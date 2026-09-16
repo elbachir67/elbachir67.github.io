@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Un nouveau push sur la PR annule la vérification en cours.
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  # Même version que le rendu local, pour un résultat identique.
+  QUARTO_VERSION: "1.9.38"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # Ce nom de job est le check obligatoire de la protection de main.
+  rendu-et-liens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v7
+
+      - name: Installer Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Installer les dépendances Python
+        run: pip install -r requirements.txt
+
+      - name: Installer Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: ${{ env.QUARTO_VERSION }}
+
+      # quarto render sort avec le code 0 malgré ses avertissements (DoD : aucun avertissement).
+      # Ses messages sont colorés même hors terminal : on retire les codes ANSI avant de chercher WARN.
+      - name: Rendre le site
+        id: rendu
+        shell: bash
+        run: |
+          quarto render 2>&1 | tee "$RUNNER_TEMP/rendu.log"
+          avertissements=$(sed -E 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/rendu.log" | grep -E '^WARN(ING)?[: (]' || true)
+          if [ -n "$avertissements" ]; then
+            while IFS= read -r ligne; do
+              echo "::error title=Avertissement de quarto render::$ligne"
+            done <<< "$avertissements"
+            exit 1
+          fi
+
+      # Liens internes : vérification hors ligne des fichiers de _site/. Un lien cassé fait échouer la CI.
+      - name: Vérifier les liens internes
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --offline --no-progress
+            --root-dir ${{ github.workspace }}/_site
+            '_site/**/*.html'
+          fail: true
+          output: lychee/liens-internes.md
+
+      # Liens externes : un lien cassé produit un avertissement, sans faire échouer la CI.
+      - name: Vérifier les liens externes
+        id: externes
+        if: ${{ !cancelled() && steps.rendu.outcome == 'success' }}
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --no-progress
+            --root-dir ${{ github.workspace }}/_site
+            --scheme https --scheme http
+            '_site/**/*.html'
+          fail: false
+          failIfEmpty: false
+          output: lychee/liens-externes.md
+
+      - name: Signaler les liens externes cassés
+        if: ${{ !cancelled() && steps.externes.outcome == 'success' && steps.externes.outputs.exit_code != '0' }}
+        run: echo "::warning title=Liens externes cassés::Voir le détail dans le résumé du job (section lychee)."
