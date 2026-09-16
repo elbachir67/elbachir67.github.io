@@ -34,11 +34,13 @@ pip install -r requirements.txt
 _quarto.yml              Configuration du site (navigation, rendu, exécution)
 index.qmd                Accueil (FR)
 recherche/               Research (EN)
+publications/            Publications (page générée, voir ci-dessous)
 enseignement/            Catalogue des cours
 blog/                    Articles
 cv/                      CV
 assets/                  Images, styles (css/custom.scss, custom-dark.scss) et polices (fonts/)
 _extensions/             Extensions Quarto versionnées (academicons)
+scripts/                 Scripts de génération (publications.py)
 _specs/                  Backlog, sprints, ADR (non publiés)
 _freeze/                 Résultats d'exécution gelés (versionnés)
 ```
@@ -57,6 +59,31 @@ Seuls les fichiers `.qmd` sont rendus ; les `.md` restent des documents de trava
 - Icônes Google Scholar, ORCID et Academia : extension [academicons](https://github.com/schochastics/academicons),
   versionnée dans `_extensions/`. Shortcode `{{< ai orcid >}}`, ou classes `ai ai-orcid` en HTML.
 - Versions épinglées et licences des composants tiers : [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+
+## Publications
+
+La page `publications/index.qmd` est **générée** : ne pas la modifier à la main.
+
+```
+publications/sources.toml  --(Crossref)-->  publications/publications.bib  -->  publications/index.qmd
+```
+
+- `publications/sources.toml` : liste des publications (titre, année, conférence, ville), reprise des
+  sources du PO. Seul fichier à modifier à la main. Une publication dont le `statut` n'est pas `publie`
+  reste dans le `.bib` mais n'apparaît pas sur la page.
+- `publications/publications.bib` : auteurs complets, DOI, titre publié, actes, éditeur, pages et année
+  de publication, récupérés dans l'[API Crossref](https://api.crossref.org). Ce qui est introuvable est
+  écrit `TODO(PO): …`, et le script ne complète jamais une donnée manquante.
+- `publications/index.qmd` : références groupées par année décroissante, nom du PO en gras, lien DOI.
+  Chaque référence a une ancre (sa clé BibTeX, par exemple `publications/#toure2019lameme`).
+
+```bash
+python3 scripts/publications.py          # sources.toml -> Crossref -> .bib -> page (réseau requis)
+python3 scripts/publications.py page     # régénère seulement la page depuis le .bib (hors ligne)
+quarto render
+```
+
+Le script n'utilise que la bibliothèque standard de Python (3.11 ou plus récent).
 
 ## Contribution
 
