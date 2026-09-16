@@ -50,7 +50,7 @@ Seuls les fichiers `.qmd` sont rendus ; les `.md` restent des documents de trava
 - Thèmes Bootswatch `cosmo` (clair) et `darkly` (sombre), avec bouton de bascule dans la barre de navigation.
 - `assets/css/custom.scss` : couleur principale `#1F6FB5`, police Source Sans 3 (repli sur les polices
   système), pied de page. Commun aux deux modes.
-- Police **hébergée dans le dépôt** (`assets/fonts/`, woff2, sous-ensemble latin) : aucune requête vers
+- Police **hébergée dans le dépôt** (`assets/fonts/`, woff2, sous-ensembles latin et latin étendu) : aucune requête vers
   Google Fonts. Quarto copie les fichiers dans `site_libs/bootstrap/assets/fonts/`, et la police du texte
   est préchargée (`include-in-header` dans `_quarto.yml`).
 - `assets/css/custom-dark.scss` : ajustements du mode sombre uniquement (couleur des liens).

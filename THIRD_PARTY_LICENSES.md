@@ -7,7 +7,7 @@ Composants tiers versionnés dans ce dépôt et publiés avec le site.
 | Extension Quarto academicons | 0.4.0, commit `2adf8a2c132031a2758e3041f5f96d7f88d7f68f` | <https://github.com/schochastics/academicons> | `_extensions/schochastics/academicons/` | voir ci-dessous |
 | ↳ Police Academicons | 1.9.4 | <https://github.com/jpswalsh/academicons> (tag `v1.9.4`) | `_extensions/schochastics/academicons/assets/webfonts/` | SIL OFL 1.1 |
 | ↳ CSS Academicons | 1.9.4 | <https://github.com/jpswalsh/academicons> (tag `v1.9.4`) | `_extensions/schochastics/academicons/assets/css/` | MIT |
-| Police Source Sans 3 | 3.052, Google Fonts `v19`, sous-ensemble latin, woff2 variable | <https://fonts.google.com/specimen/Source+Sans+3>, source amont <https://github.com/adobe-fonts/source-sans> | `assets/fonts/` | SIL OFL 1.1 |
+| Police Source Sans 3 | 3.052, Google Fonts `v19`, sous-ensembles latin et latin étendu, woff2 variable | <https://fonts.google.com/specimen/Source+Sans+3>, source amont <https://github.com/adobe-fonts/source-sans> | `assets/fonts/` | SIL OFL 1.1 |
 
 ## Academicons
 
@@ -32,12 +32,14 @@ with Reserved Font Name Academicons.
 ## Source Sans 3
 
 Police de Paul D. Hunt pour Adobe. Fichiers obtenus depuis Google Fonts (`fonts.gstatic.com`,
-`v19`), sans modification : sous-ensemble latin, format woff2, axe de graisse variable 200–900.
+`v19`), sans modification : sous-ensembles latin (normal et italique) et latin étendu (normal),
+format woff2, axe de graisse variable 200–900.
 
 | Fichier | SHA-256 |
 |---|---|
 | `source-sans-3-latin.woff2` | `ac057a5593cbe3df0d2585da5dd5f33b8efa84aa30550c710fe061b37fc5c54b` |
 | `source-sans-3-latin-italic.woff2` | `dba77455b9c188678eb9103c4b6b7fb8105968c3a4b5828204c350f6781c1638` |
+| `source-sans-3-latin-ext.woff2` | `ed3571ea9ff752f1c846f1c9ad2b0006de42f478a2db9163a74db0729a4eb281` |
 
 Mention de copyright (fichier `OFL.txt` du dépôt `google/fonts`, copié dans `assets/fonts/OFL.txt`
 et publié avec le site) :
