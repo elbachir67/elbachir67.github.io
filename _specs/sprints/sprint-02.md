@@ -21,7 +21,6 @@ Aucune fiche à remplir. Deux décisions sont posées dans les PR concernées :
 ## Ordre d'exécution
 
 US-34 → US-06 → US-09 → US-08 → US-10 → US-11 → US-13 → US-12.
-Tâche d'ouverture : refaire dans Chrome le contrôle 375 px / desktop d'US-07 si l'extension est reconnectée.
 
 ---
 
