@@ -41,9 +41,20 @@ jobs:
         with:
           version: ${{ env.QUARTO_VERSION }}
 
+      # quarto render sort avec le code 0 malgré ses avertissements (DoD : aucun avertissement).
+      # Ses messages sont colorés même hors terminal : on retire les codes ANSI avant de chercher WARN.
       - name: Rendre le site
         id: rendu
-        run: quarto render
+        shell: bash
+        run: |
+          quarto render 2>&1 | tee "$RUNNER_TEMP/rendu.log"
+          avertissements=$(sed -E 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/rendu.log" | grep -E '^WARN(ING)?[: (]' || true)
+          if [ -n "$avertissements" ]; then
+            while IFS= read -r ligne; do
+              echo "::error title=Avertissement de quarto render::$ligne"
+            done <<< "$avertissements"
+            exit 1
+          fi
 
       # Liens internes : vérification hors ligne des fichiers de _site/. Un lien cassé fait échouer la CI.
       - name: Vérifier les liens internes
