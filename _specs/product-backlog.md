@@ -29,7 +29,6 @@ d'un tuteur IA encadré.
 | US-03 | EP1 | Déploiement continu sur GitHub Pages au merge | M | 2 | 1 |
 | US-04 | EP1 | Gouvernance du dépôt (protection `main`, templates, labels, issues) | M | 1 | 1 |
 | US-07 | EP2 | Page d'accueil réelle (bio, photo, affiliations, liens) | M | 2 | 1 |
-| US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | 2 |
 | US-06 | EP1 | Charte graphique (thème, typo, mode sombre) | S | 3 | 2 |
 | US-08 | EP2 | Page Recherche en anglais (axes, projets) | M | 3 | 2 |
 | US-09 | EP2 | Publications générées depuis BibTeX | M | 3 | 2 |
@@ -37,6 +36,7 @@ d'un tuteur IA encadré.
 | US-11 | EP2 | Page Enseignement : catalogue généré depuis les métadonnées des cours | M | 2 | 2 |
 | US-12 | EP2 | Contact (email protégé, sans téléphone) | S | 1 | 2 |
 | US-13 | EP2 | SEO et métadonnées (Open Graph, sitemap) | S | 2 | 2 |
+| US-34 | EP1 | Montée de version Quarto 1.10 | S | 1 | 2 |
 | US-14 | EP3 | Gabarit de cours (structure, métadonnées, navigation chapitres) | M | 5 | 3 |
 | US-15 | EP3 | Correspondance LaTeX → Quarto (tcolorbox → callouts, TikZ → SVG, code) | M | 8 | 3 |
 | US-16 | EP3 | Migration du cours pilote : chapitre 1 | M | 5 | 3 |
@@ -57,7 +57,7 @@ d'un tuteur IA encadré.
 | US-24 | EP4 | Aperçu déployé par PR | C | 3 | 6 |
 | US-32 | EP6 | Journalisation anonymisée des questions + consentement | S | 5 | 6 |
 | US-33 | EP6 | Tableau de bord enseignant (concepts bloquants) | C | 8 | 6 |
-| US-34 | EP1 | Montée de version Quarto 1.10 | S | 1 | — |
+| US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | — |
 | US-35 | EP2 | Version anglaise du CV | C | 2 | — |
 
 ## Roadmap
@@ -65,7 +65,7 @@ d'un tuteur IA encadré.
 | Sprint | Objectif | Pts |
 |---|---|---|
 | 1 | Site minimal en ligne, déployé automatiquement | 11 |
-| 2 | Vitrine académique complète | 15 |
+| 2 | Vitrine académique complète | 17 |
 | 3 | Premier chapitre de cours natif | 20 |
 | 4 | Chaîne de publication assistée + blog | 18 |
 | 5 | Tuteur IA MVP sur le cours pilote | 22 |
