@@ -63,6 +63,16 @@ Pages uniquement en `.qmd`. Les `.md` ne sont pas rendus (`render` restreint dan
 7. **STOP.** Donner au PO : résumé en 5 lignes max, lien de la PR, comment tester.
    Pas de story suivante sans validation explicite du PO.
 
+**Corrections de specs** (backlog, sprint, ADR) : les petites corrections d'un sprint sont
+regroupées dans une seule PR `docs/sprint-XX-specs`, ouverte à la première correction puis
+complétée au fil du sprint, et mergée par le PO avant le bilan. Exception : une correction
+qui bloque une story a sa propre PR.
+
+**Critères vérifiables seulement après déploiement** : la PR référence l'issue avec `Refs #N`,
+et non `Closes #N`, pour que le merge ne la ferme pas. Après le merge et le déploiement, faire
+les vérifications en ligne et poster les preuves sur l'issue. Si tout est conforme, fermer
+l'issue soi-même ; sinon, la laisser ouverte et prévenir le PO.
+
 ## 7. Règles impératives
 
 - Jamais de commit direct sur `main`, jamais de `push --force`, jamais de merge de PR.
@@ -89,7 +99,7 @@ Pages uniquement en `.qmd`. Les `.md` ne sont pas rendus (`render` restreint dan
 - [ ] CI verte sur la PR
 - [ ] Rendu vérifié en largeur mobile (375 px) et desktop
 - [ ] Aucun lien interne cassé
-- [ ] PR liée à l'issue (`Closes #N`), template rempli
+- [ ] PR liée à l'issue (`Closes #N`, ou `Refs #N` : voir §6), template rempli
 - [ ] Validée par le PO, mergée, déployée et visible en ligne
 
 ## 10. Commandes utiles

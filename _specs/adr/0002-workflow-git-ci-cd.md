@@ -7,8 +7,9 @@ Un seul humain (PO) et deux agents IA (Claude chat pour les specs, Claude Code p
 Risque principal : du code ou du contenu produit sans contrôle.
 
 ## Décision
-- **Scrum allégé** : backlog versionné, sprints d'une semaine, validation PO à chaque story, revue et rétrospective en fin de sprint.
-- **GitHub Flow** : `main` protégée et toujours déployable ; une branche et une PR par story.
+- **Scrum allégé** : backlog versionné, sprints d'une semaine, validation PO à chaque story, bilan de sprint rédigé par Claude Code (CLAUDE.md §11).
+- **GitHub Flow** : `main` protégée et toujours déployable ; une branche et une PR par story ;
+  0 approbation requise (compte unique) ; le check CI obligatoire sert de garde-fou.
 - **Conventional Commits** avec référence à la story (`US-XX`).
 - **CI** sur chaque PR : rendu Quarto + vérification des liens.
 - **CD** au merge sur `main` : publication automatique sur `gh-pages`.

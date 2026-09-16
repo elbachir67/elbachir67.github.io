@@ -2,7 +2,10 @@
 
 Closes #
 
-<!-- US-XX — titre de la story (sprint N). Changement hors story : expliquer pourquoi. -->
+<!--
+US-XX — titre de la story (sprint N). Changement hors story : expliquer pourquoi.
+Critère vérifiable seulement après déploiement : `Refs #N` au lieu de `Closes #N` (CLAUDE.md §6).
+-->
 
 ## Changements
 
@@ -31,7 +34,7 @@ quarto preview
 - [ ] CI verte sur la PR
 - [ ] Rendu vérifié en largeur mobile (375 px) et desktop
 - [ ] Aucun lien interne cassé
-- [ ] PR liée à l'issue (`Closes #N`), template rempli
+- [ ] PR liée à l'issue (`Closes #N`, ou `Refs #N` : voir CLAUDE.md §6), template rempli
 - [ ] Validée par le PO, mergée, déployée et visible en ligne
 
 ## Propositions
