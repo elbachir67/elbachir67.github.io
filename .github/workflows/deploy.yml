@@ -1,0 +1,49 @@
+name: Déploiement
+
+on:
+  push:
+    branches: [main]
+
+# Permission minimale : pousser le site rendu sur la branche gh-pages.
+permissions:
+  contents: write
+
+# Les déploiements s'enchaînent sans s'annuler : le dernier merge est toujours publié.
+concurrency:
+  group: deploiement
+  cancel-in-progress: false
+
+env:
+  # Mêmes versions que la CI (ci.yml).
+  QUARTO_VERSION: "1.9.38"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v7
+
+      - name: Installer Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Installer les dépendances Python
+        run: pip install -r requirements.txt
+
+      - name: Installer Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: ${{ env.QUARTO_VERSION }}
+
+      - name: Rendre et publier sur gh-pages
+        uses: quarto-dev/quarto-actions/publish@v2
+        with:
+          target: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
