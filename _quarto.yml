@@ -5,6 +5,9 @@ project:
   # des documents de travail et ne sont pas publiés.
   render:
     - "**/*.qmd"
+  # Licence de la police hébergée (Source Sans 3), publiée avec elle.
+  resources:
+    - assets/fonts/OFL.txt
 
 lang: fr
 
@@ -26,8 +29,23 @@ website:
         text: Blog
       - href: cv/index.qmd
         text: CV
+  # Pied de page commun. Les shortcodes « ai » chargent aussi la feuille academicons sur
+  # toutes les pages, dont l'accueil qui l'utilise pour ses liens.
+  page-footer:
+    left: "© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD"
+    right: >-
+      [{{< ai google-scholar >}}](https://scholar.google.com/citations?user=JsZhGvQAAAAJ){aria-label="Google Scholar"}
+      [{{< ai orcid >}}](https://orcid.org/0009-0008-8554-8425){aria-label="ORCID"}
+      [<i class="bi bi-github" aria-hidden="true"></i>](https://github.com/elbachir67){aria-label="GitHub"}
 
 format:
   html:
-    theme: cosmo
+    theme:
+      light: [cosmo, assets/css/custom.scss]
+      dark: [darkly, assets/css/custom.scss, assets/css/custom-dark.scss]
     toc: true
+    # Précharge la police du texte : son téléchargement part dès la lecture de la page, sans
+    # attendre la feuille de style qui la déclare. Quarto rend ce chemin relatif à chaque page.
+    include-in-header:
+      text: |
+        <link rel="preload" href="/site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin>

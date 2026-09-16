@@ -37,12 +37,26 @@ recherche/               Research (EN)
 enseignement/            Catalogue des cours
 blog/                    Articles
 cv/                      CV
-assets/                  Images et styles
+assets/                  Images, styles (css/custom.scss, custom-dark.scss) et polices (fonts/)
+_extensions/             Extensions Quarto versionnées (academicons)
 _specs/                  Backlog, sprints, ADR (non publiés)
 _freeze/                 Résultats d'exécution gelés (versionnés)
 ```
 
 Seuls les fichiers `.qmd` sont rendus ; les `.md` restent des documents de travail.
+
+## Charte graphique
+
+- Thèmes Bootswatch `cosmo` (clair) et `darkly` (sombre), avec bouton de bascule dans la barre de navigation.
+- `assets/css/custom.scss` : couleur principale `#1F6FB5`, police Source Sans 3 (repli sur les polices
+  système), pied de page. Commun aux deux modes.
+- Police **hébergée dans le dépôt** (`assets/fonts/`, woff2, sous-ensemble latin) : aucune requête vers
+  Google Fonts. Quarto copie les fichiers dans `site_libs/bootstrap/assets/fonts/`, et la police du texte
+  est préchargée (`include-in-header` dans `_quarto.yml`).
+- `assets/css/custom-dark.scss` : ajustements du mode sombre uniquement (couleur des liens).
+- Icônes Google Scholar, ORCID et Academia : extension [academicons](https://github.com/schochastics/academicons),
+  versionnée dans `_extensions/`. Shortcode `{{< ai orcid >}}`, ou classes `ai ai-orcid` en HTML.
+- Versions épinglées et licences des composants tiers : [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
 ## Contribution
 
