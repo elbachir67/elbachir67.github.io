@@ -10,7 +10,8 @@ Site statique [Quarto](https://quarto.org) publié sur GitHub Pages
 
 ## Prérequis
 
-- [Quarto](https://quarto.org/docs/get-started/) ≥ 1.9
+- [Quarto](https://quarto.org/docs/get-started/) **1.10.18** : version épinglée dans la CI et le déploiement
+  (`QUARTO_VERSION` dans `.github/workflows/ci.yml` et `deploy.yml`). Utiliser la même en local.
 - Python ≥ 3.11 (uniquement pour les pages à code exécutable)
 
 ## Développement local
