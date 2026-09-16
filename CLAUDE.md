@@ -8,7 +8,7 @@ Ce fichier est ton contrat de travail. Lis-le entièrement avant toute action.
 |---|---|---|
 | Product Owner (PO) | Bachir | Priorise, fournit le contenu, valide chaque story, merge les PR |
 | Architecte / rédacteur des specs | Claude (chat) | Backlog, sprints, critères d'acceptation, ADR |
-| Équipe de développement | Claude Code (toi) | Implémente les stories du sprint courant, rien d'autre |
+| Équipe de développement | Claude Code (toi) | Implémente les stories du sprint courant et rédige le bilan de sprint, rien d'autre |
 
 ## 2. Vision produit
 
@@ -20,6 +20,7 @@ et, à terme, un tuteur IA par cours pour les étudiants.
 
 - Backlog : `_specs/product-backlog.md`
 - Sprint courant : `_specs/sprints/sprint-XX.md` (le numéro le plus élevé)
+- Bilans de sprint : `_specs/sprints/sprint-XX-bilan.md` (rédigés par toi, voir §11)
 - Décisions d'architecture : `_specs/adr/`
 - Suivi d'exécution : issues GitHub + milestone du sprint
 
@@ -99,3 +100,22 @@ quarto render                  # rendu complet
 gh issue list --milestone "Sprint 1"
 gh pr create --fill
 ```
+
+## 11. Bilan de fin de sprint
+
+Quand la dernière story du sprint est mergée, rédiger `_specs/sprints/sprint-XX-bilan.md`.
+Le PO ne remplit aucune fiche : ce bilan remplace la revue et la rétrospective.
+
+**Sources, exclusivement :** historique Git, PR (`gh pr list --state all`) et CI (`gh run list`).
+Chaque fait cite sa source (SHA, numéro de PR ou de run). Rien d'inventé.
+
+**Contenu :**
+
+1. **Stories livrées** : identifiant, titre, PR, date de merge.
+2. **Points** : engagés, livrés, écart.
+3. **Écarts** : par rapport à l'objectif du sprint et aux critères d'acceptation
+   (critère modifié par le PO, story reportée, critère non satisfait).
+4. **Blocages** : ce qui a ralenti ou arrêté une story, et comment il a été levé.
+5. **Propositions** : reprises des sections « Propositions » des PR du sprint.
+
+Livraison : branche `docs/sprint-XX-bilan`, PR, puis **STOP** (comme §6, étape 7).

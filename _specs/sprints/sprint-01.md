@@ -92,13 +92,6 @@ secondes qui est l'enseignant et comment le joindre, afin d'accéder à ses trav
 
 ---
 
-## Revue de sprint (PO)
+## Bilan
 
-- [ ] Le site s'ouvre en ligne sur mobile et desktop
-- [ ] Une modification mineure sur une branche → PR → CI verte → merge → visible en ligne
-
-## Rétrospective (3 lignes)
-
-- Ce qui a marché :
-- Ce qui a bloqué :
-- Action pour le Sprint 2 :
+Rédigé par Claude Code en fin de sprint : `_specs/sprints/sprint-01-bilan.md` (voir CLAUDE.md §11).
