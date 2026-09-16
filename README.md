@@ -56,6 +56,7 @@ Seuls les fichiers `.qmd` sont rendus ; les `.md` restent des documents de trava
 - `assets/css/custom-dark.scss` : ajustements du mode sombre uniquement (couleur des liens).
 - Icônes Google Scholar, ORCID et Academia : extension [academicons](https://github.com/schochastics/academicons),
   versionnée dans `_extensions/`. Shortcode `{{< ai orcid >}}`, ou classes `ai ai-orcid` en HTML.
+- Versions épinglées et licences des composants tiers : [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
 ## Contribution
 
