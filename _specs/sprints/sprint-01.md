@@ -32,7 +32,7 @@ afin de disposer d'une base saine pour toutes les stories suivantes.
 - [ ] Dépôt `elbachir67.github.io` initialisé, branche par défaut `main`.
 - [ ] `_quarto.yml` : `type: website`, `output-dir: _site`, `lang: fr`,
       `render` limité à `**/*.qmd`, `execute: freeze: auto`.
-- [ ] Barre de navigation : Accueil, Recherche, Enseignement, Blog, CV.
+- [ ] Barre de navigation : Accueil, Research, Enseignement, Blog, CV.
 - [ ] Une page `.qmd` par entrée ; les pages non traitées affichent « En construction ».
 - [ ] Fichiers présents : `.gitignore` (`_site/`, `.quarto/`, `.venv/`, `__pycache__/`),
       `requirements.txt` (jupyter, numpy, matplotlib), `README.md`.
