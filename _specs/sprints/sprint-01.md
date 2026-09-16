@@ -73,7 +73,7 @@ afin de publier sans manipulation manuelle.
 - [ ] `.github/workflows/deploy.yml` déclenché sur `push` vers `main`.
 - [ ] Publication sur la branche `gh-pages` via `quarto-dev/quarto-actions/publish`.
 - [ ] Permissions minimales (`contents: write`).
-- [ ] Instructions au PO pour la configuration unique : Settings → Pages → source `gh-pages`.
+- [ ] Configuration de GitHub Pages (source `gh-pages`) appliquée via `gh api`.
 - [ ] Site accessible sur `https://elbachir67.github.io`.
 - [ ] Site en ligne vérifié dans Chrome à 375 px et en desktop.
 - [ ] Badge de statut du déploiement dans le `README.md`.
