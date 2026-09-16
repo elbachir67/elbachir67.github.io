@@ -57,6 +57,7 @@ d'un tuteur IA encadré.
 | US-24 | EP4 | Aperçu déployé par PR | C | 3 | 6 |
 | US-32 | EP6 | Journalisation anonymisée des questions + consentement | S | 5 | 6 |
 | US-33 | EP6 | Tableau de bord enseignant (concepts bloquants) | C | 8 | 6 |
+| US-34 | EP1 | Montée de version Quarto 1.10 | S | 1 | — |
 
 ## Roadmap
 
