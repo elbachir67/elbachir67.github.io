@@ -63,6 +63,11 @@ Pages uniquement en `.qmd`. Les `.md` ne sont pas rendus (`render` restreint dan
 7. **STOP.** Donner au PO : résumé en 5 lignes max, lien de la PR, comment tester.
    Pas de story suivante sans validation explicite du PO.
 
+**Corrections de specs** (backlog, sprint, ADR) : les petites corrections d'un sprint sont
+regroupées dans une seule PR `docs/sprint-XX-specs`, ouverte à la première correction puis
+complétée au fil du sprint, et mergée par le PO avant le bilan. Exception : une correction
+qui bloque une story a sa propre PR.
+
 ## 7. Règles impératives
 
 - Jamais de commit direct sur `main`, jamais de `push --force`, jamais de merge de PR.
