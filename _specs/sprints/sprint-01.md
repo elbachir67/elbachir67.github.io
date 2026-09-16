@@ -75,6 +75,7 @@ afin de publier sans manipulation manuelle.
 - [ ] Permissions minimales (`contents: write`).
 - [ ] Instructions au PO pour la configuration unique : Settings → Pages → source `gh-pages`.
 - [ ] Site accessible sur `https://elbachir67.github.io`.
+- [ ] Site en ligne vérifié dans Chrome à 375 px et en desktop.
 - [ ] Badge de statut du déploiement dans le `README.md`.
 
 ### US-07 — Page d'accueil (2 pts)
