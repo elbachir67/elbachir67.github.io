@@ -1,5 +1,7 @@
 # elbachir67.github.io
 
+[![Déploiement](https://github.com/elbachir67/elbachir67.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/elbachir67/elbachir67.github.io/actions/workflows/deploy.yml)
+
 Sources du site académique personnel de **Dr. El Hadji Bassirou Touré**,
 Maître de Conférences Titulaire au DMI / FST / UCAD.
 
