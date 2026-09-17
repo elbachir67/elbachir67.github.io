@@ -6,7 +6,8 @@ est lisible en ligne, généré depuis les sources LaTeX existantes.
 
 ## Entrée PO
 
-- **Cours pilote** : à choisir avant US-16 (voir la question posée dans l'issue). Le cours doit avoir des sources LaTeX existantes avec encadrés `tcolorbox` et au moins une figure.
+- **Cours pilote** : « Architectures Logicielles Modernes » (M1 SIR), décision du PO (#45). Sources LaTeX fournies avant US-15.
+- **Nature des sources (décision PO, #43)** : les cours sont des `.tex` autonomes, avec les schémas en **TikZ inline**, sans fichier d'image externe.
 
 ## Périmètre linguistique (décision PO)
 
@@ -66,7 +67,9 @@ afin que la migration des 21 cours reste réaliste.
 - [ ] Table de correspondance documentée dans `_specs/contenus/latex-vers-quarto.md` : chaque environnement `tcolorbox` du cours pilote (définition, intuition, exemple, piège, exercice…) vers un callout Quarto nommé.
 - [ ] Style CSS des callouts, cohérent avec la charte d'US-06, en mode clair et sombre.
 - [ ] Script `scripts/importer_chapitre.py` : `.tex` → `.qmd`, avec les maths (`$…$`, `align`, `equation`) préservées, les `listings` en blocs de code, et les références croisées converties.
-- [ ] Figures TikZ compilées en SVG, avec texte alternatif `TODO(PO)` si aucune légende n'est disponible.
+- [ ] Figures TikZ compilées en SVG : chaque `tikzpicture` est extrait du `.tex` et compilé **en local**, jamais en CI (pas de LaTeX en CI). Les SVG sont commités, comme le cache des figures.
+- [ ] Dans les SVG produits, les noirs et les gris deviennent `currentColor`, pour rester lisibles en mode sombre.
+- [ ] Texte alternatif `TODO(PO)` si aucune légende n'est disponible.
 - [ ] Tout élément non converti est laissé en commentaire HTML `<!-- NON CONVERTI: … -->`, jamais supprimé silencieusement ; la conversion produit un rapport listant ces éléments.
 - [ ] Testé sur un chapitre réel ; le rapport et une comparaison PDF/HTML figurent dans la PR.
 - [ ] Aucune dépendance lourde ajoutée sans justification (pandoc est déjà présent avec Quarto).
