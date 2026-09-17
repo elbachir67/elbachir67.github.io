@@ -39,7 +39,7 @@ enseignement/            Catalogue des cours (cours.yml, filtre cours.lua)
 blog/                    Articles
 cv/                      CV (cv.yml, filtre cv.lua ; page et PDF générés, voir ci-dessous)
 assets/                  Images, styles (css/custom.scss, custom-dark.scss) et polices (fonts/)
-_extensions/             Extensions Quarto versionnées (academicons)
+_extensions/             Extensions Quarto versionnées (academicons, email-protege)
 scripts/                 Scripts (publications.py, verifier_telephone.py, verifier_metadonnees.py)
 robots.txt               Consignes aux robots d'indexation (publié tel quel)
 _specs/                  Backlog, sprints, ADR (non publiés)
@@ -158,6 +158,19 @@ deux pages partagent le même titre ou la même description, si une métadonnée
 ```bash
 python3 scripts/verifier_metadonnees.py    # après quarto render
 ```
+
+## Email protégé
+
+L'adresse email n'apparaît jamais en clair dans le HTML généré, pour limiter sa collecte automatique.
+
+- `_quarto.yml`, clé `contact` : adresse découpée en `email-utilisateur` et `email-domaine`, seul endroit où
+  la modifier.
+- Shortcode `{{< email >}}` (extension locale `_extensions/email-protege/`) : la page contient seulement
+  l'adresse inversée puis encodée en base64. Un petit script la reconstruit dans le navigateur (lien
+  `mailto:` et infobulle). Arguments facultatifs : `texte="…"` (« Email » par défaut) et `icone="envelope"`.
+- **Sans JavaScript**, un repli lisible s'affiche : « utilisateur [arobase] domaine ».
+- La CI vérifie par `grep` que l'adresse n'apparaît nulle part dans `_site/`, ni en clair, ni encodée
+  (`%40`, `&#64;`, `&#x40;`, `&commat;`), et qu'aucune page ne contient de lien `href="mailto:` écrit en dur.
 
 ## Contribution
 
