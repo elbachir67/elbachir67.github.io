@@ -17,8 +17,8 @@ Site statique [Quarto](https://quarto.org) publié sur GitHub Pages
 ## Développement local
 
 ```bash
-quarto preview                 # aperçu avec rechargement automatique
-quarto render                  # rendu complet dans _site/
+quarto preview                 # aperçu avec rechargement automatique (une seule langue)
+python3 scripts/rendre.py      # rendu complet des deux langues dans _site/
 ```
 
 Pour les pages contenant du code Python :
@@ -40,7 +40,8 @@ blog/                    Articles
 cv/                      CV (cv.yml, filtre cv.lua ; page et PDF générés, voir ci-dessous)
 assets/                  Images, styles (css/custom.scss, custom-dark.scss) et polices (fonts/)
 _extensions/             Extensions Quarto versionnées (academicons, email-protege)
-scripts/                 Scripts (publications.py, verifier_telephone.py, verifier_metadonnees.py)
+scripts/                 Scripts (rendre.py, publications.py, verifier_*.py)
+en/                      Pages anglaises (mêmes données, libellés traduits)
 robots.txt               Consignes aux robots d'indexation (publié tel quel)
 _specs/                  Backlog, sprints, ADR (non publiés)
 _freeze/                 Résultats d'exécution gelés (versionnés)
@@ -171,6 +172,51 @@ L'adresse email n'apparaît jamais en clair dans le HTML généré, pour limiter
 - **Sans JavaScript**, un repli lisible s'affiche : « utilisateur [arobase] domaine ».
 - La CI vérifie par `grep` que l'adresse n'apparaît nulle part dans `_site/`, ni en clair, ni encodée
   (`%40`, `&#64;`, `&#x40;`, `&commat;`), et qu'aucune page ne contient de lien `href="mailto:` écrit en dur.
+
+## Site bilingue (français et anglais)
+
+Le site existe en deux langues : le français à la racine (`/`) et l'anglais sous `/en/`. La mécanique suit
+[ADR-0003](_specs/adr/0003-architecture-multilingue.md) : **un profil Quarto par langue**, puis assemblage.
+
+- `_quarto.yml` : tout ce qui ne dépend pas de la langue (thème, formats, référencement, extensions).
+- `_quarto-fr.yml` et `_quarto-en.yml` : langue, description du site, navigation, pied de page, pages à
+  rendre et dossier de sortie.
+- **Rendu** : `python3 scripts/rendre.py` enchaîne les deux profils, copie le site anglais dans `_site/en/`,
+  fusionne les plans de site et donne à chaque langue son index de recherche. **C'est la commande à
+  utiliser**, en local comme en CI ; `quarto render` seul ne produirait qu'une langue.
+- `assets/lua/hreflang.lua` pose les balises `hreflang` (`fr`, `en`, `x-default`) sur chaque page.
+- `assets/js/bascule-langue.js` fait pointer le sélecteur de langue vers la **page équivalente**, en lisant
+  ces balises. Sans JavaScript, il mène à l'accueil de l'autre langue.
+
+**Adresses** : les dossiers anglais portent un nom anglais quand le mot diffère (`/recherche/` ↔
+`/en/research/`, `/enseignement/` ↔ `/en/teaching/`). La correspondance est écrite dans
+`assets/lua/hreflang.lua` et dans `scripts/verifier_bilingue.py` ; le sélecteur de langue, lui, n'a rien à
+tenir à jour, et la CI échoue si les deux tables divergent.
+
+**Recherche** : chaque langue a son index (`/search.json` et `/en/search.json`). Les pages anglaises sont
+rattachées à la racine `/en/` par leur méta `quarto:offset`, ajustée à l'assemblage : une recherche depuis une
+page anglaise ne renvoie que des pages anglaises.
+
+**Ajouter une page bilingue** : créer `page/index.qmd` et `en/page/index.qmd`, puis ajouter l'entrée de
+navigation dans les deux profils. Si le nom du dossier anglais diffère, l'ajouter aux deux tables de
+correspondance ci-dessus. La CI refuse une page qui n'existe que dans une langue.
+
+**Données partagées, libellés traduits** : le CV (`cv/cv.yml`), le catalogue (`enseignement/cours.yml`) et les
+publications (`publications/sources.toml`) n'existent qu'en un seul exemplaire. Seuls les libellés d'interface
+sont traduits, dans les filtres Lua et dans `scripts/publications.py`.
+
+**Pages monolingues** : les cours (à venir) restent en français ; ils sont exclus de l'appariement par
+`scripts/verifier_bilingue.py`.
+
+```bash
+python3 scripts/rendre.py               # les deux langues
+python3 scripts/rendre.py --propre      # en vidant le cache .quarto
+python3 scripts/verifier_bilingue.py    # équivalents FR/EN et hreflang réciproques
+```
+
+**Piège** : rendre un fichier isolé avec un profil (`quarto render page.qmd --profile en`) laisse des
+métadonnées de ce profil dans le cache `.quarto`, et une page peut ressortir dans la mauvaise langue.
+Relancer alors `python3 scripts/rendre.py --propre`.
 
 ## Contribution
 

@@ -43,11 +43,12 @@ jobs:
 
       # quarto render sort avec le code 0 malgré ses avertissements (DoD : aucun avertissement).
       # Ses messages sont colorés même hors terminal : on retire les codes ANSI avant de chercher WARN.
+      # Site bilingue (US-36) : un rendu par langue, puis assemblage dans _site/ (ADR-0003).
       - name: Rendre le site
         id: rendu
         shell: bash
         run: |
-          quarto render 2>&1 | tee "$RUNNER_TEMP/rendu.log"
+          python scripts/rendre.py 2>&1 | tee "$RUNNER_TEMP/rendu.log"
           avertissements=$(sed -E 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/rendu.log" | grep -E '^WARN(ING)?[: (]' || true)
           if [ -n "$avertissements" ]; then
             while IFS= read -r ligne; do
@@ -92,6 +93,10 @@ jobs:
             '_site/**/*.html'
           fail: true
           output: lychee/liens-internes.md
+
+      # Site bilingue (US-36) : équivalents FR/EN et hreflang réciproques.
+      - name: Vérifier la cohérence bilingue
+        run: python scripts/verifier_bilingue.py _site
 
       # Référencement (US-13) : titre et description uniques par page, métadonnées de partage,
       # sitemap.xml et robots.txt.

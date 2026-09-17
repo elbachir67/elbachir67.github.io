@@ -41,9 +41,15 @@ jobs:
         with:
           version: ${{ env.QUARTO_VERSION }}
 
-      - name: Rendre et publier sur gh-pages
+      # Site bilingue (US-36) : le rendu passe par le script (un profil par langue, puis assemblage),
+      # et la publication se contente de mettre _site/ en ligne.
+      - name: Rendre le site (français et anglais)
+        run: python scripts/rendre.py
+
+      - name: Publier sur gh-pages
         uses: quarto-dev/quarto-actions/publish@v2
         with:
           target: gh-pages
+          render: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

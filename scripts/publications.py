@@ -4,7 +4,7 @@
 Deux étapes, rejouables :
 
 1. bib  : publications/sources.toml -> Crossref -> publications/publications.bib
-2. page : publications/publications.bib -> publications/index.qmd
+2. page : publications/publications.bib -> publications/index.qmd et en/publications/index.qmd
 
     python3 scripts/publications.py          # les deux étapes (accès réseau)
     python3 scripts/publications.py page     # la page seule, depuis le .bib (hors ligne)
@@ -35,7 +35,8 @@ from pathlib import Path
 RACINE = Path(__file__).resolve().parent.parent
 SOURCES = RACINE / "publications" / "sources.toml"
 BIB = RACINE / "publications" / "publications.bib"
-PAGE = RACINE / "publications" / "index.qmd"
+PAGES = {"fr": RACINE / "publications" / "index.qmd",
+         "en": RACINE / "en" / "publications" / "index.qmd"}
 
 CROSSREF = "https://api.crossref.org/works"
 # Identification demandée par Crossref pour les appels d'API ; aucune adresse personnelle.
@@ -51,9 +52,40 @@ FORTHCOMING = "forthcoming"  # valeur biblatex correspondante (pubstate) dans le
 # Types d'entrée de sources.toml. Hors article : pas de Crossref, @misc avec entrysubtype dans le .bib.
 ARTICLE = "article"
 LIBELLES = {"poster": "Poster", "communication": "Communication"}
+
+# Libellés de la page, par langue (US-36). Les données, elles, ne sont pas dupliquées.
+MOTS = {
+    "fr": {
+        "titre": "Publications",
+        "description": ("Publications d'El Hadji Bassirou Touré : articles classés par année de conférence, "
+                        "avec liens DOI, puis posters et communications."),
+        "intro": ("Articles classés par année de conférence, du plus récent au plus ancien ; chaque article "
+                  "publié renvoie à la version de l'éditeur par son DOI. Suivent les posters et "
+                  "communications, par date décroissante."),
+        "articles": "Articles",
+        "presentations": "Posters et communications",
+        "a_paraitre": "à paraître",
+        "types": {"poster": "Poster", "communication": "Communication"},
+        "mois": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre",
+                 "octobre", "novembre", "décembre"],
+        "premier_jour": "1er",
+    },
+    "en": {
+        "titre": "Publications",
+        "description": ("Publications by El Hadji Bassirou Touré: articles grouped by conference year, with "
+                        "DOI links, followed by posters and talks."),
+        "intro": ("Articles are grouped by conference year, most recent first; each published article links "
+                  "to the publisher version through its DOI. Posters and talks follow, by descending date."),
+        "articles": "Articles",
+        "presentations": "Posters and talks",
+        "a_paraitre": "forthcoming",
+        "types": {"poster": "Poster", "communication": "Talk"},
+        "mois": ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+                 "October", "November", "December"],
+        "premier_jour": "1",
+    },
+}
 FORMAT_DATE = re.compile(r"\d{4}(?:-\d{2}(?:-\d{2})?)?")  # AAAA, AAAA-MM ou AAAA-MM-JJ
-MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre",
-        "octobre", "novembre", "décembre"]
 
 # Clé BibTeX = ancre de la page : minuscules, chiffres et tirets, sans année (voir sources.toml).
 FORMAT_CLE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
@@ -78,16 +110,16 @@ def normaliser_pages(pages: str | None) -> str:
     return re.sub(r"\s*[-–—]+\s*", "-", pages or "").strip()
 
 
-def date_fr(date: str) -> str:
-    """« 2026-09 » -> « septembre 2026 » ; « 2023-02-23 » -> « 23 février 2023 » ; « 2019 » -> « 2019 »."""
+def date_lisible(date: str, mots: dict) -> str:
+    """« 2026-09 » -> « septembre 2026 » / « September 2026 » ; « 2019 » reste « 2019 »."""
     parties = date.split("-")
-    mots = [parties[0]]
+    morceaux = [parties[0]]
     if len(parties) > 1:
-        mots.insert(0, MOIS[int(parties[1]) - 1])
+        morceaux.insert(0, mots["mois"][int(parties[1]) - 1])
     if len(parties) > 2:
         jour = int(parties[2])
-        mots.insert(0, "1er" if jour == 1 else str(jour))
-    return INSECABLE.join(mots)
+        morceaux.insert(0, mots["premier_jour"] if jour == 1 else str(jour))
+    return INSECABLE.join(morceaux)
 
 
 def initiales(prenoms: str) -> str:
@@ -353,7 +385,7 @@ def auteurs_md(champ: str, po: dict) -> str:
     return ", ".join(noms)
 
 
-def reference_md(cle: str, c: dict[str, str], po: dict) -> str:
+def reference_md(cle: str, c: dict[str, str], po: dict, mots: dict) -> str:
     actes = f"*{echapper_md(c['booktitle'])}*" if c.get("booktitle") else ""
     # Entre parenthèses : la conférence si son sigle n'est pas déjà dans le titre des actes, et la ville.
     evenement = c.get("eventtitle", "")
@@ -375,7 +407,8 @@ def reference_md(cle: str, c: dict[str, str], po: dict) -> str:
     edition = ", ".join(details) + "." if details else ""
     a_paraitre = c.get("pubstate") == FORTHCOMING
     if a_paraitre:  # année de publication inconnue, pas de DOI
-        edition += f" {echapper_md(c['publisher'])} (à paraître)." if c.get("publisher") else " (à paraître)"
+        marque = f"({mots['a_paraitre']})"
+        edition += f" {echapper_md(c['publisher'])} {marque}." if c.get("publisher") else f" {marque}"
     else:
         edition += f" {echapper_md(c['publisher'])}, {c['year']}." if c.get("publisher") else f" {c['year']}."
     lignes = [f"[{echapper_md(c['title'])}]{{.publication-titre}}", auteurs_md(c["author"], po),
@@ -387,17 +420,26 @@ def reference_md(cle: str, c: dict[str, str], po: dict) -> str:
     return "\n".join([f"::: {{#{cle} .publication}}", "\\\n".join(lignes), ":::"])
 
 
-def presentation_md(cle: str, c: dict[str, str], po: dict) -> str:
+def presentation_md(cle: str, c: dict[str, str], po: dict, mots: dict) -> str:
     lieu = ", ".join(echapper_md(v) for v in (c["eventtitle"], c.get("venue")) if v)
+    # En français, un libellé précisé dans sources.toml (« Communication orale ») remplace le libellé du type.
+    libelle = c.get("howpublished") if mots["types"] is MOTS["fr"]["types"] else None
+    libelle = libelle or mots["types"][c["entrysubtype"]]
     lignes = [f"[{echapper_md(c['title'])}]{{.publication-titre}}", auteurs_md(c["author"], po),
-              f"{echapper_md(c.get('howpublished') or LIBELLES[c['entrysubtype']])} · {lieu}, "
-              f"{date_fr(c['eventdate'])}."]
+              f"{echapper_md(libelle)} · {lieu}, {date_lisible(c['eventdate'], mots)}."]
     return "\n".join([f"::: {{#{cle} .publication}}", "\\\n".join(lignes), ":::"])
 
 
 def etape_page() -> None:
     po = tomllib.loads(SOURCES.read_text(encoding="utf-8"))["auteur"]
     entrees = lire_bib(BIB.read_text(encoding="utf-8"))
+    for langue in MOTS:
+        ecrire_page(langue, po, entrees)
+
+
+def ecrire_page(langue: str, po: dict, entrees: list[tuple[str, dict[str, str]]]) -> None:
+    mots = MOTS[langue]
+    page = PAGES[langue]
     publiees = [(cle, c) for cle, c in entrees
                  if "entrysubtype" not in c and c.get("pubstate") in {None, FORTHCOMING}]
     presentations = sorted(((cle, c) for cle, c in entrees if "entrysubtype" in c),
@@ -407,30 +449,28 @@ def etape_page() -> None:
     publiees.sort(key=annee_conference, reverse=True)  # tri stable : ordre du .bib dans une année
     lignes = [
         "---",
-        'title: "Publications"',
-        'description: "Publications d\'El Hadji Bassirou Touré : articles classés par année de conférence, '
-        'avec liens DOI, puis posters et communications."',
+        f'title: "{mots["titre"]}"',
+        f'description: "{mots["description"]}"',
         "# Page générée par scripts/publications.py depuis publications/publications.bib.",
         "# Ne pas modifier à la main : voir la section « Publications » du README.md.",
         "---",
         "",
-        "Articles classés par année de conférence, du plus récent au plus ancien ; chaque article publié "
-        "renvoie à la version de l'éditeur par son DOI. Suivent les posters et communications, par date "
-        "décroissante.",
+        mots["intro"],
         "",
-        "## Articles {#articles}",
+        f"## {mots['articles']} {{#articles}}",
     ]
     for annee, groupe in groupby(publiees, key=annee_conference):
         lignes += ["", f"### {annee} {{#annee-{annee}}}"]
         for cle, champs in groupe:
-            lignes += ["", reference_md(cle, champs, po)]
+            lignes += ["", reference_md(cle, champs, po, mots)]
     if presentations:
-        lignes += ["", "## Posters et communications {#posters-communications}"]
+        lignes += ["", f"## {mots['presentations']} {{#posters-communications}}"]
         for cle, champs in presentations:
-            lignes += ["", presentation_md(cle, champs, po)]
-    PAGE.write_text("\n".join(lignes) + "\n", encoding="utf-8")
+            lignes += ["", presentation_md(cle, champs, po, mots)]
+    page.parent.mkdir(parents=True, exist_ok=True)
+    page.write_text("\n".join(lignes) + "\n", encoding="utf-8")
     ecartees = len(entrees) - len(publiees) - len(presentations)
-    print(f"-> {PAGE.relative_to(RACINE)} ({len(publiees)} articles, {len(presentations)} posters et "
+    print(f"-> {page.relative_to(RACINE)} ({len(publiees)} articles, {len(presentations)} posters et "
           f"communications, {ecartees} écartée(s) par statut)")
 
 

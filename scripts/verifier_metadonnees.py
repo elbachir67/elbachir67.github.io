@@ -5,7 +5,8 @@
     python3 scripts/verifier_metadonnees.py chemin/    # analyse un autre dossier
 
 Vérifie, pour chaque page HTML (hors site_libs/) :
-- un titre et une description non vides, et uniques sur le site ;
+- un titre et une description non vides, et uniques **dans leur langue** : deux versions d'une même page
+  (française et anglaise) portent légitimement le même titre, et les balises hreflang les relient ;
 - les métadonnées de partage og:title, og:description, og:image et twitter:card ;
 - une image d'aperçu en URL absolue https, présente dans le site rendu.
 Vérifie aussi que sitemap.xml liste chaque page et que robots.txt indique ce sitemap.
@@ -30,10 +31,12 @@ class LecteurEntete(HTMLParser):
 
     def __init__(self) -> None:
         super().__init__()
-        self.titre, self.metas, self._dans_titre = "", {}, False
+        self.titre, self.metas, self.langue, self._dans_titre = "", {}, "", False
 
     def handle_starttag(self, balise, attributs):
         attributs = dict(attributs)
+        if balise == "html":
+            self.langue = (attributs.get("lang") or "")[:2]
         if balise == "title":
             self._dans_titre = True
         elif balise == "meta":
@@ -69,8 +72,8 @@ def main() -> int:
             erreur(page, "titre absent")
         if not description:
             erreur(page, "description absente")
-        titres[titre].append(page)
-        descriptions[description].append(page)
+        titres[(lecteur.langue, titre)].append(page)
+        descriptions[(lecteur.langue, description)].append(page)
         for balise in BALISES_REQUISES:
             if not lecteur.metas.get(balise):
                 erreur(page, f"métadonnée {balise} absente")
@@ -82,11 +85,11 @@ def main() -> int:
             elif not (racine / url.path.lstrip("/")).is_file():
                 erreur(page, f"og:image introuvable dans le site rendu : {image}")
 
-    for valeur, liste, nature in [(v, l, "titre") for v, l in titres.items()] + \
-                                 [(v, l, "description") for v, l in descriptions.items()]:
+    for (langue, valeur), liste, nature in [(v, l, "titre") for v, l in titres.items()] + \
+                                           [(v, l, "description") for v, l in descriptions.items()]:
         if valeur and len(liste) > 1:
             for page in liste:
-                erreur(page, f"{nature} identique sur {len(liste)} pages : « {valeur} »")
+                erreur(page, f"{nature} identique sur {len(liste)} pages en « {langue} » : « {valeur} »")
 
     sitemap = racine / "sitemap.xml"
     if not sitemap.is_file():
@@ -112,8 +115,9 @@ def main() -> int:
     if erreurs:
         print(f"ÉCHEC : {len(erreurs)} problème(s) de référencement dans {racine}/.")
         return 1
-    print(f"OK : {len(pages)} page(s) avec titre et description uniques, métadonnées de partage, "
-          f"sitemap.xml et robots.txt.")
+    langues = ", ".join(sorted({l for l, _ in titres} - {""})) or "aucune"
+    print(f"OK : {len(pages)} page(s) avec titre et description uniques par langue ({langues}), "
+          f"métadonnées de partage, sitemap.xml et robots.txt.")
     return 0
 
 

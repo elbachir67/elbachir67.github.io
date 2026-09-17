@@ -4,10 +4,16 @@
 local INSECABLE = "\u{A0}"
 local STATUTS = { ["a-venir"] = true, ["en-ligne"] = true }
 
+local LIBELLES = {
+  fr = { niveau = "Niveau", niveaux = "Niveaux", a_venir = "Bientôt en ligne" },
+  en = { niveau = "Level", niveaux = "Levels", a_venir = "Coming soon" },
+}
+
 -- cours.yml est lu comme un bloc de métadonnées : le Markdown en ligne des valeurs est interprété.
-local function lire_donnees()
+local function lire_donnees(doc)
   local dossier = pandoc.path.directory(quarto.doc.input_file)
-  local fichier = assert(io.open(pandoc.path.join({ dossier, "cours.yml" }), "r"))
+  local chemin = doc.meta.donnees and pandoc.utils.stringify(doc.meta.donnees) or "cours.yml"
+  local fichier = assert(io.open(pandoc.path.join({ dossier, chemin }), "r"))
   local texte = fichier:read("a")
   fichier:close()
   return pandoc.read("---\n" .. texte .. "\n---\n", "markdown").meta
@@ -28,7 +34,7 @@ local function texte(valeur)
   return pandoc.utils.stringify(valeur)
 end
 
-local function carte(cours)
+local function carte(cours, mots)
   local statut = texte(cours.statut)
   if not STATUTS[statut] then
     error("cours.yml : statut inconnu « " .. statut .. " » pour « " .. texte(cours.titre) .. " »")
@@ -46,7 +52,7 @@ local function carte(cours)
   for _, niveau in ipairs(cours.niveaux) do
     table.insert(niveaux, texte(niveau))
   end
-  local libelle_niveaux = #niveaux > 1 and "Niveaux" or "Niveau"
+  local libelle_niveaux = #niveaux > 1 and mots.niveaux or mots.niveau
 
   -- Le champ skill de cours.yml n'est jamais affiché.
   local details = pandoc.Inlines(libelle_niveaux .. INSECABLE .. ": " .. table.concat(niveaux, ", "))
@@ -54,7 +60,7 @@ local function carte(cours)
   local blocs = { pandoc.Para({ titre }), pandoc.Para(details) }
   if statut == "a-venir" then
     -- Pas de lien tant que le cours natif n'est pas publié.
-    table.insert(blocs, pandoc.Para({ pandoc.Span("Bientôt en ligne", { class = "badge text-bg-secondary" }) }))
+    table.insert(blocs, pandoc.Para({ pandoc.Span(mots.a_venir, { class = "badge text-bg-secondary" }) }))
   end
 
   local corps = pandoc.Div(blocs, { class = "card-body" })
@@ -62,7 +68,7 @@ local function carte(cours)
     { class = "g-col-12 g-col-md-6 g-col-lg-4" })
 end
 
-local function catalogue(donnees)
+local function catalogue(donnees, mots)
   -- Domaines dans l'ordre de première apparition dans cours.yml.
   local domaines, cartes = {}, {}
   for _, cours in ipairs(donnees.cours) do
@@ -71,7 +77,7 @@ local function catalogue(donnees)
       table.insert(domaines, domaine)
       cartes[domaine] = {}
     end
-    table.insert(cartes[domaine], carte(cours))
+    table.insert(cartes[domaine], carte(cours, mots))
   end
 
   local blocs = pandoc.Blocks({})
@@ -83,11 +89,13 @@ local function catalogue(donnees)
 end
 
 function Pandoc(doc)
-  local donnees = lire_donnees()
+  local donnees = lire_donnees(doc)
+  local langue = pandoc.utils.stringify(doc.meta.lang or "fr"):sub(1, 2)
+  local mots = LIBELLES[langue] or LIBELLES.fr
   doc.blocks = doc.blocks:walk({
     Div = function(div)
       if div.identifier == "catalogue" then
-        return catalogue(donnees)
+        return catalogue(donnees, mots)
       end
     end,
   })
