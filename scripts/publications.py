@@ -41,7 +41,8 @@ PAUSE = 1.0  # secondes entre deux appels, par courtoisie envers l'API
 # Ordre des champs dans le .bib.
 CHAMPS = ["author", "title", "booktitle", "series", "volume", "pages",
           "publisher", "year", "doi", "eventtitle", "eventdate", "venue", "pubstate"]
-MOTS_VIDES = {"a", "an", "the", "on", "of", "for", "in", "and", "to"}
+# Clé BibTeX = ancre de la page : minuscules, chiffres et tirets, sans année (voir sources.toml).
+FORMAT_CLE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 # Typographie : un nom d'auteur ou une plage de pages ne se coupe pas en fin de ligne.
 INSECABLE = "\u00a0"
 SANS_COUPURE = "\u2060"  # word joiner, de part et d'autre du tiret des pages
@@ -143,23 +144,26 @@ def est_le_po(prenoms: str, nom: str, po: dict) -> bool:
             and normaliser(prenoms)[:1] == normaliser(po["prenoms"])[:1])
 
 
-def cle_bibtex(auteurs: list[tuple[str, str]], annee: str, titre: str, prises: set[str]) -> str:
-    nom = re.sub(r"[^a-z]", "", sans_accents(auteurs[0][1]).lower()) if auteurs else "anonyme"
-    mots = [re.sub(r"[^a-z0-9]", "", sans_accents(m).lower()) for m in titre.split()]
-    mot = next((m for m in mots if m and m not in MOTS_VIDES), "publication")
-    cle, suffixe = f"{nom}{annee}{mot}", ord("a")
-    while cle in prises:
-        cle, suffixe = f"{nom}{annee}{mot}{chr(suffixe)}", suffixe + 1
-    prises.add(cle)
-    return cle
+def verifier_cles(sources: list[dict]) -> None:
+    """Chaque publication a une clé explicite, au bon format et unique (vérifié avant tout appel réseau)."""
+    vues: set[str] = set()
+    for source in sources:
+        cle = source.get("cle", "")
+        if not FORMAT_CLE.fullmatch(cle):
+            sys.exit(f"Clé absente ou invalide ({cle!r}) pour « {source['titre']} » : "
+                     "minuscules, chiffres et tirets uniquement.")
+        if re.search(r"(?:19|20)\d{2}", cle):
+            sys.exit(f"Clé avec une année ({cle!r}) : les clés doivent rester stables, sans année.")
+        if cle in vues:
+            sys.exit(f"Clé en double : {cle}")
+        vues.add(cle)
 
 
-def entree(source: dict, po: dict, prises: set[str]) -> tuple[str, dict[str, str], str]:
+def entree(source: dict, po: dict) -> tuple[dict[str, str], str]:
     notice, explication = chercher(source)
     champs: dict[str, str] = {}
     if notice is None:
         todo = f"TODO(PO): notice {explication}"
-        auteurs: list[tuple[str, str]] = []
         champs["author"] = todo
         champs["title"] = source["titre"]
         champs["year"] = str(source["event_year"])
@@ -194,8 +198,7 @@ def entree(source: dict, po: dict, prises: set[str]) -> tuple[str, dict[str, str
         champs["venue"] = source["lieu"]
     if source.get("statut", "publie") != "publie":
         champs["pubstate"] = source["statut"]
-    cle = cle_bibtex(auteurs, champs["year"], champs["title"], prises)
-    return cle, champs, explication
+    return champs, explication
 
 
 def echapper_bib(valeur: str) -> str:
@@ -223,11 +226,12 @@ def ecrire_bib(entrees: list[tuple[str, dict[str, str]]]) -> str:
 
 def etape_bib() -> None:
     config = tomllib.loads(SOURCES.read_text(encoding="utf-8"))
-    po, prises, entrees = config["auteur"], set(), []
+    po, entrees = config["auteur"], []
+    verifier_cles(config["publication"])
     for source in config["publication"]:
-        cle, champs, explication = entree(source, po, prises)
-        print(f"  {cle:32} {explication}")
-        entrees.append((cle, champs))
+        champs, explication = entree(source, po)
+        print(f"  {source['cle']:32} {explication}")
+        entrees.append((source["cle"], champs))
     BIB.write_text(ecrire_bib(entrees), encoding="utf-8")
     print(f"-> {BIB.relative_to(RACINE)} ({len(entrees)} références)")
 
