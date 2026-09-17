@@ -103,9 +103,9 @@ Les cartes sont produites **au rendu** depuis `enseignement/cours.yml` par le fi
 ```yaml
   - titre: "Intitulé du cours"
     domaine: "IA & Data"          # domaine existant, ou nouveau domaine (nouvelle section)
-    niveaux: ["M1 IABD"]
-    etablissement: "FST"
+    niveaux: ["M1"]
     statut: "a-venir"             # carte « Bientôt en ligne », sans lien
+    skill: "nom-du-skill"         # facultatif, jamais affiché sur le site
 ```
 
 - Les domaines apparaissent dans l'ordre de leur première occurrence dans `cours.yml`. Chacun a une

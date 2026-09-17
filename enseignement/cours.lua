@@ -48,10 +48,8 @@ local function carte(cours)
   end
   local libelle_niveaux = #niveaux > 1 and "Niveaux" or "Niveau"
 
+  -- Le champ skill de cours.yml n'est jamais affiché.
   local details = pandoc.Inlines(libelle_niveaux .. INSECABLE .. ": " .. table.concat(niveaux, ", "))
-  details:insert(pandoc.LineBreak())
-  details:extend(pandoc.Inlines("Établissement" .. INSECABLE .. ": "))
-  details:extend(cours.etablissement)
 
   local blocs = { pandoc.Para({ titre }), pandoc.Para(details) }
   if statut == "a-venir" then
