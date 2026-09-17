@@ -7,8 +7,9 @@ les publications, le CV et le catalogue des cours, dans une charte graphique coh
 ## Règles ajoutées à `CLAUDE.md` (PR de specs du sprint)
 
 - **Travaux non acceptés :** aucun article soumis ou en évaluation n'apparaît sur le site
-  (ni titre, ni lieu, ni résumé, ni billet). Seuls les travaux listés comme publiés dans les sources
-  peuvent être cités. En cas de doute : `TODO(PO)`.
+  (ni titre, ni lieu, ni résumé, ni billet). Aucun lien ne pointe vers un dépôt de code lié à un travail
+  non accepté ou non publié (par exemple `consistency-debt`). Seuls les travaux listés comme publiés
+  dans les sources peuvent être cités. En cas de doute : `TODO(PO)`.
 - **Données personnelles :** le PDF du CV du PO n'est jamais commité (il contient un numéro de téléphone).
   Le CV du site est régénéré depuis les sources.
 
@@ -64,7 +65,8 @@ En tant que partenaire international, je veux comprendre le programme de recherc
 - [ ] Ouverture : le fil conducteur (section « Research narrative » des sources), 3–4 phrases.
 - [ ] Axes de recherche et projets actifs, repris des sources, traduits en anglais.
 - [ ] Chaque projet peut pointer vers ses publications (ancre de la page Publications) ; aucun lien vers un travail non accepté.
-- [ ] Lien vers le dépôt public `github.com/elbachir67/consistency-debt` **uniquement si** le PO le confirme dans la PR.
+- [ ] Aucun lien vers le dépôt `github.com/elbachir67/consistency-debt`, ni vers un dépôt lié à un travail
+      non accepté ou non publié (décision anticipée du PO, règle « Travaux non acceptés »).
 - [ ] Texte relu par le PO dans la PR avant merge.
 
 ### US-10 — CV en ligne généré depuis une source unique (2 pts)

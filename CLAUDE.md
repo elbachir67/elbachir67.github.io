@@ -79,8 +79,9 @@ l'issue soi-même ; sinon, la laisser ouverte et prévenir le PO.
 - **Ne jamais inventer de contenu académique** (publications, dates, titres, projets, chiffres).
   Si l'information manque : `TODO(PO): <ce qui manque>` visible dans la page et listé dans la PR.
 - **Travaux non acceptés :** aucun article soumis ou en évaluation n'apparaît sur le site
-  (ni titre, ni lieu, ni résumé, ni billet). Seuls les travaux listés comme publiés dans les sources
-  peuvent être cités. En cas de doute : `TODO(PO)`.
+  (ni titre, ni lieu, ni résumé, ni billet). Aucun lien ne pointe vers un dépôt de code lié à un travail
+  non accepté ou non publié (par exemple `consistency-debt`). Seuls les travaux listés comme publiés
+  dans les sources peuvent être cités. En cas de doute : `TODO(PO)`.
 - Aucun numéro de téléphone sur le site.
 - **Données personnelles :** le PDF du CV du PO n'est jamais commité (il contient un numéro de téléphone).
   Le CV du site est régénéré depuis les sources.
