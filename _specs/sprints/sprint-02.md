@@ -78,7 +78,7 @@ En tant que visiteur, je veux consulter et télécharger le CV, afin d'évaluer 
 - [ ] Page `cv/index.qmd` générée depuis `cv.yml`.
 - [ ] PDF français généré par Quarto (Typst) depuis la même source et proposé au téléchargement.
 - [ ] Titre « Maître de Conférences Titulaire ». Aucun numéro de téléphone (test automatique dans la CI : échec si un motif `+221` ou un numéro à 9 chiffres apparaît dans `_site/`).
-- [ ] La version anglaise est reportée (nouvelle story au backlog : US-35, Could, 2 pts).
+- [ ] La version anglaise est reportée (US-35, Could, 2 pts, depuis fusionnée dans US-36 : site bilingue, Sprint 3).
 
 ### US-11 — Catalogue des cours (2 pts)
 
