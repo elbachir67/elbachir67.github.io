@@ -102,7 +102,8 @@ local function contenu_cv(cv, mots)
 
   local formation = {}
   for _, diplome in ipairs(cv.formation) do
-    local dates = en_ligne(diplome.periode, " · " .. mots.mention, diplome.mention)
+    -- La mention est facultative : sans elle, la ligne s'arrête à la période.
+    local dates = en_ligne(diplome.periode, diplome.mention and (" · " .. mots.mention), diplome.mention)
     table.insert(formation, entree_cv(diplome.diplome, diplome.etablissement, dates, diplome.details))
   end
   blocs:extend(section(mots.formation, "formation", formation))
