@@ -68,13 +68,15 @@ La page `publications/index.qmd` est **générée** : ne pas la modifier à la m
 publications/sources.toml  --(Crossref)-->  publications/publications.bib  -->  publications/index.qmd
 ```
 
-- `publications/sources.toml` : liste des publications (titre, année, conférence, ville), reprise des
+- `publications/sources.toml` : liste des publications (titre, `event_year`, conférence, ville), reprise des
   sources du PO. Seul fichier à modifier à la main. Une publication dont le `statut` n'est pas `publie`
   reste dans le `.bib` mais n'apparaît pas sur la page.
 - `publications/publications.bib` : auteurs complets, DOI, titre publié, actes, éditeur, pages et année
   de publication, récupérés dans l'[API Crossref](https://api.crossref.org). Ce qui est introuvable est
   écrit `TODO(PO): …`, et le script ne complète jamais une donnée manquante.
-- `publications/index.qmd` : références groupées par année décroissante, nom du PO en gras, lien DOI.
+- `publications/index.qmd` : références groupées par **année de conférence** (`event_year`, écrite
+  `eventdate` dans le `.bib`) décroissante, nom du PO en gras, lien DOI. L'année de publication de
+  Crossref reste dans le champ `year` du `.bib`.
   Chaque référence a une ancre (sa clé BibTeX, par exemple `publications/#toure2019lameme`).
 
 ```bash

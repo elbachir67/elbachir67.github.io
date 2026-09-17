@@ -40,7 +40,7 @@ PAUSE = 1.0  # secondes entre deux appels, par courtoisie envers l'API
 
 # Ordre des champs dans le .bib.
 CHAMPS = ["author", "title", "booktitle", "series", "volume", "pages",
-          "publisher", "year", "doi", "eventtitle", "venue", "pubstate"]
+          "publisher", "year", "doi", "eventtitle", "eventdate", "venue", "pubstate"]
 MOTS_VIDES = {"a", "an", "the", "on", "of", "for", "in", "and", "to"}
 # Typographie : un nom d'auteur ou une plage de pages ne se coupe pas en fin de ligne.
 INSECABLE = "\u00a0"
@@ -162,7 +162,7 @@ def entree(source: dict, po: dict, prises: set[str]) -> tuple[str, dict[str, str
         auteurs: list[tuple[str, str]] = []
         champs["author"] = todo
         champs["title"] = source["titre"]
-        champs["year"] = str(source["annee"])
+        champs["year"] = str(source["event_year"])
         champs["doi"] = todo
     else:
         auteurs = []
@@ -189,6 +189,7 @@ def entree(source: dict, po: dict, prises: set[str]) -> tuple[str, dict[str, str
         champs["year"] = str(notice["issued"]["date-parts"][0][0])
         champs["doi"] = notice["DOI"]
     champs["eventtitle"] = source["evenement"]
+    champs["eventdate"] = str(source["event_year"])
     if source.get("lieu"):
         champs["venue"] = source["lieu"]
     if source.get("statut", "publie") != "publie":
@@ -309,7 +310,9 @@ def etape_page() -> None:
     po = tomllib.loads(SOURCES.read_text(encoding="utf-8"))["auteur"]
     entrees = lire_bib(BIB.read_text(encoding="utf-8"))
     publiees = [(cle, c) for cle, c in entrees if not c.get("pubstate")]
-    publiees.sort(key=lambda e: e[1]["year"], reverse=True)  # tri stable : ordre du .bib par année
+    # Classement par année de conférence (décision du PO) ; year reste l'année de publication.
+    annee_conference = lambda e: e[1].get("eventdate") or e[1]["year"]
+    publiees.sort(key=annee_conference, reverse=True)  # tri stable : ordre du .bib dans une année
     lignes = [
         "---",
         'title: "Publications"',
@@ -317,10 +320,10 @@ def etape_page() -> None:
         "# Ne pas modifier à la main : voir la section « Publications » du README.md.",
         "---",
         "",
-        "Classées par année de publication, de la plus récente à la plus ancienne. "
+        "Classées par année de conférence, de la plus récente à la plus ancienne. "
         "Chaque référence renvoie à la version de l'éditeur par son DOI.",
     ]
-    for annee, groupe in groupby(publiees, key=lambda e: e[1]["year"]):
+    for annee, groupe in groupby(publiees, key=annee_conference):
         lignes += ["", f"## {annee} {{#annee-{annee}}}"]
         for cle, champs in groupe:
             lignes += ["", reference_md(cle, champs, po)]
