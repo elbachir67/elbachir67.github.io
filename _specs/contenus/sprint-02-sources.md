@@ -28,16 +28,17 @@ pour des classes à grands effectifs en Afrique.
 - **Consistance dans les architectures microservices.** Extension du framework Micro-Flex (ICTIS 2025) : fonction de transition complète, spécification TLA+ vérifiée par model checking, DSL de contrats de consistance.
 - **Trajectoires éducatives personnalisées en STEM.** Systèmes adaptatifs pour l'enseignement des mathématiques ; objectif : augmenter l'orientation scientifique au Sénégal.
 
-## Publications (8)
+## Publications (9)
 
-1. [2026] Touré, E.B., et al. *Decomposing Semantic Loss in Model Transformations with Neural Embeddings.* ICECET 2026, Rome, IEEE. — **statut à confirmer par le PO**
-2. [2025] Touré, E.B., et al. *Micro-Flex: Flexible Consistency Management in Microservice Architectures.* ICTIS 2025, New York, Springer LNSIST, vol. 14, pp. 203–215.
-3. [2019] Touré, E.B., et al. *A Language-oriented Approach for the Maintenance of Megamodel-based Complex Systems.* MODELSWARD 2019, Prague, pp. 337–344.
-4. [2019] Touré, E.B., et al. *LAMEME Use Case: The Example of Apache Tomcat Complex System.* WCCS 2019, Ouarzazate, IEEE.
-5. [2017] Touré, E.B., et al. *Megamodel Consistency Management at Runtime.* CNRIA/InterSol 2017, Dakar, Springer LNICST, vol. 204, pp. 257–266.
-6. [2017] Touré, E.B., et al. *Consistency Preserving for Evolving Megamodels through Axiomatic Semantics.* ISCV 2017, Fès, IEEE.
-7. [2016] Touré, E.B., et al. *Megamodel-based Management of Dynamic Tool Integration in Complex Software Systems.* FedCSIS 2016, Gdańsk, ACSIS vol. 9, pp. 211–218.
-8. [2012] Bousso, M., et al. *Ontology Change Estimation Based on Axiomatic Semantic and Entropy Measure.* SITIS 2012, Sorrento, IEEE.
+1. [2026] Coly, D., Touré, E. H. B., Nguer, E. H. M. *Profiling Structural and Academic Vulnerabilities in Online Learning: An Exploratory Clustering Analysis of Student Persistence in an African Digital University.* CNRIA 2026, Thiès, IEEE. — **acceptée, à paraître** (ajoutée par le PO dans #31)
+2. [2026] Touré, E.B., et al. *Decomposing Semantic Loss in Model Transformations with Neural Embeddings.* ICECET 2026, Rome, IEEE. — **publiée** (confirmé par le PO dans #29)
+3. [2025] Touré, E.B., et al. *Micro-Flex: Flexible Consistency Management in Microservice Architectures.* ICTIS 2025, New York, Springer LNSIST, vol. 14, pp. 203–215.
+4. [2019] Touré, E.B., et al. *A Language-oriented Approach for the Maintenance of Megamodel-based Complex Systems.* MODELSWARD 2019, Prague, pp. 337–344.
+5. [2019] Touré, E.B., et al. *LAMEME Use Case: The Example of Apache Tomcat Complex System.* WCCS 2019, Ouarzazate, IEEE.
+6. [2017] Touré, E.B., et al. *Megamodel Consistency Management at Runtime.* CNRIA/InterSol 2017, Dakar, Springer LNICST, vol. 204, pp. 257–266.
+7. [2017] Touré, E.B., et al. *Consistency Preserving for Evolving Megamodels through Axiomatic Semantics.* ISCV 2017, Fès, IEEE.
+8. [2016] Touré, E.B., et al. *Megamodel-based Management of Dynamic Tool Integration in Complex Software Systems.* FedCSIS 2016, Gdańsk, ACSIS vol. 9, pp. 211–218.
+9. [2012] Bousso, M., et al. *Ontology Change Estimation Based on Axiomatic Semantic and Entropy Measure.* SITIS 2012, Sorrento, IEEE.
 
 ## CV
 
