@@ -1,5 +1,10 @@
--- Filtre du catalogue (US-11) : remplace le bloc ::: {#catalogue} ::: de index.qmd par les cartes des
--- cours de cours.yml, groupées par domaine. Ajouter un cours = ajouter une entrée dans cours.yml.
+-- Filtre du catalogue (US-11, US-14) : remplace le bloc ::: {#catalogue} ::: de index.qmd par les cartes
+-- des cours, groupées par domaine.
+--
+-- Deux sources, sans recoupement :
+--   * cours.yml, à côté de cette page : les cours qui n'ont pas encore de page sur le site ;
+--   * cours/<slug>/cours.yml : les cours publiés, qui décrivent eux-mêmes leurs métadonnées (US-14).
+-- Un cours publié ne doit donc plus figurer dans cours.yml ; le rendu échoue s'il y est encore.
 
 local INSECABLE = "\u{A0}"
 local STATUTS = { ["a-venir"] = true, ["en-ligne"] = true }
@@ -17,6 +22,29 @@ local function lire_donnees(doc)
   local texte = fichier:read("a")
   fichier:close()
   return pandoc.read("---\n" .. texte .. "\n---\n", "markdown").meta
+end
+
+-- Cours publiés : un dossier par cours sous cours/, avec son propre cours.yml (US-14).
+local function cours_publies()
+  local dossier = pandoc.path.join({ quarto.project.directory, "cours" })
+  local ok, entrees = pcall(pandoc.system.list_directory, dossier)
+  if not ok then
+    return {}
+  end
+  table.sort(entrees)
+  local publies = {}
+  for _, slug in ipairs(entrees) do
+    local fichier = io.open(pandoc.path.join({ dossier, slug, "cours.yml" }), "r")
+    if fichier then
+      local contenu = fichier:read("a")
+      fichier:close()
+      local cours = pandoc.read("---\n" .. contenu .. "\n---\n", "markdown").meta
+      -- Lien depuis la racine du site : la même carte sert aux deux langues du catalogue.
+      cours.lien = pandoc.Inlines("/cours/" .. slug .. "/")
+      table.insert(publies, cours)
+    end
+  end
+  return publies
 end
 
 -- Identifiant d'ancre stable pour un domaine : « IA & Data » -> « ia-data ».
@@ -69,9 +97,26 @@ local function carte(cours, mots)
 end
 
 local function catalogue(donnees, mots)
-  -- Domaines dans l'ordre de première apparition dans cours.yml.
-  local domaines, cartes = {}, {}
+  local publies = cours_publies()
+  local titres_publies = {}
+  for _, cours in ipairs(publies) do
+    titres_publies[texte(cours.titre)] = true
+  end
+  local tous = {}
   for _, cours in ipairs(donnees.cours) do
+    if titres_publies[texte(cours.titre)] then
+      error("« " .. texte(cours.titre) .. " » est décrit dans cours/<slug>/cours.yml : "
+        .. "retirer son entrée de enseignement/cours.yml.")
+    end
+    table.insert(tous, cours)
+  end
+  for _, cours in ipairs(publies) do
+    table.insert(tous, cours)
+  end
+
+  -- Domaines dans l'ordre de première apparition : cours.yml d'abord, cours publiés ensuite.
+  local domaines, cartes = {}, {}
+  for _, cours in ipairs(tous) do
     local domaine = texte(cours.domaine)
     if not cartes[domaine] then
       table.insert(domaines, domaine)
