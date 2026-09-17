@@ -78,7 +78,14 @@ l'issue soi-même ; sinon, la laisser ouverte et prévenir le PO.
 - Jamais de commit direct sur `main`, jamais de `push --force`, jamais de merge de PR.
 - **Ne jamais inventer de contenu académique** (publications, dates, titres, projets, chiffres).
   Si l'information manque : `TODO(PO): <ce qui manque>` visible dans la page et listé dans la PR.
+- **Travaux non acceptés :** aucun article soumis ou en évaluation n'apparaît sur le site
+  (ni titre, ni lieu, ni résumé, ni billet). Aucun lien ne pointe vers un dépôt de code lié à un travail
+  non accepté ou non publié (par exemple `consistency-debt`). Peuvent apparaître, s'ils sont listés comme
+  tels dans les sources : les travaux publiés, et les travaux acceptés, affichés « (à paraître) ».
+  En cas de doute : `TODO(PO)`.
 - Aucun numéro de téléphone sur le site.
+- **Données personnelles :** le PDF du CV du PO n'est jamais commité (il contient un numéro de téléphone).
+  Le CV du site est régénéré depuis les sources.
 - Aucun secret, clé ou token dans le dépôt. Secrets uniquement via GitHub Secrets.
 - Aucune nouvelle dépendance sans justification dans la PR.
 - Code exécutable : `execute: freeze: auto` ; le dossier `_freeze/` est commité.
