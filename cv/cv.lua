@@ -1,0 +1,126 @@
+-- Filtre du CV (US-10) : remplace le bloc ::: {#cv} ::: de index.qmd par le contenu de cv.yml.
+-- Le même filtre sert à la page HTML et au PDF Typst : une seule source, rien de généré à la main.
+
+local INSECABLE = "\u{A0}"
+
+-- cv.yml est lu comme un bloc de métadonnées : le Markdown en ligne des valeurs est interprété.
+local function lire_donnees()
+  local dossier = pandoc.path.directory(quarto.doc.input_file)
+  local fichier = assert(io.open(pandoc.path.join({ dossier, "cv.yml" }), "r"))
+  local texte = fichier:read("a")
+  fichier:close()
+  return pandoc.read("---\n" .. texte .. "\n---\n", "markdown").meta
+end
+
+-- Concatène des chaînes et des Inlines en une seule liste d'Inlines.
+local function en_ligne(...)
+  local resultat = pandoc.Inlines({})
+  for i = 1, select("#", ...) do -- select, et non ipairs : un morceau absent (nil) ne coupe pas la suite
+    local morceau = select(i, ...)
+    if type(morceau) == "string" then
+      resultat:extend(pandoc.Inlines(morceau))
+    elseif pandoc.utils.type(morceau) == "Inline" then
+      resultat:insert(morceau)
+    elseif morceau ~= nil then
+      resultat:extend(morceau)
+    end
+  end
+  return resultat
+end
+
+local function periode(entree)
+  return en_ligne(entree.debut, " – ", entree.fin)
+end
+
+local function sous_liste(details)
+  if not details then
+    return {}
+  end
+  local items = {}
+  for _, detail in ipairs(details) do
+    table.insert(items, { pandoc.Plain(detail) })
+  end
+  return { pandoc.BulletList(items) }
+end
+
+local function section(titre, id, blocs)
+  local contenu = pandoc.Blocks({ pandoc.Header(2, titre, { id = id }) })
+  contenu:extend(blocs)
+  return contenu
+end
+
+-- Une expérience ou un diplôme : intitulé en gras et lieu, puis dates, puis précisions éventuelles.
+local function entree_cv(intitule, lieu, dates, details)
+  local blocs = pandoc.Blocks({
+    pandoc.Para(en_ligne(pandoc.Strong(intitule), " — ", lieu, pandoc.LineBreak(),
+      pandoc.Span(dates, { class = "cv-dates" }))),
+  })
+  blocs:extend(sous_liste(details))
+  return pandoc.Div(blocs, { class = "cv-entree" })
+end
+
+local function liste(elements, rendu)
+  local items = {}
+  for _, element in ipairs(elements) do
+    table.insert(items, { pandoc.Plain(rendu(element)) })
+  end
+  return pandoc.BulletList(items)
+end
+
+local function contenu_cv(cv)
+  local blocs = pandoc.Blocks({})
+
+  local parcours = {}
+  for _, poste in ipairs(cv.parcours) do
+    table.insert(parcours, entree_cv(poste.poste, poste.employeur, periode(poste), poste.details))
+  end
+  blocs:extend(section("Parcours", "parcours", parcours))
+
+  local formation = {}
+  for _, diplome in ipairs(cv.formation) do
+    local dates = en_ligne(diplome.periode, " · Mention ", diplome.mention)
+    table.insert(formation, entree_cv(diplome.diplome, diplome.etablissement, dates, diplome.details))
+  end
+  blocs:extend(section("Formation", "formation", formation))
+
+  blocs:extend(section("Responsabilités scientifiques et associatives", "responsabilites", {
+    liste(cv.responsabilites, function(r)
+      return en_ligne(pandoc.Strong(r.intitule), ", ", r.cadre, r.dates and en_ligne(" (", r.dates, ")"))
+    end),
+  }))
+
+  blocs:extend(section("Distinctions", "distinctions", {
+    liste(cv.distinctions, function(d)
+      return en_ligne(d.intitule, " (", d.dates, ")")
+    end),
+  }))
+
+  blocs:extend(section("Langues", "langues", {
+    liste(cv.langues, function(l)
+      return en_ligne(l.langue, INSECABLE .. ": ", l.niveau)
+    end),
+  }))
+
+  return blocs
+end
+
+function Pandoc(doc)
+  local cv = lire_donnees()
+  local identite = cv.identite
+  if quarto.doc.is_format("typst") then
+    -- PDF : le nom en titre.
+    doc.meta.title = identite.nom
+    doc.meta.subtitle = en_ligne(identite.titre, ", ", identite.affiliation)
+  else
+    -- Page web : « CV » en titre, comme dans la navigation.
+    doc.meta.subtitle = en_ligne(identite.nom, ", ", identite.titre, ", ", identite.affiliation)
+  end
+  doc.blocks = doc.blocks:walk({
+    Div = function(div)
+      if div.identifier == "cv" then
+        return contenu_cv(cv)
+      end
+    end,
+  })
+  return doc
+end

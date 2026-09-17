@@ -37,10 +37,10 @@ recherche/               Research (EN)
 publications/            Publications (page générée, voir ci-dessous)
 enseignement/            Catalogue des cours (cours.yml, filtre cours.lua)
 blog/                    Articles
-cv/                      CV
+cv/                      CV (cv.yml, filtre cv.lua ; page et PDF générés, voir ci-dessous)
 assets/                  Images, styles (css/custom.scss, custom-dark.scss) et polices (fonts/)
 _extensions/             Extensions Quarto versionnées (academicons)
-scripts/                 Scripts de génération (publications.py)
+scripts/                 Scripts (publications.py, verifier_telephone.py)
 _specs/                  Backlog, sprints, ADR (non publiés)
 _freeze/                 Résultats d'exécution gelés (versionnés)
 ```
@@ -118,6 +118,28 @@ Les cartes sont produites **au rendu** depuis `enseignement/cours.yml` par le fi
 - Quand la version en ligne d'un cours est publiée, passer `statut: "en-ligne"` et ajouter
   `lien: "../cours/<slug>/index.qmd"` : la carte devient un lien.
 - Un statut inconnu, ou un cours en ligne sans `lien`, fait échouer `quarto render` (et donc la CI).
+
+## CV
+
+La page `cv/index.qmd` et le PDF `cv-fr.pdf` sont produits **au rendu** depuis une seule source :
+
+- `cv/cv.yml` : identité, parcours, formation, responsabilités, distinctions et langues, repris des sources
+  du PO. Seul fichier à modifier à la main (Markdown en ligne accepté, par exemple `*italique*`).
+- `cv/cv.lua` : filtre Quarto qui remplace le bloc `::: {#cv}` de la page par le contenu de `cv.yml`.
+  Le même filtre sert à la page web et au PDF Typst (Typst est inclus dans Quarto, sans installation).
+
+```bash
+quarto render          # produit _site/cv/index.html et _site/cv/cv-fr.pdf
+```
+
+**Aucun numéro de téléphone** : la CI lance `scripts/verifier_telephone.py`, qui échoue si `+221`, `00221`,
+un numéro de 9 chiffres ou un numéro sénégalais par groupes apparaît dans `_site/`. Les PDF sont
+vérifiés via `pdftotext` (paquet poppler), et `site_libs/` est exclu. Aucun PDF de CV n'est commité
+(`cv/*.pdf` est ignoré par Git).
+
+```bash
+python3 scripts/verifier_telephone.py    # après quarto render
+```
 
 ## Contribution
 
