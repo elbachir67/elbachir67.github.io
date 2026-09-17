@@ -35,7 +35,7 @@ _quarto.yml              Configuration du site (navigation, rendu, exécution)
 index.qmd                Accueil (FR)
 recherche/               Research (EN)
 publications/            Publications (page générée, voir ci-dessous)
-enseignement/            Catalogue des cours
+enseignement/            Catalogue des cours (cours.yml, filtre cours.lua)
 blog/                    Articles
 cv/                      CV (cv.yml, filtre cv.lua ; page et PDF générés, voir ci-dessous)
 assets/                  Images, styles (css/custom.scss, custom-dark.scss) et polices (fonts/)
@@ -78,9 +78,14 @@ publications/sources.toml  --(Crossref)-->  publications/publications.bib  -->  
 - `publications/publications.bib` : auteurs complets, DOI, titre publié, actes, éditeur, pages et année
   de publication, récupérés dans l'[API Crossref](https://api.crossref.org). Ce qui est introuvable est
   écrit `TODO(PO): …`, et le script ne complète jamais une donnée manquante.
-- `publications/index.qmd` : références groupées par **année de conférence** (`event_year`, écrite
-  `eventdate` dans le `.bib`) décroissante, nom du PO en gras, lien DOI. L'année de publication de
-  Crossref reste dans le champ `year` du `.bib`.
+- **Posters et communications** : `type = "poster"` ou `type = "communication"` (`article` par défaut),
+  avec `auteurs`, `evenement`, `lieu` et `date` (`AAAA`, `AAAA-MM` ou `AAAA-MM-JJ`) décrits à la main, et
+  `libelle` facultatif (« Communication orale »). Ni DOI, ni PDF, ni recherche Crossref. Dans le `.bib`,
+  ce sont des entrées `@misc` avec `entrysubtype`.
+- `publications/index.qmd` : section **Articles**, groupée par **année de conférence** (`event_year`, écrite
+  `eventdate` dans le `.bib`) décroissante, avec le nom du PO en gras et le lien DOI. L'année de publication
+  de Crossref reste dans le champ `year` du `.bib`. Puis section **Posters et communications**, par date
+  décroissante.
   Chaque référence a une ancre égale à sa clé BibTeX, par exemple `publications/#toure-lameme-tomcat`.
   La `cle` est choisie dans `sources.toml`, sans année, et **ne change plus** une fois publiée : la page
   Research pointe vers ces ancres. Le script refuse une clé absente, en double, mal formée ou datée.
@@ -92,6 +97,27 @@ quarto render
 ```
 
 Le script n'utilise que la bibliothèque standard de Python (3.11 ou plus récent).
+
+## Enseignement
+
+La page `enseignement/index.qmd` affiche le catalogue des cours sous forme de cartes, groupées par domaine.
+Les cartes sont produites **au rendu** depuis `enseignement/cours.yml` par le filtre `enseignement/cours.lua`.
+
+**Ajouter un cours = ajouter une entrée dans `cours.yml`**, sans toucher à `index.qmd` :
+
+```yaml
+  - titre: "Intitulé du cours"
+    domaine: "IA & Data"          # domaine existant, ou nouveau domaine (nouvelle section)
+    niveaux: ["M1"]
+    statut: "a-venir"             # carte « Bientôt en ligne », sans lien
+    skill: "nom-du-skill"         # facultatif, jamais affiché sur le site
+```
+
+- Les domaines apparaissent dans l'ordre de leur première occurrence dans `cours.yml`. Chacun a une
+  ancre (par exemple `enseignement/#ia-data`).
+- Quand la version en ligne d'un cours est publiée, passer `statut: "en-ligne"` et ajouter
+  `lien: "../cours/<slug>/index.qmd"` : la carte devient un lien.
+- Un statut inconnu, ou un cours en ligne sans `lien`, fait échouer `quarto render` (et donc la CI).
 
 ## CV
 
