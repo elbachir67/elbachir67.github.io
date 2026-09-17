@@ -37,8 +37,8 @@ d'un tuteur IA encadré.
 | US-12 | EP2 | Contact (email protégé, sans téléphone) | S | 1 | 2 |
 | US-13 | EP2 | SEO et métadonnées (Open Graph, sitemap) | S | 2 | 2 |
 | US-34 | EP1 | Montée de version Quarto 1.10 | S | 1 | 2 |
-| US-37 | EP2 | Spike + ADR-0003 : architecture multilingue Quarto (avant US-36) | M | 2 | 3 |
-| US-36 | EP2 | Site bilingue FR/EN avec sélecteur de langue (inclut l'ex-US-35, CV anglais) | M | 8 | 3 |
+| US-37 | EP1 | Spike + ADR-0003 : architecture multilingue Quarto (avant US-36) | M | 2 | 3 |
+| US-36 | EP1 | Site bilingue FR/EN avec sélecteur de langue (inclut l'ex-US-35, CV anglais) | M | 8 | 3 |
 | US-14 | EP3 | Gabarit de cours (structure, métadonnées, navigation chapitres) | M | 5 | 3 |
 | US-15 | EP3 | Correspondance LaTeX → Quarto (tcolorbox → callouts, TikZ → SVG, code) | M | 8 | 3 |
 | US-16 | EP3 | Migration du cours pilote : chapitre 1 | M | 5 | 3 |
