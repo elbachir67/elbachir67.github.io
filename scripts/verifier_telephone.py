@@ -26,7 +26,9 @@ from pathlib import Path
 MOTIFS = {
     "indicatif +221": re.compile(r"(?<![\w+])\+\s*221"),
     "indicatif 00221": re.compile(r"(?<!\d)00\s*221"),
-    "9 chiffres consécutifs": re.compile(r"(?<![\d.])\d{9}(?!\d)"),
+    # Ni lettre ni chiffre autour : exclut les empreintes hexadécimales des noms de fichiers
+    # (bootstrap-cba6febe789600312bd9….min.css), qui changent à chaque modification du CSS.
+    "9 chiffres consécutifs": re.compile(r"(?<![\w.])\d{9}(?!\w)"),
     "numéro par groupes": re.compile(r"(?<![\d/.\-])(?:7[05678]|3[03])[ .\-]\d{3}[ .\-]\d{2}[ .\-]\d{2}(?!\d)"),
 }
 EXTENSIONS_TEXTE = {".html", ".xml", ".json", ".txt"}
