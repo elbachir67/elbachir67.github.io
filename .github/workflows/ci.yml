@@ -63,6 +63,25 @@ jobs:
           command -v pdftotext >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils; }
           python scripts/verifier_telephone.py _site
 
+      # Email protégé (US-12) : l'adresse de _quarto.yml ne doit apparaître nulle part dans _site/, ni en clair,
+      # ni encodée (URL, entités HTML), et aucun lien mailto ne doit être écrit en dur dans une page.
+      - name: Vérifier que l'email n'apparaît pas en clair
+        run: |
+          utilisateur=$(sed -n 's/^  email-utilisateur: "\(.*\)"$/\1/p' _quarto.yml)
+          domaine=$(sed -n 's/^  email-domaine: "\(.*\)"$/\1/p' _quarto.yml)
+          if [ -z "$utilisateur" ] || [ -z "$domaine" ]; then
+            echo "::error title=Email protégé::contact.email-utilisateur ou contact.email-domaine introuvable dans _quarto.yml"
+            exit 1
+          fi
+          if grep -rIlF \
+              -e "${utilisateur}@${domaine}" -e "${utilisateur}%40${domaine}" \
+              -e "${utilisateur}&#64;${domaine}" -e "${utilisateur}&#x40;${domaine}" -e "${utilisateur}&commat;${domaine}" \
+              -e 'href="mailto:' _site; then
+            echo "::error title=Email en clair::adresse ou lien mailto statique dans les fichiers listés ci-dessus"
+            exit 1
+          fi
+          echo "OK : ni adresse en clair ni lien mailto statique dans _site/."
+
       # Liens internes : vérification hors ligne des fichiers de _site/. Un lien cassé fait échouer la CI.
       - name: Vérifier les liens internes
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
