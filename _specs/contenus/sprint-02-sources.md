@@ -40,6 +40,14 @@ pour des classes à grands effectifs en Afrique.
 8. [2016] Touré, E.B., et al. *Megamodel-based Management of Dynamic Tool Integration in Complex Software Systems.* FedCSIS 2016, Gdańsk, ACSIS vol. 9, pp. 211–218.
 9. [2012] Bousso, M., et al. *Ontology Change Estimation Based on Axiomatic Semantic and Entropy Measure.* SITIS 2012, Sorrento, IEEE.
 
+## Posters et communications (3)
+
+Ajoutés par le PO (PR #34). Sans DOI ni PDF.
+
+1. [2026] Touré, E. H. B., Yadav, A., Sarr, I. *IA4Nieup: Teacher-Centric, AI-Powered Adaptive Learning for Computing and STEM Education in Africa.* AAP Annual Meeting 2026, University of Dar es Salaam, Tanzania, septembre 2026. — **poster**
+2. [2023] Touré, E. H. B. *A generic solution for managing scalability in modern software development.* 3e Journées scientifiques du Laboratoire d'Informatique et d'Ingénierie pour l'Innovation (LI3), Université Assane Seck de Ziguinchor, 23 février 2023. — **communication orale**
+3. [2019] Touré, E. H. B., Fall, I., Bah, A., Camara, M. S., Ba, M., Fall, A. *Approche orientée langage pour la maintenance de mégamodèles.* CNRIA 2019, Université Gaston Berger, Saint-Louis, avril 2019. — **communication** (ville et mois : appel à communications EasyChair de CNRIA 2019)
+
 ## CV
 
 ### Parcours
