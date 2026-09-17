@@ -84,7 +84,7 @@ En tant que visiteur, je veux consulter et télécharger le CV, afin d'évaluer 
 
 En tant qu'étudiant, je veux voir les cours enseignés, afin de retrouver le mien.
 
-- [ ] `enseignement/cours.yml` : un cours par entrée (titre, domaine, niveaux, établissement, statut).
+- [ ] `enseignement/cours.yml` : un cours par entrée (titre, domaine, niveaux, statut ; champ `skill` facultatif, non affiché). Établissement retiré par le PO dans #35.
 - [ ] Page `enseignement/index.qmd` : cartes groupées par domaine (Génie Logiciel & Architecture, IA & Data, Programmation/Web/Mobile).
 - [ ] Statut `a-venir` affiché « Bientôt en ligne », sans lien (les cours natifs arrivent au Sprint 3).
 - [ ] Ajouter un cours = ajouter une entrée YAML, sans toucher au `.qmd` (documenté dans le `README.md`).

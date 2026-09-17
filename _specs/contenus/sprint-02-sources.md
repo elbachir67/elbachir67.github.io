@@ -77,21 +77,26 @@ Ajoutés par le PO (PR #34). Sans DOI ni PDF.
 
 ## Enseignements (catalogue, tous au statut `a-venir`)
 
-| Domaine | Cours | Niveaux |
-|---|---|---|
-| Génie Logiciel & Architecture | UML & Ingénierie des Processus de Développement Logiciel | L3, M1 |
-| Génie Logiciel & Architecture | Architectures Logicielles : du monolithe aux microservices | M1 SIR |
-| Génie Logiciel & Architecture | Ateliers de Génie Logiciel & DevOps | M1 SIR |
-| Génie Logiciel & Architecture | Programmation par Réutilisation de Composants | L2 GLSI / DUT |
-| IA & Data | Introduction à l'IA | M1 IABD |
-| IA & Data | Machine Learning | M1 IABD |
-| IA & Data | Deep Learning | M1 |
-| IA & Data | Intégration & Déploiement de Modèles IA | L2 GLSI / DUT |
-| IA & Data | Python pour l'Analyse de Données | L3 |
-| Programmation, Web & Mobile | Programmation C avancée | L3 GLSI / DIC1 |
-| Programmation, Web & Mobile | Structures de Données & Algorithmes Avancés | M1 GLSI |
-| Programmation, Web & Mobile | Fondamentaux du Web | L1 DUT |
-| Programmation, Web & Mobile | Frontend React / Next.js | L3 GLSI |
-| Programmation, Web & Mobile | Développement Web & Mobile multiplateforme | M1 RETEL |
+Catalogue remplacé par le PO dans #35. Certains cours sont proposés à plusieurs niveaux, avec un contenu adapté.
+La colonne « Skill » (skill Claude associé au cours) n'est jamais affichée sur le site.
 
-Établissements : FST et ESP (UCAD). Les niveaux sont indicatifs : le PO les corrige dans la PR d'US-11 si besoin.
+| Domaine | Cours | Niveaux | Skill |
+|---|---|---|---|
+| Génie Logiciel & Architecture | Bases du Génie Logiciel | L3 | — |
+| Génie Logiciel & Architecture | IPDL 1, Ingénierie des Processus de Développement Logiciel | L3 | `ipdl1-sensante` |
+| Génie Logiciel & Architecture | IPDL 2 | M1 | — |
+| Génie Logiciel & Architecture | Formalismes de modélisation | M1 | `uml-course-generator` |
+| Génie Logiciel & Architecture | Architectures Logicielles Modernes | M1 | `archi-logicielles-senresto` |
+| Génie Logiciel & Architecture | Programmation par Réutilisation de Composants | L2 | `reutilisation-composants` |
+| Génie Logiciel & Architecture | Introduction au DevOps | M1 | `agl-devops-gl` |
+| IA & Data | Intégration et déploiement de modèles IA | L2, M1 | `integration-modeles-ia` |
+| IA & Data | Introduction à l'IA : logique mathématique et calcul formel | M1 | `intro-ia-course-generator` |
+| IA & Data | Introduction au Machine Learning | M1 | `hands-on-ml` |
+| IA & Data | Introduction au Deep Learning | M1 | `mit-course-translator` |
+| Programmation, Web & Mobile | Introduction à Python | L1 | `programmation-python` |
+| Programmation, Web & Mobile | Programmation C avancée | L3 | `c-advanced-course-generator` |
+| Programmation, Web & Mobile | Structures de Données & Algorithmes Avancés | M1 | `advanced-dsa-course-generator` |
+| Programmation, Web & Mobile | Programmation Frontend 1 : HTML, CSS, JavaScript | L1 | `njurelgeo-web-fundamentals` |
+| Programmation, Web & Mobile | Programmation Frontend 2 : frameworks | L2, L3 | `frontend-react-nextjs` |
+| Programmation, Web & Mobile | Développement d'applications Java | L3, M1 | — |
+| Programmation, Web & Mobile | Développement Web et Mobile | L3, M1 | `dawm-multiplatform-web-mobile` |
