@@ -24,7 +24,7 @@ pour des classes à grands effectifs en Afrique.
 ## Projets actifs
 
 - **SEMANTICA — Transformations de modèles et IA.** Décomposition de la perte sémantique dans les transformations de modèles à l'aide d'embeddings neuronaux ; mégamodèles interrogeables et intégration bayésienne de nouveaux DSMLs.
-- **IA4Nieup — Plateforme d'apprentissage adaptatif en IA.** Démocratiser l'éducation en IA en Afrique : parcours personnalisés par niveaux (intuition / application / formel), données contextualisées africaines, labs pratiques intégrés. Développée dans le cadre de DiCentre4AI et du programme AFRLP.
+- **IA4Nieup — Plateforme d'apprentissage adaptatif en IA.** Démocratiser l'éducation en IA en Afrique : parcours personnalisés par niveaux (intuition / application / formel), données contextualisées africaines, labs pratiques intégrés. Développée dans le cadre de DiCentre4AI et de l'African Futures Research Leadership Program (AFRLP) de l'Alliance for African Partnership (AAP), Michigan State University (MSU).
 - **Consistance dans les architectures microservices.** Extension du framework Micro-Flex (ICTIS 2025) : fonction de transition complète, spécification TLA+ vérifiée par model checking, DSL de contrats de consistance.
 - **Trajectoires éducatives personnalisées en STEM.** Systèmes adaptatifs pour l'enseignement des mathématiques ; objectif : augmenter l'orientation scientifique au Sénégal.
 
