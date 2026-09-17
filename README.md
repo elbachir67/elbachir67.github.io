@@ -40,7 +40,8 @@ blog/                    Articles
 cv/                      CV (cv.yml, filtre cv.lua ; page et PDF générés, voir ci-dessous)
 assets/                  Images, styles (css/custom.scss, custom-dark.scss) et polices (fonts/)
 _extensions/             Extensions Quarto versionnées (academicons)
-scripts/                 Scripts (publications.py, verifier_telephone.py)
+scripts/                 Scripts (publications.py, verifier_telephone.py, verifier_metadonnees.py)
+robots.txt               Consignes aux robots d'indexation (publié tel quel)
 _specs/                  Backlog, sprints, ADR (non publiés)
 _freeze/                 Résultats d'exécution gelés (versionnés)
 ```
@@ -139,6 +140,23 @@ vérifiés via `pdftotext` (paquet poppler), et `site_libs/` est exclu. Aucun PD
 
 ```bash
 python3 scripts/verifier_telephone.py    # après quarto render
+```
+
+## Référencement
+
+- `_quarto.yml` : `site-url`, `description` du site, image d'aperçu par défaut (`/assets/img/profil.jpg`,
+  chemin depuis la racine) et métadonnées de partage Open Graph et Twitter Card (`summary`).
+  Quarto en déduit `sitemap.xml`.
+- `robots.txt` (à la racine, publié tel quel) : tout le site est indexable, avec l'adresse du sitemap.
+- **Chaque page a une `description` propre** dans son en-tête. Celle de la page Publications est écrite par
+  `scripts/publications.py`.
+
+La CI lance `scripts/verifier_metadonnees.py`. Il échoue si une page n'a pas de titre ou de description, si
+deux pages partagent le même titre ou la même description, si une métadonnée de partage manque, ou si
+`sitemap.xml` et `robots.txt` sont incomplets.
+
+```bash
+python3 scripts/verifier_metadonnees.py    # après quarto render
 ```
 
 ## Contribution

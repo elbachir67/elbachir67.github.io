@@ -408,6 +408,8 @@ def etape_page() -> None:
     lignes = [
         "---",
         'title: "Publications"',
+        'description: "Publications d\'El Hadji Bassirou Touré : articles classés par année de conférence, '
+        'avec liens DOI, puis posters et communications."',
         "# Page générée par scripts/publications.py depuis publications/publications.bib.",
         "# Ne pas modifier à la main : voir la section « Publications » du README.md.",
         "---",
