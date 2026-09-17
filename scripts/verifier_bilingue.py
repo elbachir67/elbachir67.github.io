@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Échoue si le site bilingue est incomplet ou incohérent (US-36).
+
+    python3 scripts/verifier_bilingue.py            # analyse _site/
+    python3 scripts/verifier_bilingue.py chemin/    # analyse un autre dossier
+
+Vérifie, pour le périmètre bilingue (tout sauf les dossiers hors périmètre) :
+- chaque page française a son équivalent anglais sous `en/`, et réciproquement ;
+- chaque page porte les trois balises `hreflang` : `fr`, `en` et `x-default` ;
+- les deux versions d'une page annoncent les mêmes adresses (`hreflang` réciproques) ;
+- `x-default` pointe vers la version française.
+
+Les pages hors périmètre (les cours, monolingues par décision du PO) ne sont pas appariées et ne
+doivent pas porter de `hreflang`.
+"""
+
+from __future__ import annotations
+
+import os
+import re
+import sys
+from pathlib import Path
+
+# Dossiers monolingues, exclus de l'appariement (décision PO du Sprint 3 : les cours restent en français).
+HORS_PERIMETRE = {"cours"}
+MOTIF_HREFLANG = re.compile(r'<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">')
+
+
+def pages(racine: Path) -> list[Path]:
+    return sorted(p for p in racine.rglob("*.html")
+                  if "site_libs" not in p.relative_to(racine).parts)
+
+
+def hreflangs(page: Path) -> dict[str, str]:
+    return dict(MOTIF_HREFLANG.findall(page.read_text(encoding="utf-8")))
+
+
+def main() -> int:
+    racine = Path(sys.argv[1] if len(sys.argv) > 1 else "_site")
+    if not racine.is_dir():
+        sys.exit(f"Dossier introuvable : {racine} (lancer scripts/rendre.py d'abord).")
+    erreurs: list[tuple[str, str]] = []
+
+    def erreur(page, message):
+        erreurs.append((str(page), message))
+
+    francaises, anglaises = {}, {}
+    for page in pages(racine):
+        relatif = page.relative_to(racine)
+        parts = relatif.parts
+        if parts[0] == "en":
+            anglaises["/".join(parts[1:])] = page
+        elif parts[0] not in HORS_PERIMETRE:
+            francaises["/".join(parts)] = page
+
+    for chemin in sorted(set(francaises) | set(anglaises)):
+        fr, en = francaises.get(chemin), anglaises.get(chemin)
+        if fr is None:
+            erreur(en, f"page anglaise sans équivalent français attendu à {chemin}")
+            continue
+        if en is None:
+            erreur(fr, f"page française sans équivalent anglais attendu à en/{chemin}")
+            continue
+        liens = {"fr": hreflangs(fr), "en": hreflangs(en)}
+        for langue, page in (("fr", fr), ("en", en)):
+            manquantes = [b for b in ("fr", "en", "x-default") if b not in liens[langue]]
+            if manquantes:
+                erreur(page, f"balise(s) hreflang absente(s) : {', '.join(manquantes)}")
+        if not any(erreurs) or (liens["fr"] and liens["en"]):
+            for balise in ("fr", "en"):
+                gauche, droite = liens["fr"].get(balise), liens["en"].get(balise)
+                if gauche and droite and gauche != droite:
+                    erreur(fr, f"hreflang {balise} asymétrique : {gauche} côté français, "
+                               f"{droite} côté anglais")
+            for langue, page in (("fr", fr), ("en", en)):
+                defaut, vers_fr = liens[langue].get("x-default"), liens[langue].get("fr")
+                if defaut and vers_fr and defaut != vers_fr:
+                    erreur(page, f"x-default ({defaut}) devrait pointer vers la version française ({vers_fr})")
+
+    for page in pages(racine):
+        if page.relative_to(racine).parts[0] in HORS_PERIMETRE and hreflangs(page):
+            erreur(page, "page hors périmètre bilingue : elle ne doit pas porter de hreflang")
+
+    for fichier, message in erreurs:
+        if os.environ.get("GITHUB_ACTIONS"):
+            print(f"::error file={fichier},title=Site bilingue::{message}")
+        print(f"{fichier}: {message}")
+    if erreurs:
+        print(f"ÉCHEC : {len(erreurs)} problème(s) de cohérence bilingue dans {racine}/.")
+        return 1
+    print(f"OK : {len(francaises)} page(s) française(s) et {len(anglaises)} anglaise(s) appariées, "
+          f"hreflang réciproques.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
