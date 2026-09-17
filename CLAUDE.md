@@ -36,10 +36,13 @@ Quarto (site web) · Python (figures, `freeze`) · GitHub Actions (CI/CD) · Git
 ```
 /
 ├── _quarto.yml
+├── _quarto-fr.yml             # Profils de langue (ADR-0003)
+├── _quarto-en.yml
 ├── index.qmd                  # Accueil (FR)
-├── recherche/index.qmd        # Research (EN)
+├── recherche/index.qmd        # Recherche (FR)
 ├── publications/              # index.qmd + publications.bib
 ├── enseignement/index.qmd     # Catalogue des cours
+├── en/                        # Pages anglaises : index, research, publications, teaching, blog, cv
 ├── cours/<slug>/              # Un cours = un sous-dossier
 ├── blog/posts/<date-slug>/
 ├── cv/                        # cv-fr.pdf, cv-en.pdf
@@ -90,7 +93,11 @@ l'issue soi-même ; sinon, la laisser ouverte et prévenir le PO.
 - Aucune nouvelle dépendance sans justification dans la PR.
 - Code exécutable : `execute: freeze: auto` ; le dossier `_freeze/` est commité.
 - Images : texte alternatif obligatoire, poids < 300 Ko.
-- Langue : contenu et messages de commit en français, sauf la page Recherche (anglais).
+- Langue : le site est bilingue depuis US-36. Les pages françaises sont à la racine, leurs équivalents
+  anglais sous `en/` (adresse `/en/…`, avec un nom de dossier anglais quand le mot diffère :
+  `/recherche/` ↔ `/en/research/`, `/enseignement/` ↔ `/en/teaching/`). Les pages sous `en/` sont
+  rédigées en anglais, toutes les autres en français, y compris les cours (monolingues).
+  Messages de commit, specs, ADR et documentation : toujours en français.
 
 ## 8. Definition of Ready (story)
 

@@ -14,6 +14,13 @@ est lisible en ligne, généré depuis les sources LaTeX existantes.
 - **Bilingues** : Accueil, Research, Publications, Enseignement, CV, Contact, Blog (index).
 - **Monolingues** : les pages de cours, dans leur langue d'enseignement (français). Le catalogue est bilingue, les cours ne le sont pas. Une note l'indique au visiteur anglophone.
 
+**Décisions du PO sur la PR #48 :**
+
+- **Contact** : la page n'existe pas encore sur le site. Elle sort du périmètre d'US-36 et devient US-38 au backlog (Should, 2 pts, sans sprint).
+- **Adresses anglaises** : le dossier porte un nom anglais quand le mot diffère — `/en/research/`, `/en/teaching/`. Les adresses françaises ne changent pas.
+- **Recherche** : un index par langue ; une recherche depuis une page anglaise ne propose pas de pages françaises, et réciproquement.
+- **Données du CV et du catalogue** : elles restent en français sur les pages anglaises (seuls les libellés sont traduits). Leur traduction devient US-39 au backlog (Should, 3 pts, sans sprint).
+
 ## Ordre d'exécution
 
 US-37 → US-36 → US-14 → US-15 → US-18 → US-16.

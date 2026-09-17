@@ -61,6 +61,8 @@ d'un tuteur IA encadré.
 | US-32 | EP6 | Journalisation anonymisée des questions + consentement | S | 5 | 6 |
 | US-33 | EP6 | Tableau de bord enseignant (concepts bloquants) | C | 8 | 6 |
 | US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | — |
+| US-38 | EP2 | Page Contact bilingue (formulaire non requis : email protégé, affiliations) | S | 2 | — |
+| US-39 | EP1 | Traduire les données du CV et du catalogue des cours (et non les seuls libellés) | S | 3 | — |
 
 ## Roadmap
 
