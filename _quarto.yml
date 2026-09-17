@@ -1,17 +1,22 @@
+# Configuration commune aux deux langues (US-36, ADR-0003).
+# Ce qui dépend de la langue est dans _quarto-fr.yml et _quarto-en.yml : langue, description,
+# navigation, pied de page, liste des pages rendues et dossier de sortie.
+# Le rendu passe par scripts/rendre.py, qui enchaîne les deux profils puis assemble le site.
 project:
   type: website
-  output-dir: _site
   # Seules les pages .qmd sont rendues : les .md (README, CLAUDE, _specs) restent
   # des documents de travail et ne sont pas publiés.
-  render:
-    - "**/*.qmd"
   # Licence de la police hébergée (Source Sans 3), publiée avec elle.
   resources:
     - assets/fonts/OFL.txt
+    # Sélecteur de langue.
+    - assets/js/bascule-langue.js
     # Consignes aux robots d'indexation, avec l'adresse du plan du site (US-13).
     - robots.txt
 
-lang: fr
+# Adresse du site, déclarée une seule fois : l'ancre est reprise par website.site-url (pour Quarto)
+# et la clé reste lisible par le filtre hreflang, qui n'a pas accès à la configuration du site.
+site-url: &site-url "https://elbachir67.github.io"
 
 # Adresse email (US-12), utilisée par le shortcode « email » (extension _extensions/email-protege).
 # Elle n'apparaît jamais en clair dans le HTML généré : la page n'en contient qu'une forme encodée,
@@ -27,39 +32,18 @@ execute:
 website:
   title: "El Hadji Bassirou Touré"
   # Référencement et partage (US-13). site-url produit sitemap.xml et les URL absolues des métadonnées.
-  site-url: "https://elbachir67.github.io"
-  description: "Site académique d'El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV."
+  site-url: *site-url
   # Image d'aperçu par défaut des partages (Open Graph, Twitter Card) : photo carrée de 800 px.
   image: /assets/img/profil.jpg
   image-alt: "Portrait d'El Hadji Bassirou Touré"
   open-graph: true
   twitter-card:
     card-style: summary
-  navbar:
-    left:
-      - href: index.qmd
-        text: Accueil
-      - href: recherche/index.qmd
-        text: Research
-      - href: publications/index.qmd
-        text: Publications
-      - href: enseignement/index.qmd
-        text: Enseignement
-      - href: blog/index.qmd
-        text: Blog
-      - href: cv/index.qmd
-        text: CV
-  # Pied de page commun. Les shortcodes « ai » chargent aussi la feuille academicons sur
-  # toutes les pages, dont l'accueil qui l'utilise pour ses liens.
-  page-footer:
-    left: "© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD"
-    right: >-
-      [{{< ai google-scholar >}}](https://scholar.google.com/citations?user=JsZhGvQAAAAJ){aria-label="Google Scholar"}
-      [{{< ai orcid >}}](https://orcid.org/0009-0008-8554-8425){aria-label="ORCID"}
-      [<i class="bi bi-github" aria-hidden="true"></i>](https://github.com/elbachir67){aria-label="GitHub"}
-
 format:
   html:
+    # Balises hreflang réciproques entre les deux langues (US-36).
+    filters:
+      - assets/lua/hreflang.lua
     theme:
       light: [cosmo, assets/css/custom.scss]
       dark: [darkly, assets/css/custom.scss, assets/css/custom-dark.scss]
@@ -69,3 +53,7 @@ format:
     include-in-header:
       text: |
         <link rel="preload" href="/site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin>
+    # Sélecteur de langue : corrige la cible du lien rel="alternate" (US-36).
+    include-after-body:
+      text: |
+        <script src="/assets/js/bascule-langue.js"></script>
