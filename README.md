@@ -35,7 +35,7 @@ _quarto.yml              Configuration du site (navigation, rendu, exécution)
 index.qmd                Accueil (FR)
 recherche/               Research (EN)
 publications/            Publications (page générée, voir ci-dessous)
-enseignement/            Catalogue des cours
+enseignement/            Catalogue des cours (cours.yml, filtre cours.lua)
 blog/                    Articles
 cv/                      CV
 assets/                  Images, styles (css/custom.scss, custom-dark.scss) et polices (fonts/)
@@ -92,6 +92,27 @@ quarto render
 ```
 
 Le script n'utilise que la bibliothèque standard de Python (3.11 ou plus récent).
+
+## Enseignement
+
+La page `enseignement/index.qmd` affiche le catalogue des cours sous forme de cartes, groupées par domaine.
+Les cartes sont produites **au rendu** depuis `enseignement/cours.yml` par le filtre `enseignement/cours.lua`.
+
+**Ajouter un cours = ajouter une entrée dans `cours.yml`**, sans toucher à `index.qmd` :
+
+```yaml
+  - titre: "Intitulé du cours"
+    domaine: "IA & Data"          # domaine existant, ou nouveau domaine (nouvelle section)
+    niveaux: ["M1 IABD"]
+    etablissement: "FST"
+    statut: "a-venir"             # carte « Bientôt en ligne », sans lien
+```
+
+- Les domaines apparaissent dans l'ordre de leur première occurrence dans `cours.yml`. Chacun a une
+  ancre (par exemple `enseignement/#ia-data`).
+- Quand la version en ligne d'un cours est publiée, passer `statut: "en-ligne"` et ajouter
+  `lien: "../cours/<slug>/index.qmd"` : la carte devient un lien.
+- Un statut inconnu, ou un cours en ligne sans `lien`, fait échouer `quarto render` (et donc la CI).
 
 ## Contribution
 
