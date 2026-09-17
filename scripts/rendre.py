@@ -7,8 +7,9 @@
 1. `quarto render --profile fr` produit le site français dans `_site/`.
 2. `quarto render --profile en` produit le site anglais dans `_site-en/`.
 3. `_site-en/en/` est copié dans `_site/en/`.
-4. Les deux plans de site sont fusionnés dans `_site/sitemap.xml`, et les deux index de recherche dans
-   `_site/search.json` : les pages des deux langues lisent l'index de la racine, avec des liens corrects.
+4. Les deux plans de site sont fusionnés dans `_site/sitemap.xml`.
+5. Chaque langue garde son index de recherche : le français à la racine, l'anglais dans `_site/en/`, les pages
+   anglaises étant rattachées à cette racine. Une recherche ne renvoie donc que des pages de la langue lue.
 
 Deux dossiers de sortie sont nécessaires : deux rendus dans le même dossier s'écrasent, car chaque rendu
 nettoie sa sortie (constaté pendant le spike US-37).
@@ -21,6 +22,7 @@ relancer avec `--propre`.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -31,6 +33,12 @@ RACINE = Path(__file__).resolve().parent.parent
 SORTIE_FR = RACINE / "_site"
 SORTIE_EN = RACINE / "_site-en"
 ESPACE = "http://www.sitemaps.org/schemas/sitemap/0.9"
+MOTIF_DECALAGE = re.compile(r'(<meta name="quarto:offset" content=")((?:\.\./)*)(")')
+
+
+def decaler(trouve: re.Match[str]) -> str:
+    """Remonte d'un cran la racine d'une page anglaise : le site anglais a sa racine en /en/."""
+    return trouve[1] + (trouve[2][3:] or "./") + trouve[3]
 
 
 def rendre(profil: str) -> None:
@@ -49,22 +57,28 @@ def assembler() -> None:
     print(f"-> {cible.relative_to(RACINE)} ({sum(1 for _ in cible.rglob('*.html'))} pages)")
 
 
-def fusionner_recherche() -> None:
-    """Ajoute les pages anglaises à l'index de recherche de la racine.
+def index_de_recherche_par_langue() -> None:
+    """Donne son propre index de recherche à chaque langue.
 
-    Les pages des deux langues résolvent « search.json » depuis la racine du site : un seul index sert
-    donc les deux, et les liens (« en/… ») restent justes des deux côtés.
+    Quarto fait chercher `search.json` à la racine du site, via la méta « quarto:offset » de chaque page.
+    Les pages anglaises sont donc rattachées à `/en/` : elles lisent `/en/search.json`, écrit ici depuis le
+    rendu anglais, et les liens des résultats, relatifs à cette racine, restent justes. Sans cela, les deux
+    langues partageraient un seul index et une recherche en anglais proposerait des pages françaises.
     """
-    fr, en = SORTIE_FR / "search.json", SORTIE_EN / "search.json"
-    if not (fr.is_file() and en.is_file()):
-        print("Pas d'index de recherche à fusionner.")
+    source, cible = SORTIE_EN / "search.json", SORTIE_FR / "en" / "search.json"
+    if not source.is_file():
+        print("Pas d'index de recherche anglais.")
         return
-    entrees = json.loads(fr.read_text(encoding="utf-8"))
-    connues = {e.get("href") for e in entrees}
-    ajoutees = [e for e in json.loads(en.read_text(encoding="utf-8"))
-                if e.get("href", "").startswith("en/") and e.get("href") not in connues]
-    fr.write_text(json.dumps(entrees + ajoutees, ensure_ascii=False), encoding="utf-8")
-    print(f"-> {fr.relative_to(RACINE)} ({len(entrees)} entrées françaises + {len(ajoutees)} anglaises)")
+    # Le profil anglais rend aussi la page d'accueil du projet, en français : on ne garde que les pages de en/.
+    entrees = [e | {"href": e["href"][3:]} for e in json.loads(source.read_text(encoding="utf-8"))
+               if e.get("href", "").startswith("en/")]
+    cible.write_text(json.dumps(entrees, ensure_ascii=False), encoding="utf-8")
+
+    pages = [p for p in (SORTIE_FR / "en").rglob("*.html") if "site_libs" not in p.parts]
+    for page in pages:
+        texte = page.read_text(encoding="utf-8")
+        page.write_text(MOTIF_DECALAGE.sub(decaler, texte, count=1), encoding="utf-8")
+    print(f"-> {cible.relative_to(RACINE)} ({len(entrees)} entrées anglaises, {len(pages)} pages rattachées)")
 
 
 def fusionner_sitemaps() -> None:
@@ -96,7 +110,7 @@ def main() -> int:
     rendre("en")
     assembler()
     fusionner_sitemaps()
-    fusionner_recherche()
+    index_de_recherche_par_langue()
     return 0
 
 

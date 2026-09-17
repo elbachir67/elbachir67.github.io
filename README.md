@@ -182,14 +182,24 @@ Le site existe en deux langues : le français à la racine (`/`) et l'anglais so
 - `_quarto-fr.yml` et `_quarto-en.yml` : langue, description du site, navigation, pied de page, pages à
   rendre et dossier de sortie.
 - **Rendu** : `python3 scripts/rendre.py` enchaîne les deux profils, copie le site anglais dans `_site/en/`,
-  puis fusionne les plans de site et les index de recherche. **C'est la commande à utiliser**, en local comme
-  en CI ; `quarto render` seul ne produirait qu'une langue.
+  fusionne les plans de site et donne à chaque langue son index de recherche. **C'est la commande à
+  utiliser**, en local comme en CI ; `quarto render` seul ne produirait qu'une langue.
 - `assets/lua/hreflang.lua` pose les balises `hreflang` (`fr`, `en`, `x-default`) sur chaque page.
-- `assets/js/bascule-langue.js` fait pointer le sélecteur de langue vers la **page équivalente**. Sans
-  JavaScript, il mène à l'accueil de l'autre langue.
+- `assets/js/bascule-langue.js` fait pointer le sélecteur de langue vers la **page équivalente**, en lisant
+  ces balises. Sans JavaScript, il mène à l'accueil de l'autre langue.
+
+**Adresses** : les dossiers anglais portent un nom anglais quand le mot diffère (`/recherche/` ↔
+`/en/research/`, `/enseignement/` ↔ `/en/teaching/`). La correspondance est écrite dans
+`assets/lua/hreflang.lua` et dans `scripts/verifier_bilingue.py` ; le sélecteur de langue, lui, n'a rien à
+tenir à jour, et la CI échoue si les deux tables divergent.
+
+**Recherche** : chaque langue a son index (`/search.json` et `/en/search.json`). Les pages anglaises sont
+rattachées à la racine `/en/` par leur méta `quarto:offset`, ajustée à l'assemblage : une recherche depuis une
+page anglaise ne renvoie que des pages anglaises.
 
 **Ajouter une page bilingue** : créer `page/index.qmd` et `en/page/index.qmd`, puis ajouter l'entrée de
-navigation dans les deux profils. La CI refuse une page qui n'existe que dans une langue.
+navigation dans les deux profils. Si le nom du dossier anglais diffère, l'ajouter aux deux tables de
+correspondance ci-dessus. La CI refuse une page qui n'existe que dans une langue.
 
 **Données partagées, libellés traduits** : le CV (`cv/cv.yml`), le catalogue (`enseignement/cours.yml`) et les
 publications (`publications/sources.toml`) n'existent qu'en un seul exemplaire. Seuls les libellés d'interface

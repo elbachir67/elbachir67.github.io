@@ -5,7 +5,8 @@
     python3 scripts/verifier_bilingue.py chemin/    # analyse un autre dossier
 
 Vérifie, pour le périmètre bilingue (tout sauf les dossiers hors périmètre) :
-- chaque page française a son équivalent anglais sous `en/`, et réciproquement ;
+- chaque page française a son équivalent anglais sous `en/`, et réciproquement, en tenant compte des
+  dossiers dont le nom change de langue (`recherche` / `research`, `enseignement` / `teaching`) ;
 - chaque page porte les trois balises `hreflang` : `fr`, `en` et `x-default` ;
 - les deux versions d'une page annoncent les mêmes adresses (`hreflang` réciproques) ;
 - `x-default` pointe vers la version française.
@@ -23,12 +24,23 @@ from pathlib import Path
 
 # Dossiers monolingues, exclus de l'appariement (décision PO du Sprint 3 : les cours restent en français).
 HORS_PERIMETRE = {"cours"}
+# Dossiers dont le nom change d'une langue à l'autre (décision PO : /en/research/, /en/teaching/).
+# La même table figure dans assets/lua/hreflang.lua : si les deux divergent, l'appariement ou la
+# réciprocité des hreflang échoue ici.
+VERS_EN = {"recherche": "research", "enseignement": "teaching"}
+VERS_FR = {en: fr for fr, en in VERS_EN.items()}
 MOTIF_HREFLANG = re.compile(r'<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">')
 
 
 def pages(racine: Path) -> list[Path]:
     return sorted(p for p in racine.rglob("*.html")
                   if "site_libs" not in p.relative_to(racine).parts)
+
+
+def traduire(chemin: str, correspondances: dict[str, str]) -> str:
+    """Traduit le premier segment d'un chemin, les autres étant identiques dans les deux langues."""
+    premier, separateur, reste = chemin.partition("/")
+    return correspondances.get(premier, premier) + separateur + reste
 
 
 def hreflangs(page: Path) -> dict[str, str]:
@@ -49,7 +61,7 @@ def main() -> int:
         relatif = page.relative_to(racine)
         parts = relatif.parts
         if parts[0] == "en":
-            anglaises["/".join(parts[1:])] = page
+            anglaises[traduire("/".join(parts[1:]), VERS_FR)] = page
         elif parts[0] not in HORS_PERIMETRE:
             francaises["/".join(parts)] = page
 
@@ -59,7 +71,7 @@ def main() -> int:
             erreur(en, f"page anglaise sans équivalent français attendu à {chemin}")
             continue
         if en is None:
-            erreur(fr, f"page française sans équivalent anglais attendu à en/{chemin}")
+            erreur(fr, f"page française sans équivalent anglais attendu à en/{traduire(chemin, VERS_EN)}")
             continue
         liens = {"fr": hreflangs(fr), "en": hreflangs(en)}
         for langue, page in (("fr", fr), ("en", en)):

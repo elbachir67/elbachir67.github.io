@@ -4,6 +4,23 @@
 
 local HORS_PERIMETRE = { cours = true }
 
+-- Dossiers dont le nom change d'une langue à l'autre (décision PO : /en/research/, /en/teaching/).
+-- La même table figure dans scripts/verifier_bilingue.py, qui échoue si les deux divergent.
+-- Le sélecteur de langue, lui, lit les balises posées ici : il n'a pas de table à tenir à jour.
+local FR_VERS_EN = { recherche = "research", enseignement = "teaching" }
+local EN_VERS_FR = {}
+for fr, en in pairs(FR_VERS_EN) do
+  EN_VERS_FR[en] = fr
+end
+
+local function traduire(chemin, correspondances)
+  local premier, reste = chemin:match("^([^/]+)(/.*)$")
+  if premier and correspondances[premier] then
+    return correspondances[premier] .. reste
+  end
+  return chemin
+end
+
 local function chemin_relatif()
   local racine = quarto.project.directory
   local fichier = quarto.doc.input_file
@@ -26,9 +43,11 @@ function Pandoc(doc)
   local chemin = chemin_relatif():gsub("%.qmd$", ".html"):gsub("index%.html$", "")
   local fr, en
   if chemin:sub(1, 3) == "en/" then
-    en, fr = chemin, chemin:sub(4)
+    en = chemin
+    fr = traduire(chemin:sub(4), EN_VERS_FR)
   else
-    fr, en = chemin, "en/" .. chemin
+    fr = chemin
+    en = "en/" .. traduire(chemin, FR_VERS_EN)
   end
   if HORS_PERIMETRE[fr:match("^([^/]+)/") or ""] then
     return doc
