@@ -10,6 +10,8 @@ Deux étapes, rejouables :
     python3 scripts/publications.py page     # la page seule, depuis le .bib (hors ligne)
 
 Aucune donnée n'est inventée : ce que Crossref ne fournit pas est écrit « TODO(PO): … ».
+Exception : une publication acceptée sans DOI (statut « a-paraitre ») est décrite à la main dans
+sources.toml ; elle s'affiche « (à paraître) » et le script la complète via Crossref dès que le DOI existe.
 Bibliothèque standard uniquement (Python 3.11 ou plus récent, pour tomllib).
 """
 
@@ -41,6 +43,9 @@ PAUSE = 1.0  # secondes entre deux appels, par courtoisie envers l'API
 # Ordre des champs dans le .bib.
 CHAMPS = ["author", "title", "booktitle", "series", "volume", "pages",
           "publisher", "year", "doi", "eventtitle", "eventdate", "venue", "pubstate"]
+A_PARAITRE = "a-paraitre"    # statut dans sources.toml
+FORTHCOMING = "forthcoming"  # valeur biblatex correspondante (pubstate) dans le .bib
+
 # Clé BibTeX = ancre de la page : minuscules, chiffres et tirets, sans année (voir sources.toml).
 FORMAT_CLE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 # Typographie : un nom d'auteur ou une plage de pages ne se coupe pas en fin de ligne.
@@ -144,8 +149,9 @@ def est_le_po(prenoms: str, nom: str, po: dict) -> bool:
             and normaliser(prenoms)[:1] == normaliser(po["prenoms"])[:1])
 
 
-def verifier_cles(sources: list[dict]) -> None:
-    """Chaque publication a une clé explicite, au bon format et unique (vérifié avant tout appel réseau)."""
+def verifier_sources(sources: list[dict]) -> None:
+    """Clés explicites, au bon format et uniques ; auteurs fournis pour une publication à paraître.
+    Vérifié avant tout appel réseau."""
     vues: set[str] = set()
     for source in sources:
         cle = source.get("cle", "")
@@ -157,26 +163,42 @@ def verifier_cles(sources: list[dict]) -> None:
         if cle in vues:
             sys.exit(f"Clé en double : {cle}")
         vues.add(cle)
+        if source.get("statut") == A_PARAITRE and not source.get("auteurs"):
+            sys.exit(f"Publication à paraître sans auteurs ({cle}) : renseigner « auteurs » dans sources.toml.")
+
+
+def auteur_bib(prenoms: str, nom: str, po: dict) -> str:
+    """« Nom, Prénoms » ; le nom du PO est rétabli quand une notice l'abrège ou omet l'accent."""
+    if est_le_po(prenoms, nom, po):
+        prenoms, nom = po["prenoms"], po["nom"]
+    return f"{nom}, {prenoms}" if prenoms else nom
 
 
 def entree(source: dict, po: dict) -> tuple[dict[str, str], str]:
     notice, explication = chercher(source)
+    statut = source.get("statut", "publie")
     champs: dict[str, str] = {}
-    if notice is None:
+    if notice is None and statut == A_PARAITRE:
+        # Acceptée, sans notice Crossref : description manuelle de sources.toml, sans DOI.
+        auteurs = []
+        for auteur in source["auteurs"]:  # « Nom, Prénoms »
+            nom, _, prenoms = (p.strip() for p in auteur.partition(","))
+            auteurs.append(auteur_bib(prenoms, nom, po))
+        champs["author"] = " and ".join(auteurs)
+        champs["title"] = source["titre"]
+        champs["publisher"] = source.get("editeur") or "TODO(PO): éditeur des actes"
+        champs["year"] = str(source["event_year"])
+        champs["pubstate"] = FORTHCOMING
+        explication = f"à paraître : description manuelle ({explication})"
+    elif notice is None:
         todo = f"TODO(PO): notice {explication}"
         champs["author"] = todo
         champs["title"] = source["titre"]
         champs["year"] = str(source["event_year"])
         champs["doi"] = todo
     else:
-        auteurs = []
-        for a in notice.get("author", []):
-            prenoms, nom = a.get("given", ""), a.get("family", "")
-            if est_le_po(prenoms, nom, po):
-                prenoms, nom = po["prenoms"], po["nom"]
-            auteurs.append((prenoms, nom))
-        champs["author"] = (" and ".join(f"{nom}, {prenoms}" if prenoms else nom
-                                         for prenoms, nom in auteurs)
+        champs["author"] = (" and ".join(auteur_bib(a.get("given", ""), a.get("family", ""), po)
+                                         for a in notice.get("author", []))
                             or "TODO(PO): auteurs absents de la notice Crossref")
         champs["title"] = notice["title"][0]
         volume, collection = titre_des_actes(notice)
@@ -192,12 +214,14 @@ def entree(source: dict, po: dict) -> tuple[dict[str, str], str]:
             champs["publisher"] = notice["publisher"]
         champs["year"] = str(notice["issued"]["date-parts"][0][0])
         champs["doi"] = notice["DOI"]
+        if statut == A_PARAITRE:
+            explication += " : DOI disponible, retirer statut = \"a-paraitre\" de sources.toml"
     champs["eventtitle"] = source["evenement"]
     champs["eventdate"] = str(source["event_year"])
     if source.get("lieu"):
         champs["venue"] = source["lieu"]
-    if source.get("statut", "publie") != "publie":
-        champs["pubstate"] = source["statut"]
+    if statut not in {"publie", A_PARAITRE}:
+        champs["pubstate"] = statut  # écartée de la page
     return champs, explication
 
 
@@ -227,7 +251,7 @@ def ecrire_bib(entrees: list[tuple[str, dict[str, str]]]) -> str:
 def etape_bib() -> None:
     config = tomllib.loads(SOURCES.read_text(encoding="utf-8"))
     po, entrees = config["auteur"], []
-    verifier_cles(config["publication"])
+    verifier_sources(config["publication"])
     for source in config["publication"]:
         champs, explication = entree(source, po)
         print(f"  {source['cle']:32} {explication}")
@@ -286,7 +310,7 @@ def reference_md(cle: str, c: dict[str, str], po: dict) -> str:
     if c.get("venue"):
         precisions.append(echapper_md(c["venue"]))
     if precisions:
-        actes = f"{actes} ({', '.join(precisions)})".strip()
+        actes = f"{actes} ({', '.join(precisions)})" if actes else ", ".join(precisions)
     details = [actes] if actes else []
     if c.get("series"):
         details.append(echapper_md(c["series"]))
@@ -295,25 +319,24 @@ def reference_md(cle: str, c: dict[str, str], po: dict) -> str:
     if c.get("pages"):
         details.append(f"pp.{INSECABLE}{c['pages'].replace('--', SANS_COUPURE + '–' + SANS_COUPURE)}")
     edition = ", ".join(details) + "." if details else ""
-    edition += f" {echapper_md(c['publisher'])}, {c['year']}." if c.get("publisher") else f" {c['year']}."
-    edition = edition.strip()
-    doi = c.get("doi", "")
-    lien = (echapper_md(doi) if doi.startswith("TODO(PO)")
-            else f"DOI [{echapper_md(doi)}](https://doi.org/{doi})")
-    return "\n".join([
-        f"::: {{#{cle} .publication}}",
-        f"[{echapper_md(c['title'])}]{{.publication-titre}}\\",
-        f"{auteurs_md(c['author'], po)}\\",
-        f"{edition}\\",
-        lien,
-        ":::",
-    ])
+    a_paraitre = c.get("pubstate") == FORTHCOMING
+    if a_paraitre:  # année de publication inconnue, pas de DOI
+        edition += f" {echapper_md(c['publisher'])} (à paraître)." if c.get("publisher") else " (à paraître)"
+    else:
+        edition += f" {echapper_md(c['publisher'])}, {c['year']}." if c.get("publisher") else f" {c['year']}."
+    lignes = [f"[{echapper_md(c['title'])}]{{.publication-titre}}", auteurs_md(c["author"], po),
+              edition.strip()]
+    if not a_paraitre:
+        doi = c.get("doi", "")
+        lignes.append(echapper_md(doi) if doi.startswith("TODO(PO)")
+                      else f"DOI [{echapper_md(doi)}](https://doi.org/{doi})")
+    return "\n".join([f"::: {{#{cle} .publication}}", "\\\n".join(lignes), ":::"])
 
 
 def etape_page() -> None:
     po = tomllib.loads(SOURCES.read_text(encoding="utf-8"))["auteur"]
     entrees = lire_bib(BIB.read_text(encoding="utf-8"))
-    publiees = [(cle, c) for cle, c in entrees if not c.get("pubstate")]
+    publiees = [(cle, c) for cle, c in entrees if c.get("pubstate") in {None, FORTHCOMING}]
     # Classement par année de conférence (décision du PO) ; year reste l'année de publication.
     annee_conference = lambda e: e[1].get("eventdate") or e[1]["year"]
     publiees.sort(key=annee_conference, reverse=True)  # tri stable : ordre du .bib dans une année
@@ -325,7 +348,7 @@ def etape_page() -> None:
         "---",
         "",
         "Classées par année de conférence, de la plus récente à la plus ancienne. "
-        "Chaque référence renvoie à la version de l'éditeur par son DOI.",
+        "Chaque référence publiée renvoie à la version de l'éditeur par son DOI.",
     ]
     for annee, groupe in groupby(publiees, key=annee_conference):
         lignes += ["", f"## {annee} {{#annee-{annee}}}"]

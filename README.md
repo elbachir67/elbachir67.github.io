@@ -69,8 +69,12 @@ publications/sources.toml  --(Crossref)-->  publications/publications.bib  -->  
 ```
 
 - `publications/sources.toml` : liste des publications (`cle`, titre, `event_year`, conférence, ville), reprise des
-  sources du PO. Seul fichier à modifier à la main. Une publication dont le `statut` n'est pas `publie`
-  reste dans le `.bib` mais n'apparaît pas sur la page.
+  sources du PO. Seul fichier à modifier à la main. Une publication dont le `statut` n'est ni `publie` ni
+  `a-paraitre` reste dans le `.bib` mais n'apparaît pas sur la page.
+- **Publication acceptée sans DOI** : `statut = "a-paraitre"`, avec `auteurs` (« Nom, Initiales ») et
+  `editeur` décrits à la main. Elle s'affiche « (à paraître) », sans lien DOI. À chaque exécution, le
+  script cherche sa notice dans Crossref. Dès qu'elle existe, les métadonnées de Crossref (DOI compris)
+  remplacent la description manuelle, et le script signale qu'on peut retirer le statut.
 - `publications/publications.bib` : auteurs complets, DOI, titre publié, actes, éditeur, pages et année
   de publication, récupérés dans l'[API Crossref](https://api.crossref.org). Ce qui est introuvable est
   écrit `TODO(PO): …`, et le script ne complète jamais une donnée manquante.
