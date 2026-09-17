@@ -56,6 +56,13 @@ jobs:
             exit 1
           fi
 
+      # Aucun numéro de téléphone publié (US-10, CLAUDE.md §7), y compris dans les PDF.
+      # pdftotext (poppler) extrait le texte des PDF ; il est installé seulement s'il manque sur le runner.
+      - name: Vérifier l'absence de numéro de téléphone
+        run: |
+          command -v pdftotext >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils; }
+          python scripts/verifier_telephone.py _site
+
       # Liens internes : vérification hors ligne des fichiers de _site/. Un lien cassé fait échouer la CI.
       - name: Vérifier les liens internes
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
