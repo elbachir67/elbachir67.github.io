@@ -77,7 +77,7 @@ Ajoutés par le PO (PR #34). Sans DOI ni PDF.
 
 ## Enseignements (catalogue, tous au statut `a-venir`)
 
-Catalogue remplacé par le PO dans #35. Certains cours sont proposés à plusieurs niveaux, avec un contenu adapté.
+Catalogue remplacé par le PO dans #35, puis complété de trois cours dans #37. Certains cours sont proposés à plusieurs niveaux, avec un contenu adapté.
 La colonne « Skill » (skill Claude associé au cours) n'est jamais affichée sur le site.
 
 | Domaine | Cours | Niveaux | Skill |
@@ -89,10 +89,12 @@ La colonne « Skill » (skill Claude associé au cours) n'est jamais affichée s
 | Génie Logiciel & Architecture | Architectures Logicielles Modernes | M1 | `archi-logicielles-senresto` |
 | Génie Logiciel & Architecture | Programmation par Réutilisation de Composants | L2 | `reutilisation-composants` |
 | Génie Logiciel & Architecture | Introduction au DevOps | M1 | `agl-devops-gl` |
+| Génie Logiciel & Architecture | Services web et APIs | L3 | — |
 | IA & Data | Intégration et déploiement de modèles IA | L2, M1 | `integration-modeles-ia` |
 | IA & Data | Introduction à l'IA : logique mathématique et calcul formel | M1 | `intro-ia-course-generator` |
 | IA & Data | Introduction au Machine Learning | M1 | `hands-on-ml` |
 | IA & Data | Introduction au Deep Learning | M1 | `mit-course-translator` |
+| IA & Data | Mathématiques pour le Machine Learning | M1 | `maths-s0-td-generator` |
 | Programmation, Web & Mobile | Introduction à Python | L1 | `programmation-python` |
 | Programmation, Web & Mobile | Programmation C avancée | L3 | `c-advanced-course-generator` |
 | Programmation, Web & Mobile | Structures de Données & Algorithmes Avancés | M1 | `advanced-dsa-course-generator` |
@@ -100,3 +102,4 @@ La colonne « Skill » (skill Claude associé au cours) n'est jamais affichée s
 | Programmation, Web & Mobile | Programmation Frontend 2 : frameworks | L2, L3 | `frontend-react-nextjs` |
 | Programmation, Web & Mobile | Développement d'applications Java | L3, M1 | — |
 | Programmation, Web & Mobile | Développement Web et Mobile | L3, M1 | `dawm-multiplatform-web-mobile` |
+| Programmation, Web & Mobile | Programmation parallèle et distribuée | M1, M2 | — |
