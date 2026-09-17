@@ -1,7 +1,8 @@
 # Product Backlog — site-perso
 
 Priorité : MoSCoW (M = Must, S = Should, C = Could). Estimation : points Fibonacci.
-Les critères d'acceptation détaillés sont rédigés au sprint planning (affinage progressif).
+Les critères d'acceptation détaillés sont rédigés au sprint planning (affinage progressif), dans
+`_specs/sprints/sprint-XX.md`.
 
 ## Objectif produit
 
@@ -41,8 +42,8 @@ d'un tuteur IA encadré.
 | US-36 | EP1 | Site bilingue FR/EN avec sélecteur de langue (inclut l'ex-US-35, CV anglais) | M | 8 | 3 |
 | US-14 | EP3 | Gabarit de cours (structure, métadonnées, navigation chapitres) | M | 5 | 3 |
 | US-15 | EP3 | Correspondance LaTeX → Quarto (tcolorbox → callouts, TikZ → SVG, code) | M | 8 | 3 |
-| US-16 | EP3 | Migration du cours pilote : chapitre 1 | M | 5 | 3 |
 | US-18 | EP3 | Figures Python exécutées et gelées (`freeze`) | M | 2 | 3 |
+| US-16 | EP3 | Migration du cours pilote : chapitre 1 | M | 5 | 3 |
 | US-17 | EP3 | PDF du cours généré depuis les mêmes sources | S | 5 | 4 |
 | US-19 | EP3 | Intégration des capsules YouTube | C | 1 | 4 |
 | US-20 | EP4 | Commande Claude Code `/importer-chapitre` (.tex → .qmd) | M | 5 | 4 |
@@ -61,33 +62,13 @@ d'un tuteur IA encadré.
 | US-33 | EP6 | Tableau de bord enseignant (concepts bloquants) | C | 8 | 6 |
 | US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | — |
 
-## Critères d'acceptation fixés par le PO avant le sprint planning
-
-### US-36 — Site bilingue FR/EN avec sélecteur de langue (Must, 8 pts, Sprint 3, après US-37)
-
-Décision du PO : site bilingue FR/EN. Jusqu'au Sprint 3, rien ne change : chaque page reste dans sa
-langue actuelle (Recherche en anglais, le reste en français).
-
-- [ ] Chaque page existe en français et en anglais.
-- [ ] Un sélecteur de langue dans la barre de navigation mène à la page équivalente dans l'autre langue.
-- [ ] Les URL sont stables : `/` pour le français, `/en/` pour l'anglais.
-- [ ] Les attributs `lang` et `hreflang` sont corrects.
-- [ ] La CI échoue si une page n'a pas son équivalent dans l'autre langue.
-- [ ] Reprend l'ex-US-35 (version anglaise du CV, fusionnée et retirée) : le CV existe aussi en anglais.
-
-### US-37 — Spike + ADR-0003 : architecture multilingue Quarto (Must, 2 pts, Sprint 3, avant US-36)
-
-- [ ] Comparaison de trois options : arborescences parallèles maison, profils Quarto, babelquarto.
-- [ ] Contraintes prises en compte : pas de R en CI, maintenance par un seul PO.
-- [ ] Décision consignée dans `_specs/adr/0003-*.md` (ADR-0003), avant le démarrage d'US-36.
-
 ## Roadmap
 
 | Sprint | Objectif | Pts |
 |---|---|---|
 | 1 | Site minimal en ligne, déployé automatiquement | 11 |
 | 2 | Vitrine académique complète | 17 |
-| 3 | Premier chapitre de cours natif | 30 |
+| 3 | Bilingue et premier cours natif | 30 |
 | 4 | Chaîne de publication assistée + blog | 18 |
 | 5 | Tuteur IA MVP sur le cours pilote | 22 |
 | 6 | Automatisation avancée + analytics | 21 |
