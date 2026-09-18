@@ -1,5 +1,7 @@
-# Textes alternatifs des figures qui n'ont pas de légende dans le .tex (fournis par le PO, US-15).
-# Les autres figures reprennent la légende qui les suit dans le .tex.
+# Textes alternatifs des figures qui n'ont pas de légende dans le .tex, fournis par le PO.
 
 fig2_couches = "Les trois couches — Présentation, Service, Repository — avec des dépendances à sens unique vers la base de données."
 figB_couplage = "Comparaison entre couplage fort, où les quatre composants dépendent tous les uns des autres, et couplage faible, où chacun ne connaît que ses voisins déclarés."
+figC_inversion = "Comparaison de deux schémas de dépendances. À gauche, en couches : le service métier dépend du repository, qui dépend de JdbcTemplate, puis de la base de données — sans base, aucun test possible. À droite, avec inversion : le domaine définit l'interface CommandesPort, qu'un adaptateur JDBC implémente ; la flèche de dépendance remonte vers le domaine, qui ne connaît plus la base."
+figD_hexagone = "L'application représentée en hexagone. Au centre, le domaine porte les règles métier, la validation, la machine à états et les calculs, sans Spring, sans SQL ni HTTP. Un port entrant expose l'API métier, deux ports sortants couvrent la persistance et la notification. Autour de l'hexagone, les adaptateurs REST, JDBC, InMemory et SMS se branchent sur ces ports."
+figE_swap = "Le même domaine dans deux contextes. En production, il passe par l'interface CommandesPort vers un adaptateur JDBC et une base PostgreSQL ou H2. Dans les tests unitaires, la même interface mène à un adaptateur en mémoire, une simple Map : sans Spring ni base de données, le verdict tombe en deux secondes."
