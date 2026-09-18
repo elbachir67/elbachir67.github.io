@@ -102,6 +102,26 @@ def fusionner_sitemaps() -> None:
     print(f"-> {fr.relative_to(RACINE)} ({len(connues)} URL françaises + {ajoutees} anglaises)")
 
 
+def zoom_des_slides() -> None:
+    """Rétablit le zoom sur les présentations.
+
+    Quarto écrit « user-scalable=no » dans la balise viewport des slides : sur un téléphone, le lecteur ne
+    peut plus agrandir le texte, ce que WCAG 1.4.4 demande. Revealjs met déjà le contenu à l'échelle du
+    cadre ; autoriser le zoom ne casse rien et rend les slides lisibles de près.
+    """
+    pages = [p for p in SORTIE_FR.rglob("*.html") if "site_libs" not in p.parts]
+    corrigees = 0
+    for page in pages:
+        texte = page.read_text(encoding="utf-8")
+        if "user-scalable=no" not in texte or "reveal" not in texte:
+            continue
+        page.write_text(texte.replace("maximum-scale=1.0, user-scalable=no",
+                                      "maximum-scale=5.0, user-scalable=yes"), encoding="utf-8")
+        corrigees += 1
+    if corrigees:
+        print(f"-> zoom rétabli sur {corrigees} présentation(s)")
+
+
 def main() -> int:
     if "--propre" in sys.argv[1:]:
         shutil.rmtree(RACINE / ".quarto", ignore_errors=True)
@@ -111,6 +131,7 @@ def main() -> int:
     assembler()
     fusionner_sitemaps()
     index_de_recherche_par_langue()
+    zoom_des_slides()
     return 0
 
 
