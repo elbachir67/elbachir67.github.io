@@ -41,9 +41,9 @@ d'un tuteur IA encadré.
 | US-37 | EP1 | Spike + ADR-0003 : architecture multilingue Quarto (avant US-36) | M | 2 | 3 |
 | US-36 | EP1 | Site bilingue FR/EN avec sélecteur de langue (inclut l'ex-US-35, CV anglais) | M | 8 | 3 |
 | US-14 | EP3 | Gabarit de cours (structure, métadonnées, navigation chapitres) | M | 5 | 3 |
-| US-15 | EP3 | Correspondance LaTeX → Quarto (tcolorbox → callouts, TikZ → SVG, code) | M | 8 | 3 |
+| US-15 | EP3 | Conversion du deck Beamer en slides Quarto (ucad* → callouts, code, figures) | M | 8 | 3 |
 | US-18 | EP3 | Figures Python exécutées et gelées (`freeze`) | M | 2 | 3 |
-| US-16 | EP3 | Migration du cours pilote : chapitre 1 | M | 5 | 3 |
+| US-16 | EP3 | Migration du cours pilote : slides du chapitre 1 | M | 5 | 3 |
 | US-17 | EP3 | PDF du cours généré depuis les mêmes sources | S | 5 | 4 |
 | US-19 | EP3 | Intégration des capsules YouTube | C | 1 | 4 |
 | US-20 | EP4 | Commande Claude Code `/importer-chapitre` (.tex → .qmd) | M | 5 | 4 |

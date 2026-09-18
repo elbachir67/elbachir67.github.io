@@ -8,6 +8,9 @@ est lisible en ligne, généré depuis les sources LaTeX existantes.
 
 - **Cours pilote** : « Architectures Logicielles Modernes » (M1 SIR), décision du PO (#45). Sources LaTeX fournies avant US-15.
 - **Nature des sources (décision PO, #43)** : les cours sont des `.tex` autonomes, avec les schémas en **TikZ inline**, sans fichier d'image externe.
+- **Sources du chapitre 1, déposées dans `_import/` (décision PO sur #49)** : `cm1_archi_seance1.tex` et `beamerucad.sty`. Ce n'est pas un document rédigé mais un **deck Beamer de 20 frames** (5 sections, 17 frames titrées), avec 7 environnements `ucad*` définis dans `beamerucad.sty`, 2 blocs `lstlisting` (du Java, une commande shell) et 5 figures externes du dossier `figs/`. **Ce deck ne contient aucun TikZ** : la règle TikZ → SVG reste écrite pour les cours qui en contiennent, mais elle n'est pas exercée ici.
+- **Cible de la conversion (décision PO)** : un `.qmd` **revealjs**, une frame donnant une slide. US-16 livre donc les **slides** du chapitre 1, et non une page rédigée.
+- **Figures (décision PO)** : 4 figures fournies en SVG — `fig1_god_controller`, `fig2_couches`, `fig3_chemin_tags`, `figB_couplage` — à intégrer en convertissant noirs et gris en `currentColor` (mode sombre) et avec un texte alternatif tiré de la légende du `.tex`. La cinquième, `figA_cout_changement`, n'est **pas** copiée en image : son script matplotlib (`figA.py`) est intégré en bloc Python exécuté (US-18).
 
 ## Périmètre linguistique (décision PO)
 
@@ -66,19 +69,19 @@ afin de retrouver rapidement la notion qui me manque.
 - [ ] Un cours de démonstration à deux chapitres courts sert de test, puis est retiré ou remplacé par le cours pilote.
 - [ ] Rendu vérifié à 375 px et en desktop, en mode clair et sombre ; axe-core sans violation.
 
-### US-15 — Correspondance LaTeX → Quarto (8 pts)
+### US-15 — Conversion du deck Beamer en slides Quarto (8 pts)
 
 En tant que PO, je veux convertir mes cours LaTeX sans les réécrire à la main,
 afin que la migration des 21 cours reste réaliste.
 
-- [ ] Table de correspondance documentée dans `_specs/contenus/latex-vers-quarto.md` : chaque environnement `tcolorbox` du cours pilote (définition, intuition, exemple, piège, exercice…) vers un callout Quarto nommé.
-- [ ] Style CSS des callouts, cohérent avec la charte d'US-06, en mode clair et sombre.
-- [ ] Script `scripts/importer_chapitre.py` : `.tex` → `.qmd`, avec les maths (`$…$`, `align`, `equation`) préservées, les `listings` en blocs de code, et les références croisées converties.
-- [ ] Figures TikZ compilées en SVG : chaque `tikzpicture` est extrait du `.tex` et compilé **en local**, jamais en CI (pas de LaTeX en CI). Les SVG sont commités, comme le cache des figures.
-- [ ] Dans les SVG produits, les noirs et les gris deviennent `currentColor`, pour rester lisibles en mode sombre.
-- [ ] Texte alternatif `TODO(PO)` si aucune légende n'est disponible.
+- [ ] Table de correspondance documentée dans `_specs/contenus/latex-vers-quarto.md` : les sept environnements `ucad*` (`ucaddef`, `ucadret`, `ucadpiege`, `ucadex`, `ucadrec`, `ucadform`, `ucadfront`), **lus dans `beamerucad.sty`**, vers des callouts Quarto nommés ; le titre optionnel de l'environnement (`\begin{ucaddef}[Dette architecturale]`) devient le titre du callout.
+- [ ] Style CSS des callouts, cohérent avec la charte d'US-06, en mode clair et sombre, et lisible en projection.
+- [ ] Script `scripts/importer_chapitre.py` : `.tex` → `.qmd` **revealjs**, une `frame` par slide (titre de frame → titre de slide, `\section` → slide de section), maths préservées, `lstlisting` en blocs de code avec le bon langage (Java pour le code, shell pour les commandes), références croisées converties.
+- [ ] Les 4 SVG fournis sont copiés dans le cours et nettoyés **en local** : noirs, encres et gris en `currentColor`, fonds blancs rendus transparents, police du site à la place de DejaVu Sans ; les couleurs d'accent (orange, vert, violet, jaune) sont conservées. Les SVG nettoyés sont commités, et **aucune conversion d'image ne tourne en CI**.
+- [ ] Texte alternatif repris de la légende du `.tex` ; `TODO(PO)` quand la figure n'en a pas — c'est le cas de `fig2_couches` et de `figB_couplage`.
+- [ ] `figA_cout_changement` n'est pas importée en image : elle est produite par le bloc Python d'US-18.
 - [ ] Tout élément non converti est laissé en commentaire HTML `<!-- NON CONVERTI: … -->`, jamais supprimé silencieusement ; la conversion produit un rapport listant ces éléments.
-- [ ] Testé sur un chapitre réel ; le rapport et une comparaison PDF/HTML figurent dans la PR.
+- [ ] Testé sur le deck du chapitre 1 ; le rapport et une comparaison PDF Beamer / slides figurent dans la PR.
 - [ ] Aucune dépendance lourde ajoutée sans justification (pandoc est déjà présent avec Quarto).
 
 ### US-18 — Figures Python exécutées et gelées (2 pts)
@@ -86,21 +89,24 @@ afin que la migration des 21 cours reste réaliste.
 En tant que PO, je veux des figures générées par le code du cours,
 afin qu'elles restent cohérentes avec le contenu.
 
-- [ ] Un chapitre contient un bloc Python exécuté produisant une figure.
+- [ ] Le bloc Python exécuté du chapitre 1 est `figA.py`, fourni par le PO : il produit la figure du coût du changement, à la place de `figA_cout_changement.pdf` (aucune image importée).
 - [ ] `freeze: auto` actif ; `_freeze/` commité ; la CI ne réexécute pas le code.
 - [ ] Le code est masqué par défaut, avec un bouton pour l'afficher.
 - [ ] Les figures ont une légende et un texte alternatif.
 - [ ] Une modification du code entraîne bien la régénération : preuve dans la PR.
 
-### US-16 — Migration du premier chapitre du cours pilote (5 pts)
+### US-16 — Migration du cours pilote : slides du chapitre 1 (5 pts)
 
-En tant qu'étudiant, je veux lire le premier chapitre en ligne,
+En tant qu'étudiant, je veux suivre le chapitre 1 en ligne,
 afin de ne plus dépendre d'un PDF.
 
-- [ ] Chapitre converti avec le script d'US-15, relu par le PO dans la PR.
-- [ ] Aucun `TODO(PO)` ni bloc `NON CONVERTI` restant à la fin.
-- [ ] Le cours passe au statut `en-ligne` et devient accessible depuis le catalogue.
-- [ ] Le PDF du chapitre reste téléchargeable, généré depuis les mêmes sources.
+- [ ] `cours/<slug>/` créé à partir du gabarit d'US-14 : `cours.yml`, `index.qmd` et le chapitre 1 dans `chapitres/`.
+- [ ] Le chapitre 1 est un **deck revealjs** produit par le script d'US-15, puis relu : les 20 slides, dans l'ordre du deck Beamer, avec les 7 types d'encadrés, les 2 blocs de code, les 4 figures SVG et la figure calculée d'US-18.
+- [ ] Aucun `TODO(PO)` ni bloc `NON CONVERTI` restant à la fin, sauf textes alternatifs validés par le PO.
+- [ ] Le cours apparaît au catalogue avec un lien vers sa page ; le cours de démonstration d'US-14 est retiré.
+- [ ] Relu par le PO dans la PR, et vérifié à 375 px, en desktop et en projection (16:9), en mode clair et sombre.
+- [ ] Le contrôle « aucun numéro de téléphone » reste vert malgré l'expression régulière `^7[05678][0-9]{7}$` du code du chapitre.
+- [ ] Le PDF reste disponible en imprimant le deck depuis le navigateur (`?print-pdf`) ; sa génération automatisée reste US-17 (Sprint 4).
 - [ ] Vérification en ligne après déploiement (règle `Refs #N`).
 
 ---
