@@ -496,7 +496,8 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str) -> str:
         # Le menu de revealjs est construit à l'exécution : ce script lui donne un nom accessible et
         # rend son panneau atteignable au clavier (US-42).
         "    include-after-body:",
-        '      text: \'<script src="/assets/js/slides-accessibilite.js"></script>\'',
+        '      text: \'<script src="/assets/js/slides-accessibilite.js"></script>'
+        '<script src="/assets/js/slides-pdf.js"></script>\'',
         "---",
         "",
     ]

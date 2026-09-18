@@ -35,6 +35,12 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      # Outils Node : ils impriment les PDF des séances pendant le rendu (US-17) et font l'audit
+      # d'accessibilité plus bas (US-42). Le navigateur est le Chrome déjà installé sur la machine :
+      # aucun navigateur n'est téléchargé.
+      - name: Installer les outils Node
+        run: npm ci --no-audit --no-fund
+
       - name: Installer Quarto
         uses: quarto-dev/quarto-actions/setup@v2
         with:
@@ -106,12 +112,6 @@ jobs:
       # tout bloc exécutable doit avoir son résultat gelé — la CI n'exécute aucun code Python.
       - name: Vérifier la conversion des cours
         run: python scripts/verifier_conversion.py
-
-      # Accessibilité (US-42) : axe-core sur chaque page rendue, dans les deux langues, en clair et en
-      # sombre, à 375 et 1440 px, et sur chaque slide des présentations. Le navigateur est le Chrome déjà
-      # installé sur la machine : aucun navigateur n'est téléchargé.
-      - name: Installer les outils d'accessibilité
-        run: npm ci --no-audit --no-fund
 
       - name: Vérifier l'accessibilité
         run: node scripts/verifier_accessibilite.js _site
