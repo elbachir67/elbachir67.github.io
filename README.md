@@ -295,6 +295,19 @@ python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
   montre la figure, et le code reste replié sous un « Voir le code de la figure ». Le repli est un
   `<details>` : en revealjs, ni `code-fold` ni un callout `collapse` ne replient quoi que ce soit.
 
+### PDF des séances
+
+Chaque séance est imprimée en PDF **au rendu**, à côté de sa page (`…/01-<slug>.pdf`) :
+`scripts/generer_pdf.js` ouvre la présentation en mode impression et laisse le navigateur l'imprimer — même
+source, même style, texte sélectionnable, figures vectorielles. Le lien de téléchargement apparaît sur la
+page du cours et sur la slide de titre.
+
+- L'impression demande les paquets Node (`npm ci`). Sans eux, `scripts/rendre.py` saute cette étape et le
+  dit ; le lien de la slide de titre ne s'affiche alors pas, puisqu'il vérifie que le fichier existe.
+- Aucune dépendance nouvelle : le Chrome déjà installé suffit (decktape, l'outil habituel pour revealjs,
+  aurait téléchargé son propre navigateur).
+- Les PDF ne sont pas commités : ils sont refaits à chaque rendu, comme les pages.
+
 ### Commande `/importer-chapitre`
 
 `/importer-chapitre <cours-slug> <fichier.tex>` (définie dans `.claude/commands/`) enchaîne tout ce qui

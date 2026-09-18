@@ -7,7 +7,8 @@
 1. `quarto render --profile fr` produit le site français dans `_site/`.
 2. `quarto render --profile en` produit le site anglais dans `_site-en/`.
 3. `_site-en/en/` est copié dans `_site/en/`.
-4. Les deux plans de site sont fusionnés dans `_site/sitemap.xml`.
+4. Les deux plans de site sont fusionnés dans `_site/sitemap.xml`, et chaque séance de cours est imprimée
+   en PDF à côté de sa page (US-17).
 5. Chaque langue garde son index de recherche : le français à la racine, l'anglais dans `_site/en/`, les pages
    anglaises étant rattachées à cette racine. Une recherche ne renvoie donc que des pages de la langue lue.
 
@@ -122,7 +123,23 @@ def zoom_des_slides() -> None:
         print(f"-> zoom rétabli sur {corrigees} présentation(s)")
 
 
+def pdf_des_seances() -> None:
+    """Imprime chaque présentation en PDF, à côté de sa page (US-17).
+
+    L'impression est faite par le navigateur, via scripts/generer_pdf.js. Elle demande les paquets Node du
+    dépôt (`npm ci`) : quand ils manquent, le rendu continue sans les PDF et le dit, plutôt que d'échouer.
+    """
+    if not (RACINE / "node_modules" / "playwright-core").is_dir():
+        print("PDF des séances ignorés : lancer « npm ci » pour les produire.")
+        return
+    subprocess.run(["node", str(RACINE / "scripts" / "generer_pdf.js"), str(SORTIE_FR)],
+                   cwd=RACINE, check=True)
+
+
 def main() -> int:
+    # Les sorties de Quarto et de Node arrivent au fil de l'eau : sans cela, les messages de ce script
+    # seraient affichés après elles, dans le désordre.
+    sys.stdout.reconfigure(line_buffering=True)
     if "--propre" in sys.argv[1:]:
         shutil.rmtree(RACINE / ".quarto", ignore_errors=True)
         print("Cache .quarto vidé.")
@@ -132,6 +149,7 @@ def main() -> int:
     fusionner_sitemaps()
     index_de_recherche_par_langue()
     zoom_des_slides()
+    pdf_des_seances()
     return 0
 
 
