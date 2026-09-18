@@ -31,7 +31,9 @@ est lisible en ligne, généré depuis les sources LaTeX existantes.
 - **Sources LaTeX commitées** sous `cours/<slug>/_sources/` — non publié, comme `_specs/` — avec `beamerucad.sty` et les figures d'origine, pour que la conversion soit rejouable.
 - **PDF du chapitre** : impression du deck depuis le navigateur (`?print-pdf`) ; la génération automatisée reste US-17 (Sprint 4).
 - **Contrôle « aucun numéro de téléphone »** : si l'expression régulière du chapitre le déclenche, l'exception est **limitée aux blocs de code**.
-- **Textes alternatifs de `fig2_couches` et `figB_couplage`** : attendus du PO. `TODO(PO)` dans la page tant qu'ils ne sont pas fournis.
+- **Textes alternatifs fournis par le PO** pour les deux figures sans légende :
+  - `fig2_couches` : « Les trois couches — Présentation, Service, Repository — avec des dépendances à sens unique vers la base de données. »
+  - `figB_couplage` : « Comparaison entre couplage fort, où les quatre composants dépendent tous les uns des autres, et couplage faible, où chacun ne connaît que ses voisins déclarés. »
 
 ## Ordre d'exécution
 
@@ -87,7 +89,7 @@ afin que la migration des 21 cours reste réaliste.
 - [ ] Style CSS des callouts, cohérent avec la charte d'US-06, en mode clair et sombre, et lisible en projection.
 - [ ] Script `scripts/importer_chapitre.py` : `.tex` → `.qmd` **revealjs**, une `frame` par slide (titre de frame → titre de slide, `\section` → slide de section), maths préservées, `lstlisting` en blocs de code avec le bon langage (Java pour le code, shell pour les commandes), références croisées converties.
 - [ ] Les 4 SVG fournis sont copiés dans le cours et nettoyés **en local** : noirs, encres et gris en `currentColor`, fonds blancs rendus transparents, police du site à la place de DejaVu Sans ; les couleurs d'accent (orange, vert, violet, jaune) sont conservées. Les SVG nettoyés sont commités, et **aucune conversion d'image ne tourne en CI**.
-- [ ] Texte alternatif repris de la légende du `.tex` ; `TODO(PO)` quand la figure n'en a pas — c'est le cas de `fig2_couches` et de `figB_couplage`.
+- [ ] Texte alternatif repris de la légende du `.tex` ; pour `fig2_couches` et `figB_couplage`, qui n'en ont pas, les phrases fournies par le PO (voir les décisions ci-dessus). `TODO(PO)` pour toute figure future sans légende.
 - [ ] `figA_cout_changement` n'est pas importée en image : elle est produite par le bloc Python d'US-18.
 - [ ] Les sources d'origine (`.tex`, `beamerucad.sty`, figures) sont commitées sous `cours/<slug>/_sources/`, non publié, pour que la conversion soit rejouable.
 - [ ] Tout élément non converti est laissé en commentaire HTML `<!-- NON CONVERTI: … -->`, jamais supprimé silencieusement ; la conversion produit un rapport listant ces éléments.
