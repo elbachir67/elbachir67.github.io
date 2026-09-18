@@ -63,6 +63,7 @@ d'un tuteur IA encadré.
 | US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | — |
 | US-38 | EP2 | Page Contact bilingue (formulaire non requis : email protégé, affiliations) | S | 2 | — |
 | US-39 | EP1 | Traduire les données du CV et du catalogue des cours (et non les seuls libellés) | S | 3 | — |
+| US-40 | EP3 | Page rédigée par chapitre, en complément du deck de slides | S | 5 | — |
 
 ## Roadmap
 
