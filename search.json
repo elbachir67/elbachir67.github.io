@@ -77,6 +77,167 @@
     "text": "Langues\n\nFrançais : excellent\nAnglais : bon"
   },
   {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#objectifs-de-la-séance",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#objectifs-de-la-séance",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Objectifs de la séance",
+    "text": "Objectifs de la séance\n\n\n\n\n\n\n\nContenu\n\n\nLe Lab 1 a rangé la maison : couches propres, responsabilités séparées. Cette séance s’attaque au problème qui reste : le métier dépend toujours de la technique. Nous allons inverser cette dépendance — ports & adaptateurs, l’architecture dite hexagonale — et en apporter la preuve par le swap : remplacer la base de données par une simple Map, sans toucher une ligne du domaine.\n\n\n\n\n\nComprendre pourquoi des couches propres ne suffisent pas : le sens des dépendances.\nMaîtriser le principe d’inversion de dépendances — et sa question clé : qui possède l’interface ?\nSavoir lire et construire une architecture ports & adaptateurs.\nEn vérifier le bénéfice au chronomètre : des tests du domaine en 2 secondes, sans base de données.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-le-lab-1-a-réglé-et-pas-réglé",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-le-lab-1-a-réglé-et-pas-réglé",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Ce que le Lab 1 a réglé — et pas réglé",
+    "text": "Ce que le Lab 1 a réglé — et pas réglé\n\n\n\n\n\n\n\nL’acquis du Lab 1\n\n\nTrois couches, des dépendances à sens unique, zéro SQL hors des repositories, les quartiers de Dakar à une seule adresse. Le God controller est mort : chaque responsabilité a une maison.\n\n\n\n\n\n\n\n\n\n\n\nL’exigence nouvelle\n\n\nLa direction de SénResto exige que les règles métier — frais, transitions de statut, calcul d’ETA — soient testées à chaque commit. Les tests d’intégration (Spring + BDD + HTTP) prennent plusieurs secondes chacun : trop lents. Il faut des tests unitaires du métier. Essayez d’en écrire un sur CommandeService… vous n’y arriverez pas proprement.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-chaîne-qui-emprisonne-le-métier",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-chaîne-qui-emprisonne-le-métier",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "La chaîne qui emprisonne le métier",
+    "text": "La chaîne qui emprisonne le métier\nSuivez les flèches de dépendance de CommandeService :\nCommandeService \\(\\to\\) CommandeRepository \\(\\to\\) JdbcTemplate \\(\\to\\) BDD\n\nPour instancier le service, il faut un repository ; pour le repository, un JdbcTemplate ; pour le JdbcTemplate, une base qui tourne.\nConclusion : impossible de tester la formule des frais sans démarrer toute la pile. Le métier est propre, mais prisonnier — trois étages au-dessus de la technique.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nLe problème n’est plus le désordre (Lab 1 l’a réglé) : c’est le sens des flèches. Tant que le métier pointe vers la technique, la technique dicte ses conditions au métier.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-principe-dinversion-de-dépendances",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-principe-dinversion-de-dépendances",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Le principe d’inversion de dépendances",
+    "text": "Le principe d’inversion de dépendances\n\n\n\n\n\n\n\nDéfinition\n\n\nPrincipe d’inversion de dépendances (DIP) : le code de haut niveau (le métier) ne doit pas dépendre du code de bas niveau (la technique). Les deux doivent dépendre d’abstractions — des interfaces. Et surtout : ces interfaces sont définies par le métier, selon ses besoins.\n\n\n\n\n\n  \n    \n      \n    \n    \n      \n    \n  \n\n  \n\n  \n  Aujourd'hui (couches)\n\n  \n  CommandeService\n  \n\n  \n  CommandeRepository\n  \n\n  \n  JdbcTemplate\n  \n\n  \n  BDD\n\n  le metier depend de la technique :\n  pas de BDD, pas de test\n\n  \n  \n\n  \n  Demain (inversion)\n\n  \n  Domaine (metier)\n\n  \n  interface CommandesPort\n  definie PAR le domaine\n\n  \n\n  \n  AdaptateurJdbc\n  implements CommandesPort\n\n  \n  la fleche\n  remonte !\n\n  la technique depend du metier :\n  le domaine ne connait plus la BDD",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-question-qui-change-tout",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-question-qui-change-tout",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "La question qui change tout",
+    "text": "La question qui change tout\n\n\n\n\n\n\n\nQui possède l’interface ?\n\n\nUne interface ne suffit pas à inverser quoi que ce soit : si CommandeRepository définit lui-même son interface dans le paquetage repository, le domaine qui l’importe dépend toujours de la persistance. L’inversion se joue sur la propriété : l’interface habite chez le domaine, écrite dans son vocabulaire.\n\n\n\n\n\nLe domaine déclare : « j’ai besoin qu’on me sauvegarde des commandes » — il écrit CommandesPort chez lui.\nLa technique répond : « je sais faire, en JDBC » — l’adaptateur implémente le port, et c’est donc lui qui importe le domaine. La flèche a remonté.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nInverser une dépendance, c’est déplacer la propriété du contrat : le métier ne demande plus la permission à la technique — il publie ses exigences, la technique s’y plie.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#larchitecture-hexagonale",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#larchitecture-hexagonale",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "L’architecture hexagonale",
+    "text": "L’architecture hexagonale\n\n\n\n\n\n\n\nDéfinition (Alistair Cockburn, 2005)\n\n\nL’architecture hexagonale (ports & adaptateurs) place le domaine au centre, entouré de ports — les interfaces qu’il définit. Les adaptateurs traduisent le monde extérieur vers les ports ou les implémentent. Règle unique : toutes les dépendances pointent vers le centre.\n\n\n\n\n\n  \n    \n      \n    \n  \n\n  \n\n  \n  \n  L'application (l'hexagone)\n\n  \n  \n  DOMAINE\n  regles metier, validation,\n  machine a etats, calculs\n  zero Spring, zero SQL, zero HTTP\n\n  \n  \n  PORT\n  entrant\n  (API metier)\n\n  \n  \n  PORT\n  sortant\n  persistance\n\n  \n  PORT\n  sortant\n  notification\n\n  \n  \n  Adaptateur\n  REST\n  controllers Spring\n\n  \n  \n  Adaptateur JDBC\n  H2 / PostgreSQL\n\n  \n  Adaptateur\n  InMemory\n\n  \n  Adaptateur SMS\n  console (System.out)\n\n  \n  \n  \n\n  \n  \n  \n\n  \n  \n  \n\n  \n\n  \n  \n\n  \n  Les ports sont des interfaces definies PAR le domaine ; les adaptateurs les implementent ou les appellent.\n  Toutes les fleches de dependance pointent vers le centre : le domaine ne depend de rien.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ports-entrants-ports-sortants",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ports-entrants-ports-sortants",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Ports entrants, ports sortants",
+    "text": "Ports entrants, ports sortants\n\n\n\n\n\n\n\n\n\nPort entrant\nPort sortant\n\n\n\n\nQui l’appelle ?\nle monde extérieur (REST, plus tard : messages)\nle domaine\n\n\nQui l’implémente ?\nle domaine\nun adaptateur technique (JDBC, SMS…)\n\n\nChez SénResto\n« créer une commande, la confirmer… »\n« sauvegarder, chercher un livreur, notifier »\n\n\n\n\n\n\n\n\n\n\nLe test du vocabulaire\n\n\nLisez un port à voix haute : s’il parle de SELECT, de JSON ou de HTTP, il est mal placé. CommandesPort.sauvegarder(commande) — du métier. executerRequete(sql) — de la technique déguisée.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#à-quoi-ressemble-un-port",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#à-quoi-ressemble-un-port",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "À quoi ressemble un port",
+    "text": "À quoi ressemble un port\nLe domaine écrit son besoin, dans son vocabulaire, chez lui :\npackage sn.ucad.senresto.domaine.port;\n\n/** Ce dont le metier des commandes a besoin — rien de plus. */\npublic interface LivreursPort {\n    Optional&lt;Livreur&gt; premierDisponible();\n    void reserver(long livreurId);\n    void liberer(long livreurId);\n}\n\nAucune annotation Spring, aucun mot technique : ce fichier compilerait en 2005 comme en 2035.\nL’adaptateur JDBC du Lab 1 devient : class AdaptateurLivreursJdbc implements LivreursPort — trois méthodes déjà écrites, seule l’appartenance change.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nAu Lab 2, vous n’écrirez presque pas de code nouveau : vous déplacerez la propriété du code existant. C’est un refactoring de frontières, pas une réécriture.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-moment-magique-changer-la-technique",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-moment-magique-changer-la-technique",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Le moment magique : changer la technique",
+    "text": "Le moment magique : changer la technique\n\n  \n    \n      \n    \n  \n\n  \n\n  \n  En production\n\n  \n  DOMAINE\n  inchange au caractere pres\n\n  \n\n  \n  CommandesPort\n  (interface)\n\n  \n\n  \n  AdaptateurJdbc\n  PostgreSQL / H2\n\n  demarrage complet, vraies donnees\n\n  \n  \n\n  \n  Dans les tests unitaires\n\n  \n  DOMAINE\n  le MEME, au caractere pres\n\n  \n\n  \n  CommandesPort\n  (la meme interface)\n\n  \n\n  \n  AdaptateurInMemory\n  une simple Map en memoire\n\n  zero Spring, zero BDD : verdict en 2 secondes\n\n  \n  On change la technique sans toucher une ligne du metier : c'est la preuve de l'inversion.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-métier-testé-en-deux-secondes",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-métier-testé-en-deux-secondes",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Le métier testé en deux secondes",
+    "text": "Le métier testé en deux secondes\nL’adaptateur in-memory — une Map — implémente les mêmes ports. Le test unitaire devient trivial :\n@Test\nvoid lesFraisDeLivraisonSuiventLeQuartier() {\n    var domaine = new CommandeMetier(new CommandesEnMemoire(),\n            new RestaurantsEnMemoire(), new LivreursEnMemoire(),\n            new NotificationsEnMemoire());\n    var commande = domaine.creer(new CommandeRequete(\n            \"Awa Ba\", \"770000000\", \"Ouakam\", 1L, 2));\n    assertEquals(2500 * 2 + 1500, commande.montantTotal()); // verdict : ~2 s\n}\n\nZéro Spring, zéro BDD, zéro HTTP : on instancie le domaine au constructeur, comme n’importe quel objet Java.\nLes 4 tests d’intégration restent en poste : ils vérifient le branchement complet. Les deux familles de tests sont complémentaires — rapides et nombreux au centre, lents et rares en périphérie.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-lhexagone-achète-et-ce-quil-coûte",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-lhexagone-achète-et-ce-quil-coûte",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Ce que l’hexagone achète — et ce qu’il coûte",
+    "text": "Ce que l’hexagone achète — et ce qu’il coûte\n\nAchète : le métier testable au centre ; la BDD, le framework, le canal de notification remplaçables sans toucher au domaine ; et une frontière prête pour la suite — au Lab 4, extraire un module sera d’autant plus simple que ses dépendances passent déjà par des ports.\nCoûte : des interfaces en plus, une indirection en plus, une discipline de vocabulaire permanente. Pour un script jetable, ce serait du zèle ; pour un système qui doit vivre et évoluer, c’est un investissement.\n\n\n\n\n\n\n\n\nÀ retenir — le réflexe de l’architecte\n\n\nToujours la même question : qu’est-ce que j’achète, avec quoi je le paie ? Votre ADR no2 devra répondre pour SénResto — pas en général.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-chemin-du-lab-2",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-chemin-du-lab-2",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Le chemin du Lab 2",
+    "text": "Le chemin du Lab 2\n\n  \n    \n      \n    \n  \n\n  \n\n  \n\n  \n  \n  \n  lab2-depart\n  \n  = lab1-final\n  couches propres,\n  mais le metier\n  depend du SQL\n  \n\n  \n  \n  \n  lab2-etape1\n  \n  Ports definis\n  les interfaces du\n  domaine, ecrites\n  par le domaine\n  \n\n  \n  \n  \n  lab2-etape2\n  \n  Adaptateurs\n  JDBC et REST\n  branches sur les\n  ports, tests verts\n  \n\n  \n  \n  \n  lab2-final\n  \n  Le swap\n  InMemory branche,\n  tests du domaine\n  en 2 secondes\n  \n\n  Bloques ? git checkout du tag suivant : personne ne reste au bord de la route.\n\n\n\nPoint de départ : votre lab1-final. Le comportement de l’API ne change pas d’un octet — les 4 tests d’intégration restent les juges de paix.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#votre-mission-daujourdhui",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#votre-mission-daujourdhui",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Votre mission d’aujourd’hui",
+    "text": "Votre mission d’aujourd’hui\n\n\n\n\n\n\n\nRôle\nPilotage au Lab 2\n\n\n\n\nLe Doyen\nbranches, merges, tags — et l’ADR avec l’Architecte du jour\n\n\nL’Huissier\nle domaine des commandes : CommandeMetier + ports sortants\n\n\nLe Rédacteur\nl’adaptateur REST (controllers) branché sur les ports entrants\n\n\nLe Notaire\nles adaptateurs JDBC : implements des ports, SQL inchangé\n\n\nL’Appariteur\nles adaptateurs in-memory + les nouveaux tests unitaires du domaine\n\n\n\n\n\n\n\n\n\n\nLe livrable individuel de la séance\n\n\nL’Architecte du jour signe l’ADR no2 : « Pourquoi inverser les dépendances ? » — une page, deux alternatives sérieuses, deux conséquences négatives assumées.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#lessentiel-de-la-séance",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#lessentiel-de-la-séance",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "L’essentiel de la séance",
+    "text": "L’essentiel de la séance\n\n\n\n\n\n\n\nÀ retenir\n\n\n\nDes couches propres ne suffisent pas : tant que les flèches descendent vers la technique, le métier reste prisonnier.\nL’inversion se joue sur la propriété de l’interface : le port appartient au domaine, écrit dans son vocabulaire.\nHexagone = domaine au centre, ports à la frontière, adaptateurs autour — toutes les dépendances pointent vers le centre.\nLa preuve par le swap : même domaine, adaptateur JDBC en production, Map en mémoire dans les tests — verdict en 2 secondes.\n\n\n\n\n\n\n\n\n\n\n\n\nLa question qui ouvre la séance 3\n\n\nVotre hexagone protège le métier… mais tout SénResto vit dans un seul hexagone : Catalogue, Commandes, Paiement, Livraison s’y mélangent. Où sont les frontières entre les métiers ? Réponse au Lab 3 : le monolithe modulaire.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "blog/index.html",
+    "href": "blog/index.html",
+    "title": "Blog",
+    "section": "",
+    "text": "NoteEn construction\n\n\n\nLe contenu de cette page sera publié prochainement."
+  },
+  {
     "objectID": "cours/architectures-logicielles-modernes/chapitres/01-du-chaos-aux-couches.html#objectifs-de-la-séance",
     "href": "cours/architectures-logicielles-modernes/chapitres/01-du-chaos-aux-couches.html#objectifs-de-la-séance",
     "title": "Architectures Logicielles — Séance 1",
@@ -286,13 +447,6 @@
     ]
   },
   {
-    "objectID": "blog/index.html",
-    "href": "blog/index.html",
-    "title": "Blog",
-    "section": "",
-    "text": "NoteEn construction\n\n\n\nLe contenu de cette page sera publié prochainement."
-  },
-  {
     "objectID": "cours/architectures-logicielles-modernes/index.html",
     "href": "cours/architectures-logicielles-modernes/index.html",
     "title": "Architectures Logicielles Modernes",
@@ -307,7 +461,7 @@
     "href": "cours/architectures-logicielles-modernes/index.html#séances",
     "title": "Architectures Logicielles Modernes",
     "section": "Séances",
-    "text": "Séances\nChaque séance se lit dans le navigateur, et se télécharge en PDF pour la relire hors ligne.\n\n\n\nSéance\nContenu\nFormat\n\n\n\n\nArchitectures Logicielles — Séance 1\nSéance 1 du cours Architectures Logicielles Modernes : dette architecturale, attributs de qualité, couplage, cohésion et refactoring vers une architecture en couches.\n PDF",
+    "text": "Séances\nChaque séance se lit dans le navigateur, et se télécharge en PDF pour la relire hors ligne.\n\n\n\nSéance\nContenu\nFormat\n\n\n\n\nArchitectures Logicielles — Séance 1\nSéance 1 du cours Architectures Logicielles Modernes : dette architecturale, attributs de qualité, couplage, cohésion et refactoring vers une architecture en couches.\n PDF\n\n\nArchitectures Logicielles — Séance 2\nArchitectures Logicielles — Séance 2 — L’hexagone : mettre le domaine au centre, la technique en périphérie\n PDF",
     "crumbs": [
       "Présentation"
     ]
