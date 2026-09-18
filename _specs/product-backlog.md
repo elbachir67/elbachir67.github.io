@@ -71,6 +71,7 @@ d'un tuteur IA encadré.
 | US-45 | EP3 | Notes du présentateur (`\note{}` → `::: {.notes}`) | C | 1 | — |
 | US-46 | EP3 | Numérotation automatique des chapitres depuis le nom de fichier | C | 1 | — |
 | US-47 | EP1 | Index de recherche par langue, sans ajustement du décalage Quarto | C | 2 | — |
+| US-48 | EP3 | Page de garde des PDF de séance | S | 2 | — |
 
 ## Roadmap
 

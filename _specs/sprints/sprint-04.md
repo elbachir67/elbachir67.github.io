@@ -9,6 +9,12 @@ et les contrôles faits à la main jusqu'ici tournent en CI.
 Aucune. Les commandes sont testées sur des sources déjà présentes dans le dépôt ;
 si un test demande un nouveau `.tex`, la PR le demande explicitement.
 
+## Décisions du PO en cours de sprint
+
+- **Page de garde des PDF** (proposée dans #69) : retenue, mais hors sprint — devient **US-48** au backlog
+  (Should, 2 pts).
+- **PDF dans le plan du site** (proposée dans #69) : **non**. Le `sitemap.xml` reste réservé aux pages HTML.
+
 ## Ordre d'exécution
 
 US-42 → US-41 → US-20 → US-17 → US-19 → US-25 → US-21 → US-22.
