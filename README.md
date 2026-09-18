@@ -269,6 +269,15 @@ python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
 
 - Les **sources** (`.tex`, `.sty`, figures d'origine) vivent dans `cours/<slug>/_sources/`. Le préfixe `_`
   les tient hors du site publié, comme `_specs/` ; elles sont commitées pour que la conversion soit rejouable.
+- **`cours/<slug>/_sources/import.toml` décrit chaque import** (fichier `.tex`, page produite, dossier des
+  figures, textes alternatifs, figures calculées, description). `scripts/verifier_conversion.py` rejoue ces
+  imports en CI et **échoue si la page ou une figure commitée diffère** de ce que produit le script : une
+  conversion oubliée après modification d'un `.tex` ne peut pas passer inaperçue. Le même contrôle échoue si
+  une page à code exécutable n'a pas son résultat dans `_freeze/`.
+
+  ```bash
+  python3 scripts/verifier_conversion.py    # même contrôle qu'en CI, sans dépendance
+  ```
 - Le script **n'invente rien** : ce qu'il ne sait pas convertir reste en commentaire `<!-- NON CONVERTI: … -->`
   dans la page et figure dans le rapport, avec les figures, les blocs de code et les tableaux traités.
 - Les **figures SVG** sont nettoyées en local (encres et gris en `currentColor`, fonds clairs transparents,
