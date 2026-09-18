@@ -36,6 +36,7 @@ index.qmd                Accueil (FR)
 recherche/               Research (EN)
 publications/            Publications (page générée, voir ci-dessous)
 enseignement/            Catalogue des cours (cours.yml, filtre cours.lua)
+cours/<slug>/            Un cours publié : cours.yml, index.qmd, chapitres/NN-<slug>.qmd
 blog/                    Articles
 cv/                      CV (cv.yml, filtre cv.lua ; page et PDF générés, voir ci-dessous)
 assets/                  Images, styles (css/custom.scss, custom-dark.scss) et polices (fonts/)
@@ -117,9 +118,36 @@ Les cartes sont produites **au rendu** depuis `enseignement/cours.yml` par le fi
 
 - Les domaines apparaissent dans l'ordre de leur première occurrence dans `cours.yml`. Chacun a une
   ancre (par exemple `enseignement/#ia-data`).
-- Quand la version en ligne d'un cours est publiée, passer `statut: "en-ligne"` et ajouter
-  `lien: "../cours/<slug>/index.qmd"` : la carte devient un lien.
+- Quand un cours est publié, **son entrée quitte `cours.yml`** : ses métadonnées passent dans
+  `cours/<slug>/cours.yml` (voir « Cours » ci-dessous) et le catalogue les lit directement. Un cours
+  décrit aux deux endroits fait échouer `quarto render`, pour qu'il n'y ait jamais deux vérités.
 - Un statut inconnu, ou un cours en ligne sans `lien`, fait échouer `quarto render` (et donc la CI).
+
+## Cours
+
+Un cours publié est un dossier autonome. Les pages de cours sont **monolingues** : elles sont écrites
+dans la langue d'enseignement (le français) et sortent du périmètre bilingue ; le catalogue, lui, est
+bilingue et signale la langue des cours au lecteur anglophone.
+
+```
+cours/<slug>/
+├── cours.yml            Métadonnées : titre, domaine, niveaux, semestre, statut, prérequis, objectifs
+├── _metadata.yml        Options communes aux pages du cours (table des matières)
+├── index.qmd            Présentation, fiche (générée) et plan (listing des chapitres)
+└── chapitres/
+    ├── 01-<slug>.qmd    Le numéro fixe l'ordre de lecture
+    └── 02-<slug>.qmd
+```
+
+- `cours.yml` est la **seule source** des métadonnées : la fiche de la page du cours et la carte du
+  catalogue en sortent. Le filtre `assets/lua/fiche-cours.lua` remplace le bloc `::: {#fiche} :::`
+  de `index.qmd` par les niveaux, le semestre, le domaine, les objectifs et les prérequis.
+- Le `titre` de `cours.yml` et le `title` de `index.qmd` doivent coïncider : le rendu échoue sinon.
+- Le plan est un listing Quarto sur `chapitres/*.qmd`, trié par nom de fichier : **ajouter un chapitre
+  = ajouter un fichier**, rien d'autre à mettre à jour dans la page.
+- La **barre latérale** du cours et les liens **précédent/suivant** viennent de `_quarto-fr.yml`
+  (clé `website.sidebar`) : ajouter un cours = y ajouter une barre latérale, avec son `id`, la page de
+  présentation et le glob des chapitres. Elle ne s'affiche que sur les pages du cours.
 
 ## CV
 
