@@ -132,7 +132,7 @@ bilingue et signale la langue des cours au lecteur anglophone.
 ```
 cours/<slug>/
 ├── cours.yml            Métadonnées : titre, domaine, niveaux, semestre, statut, prérequis, objectifs
-├── _metadata.yml        Options communes aux pages du cours (table des matières)
+├── _metadata.yml        Options communes aux pages du cours (profondeur et titre de la table des matières)
 ├── index.qmd            Présentation, fiche (générée) et plan (listing des chapitres)
 └── chapitres/
     ├── 01-<slug>.qmd    Le numéro fixe l'ordre de lecture
@@ -145,6 +145,9 @@ cours/<slug>/
 - Le `titre` de `cours.yml` et le `title` de `index.qmd` doivent coïncider : le rendu échoue sinon.
 - Le plan est un listing Quarto sur `chapitres/*.qmd`, trié par nom de fichier : **ajouter un chapitre
   = ajouter un fichier**, rien d'autre à mettre à jour dans la page.
+- `_metadata.yml` ne doit déclarer **ni `toc: true` ni un bloc `format:`** : le dossier contient des slides
+  revealjs, qui gagneraient une slide de sommaire dans le premier cas et seraient rendues comme des pages
+  HTML ordinaires dans le second (constaté). La table des matières des pages HTML vient de `_quarto.yml`.
 - La **barre latérale** du cours et les liens **précédent/suivant** viennent de `_quarto-fr.yml`
   (clé `website.sidebar`) : ajouter un cours = y ajouter une barre latérale, avec son `id`, la page de
   présentation et le glob des chapitres. Elle ne s'affiche que sur les pages du cours.
