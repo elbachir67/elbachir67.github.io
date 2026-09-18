@@ -295,6 +295,14 @@ python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
   montre la figure, et le code reste replié sous un « Voir le code de la figure ». Le repli est un
   `<details>` : en revealjs, ni `code-fold` ni un callout `collapse` ne replient quoi que ce soit.
 
+### Commande `/importer-chapitre`
+
+`/importer-chapitre <cours-slug> <fichier.tex>` (définie dans `.claude/commands/`) enchaîne tout ce qui
+précède : copie des sources, import, nettoyage des figures, rendu, contrôles, branche et PR. Elle s'arrête
+pour demander au PO les textes alternatifs des figures sans légende — elle n'en invente jamais — et refuse
+d'ouvrir la PR tant qu'un bloc `NON CONVERTI` subsiste. Sa partie mécanique est
+`scripts/preparer_chapitre.py`, utilisable seule.
+
 ### Code exécuté et figures gelées
 
 Les résultats d'exécution sont **gelés** (`execute: freeze: auto`) et versionnés dans `_freeze/` : la CI ne
