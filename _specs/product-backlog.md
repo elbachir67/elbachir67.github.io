@@ -44,6 +44,8 @@ d'un tuteur IA encadré.
 | US-15 | EP3 | Conversion du deck Beamer en slides Quarto (ucad* → callouts, code, figures) | M | 8 | 3 |
 | US-18 | EP3 | Figures Python exécutées et gelées (`freeze`) | M | 2 | 3 |
 | US-16 | EP3 | Migration du cours pilote : slides du chapitre 1 | M | 5 | 3 |
+| US-42 | EP1 | Accessibilité vérifiée en CI (axe-core sur les pages et les slides) | S | 3 | 4 |
+| US-41 | EP1 | Conversion et gel vérifiés en CI | S | 2 | 4 |
 | US-17 | EP3 | PDF du cours généré depuis les mêmes sources | S | 5 | 4 |
 | US-19 | EP3 | Intégration des capsules YouTube | C | 1 | 4 |
 | US-20 | EP4 | Commande Claude Code `/importer-chapitre` (.tex → .qmd) | M | 5 | 4 |
@@ -65,6 +67,10 @@ d'un tuteur IA encadré.
 | US-39 | EP1 | Traduire les données du CV et du catalogue des cours (et non les seuls libellés) | S | 3 | — |
 | US-40 | EP3 | Page rédigée par chapitre, en complément du deck de slides | S | 5 | — |
 | US-43 | EP3 | Contrôle de débordement des slides (échec si une slide dépasse le cadre) | S | 2 | — |
+| US-44 | EP3 | Style matplotlib accordé à la charte, partagé par les cours | C | 2 | — |
+| US-45 | EP3 | Notes du présentateur (`\note{}` → `::: {.notes}`) | C | 1 | — |
+| US-46 | EP3 | Numérotation automatique des chapitres depuis le nom de fichier | C | 1 | — |
+| US-47 | EP1 | Index de recherche par langue, sans ajustement du décalage Quarto | C | 2 | — |
 
 ## Roadmap
 
@@ -73,7 +79,7 @@ d'un tuteur IA encadré.
 | 1 | Site minimal en ligne, déployé automatiquement | 11 |
 | 2 | Vitrine académique complète | 17 |
 | 3 | Bilingue et premier cours natif | 30 |
-| 4 | Chaîne de publication assistée + blog | 18 |
+| 4 | Chaîne de publication et blog | 23 |
 | 5 | Tuteur IA MVP sur le cours pilote | 22 |
 | 6 | Automatisation avancée + analytics | 21 |
 
