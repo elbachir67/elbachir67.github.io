@@ -246,6 +246,34 @@ python3 scripts/verifier_bilingue.py    # équivalents FR/EN et hreflang récipr
 métadonnées de ce profil dans le cache `.quarto`, et une page peut ressortir dans la mauvaise langue.
 Relancer alors `python3 scripts/rendre.py --propre`.
 
+## Import d'un cours LaTeX
+
+Les cours existent en LaTeX (Beamer). `scripts/importer_chapitre.py` en fait des slides Quarto revealjs :
+une `frame` donne une slide, les encadrés `ucad*` deviennent des callouts, les figures sont nettoyées pour
+le mode sombre. La table de correspondance complète est dans
+[`_specs/contenus/latex-vers-quarto.md`](_specs/contenus/latex-vers-quarto.md).
+
+```bash
+python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
+    --sortie cours/<slug>/chapitres/01-<slug>.qmd \
+    --figures cours/<slug>/figures \
+    --rapport cours/<slug>/_sources/rapport-import.md \
+    --alt cours/<slug>/_sources/textes-alternatifs.toml \
+    --description "Phrase de référencement de la séance."
+```
+
+- Les **sources** (`.tex`, `.sty`, figures d'origine) vivent dans `cours/<slug>/_sources/`. Le préfixe `_`
+  les tient hors du site publié, comme `_specs/` ; elles sont commitées pour que la conversion soit rejouable.
+- Le script **n'invente rien** : ce qu'il ne sait pas convertir reste en commentaire `<!-- NON CONVERTI: … -->`
+  dans la page et figure dans le rapport, avec les figures, les blocs de code et les tableaux traités.
+- Les **figures SVG** sont nettoyées en local (encres et gris en `currentColor`, fonds clairs transparents,
+  police héritée) puis commitées : **aucune conversion d'image ne tourne en CI**.
+- Le **texte alternatif** vient de la légende du `.tex`, ou du fichier `--alt` quand la figure n'en a pas.
+  Sans l'un ni l'autre, la figure part avec un `TODO(PO)` visible.
+- Les figures sont **incorporées** à la page par le shortcode `{{< svg … >}}` (extension
+  `_extensions/svg-inline`) : c'est la condition pour que `currentColor` suive la couleur du texte.
+- Le style des slides est dans `assets/css/slides.scss` (charte d'US-06, couleurs des encadrés d'origine).
+
 ## Contribution
 
 `main` est protégée et toujours déployable. Chaque changement passe par une branche
