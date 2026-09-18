@@ -295,6 +295,21 @@ python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
   montre la figure, et le code reste replié sous un « Voir le code de la figure ». Le repli est un
   `<details>` : en revealjs, ni `code-fold` ni un callout `collapse` ne replient quoi que ce soit.
 
+### Capsule vidéo d'une séance
+
+Une séance peut porter une capsule YouTube : ajouter `video = "<identifiant>"` à son entrée dans
+`_sources/import.toml` (ou passer `--video` à l'import). Le script écrit alors `video:` dans l'en-tête de la
+séance et ajoute une dernière slide « Capsule vidéo » avec le shortcode :
+
+```
+{{< capsule <identifiant> titre="Titre de la vidéo" >}}
+```
+
+**Rien n'est chargé avant le clic** : la vignette est dessinée par le site — pas de vignette YouTube, qui
+serait déjà une requête vers Google — et l'iframe n'est créée qu'au clic, sur `youtube-nocookie.com`. Le
+bouton porte un nom explicite, l'iframe reçoit le même titre, et un lien de repli s'affiche sans JavaScript.
+L'extension est dans `_extensions/capsule/`.
+
 ### PDF des séances
 
 Chaque séance est imprimée en PDF **au rendu**, à côté de sa page (`…/01-<slug>.pdf`) :
