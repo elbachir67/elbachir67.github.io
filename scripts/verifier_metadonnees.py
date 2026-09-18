@@ -24,6 +24,13 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 BALISES_REQUISES = ["og:title", "og:description", "og:image", "twitter:card"]
+# Page laissée vide par Quarto à la place d'un brouillon (« draft-mode: gone ») : elle n'a ni en-tête ni
+# contenu, et n'est pas publiée. Rien à y vérifier.
+MOTIF_BROUILLON = re.compile(r"<head\b", re.I)
+
+
+def brouillon(html: str) -> bool:
+    return MOTIF_BROUILLON.search(html) is None
 
 
 class LecteurEntete(HTMLParser):
@@ -63,6 +70,8 @@ def main() -> int:
         erreurs.append((str(fichier), message))
 
     pages = sorted(p for p in racine.rglob("*.html") if "site_libs" not in p.relative_to(racine).parts)
+    brouillons = [p for p in pages if brouillon(p.read_text(encoding="utf-8"))]
+    pages = [p for p in pages if p not in brouillons]
     titres, descriptions = defaultdict(list), defaultdict(list)
     for page in pages:
         lecteur = LecteurEntete()
@@ -116,8 +125,9 @@ def main() -> int:
         print(f"ÉCHEC : {len(erreurs)} problème(s) de référencement dans {racine}/.")
         return 1
     langues = ", ".join(sorted({l for l, _ in titres} - {""})) or "aucune"
+    ignores = f" ({len(brouillons)} brouillon(s) non publié(s) ignoré(s))" if brouillons else ""
     print(f"OK : {len(pages)} page(s) avec titre et description uniques par langue ({langues}), "
-          f"métadonnées de partage, sitemap.xml et robots.txt.")
+          f"métadonnées de partage, sitemap.xml et robots.txt.{ignores}")
     return 0
 
 

@@ -214,6 +214,17 @@ pose cette balise là où Quarto ne la met pas.
 **Écrire un article** : créer `blog/posts/<AAAA-MM-JJ>-<slug>/index.qmd` avec `title`, `description`,
 `date` et `categories`. La description sert d'extrait dans la liste et de métadonnée de partage.
 
+**Brouillons** : un article avec `draft: true` **n'est pas publié du tout** (`draft-mode: gone`) — ni page,
+ni entrée dans la liste, le flux ou le plan du site. Les contrôles le comptent comme « brouillon non publié
+ignoré ». Seul le PO retire cette ligne.
+
+### Commande `/resume`
+
+`/resume <fichier.tex|.pdf> [--langue fr|en]` (définie dans `.claude/commands/`) écrit un **brouillon**
+d'article à partir d'un document. Elle **refuse** de résumer un travail listé comme non accepté dans
+`publications/sources.toml` (CLAUDE.md §7), **demande confirmation** pour un document inconnu du dépôt, et
+n'écrit jamais un chiffre absent du document. Sa partie mécanique est `scripts/preparer_resume.py`.
+
 **Traduction facultative** : un article n'existe pas forcément dans les deux langues. Les articles sortent
 donc du périmètre bilingue — ni équivalent exigé, ni `hreflang` — tandis que les deux pages `blog/`
 restent, elles, appariées.

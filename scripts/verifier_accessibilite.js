@@ -38,6 +38,8 @@ function pages(dossier) {
         if (entree.name !== "site_libs") parcourir(complet);
       } else if (entree.name.endsWith(".html")) {
         const contenu = fs.readFileSync(complet, "utf8");
+        // Page laissée vide par Quarto à la place d'un brouillon (« draft-mode: gone ») : rien à auditer.
+        if (!/<head\b/i.test(contenu)) continue;
         trouvees.push({
           adresse: "/" + path.relative(dossier, complet).split(path.sep).join("/"),
           slides: contenu.includes('class="reveal"'),

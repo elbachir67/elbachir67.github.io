@@ -1,0 +1,48 @@
+---
+title: "Quand la base de données n'est plus au centre"
+description: "Une séance de M1 sur l'architecture hexagonale : inverser les dépendances pour tester les règles métier sans démarrer quoi que ce soit."
+date: 2026-09-18
+categories: [enseignement, recherche]
+# Retiré par le PO, et par personne d'autre, une fois l'article relu (US-21).
+draft: true
+---
+
+Cet article résume le document `cours/architectures-logicielles-modernes/_sources/cm2_archi_seance2.tex` de ce dépôt.
+
+Ranger un programme en couches — présentation, service, accès aux données — met de l'ordre, mais laisse un
+problème entier. Les dépendances continuent de descendre : le service appelle le repository, qui appelle la
+base. Tant que cette chaîne tient, la règle métier ne peut pas être vérifiée sans base de données.
+
+## Renverser la flèche
+
+La séance part de là et propose une seule idée, mais structurante : **c'est le domaine qui définit
+l'interface**. Le code métier déclare ce dont il a besoin — enregistrer une commande, notifier un livreur —
+et la technique vient s'y brancher. L'adaptateur JDBC implémente l'interface du domaine, au lieu que le
+domaine dépende de JDBC. La flèche de dépendance remonte.
+
+C'est le principe de l'**architecture hexagonale**, telle qu'Alistair Cockburn l'a décrite en 2005 : le
+domaine au centre, des **ports** — les interfaces qu'il définit — et, autour, des **adaptateurs** qui
+traduisent le monde extérieur. Un port entrant expose l'API métier ; des ports sortants couvrent la
+persistance et la notification.
+
+## La preuve par le remplacement
+
+La démonstration de la séance ne tient pas dans un schéma, mais dans un test. Le même domaine, sans en
+changer une ligne, tourne en production derrière un adaptateur JDBC et une base PostgreSQL, et dans les
+tests derrière un adaptateur en mémoire — une simple `Map`. Le test unitaire vérifie alors la règle des
+frais de livraison sans démarrer de framework ni de base.
+
+Ce que cela achète, la séance le nomme : le métier testable au centre, la base, le framework et le canal de
+notification remplaçables sans toucher au domaine, et une frontière déjà prête pour le jour où l'on voudra
+extraire un module. Ce que cela coûte est dit aussi, dans la même diapositive : des interfaces en plus, une
+indirection en plus, et une discipline de vocabulaire permanente.
+
+## Ce que les étudiants en font
+
+Le lab qui suit la séance reprend le code de la séance précédente et le fait passer aux ports et adaptateurs,
+rôle par rôle : le domaine des commandes, l'adaptateur REST, les adaptateurs JDBC, les adaptateurs en
+mémoire. Les tests d'intégration existants ne bougent pas — ils restent le juge de paix : si le comportement
+de l'API change, ce n'est plus du refactoring.
+
+TODO(PO): dire si cette séance a déjà été donnée en amphi, et ce que les étudiants en ont retenu — le
+document ne le dit pas.
