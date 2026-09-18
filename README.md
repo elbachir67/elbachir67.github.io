@@ -303,6 +303,25 @@ git add _freeze                       # le gel accompagne la modification du cod
 - Chaque réexécution change l'identifiant aléatoire de la cellule dans `execute-results/html.json` : un
   rendu sans changement de code ne produit donc pas de différence, mais une réexécution volontaire, si.
 
+## Accessibilité
+
+Le site rendu est audité par [axe-core](https://github.com/dequelabs/axe-core), dans les règles WCAG 2.2
+niveaux A et AA. **La CI échoue sur la moindre violation.**
+
+```bash
+python3 scripts/rendre.py
+npm ci                                    # axe-core et playwright-core, épinglés dans package.json
+node scripts/verifier_accessibilite.js
+```
+
+- Chaque page rendue est visitée **dans les deux langues**, en mode **clair et sombre** (par le bouton du
+  site, comme un visiteur), en **375 px** et en **1440 px**.
+- Les séances de cours sont auditées **page entière puis slide par slide** : revealjs n'affiche qu'une
+  slide à la fois, et axe ne voit que celle-là. Le mode impression, où toutes les slides sont visibles,
+  n'est pas utilisé : il remonterait des défauts de slides masquées que personne ne rencontre.
+- Le navigateur est le **Chrome déjà installé** (`channel: "chrome"`) : aucun navigateur n'est téléchargé,
+  ni en local ni en CI. Durée : environ 50 secondes pour 109 combinaisons.
+
 ## Contribution
 
 `main` est protégée et toujours déployable. Chaque changement passe par une branche
