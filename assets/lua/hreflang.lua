@@ -2,7 +2,18 @@
 -- Les pages françaises sont à la racine, les anglaises sous en/ : le chemin de l'une se déduit de l'autre.
 -- Les pages hors périmètre bilingue (les cours) ne reçoivent pas de balise.
 
-local HORS_PERIMETRE = { cours = true }
+-- Chemins monolingues : les cours (décision PO du Sprint 3) et les articles de blog, qui ne sont pas
+-- forcément traduits (US-25). Le blog lui-même existe dans les deux langues.
+local HORS_PERIMETRE = { "cours/", "blog/posts/" }
+
+local function hors_perimetre(chemin)
+  for _, prefixe in ipairs(HORS_PERIMETRE) do
+    if chemin:sub(1, #prefixe) == prefixe then
+      return true
+    end
+  end
+  return false
+end
 
 -- Dossiers dont le nom change d'une langue à l'autre (décision PO : /en/research/, /en/teaching/).
 -- La même table figure dans scripts/verifier_bilingue.py, qui échoue si les deux divergent.
@@ -49,7 +60,7 @@ function Pandoc(doc)
     fr = chemin
     en = "en/" .. traduire(chemin, FR_VERS_EN)
   end
-  if HORS_PERIMETRE[fr:match("^([^/]+)/") or ""] then
+  if hors_perimetre(fr) then
     return doc
   end
 
