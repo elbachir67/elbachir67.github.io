@@ -482,6 +482,8 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str) -> str:
         "  revealjs:",
         f"    theme: [default, {feuille}]",
         "    slide-number: true",
+        # Contenu centré verticalement : sans cela, une slide courte laisse tout le bas de l'écran vide.
+        "    center: true",
         # Le deck d'origine ne numérote pas les lignes de code ; les ancres que Quarto ajoute pour
         # cela portent par ailleurs un aria-label interdit sur un lien sans cible.
         "    code-line-numbers: false",

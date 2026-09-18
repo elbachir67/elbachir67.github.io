@@ -278,6 +278,9 @@ python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
 - Les figures sont **incorporées** à la page par le shortcode `{{< svg … >}}` (extension
   `_extensions/svg-inline`) : c'est la condition pour que `currentColor` suive la couleur du texte.
 - Le style des slides est dans `assets/css/slides.scss` (charte d'US-06, couleurs des encadrés d'origine).
+  Une slide mesure **1050 × 700 unités** : toutes les hauteurs de cette feuille s'y rapportent, et une
+  séance doit tenir dans ce cadre, sans défilement. Après un import, vérifier la slide la plus chargée —
+  c'est en général celle qui porte une figure **et** un encadré.
 - `--figure-python nom=script.py` remplace une figure importée par un **bloc Python exécuté** : le script
   du cours est inséré tel quel, moins ses lignes d'export (`savefig`, `print`, choix du moteur), la slide
   montre la figure, et le code reste replié sous un « Voir le code de la figure ». Le repli est un

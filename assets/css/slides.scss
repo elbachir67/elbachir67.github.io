@@ -8,7 +8,18 @@
 // découpé, donc sans guillemets la déclaration est invalide et le navigateur retombe sur sa police par
 // défaut (constaté : du Times à l'écran).
 $font-family-sans-serif: unquote('"Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"');
-$presentation-font-size-root: 34px;
+// Lisibilité en projection : valeurs arrêtées par essais comparés (PR fix/slides-mise-en-page, essai A).
+// Le cadre d'une slide mesure 1050 × 700 unités ; toutes les hauteurs ci-dessous s'y rapportent, et les
+// 25 slides du chapitre 1 tiennent dedans sans défilement, la plus haute à 661 px.
+$presentation-font-size-root: 38px;   // corps à 26,6 px, soit +12 % par rapport au réglage d'origine
+// Au-delà d'environ 80 caractères, l'œil retrouve mal le début de la ligne suivante.
+$largeur-ligne: 34em;
+// Les encadrés portent l'essentiel du cours : Quarto les réduit à 0,7 em (16,7 px), trop petit de loin.
+$taille-encadre: 0.85em;
+// Interligne resserré et titre plus sobre : un titre sur deux lignes occupait 154 px, soit un cinquième
+// de la slide.
+$presentation-line-height: 1.25;
+$presentation-h2-font-size: 1.5em;
 $body-color: #1c2a33;
 $body-bg: #ffffff;
 $link-color: #1f6fb5;
@@ -51,16 +62,17 @@ $code-block-font-size: 0.7em;
 .reveal .ucad-front { --ucad-couleur: #1d7382; --ucad-titre: #175c69; }
 
 .reveal div[class*="ucad-"] > .callout.callout-style-default {
+  font-size: $taille-encadre;
   border: none;
   border-left: 3px solid var(--ucad-couleur);
   border-radius: 0;
   background-color: color-mix(in srgb, var(--ucad-couleur) 8%, transparent);
-  margin: 0.5em 0;
+  margin: 0.35em 0;
 
   // Titre de l'encadré : à la couleur du filet, et de la taille du texte, comme en Beamer.
   .callout-title {
     background-color: transparent;
-    padding: 0.3em 0.7em 0;
+    padding: 0.2em 0.7em 0;
     margin-bottom: 0;
     // Quarto atténue le titre à 85 % : sur un fond teinté, la couleur passait sous le seuil de contraste.
     opacity: 1;
@@ -77,7 +89,7 @@ $code-block-font-size: 0.7em;
   }
 
   .callout-content {
-    padding: 0.15em 0.7em 0.45em;
+    padding: 0.1em 0.7em 0.35em;
     font-size: 1em;
 
     p:last-child {
@@ -86,7 +98,42 @@ $code-block-font-size: 0.7em;
   }
 }
 
+// Rythme vertical : le deck d'origine tenait sur une page A4 en 16:9 ; en HTML, le texte est plus grand,
+// et les blancs entre blocs doivent se resserrer pour que chaque slide tienne dans le cadre.
+.reveal .slides section {
+  h2 {
+    margin-bottom: 0.35em;
+  }
+
+  ul, ol {
+    margin-block: 0.25em;
+  }
+
+  li + li {
+    margin-top: 0.12em;
+  }
+
+  p {
+    margin-block: 0.25em;
+  }
+}
+
+// Largeur de ligne : le texte et les encadrés sont bornés et centrés ; les figures et les tableaux, eux,
+// gardent toute la largeur de la slide.
+.reveal .slides section > p,
+.reveal .slides section > ul,
+.reveal .slides section > ol,
+.reveal .slides section > div[class*="ucad-"],
+.reveal .slides section > .legende,
+.reveal .slides section > details {
+  max-width: $largeur-ligne;
+  // Alignés à gauche, sur le même bord que le titre : centrés, ils dessinaient trois bords différents.
+  margin-inline: 0 auto;
+}
+
 // Figures : SVG incorporés à la page, dont les encres suivent la couleur du texte (currentColor).
+// Les hauteurs sont bornées en unités de la présentation (cadre de 1050 × 700), pour qu'une figure ne
+// pousse jamais le texte hors du cadre.
 .reveal .figure-cours {
   display: block;
   margin: 0.4em auto;
@@ -96,7 +143,20 @@ $code-block-font-size: 0.7em;
     display: block;
     width: 100%;
     height: auto;
+    max-height: 420px;
   }
+}
+
+// Figure calculée par un bloc Python (US-18) : elle partage la slide avec un encadré, sa légende et le
+// repli du code, d'où une hauteur plus contenue que celle des figures qui occupent seules leur slide.
+.reveal .slides section .cell img {
+  max-height: 250px;
+  width: auto;
+}
+
+// Repli du code : il ferme la slide, sans marge inutile sous lui.
+.reveal .slides section > details {
+  margin-bottom: 0.3em;
 }
 
 // Légende sous une figure : plus petite et moins appuyée que le texte de la slide.
