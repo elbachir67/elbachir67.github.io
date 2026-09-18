@@ -464,7 +464,12 @@ def nettoyer_svg(source: Path, cible: Path) -> dict[str, int]:
 # Écriture
 # --------------------------------------------------------------------------------------------------
 
-def entete_yaml(entete: dict[str, str], description: str, feuille: str) -> str:
+def slide_capsule(video: str, titre: str) -> str:
+    """Dernière slide : la capsule vidéo de la séance, chargée seulement au clic (US-19)."""
+    return f'## Capsule vidéo\n\n{{{{< capsule {video} titre="{titre}" >}}}}'
+
+
+def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: str = "") -> str:
     def guillemets(valeur: str) -> str:
         return '"' + valeur.replace('"', '\\"') + '"'
 
@@ -474,6 +479,9 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str) -> str:
     ]
     if entete.get("subtitle"):
         lignes.append(f"subtitle: {guillemets(entete['subtitle'])}")
+    if video:
+        # Métadonnée de la séance : la capsule est aussi une slide, en fin de deck.
+        lignes.append(f"video: {guillemets(video)}")
     lignes += [
         f"description: {guillemets(description)}",
         f"author: {guillemets(entete.get('author', ''))}",
@@ -551,6 +559,8 @@ def main() -> int:
                            help="textes alternatifs des figures sans légende (TOML)")
     analyseur.add_argument("--description", default="",
                            help="description de la page, pour le référencement")
+    analyseur.add_argument("--video", default="",
+                           help="identifiant YouTube de la capsule de la séance (slide finale, US-19)")
     analyseur.add_argument("--feuille", default="../../../assets/css/slides.scss",
                            help="feuille de style des slides, relative au .qmd")
     args = analyseur.parse_args()
@@ -570,8 +580,10 @@ def main() -> int:
 
     entete = preambule(source)
     description = args.description or entete.get("subtitle", "")
+    if args.video:
+        pages.append(slide_capsule(args.video, entete.get("title", "Capsule vidéo")))
     args.sortie.parent.mkdir(parents=True, exist_ok=True)
-    args.sortie.write_text(entete_yaml(entete, description, args.feuille)
+    args.sortie.write_text(entete_yaml(entete, description, args.feuille, args.video)
                            + "\n\n".join(pages) + "\n", encoding="utf-8")
 
     nettoyees = {}

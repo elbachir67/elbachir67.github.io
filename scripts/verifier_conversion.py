@@ -54,6 +54,8 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
     ]
     if chapitre.get("alt"):
         commande += ["--alt", str(cours / chapitre["alt"])]
+    if chapitre.get("video"):
+        commande += ["--video", chapitre["video"]]
     for nom, script in chapitre.get("figures_python", {}).items():
         commande += ["--figure-python", f"{nom}={cours / script}"]
 

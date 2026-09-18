@@ -138,6 +138,7 @@ def main() -> int:
                            help="texte alternatif d'une figure sans légende, fourni par le PO")
     analyseur.add_argument("--figure-python", action="append", default=[], metavar="NOM=SCRIPT.py",
                            help="figure produite par un bloc Python exécuté, au lieu d'être importée")
+    analyseur.add_argument("--video", help="identifiant YouTube de la capsule de la séance (US-19)")
     analyseur.add_argument("--figures-source", type=Path,
                            help="dossier des figures (par défaut : figs/ à côté du .tex)")
     args = analyseur.parse_args()
@@ -174,6 +175,9 @@ def main() -> int:
                 "--description", args.description or " — ".join(filter(None, [titre, sous_titre]))]
     if alt:
         commande += ["--alt", str(alt)]
+    video = args.video or (precedente or {}).get("video", "")
+    if video:
+        commande += ["--video", video]
     for nom, script in scripts_python.items():
         commande += ["--figure-python", f"{nom}={cours / script}"]
 
@@ -197,6 +201,7 @@ def main() -> int:
         "figures": str(figures.relative_to(cours)),
         **({"alt": str(alt.relative_to(cours))} if alt else {}),
         "description": args.description or " — ".join(filter(None, [titre, sous_titre])),
+        **({"video": video} if video else {}),
         "figures_python": scripts_python,
     })
 
