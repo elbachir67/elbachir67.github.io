@@ -52,11 +52,11 @@ d'un tuteur IA encadré.
 | US-21 | EP4 | Commande `/resume` (.tex/.pdf → article résumé) | M | 3 | 4 |
 | US-22 | EP4 | Commande `/nouvel-article` (blog) | S | 2 | 4 |
 | US-25 | EP5 | Blog : listing, catégories, flux RSS | S | 2 | 4 |
-| US-26 | EP6 | Spike + ADR architecture du tuteur | M | 2 | 5 |
-| US-27 | EP6 | Proxy API sécurisé (Cloudflare Worker, clé en secret, CORS restreint) | M | 5 | 5 |
-| US-28 | EP6 | Contexte du cours généré au build (index JSON du contenu) | M | 5 | 5 |
-| US-29 | EP6 | Widget de chat sur les pages de cours | M | 3 | 5 |
-| US-30 | EP6 | Garde-fous (limite de requêtes, posture socratique, refus des corrigés) | M | 5 | 5 |
+| US-26 | EP6 | Spike + ADR-0004 : architecture du tuteur (coût par question, anti-abus) | M | 2 | 5 |
+| US-27 | EP6 | Service proxy sécurisé (Worker, clé en secret, CORS, code d'accès) | M | 5 | 5 |
+| US-28 | EP6 | Contexte d'une séance produit au rendu, corrigés exclus | M | 5 | 5 |
+| US-29 | EP6 | Widget de discussion sur les pages de séance (code d'accès, accessible) | M | 3 | 5 |
+| US-30 | EP6 | Garde-fous pédagogiques et budgétaires (plafond global prioritaire) | M | 5 | 5 |
 | US-31 | EP6 | Déploiement continu du Worker | M | 2 | 5 |
 | US-23 | EP4 | GitHub Action Claude : issue labellisée → PR | C | 5 | 6 |
 | US-24 | EP4 | Aperçu déployé par PR | C | 3 | 6 |
@@ -93,7 +93,7 @@ impérative : **jamais de corrigé publié à côté de son énoncé**.
 | 2 | Vitrine académique complète | 17 |
 | 3 | Bilingue et premier cours natif | 30 |
 | 4 | Chaîne de publication et blog | 23 |
-| 5 | Tuteur IA MVP sur le cours pilote | 22 |
+| 5 | Tuteur IA du cours pilote | 22 |
 | 6 | Automatisation avancée + analytics | 21 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
