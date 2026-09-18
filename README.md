@@ -218,6 +218,14 @@ pose cette balise là où Quarto ne la met pas.
 ni entrée dans la liste, le flux ou le plan du site. Les contrôles le comptent comme « brouillon non publié
 ignoré ». Seul le PO retire cette ligne.
 
+### Commande `/nouvel-article`
+
+`/nouvel-article "<titre>" [--langue fr|en] [--categories a,b]` (définie dans `.claude/commands/`) crée
+`blog/posts/<date>-<slug>/index.qmd` : en-tête complet, slug sans accent ni caractère spécial, catégories
+déjà employées rappelées en commentaire, `draft: true` et une trame de trois sections. Elle **ne commite ni
+ne pousse** : le PO écrit d'abord, et retirer `draft: true` est la seule chose qui publie. Sa partie
+mécanique est `scripts/nouvel_article.py`.
+
 ### Commande `/resume`
 
 `/resume <fichier.tex|.pdf> [--langue fr|en]` (définie dans `.claude/commands/`) écrit un **brouillon**
