@@ -72,6 +72,18 @@ d'un tuteur IA encadré.
 | US-46 | EP3 | Numérotation automatique des chapitres depuis le nom de fichier | C | 1 | — |
 | US-47 | EP1 | Index de recherche par langue, sans ajustement du décalage Quarto | C | 2 | — |
 | US-48 | EP3 | Page de garde des PDF de séance | S | 2 | — |
+| US-49 | EP3 | Ressources par séance (lab, TD, notebook, corrigé) | M | 3 | — |
+| US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | — |
+
+### Deux stories décrites par le PO (à planifier)
+
+**US-49 — Ressources par séance.** Champ `ressources` dans `cours/<slug>/_sources/import.toml`, avec un
+**type** par entrée (`lab`, `td`, `notebook`, `corrigé`). Les fichiers sont rangés dans le dossier du cours.
+La liste s'affiche **sur la page de la séance et sur la page du cours**, dans les deux langues. Règle
+impérative : **jamais de corrigé publié à côté de son énoncé**.
+
+**US-50 — Notebooks rendus en page.** Un `.ipynb` de lab est rendu en page HTML par Quarto, avec le
+**téléchargement du notebook** et son **ouverture dans Colab**.
 
 ## Roadmap
 
