@@ -1,6 +1,6 @@
 # Rapport de conversion — cm2_archi_seance2.tex
 
-Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `/Users/elbachir67/dev/site-perso/cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.qmd`.
+Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.qmd`.
 
 ## À traiter à la main
 
