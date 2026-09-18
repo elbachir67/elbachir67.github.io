@@ -245,9 +245,10 @@ python3 scripts/rendre.py --propre      # en vidant le cache .quarto
 python3 scripts/verifier_bilingue.py    # équivalents FR/EN et hreflang réciproques
 ```
 
-**Piège** : rendre un fichier isolé avec un profil (`quarto render page.qmd --profile en`) laisse des
-métadonnées de ce profil dans le cache `.quarto`, et une page peut ressortir dans la mauvaise langue.
-Relancer alors `python3 scripts/rendre.py --propre`.
+**Piège** : rendre un fichier isolé (`quarto render page.qmd`) laisse des métadonnées dans le cache
+`.quarto` — la page peut ensuite ressortir dans la mauvaise langue — et écrit la page **à côté de sa
+source** (`cv/index.html`, `cv/index_files/`). Supprimer ces fichiers, que git ignore, puis relancer
+`python3 scripts/rendre.py --propre`.
 
 ## Import d'un cours LaTeX
 
