@@ -541,6 +541,9 @@ def main() -> int:
     analyseur.add_argument("--sortie", type=Path, required=True, help="fichier .qmd à écrire")
     analyseur.add_argument("--figures", type=Path, required=True, help="dossier des SVG nettoyés")
     analyseur.add_argument("--rapport", type=Path, help="rapport de conversion (Markdown)")
+    analyseur.add_argument("--prefixe-figures",
+                           help="chemin des figures écrit dans le .qmd, s'il doit différer du dossier "
+                                "réel (utilisé par scripts/verifier_conversion.py, qui écrit ailleurs)")
     analyseur.add_argument("--figure-python", action="append", default=[], metavar="NOM=SCRIPT.py",
                            help="figure produite par un bloc Python exécuté, au lieu d'être importée")
     analyseur.add_argument("--alt", type=Path,
@@ -554,7 +557,7 @@ def main() -> int:
     source = args.source.read_text(encoding="utf-8")
     alternatifs = tomllib.loads(args.alt.read_text(encoding="utf-8")) if args.alt else {}
     # Les figures sont citées dans le .qmd par un chemin relatif à lui, comme un lien Markdown.
-    prefixe = os.path.relpath(args.figures, args.sortie.parent)
+    prefixe = args.prefixe_figures or os.path.relpath(args.figures, args.sortie.parent)
     conversion = Conversion(alternatifs, prefixe)
     for couple in args.figure_python:
         nom, _, script = couple.partition("=")
