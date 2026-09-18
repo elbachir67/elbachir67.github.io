@@ -1,0 +1,127 @@
+/*-- scss:defaults --*/
+
+// Slides de cours (US-15) : même charte que le site (US-06), adaptée à la projection.
+// Les couleurs des encadrés reprennent celles de beamerucad.sty, pour que les slides HTML ressemblent
+// aux slides Beamer que les étudiants ont déjà vues.
+
+// unquote garde les guillemets dans le CSS produit : « Source Sans 3 » commence par un chiffre une fois
+// découpé, donc sans guillemets la déclaration est invalide et le navigateur retombe sur sa police par
+// défaut (constaté : du Times à l'écran).
+$font-family-sans-serif: unquote('"Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"');
+$presentation-font-size-root: 34px;
+$body-color: #1c2a33;
+$body-bg: #ffffff;
+$link-color: #1f6fb5;
+$presentation-heading-color: #0f3a5e;
+$presentation-heading-font-weight: 700;
+$code-block-font-size: 0.7em;
+
+/*-- scss:rules --*/
+
+// Source Sans 3 3.052 (SIL OFL 1.1, voir THIRD_PARTY_LICENSES.md), hébergée dans le dépôt.
+// Les slides réutilisent la copie publiée par le thème du site — le même chemin que le préchargement
+// déclaré dans _quarto.yml — plutôt que d'embarquer un second exemplaire des fichiers.
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/site_libs/bootstrap/assets/fonts/source-sans-3-latin-italic.woff2") format("woff2");
+}
+
+// Encadrés du cours : filet gauche coloré, titre coloré, fond très léger — comme dans beamerucad.sty.
+// En revealjs, Quarto met les classes de l'auteur sur un conteneur et place le callout à l'intérieur :
+// la couleur est donc portée par le conteneur, et le style s'applique au callout qu'il enveloppe.
+// Deux teintes par encadré : celle du filet et du fond, reprise de beamerucad.sty, et une version
+// assombrie pour le titre — au moins 5,9:1 sur le fond teinté, là où la teinte vive plafonnait à 3,9:1.
+.reveal .ucad-def { --ucad-couleur: #3b6fb0; --ucad-titre: #2d5c96; }
+.reveal .ucad-form { --ucad-couleur: #7d3c98; --ucad-titre: #6a3282; }
+.reveal .ucad-ex { --ucad-couleur: #2e8b57; --ucad-titre: #1f6b42; }
+.reveal .ucad-piege { --ucad-couleur: #b1621c; --ucad-titre: #8c4c16; }
+.reveal .ucad-ret { --ucad-couleur: #8a7008; --ucad-titre: #6b5607; }
+.reveal .ucad-rec { --ucad-couleur: #1f776c; --ucad-titre: #186057; }
+.reveal .ucad-front { --ucad-couleur: #1d7382; --ucad-titre: #175c69; }
+
+.reveal div[class*="ucad-"] > .callout.callout-style-default {
+  border: none;
+  border-left: 3px solid var(--ucad-couleur);
+  border-radius: 0;
+  background-color: color-mix(in srgb, var(--ucad-couleur) 8%, transparent);
+  margin: 0.5em 0;
+
+  // Titre de l'encadré : à la couleur du filet, et de la taille du texte, comme en Beamer.
+  .callout-title {
+    background-color: transparent;
+    padding: 0.3em 0.7em 0;
+    margin-bottom: 0;
+    // Quarto atténue le titre à 85 % : sur un fond teinté, la couleur passait sous le seuil de contraste.
+    opacity: 1;
+
+    p, strong {
+      color: var(--ucad-titre);
+      font-size: 0.92em;
+    }
+  }
+
+  // Le filet coloré et le titre suffisent à distinguer les encadrés : l'icône alourdirait la slide.
+  .callout-icon-container {
+    display: none;
+  }
+
+  .callout-content {
+    padding: 0.15em 0.7em 0.45em;
+    font-size: 1em;
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Figures : SVG incorporés à la page, dont les encres suivent la couleur du texte (currentColor).
+.reveal .figure-cours {
+  display: block;
+  margin: 0.4em auto;
+  color: $body-color;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+// Légende sous une figure : plus petite et moins appuyée que le texte de la slide.
+.reveal .legende {
+  font-size: 0.72em;
+  color: color-mix(in srgb, $body-color 72%, transparent);
+  text-align: center;
+  margin-top: 0.2em;
+}
+
+// Tableaux : lisibles de loin, sans quadrillage inutile.
+.reveal table {
+  font-size: 0.78em;
+
+  th {
+    border-bottom: 2px solid $presentation-heading-color;
+  }
+
+  td, th {
+    padding: 0.25em 0.5em;
+  }
+}
+
+// Slide de section : le titre seul, centré, comme les intercalaires du deck Beamer.
+.reveal .quarto-title-block h1,
+.reveal section > h1 {
+  color: $presentation-heading-color;
+}
