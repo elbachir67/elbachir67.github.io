@@ -204,6 +204,20 @@ L'adresse email n'apparaît jamais en clair dans le HTML généré, pour limiter
 - La CI vérifie par `grep` que l'adresse n'apparaît nulle part dans `_site/`, ni en clair, ni encodée
   (`%40`, `&#64;`, `&#x40;`, `&commat;`), et qu'aucune page ne contient de lien `href="mailto:` écrit en dur.
 
+## Blog
+
+`blog/index.qmd` liste les articles de `blog/posts/`, du plus récent au plus ancien, avec leur date, leurs
+catégories, leur extrait et leur temps de lecture. Le flux RSS est produit par Quarto (`blog/index.xml`) et
+**annoncé dans l'en-tête de toutes les pages**, dans la langue de la page — c'est `scripts/rendre.py` qui
+pose cette balise là où Quarto ne la met pas.
+
+**Écrire un article** : créer `blog/posts/<AAAA-MM-JJ>-<slug>/index.qmd` avec `title`, `description`,
+`date` et `categories`. La description sert d'extrait dans la liste et de métadonnée de partage.
+
+**Traduction facultative** : un article n'existe pas forcément dans les deux langues. Les articles sortent
+donc du périmètre bilingue — ni équivalent exigé, ni `hreflang` — tandis que les deux pages `blog/`
+restent, elles, appariées.
+
 ## Site bilingue (français et anglais)
 
 Le site existe en deux langues : le français à la racine (`/`) et l'anglais sous `/en/`. La mécanique suit

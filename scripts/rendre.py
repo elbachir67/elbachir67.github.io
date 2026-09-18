@@ -9,7 +9,8 @@
 3. `_site-en/en/` est copié dans `_site/en/`.
 4. Les deux plans de site sont fusionnés dans `_site/sitemap.xml`, et chaque séance de cours est imprimée
    en PDF à côté de sa page (US-17).
-5. Chaque langue garde son index de recherche : le français à la racine, l'anglais dans `_site/en/`, les pages
+5. Le flux RSS du blog est annoncé dans l'en-tête de chaque page, dans la langue de la page.
+6. Chaque langue garde son index de recherche : le français à la racine, l'anglais dans `_site/en/`, les pages
    anglaises étant rattachées à cette racine. Une recherche ne renvoie donc que des pages de la langue lue.
 
 Deux dossiers de sortie sont nécessaires : deux rendus dans le même dossier s'écrasent, car chaque rendu
@@ -123,6 +124,30 @@ def zoom_des_slides() -> None:
         print(f"-> zoom rétabli sur {corrigees} présentation(s)")
 
 
+def annoncer_le_flux() -> None:
+    """Annonce le flux RSS du blog dans l'en-tête de chaque page (US-25).
+
+    Quarto ne pose cette balise que sur la page qui porte le listing : un lecteur qui arrive sur l'accueil
+    ou sur un cours ne voit pas qu'un flux existe. Chaque page reçoit donc celui de sa langue, et seulement
+    si elle n'en a pas déjà un — la page du blog garde le sien, écrit par Quarto.
+    """
+    flux = {
+        "en": '<link rel="alternate" type="application/rss+xml" '
+              'title="Blog — El Hadji Bassirou Touré" href="/en/blog/index.xml">',
+        "fr": '<link rel="alternate" type="application/rss+xml" '
+              'title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">',
+    }
+    annoncees = 0
+    for page in (p for p in SORTIE_FR.rglob("*.html") if "site_libs" not in p.parts):
+        texte = page.read_text(encoding="utf-8")
+        if "application/rss+xml" in texte or "</head>" not in texte:
+            continue
+        langue = "en" if page.relative_to(SORTIE_FR).parts[0] == "en" else "fr"
+        page.write_text(texte.replace("</head>", flux[langue] + "\n</head>", 1), encoding="utf-8")
+        annoncees += 1
+    print(f"-> flux RSS annoncé sur {annoncees} page(s)")
+
+
 def pdf_des_seances() -> None:
     """Imprime chaque présentation en PDF, à côté de sa page (US-17).
 
@@ -149,6 +174,7 @@ def main() -> int:
     fusionner_sitemaps()
     index_de_recherche_par_langue()
     zoom_des_slides()
+    annoncer_le_flux()
     pdf_des_seances()
     return 0
 

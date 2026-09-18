@@ -7,6 +7,7 @@
 Vérifie, pour le périmètre bilingue (tout sauf les dossiers hors périmètre) :
 - chaque page française a son équivalent anglais sous `en/`, et réciproquement, en tenant compte des
   dossiers dont le nom change de langue (`recherche` / `research`, `enseignement` / `teaching`) ;
+- les pages monolingues (cours, articles de blog) n'ont ni équivalent exigé ni `hreflang` ;
 - chaque page porte les trois balises `hreflang` : `fr`, `en` et `x-default` ;
 - les deux versions d'une page annoncent les mêmes adresses (`hreflang` réciproques) ;
 - `x-default` pointe vers la version française.
@@ -22,8 +23,10 @@ import re
 import sys
 from pathlib import Path
 
-# Dossiers monolingues, exclus de l'appariement (décision PO du Sprint 3 : les cours restent en français).
-HORS_PERIMETRE = {"cours"}
+# Chemins monolingues, exclus de l'appariement : les cours restent en français (décision PO du Sprint 3),
+# et un article de blog n'est pas forcément traduit (US-25). Le blog lui-même, lui, existe dans les deux
+# langues : seul ce qu'il y a sous posts/ sort du périmètre.
+HORS_PERIMETRE = ("cours/", "blog/posts/")
 # Dossiers dont le nom change d'une langue à l'autre (décision PO : /en/research/, /en/teaching/).
 # La même table figure dans assets/lua/hreflang.lua : si les deux divergent, l'appariement ou la
 # réciprocité des hreflang échoue ici.
@@ -61,8 +64,10 @@ def main() -> int:
         relatif = page.relative_to(racine)
         parts = relatif.parts
         if parts[0] == "en":
-            anglaises[traduire("/".join(parts[1:]), VERS_FR)] = page
-        elif parts[0] not in HORS_PERIMETRE:
+            chemin = traduire("/".join(parts[1:]), VERS_FR)
+            if not chemin.startswith(HORS_PERIMETRE):
+                anglaises[chemin] = page
+        elif not "/".join(parts).startswith(HORS_PERIMETRE):
             francaises["/".join(parts)] = page
 
     for chemin in sorted(set(francaises) | set(anglaises)):
@@ -90,7 +95,9 @@ def main() -> int:
                     erreur(page, f"x-default ({defaut}) devrait pointer vers la version française ({vers_fr})")
 
     for page in pages(racine):
-        if page.relative_to(racine).parts[0] in HORS_PERIMETRE and hreflangs(page):
+        relatif = "/".join(page.relative_to(racine).parts)
+        relatif = relatif[3:] if relatif.startswith("en/") else relatif
+        if relatif.startswith(HORS_PERIMETRE) and hreflangs(page):
             erreur(page, "page hors périmètre bilingue : elle ne doit pas porter de hreflang")
 
     for fichier, message in erreurs:
