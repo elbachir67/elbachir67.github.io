@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Blog of El Hadji Bassirou Touré, Associate Professor at DMI/FST/UCAD.">
+<meta name="description" content="Notes by El Hadji Bassirou Touré, Associate Professor at DMI/FST/UCAD: teaching, research and tools.">
 
 <title>Blog – El Hadji Bassirou Touré</title>
 <style>
@@ -37,6 +37,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<script src="../../site_libs/quarto-listing/list.min.js"></script>
+<script src="../../site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
@@ -48,9 +50,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-84d32e0692d2da4e86102d8e8e92780a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-a363e80a1f7e39b52a2414bf9229ddb9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-84d32e0692d2da4e86102d8e8e92780a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-f3d951348dd9633d8a907af871a80b82.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-6be6db8db4ff0f5c1badf588368e76fa.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-f3d951348dd9633d8a907af871a80b82.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <link href="../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
@@ -80,19 +82,77 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script>
+
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-articles .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-date','listing-title','listing-description','listing-categories','listing-reading-time',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-articles'] = new List('listing-articles', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
 <link rel="preload" href="../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
 <link rel="alternate" hreflang="fr" href="https://elbachir67.github.io/blog/">
 <link rel="alternate" hreflang="en" href="https://elbachir67.github.io/en/blog/">
 <link rel="alternate" hreflang="x-default" href="https://elbachir67.github.io/blog/">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
-<meta property="og:title" content="Blog – El Hadji Bassirou Touré">
-<meta property="og:description" content="Blog of El Hadji Bassirou Touré, Associate Professor at DMI/FST/UCAD.">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="index.xml" data-external="1"><meta property="og:title" content="Blog – El Hadji Bassirou Touré">
+<meta property="og:description" content="Notes by El Hadji Bassirou Touré, Associate Professor at DMI/FST/UCAD: teaching, research and tools.">
 <meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
 <meta property="og:site_name" content="El Hadji Bassirou Touré">
 <meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
 <meta name="twitter:title" content="Blog – El Hadji Bassirou Touré">
-<meta name="twitter:description" content="Blog of El Hadji Bassirou Touré, Associate Professor at DMI/FST/UCAD.">
+<meta name="twitter:description" content="Notes by El Hadji Bassirou Touré, Associate Professor at DMI/FST/UCAD: teaching, research and tools.">
 <meta name="twitter:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
@@ -319,9 +379,9 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    </div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(1)</span></div><div class="category" data-category="cGVkYWdvZ3k=">pedagogy <span class="quarto-category-count">(1)</span></div><div class="category" data-category="dGVhY2hpbmc=">teaching <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -333,7 +393,7 @@ ul.task-list li input[type="checkbox"] {
 
 <div>
   <div class="description">
-    Blog of El Hadji Bassirou Touré, Associate Professor at DMI/FST/UCAD.
+    Notes by El Hadji Bassirou Touré, Associate Professor at DMI/FST/UCAD: teaching, research and tools.
   </div>
 </div>
 
@@ -350,19 +410,38 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled" title="Under construction">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<p>Notes on teaching, research and the tools of the trade. The <a href="index.xml">RSS</a> feed follows new posts. Posts are written in the language they were thought in, and are not always translated.</p>
+<div id="listing-articles" class="quarto-listing quarto-listing-container-default">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="cGVkYWdvZ3klMkN0ZWFjaGluZw==" data-listing-date-sort="1789689600000" data-listing-file-modified-sort="1789771426623" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="810">
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../../en/blog/posts/2026-09-18-analogy-formula-worked-example/index.html" class="no-external">An analogy, a formula, a worked example</a>
+</h3>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('cGVkYWdvZ3k='); return false;">pedagogy</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('dGVhY2hpbmc='); return false;">teaching</div>
+
 </div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Under construction
+<div class="delink listing-description"><a href="../../en/blog/posts/2026-09-18-analogy-formula-worked-example/index.html" class="no-external">
+<p>How I build a course: intuition first, formalism next, and never an invented result.</p>
+</a></div>
+</div>
+<div class="metadata">
+<a href="../../en/blog/posts/2026-09-18-analogy-formula-worked-example/index.html" class="no-external">
+<div class="listing-date">
+September 18, 2026
+</div>
+<div class="listing-reading-time">5 min</div>
+</a>
 </div>
 </div>
-<div class="callout-body-container callout-body">
-<p>The content of this page will be published soon.</p>
 </div>
+<div class="listing-no-matching d-none">No matching items</div>
 </div>
+
 
 
 
