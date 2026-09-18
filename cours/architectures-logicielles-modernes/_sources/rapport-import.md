@@ -8,7 +8,7 @@ Rien : tout le contenu a été converti.
 
 ## Figures
 
-- figA_cout_changement : non importée, produite par le bloc Python d'US-18
+- figA_cout_changement : bloc Python exécuté depuis figA.py (4 ligne(s) d'export retirée(s)), texte alternatif — légende du .tex
 - figB_couplage : insérée, texte alternatif — texte fourni par le PO
 - fig1_god_controller : insérée, texte alternatif — légende du .tex
 - fig2_couches : insérée, texte alternatif — texte fourni par le PO

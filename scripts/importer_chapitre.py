@@ -57,6 +57,11 @@ FONDS_CLAIRS = {"#fff", "#ffffff", "white", "#f8f9fb", "#fafafa", "#f7f7f7"}
 FORMES = {"rect", "circle", "ellipse", "polygon", "polyline", "path", "line"}
 
 
+# Lignes de fin de script : elles servent à produire un fichier pour LaTeX. Dans un bloc exécuté, la
+# figure est affichée par Quarto, et le choix du moteur graphique lui revient.
+EXPORT = re.compile(r"^\s*(matplotlib\.use\(|fig\.savefig\(|plt\.savefig\(|plt\.show\(|print\()")
+
+
 class Conversion:
     """Contexte de la conversion, et compte rendu de ce qu'elle a fait ou laissé à faire."""
 
@@ -64,6 +69,7 @@ class Conversion:
         self.alternatifs = alternatifs          # textes alternatifs fournis par le PO, par figure
         self.prefixe_figures = prefixe_figures  # chemin des figures, relatif au .qmd produit
         self.insertions: list[str] = []         # blocs déjà finalisés, à l'abri de la conversion
+        self.scripts: dict[str, Path] = {}      # figures calculées : script Python, par nom de figure
         self.non_convertis: list[tuple[str, str]] = []
         self.ignorees: Counter[str] = Counter()
         self.figures: list[str] = []
@@ -173,6 +179,48 @@ def sans_balises(texte: str) -> str:
     return re.sub(r"\s+", " ", texte).replace('"', "«").strip()
 
 
+def code_python(nom: str, conversion: Conversion) -> tuple[str, int]:
+    """Code du script du PO, sans les lignes qui écrivaient un fichier pour LaTeX."""
+    lignes = conversion.scripts[nom].read_text(encoding="utf-8").splitlines()
+    gardees = [ligne for ligne in lignes if not EXPORT.match(ligne)]
+    return "\n".join(gardees).strip(), len(lignes) - len(gardees)
+
+
+def bloc_python(nom: str, conversion: Conversion, legende: str | None) -> tuple[str, str]:
+    """Figure calculée : le script du PO devient un bloc exécuté, dont Quarto gèle le résultat.
+
+    La slide montre la figure, pas le code : le bloc est exécuté sans écho, et le code est repris juste
+    en dessous dans un repli que le lecteur ouvre s'il le souhaite. En revealjs, ni « code-fold » ni un
+    callout « collapse » ne replient quoi que ce soit : le repli est donc un <details> HTML, dont Quarto
+    colore le contenu comme n'importe quel bloc de code.
+    """
+    code, retirees = code_python(nom, conversion)
+    alt = conversion.alternatifs.get(nom) or (sans_balises(legende) if legende else "")
+    origine = ("texte fourni par le PO" if nom in conversion.alternatifs
+               else "légende du .tex" if legende else "TODO(PO)")
+    conversion.figures.append(
+        f"{nom} : bloc Python exécuté depuis {conversion.scripts[nom].name} "
+        f"({retirees} ligne(s) d'export retirée(s)), texte alternatif — {origine}")
+    chunk = "\n".join([
+        "```{python}",
+        f'#| fig-alt: "{alt or "TODO(PO): description de la figure"}"',
+        "#| echo: false",
+        code,
+        "```",
+    ])
+    repli = "\n".join([
+        "<details>",
+        "<summary>Voir le code de la figure</summary>",
+        "",
+        "```python",
+        code,
+        "```",
+        "",
+        "</details>",
+    ])
+    return chunk, repli
+
+
 def figures(texte: str, conversion: Conversion) -> str:
     """Remplace chaque image, et la légende qui la suit, par le shortcode et sa légende.
 
@@ -195,7 +243,10 @@ def figures(texte: str, conversion: Conversion) -> str:
             fermeture = accolade(texte, ouverture)
             legende, fin = texte[suivante.end():fermeture], fermeture + 1
 
-        if nom.startswith("figA"):
+        repli = None
+        if nom in conversion.scripts:
+            insertion, repli = bloc_python(nom, conversion, legende)
+        elif nom.startswith("figA"):
             conversion.figures.append(f"{nom} : non importée, produite par le bloc Python d'US-18")
             insertion = ("<!-- FIGURE CALCULÉE (US-18) : " + nom
                          + ", à produire par le bloc Python de _sources/figs/figA.py -->")
@@ -212,6 +263,8 @@ def figures(texte: str, conversion: Conversion) -> str:
         bloc = conversion.proteger(insertion)
         if legende:
             bloc += "\n\n::: {.legende}\n" + legende.strip() + "\n:::"
+        if repli:
+            bloc += "\n\n" + conversion.proteger(repli)
         texte = texte[:trouve.start()] + bloc + texte[fin:]
 
 
@@ -482,6 +535,8 @@ def main() -> int:
     analyseur.add_argument("--sortie", type=Path, required=True, help="fichier .qmd à écrire")
     analyseur.add_argument("--figures", type=Path, required=True, help="dossier des SVG nettoyés")
     analyseur.add_argument("--rapport", type=Path, help="rapport de conversion (Markdown)")
+    analyseur.add_argument("--figure-python", action="append", default=[], metavar="NOM=SCRIPT.py",
+                           help="figure produite par un bloc Python exécuté, au lieu d'être importée")
     analyseur.add_argument("--alt", type=Path,
                            help="textes alternatifs des figures sans légende (TOML)")
     analyseur.add_argument("--description", default="",
@@ -495,6 +550,9 @@ def main() -> int:
     # Les figures sont citées dans le .qmd par un chemin relatif à lui, comme un lien Markdown.
     prefixe = os.path.relpath(args.figures, args.sortie.parent)
     conversion = Conversion(alternatifs, prefixe)
+    for couple in args.figure_python:
+        nom, _, script = couple.partition("=")
+        conversion.scripts[nom] = Path(script)
 
     debut = source.index("\\begin{document}") + len("\\begin{document}")
     corps = source[debut:source.index("\\end{document}")]

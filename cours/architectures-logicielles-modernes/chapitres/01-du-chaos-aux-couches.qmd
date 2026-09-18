@@ -72,11 +72,66 @@ Une bonne structure permet de comprendre, modifier, tester et remplacer chaque p
 La **dette architecturale** est le coût futur créé par les raccourcis structurels d'aujourd'hui. Comme une dette d'argent, elle porte intérêt : chaque fonctionnalité coûte plus cher que la précédente.
 :::
 
-<!-- FIGURE CALCULÉE (US-18) : figA_cout_changement, à produire par le bloc Python de _sources/figs/figA.py -->
+```{python}
+#| fig-alt: "Au début, les deux courbes se confondent — la mauvaise structure est même souvent plus rapide. C'est pour cela qu'on la choisit... et qu'on la regrette."
+#| echo: false
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.rcParams["font.family"] = "DejaVu Sans"
+plt.rcParams["font.size"] = 11
+
+t = np.linspace(0, 10, 200)
+saine = 1.0 + 0.06 * t          # structure saine : cout quasi constant
+dette = 1.0 + 0.035 * np.exp(0.52 * t)   # dette : cout qui explose
+
+fig, ax = plt.subplots(figsize=(7.2, 3.6))
+ax.plot(t, saine, color="#2E8B57", lw=2.6, label="Structure saine")
+ax.plot(t, dette, color="#D9822B", lw=2.6, label="Dette architecturale")
+ax.fill_between(t, saine, dette, where=dette > saine, color="#D9822B", alpha=0.08)
+ax.annotate("le prix de la dette", xy=(8.4, 4.6), fontsize=10, color="#D9822B")
+ax.set_xlabel("Temps de vie du projet")
+ax.set_ylabel("Coût d'ajout d'une fonctionnalité")
+ax.set_xticks([]); ax.set_yticks([])
+ax.spines[["top", "right"]].set_visible(False)
+ax.legend(frameon=False, loc="upper left")
+fig.tight_layout()
+```
 
 ::: {.legende}
 Au début, les deux courbes se confondent — la mauvaise structure est même souvent *plus rapide*. C'est pour cela qu'on la choisit... et qu'on la regrette.
 :::
+
+<details>
+<summary>Voir le code de la figure</summary>
+
+```python
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.rcParams["font.family"] = "DejaVu Sans"
+plt.rcParams["font.size"] = 11
+
+t = np.linspace(0, 10, 200)
+saine = 1.0 + 0.06 * t          # structure saine : cout quasi constant
+dette = 1.0 + 0.035 * np.exp(0.52 * t)   # dette : cout qui explose
+
+fig, ax = plt.subplots(figsize=(7.2, 3.6))
+ax.plot(t, saine, color="#2E8B57", lw=2.6, label="Structure saine")
+ax.plot(t, dette, color="#D9822B", lw=2.6, label="Dette architecturale")
+ax.fill_between(t, saine, dette, where=dette > saine, color="#D9822B", alpha=0.08)
+ax.annotate("le prix de la dette", xy=(8.4, 4.6), fontsize=10, color="#D9822B")
+ax.set_xlabel("Temps de vie du projet")
+ax.set_ylabel("Coût d'ajout d'une fonctionnalité")
+ax.set_xticks([]); ax.set_yticks([])
+ax.spines[["top", "right"]].set_visible(False)
+ax.legend(frameon=False, loc="upper left")
+fig.tight_layout()
+```
+
+</details>
 
 ## Les attributs de qualité
 

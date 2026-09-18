@@ -74,9 +74,13 @@ ajoute pour cela portent un `aria-label` interdit sur un lien sans cible (relev�
   `#5a6b75`…) deviennent `currentColor` ; les fonds clairs des **formes** (`#fff`, `#f8f9fb`…) deviennent
   transparents ; `font-family` devient `inherit`. Le blanc est conservé sur les `<text>` : il y sert à écrire
   dans un bloc de couleur. Les couleurs d'accent (orange, vert, violet, jaune) sont conservées telles quelles.
-- **Figure calculée** : `figA_cout_changement` n'est pas importée. Elle est produite par le script matplotlib
-  du PO, en bloc Python exécuté et gelé (US-18). Le script laisse à sa place un commentaire
-  `<!-- FIGURE CALCULÉE (US-18) : … -->`, et conserve la légende.
+- **Figure calculée** : `figA_cout_changement` n'est pas importée. Avec `--figure-python`, le script
+  matplotlib du PO devient un **bloc Python exécuté** (US-18), dont Quarto gèle le résultat : la slide
+  montre la figure, la légende du `.tex` la suit, et le code est repris juste en dessous dans un repli
+  `<details>` — en revealjs, ni `code-fold` ni un callout `collapse` ne replient quoi que ce soit. Les
+  lignes d'export du script (`matplotlib.use`, `savefig`, `print`) sont retirées et comptées dans le
+  rapport : dans un bloc exécuté, la figure est affichée par Quarto. Sans `--figure-python`, le script
+  laisse à la place un commentaire `<!-- FIGURE CALCULÉE (US-18) : … -->`.
 
 ## Ce que la conversion ne fait pas
 

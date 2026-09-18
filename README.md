@@ -259,6 +259,7 @@ python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
     --figures cours/<slug>/figures \
     --rapport cours/<slug>/_sources/rapport-import.md \
     --alt cours/<slug>/_sources/textes-alternatifs.toml \
+    --figure-python figA_cout_changement=cours/<slug>/_sources/figs/figA.py \
     --description "Phrase de référencement de la séance."
 ```
 
@@ -273,6 +274,27 @@ python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
 - Les figures sont **incorporées** à la page par le shortcode `{{< svg … >}}` (extension
   `_extensions/svg-inline`) : c'est la condition pour que `currentColor` suive la couleur du texte.
 - Le style des slides est dans `assets/css/slides.scss` (charte d'US-06, couleurs des encadrés d'origine).
+- `--figure-python nom=script.py` remplace une figure importée par un **bloc Python exécuté** : le script
+  du cours est inséré tel quel, moins ses lignes d'export (`savefig`, `print`, choix du moteur), la slide
+  montre la figure, et le code reste replié sous un « Voir le code de la figure ». Le repli est un
+  `<details>` : en revealjs, ni `code-fold` ni un callout `collapse` ne replient quoi que ce soit.
+
+### Code exécuté et figures gelées
+
+Les résultats d'exécution sont **gelés** (`execute: freeze: auto`) et versionnés dans `_freeze/` : la CI ne
+réexécute jamais de code, et n'a donc besoin ni de Python ni de matplotlib. Une page à code exécutable n'est
+réexécutée que si son code change.
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+QUARTO_PYTHON=$PWD/.venv/bin/python quarto render cours/<slug>/chapitres/01-<slug>.qmd --profile fr
+git add _freeze                       # le gel accompagne la modification du code
+```
+
+- `_freeze/site_libs/` est **ignoré** : ce n'est qu'une copie des bibliothèques livrées avec Quarto (5 Mo
+  pour revealjs). Vérifié : un rendu gelé aboutit sans ce dossier et sans Python installé.
+- Chaque réexécution change l'identifiant aléatoire de la cellule dans `execute-results/html.json` : un
+  rendu sans changement de code ne produit donc pas de différence, mais une réexécution volontaire, si.
 
 ## Contribution
 
