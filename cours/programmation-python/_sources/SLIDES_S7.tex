@@ -1,0 +1,375 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{beamerucad}
+\usepackage{listings}
+\definecolor{ckw}{HTML}{2563AB}\definecolor{cst}{HTML}{2E8B57}\definecolor{ccm}{HTML}{8A8F98}
+\definecolor{outbg}{HTML}{F4F5F7}\definecolor{outrule}{HTML}{2E8B57}
+\lstdefinestyle{py}{language=Python,basicstyle=\ttfamily\scriptsize,
+ keywordstyle=\color{ckw}\bfseries,stringstyle=\color{cst},commentstyle=\color{ccm}\itshape,
+ showstringspaces=false,columns=fullflexible,keepspaces=true,
+ backgroundcolor=\color{ucadband!8},frame=leftline,framerule=2.5pt,rulecolor=\color{ucadband},
+ xleftmargin=8pt,aboveskip=3pt,belowskip=1pt,basewidth=0.5em}
+\lstdefinestyle{out}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{outbg},frame=leftline,framerule=2.5pt,rulecolor=\color{outrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+\lstset{style=py}
+\newcommand{\resultat}{{\scriptsize\textbf{R\'esultat}~$\rightarrow$}\par\vspace{1pt}}
+
+\title{Programmation Python — Séance 7}
+\subtitle{pandas}
+\author{Dr. El Hadji Bassirou TOURÉ}
+\institute{Département de Mathématiques et Informatique\\ Faculté des Sciences et Techniques\\ Université Cheikh Anta Diop de Dakar}
+\date{}
+\setucadfoot{Programmation Python — Séance 7}
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]\titlepage\end{frame}
+
+% =====================================================================
+\begin{frame}{Objectifs de la séance}
+\begin{ucaddef}[Contenu]
+{\small NumPy calcule sur des tableaux de nombres. \texttt{pandas}, bâti sur NumPy, ajoute des \textbf{colonnes nommées} et des lignes étiquetées : le \textbf{DataFrame}, la table de données de la bio-informatique. On manipule notre jeu de morphométrie de pinsons, cette fois avec une colonne \texttt{espece}.}
+\end{ucaddef}
+\begin{itemize}\small
+  \item \textbf{Series} et \textbf{DataFrame} ; créer et charger (\texttt{read\_csv}).
+  \item \textbf{Explorer} : \texttt{shape}, \texttt{info}, \texttt{describe}.
+  \item \textbf{Sélectionner}, \textbf{filtrer}, \textbf{créer une colonne}, \textbf{trier}.
+  \item \textbf{Valeurs manquantes} et \textbf{groupby} — le cœur de l'analyse.
+\end{itemize}
+{\small L'entraînement se fait dans le \textbf{notebook}, avec une cellule « À vous » après chaque notion.}
+\end{frame}
+
+\begin{frame}{Un DataFrame}
+\figslide{0.92}{figs/f7_pandas}{Un DataFrame : des colonnes nommées et un index. On sélectionne une colonne (une Series), on filtre des lignes ; une case manquante vaut \texttt{NaN}.}
+\end{frame}
+
+% #####################################################################
+\section{Series et DataFrame}
+
+\begin{frame}{L'idée : la colonne, puis la table}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une \textbf{Series} est une colonne : des valeurs avec une \textbf{étiquette} (l'index). Un \textbf{DataFrame} réunit plusieurs colonnes partageant le même index — une table. On importe pandas sous le nom \texttt{pd} ; tout est bâti sur NumPy.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Une Series : une colonne étiquetée}
+\begin{lstlisting}
+import pandas as pd
+
+masse_moy = pd.Series([15.2, 21.5, 28.0],
+                      index=["fuliginosa", "fortis", "magnirostris"])
+print(masse_moy)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+fuliginosa      15.2
+fortis          21.5
+magnirostris    28.0
+dtype: float64
+\end{lstlisting}
+{\small Chaque valeur porte une étiquette (le nom d'espèce) plutôt qu'un simple numéro de position.}
+\end{frame}
+
+% #####################################################################
+\section{Créer et charger}
+
+\begin{frame}{L'idée : d'un dictionnaire, ou d'un CSV}
+\begin{ucaddef}[L'idée en une phrase]
+{\small On construit un DataFrame à partir d'un \textbf{dictionnaire} (chaque clé devient une colonne) ; mais en pratique, les données arrivent dans un fichier \textbf{CSV} que l'on charge avec \texttt{read\_csv}.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Créer un DataFrame depuis un dictionnaire}
+\begin{lstlisting}
+data = {
+    "espece":   ["fuliginosa"]*5 + ["fortis"]*6 + ["magnirostris"]*4,
+    "bec_long": [9.1, 9.4, 8.9, ...],
+    "bec_haut": [8.0, 8.3, 7.8, ...],
+    "aile":     [67, 68, 66, ...],
+    "masse":    [15, 16, 14, ...],
+}
+df = pd.DataFrame(data)
+print(df.head())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+       espece  bec_long  bec_haut  aile  masse
+0  fuliginosa       9.1       8.0  67.0     15
+1  fuliginosa       9.4       8.3  68.0     16
+2  fuliginosa       8.9       7.8  66.0     14
+3  fuliginosa       9.6       8.5  69.0     16
+4  fuliginosa       9.2       8.1  67.0     15
+\end{lstlisting}
+{\small \texttt{head()} montre les premières lignes. La table compte 15 spécimens.}
+\end{frame}
+
+\begin{frame}[fragile]{Sauvegarder et recharger en CSV}
+\begin{lstlisting}
+df.to_csv("pinsons.csv", index=False)
+df2 = pd.read_csv("pinsons.csv")
+print(df2.head())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+       espece  bec_long  bec_haut  aile  masse
+0  fuliginosa       9.1       8.0  67.0     15
+1  fuliginosa       9.4       8.3  68.0     16
+2  fuliginosa       8.9       7.8  66.0     14
+3  fuliginosa       9.6       8.5  69.0     16
+4  fuliginosa       9.2       8.1  67.0     15
+\end{lstlisting}
+{\small \texttt{read\_csv} est le point de départ de presque toute analyse de données réelle.}
+\end{frame}
+
+% #####################################################################
+\section{Explorer}
+
+\begin{frame}[fragile]{Dimensions et résumé statistique}
+\begin{lstlisting}
+print(df.shape)
+print(df.describe().round(2))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+(15, 5)
+       bec_long  bec_haut   aile  masse
+count     15.00     15.00  14.00  15.00
+mean      12.55     10.75  73.64  21.13
+std        2.75      2.41   5.36   5.18
+min        8.90      7.80  66.00  14.00
+25%        9.50      8.40  68.25  16.00
+50%       12.90     10.60  74.50  21.00
+75%       14.60     12.45  78.25  25.00
+max       16.50     14.60  81.00  29.00
+\end{lstlisting}
+{\small \texttt{describe} résume chaque mesure. \texttt{aile} n'a que \textbf{14} valeurs (\texttt{count}) : une manque.}
+\end{frame}
+
+\begin{frame}[fragile]{Colonnes et types : \texttt{info()}}
+\begin{lstlisting}
+df.info()
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+<class 'pandas.DataFrame'>
+RangeIndex: 15 entries, 0 to 14
+Data columns (total 5 columns):
+ #   Column    Non-Null Count  Dtype
+---  ------    --------------  -----
+ 0   espece    15 non-null     str
+ 1   bec_long  15 non-null     float64
+ 2   bec_haut  15 non-null     float64
+ 3   aile      14 non-null     float64
+ 4   masse     15 non-null     int64
+dtypes: float64(3), int64(1), str(1)
+\end{lstlisting}
+{\small \texttt{info()} donne le type de chaque colonne et son nombre de valeurs présentes : \texttt{aile} affiche 14, la mesure manquante s'y voit aussi.}
+\end{frame}
+
+% #####################################################################
+\section{Sélectionner}
+
+\begin{frame}{L'idée : colonnes et lignes}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une colonne se prend par son nom : \texttt{df["masse"]} (une Series). Plusieurs colonnes : une \textbf{liste} de noms, \texttt{df[["espece", "masse"]]}. Une ligne se prend par son étiquette avec \texttt{loc}.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Une colonne, plusieurs colonnes}
+\begin{lstlisting}
+print(df[["espece", "masse"]].head())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+       espece  masse
+0  fuliginosa     15
+1  fuliginosa     16
+2  fuliginosa     14
+3  fuliginosa     16
+4  fuliginosa     15
+\end{lstlisting}
+{\small Crochets \textbf{simples} pour une colonne (Series) ; crochets \textbf{doubles} (une liste de noms) pour plusieurs colonnes (un DataFrame).}
+\end{frame}
+
+\begin{frame}[fragile]{Une ligne : \texttt{loc}}
+\begin{lstlisting}
+print(df.loc[0])
+print(df.loc[0, "espece"])
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+espece      fuliginosa
+bec_long           9.1
+bec_haut           8.0
+aile              67.0
+masse               15
+Name: 0, dtype: object
+fuliginosa
+\end{lstlisting}
+{\small \texttt{df.loc[0]} donne la ligne d'étiquette 0 (comme une Series) ; \texttt{df.loc[0, "espece"]} vise une case précise.}
+\end{frame}
+
+% #####################################################################
+\section{Filtrer}
+
+\begin{frame}[fragile]{Filtrer avec un masque booléen}
+\begin{ucadex}[Comme avec NumPy]
+{\small Une comparaison produit un masque ; entre crochets, il ne garde que les lignes qui vérifient la condition.}
+\end{ucadex}
+\begin{lstlisting}
+print(df[df["masse"] > 25])
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+          espece  bec_long  bec_haut  aile  masse
+11  magnirostris      16.1      14.2  80.0     28
+12  magnirostris      15.7      13.8  79.0     27
+13  magnirostris      16.5      14.6  81.0     29
+14  magnirostris      15.9      14.0  80.0     28
+\end{lstlisting}
+{\small Tous les spécimens de plus de 25 g sont des \texttt{magnirostris} : le filtre a isolé la plus grande espèce.}
+\end{frame}
+
+% #####################################################################
+\section{Créer une colonne}
+
+\begin{frame}[fragile]{Ajouter une colonne calculée}
+\begin{lstlisting}
+df["rapport_bec"] = (df["bec_long"] / df["bec_haut"]).round(2)
+print(df[["espece", "bec_long", "bec_haut", "rapport_bec"]].head())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+       espece  bec_long  bec_haut  rapport_bec
+0  fuliginosa       9.1       8.0         1.14
+1  fuliginosa       9.4       8.3         1.13
+2  fuliginosa       8.9       7.8         1.14
+3  fuliginosa       9.6       8.5         1.13
+4  fuliginosa       9.2       8.1         1.14
+\end{lstlisting}
+{\small Le calcul est \textbf{vectorisé}, comme avec NumPy : la nouvelle colonne s'obtient à partir des colonnes existantes.}
+\end{frame}
+
+% #####################################################################
+\section{Trier}
+
+\begin{frame}[fragile]{Trier les lignes}
+\begin{lstlisting}
+print(df.sort_values("masse").head())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+       espece  bec_long  bec_haut  aile  masse  rapport_bec
+2  fuliginosa       8.9       7.8  66.0     14         1.14
+0  fuliginosa       9.1       8.0  67.0     15         1.14
+4  fuliginosa       9.2       8.1  67.0     15         1.14
+1  fuliginosa       9.4       8.3  68.0     16         1.13
+3  fuliginosa       9.6       8.5  69.0     16         1.13
+\end{lstlisting}
+{\small \texttt{sort\_values("masse")} réordonne du plus léger au plus lourd : les plus petits spécimens sont des \texttt{fuliginosa}.}
+\end{frame}
+
+% #####################################################################
+\section{Valeurs manquantes}
+
+\begin{frame}[fragile]{Repérer et combler les trous}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une mesure absente vaut \texttt{NaN}. \texttt{isna()} la repère, \texttt{.sum()} la compte ; on peut \textbf{supprimer} les lignes (\texttt{dropna}) ou \textbf{combler} le trou (\texttt{fillna}).}
+\end{ucaddef}
+\begin{lstlisting}
+print(df[df["aile"].isna()])
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+   espece  bec_long  bec_haut  aile  masse  rapport_bec
+7  fortis      12.5      10.2   NaN     20         1.23
+\end{lstlisting}
+\begin{lstlisting}
+aile_pleine = df["aile"].fillna(df["aile"].mean())
+print(aile_pleine.isna().sum())
+\end{lstlisting}
+\begin{lstlisting}[style=out]
+0
+\end{lstlisting}
+\end{frame}
+
+% #####################################################################
+\section{Grouper}
+
+\begin{frame}{L'idée : compter, puis agréger par groupe}
+\begin{ucaddef}[L'idée en une phrase]
+{\small \texttt{value\_counts()} compte les occurrences de chaque valeur d'une colonne. \texttt{groupby("espece")} rassemble les lignes par espèce ; on applique ensuite une agrégation (\texttt{mean}, \texttt{sum}...) à \textbf{chaque groupe}. C'est le cœur de l'analyse de données.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Compter les effectifs}
+\begin{lstlisting}
+print(df["espece"].value_counts())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+espece
+fortis          6
+fuliginosa      5
+magnirostris    4
+Name: count, dtype: int64
+\end{lstlisting}
+{\small L'échantillon compte 6 \texttt{fortis}, 5 \texttt{fuliginosa} et 4 \texttt{magnirostris}.}
+\end{frame}
+
+\begin{frame}[fragile]{Le profil moyen de chaque espèce}
+\begin{lstlisting}
+print(df.groupby("espece")[["bec_long", "aile", "masse"]].mean().round(2))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+              bec_long  aile  masse
+espece
+fortis           12.98  74.8   21.5
+fuliginosa        9.24  67.4   15.2
+magnirostris     16.05  80.0   28.0
+\end{lstlisting}
+{\small En une ligne, \texttt{groupby} révèle le profil de chaque espèce : \texttt{magnirostris} a le bec le plus long, l'aile la plus grande et la masse la plus élevée ; \texttt{fuliginosa} est la plus petite sur les trois mesures.}
+\end{frame}
+
+% #####################################################################
+\section{Synthèse}
+
+\begin{frame}{Pièges fréquents}
+\begin{itemize}\small
+  \item \textbf{Une colonne est une Series} : \texttt{df["masse"]} (crochets simples). Avec une \textbf{liste} de noms, \texttt{df[["espece", "masse"]]}, on obtient un DataFrame (crochets doubles).
+  \item \textbf{\texttt{loc} (étiquette) vs \texttt{iloc} (position)} : \texttt{df.loc[0]} cible l'étiquette 0 ; \texttt{df.iloc[0]} la première ligne.
+  \item \textbf{\texttt{NaN} n'est pas 0} : une valeur manquante doit être traitée (\texttt{dropna}, \texttt{fillna}).
+  \item \textbf{Un filtre ne modifie pas la table} : \texttt{df[df["masse"] > 25]} renvoie une nouvelle vue ; on l'affecte à une variable pour la garder.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{À retenir — Séance 7}
+\begin{ucadret}[L'essentiel]
+{\small
+\textbf{DataFrame} : une table à colonnes nommées, bâtie sur NumPy ; \textbf{Series} : une colonne.\\[2pt]
+\textbf{Créer / charger} : \texttt{pd.DataFrame(\{...\})}, \texttt{read\_csv}, \texttt{to\_csv}.\\[2pt]
+\textbf{Explorer} : \texttt{shape}, \texttt{info()}, \texttt{describe()}, \texttt{head()}.\\[2pt]
+\textbf{Sélectionner} : \texttt{df["col"]}, \texttt{df[["c1", "c2"]]}, \texttt{df.loc[...]}.\\[2pt]
+\textbf{Filtrer} : masque booléen \texttt{df[df["col"] > v]}.\\[2pt]
+\textbf{Créer une colonne} : à partir des colonnes existantes (vectorisé). \textbf{Trier} : \texttt{sort\_values}.\\[2pt]
+\textbf{Manquantes} : \texttt{isna}, \texttt{dropna}, \texttt{fillna}. \textbf{Grouper} : \texttt{value\_counts}, \texttt{groupby("col").mean()}.}
+\end{ucadret}
+\end{frame}
+
+\begin{frame}{Prochaine séance}
+\begin{ucaddef}[Séance 8 — Visualiser et faire le pont]
+{\small On sait charger et résumer une table. La Séance 8 la \textbf{visualise} — histogrammes, nuages de points colorés par espèce — puis fait le \textbf{pont vers le Machine Learning} : la table devient une matrice \texttt{X} (les mesures) et un vecteur \texttt{y} (l'espèce à prédire).}
+\end{ucaddef}
+{\small À faire d'ici là : refaire les cellules « À vous » du notebook de la séance.}
+\end{frame}
+
+\begin{frame}{Références}
+\begin{itemize}\small
+  \item McKinney, W. — \emph{Python for Data Analysis}, 3e éd., O'Reilly, 2022.
+  \item VanderPlas, J. — \emph{Python Data Science Handbook}, 2e éd., O'Reilly, 2023.
+  \item pandas — \emph{10 minutes to pandas} (documentation), 2024.
+  \item pandas — \emph{Getting started tutorials} (documentation), 2024.
+\end{itemize}
+\end{frame}
+
+\end{document}
