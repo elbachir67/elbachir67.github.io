@@ -113,6 +113,11 @@ jobs:
       - name: Vérifier la conversion des cours
         run: python scripts/verifier_conversion.py
 
+      # Cours (US-51) : un « \\[2pt] » non converti s'afficherait en clair sur une slide. Le rapport
+      # de conversion ne voit que ce que le script sait ignorer ; ce contrôle regarde le résultat.
+      - name: Vérifier qu'aucun reste de LaTeX n'a traversé
+        run: python scripts/verifier_latex.py
+
       - name: Vérifier l'accessibilité
         run: node scripts/verifier_accessibilite.js _site
 

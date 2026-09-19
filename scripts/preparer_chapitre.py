@@ -76,8 +76,13 @@ def copier_sources(cours: Path, tex: Path, figures_source: Path | None) -> Path:
     dossier = figures_source or (tex.parent / "figs")
     if dossier.is_dir():
         (sources / "figs").mkdir(exist_ok=True)
+        # Une figure déjà disponible en vectoriel n'a pas besoin de sa version matricielle : le site
+        # incorpore le SVG, LaTeX prend le PDF, et le PNG ne pèserait que dans l'historique.
+        vectorielles = {f.stem for f in dossier.iterdir() if f.suffix in (".svg", ".pdf")}
         for figure in sorted(dossier.iterdir()):
             destination = sources / "figs" / figure.name
+            if figure.suffix == ".png" and figure.stem in vectorielles:
+                continue
             # Relance depuis le dépôt : les figures sont déjà à leur place.
             if figure.is_file() and not (destination.is_file()
                                          and destination.resolve() == figure.resolve()):

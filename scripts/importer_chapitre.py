@@ -354,7 +354,10 @@ def inline(texte: str, conversion: Conversion) -> str:
             return "<br>"
         return conversion.non_converti("\\" + nom)
 
-    texte = re.sub(r"\\(vskip|vspace)\*?\s*-?[\d.]+\s*(pt|ex|em|cm|mm)", "", texte)
+    # « \\ », « \\[2pt] », « \\* » : un saut de ligne, l'espacement en plus étant affaire de style.
+    texte = re.sub(r"\\\\\*?\s*(?:\[[^\]]*\])?", "<br>", texte)
+    # Espacements verticaux, avec ou sans accolades : « \vspace{3pt} », « \vskip 2ex », « \vspace*{1cm} ».
+    texte = re.sub(r"\\(?:vskip|vspace)\*?\s*(?:\{[^}]*\}|-?[\d.]+\s*[a-z]+)", "", texte)
     texte = re.sub(r"\\([A-Za-z]+)\s*(?:\{\})?", commande, texte)
     texte = (texte.replace("\\%", "%").replace("\\&", "&").replace("\\_", "_")
              .replace("\\#", "#").replace("~", "\u00a0"))
@@ -367,6 +370,8 @@ def tableau(contenu: str, conversion: Conversion) -> str:
     conversion.tableaux += 1
     lignes = []
     for brute in contenu.split("\\\\"):
+        # Une ligne peut finir par « \\[2pt] » : l'espacement reste collé au début de la suivante.
+        brute = re.sub(r"^\s*\[[^\]]*\]", "", brute)
         cellules = [inline(c, conversion).replace("\n", " ").strip()
                     for c in brute.split("&")]
         if any(cellules):
