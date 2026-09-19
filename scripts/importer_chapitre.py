@@ -291,7 +291,9 @@ def figures(texte: str, conversion: Conversion) -> str:
         trouve = MOTIF_IMAGE.search(texte)
         if not trouve:
             return texte
-        nom = Path(trouve["nom"]).name
+        # Le dossier ne compte pas (les figures sont celles du cours), et l'extension non plus :
+        # le .tex cite le PDF que compile LaTeX, la page incorpore le SVG du même nom.
+        nom = Path(trouve["nom"]).stem
         mesure = re.search(r"width=([\d.]+)\\linewidth", trouve["options"] or "")
         largeur = float(mesure[1]) if mesure else None
 
