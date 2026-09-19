@@ -26,6 +26,9 @@ import tomllib
 import unicodedata
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from importer_chapitre import langage_declare  # noqa: E402  (même dossier)
+
 RACINE = Path(__file__).resolve().parent.parent
 BESOIN_DU_PO = 2
 
@@ -174,11 +177,15 @@ def main() -> int:
     analyseur.add_argument("tex", type=Path, help="fichier .tex de la séance")
     analyseur.add_argument("--slug", help="nom du fichier produit, sans le numéro (par défaut : "
                                           "déduit du sous-titre du .tex)")
+    analyseur.add_argument("--numero", help="numéro de la séance sur deux chiffres (par défaut : le "
+                                            "suivant). « 00 » pour une séance 0, de prise en main.")
     analyseur.add_argument("--description", help="phrase de référencement (par défaut : titre et sous-titre)")
     analyseur.add_argument("--alt", action="append", default=[], metavar='NOM="texte"',
                            help="texte alternatif d'une figure sans légende, fourni par le PO")
     analyseur.add_argument("--figure-python", action="append", default=[], metavar="NOM=SCRIPT.py",
                            help="figure produite par un bloc Python exécuté, au lieu d'être importée")
+    analyseur.add_argument("--langage-code", help="langage des blocs de code (par défaut : celui que "
+                                                  "le .tex déclare)")
     analyseur.add_argument("--video", help="identifiant YouTube de la capsule de la séance (US-19)")
     analyseur.add_argument("--ressource", action="append", default=[], metavar="TYPE|FICHIER|TITRE",
                            help="ressource de la séance : lab, td, notebook ou corrige, le fichier "
@@ -204,7 +211,7 @@ def main() -> int:
         print(f"Séance déjà décrite par le manifeste : {sortie.relative_to(RACINE)} est remplacée.")
     else:
         slug = args.slug or identifiant(sous_titre or titre)
-        numero = numero_suivant(cours)
+        numero = args.numero or numero_suivant(cours)
         sortie = cours / "chapitres" / f"{numero}-{slug}.qmd"
     figures = cours / "figures"
 
@@ -223,6 +230,11 @@ def main() -> int:
                 "--description", description]
     if alt:
         commande += ["--alt", str(alt)]
+    # Langage des blocs de code : celui demandé, sinon celui du manifeste, sinon celui que le .tex
+    # déclare. Il est écrit dans le manifeste pour que le rejeu de la CI ne dépende pas d'une devinette.
+    langage = (args.langage_code or (precedente or {}).get("langage")
+               or langage_declare(source) or "java")
+    commande += ["--langage-code", langage]
     video = args.video or (precedente or {}).get("video", "")
     if video:
         commande += ["--video", video]
@@ -252,6 +264,7 @@ def main() -> int:
         "figures": str(figures.relative_to(cours)),
         **({"alt": str(alt.relative_to(cours))} if alt else {}),
         "description": description,
+        "langage": langage,
         **({"video": video} if video else {}),
         **({"ressources": ressources} if ressources else {}),
         "figures_python": scripts_python,
