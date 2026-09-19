@@ -1,5 +1,17 @@
 # Sprint 5 — Tuteur IA du cours pilote
 
+> **Sprint reporté — décision du PO, 19/09/2026.** Le tuteur IA (EP6) retourne au backlog, sans sprint :
+> US-27, US-28, US-29, US-30 et US-31 y attendent une prochaine planification, telles qu'elles sont
+> décrites ici. La milestone « Sprint 5 » est fermée, et une nouvelle composition du sprint est donnée
+> par le PO.
+>
+> **US-26 a été livrée** et n'est pas à refaire : [ADR-0004](../adr/0004-architecture-tuteur.md) **reste
+> valable**. Il fixe l'architecture (contexte de la séance injecté et mis en cache, Haiku 4.5), le coût
+> par question mesuré sur les séances réelles, et la stratégie anti-abus. Le seul point resté ouvert est
+> le **plafond mensuel**, proposé à 10 $ : il se tranchera quand le tuteur reviendra.
+>
+> Le reste de ce document est conservé sans modification : il servira de base ce jour-là.
+
 **Objectif :** sur les séances du cours pilote, un étudiant peut poser une question et obtenir
 une réponse ancrée dans le cours, encadrée, à un coût maîtrisé et connu d'avance.
 **Capacité :** 22 points
