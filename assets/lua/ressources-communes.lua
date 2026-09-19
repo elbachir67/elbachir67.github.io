@@ -72,17 +72,28 @@ end
 
 --- Lien d'une ressource, avec son type et son poids : « **Lab** · Lab 1 — … (235 Ko) ».
 --- `court` ne garde que le type : c'est la forme de la table des séances, où la place manque.
+--- Attributs du lien : tout ce qui n'est pas un PDF se télécharge.
+--- Le navigateur affiche correctement un PDF ; il afficherait un notebook en JSON brut, ce qui
+--- n'aide personne. L'attribut `download` lui dit d'enregistrer le fichier au lieu de l'ouvrir.
+local function attributs(ressource)
+  local extension = (ressource.chemin:match("%.(%w+)$") or ""):lower()
+  if extension == "pdf" then
+    return { class = "seance-ressource" }
+  end
+  return { class = "seance-ressource", download = "" }
+end
+
 function M.lien(ressource, langue, cours, court)
   local libelle = LIBELLES[langue][ressource.type]
   local inlines = pandoc.Inlines({})
+  local attr = attributs(ressource)
   if court then
-    inlines:insert(pandoc.Link(pandoc.Inlines(libelle), ressource.chemin, ressource.titre,
-      { class = "seance-ressource" }))
+    inlines:insert(pandoc.Link(pandoc.Inlines(libelle), ressource.chemin, ressource.titre, attr))
   else
     inlines:insert(pandoc.Strong(pandoc.Inlines(libelle)))
     inlines:insert(pandoc.Str(" · "))
     inlines:insert(pandoc.Link(pandoc.Inlines(ressource.titre), ressource.chemin, ressource.titre,
-      { class = "seance-ressource" }))
+      attr))
   end
   local poids = M.poids(pandoc.path.join({ cours, ressource.fichier }), langue)
   if poids then
