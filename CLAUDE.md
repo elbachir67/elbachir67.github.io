@@ -61,10 +61,18 @@ Pages uniquement en `.qmd`. Les `.md` ne sont pas rendus (`render` restreint dan
 3. Créer la branche `feat/US-XX-slug-court` (ou `fix/`, `docs/`, `ci/`) depuis `main` à jour.
 4. Implémenter par petits commits au format Conventional Commits :
    `feat(accueil): ajoute la section affiliations (US-07)`
-5. Vérifier localement : `quarto render` sans erreur ni avertissement.
+5. Vérifier localement : `quarto render` sans erreur ni avertissement — chercher `ERROR`, `WARNING`
+   **et** `warning:` dans la sortie, les trois formes existant.
 6. Pousser, puis `gh pr create` en remplissant le template (story, changements, checklist DoD).
+   **Toute PR a `main` pour base, sans exception** : une PR dont la base est une autre branche se
+   merge dans cette branche, sans que cela se voie, et le travail n'arrive jamais en ligne.
 7. **STOP.** Donner au PO : résumé en 5 lignes max, lien de la PR, comment tester.
+   **Vérifier et indiquer la base de la PR** avant de demander un merge (`gh pr view --json baseRefName`).
    Pas de story suivante sans validation explicite du PO.
+
+**Plusieurs livrables d'un même lot** (par exemple les séances d'un cours, qui écrivent toutes dans le
+même `import.toml`) : **une seule PR**, avec un commit par livrable. Des PR enchaînées se cassent au
+premier merge en squash, et leur base n'est pas `main`.
 
 **Corrections de specs** (backlog, sprint, ADR) : les petites corrections d'un sprint sont
 regroupées dans une seule PR `docs/sprint-XX-specs`, ouverte à la première correction puis

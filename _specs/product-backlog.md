@@ -76,6 +76,7 @@ d'un tuteur IA encadré.
 | US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | 5 |
 | US-51 | EP3 | Migration d'un deuxième cours : Programmation Python (L1) | M | 5 | 5 |
 | US-52 | EP1 | Déploiement quotidien programmé (les dates de publication s'appliquent seules) | C | 1 | — |
+| US-53 | EP3 | Un manifeste d'import par séance (séances vraiment indépendantes) | C | 3 | — |
 
 ### Stories décrites par le PO
 
@@ -90,6 +91,12 @@ C'est le même chemin d'import que le cours pilote, plus les notebooks (US-50).
 date de publication (US-49), donc au prochain déploiement, et non à minuit. Le PO a accepté ce
 fonctionnement : la date reste manuelle pour l'instant. Une exécution programmée du déploiement la
 rendrait automatique — un `schedule:` dans le workflow, rien de plus.
+
+**US-53 — Un manifeste d'import par séance.** Aujourd'hui, toutes les séances d'un cours sont
+décrites dans un seul `_sources/import.toml` : deux séances importées en parallèle entrent en conflit
+sur ce fichier, ce qui a conduit à enchaîner leurs PR, avec les dégâts constatés au Sprint 5. Un
+fichier par séance supprimerait la cause. Il faudrait adapter `preparer_chapitre.py`,
+`verifier_conversion.py` et `rendre.py`, qui lisent tous le manifeste.
 
 **Cours faits de CM rédigés.** *Programmation C avancée* et *Structures de Données* ne sont pas
 candidats à US-51 : ce sont des **CM rédigés**, et non des decks. Ils attendent deux choses, dans un
