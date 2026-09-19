@@ -1,16 +1,16 @@
-# Sprint 5 — Tuteur IA du cours pilote
+# Tuteur IA du cours pilote — spécification en attente de planification
 
-> **Sprint reporté — décision du PO, 19/09/2026.** Le tuteur IA (EP6) retourne au backlog, sans sprint :
-> US-27, US-28, US-29, US-30 et US-31 y attendent une prochaine planification, telles qu'elles sont
-> décrites ici. La milestone « Sprint 5 » est fermée, et une nouvelle composition du sprint est donnée
-> par le PO.
+> **Reporté — décision du PO, 19/09/2026.** Le tuteur IA (EP6) attend une planification : US-27, US-28,
+> US-29, US-30 et US-31 sont au backlog, sans sprint, telles qu'elles sont décrites ici. Ce document a
+> d'abord été le sprint 5 ; il est conservé **mot pour mot** comme spécification de référence, le Sprint 5
+> ayant reçu une autre composition.
 >
 > **US-26 a été livrée** et n'est pas à refaire : [ADR-0004](../adr/0004-architecture-tuteur.md) **reste
 > valable**. Il fixe l'architecture (contexte de la séance injecté et mis en cache, Haiku 4.5), le coût
 > par question mesuré sur les séances réelles, et la stratégie anti-abus. Le seul point resté ouvert est
 > le **plafond mensuel**, proposé à 10 $ : il se tranchera quand le tuteur reviendra.
 >
-> Le reste de ce document est conservé sans modification : il servira de base ce jour-là.
+> Le reste de ce document est celui du sprint d'origine, sans modification.
 
 **Objectif :** sur les séances du cours pilote, un étudiant peut poser une question et obtenir
 une réponse ancrée dans le cours, encadrée, à un coût maîtrisé et connu d'avance.
@@ -121,4 +121,4 @@ sera opérationnelle (le tuteur du site reste volontairement léger et sans comp
 
 ## Bilan
 
-Rédigé par Claude Code en fin de sprint : `_specs/sprints/sprint-05-bilan.md` (CLAUDE.md §11).
+Rédigé par Claude Code en fin du sprint qui portera ces stories (CLAUDE.md §11).
