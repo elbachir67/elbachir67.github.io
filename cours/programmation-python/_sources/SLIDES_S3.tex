@@ -1,0 +1,375 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{beamerucad}
+\usepackage{listings}
+\definecolor{ckw}{HTML}{2563AB}\definecolor{cst}{HTML}{2E8B57}\definecolor{ccm}{HTML}{8A8F98}
+\definecolor{outbg}{HTML}{F4F5F7}\definecolor{outrule}{HTML}{2E8B57}
+\definecolor{errbg}{HTML}{FBEDEC}\definecolor{errrule}{HTML}{C0392B}
+\lstdefinestyle{py}{language=Python,basicstyle=\ttfamily\scriptsize,
+ keywordstyle=\color{ckw}\bfseries,stringstyle=\color{cst},commentstyle=\color{ccm}\itshape,
+ showstringspaces=false,columns=fullflexible,keepspaces=true,
+ backgroundcolor=\color{ucadband!8},frame=leftline,framerule=2.5pt,rulecolor=\color{ucadband},
+ xleftmargin=8pt,aboveskip=3pt,belowskip=1pt,basewidth=0.5em}
+\lstdefinestyle{out}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{outbg},frame=leftline,framerule=2.5pt,rulecolor=\color{outrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+\lstset{style=py}
+\newcommand{\resultat}{{\scriptsize\textbf{R\'esultat}~$\rightarrow$}\par\vspace{1pt}}
+
+\title{Programmation Python — Séance 3}
+\subtitle{Contrôle du flux}
+\author{Dr. El Hadji Bassirou TOURÉ}
+\institute{Département de Mathématiques et Informatique\\ Faculté des Sciences et Techniques\\ Université Cheikh Anta Diop de Dakar}
+\date{}
+\setucadfoot{Programmation Python — Séance 3}
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]\titlepage\end{frame}
+
+% =====================================================================
+\begin{frame}{Objectifs de la séance}
+\begin{ucaddef}[Contenu]
+{\small Jusqu'ici, le code s'exécutait ligne après ligne, de haut en bas. On apprend à \textbf{casser cette ligne droite} : exécuter un bloc \emph{sous condition}, et \emph{répéter} un bloc autant de fois que nécessaire. C'est ce qui rend un programme réellement utile.}
+\end{ucaddef}
+\begin{itemize}\small
+  \item \textbf{Conditions} : \texttt{if} / \texttt{elif} / \texttt{else} pour décider.
+  \item \textbf{Boucle for} : répéter pour chaque élément ; \texttt{range}, accumulation.
+  \item \textbf{enumerate} et \textbf{zip} : parcourir avec l'indice, ou deux listes à la fois.
+  \item \textbf{Boucle while} : répéter tant qu'une condition tient.
+  \item \textbf{break} et \textbf{continue} : contrôler le déroulement d'une boucle.
+\end{itemize}
+{\small L'entraînement se fait dans le \textbf{notebook}, avec une cellule « À vous » après chaque notion.}
+\end{frame}
+
+\begin{frame}{La carte du contrôle du flux}
+\figslide{0.9}{figs/f3_flux}{Deux mécanismes : \emph{décider} (suivre une branche selon un test) et \emph{répéter} (reboucler tant qu'un test reste vrai).}
+\end{frame}
+
+% #####################################################################
+\section{Les conditions}
+
+\begin{frame}{L'idée : exécuter un bloc sous condition}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une instruction \texttt{if} exécute un bloc \textbf{seulement si} un test est vrai. Le test est un booléen (Séance 1). Deux éléments de syntaxe sont obligatoires : les deux points \texttt{:} en fin de ligne, et l'\textbf{indentation} du bloc (son décalage vers la droite).}
+\end{ucaddef}
+{\small L'indentation n'est pas décorative en Python : c'est elle qui délimite le bloc. Tout ce qui est décalé sous le \texttt{if} lui appartient ; dès qu'on revient à gauche, on sort du bloc.}
+\end{frame}
+
+\begin{frame}[fragile]{Deux issues : \texttt{if} et \texttt{else}}
+\begin{lstlisting}
+note = 12
+if note >= 10:
+    print("Admis")
+else:
+    print("Recale")
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Admis
+\end{lstlisting}
+{\small Le bloc du \texttt{if} s'exécute si le test est vrai ; sinon, c'est le bloc du \texttt{else}. Ici \texttt{note} vaut 12, donc « Admis ».}
+\end{frame}
+
+\begin{frame}[fragile]{Plusieurs cas : \texttt{elif}}
+\begin{lstlisting}
+note = 14
+if note >= 16:
+    mention = "Tres bien"
+elif note >= 14:
+    mention = "Bien"
+elif note >= 10:
+    mention = "Passable"
+else:
+    mention = "Insuffisant"
+print(mention)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Bien
+\end{lstlisting}
+{\small Python teste dans l'ordre et s'arrête au \textbf{premier} test vrai : 14 n'est pas $\geq$ 16, mais est $\geq$ 14.}
+\end{frame}
+
+\begin{frame}[fragile]{Combiner des conditions}
+\begin{lstlisting}
+note = 15
+assiduite = True
+if note >= 10 and assiduite:
+    print("Valide")
+else:
+    print("A revoir")
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Valide
+\end{lstlisting}
+{\small On réutilise \texttt{and} / \texttt{or} / \texttt{not} (Séance 1) pour former des tests plus riches.}
+\end{frame}
+
+\begin{frame}{Piège — les deux points et l'indentation}
+\begin{ucadpiege}[La syntaxe des blocs]
+{\small Trois erreurs reviennent sans cesse : \textbf{1.} oublier les deux points \texttt{:} à la fin de la ligne \texttt{if} ; \textbf{2.} ne pas indenter le bloc (ou l'indenter de travers) — Python lève une \texttt{IndentationError} ; \textbf{3.} écrire \texttt{=} (affecter) au lieu de \texttt{==} (comparer) dans le test.}
+\end{ucadpiege}
+{\small Règle simple : toute ligne qui se termine par \texttt{:} ouvre un bloc, et ce bloc est décalé de quatre espaces. On garde une indentation cohérente dans tout le fichier.}
+\end{frame}
+
+% #####################################################################
+\section{La boucle for}
+
+\begin{frame}{L'idée : répéter pour chaque élément}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une boucle \texttt{for} exécute un bloc \textbf{une fois par élément} d'une collection. À chaque tour, la variable de boucle prend la valeur de l'élément courant.}
+\end{ucaddef}
+{\small C'est le moyen naturel de traiter une liste, une chaîne, ou toute suite de valeurs, sans écrire le même code plusieurs fois. Comme pour le \texttt{if}, le corps de la boucle est un \textbf{bloc indenté} après les deux points.}
+\end{frame}
+
+\begin{frame}[fragile]{Parcourir une collection}
+\begin{lstlisting}
+villes = ["Dakar", "Louga", "Mbour"]
+for ville in villes:
+    print(ville)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Dakar
+Louga
+Mbour
+\end{lstlisting}
+{\small La variable \texttt{ville} prend successivement chaque valeur de la liste. Le bloc s'exécute donc trois fois.}
+\end{frame}
+
+\begin{frame}[fragile]{Répéter un nombre fixé de fois : \texttt{range}}
+\begin{ucadex}[La fonction \texttt{range}]
+{\small \texttt{range(n)} produit les entiers de \texttt{0} à \texttt{n-1} ; \texttt{range(a, b)} va de \texttt{a} à \texttt{b} exclu.}
+\end{ucadex}
+\begin{lstlisting}
+for i in range(5):
+    print(i)
+\end{lstlisting}
+\begin{lstlisting}[style=out]
+0
+1
+2
+3
+4
+\end{lstlisting}
+\begin{lstlisting}
+for i in range(1, 4):
+    print("tour", i)
+\end{lstlisting}
+\begin{lstlisting}[style=out]
+tour 1
+tour 2
+tour 3
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Le motif clé : l'accumulation}
+\begin{ucadex}[Le schéma de l'accumulation]
+{\small On prépare une variable \textbf{avant} la boucle, avec une valeur de départ, puis on la met à jour à chaque tour.}
+\end{ucadex}
+\begin{lstlisting}
+notes = [12, 15, 9, 18]
+total = 0
+for note in notes:
+    total = total + note
+print("total :", total)
+print("moyenne :", total / len(notes))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+total : 54
+moyenne : 13.5
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Accumuler pour compter}
+\begin{lstlisting}
+villes = ["Dakar", "Saint-Louis", "Mbour", "Ziguinchor"]
+grandes = 0
+for ville in villes:
+    if len(ville) > 5:
+        grandes = grandes + 1
+print("villes de plus de 5 lettres :", grandes)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+villes de plus de 5 lettres : 2
+\end{lstlisting}
+{\small On combine boucle et condition : le compteur n'avance que pour les villes dont le nom dépasse 5 lettres (Saint-Louis, Ziguinchor).}
+\end{frame}
+
+\begin{frame}{Piège — préparer l'accumulateur}
+\begin{ucadpiege}[Initialiser avant, mettre à jour dedans]
+{\small La variable qui accumule (\texttt{total}, \texttt{grandes}) doit être créée \textbf{avant} la boucle, avec une valeur de départ (\texttt{0} pour une somme). L'initialiser à l'intérieur la remettrait à zéro à chaque tour. Et l'oublier complètement provoque une \texttt{NameError} au premier \texttt{+=}.}
+\end{ucadpiege}
+{\small Le schéma est toujours le même : \emph{préparer} $\rightarrow$ \emph{parcourir en mettant à jour} $\rightarrow$ \emph{utiliser le résultat après la boucle}.}
+\end{frame}
+
+% #####################################################################
+\section{enumerate et zip}
+
+\begin{frame}[fragile]{\texttt{enumerate} : l'indice et la valeur}
+\begin{lstlisting}
+villes = ["Dakar", "Louga", "Mbour"]
+for i, ville in enumerate(villes):
+    print(i, ville)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+0 Dakar
+1 Louga
+2 Mbour
+\end{lstlisting}
+{\small \texttt{enumerate} fournit à chaque tour un couple \texttt{(indice, valeur)}, qu'on déballe dans deux variables — pratique pour numéroter un affichage.}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{zip} : deux listes en parallèle}
+\begin{lstlisting}
+villes = ["Dakar", "Thies", "Kaolack"]
+population = [1200000, 320000, 240000]
+for ville, hab in zip(villes, population):
+    print(ville, ":", hab)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Dakar : 1200000
+Thies : 320000
+Kaolack : 240000
+\end{lstlisting}
+{\small \texttt{zip} avance dans les deux listes \emph{en même temps} et associe les éléments qui se correspondent, position par position.}
+\end{frame}
+
+% #####################################################################
+\section{La boucle while}
+
+\begin{frame}{L'idée : répéter tant qu'une condition tient}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une boucle \texttt{while} répète un bloc \textbf{tant qu'}un test reste vrai. On l'emploie quand on ne connaît pas d'avance le nombre de tours, mais qu'on sait quand \emph{s'arrêter}.}
+\end{ucaddef}
+{\small Différence avec \texttt{for} : \texttt{for} parcourt une collection connue ; \texttt{while} tourne jusqu'à ce qu'une condition devienne fausse. Il faut donc faire \textbf{évoluer} cette condition à chaque tour, pour finir par sortir.}
+\end{frame}
+
+\begin{frame}[fragile]{Compter avec \texttt{while}}
+\begin{lstlisting}
+compteur = 0
+while compteur < 3:
+    print("compteur =", compteur)
+    compteur = compteur + 1
+print("fin")
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+compteur = 0
+compteur = 1
+compteur = 2
+fin
+\end{lstlisting}
+{\small À chaque tour, \texttt{compteur} augmente ; quand il atteint 3, le test devient faux et la boucle s'arrête.}
+\end{frame}
+
+\begin{frame}{Piège — la boucle infinie}
+\begin{ucadpiege}[Toujours avancer vers la sortie]
+{\small Si la condition d'un \texttt{while} ne devient \textbf{jamais} fausse — par exemple si l'on oublie \texttt{compteur = compteur + 1} — la boucle tourne sans fin et le programme se bloque. Avant d'écrire un \texttt{while}, il faut identifier la variable qui progresse vers la sortie, et vérifier qu'elle change bien à chaque tour.}
+\end{ucadpiege}
+{\small En pratique : une boucle emballée s'interrompt avec le bouton \emph{Interrupt} du noyau Jupyter.}
+\end{frame}
+
+% #####################################################################
+\section{break et continue}
+
+\begin{frame}[fragile]{\texttt{break} : arrêter la boucle}
+\begin{lstlisting}
+for n in [1, 2, 3, 4, 5]:
+    if n == 3:
+        break
+    print(n)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+1
+2
+\end{lstlisting}
+{\small Dès que \texttt{n} vaut 3, \texttt{break} interrompt complètement la boucle : les valeurs 3, 4 et 5 ne sont jamais affichées.}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{continue} : sauter un tour}
+\begin{lstlisting}
+for n in [1, 2, 3, 4, 5]:
+    if n % 2 == 0:
+        continue
+    print(n)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+1
+3
+5
+\end{lstlisting}
+{\small \texttt{continue} saute le reste du bloc et passe au tour suivant. Ici, les nombres pairs sont ignorés, seuls les impairs sont affichés.}
+\end{frame}
+
+% #####################################################################
+\section{Retour sur les compréhensions}
+
+\begin{frame}[fragile]{Une compréhension est un \texttt{for} compact}
+\begin{lstlisting}
+# Version longue : boucle for + append
+carres = []
+for n in [1, 2, 3, 4]:
+    carres.append(n * n)
+print(carres)
+
+# Version compacte : comprehension
+carres2 = [n * n for n in [1, 2, 3, 4]]
+print(carres2)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[1, 4, 9, 16]
+[1, 4, 9, 16]
+\end{lstlisting}
+{\small La compréhension (Séance 2) n'est rien d'autre que cette boucle, écrite en une ligne.}
+\end{frame}
+
+% #####################################################################
+\section{Synthèse}
+
+\begin{frame}{À retenir — Séance 3}
+\begin{ucadret}[L'essentiel]
+{\small
+\textbf{Conditions} : \texttt{if} / \texttt{elif} / \texttt{else} ; deux points \texttt{:} puis \textbf{bloc indenté} ; le premier test vrai gagne.\\[2pt]
+\textbf{Boucle for} : \texttt{for element in collection:} répète pour chaque élément ; \texttt{range(n)} répète n fois.\\[2pt]
+\textbf{Accumulation} : préparer une variable \textbf{avant}, la mettre à jour dans la boucle (somme, compteur).\\[2pt]
+\textbf{enumerate} : indice + valeur. \textbf{zip} : deux listes en parallèle.\\[2pt]
+\textbf{Boucle while} : \texttt{while condition:} tant que c'est vrai ; faire évoluer la condition.\\[2pt]
+\textbf{break} arrête la boucle ; \textbf{continue} passe au tour suivant.}
+\end{ucadret}
+\end{frame}
+
+\begin{frame}{Pièges fréquents}
+\begin{itemize}\small
+  \item Oublier les deux points \texttt{:} ou mal indenter un bloc : \texttt{IndentationError}.
+  \item Confondre \texttt{=} (affecter) et \texttt{==} (comparer) dans un test.
+  \item Initialiser l'accumulateur \emph{dans} la boucle (remis à zéro chaque tour) au lieu d'\emph{avant}.
+  \item \texttt{while} sans progression vers la sortie : \textbf{boucle infinie}.
+  \item Croire que \texttt{continue} arrête la boucle : il ne fait que \textbf{sauter} au tour suivant.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Prochaine séance}
+\begin{ucaddef}[Séance 4 — Fonctions, modules et robustesse]
+{\small On sait décider et répéter. La Séance 4 apprend à \textbf{organiser} le code en \textbf{fonctions} réutilisables (\texttt{def}, paramètres, \texttt{return}), à importer des \textbf{modules}, à lire et écrire des \textbf{fichiers}, et à gérer les erreurs proprement avec \texttt{try}/\texttt{except}.}
+\end{ucaddef}
+{\small À faire d'ici là : refaire les cellules « À vous » du notebook de la séance.}
+\end{frame}
+
+\begin{frame}{Références}
+\begin{itemize}\small
+  \item Severance, C. — \emph{Python for Everybody}, 2016.
+  \item Downey, A. — \emph{Think Python}, 2e éd., O'Reilly, 2015.
+  \item Matthes, E. — \emph{Python Crash Course}, 3e éd., No Starch Press, 2023.
+  \item Python Software Foundation — \emph{The Python Tutorial} (Control Flow), 2024.
+\end{itemize}
+\end{frame}
+
+\end{document}
