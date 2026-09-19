@@ -8,6 +8,7 @@ Composants tiers versionnés dans ce dépôt et publiés avec le site.
 | ↳ Police Academicons | 1.9.4 | <https://github.com/jpswalsh/academicons> (tag `v1.9.4`) | `_extensions/schochastics/academicons/assets/webfonts/` | SIL OFL 1.1 |
 | ↳ CSS Academicons | 1.9.4 | <https://github.com/jpswalsh/academicons> (tag `v1.9.4`) | `_extensions/schochastics/academicons/assets/css/` | MIT |
 | Police Source Sans 3 | 3.052, Google Fonts `v19`, sous-ensembles latin et latin étendu, woff2 variable | <https://fonts.google.com/specimen/Source+Sans+3>, source amont <https://github.com/adobe-fonts/source-sans> | `assets/fonts/` | SIL OFL 1.1 |
+| Sceau de l'UCAD | fichier fourni par le PO, fond détouré | emblème institutionnel de l'Université Cheikh Anta Diop de Dakar | `assets/img/ucad-sceau.png` | voir ci-dessous |
 
 ## Academicons
 
@@ -48,6 +49,22 @@ et publié avec le site) :
 Copyright 2010-2020 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
 All Rights Reserved. Source is a trademark of Adobe in the United States and/or other countries.
 ```
+
+## Sceau de l'UCAD
+
+`assets/img/ucad-sceau.png` est le **sceau de l'Université Cheikh Anta Diop de Dakar**. Ce n'est pas un
+composant libre : c'est l'**emblème institutionnel** de l'université, reproduit ici par un membre de
+cette université — le PO, Maître de Conférences Titulaire au DMI/FST/UCAD — sur ses propres supports de
+cours et son CV, comme sur ses présentations. Il n'est ni redistribué comme ressource, ni modifié dans
+ses formes ou ses couleurs.
+
+Seul son **fond blanc a été rendu transparent**, pour qu'il se pose sur une page claire comme sombre :
+`scripts/detourer_logo.py` part des bords de l'image et ne touche qu'au blanc qui leur est relié, de
+sorte que les blancs intérieurs de l'emblème sont conservés.
+
+| Fichier | SHA-256 |
+|---|---|
+| `ucad-sceau.png` | `cf7d25a36b8221e78d7d9d3a880eff8419a8d9374f131f9ab01f71c8dc3c9a2f` |
 
 ## Texte de la licence MIT
 
