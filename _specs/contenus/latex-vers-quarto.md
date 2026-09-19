@@ -61,6 +61,8 @@ couleur (au moins 5,9:1 sur le fond teinté) : la teinte vive du filet plafonnai
 | `lstlisting[style=out]`, `[style=err]` | bloc sans langage | une sortie de programme n'est pas du code |
 | `lstlisting[style=sh]` | ```` ```bash ```` | |
 | `\oe`, `~`, `\%`, `\&`, `\_`, `\#` | `œ`, espace insécable, `%`, `&`, `_`, `#` | |
+| `\ldots`, `\dots` | `…` | |
+| `\textbackslash`, `\textasciitilde`, `\textasciicircum` | `\`, `~`, `^` | dans ces cours, toujours à l'intérieur d'un `\texttt{}`, donc d'un code en ligne |
 | toute autre commande ou environnement | `<!-- NON CONVERTI: … -->` | et une ligne dans le rapport |
 
 Les lignes de code ne sont pas numérotées : le deck d'origine ne les numérote pas, et les ancres que Quarto
