@@ -7,8 +7,8 @@
 >
 > **US-26 a été livrée** et n'est pas à refaire : [ADR-0004](../adr/0004-architecture-tuteur.md) **reste
 > valable**. Il fixe l'architecture (contexte de la séance injecté et mis en cache, Haiku 4.5), le coût
-> par question mesuré sur les séances réelles, et la stratégie anti-abus. Le seul point resté ouvert est
-> le **plafond mensuel**, proposé à 10 $ : il se tranchera quand le tuteur reviendra.
+> par question mesuré sur les séances réelles, et la stratégie anti-abus. Le **plafond mensuel** a été
+> fixé par le PO à **10 $**, à reprendre le jour où EP6 reviendra.
 >
 > Le reste de ce document est celui du sprint d'origine, sans modification.
 

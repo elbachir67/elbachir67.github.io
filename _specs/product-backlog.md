@@ -75,6 +75,7 @@ d'un tuteur IA encadré.
 | US-49 | EP3 | Ressources par séance (lab, TD, notebook, corrigé) | M | 3 | 5 |
 | US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | 5 |
 | US-51 | EP3 | Migration d'un deuxième cours : Programmation Python (L1) | M | 5 | 5 |
+| US-52 | EP1 | Déploiement quotidien programmé (les dates de publication s'appliquent seules) | C | 1 | — |
 
 ### Stories décrites par le PO
 
@@ -84,6 +85,11 @@ Les critères d'acceptation d'**US-49**, **US-50** et **US-51** sont dans
 **US-51 — Migration d'un deuxième cours.** Le cours retenu est **Programmation Python (L1)** : decks
 Beamer avec le thème `beamerucad` et **notebooks Jupyter exécutés**, dont le PO fournira les sources.
 C'est le même chemin d'import que le cours pilote, plus les notebooks (US-50).
+
+**US-52 — Déploiement quotidien programmé.** Un corrigé rejoint le site au premier rendu qui suit sa
+date de publication (US-49), donc au prochain déploiement, et non à minuit. Le PO a accepté ce
+fonctionnement : la date reste manuelle pour l'instant. Une exécution programmée du déploiement la
+rendrait automatique — un `schedule:` dans le workflow, rien de plus.
 
 **Cours faits de CM rédigés.** *Programmation C avancée* et *Structures de Données* ne sont pas
 candidats à US-51 : ce sont des **CM rédigés**, et non des decks. Ils attendent deux choses, dans un
