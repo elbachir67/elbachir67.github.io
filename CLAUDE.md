@@ -78,7 +78,11 @@ l'issue soi-même ; sinon, la laisser ouverte et prévenir le PO.
 
 ## 7. Règles impératives
 
-- Jamais de commit direct sur `main`, jamais de `push --force`, jamais de merge de PR.
+- Jamais de commit direct sur `main`, jamais de merge de PR.
+- **Réécriture d'historique** : `push --force` est **interdit sur `main`**, sans exception. Sur une
+  branche de story que personne d'autre n'a tirée, et **avant l'ouverture de la PR**, l'historique peut
+  être réécrit (amend, rebase) — à condition de **le mentionner dans la PR**. Une fois la PR ouverte,
+  on corrige par un commit de plus.
 - **Ne jamais inventer de contenu académique** (publications, dates, titres, projets, chiffres).
   Si l'information manque : `TODO(PO): <ce qui manque>` visible dans la page et listé dans la PR.
 - **Travaux non acceptés :** aucun article soumis ou en évaluation n'apparaît sur le site
