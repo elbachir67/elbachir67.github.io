@@ -12,7 +12,7 @@ Rien : tout le contenu a été converti.
 
 Nettoyage des SVG (encres en `currentColor`, fonds clairs transparents) :
 
-- `f4_fonction` : 0 encre(s), 0 fond(s), 0 police(s)
+- `f4_fonction` : 5 encre(s), 1 fond(s), 13 police(s)
 
 ## Blocs de code
 
