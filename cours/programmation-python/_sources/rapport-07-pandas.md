@@ -12,7 +12,7 @@ Rien : tout le contenu a été converti.
 
 Nettoyage des SVG (encres en `currentColor`, fonds clairs transparents) :
 
-- `f7_pandas` : 0 encre(s), 0 fond(s), 0 police(s)
+- `f7_pandas` : 34 encre(s), 13 fond(s), 38 police(s)
 
 ## Blocs de code
 
