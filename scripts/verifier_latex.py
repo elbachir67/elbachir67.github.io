@@ -8,10 +8,14 @@ contrôle regarde le résultat, qui est le seul juge.
 Sont cherchés, dans les pages rendues et **hors des blocs de code** :
 
 - `\\\\`, avec ou sans espacement (`\\\\[2pt]`, `\\\\*`) : un saut de ligne LaTeX ;
-- `\\[` : soit le même saut de ligne mal découpé, soit une commande restée entière.
+- `\\[` : soit le même saut de ligne mal découpé, soit une commande restée entière ;
+- une barre oblique inverse devant l'un des caractères que LaTeX échappe — `{ } [ ] $ % & _ # ~ ^`.
 
-Les blocs de code (`<pre>`, `<code>`) sont retirés avant l'examen : un cours peut montrer du LaTeX,
-une chaîne Python avec des barres obliques inverses, ou une commande shell.
+Les **blocs** de code (`<pre>`) sont retirés avant l'examen : un cours peut y montrer du LaTeX, une
+chaîne Python ou une commande shell. Les **codes en ligne** (`<code>`), eux, sont examinés pour le
+dernier motif : c'est justement là que le défaut se logeait — « `\\{ \\}` » s'affichait avec ses
+barres obliques, parce qu'un code en ligne rend son contenu littéralement. Aucune de ces onze
+séquences n'a de sens dans le Python, le shell ou le texte que ces cours montrent.
 
 Si le site publie un jour des **mathématiques hors ligne** (`\\[ … \\]`, rendues par MathJax), il faudra
 les excepter ici : aujourd'hui, le site n'en contient aucune, et les formules en ligne s'écrivent `$…$`.
@@ -30,19 +34,26 @@ SITE = RACINE / "_site"
 HORS_PERIMETRE = ("site_libs",)
 
 CODE = re.compile(r"<(code|pre|script|style)\b[^>]*>.*?</\1>", re.S | re.I)
+BLOCS = re.compile(r"<(pre|script|style)\b[^>]*>.*?</\1>", re.S | re.I)
 RESTES = re.compile(r"\\\\\*?(?:\[[^\]]*\])?|\\\[")
+# Les caractères que LaTeX échappe : dans une page rendue, la barre oblique n'a rien à faire devant.
+ECHAPPES = re.compile(r"\\[{}\[\]$%&_#~^]")
 CONTEXTE = 60
+
+
+def autour_de(texte: str, trouve: re.Match[str]) -> str:
+    debut = max(0, trouve.start() - CONTEXTE)
+    entourage = re.sub(r"\s+", " ", texte[debut:trouve.end() + CONTEXTE])
+    return f"« {trouve[0]} » dans : …{entourage}…"
 
 
 def restes_de_la_page(page: Path) -> list[str]:
     """Restes de LaTeX visibles dans une page, avec ce qui les entoure."""
     html = page.read_text(encoding="utf-8", errors="ignore")
-    texte = CODE.sub(" ", html)
-    trouves = []
-    for trouve in RESTES.finditer(texte):
-        debut = max(0, trouve.start() - CONTEXTE)
-        autour = re.sub(r"\s+", " ", texte[debut:trouve.end() + CONTEXTE])
-        trouves.append(f"« {trouve[0]} » dans : …{autour}…")
+    trouves = [autour_de(t.string, t) for t in RESTES.finditer(CODE.sub(" ", html))]
+    # Les caractères échappés sont cherchés jusque dans les codes en ligne : c'est là qu'ils se
+    # voyaient, un code en ligne rendant son contenu tel quel.
+    trouves += [autour_de(t.string, t) for t in ECHAPPES.finditer(BLOCS.sub(" ", html))]
     return trouves
 
 
