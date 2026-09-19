@@ -57,9 +57,13 @@ def copier_sources(cours: Path, tex: Path, figures_source: Path | None) -> Path:
     sources = cours / "_sources"
     sources.mkdir(parents=True, exist_ok=True)
     cible = sources / tex.name
-    if cible.is_file() and cible.read_bytes() != tex.read_bytes():
-        print(f"Attention : {cible.relative_to(RACINE)} existait et a été remplacé.")
-    shutil.copy2(tex, cible)
+    if cible.is_file() and cible.resolve() == tex.resolve():
+        # Relance sur une séance déjà importée : la source est déjà à sa place, rien à copier.
+        print(f"Sources déjà dans le dépôt : {cible.relative_to(RACINE)}")
+    else:
+        if cible.is_file() and cible.read_bytes() != tex.read_bytes():
+            print(f"Attention : {cible.relative_to(RACINE)} existait et a été remplacé.")
+        shutil.copy2(tex, cible)
 
     for style in sorted(tex.parent.glob("*.sty")):
         destination = sources / style.name
@@ -70,8 +74,11 @@ def copier_sources(cours: Path, tex: Path, figures_source: Path | None) -> Path:
     if dossier.is_dir():
         (sources / "figs").mkdir(exist_ok=True)
         for figure in sorted(dossier.iterdir()):
-            if figure.is_file():
-                shutil.copy2(figure, sources / "figs" / figure.name)
+            destination = sources / "figs" / figure.name
+            # Relance depuis le dépôt : les figures sont déjà à leur place.
+            if figure.is_file() and not (destination.is_file()
+                                         and destination.resolve() == figure.resolve()):
+                shutil.copy2(figure, destination)
     return cible
 
 
@@ -87,6 +94,31 @@ def ecrire_textes_alternatifs(cours: Path, textes: dict[str, str]) -> Path | Non
     lignes += [f'{nom} = "{texte}"' for nom, texte in sorted(existants.items())]
     fichier.write_text("\n".join(lignes) + "\n", encoding="utf-8")
     return fichier
+
+
+def ressources_demandees(brutes: list[str]) -> list[dict]:
+    """« corrige|_corriges/c1.pdf|Corrigé du Lab 1|2026-10-15 » -> entrée du manifeste.
+
+    La date n'existe que pour un corrigé : c'est le jour où il rejoint le site (US-49).
+    """
+    ressources = []
+    for brute in brutes:
+        champs = brute.split("|")
+        if len(champs) < 3:
+            sys.exit(f"Ressource mal formée : « {brute} » (attendu : type|fichier|titre[|date]).")
+        entree = {"type": champs[0], "fichier": champs[1], "titre": champs[2] or champs[1]}
+        if len(champs) > 3 and champs[3]:
+            entree["date"] = champs[3]
+        ressources.append(entree)
+    return ressources
+
+
+def ligne_de_ressource(cours: Path, ressource: dict) -> str:
+    """Ce que l'import attend : le type, le fichier dans le dépôt, le titre, et la date d'un corrigé."""
+    champs = [ressource["type"], f"cours/{cours.name}/{ressource['fichier']}", ressource["titre"]]
+    if ressource.get("date"):
+        champs.append(ressource["date"])
+    return "|".join(champs)
 
 
 def entree_existante(cours: Path, tex: str) -> dict | None:
@@ -112,19 +144,28 @@ def ajouter_au_manifeste(cours: Path, entree: dict) -> None:
             "#\n"
             "# Les chemins sont relatifs au dossier du cours.\n", encoding="utf-8")
     texte = manifeste.read_text(encoding="utf-8")
-    # Une relance remplace l'entrée de la même séance : le PO fournit ses textes alternatifs en plusieurs
-    # fois, et le manifeste doit décrire le dernier import, pas le premier.
+    # Une relance remplace l'entrée de la même séance, **à sa place** : le PO fournit ses textes
+    # alternatifs en plusieurs fois, et le manifeste doit décrire le dernier import, pas le premier,
+    # sans que les séances se retrouvent dans le désordre.
+    avant, apres = texte, ""
     depart = texte.find(f'tex = "{entree["tex"]}"')
     if depart != -1:
         debut = texte.rfind("[[chapitres]]", 0, depart)
         suivant = texte.find("[[chapitres]]", depart)
-        texte = texte[:debut] + (texte[suivant:] if suivant != -1 else "")
+        avant, apres = texte[:debut], (texte[suivant:] if suivant != -1 else "")
     bloc = ["", "[[chapitres]]"]
-    bloc += [f'{cle} = "{valeur}"' for cle, valeur in entree.items() if cle != "figures_python"]
+    bloc += [f'{cle} = "{valeur}"' for cle, valeur in entree.items()
+             if cle not in ("figures_python", "ressources")]
     if entree.get("figures_python"):
         bloc += ["", "[chapitres.figures_python]"]
         bloc += [f'{nom} = "{script}"' for nom, script in entree["figures_python"].items()]
-    manifeste.write_text(texte.rstrip("\n") + "\n" + "\n".join(bloc) + "\n", encoding="utf-8")
+    for ressource in entree.get("ressources", []):
+        bloc += ["", "[[chapitres.ressources]]"]
+        bloc += [f'{cle} = "{valeur}"' for cle, valeur in ressource.items()]
+    ecrit = avant.rstrip("\n") + "\n" + "\n".join(bloc) + "\n"
+    if apres.strip():
+        ecrit += "\n" + apres.lstrip("\n")
+    manifeste.write_text(ecrit, encoding="utf-8")
 
 
 def main() -> int:
@@ -139,6 +180,9 @@ def main() -> int:
     analyseur.add_argument("--figure-python", action="append", default=[], metavar="NOM=SCRIPT.py",
                            help="figure produite par un bloc Python exécuté, au lieu d'être importée")
     analyseur.add_argument("--video", help="identifiant YouTube de la capsule de la séance (US-19)")
+    analyseur.add_argument("--ressource", action="append", default=[], metavar="TYPE|FICHIER|TITRE",
+                           help="ressource de la séance : lab, td, notebook ou corrige, le fichier "
+                                "relatif au dossier du cours, et son titre (répétable, US-49)")
     analyseur.add_argument("--figures-source", type=Path,
                            help="dossier des figures (par défaut : figs/ à côté du .tex)")
     args = analyseur.parse_args()
@@ -168,16 +212,23 @@ def main() -> int:
     textes = dict(morceau.split("=", 1) for morceau in args.alt)
     alt = ecrire_textes_alternatifs(cours, {nom: texte.strip('"') for nom, texte in textes.items()})
 
-    scripts_python = dict(morceau.split("=", 1) for morceau in args.figure_python)
+    # Une relance sans --description ne doit pas écraser celle qu'on avait écrite : le manifeste fait foi.
+    description = (args.description or (precedente or {}).get("description")
+                   or " — ".join(filter(None, [titre, sous_titre])))
+    scripts_python = (dict(morceau.split("=", 1) for morceau in args.figure_python)
+                      or (precedente or {}).get("figures_python", {}))
     commande = [sys.executable, str(RACINE / "scripts" / "importer_chapitre.py"), str(tex),
                 "--sortie", str(sortie), "--figures", str(figures),
                 "--rapport", str(cours / "_sources" / f"rapport-{numero}-{slug}.md"),
-                "--description", args.description or " — ".join(filter(None, [titre, sous_titre]))]
+                "--description", description]
     if alt:
         commande += ["--alt", str(alt)]
     video = args.video or (precedente or {}).get("video", "")
     if video:
         commande += ["--video", video]
+    ressources = ressources_demandees(args.ressource) or (precedente or {}).get("ressources", [])
+    for ressource in ressources:
+        commande += ["--ressource", ligne_de_ressource(cours, ressource)]
     for nom, script in scripts_python.items():
         commande += ["--figure-python", f"{nom}={cours / script}"]
 
@@ -200,8 +251,9 @@ def main() -> int:
         "sortie": str(sortie.relative_to(cours)),
         "figures": str(figures.relative_to(cours)),
         **({"alt": str(alt.relative_to(cours))} if alt else {}),
-        "description": args.description or " — ".join(filter(None, [titre, sous_titre])),
+        "description": description,
         **({"video": video} if video else {}),
+        **({"ressources": ressources} if ressources else {}),
         "figures_python": scripts_python,
     })
 
