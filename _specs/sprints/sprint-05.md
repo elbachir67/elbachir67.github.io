@@ -70,6 +70,23 @@ afin que le site serve à toute ma promotion.
 
 ---
 
+## Notes pour le bilan
+
+**PR enchaînées et merge en squash ne s'entendent pas.** Les séances d'un cours écrivent toutes dans
+le même `_sources/import.toml`, ce qui a conduit à enchaîner leurs PR — chacune partant de la
+précédente. Deux défauts en ont découlé :
+
+1. Le workflow de CI ne se déclenchait que sur les PR visant `main` (`branches: [main]`) : trois PR de
+   séances n'ont reçu **aucune vérification**. Corrigé en cours de sprint (#99).
+2. Le merge **en squash** de la première PR a réécrit l'historique dont les suivantes dépendaient :
+   #96 et #98 se sont retrouvées en conflit. Pire, #97 a été mergée **dans sa branche de base** et non
+   dans `main`, sans que cela se voie : la séance 3 n'était pas en ligne alors qu'elle passait pour
+   livrée. Les trois séances ont été reprises dans une PR unique partant de `main` (#101).
+
+**Ce qu'on en retient :** une PR dont la base n'est pas `main` se merge dans sa base, silencieusement.
+Pour la suite, les séances d'un même lot passent dans **une seule PR**, avec un commit par séance. Un
+fichier de manifeste par séance supprimerait la cause du conflit, mais c'est une story à part.
+
 ## Bilan
 
 Rédigé par Claude Code en fin de sprint : `_specs/sprints/sprint-05-bilan.md` (CLAUDE.md §11).
