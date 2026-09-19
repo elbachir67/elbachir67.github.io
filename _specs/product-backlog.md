@@ -62,7 +62,7 @@ d'un tuteur IA encadré.
 | US-24 | EP4 | Aperçu déployé par PR | C | 3 | 6 |
 | US-32 | EP6 | Journalisation anonymisée des questions + consentement | S | 5 | 6 |
 | US-33 | EP6 | Tableau de bord enseignant (concepts bloquants) | C | 8 | 6 |
-| US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | 5 |
+| US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | — |
 | US-38 | EP2 | Page Contact bilingue (formulaire non requis : email protégé, affiliations) | S | 2 | — |
 | US-39 | EP1 | Traduire les données du CV et du catalogue des cours (et non les seuls libellés) | S | 3 | — |
 | US-40 | EP3 | Page rédigée par chapitre, en complément du deck de slides | S | 5 | — |
@@ -104,7 +104,7 @@ figures TikZ**, que la chaîne d'import ne sait pas encore faire.
 | 2 | Vitrine académique complète | 17 |
 | 3 | Bilingue et premier cours natif | 30 |
 | 4 | Chaîne de publication et blog | 23 |
-| 5 | Du contenu, et un nom à soi (le tuteur IA, EP6, est reporté sans sprint) | 19 |
+| 5 | Du contenu : un deuxième cours en ligne (nom de domaine et tuteur IA reportés) | 17 |
 | 6 | Automatisation avancée + analytics | 21 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.

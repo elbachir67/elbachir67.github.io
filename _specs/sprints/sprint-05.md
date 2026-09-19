@@ -1,30 +1,25 @@
-# Sprint 5 — Du contenu, et un nom à soi
+# Sprint 5 — Du contenu
 
 **Objectif :** le site cesse d'être une vitrine avec un cours de démonstration : un deuxième cours
-y est en ligne, les labs et TD accompagnent les séances, et l'adresse du site est la tienne.
-**Capacité :** 19 points
+y est en ligne, et les labs et TD accompagnent les séances.
+
+> **Décision du PO, 19/09/2026 :** le **nom de domaine est reporté**. US-05 quitte le sprint et retourne
+> au backlog, sans sprint ; la capacité passe de 19 à 17 points. Le titre du sprint, « Du contenu, et un
+> nom à soi », devient « Du contenu ».
+
+**Capacité :** 17 points
 
 ## Entrées PO
 
 - [ ] **Deuxième cours à migrer** : ses sources LaTeX (séances, et labs si disponibles), déposées dans `_import/`.
 - [ ] **Labs, TD, notebooks** du cours pilote, pour US-49 et US-50.
-- [ ] **Nom de domaine** souhaité (US-05) : le PO l'achète, Claude Code fait le reste.
 
 ## Ordre d'exécution
 
-US-05 → US-49 → US-48 → US-43 → US-50 → US-51.
+US-49 → US-48 → US-43 → US-51 → US-50. (US-51 passe avant US-50 : décision du PO — les
+notebooks seront d'abord téléchargeables, et deviendront des pages ensuite.)
 
 ---
-
-### US-05 — Nom de domaine et HTTPS (2 pts)
-
-En tant que PO, je veux diffuser une adresse qui m'appartienne,
-afin que mon site survive à un changement de compte ou d'hébergeur.
-
-- [ ] Domaine configuré sur GitHub Pages (fichier `CNAME`, enregistrements DNS documentés dans le README).
-- [ ] HTTPS actif, redirection depuis `elbachir67.github.io` vérifiée.
-- [ ] `site-url` mis à jour partout : sitemap, flux RSS, métadonnées de partage, liens absolus.
-- [ ] Vérification en ligne après déploiement (règle `Refs #N`), sur les deux langues.
 
 ### US-49 — Ressources par séance (3 pts)
 
