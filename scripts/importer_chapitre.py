@@ -42,6 +42,11 @@ RESSOURCES = {
 }
 CORRIGE = "corrige"
 
+# Commandes qui ne produisent qu'un caractère. `\textbackslash` apparaît dans ces cours à l'intérieur
+# d'un `\texttt{}`, donc dans un code en ligne, où la barre oblique inverse ne s'échappe pas.
+CARACTERES = {"oe": "œ", "ldots": "\u2026", "dots": "\u2026", "textbackslash": "\\",
+              "textasciitilde": "~", "textasciicircum": "^"}
+
 # Styles de `lstlisting` définis par beamerucad.sty : « out » et « err » sont des sorties de
 # programme, « sh » une commande shell. Sans style, c'est du code dans le langage du cours.
 STYLES_CODE = {"out": "", "err": "", "sh": "bash"}
@@ -348,8 +353,8 @@ def inline(texte: str, conversion: Conversion) -> str:
         if nom in IGNOREES:
             conversion.ignorees[nom] += 1
             return ""
-        if nom == "oe":
-            return "œ"
+        if nom in CARACTERES:
+            return CARACTERES[nom]
         if nom == "newline":
             return "<br>"
         return conversion.non_converti("\\" + nom)
