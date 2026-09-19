@@ -23,11 +23,13 @@ relancer avec `--propre`.
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import re
 import shutil
 import subprocess
 import sys
+import tomllib
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -161,6 +163,37 @@ def pdf_des_seances() -> None:
                    cwd=RACINE, check=True)
 
 
+def corriges_du_jour() -> None:
+    """Publie les corrigés dont la date est atteinte, et eux seuls (US-49).
+
+    Un corrigé vit dans `cours/<slug>/_corriges/`, que Quarto ne rend pas : le dossier est invisible du
+    site tant que personne ne l'y copie. C'est ici que la date décide — avant elle, le fichier reste
+    hors du site, et la page ne porte aucun lien vers lui (le filtre Lua applique la même règle).
+
+    Conséquence à connaître : un corrigé rejoint le site au **premier rendu qui suit sa date**, donc au
+    prochain déploiement, et non à minuit.
+    """
+    aujourdhui = dt.date.today().isoformat()
+    publies, attendus = 0, 0
+    for manifeste in sorted((RACINE / "cours").glob("*/_sources/import.toml")):
+        cours = manifeste.parent.parent
+        for chapitre in tomllib.loads(manifeste.read_text(encoding="utf-8")).get("chapitres", []):
+            for ressource in chapitre.get("ressources", []):
+                if ressource.get("type") != "corrige":
+                    continue
+                date = ressource.get("date", "")
+                if not date or date > aujourdhui:
+                    attendus += 1
+                    continue
+                fichier = cours / ressource["fichier"]
+                cible = SORTIE_FR / "cours" / cours.name / "corriges" / fichier.name
+                cible.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(fichier, cible)
+                publies += 1
+    if publies or attendus:
+        print(f"-> {publies} corrigé(s) publié(s), {attendus} en attente de leur date")
+
+
 def main() -> int:
     # Les sorties de Quarto et de Node arrivent au fil de l'eau : sans cela, les messages de ce script
     # seraient affichés après elles, dans le désordre.
@@ -175,6 +208,7 @@ def main() -> int:
     index_de_recherche_par_langue()
     zoom_des_slides()
     annoncer_le_flux()
+    corriges_du_jour()
     pdf_des_seances()
     return 0
 

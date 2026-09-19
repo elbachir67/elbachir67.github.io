@@ -52,7 +52,7 @@ d'un tuteur IA encadré.
 | US-21 | EP4 | Commande `/resume` (.tex/.pdf → article résumé) | M | 3 | 4 |
 | US-22 | EP4 | Commande `/nouvel-article` (blog) | S | 2 | 4 |
 | US-25 | EP5 | Blog : listing, catégories, flux RSS | S | 2 | 4 |
-| US-26 | EP6 | Spike + ADR-0004 : architecture du tuteur (coût par question, anti-abus) | M | 2 |livrée |
+| US-26 | EP6 | Spike + ADR-0004 : architecture du tuteur (coût par question, anti-abus) | M | 2 | livrée |
 | US-27 | EP6 | Service proxy sécurisé (Worker, clé en secret, CORS, code d'accès) | M | 5 | — |
 | US-28 | EP6 | Contexte d'une séance produit au rendu, corrigés exclus | M | 5 | — |
 | US-29 | EP6 | Widget de discussion sur les pages de séance (code d'accès, accessible) | M | 3 | — |
