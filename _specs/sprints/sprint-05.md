@@ -7,7 +7,7 @@ y est en ligne, et les labs et TD accompagnent les séances.
 > au backlog, sans sprint ; la capacité passe de 19 à 17 points. Le titre du sprint, « Du contenu, et un
 > nom à soi », devient « Du contenu ».
 
-**Capacité :** 17 points
+**Capacité :** 19 points
 
 ## Entrées PO
 
@@ -16,7 +16,7 @@ y est en ligne, et les labs et TD accompagnent les séances.
 
 ## Ordre d'exécution
 
-US-49 → US-48 → US-43 → US-51 → US-50. (US-51 passe avant US-50 : décision du PO — les
+US-49 → US-51 → US-54 → US-48 → US-43 → US-50. (US-51 passe avant US-50 : décision du PO — les
 notebooks seront d'abord téléchargeables, et deviendront des pages ensuite.)
 
 ---
@@ -67,6 +67,22 @@ afin que le site serve à toute ma promotion.
 - [ ] Séances importées avec `/importer-chapitre`, une PR par séance, les textes alternatifs demandés au PO.
 - [ ] Le cours passe au statut `en-ligne` et apparaît dans le catalogue, dans les deux langues.
 - [ ] Tout élément que la chaîne ne sait pas encore convertir est signalé, jamais converti à la main en silence : c'est ce qui fera évoluer le script.
+
+---
+
+### US-54 — Contrôle de figure vide (2 pts)
+
+Ajoutée en cours de sprint par le PO, après qu'une figure publiée vide eut tenu plusieurs jours sans
+qu'aucun contrôle ne la voie.
+
+En tant que PO, je veux qu'une figure publiée vide fasse échouer la CI,
+afin qu'un défaut silencieux ne reste pas sur le site.
+
+- [ ] Le contrôle compare le nombre d'éléments dessinés avant et après le nettoyage, et échoue si
+      l'écart dépasse un seuil.
+- [ ] Il échoue aussi si une figure rendue n'a aucun élément visible.
+- [ ] Exécuté en CI, avec les autres contrôles.
+- [ ] Vérifié dans les deux sens sur le défaut réel d'US-51.
 
 ---
 

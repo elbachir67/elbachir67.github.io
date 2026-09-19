@@ -77,6 +77,7 @@ d'un tuteur IA encadré.
 | US-51 | EP3 | Migration d'un deuxième cours : Programmation Python (L1) | M | 5 | 5 |
 | US-52 | EP1 | Déploiement quotidien programmé (les dates de publication s'appliquent seules) | C | 1 | — |
 | US-53 | EP3 | Un manifeste d'import par séance (séances vraiment indépendantes) | C | 3 | — |
+| US-54 | EP3 | Contrôle de figure vide (écart d'éléments dessinés, références illisibles) | M | 2 | 5 |
 
 ### Stories décrites par le PO
 
@@ -111,7 +112,7 @@ figures TikZ**, que la chaîne d'import ne sait pas encore faire.
 | 2 | Vitrine académique complète | 17 |
 | 3 | Bilingue et premier cours natif | 30 |
 | 4 | Chaîne de publication et blog | 23 |
-| 5 | Du contenu : un deuxième cours en ligne (nom de domaine et tuteur IA reportés) | 17 |
+| 5 | Du contenu : un deuxième cours en ligne (nom de domaine et tuteur IA reportés) | 19 |
 | 6 | Automatisation avancée + analytics | 21 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
