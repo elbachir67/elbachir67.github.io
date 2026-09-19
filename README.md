@@ -398,6 +398,11 @@ page** — une entrée dans `import.toml`, et l'import rejoué.
 À savoir : un corrigé rejoint le site au **premier rendu qui suit sa date**, donc au prochain
 déploiement — pas à minuit.
 
+**Ce qui n'est pas un PDF se télécharge.** Le lien d'une ressource porte l'attribut `download` dès
+que son fichier n'est pas un PDF : le navigateur affiche correctement un PDF, mais il afficherait un
+notebook en JSON brut, ce qui n'aide personne. Vérifié au navigateur : un `.ipynb` arrive dans les
+téléchargements, un PDF s'ouvre dans la visionneuse.
+
 Les libellés sont traduits (`TD` → `Tutorial`, `Corrigé` → `Solution`) et suivent la langue de la page
 qui les affiche. Les pages de cours étant monolingues (voir « Cours »), ils s'affichent aujourd'hui en
 français ; le jour où une page de cours existera en anglais, rien ne sera à changer.
