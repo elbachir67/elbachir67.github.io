@@ -138,7 +138,7 @@ cours/<slug>/
 │   ├── 01-<slug>.qmd    Le numéro fixe l'ordre de lecture
 │   └── 02-<slug>.qmd
 ├── ressources/          Énoncés distribués aux étudiants : labs, TD, notebooks (publiés)
-└── _corriges/           Corrigés : le préfixe « _ » les tient hors du site (jamais publiés)
+└── _corriges/           Corrigés : hors du site tant que leur date de publication n'est pas atteinte
 ```
 
 - `cours.yml` est la **seule source** des métadonnées : la fiche de la page du cours et la carte du
@@ -347,14 +347,21 @@ L'extension est dans `_extensions/capsule/`.
 
 ### Ressources d'une séance
 
-Une séance peut distribuer des énoncés — lab, TD, notebook. Ils se déclarent dans son entrée de
-`_sources/import.toml`, une entrée par ressource (ou `--ressource type|fichier|titre` à l'import) :
+Une séance peut distribuer des énoncés — lab, TD, notebook — et leurs corrigés. Ils se déclarent dans
+son entrée de `_sources/import.toml`, une entrée par ressource (ou `--ressource type|fichier|titre[|date]`
+à l'import) :
 
 ```toml
 [[chapitres.ressources]]
 type = "lab"                              # lab, td, notebook, ou corrige
 fichier = "ressources/lab1-couches.pdf"   # chemin relatif au dossier du cours
 titre = "Lab 1 — refactoring vers les couches"
+
+[[chapitres.ressources]]
+type = "corrige"
+fichier = "_corriges/lab1-corrige.pdf"
+titre = "Corrigé du Lab 1"
+date = "2026-10-15"                       # obligatoire : le jour où le corrigé rejoint le site
 ```
 
 Le fichier est **rangé par le PO** dans le dossier du cours, et le type décide où :
@@ -362,17 +369,29 @@ Le fichier est **rangé par le PO** dans le dossier du cours, et le type décide
 | Type | Dossier | Publié ? |
 |---|---|---|
 | `lab`, `td`, `notebook` | `ressources/` | oui : lien sur la séance et sur la page du cours |
-| `corrige` | `_corriges/` | **non**, jamais : le préfixe `_` le tient hors du rendu Quarto |
+| `corrige` | `_corriges/` | **à partir de sa `date`**, et pas un jour avant |
 
-La règle « **jamais de corrigé publié à côté de son énoncé** » est tenue par trois verrous, pas par la
-vigilance : le script d'import n'écrit pas de lien pour un corrigé, `scripts/verifier_conversion.py`
-échoue si un corrigé est rangé ailleurs que dans `_corriges/`, et le même contrôle échoue si un nom de
-fichier de `_corriges/` apparaît dans le site rendu. Un corrigé se déclare quand même dans
-`import.toml` : c'est ce qui permet de vérifier qu'il existe et qu'il est bien rangé.
+La liste s'affiche sur la slide de fin de la séance et dans la colonne « Format » de la table des
+séances, avec le **type** et le **poids** du fichier. Ces deux pages sont remplies **au rendu** par
+`assets/lua/ressources.lua` et `assets/lua/fiche-cours.lua` : le poids se lit sur le fichier, et la date
+d'un corrigé se compare au jour même. **Ajouter une ressource ne demande donc aucune modification de
+page** — une entrée dans `import.toml`, et l'import rejoué.
 
-Les libellés sont traduits (`TD` → `Tutorial`) et suivent la langue de la page qui les affiche. Les
-pages de cours étant monolingues (voir « Cours »), ils s'affichent aujourd'hui en français ; le jour où
-une page de cours existe en anglais, rien n'est à changer.
+**La règle du corrigé tient à quatre verrous**, pas à la vigilance :
+
+1. `_corriges/` commence par `_` : Quarto ne rend pas ce dossier.
+2. L'import **refuse** un corrigé sans date de publication valide.
+3. `scripts/rendre.py` ne copie dans le site (`cours/<slug>/corriges/`) que les corrigés dont la date
+   est atteinte, et les filtres n'affichent que ceux-là : avant la date, ni fichier, ni lien, ni mention.
+4. `scripts/verifier_conversion.py` échoue si un corrigé est rangé ailleurs que dans `_corriges/`, s'il
+   n'a pas de date, ou si son fichier apparaît dans `_site/` avant cette date.
+
+À savoir : un corrigé rejoint le site au **premier rendu qui suit sa date**, donc au prochain
+déploiement — pas à minuit.
+
+Les libellés sont traduits (`TD` → `Tutorial`, `Corrigé` → `Solution`) et suivent la langue de la page
+qui les affiche. Les pages de cours étant monolingues (voir « Cours »), ils s'affichent aujourd'hui en
+français ; le jour où une page de cours existera en anglais, rien ne sera à changer.
 
 ### PDF des séances
 

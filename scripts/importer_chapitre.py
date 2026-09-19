@@ -33,14 +33,15 @@ from pathlib import Path
 
 SVG = "http://www.w3.org/2000/svg"
 
-# Ressources d'une séance (US-49) : libellé par type, dans les deux langues. Un corrigé n'est jamais
-# publié : il n'a donc pas de libellé ici, et le script refuse de l'écrire dans la page.
+# Ressources d'une séance (US-49) : libellé par type, dans les deux langues. Un corrigé n'a pas de
+# libellé ici : c'est `assets/lua/ressources.lua` qui l'affiche, et seulement à partir de sa date.
 RESSOURCES = {
     "lab": {"fr": "Lab", "en": "Lab"},
     "td": {"fr": "TD", "en": "Tutorial"},
     "notebook": {"fr": "Notebook", "en": "Notebook"},
 }
 CORRIGE = "corrige"
+ISO = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # Encadrés de beamerucad.sty : type de callout Quarto, classe de couleur, titre par défaut.
 ENCADRES = {
@@ -473,21 +474,48 @@ def nettoyer_svg(source: Path, cible: Path) -> dict[str, int]:
 # Écriture
 # --------------------------------------------------------------------------------------------------
 
+def ressource(brute: str) -> dict:
+    """« lab|cours/x/ressources/lab1.pdf|Lab 1 » -> l'entrée écrite dans l'en-tête de la séance.
+
+    Un corrigé a un quatrième champ, sa **date de publication** : il est obligatoire, et c'est lui qui
+    décide du jour où le corrigé rejoint le site. Son fichier vit dans `_corriges/`, que Quarto ne rend
+    pas ; il est copié à l'assemblage, sous `corriges/`, le jour venu seulement.
+    """
+    champs = brute.split("|")
+    if len(champs) < 3:
+        sys.exit(f"Ressource mal formée : « {brute} » (attendu : type|fichier|titre[|date]).")
+    type_, fichier, titre = champs[0], champs[1], champs[2]
+    date = champs[3] if len(champs) > 3 else ""
+    if type_ not in RESSOURCES and type_ != CORRIGE:
+        sys.exit(f"Type de ressource inconnu : « {type_} » "
+                 f"(attendu : {', '.join(sorted(RESSOURCES))} ou {CORRIGE}).")
+    if type_ == CORRIGE and not ISO.fullmatch(date):
+        sys.exit(f"Le corrigé « {titre} » n'a pas de date de publication (type|fichier|titre|AAAA-MM-JJ). "
+                 "Sans date, un corrigé ne peut pas être publié : c'est la règle d'US-49.")
+    if type_ != CORRIGE and date:
+        sys.exit(f"Seul un corrigé porte une date de publication (ici : « {type_} »).")
+
+    # Chemins : `fichier` est relatif au dossier du cours (le filtre y lit le poids), `chemin` est
+    # l'adresse publique. Ils se déduisent du chemin donné, et non de `--sortie` : le contrôle de
+    # conversion rejoue l'import dans un dossier temporaire, où `--sortie` ne dit plus rien du cours.
+    parties = Path(fichier).parts
+    if len(parties) < 3 or parties[0] != "cours":
+        sys.exit(f"Ressource hors d'un cours : {fichier} (attendu : cours/<slug>/…).")
+    slug, relatif = parties[1], str(Path(*parties[2:]))
+    publie = f"corriges/{Path(relatif).name}" if type_ == CORRIGE else relatif
+    return {"type": type_, "titre": titre or Path(relatif).name, "fichier": relatif,
+            "chemin": f"/cours/{slug}/{publie}", "date": date}
+
+
 def slide_ressources(ressources: list[dict]) -> str:
     """Dernière slide : les ressources de la séance (US-49).
 
-    Les corrigés en sont absents par construction : ils vivent hors du site (dossier _corriges/), et le
-    script refuse de les écrire ici — un corrigé ne doit jamais être publié à côté de son énoncé.
+    La slide n'est qu'un emplacement : c'est `assets/lua/ressources.lua` qui la remplit **au rendu**,
+    parce que deux de ses données ne sont connues qu'à ce moment-là — le poids de chaque fichier, et le
+    fait qu'un corrigé ait atteint ou non sa date de publication. Un corrigé avant sa date n'apparaît
+    donc nulle part, pas même en commentaire dans la page.
     """
-    lignes = []
-    for ressource in ressources:
-        if ressource["type"] == CORRIGE:
-            continue
-        libelle = RESSOURCES[ressource["type"]]["fr"]
-        lignes.append(f'- {libelle} — [{ressource["titre"]}](/{ressource["chemin"]})')
-    if not lignes:
-        return ""
-    return "## Ressources de la séance\n\n" + "\n".join(lignes)
+    return "::: {#ressources-seance}\n:::" if ressources else ""
 
 
 def slide_capsule(video: str, titre: str) -> str:
@@ -509,15 +537,19 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: s
     if video:
         # Métadonnée de la séance : la capsule est aussi une slide, en fin de deck.
         lignes.append(f"video: {guillemets(video)}")
-    publiees = [r for r in (ressources or []) if r["type"] != CORRIGE]
-    if publiees:
-        # Métadonnée de la séance : la page du cours y lit la liste des ressources (US-49). Les corrigés
-        # n'y figurent pas — ils ne sont écrits nulle part dans le site.
+    if ressources:
+        # Métadonnée de la séance : la slide de fin et la page du cours y lisent les ressources (US-49).
+        # `fichier` est relatif au dossier du cours — c'est ce qui permet au filtre d'en lire le poids ;
+        # `chemin` est l'adresse publique. Un corrigé porte en plus sa date de publication : avant elle,
+        # ni le filtre ni le rendu ne le laissent apparaître.
         lignes.append("ressources:")
-        for ressource in publiees:
+        for ressource in ressources:
             lignes.append(f"  - type: {guillemets(ressource['type'])}")
             lignes.append(f"    titre: {guillemets(ressource['titre'])}")
-            lignes.append(f"    chemin: {guillemets('/' + ressource['chemin'])}")
+            lignes.append(f"    fichier: {guillemets(ressource['fichier'])}")
+            lignes.append(f"    chemin: {guillemets(ressource['chemin'])}")
+            if ressource.get("date"):
+                lignes.append(f"    date: {guillemets(ressource['date'])}")
     lignes += [
         f"description: {guillemets(description)}",
         f"author: {guillemets(entete.get('author', ''))}",
@@ -607,9 +639,11 @@ def main() -> int:
                            help="description de la page, pour le référencement")
     analyseur.add_argument("--video", default="",
                            help="identifiant YouTube de la capsule de la séance (slide finale, US-19)")
-    analyseur.add_argument("--ressource", action="append", default=[], metavar="TYPE|CHEMIN|TITRE",
-                           help="ressource de la séance : lab, td, notebook ou corrige, son chemin dans "
-                                "le site et son titre (répétable, US-49)")
+    analyseur.add_argument("--ressource", action="append", default=[],
+                           metavar="TYPE|FICHIER|TITRE[|DATE]",
+                           help="ressource de la séance : lab, td, notebook ou corrige, son fichier dans "
+                                "le dépôt et son titre ; un corrigé exige en plus sa date de publication "
+                                "(AAAA-MM-JJ). Répétable (US-49)")
     analyseur.add_argument("--feuille", default="../../../assets/css/slides.scss",
                            help="feuille de style des slides, relative au .qmd")
     args = analyseur.parse_args()
@@ -629,14 +663,7 @@ def main() -> int:
 
     entete = preambule(source)
     description = args.description or entete.get("subtitle", "")
-    ressources = []
-    for brute in args.ressource:
-        type_, _, reste = brute.partition("|")
-        chemin, _, titre = reste.partition("|")
-        if type_ not in RESSOURCES and type_ != CORRIGE:
-            sys.exit(f"Type de ressource inconnu : « {type_} » "
-                     f"(attendu : {', '.join(sorted(RESSOURCES))} ou {CORRIGE}).")
-        ressources.append({"type": type_, "chemin": chemin, "titre": titre or chemin})
+    ressources = [ressource(brute) for brute in args.ressource]
     slide = slide_ressources(ressources)
     if slide:
         pages.append(slide)

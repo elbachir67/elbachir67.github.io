@@ -7,12 +7,9 @@
 
 local INSECABLE = "\u{A0}"
 
--- Ressources d'une séance (US-49) : libellé par type et par langue. Un corrigé n'apparaît jamais —
--- il n'est pas écrit dans l'en-tête de la séance, et son fichier vit hors du site.
-local RESSOURCES = {
-  fr = { lab = "Lab", td = "TD", notebook = "Notebook" },
-  en = { lab = "Lab", td = "Tutorial", notebook = "Notebook" },
-}
+-- Ressources des séances (US-49) : le poids des fichiers et la date des corrigés sont lus au rendu.
+package.path = package.path .. ";" .. pandoc.path.directory(PANDOC_SCRIPT_FILE) .. "/?.lua"
+local R = require("ressources-communes")
 
 -- Libellé du lien de téléchargement, avec l'icône du thème.
 local function mots_pdf()
@@ -90,7 +87,8 @@ end
 -- Table des séances : chacune mène à ses slides et à leur PDF (US-17). Le PDF est produit au rendu par
 -- scripts/generer_pdf.js, à côté de la page : le lien est donc le même chemin, en .pdf.
 local function seances(doc)
-  local langue = pandoc.utils.stringify(doc.meta.lang or "fr"):sub(1, 2)
+  local langue = R.langue(doc)
+  local cours = pandoc.path.directory(quarto.doc.input_file)
   local dossier = pandoc.path.join({ pandoc.path.directory(quarto.doc.input_file), "chapitres" })
   local ok, fichiers = pcall(pandoc.system.list_directory, dossier)
   if not ok then
@@ -109,14 +107,9 @@ local function seances(doc)
       local formats = pandoc.Inlines({
         pandoc.Link(mots_pdf(), pdf, "", { class = "seance-pdf", download = "" }),
       })
-      for _, ressource in ipairs(meta and meta.ressources or {}) do
-        local type_ = pandoc.utils.stringify(ressource.type)
-        local libelle = (RESSOURCES[langue] or RESSOURCES.fr)[type_]
-        if libelle then
-          formats:insert(pandoc.Str(" · "))
-          formats:insert(pandoc.Link(pandoc.Inlines(libelle), pandoc.utils.stringify(ressource.chemin),
-            pandoc.utils.stringify(ressource.titre), { class = "seance-ressource" }))
-        end
+      for _, ressource in ipairs(R.publiables(meta and meta.ressources)) do
+        formats:insert(pandoc.Str(" · "))
+        formats:extend(R.lien(ressource, langue, cours, true))
       end
       table.insert(lignes, {
         { pandoc.Plain(pandoc.Link(titre, page)) },

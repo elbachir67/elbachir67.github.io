@@ -97,19 +97,28 @@ def ecrire_textes_alternatifs(cours: Path, textes: dict[str, str]) -> Path | Non
 
 
 def ressources_demandees(brutes: list[str]) -> list[dict]:
-    """« lab|ressources/lab1.pdf|Lab 1 — … » -> entrée du manifeste."""
+    """« corrige|_corriges/c1.pdf|Corrigé du Lab 1|2026-10-15 » -> entrée du manifeste.
+
+    La date n'existe que pour un corrigé : c'est le jour où il rejoint le site (US-49).
+    """
     ressources = []
     for brute in brutes:
-        type_, _, reste = brute.partition("|")
-        fichier, _, titre = reste.partition("|")
-        ressources.append({"type": type_, "fichier": fichier, "titre": titre or fichier})
+        champs = brute.split("|")
+        if len(champs) < 3:
+            sys.exit(f"Ressource mal formée : « {brute} » (attendu : type|fichier|titre[|date]).")
+        entree = {"type": champs[0], "fichier": champs[1], "titre": champs[2] or champs[1]}
+        if len(champs) > 3 and champs[3]:
+            entree["date"] = champs[3]
+        ressources.append(entree)
     return ressources
 
 
 def ligne_de_ressource(cours: Path, ressource: dict) -> str:
-    """Ce que l'import attend : le type, le chemin dans le site, le titre."""
-    chemin = f"cours/{cours.name}/{ressource['fichier']}"
-    return f"{ressource['type']}|{chemin}|{ressource['titre']}"
+    """Ce que l'import attend : le type, le fichier dans le dépôt, le titre, et la date d'un corrigé."""
+    champs = [ressource["type"], f"cours/{cours.name}/{ressource['fichier']}", ressource["titre"]]
+    if ressource.get("date"):
+        champs.append(ressource["date"])
+    return "|".join(champs)
 
 
 def entree_existante(cours: Path, tex: str) -> dict | None:

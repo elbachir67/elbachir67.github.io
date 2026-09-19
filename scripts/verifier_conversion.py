@@ -21,7 +21,9 @@ Bibliothèque standard uniquement : ce contrôle n'ajoute aucune dépendance à 
 
 from __future__ import annotations
 
+import datetime as dt
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -57,8 +59,10 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
     if chapitre.get("video"):
         commande += ["--video", chapitre["video"]]
     for ressource in chapitre.get("ressources", []):
-        commande += ["--ressource",
-                     f"{ressource['type']}|cours/{cours.name}/{ressource['fichier']}|{ressource['titre']}"]
+        champs = [ressource["type"], f"cours/{cours.name}/{ressource['fichier']}", ressource["titre"]]
+        if ressource.get("date"):
+            champs.append(ressource["date"])
+        commande += ["--ressource", "|".join(champs)]
     for nom, script in chapitre.get("figures_python", {}).items():
         commande += ["--figure-python", f"{nom}={cours / script}"]
 
@@ -86,32 +90,57 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
 # Ressources d'une séance (US-49) : les énoncés sont publiés depuis ressources/, les corrigés vivent
 # dans _corriges/, que Quarto ne publie pas — le préfixe « _ » est la garantie, pas la vigilance.
 DOSSIER_PUBLIE, DOSSIER_CORRIGES = "ressources", "_corriges"
+ISO = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 def ressources_mal_rangees(cours: Path, chapitre: dict) -> list[tuple[Path, str]]:
-    """Une ressource doit exister, et un corrigé ne doit jamais être publiable."""
+    """Une ressource doit exister, être bien rangée, et un corrigé doit porter sa date."""
     ecarts = []
     for ressource in chapitre.get("ressources", []):
         fichier = cours / ressource["fichier"]
         dossier = Path(ressource["fichier"]).parts[0]
+        corrige = ressource["type"] == "corrige"
+        date = ressource.get("date", "")
         if not fichier.is_file():
             ecarts.append((fichier, "ressource déclarée dans import.toml mais absente du dépôt"))
-        if ressource["type"] == "corrige" and dossier != DOSSIER_CORRIGES:
-            ecarts.append((fichier, f"un corrigé doit vivre dans {DOSSIER_CORRIGES}/, que le site ne "
-                                    "publie pas : jamais à côté de son énoncé"))
-        if ressource["type"] != "corrige" and dossier != DOSSIER_PUBLIE:
+        if corrige and dossier != DOSSIER_CORRIGES:
+            ecarts.append((fichier, f"corrigé publiable : il doit vivre dans {DOSSIER_CORRIGES}/, que "
+                                    "Quarto ne rend pas, et n'être publié qu'à sa date"))
+        if not corrige and dossier != DOSSIER_PUBLIE:
             ecarts.append((fichier, f"une ressource publiée doit vivre dans {DOSSIER_PUBLIE}/"))
+        if corrige and not ISO.fullmatch(date):
+            ecarts.append((fichier, "corrigé sans date de publication valide (AAAA-MM-JJ) : sans date, "
+                                    "il ne peut pas être publié"))
+        if not corrige and date:
+            ecarts.append((fichier, "seul un corrigé porte une date de publication"))
     return ecarts
 
 
 def corriges_publies(site: Path) -> list[tuple[Path, str]]:
-    """Dernier filet : aucun fichier de _corriges/ ne doit se retrouver dans le site rendu."""
+    """Dernier filet : dans le site rendu, un corrigé n'est là que si sa date est atteinte.
+
+    Le contrôle regarde le site et non les sources : il attrape aussi bien une copie faite à la main
+    qu'une erreur de la publication par date (scripts/rendre.py).
+    """
     if not site.is_dir():
         return []
+    aujourdhui = dt.date.today().isoformat()
+    dates: dict[str, str] = {}
+    for manifeste in sorted(RACINE.glob("cours/*/_sources/import.toml")):
+        for chapitre in tomllib.loads(manifeste.read_text(encoding="utf-8")).get("chapitres", []):
+            for ressource in chapitre.get("ressources", []):
+                if ressource["type"] == "corrige":
+                    dates[Path(ressource["fichier"]).name] = ressource.get("date", "")
     noms = {fichier.name for corriges in RACINE.glob(f"cours/*/{DOSSIER_CORRIGES}")
             for fichier in corriges.iterdir() if fichier.is_file()}
-    return [(publie, "corrigé publié : il doit rester hors du site")
-            for publie in site.rglob("*") if publie.is_file() and publie.name in noms]
+    ecarts = []
+    for publie in site.rglob("*"):
+        if publie.is_file() and publie.name in noms:
+            date = dates.get(publie.name, "")
+            if not date or date > aujourdhui:
+                ecarts.append((publie, "corrigé publié avant sa date" if date
+                               else "corrigé publié sans date : il doit rester hors du site"))
+    return ecarts
 
 
 def gel_manquant(page: Path) -> str | None:
