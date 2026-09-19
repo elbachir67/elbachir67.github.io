@@ -42,6 +42,11 @@ RESSOURCES = {
 }
 CORRIGE = "corrige"
 
+# Commandes qui ne produisent qu'un caractère. `\textbackslash` apparaît dans ces cours à l'intérieur
+# d'un `\texttt{}`, donc dans un code en ligne, où la barre oblique inverse ne s'échappe pas.
+CARACTERES = {"oe": "œ", "ldots": "\u2026", "dots": "\u2026", "textbackslash": "\\",
+              "textasciitilde": "~", "textasciicircum": "^"}
+
 # Styles de `lstlisting` définis par beamerucad.sty : « out » et « err » sont des sorties de
 # programme, « sh » une commande shell. Sans style, c'est du code dans le langage du cours.
 STYLES_CODE = {"out": "", "err": "", "sh": "bash"}
@@ -60,7 +65,7 @@ ENCADRES = {
 
 # Commandes de mise en page sans équivalent en HTML : le style s'en charge.
 IGNOREES = {"vskip", "vspace", "smallskip", "medskip", "bigskip", "centering", "par", "vfill",
-            "toprule", "midrule", "bottomrule", "addlinespace", "small", "scriptsize", "footnotesize",
+            "toprule", "midrule", "bottomrule", "hline", "addlinespace", "small", "scriptsize", "footnotesize",
             "normalsize", "large", "Large", "raggedright", "noindent", "titlepage"}
 
 # Couleurs d'encre du jeu de figures : elles suivront la couleur du texte de la page.
@@ -130,11 +135,23 @@ def argument(texte: str, position: int) -> tuple[str, int]:
 
 
 def option(texte: str, position: int) -> tuple[str | None, int]:
-    """Argument optionnel entre crochets, s'il y en a un."""
-    if position < len(texte) and texte[position] == "[":
-        fin = texte.index("]", position)
-        return texte[position + 1:fin], fin + 1
-    return None, position
+    """Argument optionnel entre crochets, s'il y en a un.
+
+    Le crochet fermant est cherché **à la même profondeur** : un titre d'encadré peut contenir des
+    crochets, comme « [La syntaxe \\texttt{[debut:fin]}] ». S'arrêter au premier `]` tronquait le
+    titre au milieu d'une accolade, et le reste partait dans le corps de la slide.
+    """
+    if position >= len(texte) or texte[position] != "[":
+        return None, position
+    profondeur = 0
+    for i in range(position, len(texte)):
+        if texte[i] in "[{" and texte[i - 1] != "\\":
+            profondeur += 1
+        elif texte[i] in "]}" and texte[i - 1] != "\\":
+            profondeur -= 1
+            if profondeur == 0:
+                return texte[position + 1:i], i + 1
+    raise ValueError(f"crochet non fermé à partir de {texte[position:position + 40]!r}")
 
 
 def environnement(texte: str, nom: str, depart: int) -> tuple[str, int]:
@@ -348,8 +365,8 @@ def inline(texte: str, conversion: Conversion) -> str:
         if nom in IGNOREES:
             conversion.ignorees[nom] += 1
             return ""
-        if nom == "oe":
-            return "œ"
+        if nom in CARACTERES:
+            return CARACTERES[nom]
         if nom == "newline":
             return "<br>"
         return conversion.non_converti("\\" + nom)
@@ -363,6 +380,18 @@ def inline(texte: str, conversion: Conversion) -> str:
              .replace("\\#", "#").replace("~", "\u00a0"))
     texte = re.sub(r"\x00(\d+)\x00", lambda t: formules[int(t[1])], texte)
     return re.sub(r"\n{3,}", "\n\n", texte).strip()
+
+
+def titre_de_callout(titre: str | None, conversion: Conversion) -> str:
+    """Titre d'un encadré : converti comme le reste, et guillemets échappés.
+
+    Le titre passait brut dans l'attribut `title="…"`. Un `\\texttt{"w"}` y mettait donc du LaTeX et,
+    surtout, des guillemets qui fermaient l'attribut : Quarto perdait le div et le signalait par un
+    avertissement, que la CI refuse.
+    """
+    if not titre:
+        return ""
+    return inline(titre, conversion).replace("\n", " ").replace('"', '\\"').strip()
 
 
 def tableau(contenu: str, conversion: Conversion) -> str:
@@ -447,7 +476,8 @@ def convertir(texte: str, conversion: Conversion) -> str:
         if nom in ENCADRES:
             genre, classe, defaut = ENCADRES[nom]
             corps = convertir(contenu, conversion)
-            entete = f'::: {{.callout-{genre} .{classe} title="{titre or defaut}"}}'
+            entete = (f'::: {{.callout-{genre} .{classe} '
+                      f'title="{titre_de_callout(titre, conversion) or defaut}"}}')
             morceaux.append(f"{entete}\n{corps}\n:::")
         elif nom in ("itemize", "enumerate"):
             morceaux.append(liste(contenu, nom == "enumerate", conversion))

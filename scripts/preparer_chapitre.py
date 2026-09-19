@@ -121,6 +121,16 @@ def ressources_demandees(brutes: list[str]) -> list[dict]:
     return ressources
 
 
+def chemin_dans_le_cours(cours: Path, fichier: str) -> str:
+    """Chemin d'une ressource, relatif au dossier du cours.
+
+    L'importeur attend un chemin depuis la racine du dépôt, le manifeste un chemin depuis le cours :
+    on accepte les deux à l'entrée, plutôt que de laisser l'un se préfixer deux fois.
+    """
+    prefixe = f"cours/{cours.name}/"
+    return fichier[len(prefixe):] if fichier.startswith(prefixe) else fichier
+
+
 def ligne_de_ressource(cours: Path, ressource: dict) -> str:
     """Ce que l'import attend : le type, le fichier dans le dépôt, le titre, et la date d'un corrigé."""
     champs = [ressource["type"], f"cours/{cours.name}/{ressource['fichier']}", ressource["titre"]]
@@ -244,6 +254,8 @@ def main() -> int:
     if video:
         commande += ["--video", video]
     ressources = ressources_demandees(args.ressource) or (precedente or {}).get("ressources", [])
+    for ressource in ressources:
+        ressource["fichier"] = chemin_dans_le_cours(cours, ressource["fichier"])
     for ressource in ressources:
         commande += ["--ressource", ligne_de_ressource(cours, ressource)]
     for nom, script in scripts_python.items():
