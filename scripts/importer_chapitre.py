@@ -334,6 +334,37 @@ def figures(texte: str, conversion: Conversion) -> str:
 MOTIF_MATHS = re.compile(r"\$\$.+?\$\$|\$[^$]+?\$|\\\[.+?\\\]", re.S)
 
 
+# Caractères que LaTeX écrit échappés. Ceux de MARKDOWN_SPECIAUX doivent le rester dans le texte
+# courant — sinon Quarto y verrait des maths, un lien ou un attribut —, mais pas dans un code en
+# ligne, où les accents graves suffisent et où une barre oblique s'afficherait telle quelle.
+ECHAPPES = "{}[]$%&_#~^"
+MARKDOWN_SPECIAUX = set("{}[]$_#~^")
+MOTIF_ECHAPPE = re.compile(r"\\([" + re.escape(ECHAPPES) + r"])(?:\{\})?")
+# Découpe le texte en alternant hors-code et code en ligne, accents graves compris.
+MOTIF_CODE_EN_LIGNE = re.compile(r"(`+[^`]*`+)")
+
+
+def caracteres_echappes(texte: str) -> str:
+    """« \\{ » -> « { », en respectant le Markdown et les codes en ligne.
+
+    Dans un code en ligne, le caractère est rendu littéralement : la barre oblique doit disparaître,
+    sinon la page affiche « \\{ ». Dans le texte courant, elle doit au contraire rester devant les
+    caractères que Markdown interprète — c'est alors une échappe Markdown, et non un reste de LaTeX.
+
+    Le tilde de LaTeX, lui, est une espace insécable : il ne le devient qu'hors des codes en ligne,
+    où « ~ » désigne le plus souvent un dossier personnel.
+    """
+    morceaux = []
+    for morceau in MOTIF_CODE_EN_LIGNE.split(texte):
+        if morceau.startswith("`"):
+            morceaux.append(MOTIF_ECHAPPE.sub(lambda t: t[1], morceau))
+        else:
+            morceaux.append(MOTIF_ECHAPPE.sub(
+                lambda t: ("\\" + t[1]) if t[1] in MARKDOWN_SPECIAUX else t[1],
+                morceau).replace("~", "\u00a0"))
+    return "".join(morceaux)
+
+
 def inline(texte: str, conversion: Conversion) -> str:
     """Conversion du texte courant : mise en forme et caractères LaTeX.
 
@@ -380,8 +411,7 @@ def inline(texte: str, conversion: Conversion) -> str:
     # Espacements verticaux, avec ou sans accolades : « \vspace{3pt} », « \vskip 2ex », « \vspace*{1cm} ».
     texte = re.sub(r"\\(?:vskip|vspace)\*?\s*(?:\{[^}]*\}|-?[\d.]+\s*[a-z]+)", "", texte)
     texte = re.sub(r"\\([A-Za-z]+)\s*(?:\{\})?", commande, texte)
-    texte = (texte.replace("\\%", "%").replace("\\&", "&").replace("\\_", "_")
-             .replace("\\#", "#").replace("~", "\u00a0"))
+    texte = caracteres_echappes(texte)
     texte = re.sub(r"\x00(\d+)\x00", lambda t: formules[int(t[1])], texte)
     return re.sub(r"\n{3,}", "\n\n", texte).strip()
 

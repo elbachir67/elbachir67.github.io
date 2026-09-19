@@ -59,7 +59,9 @@ couleur (au moins 5,9:1 sur le fond teinté) : la teinte vive du filet plafonnai
 | `\resultat` | **Résultat →** | annonce la sortie du programme qui suit |
 | `lstlisting[style=out]`, `[style=err]` | bloc sans langage | une sortie de programme n'est pas du code |
 | `lstlisting[style=sh]` | ```` ```bash ```` | |
-| `\oe`, `~`, `\%`, `\&`, `\_`, `\#` | `œ`, espace insécable, `%`, `&`, `_`, `#` | |
+| `\oe` | `œ` | |
+| `~` | espace insécable | sauf dans un code en ligne, où « ~ » désigne un dossier personnel |
+| `\{`, `\}`, `\[`, `\]`, `\$`, `\%`, `\&`, `\_`, `\#`, `\~`, `\^{}` | le caractère lui-même | dans un **code en ligne**, la barre oblique disparaît — sinon elle s'affiche. Dans le **texte courant**, elle reste devant les caractères que Markdown interprète (`{}[]$_#~^`) : c'est alors une échappe Markdown, et non un reste de LaTeX |
 | toute autre commande ou environnement | `<!-- NON CONVERTI: … -->` | et une ligne dans le rapport |
 
 Les lignes de code ne sont pas numérotées : le deck d'origine ne les numérote pas, et les ancres que Quarto
