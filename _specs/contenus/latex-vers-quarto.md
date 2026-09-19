@@ -51,6 +51,7 @@ couleur (au moins 5,9:1 sur le fond teinté) : la teinte vive du filet plafonnai
 | `$…$`, `$$…$$`, `\[…\]` | inchangés | rendus par MathJax |
 | `{\small …}`, `{\scriptsize …}` | *(retirés)* | la taille est affaire de style |
 | `\vskip`, `\centering`, `\par`, `\vfill` | *(retirés)* | idem |
+| `\toprule`, `\midrule`, `\bottomrule`, `\hline` | *(retirés)* | filets de tableau : un tableau Markdown n'en a qu'un, sous l'en-tête |
 | `\\`, `\\[2pt]`, `\\*` | `<br>` | saut de ligne ; l'espacement en plus est affaire de style |
 | `\vspace{3pt}`, `\vskip 2ex`, `\vspace*{1cm}` | *(retirés)* | avec ou sans accolades, et quelle que soit l'unité |
 | `\smallskip`, `\medskip`, `\bigskip` | *(retirés)* | idem |

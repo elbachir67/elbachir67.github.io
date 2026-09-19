@@ -60,7 +60,7 @@ ENCADRES = {
 
 # Commandes de mise en page sans équivalent en HTML : le style s'en charge.
 IGNOREES = {"vskip", "vspace", "smallskip", "medskip", "bigskip", "centering", "par", "vfill",
-            "toprule", "midrule", "bottomrule", "addlinespace", "small", "scriptsize", "footnotesize",
+            "toprule", "midrule", "bottomrule", "hline", "addlinespace", "small", "scriptsize", "footnotesize",
             "normalsize", "large", "Large", "raggedright", "noindent", "titlepage"}
 
 # Couleurs d'encre du jeu de figures : elles suivront la couleur du texte de la page.
