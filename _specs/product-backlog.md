@@ -52,7 +52,7 @@ d'un tuteur IA encadré.
 | US-21 | EP4 | Commande `/resume` (.tex/.pdf → article résumé) | M | 3 | 4 |
 | US-22 | EP4 | Commande `/nouvel-article` (blog) | S | 2 | 4 |
 | US-25 | EP5 | Blog : listing, catégories, flux RSS | S | 2 | 4 |
-| US-26 | EP6 | Spike + ADR-0004 : architecture du tuteur (coût par question, anti-abus) | M | 2 | 5 |
+| US-26 | EP6 | Spike + ADR-0004 : architecture du tuteur (coût par question, anti-abus) | M | 2 |livrée |
 | US-27 | EP6 | Service proxy sécurisé (Worker, clé en secret, CORS, code d'accès) | M | 5 | — |
 | US-28 | EP6 | Contexte d'une séance produit au rendu, corrigés exclus | M | 5 | — |
 | US-29 | EP6 | Widget de discussion sur les pages de séance (code d'accès, accessible) | M | 3 | — |
@@ -62,28 +62,33 @@ d'un tuteur IA encadré.
 | US-24 | EP4 | Aperçu déployé par PR | C | 3 | 6 |
 | US-32 | EP6 | Journalisation anonymisée des questions + consentement | S | 5 | 6 |
 | US-33 | EP6 | Tableau de bord enseignant (concepts bloquants) | C | 8 | 6 |
-| US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | — |
+| US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | 5 |
 | US-38 | EP2 | Page Contact bilingue (formulaire non requis : email protégé, affiliations) | S | 2 | — |
 | US-39 | EP1 | Traduire les données du CV et du catalogue des cours (et non les seuls libellés) | S | 3 | — |
 | US-40 | EP3 | Page rédigée par chapitre, en complément du deck de slides | S | 5 | — |
-| US-43 | EP3 | Contrôle de débordement des slides (échec si une slide dépasse le cadre) | S | 2 | — |
+| US-43 | EP3 | Contrôle de débordement des slides (échec si une slide dépasse le cadre) | S | 2 | 5 |
 | US-44 | EP3 | Style matplotlib accordé à la charte, partagé par les cours | C | 2 | — |
 | US-45 | EP3 | Notes du présentateur (`\note{}` → `::: {.notes}`) | C | 1 | — |
 | US-46 | EP3 | Numérotation automatique des chapitres depuis le nom de fichier | C | 1 | — |
 | US-47 | EP1 | Index de recherche par langue, sans ajustement du décalage Quarto | C | 2 | — |
-| US-48 | EP3 | Page de garde des PDF de séance | S | 2 | — |
-| US-49 | EP3 | Ressources par séance (lab, TD, notebook, corrigé) | M | 3 | — |
-| US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | — |
+| US-48 | EP3 | Page de garde des PDF de séance | S | 2 | 5 |
+| US-49 | EP3 | Ressources par séance (lab, TD, notebook, corrigé) | M | 3 | 5 |
+| US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | 5 |
+| US-51 | EP3 | Migration d'un deuxième cours : Programmation Python (L1) | M | 5 | 5 |
 
-### Deux stories décrites par le PO (à planifier)
+### Stories décrites par le PO
 
-**US-49 — Ressources par séance.** Champ `ressources` dans `cours/<slug>/_sources/import.toml`, avec un
-**type** par entrée (`lab`, `td`, `notebook`, `corrigé`). Les fichiers sont rangés dans le dossier du cours.
-La liste s'affiche **sur la page de la séance et sur la page du cours**, dans les deux langues. Règle
-impérative : **jamais de corrigé publié à côté de son énoncé**.
+Les critères d'acceptation d'**US-49**, **US-50** et **US-51** sont dans
+[`sprint-05.md`](sprints/sprint-05.md) : ce qui suit n'est que le contexte que le PO a donné en plus.
 
-**US-50 — Notebooks rendus en page.** Un `.ipynb` de lab est rendu en page HTML par Quarto, avec le
-**téléchargement du notebook** et son **ouverture dans Colab**.
+**US-51 — Migration d'un deuxième cours.** Le cours retenu est **Programmation Python (L1)** : decks
+Beamer avec le thème `beamerucad` et **notebooks Jupyter exécutés**, dont le PO fournira les sources.
+C'est le même chemin d'import que le cours pilote, plus les notebooks (US-50).
+
+**Cours faits de CM rédigés.** *Programmation C avancée* et *Structures de Données* ne sont pas
+candidats à US-51 : ce sont des **CM rédigés**, et non des decks. Ils attendent deux choses, dans un
+sprint ultérieur : **US-40** (page rédigée par chapitre, en complément du deck) et la **conversion des
+figures TikZ**, que la chaîne d'import ne sait pas encore faire.
 
 ## Roadmap
 
@@ -93,7 +98,7 @@ impérative : **jamais de corrigé publié à côté de son énoncé**.
 | 2 | Vitrine académique complète | 17 |
 | 3 | Bilingue et premier cours natif | 30 |
 | 4 | Chaîne de publication et blog | 23 |
-| 5 | À recomposer : le tuteur IA (EP6) est reporté, sans sprint | — |
+| 5 | Du contenu, et un nom à soi (le tuteur IA, EP6, est reporté sans sprint) | 19 |
 | 6 | Automatisation avancée + analytics | 21 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
