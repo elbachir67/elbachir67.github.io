@@ -1,0 +1,373 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{beamerucad}
+\usepackage{listings}
+\definecolor{ckw}{HTML}{2563AB}\definecolor{cst}{HTML}{2E8B57}\definecolor{ccm}{HTML}{8A8F98}
+\definecolor{outbg}{HTML}{F4F5F7}\definecolor{outrule}{HTML}{2E8B57}
+\definecolor{errbg}{HTML}{FBEDEC}\definecolor{errrule}{HTML}{C0392B}
+% --- code Python (barre bleue, coloration syntaxique) ---
+\lstdefinestyle{py}{language=Python,basicstyle=\ttfamily\scriptsize,
+ keywordstyle=\color{ckw}\bfseries,stringstyle=\color{cst},commentstyle=\color{ccm}\itshape,
+ showstringspaces=false,columns=fullflexible,keepspaces=true,
+ backgroundcolor=\color{ucadband!8},frame=leftline,framerule=2.5pt,rulecolor=\color{ucadband},
+ xleftmargin=8pt,aboveskip=3pt,belowskip=1pt,basewidth=0.5em}
+% --- sortie d'execution (barre verte) ---
+\lstdefinestyle{out}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{outbg},frame=leftline,framerule=2.5pt,rulecolor=\color{outrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+% --- message d'erreur / traceback (barre rouge) ---
+\lstdefinestyle{err}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{errbg},frame=leftline,framerule=2.5pt,rulecolor=\color{errrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+\lstset{style=py}
+\newcommand{\resultat}{{\scriptsize\textbf{R\'esultat}~$\rightarrow$}\par\vspace{1pt}}
+
+\title{Programmation Python — Séance 1}
+\subtitle{Valeurs, types et chaînes}
+\author{Dr. El Hadji Bassirou TOURÉ}
+\institute{Département de Mathématiques et Informatique\\ Faculté des Sciences et Techniques\\ Université Cheikh Anta Diop de Dakar}
+\date{}
+\setucadfoot{Programmation Python — Séance 1}
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]\titlepage\end{frame}
+
+% =====================================================================
+\begin{frame}{Objectifs de la séance}
+\begin{ucaddef}[Contenu]
+{\small L'atelier est monté (Séance 0). On écrit maintenant les \textbf{premières briques} du langage. À chaque notion, le même rythme — une explication, un \emph{code}, et sa \emph{vraie sortie d'exécution}. Le but n'est pas de tout mémoriser, mais de savoir lire et écrire ces briques, qui reviendront à chaque séance.}
+\end{ucaddef}
+\begin{itemize}\small
+  \item \textbf{Variables et types} : stocker une valeur (texte, entier, décimal, booléen).
+  \item \textbf{Opérations} : calculer, comparer, combiner des conditions.
+  \item \textbf{f-strings} : afficher proprement du texte mêlé à des valeurs.
+  \item \textbf{Chaînes de caractères} : longueur, accès, découpage, méthodes.
+\end{itemize}
+{\small L'entraînement se fait dans le \textbf{notebook} de la séance : chaque notion y est suivie d'une cellule « À vous ».}
+\end{frame}
+
+% #####################################################################
+\section{Variables et types}
+
+\begin{frame}{L'idée : une variable est une étiquette}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une \textbf{variable} est un nom auquel on attache une valeur, avec le signe \texttt{=}. On réutilise ensuite ce nom partout. Chaque valeur a un \textbf{type} : texte, entier, décimal, ou booléen.}
+\end{ucaddef}
+{\small Le signe \texttt{=} n'est pas l'égalité des mathématiques : c'est une \emph{affectation} (« range cette valeur sous ce nom »). Les quatre types de base suffisent à démarrer : \texttt{str} (texte entre guillemets), \texttt{int} (entier), \texttt{float} (décimal, avec un point), \texttt{bool} (\texttt{True}/\texttt{False}). Python devine le type tout seul.}
+\end{frame}
+
+\begin{frame}[fragile]{Déclarer des variables}
+\begin{lstlisting}
+nom = "Fatou"
+age = 23
+moyenne = 14.5
+ville = "Dakar"
+est_etudiant = True
+
+print(nom)
+print(age)
+print(moyenne)
+print(est_etudiant)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Fatou
+23
+14.5
+True
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Connaître le type d'une valeur}
+\begin{ucadex}[La fonction \texttt{type()}]
+{\small \texttt{type()} révèle le type d'une valeur — utile pour comprendre une erreur ou vérifier une donnée.}
+\end{ucadex}
+\begin{lstlisting}
+print(type(nom))
+print(type(age))
+print(type(moyenne))
+print(type(est_etudiant))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+<class 'str'>
+<class 'int'>
+<class 'float'>
+<class 'bool'>
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Piège — \texttt{=} n'est pas \texttt{==}}
+\begin{ucadpiege}[Affecter ou comparer]
+{\small Un seul signe égal, \texttt{=}, \textbf{affecte} une valeur à une variable : \texttt{age = 23} range 23 dans \texttt{age}. Deux signes, \texttt{==}, \textbf{comparent} : \texttt{age == 23} demande « \texttt{age} vaut-il 23 ? » et renvoie \texttt{True} ou \texttt{False}. Les confondre est l'erreur de débutant la plus fréquente.}
+\end{ucadpiege}
+{\small Mémo : \texttt{=} pour ranger, \texttt{==} pour interroger. On revoit \texttt{==} dans la partie sur les comparaisons.}
+\end{frame}
+
+% #####################################################################
+\section{Opérations}
+
+\begin{frame}{L'idée : calculer avec Python}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Python calcule avec les opérateurs habituels. Trois méritent l'attention : \texttt{/} (division), \texttt{//} (division \emph{entière}, on garde la partie entière) et \texttt{\%} (le \emph{reste}). L'opérateur \texttt{**} est la puissance.}
+\end{ucaddef}
+{\small On peut stocker le résultat d'un calcul dans une variable, puis le réutiliser. Les opérations s'enchaînent en respectant les priorités mathématiques (\texttt{*} avant \texttt{+}), et les parenthèses forcent l'ordre.}
+\end{frame}
+
+\begin{frame}[fragile]{Les opérations arithmétiques}
+\begin{lstlisting}
+a = 7
+b = 2
+print("somme        :", a + b)
+print("difference   :", a - b)
+print("produit      :", a * b)
+print("division     :", a / b)
+print("div. entiere :", a // b)
+print("reste        :", a % b)
+print("puissance    :", a ** b)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+somme        : 9
+difference   : 5
+produit      : 14
+division     : 3.5
+div. entiere : 3
+reste        : 1
+puissance    : 49
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Piège — la division}
+\begin{ucadpiege}[Trois opérateurs à ne pas confondre]
+{\small \texttt{/} donne \textbf{toujours} un résultat décimal (un \texttt{float}) : \texttt{7 / 2} vaut \texttt{3.5}, et même \texttt{4 / 2} vaut \texttt{2.0}. Pour obtenir un entier, on utilise la \textbf{division entière} \texttt{//} (\texttt{7 // 2} vaut \texttt{3}). Le \textbf{reste} de cette division est donné par \texttt{\%} (\texttt{7 \% 2} vaut \texttt{1}).}
+\end{ucadpiege}
+{\small Exemple utile : pour \texttt{100} heures, \texttt{100 // 24} donne le nombre de jours entiers (\texttt{4}) et \texttt{100 \% 24} les heures restantes (\texttt{4}).}
+\end{frame}
+
+\begin{frame}[fragile]{Comparer : un résultat booléen}
+\begin{ucadex}[Les comparaisons renvoient \texttt{True} ou \texttt{False}]
+{\small \texttt{==} (égal), \texttt{!=} (différent), \texttt{<}, \texttt{>}, \texttt{<=}, \texttt{>=}.}
+\end{ucadex}
+\begin{lstlisting}
+x = 14
+print(x >= 10)
+print(x == 10)
+print(x != 10)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+True
+False
+True
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Combiner des conditions : \texttt{and}, \texttt{or}, \texttt{not}}
+\begin{lstlisting}
+note = 12
+assiduite = True
+admis = note >= 10 and assiduite
+print("Admis ?", admis)
+print("Pas admis ?", not admis)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Admis ? True
+Pas admis ? False
+\end{lstlisting}
+{\small \texttt{and} exige que \emph{les deux} conditions soient vraies ; \texttt{or} qu'\emph{au moins une} le soit ; \texttt{not} inverse. Ces combinaisons seront le cœur des conditions \texttt{if} (Séance 3).}
+\end{frame}
+
+% #####################################################################
+\section{Afficher proprement : les f-strings}
+
+\begin{frame}{L'idée : insérer des valeurs dans du texte}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une \textbf{f-string} est un texte précédé de la lettre \texttt{f}, dans lequel on insère des variables entre accolades \texttt{\{ \}}. C'est la façon propre d'afficher un message qui mélange texte et valeurs.}
+\end{ucaddef}
+{\small Sans f-string, on devrait coller des morceaux à la main, au risque d'erreurs de type. La f-string lit la variable, la convertit en texte, et l'insère à l'endroit voulu — lisible et sans piège.}
+\end{frame}
+
+\begin{frame}[fragile]{Une f-string}
+\begin{lstlisting}
+prenom = "Awa"
+ville = "Louga"
+print(f"Je m'appelle {prenom}, ville : {ville}.")
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Je m'appelle Awa, ville : Louga.
+\end{lstlisting}
+{\small Tout ce qui est entre accolades est \emph{évalué} : on peut y mettre une variable, mais aussi un petit calcul, comme \texttt{\{age + 1\}}.}
+\end{frame}
+
+\begin{frame}[fragile]{Mettre en forme une valeur}
+\begin{ucadex}[Le format \texttt{:.2f}]
+{\small Dans l'accolade, après deux-points, on précise l'affichage. \texttt{:.2f} arrondit un décimal à deux chiffres.}
+\end{ucadex}
+\begin{lstlisting}
+moyenne = 14.567
+print(f"Moyenne : {moyenne:.2f}")
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Moyenne : 14.57
+\end{lstlisting}
+{\small Pratique pour des prix, des moyennes, des pourcentages : on contrôle le nombre de décimales sans toucher à la valeur stockée.}
+\end{frame}
+
+\begin{frame}[fragile]{Piège — coller du texte et un nombre}
+\begin{ucadpiege}[L'opérateur \texttt{+} ne colle que du texte]
+{\small Rappel de la Séance 0 : combiner du texte et un entier avec \texttt{+} échoue.}
+\end{ucadpiege}
+\begin{lstlisting}
+age = 23
+print("Age : " + age)
+\end{lstlisting}
+\begin{lstlisting}[style=err]
+TypeError: can only concatenate str (not "int") to str
+\end{lstlisting}
+{\small La f-string règle le problème proprement : \texttt{print(f"Age : \{age\}")} affiche \texttt{Age : 23}.}
+\end{frame}
+
+% #####################################################################
+\section{Les chaînes de caractères}
+
+\begin{frame}{L'idée : une chaîne est une séquence}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une chaîne (\texttt{str}) est une \textbf{suite ordonnée de caractères}. On peut mesurer sa longueur avec \texttt{len()}, accéder à un caractère par sa \textbf{position}, et en extraire un morceau par \textbf{découpage}.}
+\end{ucaddef}
+{\small La position commence à \textbf{0} : le premier caractère est à l'indice \texttt{0}, le deuxième à \texttt{1}, etc. L'indice \texttt{-1} désigne le dernier, \texttt{-2} l'avant-dernier — pratique pour compter depuis la fin.}
+\end{frame}
+
+\begin{frame}{Les positions dans une chaîne}
+\figslide{0.92}{figs/f1_indexing}{Indices positifs au-dessus, négatifs en dessous ; le découpage \texttt{[0:5]} prend les positions 0 à 4 (la fin est exclue).}
+\end{frame}
+
+\begin{frame}[fragile]{Longueur et accès par position}
+\begin{lstlisting}
+ville = "Saint-Louis"
+print("longueur :", len(ville))
+print("premier  :", ville[0])
+print("dernier  :", ville[-1])
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+longueur : 11
+premier  : S
+dernier  : s
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Découper une chaîne}
+\begin{ucadex}[La syntaxe \texttt{[debut:fin]}]
+{\small On prend les caractères de \texttt{debut} jusqu'à \texttt{fin} \textbf{exclu}. On peut omettre l'une des bornes.}
+\end{ucadex}
+\begin{lstlisting}
+ville = "Saint-Louis"
+print(ville[0:5])
+print(ville[6:])
+print(ville[:5])
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Saint
+Louis
+Saint
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Les méthodes utiles}
+\begin{ucadex}[Des outils attachés à la chaîne, appelés avec un point]
+{\small \texttt{.strip()} enlève les espaces aux bords ; \texttt{.upper()} / \texttt{.lower()} changent la casse ; \texttt{.replace(a, b)} remplace.}
+\end{ucadex}
+\begin{lstlisting}
+phrase = "  Bonjour Dakar  "
+print(phrase.strip())
+print(phrase.strip().upper())
+print(phrase.strip().lower())
+print(phrase.strip().replace("Dakar", "Louga"))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Bonjour Dakar
+BONJOUR DAKAR
+bonjour dakar
+Bonjour Louga
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Une chaîne est immuable}
+\begin{lstlisting}
+mot = "dakar"
+print(mot.upper())
+print(mot)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+DAKAR
+dakar
+\end{lstlisting}
+{\small Une méthode de chaîne renvoie une \textbf{nouvelle} chaîne ; l'originale ne change pas. Pour conserver le résultat, il faut le ranger dans une variable : \texttt{mot = mot.upper()}.}
+\end{frame}
+
+\begin{frame}[fragile]{Découper en liste : \texttt{split}}
+\begin{lstlisting}
+villes = "Dakar,Louga,Kaolack".split(",")
+print(villes)
+print("nombre de villes :", len(villes))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+['Dakar', 'Louga', 'Kaolack']
+nombre de villes : 3
+\end{lstlisting}
+{\small \texttt{.split(sep)} découpe selon un séparateur et renvoie une \textbf{liste} de morceaux. C'est l'un des outils les plus utilisés pour lire des données — les listes sont l'objet de la Séance 2.}
+\end{frame}
+
+\begin{frame}{Piège — indices et bornes}
+\begin{ucadpiege}[Trois confusions classiques]
+{\small \textbf{1.} Les indices commencent à \texttt{0}, donc le dernier caractère d'une chaîne de longueur \texttt{n} est à l'indice \texttt{n-1} (ou \texttt{-1}). \quad \textbf{2.} Dans \texttt{[debut:fin]}, la position \texttt{fin} est \textbf{exclue} : \texttt{ville[0:5]} prend 5 caractères (0 à 4). \quad \textbf{3.} Accéder à un indice qui n'existe pas (\texttt{ville[99]}) provoque une \texttt{IndexError}.}
+\end{ucadpiege}
+\end{frame}
+
+% #####################################################################
+\section{Synthèse}
+
+\begin{frame}{À retenir — Séance 1}
+\begin{ucadret}[L'essentiel]
+{\small
+\textbf{Variable} : \texttt{=} attache une valeur à un nom ; \texttt{type()} donne son type (\texttt{str}, \texttt{int}, \texttt{float}, \texttt{bool}).\\[2pt]
+\textbf{Opérations} : \texttt{+ - * /\,/\!/ \% **} ; \texttt{/} donne un décimal, \texttt{//} la division entière, \texttt{\%} le reste. Les comparaisons et \texttt{and}/\texttt{or}/\texttt{not} renvoient \texttt{True}/\texttt{False}.\\[2pt]
+\textbf{f-string} : \texttt{f"... \{variable\} ..."} insère et met en forme (\texttt{:.2f}). \texttt{+} ne colle que du texte.\\[2pt]
+\textbf{Chaîne} : séquence ; \texttt{len}, indices (à partir de \texttt{0}, \texttt{-1} pour le dernier), découpage \texttt{[a:b]} (fin exclue), méthodes \texttt{.strip/.upper/.lower/.replace/.split} ; elle est \textbf{immuable}.}
+\end{ucadret}
+\end{frame}
+
+\begin{frame}{Pièges fréquents}
+\begin{itemize}\small
+  \item Confondre \texttt{=} (affecter) et \texttt{==} (comparer).
+  \item Attendre un entier de \texttt{/} : utiliser \texttt{//} pour la division entière.
+  \item Coller texte et nombre avec \texttt{+} : passer par une f-string.
+  \item Oublier que les indices commencent à \textbf{0}, et que la borne de fin d'un découpage est \textbf{exclue}.
+  \item Croire qu'une méthode modifie la chaîne : elle en renvoie une \textbf{nouvelle}, à ranger dans une variable.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Prochaine séance}
+\begin{ucaddef}[Séance 2 — Structures de données]
+{\small On sait manipuler des valeurs isolées et des chaînes. La Séance 2 regroupe plusieurs valeurs dans une même structure : les \textbf{listes} (ordonnées, modifiables), les \textbf{tuples} (figés), les \textbf{dictionnaires} (clé $\rightarrow$ valeur) et les \textbf{ensembles}. On y retrouvera l'indexation et le découpage, étendus aux listes.}
+\end{ucaddef}
+{\small À faire d'ici là : refaire les cellules « À vous » du notebook de la séance.}
+\end{frame}
+
+\begin{frame}{Références}
+\begin{itemize}\small
+  \item Severance, C. — \emph{Python for Everybody}, 2016.
+  \item Downey, A. — \emph{Think Python}, 2e éd., O'Reilly, 2015.
+  \item Matthes, E. — \emph{Python Crash Course}, 3e éd., No Starch Press, 2023.
+  \item Python Software Foundation — \emph{The Python Tutorial}, documentation, 2024.
+\end{itemize}
+\end{frame}
+
+\end{document}
