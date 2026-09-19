@@ -51,6 +51,14 @@ couleur (au moins 5,9:1 sur le fond teinté) : la teinte vive du filet plafonnai
 | `$…$`, `$$…$$`, `\[…\]` | inchangés | rendus par MathJax |
 | `{\small …}`, `{\scriptsize …}` | *(retirés)* | la taille est affaire de style |
 | `\vskip`, `\centering`, `\par`, `\vfill` | *(retirés)* | idem |
+| `\\`, `\\[2pt]`, `\\*` | `<br>` | saut de ligne ; l'espacement en plus est affaire de style |
+| `\vspace{3pt}`, `\vskip 2ex`, `\vspace*{1cm}` | *(retirés)* | avec ou sans accolades, et quelle que soit l'unité |
+| `\smallskip`, `\medskip`, `\bigskip` | *(retirés)* | idem |
+| `\quad` | espace | sépare des éléments sur une même ligne |
+| `\figslide{l}{fichier}{légende}` | figure + légende | macro de `beamerucad.sty` ; la légende sert de texte alternatif |
+| `\resultat` | **Résultat →** | annonce la sortie du programme qui suit |
+| `lstlisting[style=out]`, `[style=err]` | bloc sans langage | une sortie de programme n'est pas du code |
+| `lstlisting[style=sh]` | ```` ```bash ```` | |
 | `\oe`, `~`, `\%`, `\&`, `\_`, `\#` | `œ`, espace insécable, `%`, `&`, `_`, `#` | |
 | toute autre commande ou environnement | `<!-- NON CONVERTI: … -->` | et une ligne dans le rapport |
 
