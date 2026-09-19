@@ -4,7 +4,7 @@
     python3 scripts/importer_chapitre.py cours/<slug>/_sources/cm1_archi_seance1.tex \
         --sortie cours/<slug>/chapitres/01-<slug>.qmd \
         --figures cours/<slug>/figures \
-        --rapport cours/<slug>/_sources/rapport-import.md
+        --rapport cours/<slug>/_sources/rapport-NN-<slug>.md
 
 Une `frame` Beamer donne une slide, une `\\section` donne une slide de section, et les sept encadrés
 `ucad*` donnent des callouts Quarto (voir `_specs/contenus/latex-vers-quarto.md`).
@@ -32,6 +32,15 @@ from collections import Counter
 from pathlib import Path
 
 SVG = "http://www.w3.org/2000/svg"
+
+# Ressources d'une séance (US-49) : libellé par type, dans les deux langues. Un corrigé n'est jamais
+# publié : il n'a donc pas de libellé ici, et le script refuse de l'écrire dans la page.
+RESSOURCES = {
+    "lab": {"fr": "Lab", "en": "Lab"},
+    "td": {"fr": "TD", "en": "Tutorial"},
+    "notebook": {"fr": "Notebook", "en": "Notebook"},
+}
+CORRIGE = "corrige"
 
 # Encadrés de beamerucad.sty : type de callout Quarto, classe de couleur, titre par défaut.
 ENCADRES = {
@@ -464,12 +473,30 @@ def nettoyer_svg(source: Path, cible: Path) -> dict[str, int]:
 # Écriture
 # --------------------------------------------------------------------------------------------------
 
+def slide_ressources(ressources: list[dict]) -> str:
+    """Dernière slide : les ressources de la séance (US-49).
+
+    Les corrigés en sont absents par construction : ils vivent hors du site (dossier _corriges/), et le
+    script refuse de les écrire ici — un corrigé ne doit jamais être publié à côté de son énoncé.
+    """
+    lignes = []
+    for ressource in ressources:
+        if ressource["type"] == CORRIGE:
+            continue
+        libelle = RESSOURCES[ressource["type"]]["fr"]
+        lignes.append(f'- {libelle} — [{ressource["titre"]}](/{ressource["chemin"]})')
+    if not lignes:
+        return ""
+    return "## Ressources de la séance\n\n" + "\n".join(lignes)
+
+
 def slide_capsule(video: str, titre: str) -> str:
     """Dernière slide : la capsule vidéo de la séance, chargée seulement au clic (US-19)."""
     return f'## Capsule vidéo\n\n{{{{< capsule {video} titre="{titre}" >}}}}'
 
 
-def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: str = "") -> str:
+def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: str = "",
+                ressources: list[dict] | None = None) -> str:
     def guillemets(valeur: str) -> str:
         return '"' + valeur.replace('"', '\\"') + '"'
 
@@ -482,6 +509,15 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: s
     if video:
         # Métadonnée de la séance : la capsule est aussi une slide, en fin de deck.
         lignes.append(f"video: {guillemets(video)}")
+    publiees = [r for r in (ressources or []) if r["type"] != CORRIGE]
+    if publiees:
+        # Métadonnée de la séance : la page du cours y lit la liste des ressources (US-49). Les corrigés
+        # n'y figurent pas — ils ne sont écrits nulle part dans le site.
+        lignes.append("ressources:")
+        for ressource in publiees:
+            lignes.append(f"  - type: {guillemets(ressource['type'])}")
+            lignes.append(f"    titre: {guillemets(ressource['titre'])}")
+            lignes.append(f"    chemin: {guillemets('/' + ressource['chemin'])}")
     lignes += [
         f"description: {guillemets(description)}",
         f"author: {guillemets(entete.get('author', ''))}",
@@ -512,12 +548,22 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: s
     return "\n".join(lignes)
 
 
+def depuis_la_racine(chemin: Path) -> Path:
+    """Chemin relatif au dépôt quand il y est, sinon tel quel (import hors dépôt)."""
+    try:
+        return chemin.resolve().relative_to(Path(__file__).resolve().parent.parent)
+    except ValueError:
+        return chemin
+
+
 def ecrire_rapport(chemin: Path, source: Path, sortie: Path, conversion: Conversion,
                    figures: dict[str, dict[str, int]]) -> None:
     lignes = [
         f"# Rapport de conversion — {source.name}",
         "",
-        f"Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `{sortie}`.",
+        # Chemin relatif au dépôt : un chemin absolu inscrirait le dossier personnel de qui importe
+        # dans un fichier commité, et changerait d'une machine à l'autre.
+        f"Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `{depuis_la_racine(sortie)}`.",
         "",
         "## À traiter à la main",
         "",
@@ -561,6 +607,9 @@ def main() -> int:
                            help="description de la page, pour le référencement")
     analyseur.add_argument("--video", default="",
                            help="identifiant YouTube de la capsule de la séance (slide finale, US-19)")
+    analyseur.add_argument("--ressource", action="append", default=[], metavar="TYPE|CHEMIN|TITRE",
+                           help="ressource de la séance : lab, td, notebook ou corrige, son chemin dans "
+                                "le site et son titre (répétable, US-49)")
     analyseur.add_argument("--feuille", default="../../../assets/css/slides.scss",
                            help="feuille de style des slides, relative au .qmd")
     args = analyseur.parse_args()
@@ -580,10 +629,21 @@ def main() -> int:
 
     entete = preambule(source)
     description = args.description or entete.get("subtitle", "")
+    ressources = []
+    for brute in args.ressource:
+        type_, _, reste = brute.partition("|")
+        chemin, _, titre = reste.partition("|")
+        if type_ not in RESSOURCES and type_ != CORRIGE:
+            sys.exit(f"Type de ressource inconnu : « {type_} » "
+                     f"(attendu : {', '.join(sorted(RESSOURCES))} ou {CORRIGE}).")
+        ressources.append({"type": type_, "chemin": chemin, "titre": titre or chemin})
+    slide = slide_ressources(ressources)
+    if slide:
+        pages.append(slide)
     if args.video:
         pages.append(slide_capsule(args.video, entete.get("title", "Capsule vidéo")))
     args.sortie.parent.mkdir(parents=True, exist_ok=True)
-    args.sortie.write_text(entete_yaml(entete, description, args.feuille, args.video)
+    args.sortie.write_text(entete_yaml(entete, description, args.feuille, args.video, ressources)
                            + "\n\n".join(pages) + "\n", encoding="utf-8")
 
     nettoyees = {}

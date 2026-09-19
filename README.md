@@ -134,9 +134,11 @@ cours/<slug>/
 ├── cours.yml            Métadonnées : titre, domaine, niveaux, semestre, statut, prérequis, objectifs
 ├── _metadata.yml        Options communes aux pages du cours (profondeur et titre de la table des matières)
 ├── index.qmd            Présentation, fiche (générée) et plan (listing des chapitres)
-└── chapitres/
-    ├── 01-<slug>.qmd    Le numéro fixe l'ordre de lecture
-    └── 02-<slug>.qmd
+├── chapitres/
+│   ├── 01-<slug>.qmd    Le numéro fixe l'ordre de lecture
+│   └── 02-<slug>.qmd
+├── ressources/          Énoncés distribués aux étudiants : labs, TD, notebooks (publiés)
+└── _corriges/           Corrigés : le préfixe « _ » les tient hors du site (jamais publiés)
 ```
 
 - `cours.yml` est la **seule source** des métadonnées : la fiche de la page du cours et la carte du
@@ -294,7 +296,7 @@ le mode sombre. La table de correspondance complète est dans
 python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
     --sortie cours/<slug>/chapitres/01-<slug>.qmd \
     --figures cours/<slug>/figures \
-    --rapport cours/<slug>/_sources/rapport-import.md \
+    --rapport cours/<slug>/_sources/rapport-NN-<slug>.md \
     --alt cours/<slug>/_sources/textes-alternatifs.toml \
     --figure-python figA_cout_changement=cours/<slug>/_sources/figs/figA.py \
     --description "Phrase de référencement de la séance."
@@ -342,6 +344,35 @@ séance et ajoute une dernière slide « Capsule vidéo » avec le shortcode :
 serait déjà une requête vers Google — et l'iframe n'est créée qu'au clic, sur `youtube-nocookie.com`. Le
 bouton porte un nom explicite, l'iframe reçoit le même titre, et un lien de repli s'affiche sans JavaScript.
 L'extension est dans `_extensions/capsule/`.
+
+### Ressources d'une séance
+
+Une séance peut distribuer des énoncés — lab, TD, notebook. Ils se déclarent dans son entrée de
+`_sources/import.toml`, une entrée par ressource (ou `--ressource type|fichier|titre` à l'import) :
+
+```toml
+[[chapitres.ressources]]
+type = "lab"                              # lab, td, notebook, ou corrige
+fichier = "ressources/lab1-couches.pdf"   # chemin relatif au dossier du cours
+titre = "Lab 1 — refactoring vers les couches"
+```
+
+Le fichier est **rangé par le PO** dans le dossier du cours, et le type décide où :
+
+| Type | Dossier | Publié ? |
+|---|---|---|
+| `lab`, `td`, `notebook` | `ressources/` | oui : lien sur la séance et sur la page du cours |
+| `corrige` | `_corriges/` | **non**, jamais : le préfixe `_` le tient hors du rendu Quarto |
+
+La règle « **jamais de corrigé publié à côté de son énoncé** » est tenue par trois verrous, pas par la
+vigilance : le script d'import n'écrit pas de lien pour un corrigé, `scripts/verifier_conversion.py`
+échoue si un corrigé est rangé ailleurs que dans `_corriges/`, et le même contrôle échoue si un nom de
+fichier de `_corriges/` apparaît dans le site rendu. Un corrigé se déclare quand même dans
+`import.toml` : c'est ce qui permet de vérifier qu'il existe et qu'il est bien rangé.
+
+Les libellés sont traduits (`TD` → `Tutorial`) et suivent la langue de la page qui les affiche. Les
+pages de cours étant monolingues (voir « Cours »), ils s'affichent aujourd'hui en français ; le jour où
+une page de cours existe en anglais, rien n'est à changer.
 
 ### PDF des séances
 

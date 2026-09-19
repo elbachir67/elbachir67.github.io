@@ -56,6 +56,9 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
         commande += ["--alt", str(cours / chapitre["alt"])]
     if chapitre.get("video"):
         commande += ["--video", chapitre["video"]]
+    for ressource in chapitre.get("ressources", []):
+        commande += ["--ressource",
+                     f"{ressource['type']}|cours/{cours.name}/{ressource['fichier']}|{ressource['titre']}"]
     for nom, script in chapitre.get("figures_python", {}).items():
         commande += ["--figure-python", f"{nom}={cours / script}"]
 
@@ -78,6 +81,37 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
         elif commitee.read_bytes() != produite.read_bytes():
             ecarts.append((commitee, "figure différente de celle que produit l'import"))
     return ecarts
+
+
+# Ressources d'une séance (US-49) : les énoncés sont publiés depuis ressources/, les corrigés vivent
+# dans _corriges/, que Quarto ne publie pas — le préfixe « _ » est la garantie, pas la vigilance.
+DOSSIER_PUBLIE, DOSSIER_CORRIGES = "ressources", "_corriges"
+
+
+def ressources_mal_rangees(cours: Path, chapitre: dict) -> list[tuple[Path, str]]:
+    """Une ressource doit exister, et un corrigé ne doit jamais être publiable."""
+    ecarts = []
+    for ressource in chapitre.get("ressources", []):
+        fichier = cours / ressource["fichier"]
+        dossier = Path(ressource["fichier"]).parts[0]
+        if not fichier.is_file():
+            ecarts.append((fichier, "ressource déclarée dans import.toml mais absente du dépôt"))
+        if ressource["type"] == "corrige" and dossier != DOSSIER_CORRIGES:
+            ecarts.append((fichier, f"un corrigé doit vivre dans {DOSSIER_CORRIGES}/, que le site ne "
+                                    "publie pas : jamais à côté de son énoncé"))
+        if ressource["type"] != "corrige" and dossier != DOSSIER_PUBLIE:
+            ecarts.append((fichier, f"une ressource publiée doit vivre dans {DOSSIER_PUBLIE}/"))
+    return ecarts
+
+
+def corriges_publies(site: Path) -> list[tuple[Path, str]]:
+    """Dernier filet : aucun fichier de _corriges/ ne doit se retrouver dans le site rendu."""
+    if not site.is_dir():
+        return []
+    noms = {fichier.name for corriges in RACINE.glob(f"cours/*/{DOSSIER_CORRIGES}")
+            for fichier in corriges.iterdir() if fichier.is_file()}
+    return [(publie, "corrigé publié : il doit rester hors du site")
+            for publie in site.rglob("*") if publie.is_file() and publie.name in noms]
 
 
 def gel_manquant(page: Path) -> str | None:
@@ -104,9 +138,11 @@ def main() -> int:
         cours = manifeste.parent.parent
         for chapitre in tomllib.loads(manifeste.read_text(encoding="utf-8"))["chapitres"]:
             chapitres += 1
+            ecarts += ressources_mal_rangees(cours, chapitre)
             with tempfile.TemporaryDirectory() as dossier:
                 ecarts += rejouer(cours, chapitre, Path(dossier))
 
+    ecarts += corriges_publies(RACINE / "_site")
     pages = sorted(RACINE.glob("cours/*/chapitres/*.qmd"))
     for page in pages:
         manquant = gel_manquant(page)
