@@ -302,8 +302,17 @@ python3 scripts/importer_chapitre.py cours/<slug>/_sources/<chapitre>.tex \
     --description "Phrase de référencement de la séance."
 ```
 
+- Le **langage des blocs de code** est celui que le `.tex` déclare (`\lstset{language=…}` ou
+  `\lstdefinestyle{…}`), et il est inscrit dans `import.toml` pour que le rejeu de la CI n'ait rien à
+  deviner. `--langage-code` le force. Les styles du thème sont respectés : `[style=out]` et `[style=err]`
+  donnent un bloc **sans coloration** — une sortie de programme n'est pas du code —, `[style=sh]` du shell.
+- Les **macros de `beamerucad.sty`** sont développées avant la conversion : `\figslide{largeur}{fichier}
+  {légende}` place la figure **et sa légende**, qui devient son texte alternatif — un deck qui légende ses
+  figures n'a donc aucun `TODO(PO)` à remplir. `\resultat` annonce la sortie qui suit.
 - Les **sources** (`.tex`, `.sty`, figures d'origine) vivent dans `cours/<slug>/_sources/`. Le préfixe `_`
   les tient hors du site publié, comme `_specs/` ; elles sont commitées pour que la conversion soit rejouable.
+  Quand les figures sont **produites par un script** (`make_figs_*.py`), le script est commité avec elles :
+  il sort le PDF pour LaTeX et le **SVG** pour le site, et c'est le SVG que la page incorpore.
 - **`cours/<slug>/_sources/import.toml` décrit chaque import** (fichier `.tex`, page produite, dossier des
   figures, textes alternatifs, figures calculées, description). `scripts/verifier_conversion.py` rejoue ces
   imports en CI et **échoue si la page ou une figure commitée diffère** de ce que produit le script : une

@@ -41,6 +41,10 @@ RESSOURCES = {
     "notebook": {"fr": "Notebook", "en": "Notebook"},
 }
 CORRIGE = "corrige"
+
+# Styles de `lstlisting` définis par beamerucad.sty : « out » et « err » sont des sorties de
+# programme, « sh » une commande shell. Sans style, c'est du code dans le langage du cours.
+STYLES_CODE = {"out": "", "err": "", "sh": "bash"}
 ISO = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # Encadrés de beamerucad.sty : type de callout Quarto, classe de couleur, titre par défaut.
@@ -75,9 +79,11 @@ EXPORT = re.compile(r"^\s*(matplotlib\.use\(|fig\.savefig\(|plt\.savefig\(|plt\.
 class Conversion:
     """Contexte de la conversion, et compte rendu de ce qu'elle a fait ou laissé à faire."""
 
-    def __init__(self, alternatifs: dict[str, str], prefixe_figures: str) -> None:
+    def __init__(self, alternatifs: dict[str, str], prefixe_figures: str,
+                 langage: str = "java") -> None:
         self.alternatifs = alternatifs          # textes alternatifs fournis par le PO, par figure
         self.prefixe_figures = prefixe_figures  # chemin des figures, relatif au .qmd produit
+        self.langage = langage                  # langage des blocs de code, déclaré par le .tex
         self.insertions: list[str] = []         # blocs déjà finalisés, à l'abri de la conversion
         self.scripts: dict[str, Path] = {}      # figures calculées : script Python, par nom de figure
         self.non_convertis: list[tuple[str, str]] = []
@@ -161,6 +167,32 @@ def preambule(source: str) -> dict[str, str]:
 # Conversion du texte
 # --------------------------------------------------------------------------------------------------
 
+def macros_du_theme(texte: str) -> str:
+    """Développe les macros de beamerucad.sty que la conversion ne peut pas deviner.
+
+    `\\figslide{largeur}{fichier}{légende}` place une figure et sa légende : on le récrit sous la
+    forme que le reste du script connaît déjà, pour que la légende serve de texte alternatif.
+    `\\resultat` annonce la sortie du programme qui suit.
+    """
+    motif = re.compile(r"\\figslideb?\{([^}]*)\}\{([^}]*)\}\{", re.S)
+    while True:
+        trouve = motif.search(texte)
+        if not trouve:
+            break
+        # La légende est le troisième argument : elle contient des accolades (\texttt{…}), donc
+        # elle se lit en comptant les accolades, et non avec une expression régulière.
+        fin = accolade(texte, trouve.end() - 1)
+        largeur, fichier, legende = trouve[1], trouve[2], texte[trouve.end():fin]
+        # La légende suit immédiatement l'image : c'est à cette adjacence que le script la reconnaît,
+        # et c'est elle qui deviendra le texte alternatif de la figure.
+        texte = (texte[:trouve.start()]
+                 + f"\\begin{{center}}\\includegraphics[width={largeur}\\linewidth]{{{fichier}}}\n"
+                   f"{{\\scriptsize {legende}}}\\end{{center}}"
+                 + texte[fin + 1:])
+    texte = texte.replace("\\resultat", "\n\n**Résultat →**\n\n")
+    return texte.replace("\\quad", " ")
+
+
 def sans_commentaires(texte: str) -> str:
     return "\n".join(ligne for ligne in texte.splitlines()
                      if not ligne.lstrip().startswith("%"))
@@ -242,7 +274,7 @@ def figures(texte: str, conversion: Conversion) -> str:
         trouve = MOTIF_IMAGE.search(texte)
         if not trouve:
             return texte
-        nom = trouve["nom"]
+        nom = Path(trouve["nom"]).name
         mesure = re.search(r"width=([\d.]+)\\linewidth", trouve["options"] or "")
         largeur = float(mesure[1]) if mesure else None
 
@@ -322,7 +354,10 @@ def inline(texte: str, conversion: Conversion) -> str:
             return "<br>"
         return conversion.non_converti("\\" + nom)
 
-    texte = re.sub(r"\\(vskip|vspace)\*?\s*-?[\d.]+\s*(pt|ex|em|cm|mm)", "", texte)
+    # « \\ », « \\[2pt] », « \\* » : un saut de ligne, l'espacement en plus étant affaire de style.
+    texte = re.sub(r"\\\\\*?\s*(?:\[[^\]]*\])?", "<br>", texte)
+    # Espacements verticaux, avec ou sans accolades : « \vspace{3pt} », « \vskip 2ex », « \vspace*{1cm} ».
+    texte = re.sub(r"\\(?:vskip|vspace)\*?\s*(?:\{[^}]*\}|-?[\d.]+\s*[a-z]+)", "", texte)
     texte = re.sub(r"\\([A-Za-z]+)\s*(?:\{\})?", commande, texte)
     texte = (texte.replace("\\%", "%").replace("\\&", "&").replace("\\_", "_")
              .replace("\\#", "#").replace("~", "\u00a0"))
@@ -335,6 +370,8 @@ def tableau(contenu: str, conversion: Conversion) -> str:
     conversion.tableaux += 1
     lignes = []
     for brute in contenu.split("\\\\"):
+        # Une ligne peut finir par « \\[2pt] » : l'espacement reste collé au début de la suivante.
+        brute = re.sub(r"^\s*\[[^\]]*\]", "", brute)
         cellules = [inline(c, conversion).replace("\n", " ").strip()
                     for c in brute.split("&")]
         if any(cellules):
@@ -361,11 +398,30 @@ def liste(contenu: str, ordonnee: bool, conversion: Conversion) -> str:
     return "\n".join(puces)
 
 
-def code(contenu: str, conversion: Conversion) -> str:
-    """lstlisting -> bloc de code ; le langage se déduit du contenu, Java ou shell."""
+def langage_declare(source: str) -> str:
+    """Langage annoncé par le .tex : `\\lstset{language=Python}` ou `\\lstdefinestyle{…,language=…}`.
+
+    Le deviner d'après le contenu suffisait pour un seul cours ; avec un deuxième, la source fait foi.
+    """
+    preambule = source.split(r"\begin{document}", 1)[0]
+    trouve = re.search(r"language\s*=\s*([A-Za-z+#]+)", preambule)
+    return trouve[1].lower() if trouve else ""
+
+
+def code(contenu: str, conversion: Conversion, options: str | None = None) -> str:
+    """lstlisting -> bloc de code, dans le langage du cours ; une sortie de programme reste nue.
+
+    Le style est celui que le .tex demande (`[style=out]`, `[style=err]`, `[style=sh]`) : une sortie
+    de programme ou une trace d'erreur n'est pas du code, et ne doit pas être colorée comme tel.
+    """
     corps = contenu.strip("\n")
+    style = re.search(r"style\s*=\s*(\w+)", options or "")
+    if style and style[1] in STYLES_CODE:
+        langage = STYLES_CODE[style[1]]
+        conversion.codes.append(langage or "sortie")
+        return f"```{langage}\n{corps}\n```"
     shell = re.search(r"^\s*(\./|\$ |#\s|[a-z-]+\s+--?[a-z])", corps, re.M) and ";" not in corps
-    langage = "bash" if shell else "java"
+    langage = "bash" if shell else conversion.langage
     conversion.codes.append(langage)
     return f"```{langage}\n{corps}\n```"
 
@@ -396,7 +452,7 @@ def convertir(texte: str, conversion: Conversion) -> str:
         elif nom in ("itemize", "enumerate"):
             morceaux.append(liste(contenu, nom == "enumerate", conversion))
         elif nom == "lstlisting":
-            morceaux.append(code(contenu, conversion))
+            morceaux.append(code(contenu, conversion, titre))
         elif nom == "tabular":
             morceaux.append(tableau(contenu, conversion))
         elif nom in ("center", "block", "columns", "column"):
@@ -644,6 +700,9 @@ def main() -> int:
                            help="ressource de la séance : lab, td, notebook ou corrige, son fichier dans "
                                 "le dépôt et son titre ; un corrigé exige en plus sa date de publication "
                                 "(AAAA-MM-JJ). Répétable (US-49)")
+    analyseur.add_argument("--langage-code",
+                           help="langage des blocs lstlisting (par défaut : celui que le .tex déclare, "
+                                "sinon java). Une commande shell reste du shell.")
     analyseur.add_argument("--feuille", default="../../../assets/css/slides.scss",
                            help="feuille de style des slides, relative au .qmd")
     args = analyseur.parse_args()
@@ -652,13 +711,14 @@ def main() -> int:
     alternatifs = tomllib.loads(args.alt.read_text(encoding="utf-8")) if args.alt else {}
     # Les figures sont citées dans le .qmd par un chemin relatif à lui, comme un lien Markdown.
     prefixe = args.prefixe_figures or os.path.relpath(args.figures, args.sortie.parent)
-    conversion = Conversion(alternatifs, prefixe)
+    conversion = Conversion(alternatifs, prefixe,
+                            args.langage_code or langage_declare(source) or "java")
     for couple in args.figure_python:
         nom, _, script = couple.partition("=")
         conversion.scripts[nom] = Path(script)
 
     debut = source.index("\\begin{document}") + len("\\begin{document}")
-    corps = source[debut:source.index("\\end{document}")]
+    corps = macros_du_theme(source[debut:source.index("\\end{document}")])
     pages = slides(corps, conversion)
 
     entete = preambule(source)

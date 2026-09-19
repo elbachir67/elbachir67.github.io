@@ -1,0 +1,374 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{beamerucad}
+\usepackage{listings}
+\definecolor{ckw}{HTML}{2563AB}\definecolor{cst}{HTML}{2E8B57}\definecolor{ccm}{HTML}{8A8F98}
+\definecolor{outbg}{HTML}{F4F5F7}\definecolor{outrule}{HTML}{2E8B57}
+\definecolor{errbg}{HTML}{FBEDEC}\definecolor{errrule}{HTML}{C0392B}
+\definecolor{shrule}{HTML}{2563AB}
+% --- code Python (barre bleue, coloration syntaxique) ---
+\lstdefinestyle{py}{language=Python,basicstyle=\ttfamily\scriptsize,
+ keywordstyle=\color{ckw}\bfseries,stringstyle=\color{cst},commentstyle=\color{ccm}\itshape,
+ showstringspaces=false,columns=fullflexible,keepspaces=true,
+ backgroundcolor=\color{ucadband!8},frame=leftline,framerule=2.5pt,rulecolor=\color{ucadband},
+ xleftmargin=8pt,aboveskip=3pt,belowskip=1pt,basewidth=0.5em}
+% --- sortie d'execution (barre verte) ---
+\lstdefinestyle{out}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{outbg},frame=leftline,framerule=2.5pt,rulecolor=\color{outrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+% --- terminal : commandes + sortie (barre bleue, pas de coloration de mots-cles) ---
+\lstdefinestyle{sh}{basicstyle=\ttfamily\scriptsize\color{black!85},
+ backgroundcolor=\color{ucadband!8},frame=leftline,framerule=2.5pt,rulecolor=\color{shrule},
+ xleftmargin=8pt,aboveskip=3pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+% --- message d'erreur / traceback (barre rouge) ---
+\lstdefinestyle{err}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{errbg},frame=leftline,framerule=2.5pt,rulecolor=\color{errrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+\lstset{style=py}
+\newcommand{\resultat}{{\scriptsize\textbf{R\'esultat}~$\rightarrow$}\par\vspace{1pt}}
+
+\title{Programmation Python — Séance 0}
+\subtitle{Mise en place et outils du praticien}
+\author{Dr. El Hadji Bassirou TOURÉ}
+\institute{Département de Mathématiques et Informatique\\ Faculté des Sciences et Techniques\\ Université Cheikh Anta Diop de Dakar}
+\date{}
+\setucadfoot{Programmation Python — Séance 0}
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]\titlepage\end{frame}
+
+% =====================================================================
+\begin{frame}{Objectifs de la séance}
+\begin{ucaddef}[Contenu]
+{\small Avant d'écrire la moindre ligne de Python, il faut \textbf{installer l'atelier} et savoir s'en servir. Cette séance ne contient aucun formalisme : on met en place les outils, et on apprend les gestes qui reviendront à chaque séance. Le but n'est pas de tout retenir, mais d'avoir un poste de travail qui fonctionne et de ne plus paniquer devant un message d'erreur.}
+\end{ucaddef}
+\begin{itemize}\small
+  \item \textbf{Le terminal} : donner des ordres à la machine en quelques commandes.
+  \item \textbf{Anaconda et les environnements} : installer Python dans une bulle isolée.
+  \item \textbf{Jupyter} : le cahier interactif où l'on écrit et exécute du code.
+  \item \textbf{Lire une erreur} : comprendre un \emph{traceback} au lieu de le craindre.
+  \item \textbf{Git et GitHub} : sauvegarder et partager son travail (découverte).
+\end{itemize}
+{\small Le détail d'installation, étape par étape, est dans la \textbf{fiche pratique} fournie avec la séance.}
+\end{frame}
+
+% #####################################################################
+\section{Pourquoi des outils ?}
+
+\begin{frame}{L'idée : programmer, c'est tenir un atelier}
+\begin{ucadfront}[Analogie]
+{\small Un menuisier ne se résume pas à son marteau : il a un \textbf{établi}, des \textbf{outils rangés}, et un \textbf{carnet} où il note ce qu'il fait. Programmer, c'est pareil. Le code n'est qu'une partie ; autour, il y a un atelier qu'il faut monter une fois pour toutes.}
+\end{ucadfront}
+{\small Quatre outils composent cet atelier, et chacun a un rôle précis :}
+\begin{itemize}\small
+  \item le \textbf{terminal}, pour donner des ordres directs à la machine ;
+  \item \textbf{Anaconda}, qui installe Python et range les bibliothèques dans des \textbf{environnements} ;
+  \item \textbf{Jupyter}, le cahier où l'on travaille réellement ;
+  \item \textbf{Git} (avec \textbf{GitHub}), le carnet de bord qui garde la trace de tout.
+\end{itemize}
+{\small On les installe d'abord, on les comprend ensuite. La séance suit cet ordre.}
+\end{frame}
+
+\begin{frame}{L'atelier du praticien}
+\figslide{0.74}{figs/f0_atelier}{Chaque outil s'appuie sur le précédent ; Git veille à côté et conserve l'historique du travail.}
+\end{frame}
+
+% #####################################################################
+\section{Le terminal}
+
+\begin{frame}{L'idée : parler à la machine en ligne de commande}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Le \textbf{terminal} est une fenêtre où l'on tape des \textbf{commandes} que la machine exécute aussitôt. Pas de boutons, pas de souris : on écrit l'ordre, on appuie sur Entrée, on lit la réponse.}
+\end{ucaddef}
+{\small C'est austère, mais c'est l'outil le plus direct et le plus universel : installer Python, créer un environnement, lancer Jupyter, utiliser Git — tout passe par là. On l'ouvre via \emph{Terminal} (macOS, Linux) ou \emph{Anaconda Prompt} (Windows). Le signe \texttt{\$} au début d'une ligne signale « ici, vous tapez une commande » ; il ne se tape pas.}
+\end{frame}
+
+\begin{frame}[fragile]{Les commandes vitales}
+\begin{ucadex}[Se repérer et créer des dossiers]
+{\small Quatre commandes suffisent pour commencer : savoir où l'on est, voir ce qu'il y a, se déplacer, créer un dossier.}
+\end{ucadex}
+\begin{lstlisting}[style=sh]
+$ pwd                      # ou suis-je ? (Print Working Directory)
+/home/fatou
+$ ls                       # lister le contenu du dossier
+Bureau   Documents   Telechargements
+$ mkdir projet-python      # creer un dossier
+$ cd projet-python         # entrer dedans
+$ pwd
+/home/fatou/projet-python
+\end{lstlisting}
+{\small \texttt{cd ..} remonte d'un cran ; \texttt{cd} seul ramène au dossier personnel.}
+\end{frame}
+
+\begin{frame}{Piège — les chemins}
+\begin{ucadpiege}[Chemin relatif ou absolu]
+{\small Un \textbf{chemin absolu} part de la racine et ne change jamais : \texttt{/home/fatou/projet-python}. Un \textbf{chemin relatif} part de l'endroit où l'on se trouve : \texttt{projet-python} ne marche que si l'on est déjà dans \texttt{/home/fatou}. Une commande qui « ne trouve pas le fichier » vient presque toujours de là : on n'est pas dans le bon dossier (\texttt{pwd} pour vérifier).}
+\end{ucadpiege}
+{\small Second piège : les \textbf{espaces} dans les noms. \texttt{cd Mon projet} échoue, car le terminal lit deux mots. On évite les espaces (\texttt{mon-projet}) ou on protège par des guillemets : \texttt{cd "Mon projet"}.}
+\end{frame}
+
+% #####################################################################
+\section{Anaconda et les environnements}
+
+\begin{frame}{L'idée : une boîte à outils isolée par projet}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Un \textbf{environnement} est une installation de Python séparée, avec ses propres bibliothèques, réservée à un projet. \textbf{Anaconda} fournit Python et l'outil \texttt{conda} qui crée et gère ces environnements.}
+\end{ucaddef}
+\begin{ucadfront}[Analogie]
+{\small Une \textbf{trousse par matière} : les stylos de mathématiques ne se mélangent pas avec ceux de dessin. De même, un projet qui a besoin d'une ancienne version d'une bibliothèque ne doit pas casser un autre projet. Chaque environnement est une bulle : ce qu'on y installe n'affecte que lui.}
+\end{ucadfront}
+\end{frame}
+
+\begin{frame}[fragile]{Créer et activer un environnement}
+\begin{lstlisting}[style=sh]
+$ conda create -n prog-python python=3.12
+Collecting package metadata: done
+Solving environment: done
+Proceed ([y]/n)? y
+Preparing transaction: done
+#
+# To activate this environment, use
+#     $ conda activate prog-python
+
+$ conda activate prog-python
+(prog-python) $        # le nom de la bulle apparait a gauche
+\end{lstlisting}
+{\small \texttt{-n prog-python} nomme l'environnement ; \texttt{python=3.12} fixe la version. Une fois \emph{activé}, tout ce qu'on installe va dans cette bulle.}
+\end{frame}
+
+\begin{frame}[fragile]{Installer des bibliothèques}
+\begin{ucadex}[Ajouter les outils de la science des données]
+{\small Dans l'environnement activé, on installe les bibliothèques du cours en une commande.}
+\end{ucadex}
+\begin{lstlisting}[style=sh]
+(prog-python) $ pip install numpy pandas matplotlib jupyter
+...
+Successfully installed jupyter matplotlib numpy pandas
+
+(prog-python) $ conda list        # verifier ce qui est installe
+\end{lstlisting}
+\begin{ucadpiege}[L'erreur numéro un]
+{\small \texttt{ModuleNotFoundError: No module named 'pandas'} signifie presque toujours : l'environnement n'est pas activé, ou la bibliothèque a été installée dans la mauvaise bulle. Réflexe : vérifier le \texttt{(prog-python)} à gauche, puis réactiver.}
+\end{ucadpiege}
+\end{frame}
+
+\begin{frame}{Une alternative : venv}
+\begin{ucadfront}[Pour information]
+{\small Sans Anaconda, Python possède son propre outil d'environnements, \texttt{venv} : \texttt{python -m venv mon-env} crée la bulle, puis on l'active. C'est plus léger mais moins complet que \texttt{conda} (qui gère aussi des outils non-Python). Pour ce cours, on reste sur \texttt{conda}.}
+\end{ucadfront}
+{\small À retenir simplement : \textbf{toujours travailler dans un environnement activé}, jamais dans le Python « du système ». C'est ce qui rend un projet reproductible : on peut recréer exactement la même bulle sur une autre machine.}
+\end{frame}
+
+% #####################################################################
+\section{Jupyter, le carnet de laboratoire}
+
+\begin{frame}{L'idée : un cahier qui mêle texte, code et résultats}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Un \textbf{notebook} Jupyter est un document fait de \textbf{cellules} : des cellules de \emph{texte} (Markdown) pour expliquer, des cellules de \emph{code} (Python) qu'on exécute une à une, et la \emph{sortie} qui s'affiche juste en dessous.}
+\end{ucaddef}
+{\small C'est l'outil du praticien des données : on essaie une idée, on voit le résultat immédiatement, on ajuste. On peut tout raconter dans le même document — d'où son nom de cahier de laboratoire. Tous les TP du cours sont des notebooks.}
+\end{frame}
+
+\begin{frame}{Anatomie d'un notebook}
+\figslide{0.72}{figs/f0_notebook}{Trois types de contenu dans un même document : texte, code exécutable, et la sortie produite.}
+\end{frame}
+
+\begin{frame}[fragile]{Lancer Jupyter et exécuter une cellule}
+\begin{lstlisting}[style=sh]
+(prog-python) $ jupyter notebook
+[I] Jupyter Notebook is running at:
+[I] http://localhost:8888/tree
+\end{lstlisting}
+{\small Le navigateur s'ouvre. On crée un notebook, on tape une ligne dans une cellule de code, puis \textbf{Maj+Entrée} pour l'exécuter :}
+\begin{lstlisting}
+print("Salut Dakar !")
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Salut Dakar !
+\end{lstlisting}
+{\small Le compteur passe de \texttt{In [\,]} à \texttt{In [1]} : la cellule a été exécutée, et c'était la première.}
+\end{frame}
+
+\begin{frame}{Piège — l'ordre d'exécution}
+\begin{ucadpiege}[Le notebook garde une mémoire cachée]
+{\small Les cellules ne s'exécutent pas forcément du haut vers le bas : elles s'exécutent \textbf{dans l'ordre où vous appuyez sur Maj+Entrée}. Le numéro \texttt{In [n]} donne cet ordre réel. Si vous revenez modifier une cellule du haut sans ré-exécuter celles du bas, l'affichage et l'état réel ne correspondent plus.}
+\end{ucadpiege}
+{\small Symptôme classique : une variable « existe » alors qu'on a effacé la cellule qui la définissait — elle vit encore en mémoire. Réflexe en cas de doute : menu \emph{Kernel} $\rightarrow$ \emph{Restart \& Run All} pour tout ré-exécuter proprement, du début.}
+\end{frame}
+
+% #####################################################################
+\section{Lire une erreur sans paniquer}
+
+\begin{frame}{L'idée : une erreur est un message, pas un échec}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Quand Python rencontre un problème, il s'arrête et affiche un \textbf{traceback} : un message qui indique \emph{où} ça casse et \emph{pourquoi}. Ce n'est pas une punition, c'est une information précise. La règle : le \textbf{lire de bas en haut}.}
+\end{ucaddef}
+{\small La dernière ligne donne le \textbf{type} d'erreur et sa cause — c'est elle qu'on lit en premier. Au-dessus, le fichier et le numéro de ligne situent l'endroit. Une flèche (\texttt{\^{}} ou \texttt{\~{}\~{}\^{}}) pointe le caractère fautif. Avec un peu d'habitude, les mêmes erreurs reviennent : on les reconnaît d'un coup d'œil.}
+\end{frame}
+
+\begin{frame}{Anatomie d'un traceback}
+\figslide{0.78}{figs/f0_traceback}{La dernière ligne (le type et le message) est la plus utile ; on remonte ensuite vers l'endroit fautif.}
+\end{frame}
+
+\begin{frame}[fragile]{Erreur 1 — \texttt{SyntaxError}}
+{\small Python n'arrive pas à \emph{lire} le code : il est mal écrit.}
+\begin{lstlisting}
+print("Bonjour Dakar)
+\end{lstlisting}
+\begin{lstlisting}[style=err]
+  File "analyse.py", line 1
+    print("Bonjour Dakar)
+          ^
+SyntaxError: unterminated string literal (detected at line 1)
+\end{lstlisting}
+{\small \emph{unterminated string literal} = un guillemet n'a pas été fermé. Correction : \texttt{print("Bonjour Dakar")}. Ce type d'erreur empêche le programme de démarrer.}
+\end{frame}
+
+\begin{frame}[fragile]{Erreur 2 — \texttt{NameError}}
+{\small On utilise un nom que Python ne connaît pas (souvent une faute de frappe).}
+\begin{lstlisting}
+moyenne = 14.5
+print(moyene)
+\end{lstlisting}
+\begin{lstlisting}[style=err]
+Traceback (most recent call last):
+  File "analyse.py", line 2, in <module>
+    print(moyene)
+          ^^^^^^
+NameError: name 'moyene' is not defined. Did you mean: 'moyenne'?
+\end{lstlisting}
+{\small Python va jusqu'à \textbf{suggérer} le bon nom. Correction : \texttt{print(moyenne)}.}
+\end{frame}
+
+\begin{frame}[fragile]{Erreur 3 — \texttt{IndentationError}}
+{\small L'indentation (le décalage en début de ligne) est obligatoire en Python.}
+\begin{lstlisting}
+for i in range(3):
+print(i)
+\end{lstlisting}
+\begin{lstlisting}[style=err]
+  File "analyse.py", line 2
+    print(i)
+    ^
+IndentationError: expected an indented block after 'for' statement on line 1
+\end{lstlisting}
+{\small Le corps d'une boucle doit être \textbf{décalé} (4 espaces). Correction : indenter \texttt{print(i)}. On reverra l'indentation en Séance 3.}
+\end{frame}
+
+\begin{frame}[fragile]{Erreur 4 — \texttt{TypeError}}
+{\small On combine des types incompatibles : ici du texte et un entier.}
+\begin{lstlisting}
+age = 23
+print("Age : " + age)
+\end{lstlisting}
+\begin{lstlisting}[style=err]
+Traceback (most recent call last):
+  File "analyse.py", line 2, in <module>
+    print("Age : " + age)
+          ~~~~~~~~~^~~~~
+TypeError: can only concatenate str (not "int") to str
+\end{lstlisting}
+{\small On ne « colle » pas un nombre à du texte. Correction propre, avec une f-string (Séance 1) : \texttt{print(f"Age : \{age\}")}.}
+\end{frame}
+
+% #####################################################################
+\section{Git et GitHub (découverte)}
+
+\begin{frame}{L'idée : une machine à remonter le temps pour le code}
+\begin{ucaddef}[L'idée en une phrase]
+{\small \textbf{Git} enregistre des \textbf{photos} successives de votre projet (les \emph{commits}). On peut revenir à n'importe quelle photo, comparer, ne jamais rien perdre. \textbf{GitHub} est un site qui héberge une copie en ligne de ces photos, pour les sauvegarder et les partager.}
+\end{ucaddef}
+\begin{ucadfront}[Analogie]
+{\small Comme des \textbf{sauvegardes nommées} d'un document : « version avec l'introduction », « version corrigée ». Sauf qu'ici chaque sauvegarde est datée, accompagnée d'un message, et qu'on peut revenir à l'une d'elles à tout moment.}
+\end{ucadfront}
+\end{frame}
+
+\begin{frame}{Le cycle de Git}
+\figslide{0.82}{figs/f0_gitflow}{De vos fichiers à GitHub : \texttt{add} prépare, \texttt{commit} enregistre une photo, \texttt{push} l'envoie en ligne.}
+\end{frame}
+
+\begin{frame}[fragile]{Le cycle en pratique}
+\begin{ucadex}[Premier dépôt, premier commit]
+{\small On initialise un dépôt dans le dossier du projet, on prépare un fichier, on enregistre une photo.}
+\end{ucadex}
+\begin{lstlisting}[style=sh]
+$ git init
+Initialized empty Git repository in /home/fatou/projet/.git/
+$ git add analyse.py
+$ git commit -m "Premier commit : squelette de l'analyse"
+[main (root-commit) f07be7e] Premier commit : squelette de l'analyse
+ 1 file changed, 2 insertions(+)
+ create mode 100644 analyse.py
+\end{lstlisting}
+{\small \texttt{f07be7e} est l'identifiant unique de cette photo ; le message décrit ce qu'elle contient.}
+\end{frame}
+
+\begin{frame}[fragile]{Envoyer sur GitHub}
+{\small Après avoir créé un dépôt vide sur GitHub, on le relie au projet local et on envoie :}
+\begin{lstlisting}[style=sh]
+$ git remote add origin https://github.com/fatou/projet.git
+$ git push -u origin main
+To https://github.com/fatou/projet.git
+ * [new branch]      main -> main
+\end{lstlisting}
+{\small Un fichier \texttt{.gitignore} indique ce qu'il ne faut \textbf{pas} versionner :}
+\begin{lstlisting}[style=sh]
+# .gitignore
+__pycache__/
+*.csv
+.env
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Pièges de Git, et ce qui vient après}
+\begin{ucadpiege}[Trois réflexes]
+{\small \textbf{1.} Un commit sans \texttt{add} préalable n'enregistre rien : \texttt{add} puis \texttt{commit}. \quad \textbf{2.} Un message de commit doit décrire le \emph{quoi} (« ajoute le calcul de la moyenne »), pas « modif ». \quad \textbf{3.} Ne jamais pousser de \textbf{données} volumineuses ni de \textbf{mots de passe} : c'est le rôle du \texttt{.gitignore}.}
+\end{ucadpiege}
+\begin{ucadfront}[Vu plus loin]
+{\small Git permet aussi de travailler à plusieurs grâce aux \emph{branches} et au \emph{merge}. Ces notions ne sont pas nécessaires ici : à ce stade, le cycle \texttt{add} $\rightarrow$ \texttt{commit} $\rightarrow$ \texttt{push} suffit largement.}
+\end{ucadfront}
+\end{frame}
+
+% #####################################################################
+\section{Synthèse}
+
+\begin{frame}{À retenir — Séance 0}
+\begin{ucadret}[L'essentiel]
+{\small
+\textbf{Le terminal} exécute des commandes : \texttt{pwd}, \texttt{ls}, \texttt{cd}, \texttt{mkdir}.\\[2pt]
+\textbf{Anaconda} installe Python ; \texttt{conda} crée des \textbf{environnements} isolés. On travaille toujours dans un environnement \textbf{activé}.\\[2pt]
+\textbf{Jupyter} est le cahier : cellules de texte, de code, et sorties. Le numéro \texttt{In [n]} donne l'ordre réel d'exécution.\\[2pt]
+\textbf{Un traceback se lit de bas en haut} : le type et le message d'abord, puis l'endroit.\\[2pt]
+\textbf{Git} enregistre des photos du projet : \texttt{add} $\rightarrow$ \texttt{commit} $\rightarrow$ \texttt{push} ; \textbf{GitHub} en garde une copie en ligne.}
+\end{ucadret}
+\end{frame}
+
+\begin{frame}{Pièges fréquents}
+\begin{itemize}\small
+  \item \textbf{« Fichier introuvable »} au terminal : on n'est pas dans le bon dossier (\texttt{pwd}), ou un espace traîne dans un nom.
+  \item \textbf{\texttt{ModuleNotFoundError}} : environnement non activé, ou bibliothèque installée dans la mauvaise bulle.
+  \item \textbf{Notebook incohérent} : cellules exécutées dans le désordre ; \emph{Restart \& Run All}.
+  \item \textbf{Lire le haut du traceback} au lieu du bas : la cause est sur la \textbf{dernière} ligne.
+  \item \textbf{\texttt{commit} sans \texttt{add}}, ou message vague : préparer puis enregistrer, avec un message clair.
+  \item \textbf{Pousser des données ou des secrets} sur GitHub : les exclure via \texttt{.gitignore}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Prochaine séance}
+\begin{ucaddef}[Séance 1 — Valeurs, types et chaînes]
+{\small L'atelier est monté : on peut écrire du Python. La Séance 1 pose les premières briques du langage — les \textbf{variables}, les \textbf{types} (entier, décimal, texte, booléen), les \textbf{opérations}, les \textbf{f-strings} pour afficher proprement, et la manipulation des \textbf{chaînes de caractères}.}
+\end{ucaddef}
+{\small À faire d'ici là : suivre la \textbf{fiche pratique} pour installer Anaconda, créer l'environnement \texttt{prog-python}, lancer Jupyter, et déposer un premier fichier sur GitHub.}
+\end{frame}
+
+\begin{frame}{Références}
+\begin{itemize}\small
+  \item Software Carpentry — \emph{The Unix Shell} et \emph{Version Control with Git}, lessons, 2024.
+  \item Anaconda — \emph{Getting Started with conda}, documentation, 2024.
+  \item Project Jupyter — \emph{Jupyter Notebook Documentation}, 2024.
+  \item Severance, C. — \emph{Python for Everybody}, 2016.
+  \item Chacon, S., Straub, B. — \emph{Pro Git}, 2e éd., Apress, 2014.
+\end{itemize}
+\end{frame}
+
+\end{document}

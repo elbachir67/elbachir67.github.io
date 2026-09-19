@@ -1,0 +1,193 @@
+% ======================================================================
+%  beamerucad.sty  --  Theme Beamer "cours magistral" UCAD (reutilisable)
+%  Moteur : xelatex.  Police : DejaVu Sans (= police des figures matplotlib)
+%  + Latin Modern Math.  Couleurs calees sur le logo UCAD (#2890E8).
+%
+%  Usage :
+%     \documentclass[aspectratio=169]{beamer}
+%     \usepackage{beamerucad}
+%     \setucadfoot{Practical ML -- Seance 6}
+%     \title{...}\subtitle{...}\author{...}\institute{...}\date{...}
+%
+%  Logo : place "logo-ucad.png" (ou .pdf) dans le dossier.
+% ======================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerucad}[2026/06/08 Theme UCAD magistral]
+
+% ---------- Polices (xelatex) ----------
+\RequirePackage{fontspec}
+\setsansfont{DejaVu Sans}[Scale=0.90,BoldFont={DejaVu Sans Bold}]
+\setmonofont{DejaVu Sans Mono}[Scale=0.82]
+\RequirePackage{unicode-math}
+\setmathfont{Latin Modern Math}
+\renewcommand{\familydefault}{\sfdefault}
+
+% ---------- Paquets ----------
+\RequirePackage{tcolorbox}\tcbuselibrary{skins}
+\RequirePackage{booktabs}\RequirePackage{array}\RequirePackage{graphicx}
+
+% ---------- Palette (logo UCAD) ----------
+\definecolor{ucadblue}{HTML}{2890E8}   % bleu du sceau UCAD
+\definecolor{ucadband}{HTML}{2585D6}   % bandeau (legerement plus profond)
+\definecolor{ucaddark}{HTML}{0F3A5E}   % bleu fonce (texte/accents)
+\definecolor{ucadmuted}{HTML}{5A6B75}
+\definecolor{ucadink}{HTML}{1C2A33}
+% accents semantiques (identiques a la fiche)
+\definecolor{cDef}{HTML}{3B6FB0}\definecolor{cForm}{HTML}{7D3C98}
+\definecolor{cEx}{HTML}{2E8B57}\definecolor{cPiege}{HTML}{D9822B}
+\definecolor{cRet}{HTML}{B7950B}\definecolor{cRec}{HTML}{2A9D8F}
+\definecolor{cFront}{HTML}{2899A9}
+
+% ---------- Couleurs Beamer ----------
+\setbeamercolor{normal text}{fg=ucadink,bg=white}
+\setbeamercolor{structure}{fg=ucadblue}
+\setbeamercolor{title}{fg=ucaddark}
+\setbeamercolor{frametitle}{fg=white,bg=ucadband}
+\setbeamercolor{itemize item}{fg=ucadblue}
+\setbeamercolor{itemize subitem}{fg=ucadmuted}
+\setbeamercolor{enumerate item}{fg=ucadblue}
+\setbeamercolor{alerted text}{fg=cPiege}
+\setbeamercolor{example text}{fg=cEx}
+\setbeamercolor{block title}{fg=white,bg=ucadband}
+\setbeamercolor{block body}{fg=ucadink,bg=ucadblue!7}
+
+% ---------- Polices Beamer ----------
+\setbeamerfont{title}{size=\LARGE,series=\bfseries}
+\setbeamerfont{subtitle}{size=\large}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{foottext}{size=\scriptsize}
+\setbeamertemplate{navigation symbols}{}
+
+% ---------- Puces ----------
+\setbeamertemplate{itemize item}{\small\raisebox{0.18ex}{\color{ucadblue}\rule{0.95ex}{0.95ex}}}
+\setbeamertemplate{itemize subitem}{\color{ucadmuted}\textendash}
+\setbeamertemplate{itemize subsubitem}{\color{ucadmuted}\textperiodcentered}
+\setlength{\leftmargini}{1.5em}
+
+% ---------- Logo ----------
+\newcommand{\ucadlogofile}{logo-ucad.png}
+\newcommand{\ucadlogo}[1][1cm]{\IfFileExists{\ucadlogofile}{\raisebox{0pt}{\includegraphics[height=#1]{\ucadlogofile}}}{}}
+
+% ---------- Pied de page (modifiable) ----------
+\newcommand{\ucadfoottext}{}
+\newcommand{\setucadfoot}[1]{\renewcommand{\ucadfoottext}{#1}}
+% ---------- Auteur OBLIGATOIRE au pied (toujours affiché) ----------
+\newcommand{\ucadauthorfoot}{Dr.~El Hadji Bassirou TOUR\'E \quad\textbullet\quad DMI/FST/UCAD}
+
+% ---------- Liens hyperref discrets + pas de boîte d'annotation qui déborde ----------
+% (évite le warning xdvipdfmx "Annotation out of page boundary" sur les liens du bandeau)
+\AtBeginDocument{\hypersetup{hidelinks,pdfborder={0 0 0}}}
+
+% ---------- Bandeau de titre ----------
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.7ex,dp=1.4ex,leftskip=2.2ex,rightskip=2.2ex,sep=0pt]{frametitle}%
+    \usebeamerfont{frametitle}\insertframetitle\hfill
+    {\normalfont\footnotesize\color{white!88}\insertsectionhead}%
+  \end{beamercolorbox}%
+  \nointerlineskip\hspace*{-\beamer@leftmargin}{\color{ucaddark}\rule{\paperwidth}{1.4pt}}%
+}
+
+% ---------- Pied : progression 2 tons + logo + infos ----------
+\newlength{\ucadprog}
+\setbeamertemplate{footline}{%
+  \setlength{\ucadprog}{0pt}%
+  \ifnum\inserttotalframenumber>0\relax
+    \setlength{\ucadprog}{\dimexpr\paperwidth*\insertframenumber/\inserttotalframenumber\relax}%
+  \fi
+  \vbox{%
+    \vskip4pt%
+    \hbox{\color{ucadblue}\rule{\ucadprog}{1.1pt}%
+          \color{ucadblue!18}\rule{\dimexpr\paperwidth-\ucadprog\relax}{1.1pt}}%
+    \vskip2pt%
+    \hbox to\paperwidth{\hspace{1.6ex}\raisebox{-0.165cm}{\ucadlogo[0.52cm]}\hspace{1.1ex}%
+      \usebeamerfont{foottext}\color{ucadmuted}\ucadfoottext\hfill%
+      {\usebeamerfont{foottext}\color{ucadmuted}\ucadauthorfoot}\hspace{2.0ex}%
+      \insertframenumber\,/\,\inserttotalframenumber\hspace{2.2ex}}%
+    \vskip3pt%
+  }%
+}
+
+% ---------- Frame figure robuste : figure bornée en hauteur + légende ----------
+% \figslide{largeur}{fichier}{légende}  — la figure ne dépasse jamais 0.60\textheight,
+% l'ensemble est centré verticalement, la légende reste au-dessus du pied.
+\newcommand{\figslide}[3]{%
+  \vfill
+  \begin{center}\includegraphics[width=#1\linewidth,height=0.58\textheight,keepaspectratio]{#2}\end{center}
+  \vskip2pt
+  {\scriptsize #3}
+  \vfill
+}
+% \figslideb{largeur}{fichier}{légende} — pour les frames AVEC un encadré au-dessus.
+% Pas de centrage vertical : la figure suit l'encadré, l'espace libre tombe au bas (au-dessus
+% du pied). Hauteur plafonnée bas + légende courte => débordement impossible par construction.
+\newcommand{\figslideb}[3]{%
+  \vspace{3pt}
+  \begin{center}\includegraphics[width=#1\linewidth,height=0.38\textheight,keepaspectratio]{#2}\end{center}
+  \vskip3pt
+  {\scriptsize #3}
+  \vfill
+}
+% \figduo{l1}{f1}{l2}{f2}{légende} — deux figures côte à côte, bornées en hauteur
+\newcommand{\figduo}[5]{%
+  \vfill
+  \begin{center}\includegraphics[width=#1\linewidth,height=0.55\textheight,keepaspectratio]{#2}\hfill\includegraphics[width=#3\linewidth,height=0.55\textheight,keepaspectratio]{#4}\end{center}
+  \vskip2pt
+  {\scriptsize #5}
+  \vfill
+}
+\setbeamersize{text margin left=2.4ex,text margin right=2.4ex}
+
+% ---------- Page de titre ----------
+\setbeamertemplate{title page}{%
+  \vbox to\textheight{%
+    \vskip1.2ex\hbox to\paperwidth{\hfill\ucadlogo[2.0cm]\hspace{2.4ex}}%
+    \vfill
+    \hspace{2.4ex}{\color{ucadblue}\rule{0.32\paperwidth}{3pt}}\par\vskip1.2ex
+    \hspace{2.4ex}\begin{minipage}{0.92\paperwidth}\raggedright
+      {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+      \ifx\insertsubtitle\empty\else\vskip0.6ex{\usebeamerfont{subtitle}\color{ucadmuted}\insertsubtitle\par}\fi
+    \end{minipage}\par
+    \vskip1.2ex\hspace{2.4ex}{\color{ucadblue!30}\rule{0.92\paperwidth}{0.6pt}}\par\vskip1.0ex
+    \hspace{2.4ex}\begin{minipage}{0.92\paperwidth}\raggedright\color{ucadink}
+      {\bfseries\insertauthor}\par
+      \ifx\insertinstitute\empty\else\vskip0.3ex{\small\color{ucadmuted}\insertinstitute}\par\fi
+      \ifx\insertdate\empty\else\vskip0.5ex{\small\color{ucadmuted}\insertdate}\par\fi
+    \end{minipage}\vfill
+  }%
+}
+
+% ---------- Page de section ----------
+\AtBeginSection[]{%
+  \begin{frame}[plain,noframenumbering]
+    \vbox to\textheight{\vfill
+      \hspace{2.4ex}{\fontsize{40}{40}\selectfont\bfseries\color{ucadblue!25}\thesection}\par
+      \vskip-0.2ex\hspace{2.6ex}{\color{ucadblue}\rule{9ex}{2.6pt}}\par\vskip1.0ex
+      \hspace{2.6ex}\begin{minipage}{0.9\paperwidth}\raggedright
+        {\Large\bfseries\color{ucaddark}\insertsection}\par\end{minipage}
+      \vfill}%
+  \end{frame}%
+}
+
+% ---------- Encadres semantiques (filet gauche + titre colore) ----------
+\tcbset{ucadboxbase/.style={enhanced, sharp corners, boxrule=0pt, frame hidden,
+  left=8pt,right=8pt,top=4.5pt,bottom=4.5pt, before skip=3.5pt, after skip=3.5pt,
+  fonttitle=\bfseries, coltitle=ucadink}}
+\newtcolorbox{ucadform}[1][Formellement]{ucadboxbase,colback=cForm!6,
+  borderline west={2.6pt}{0pt}{cForm},coltitle=cForm,title={#1}}
+\newtcolorbox{ucaddef}[1][L'essentiel]{ucadboxbase,colback=cDef!6,
+  borderline west={2.6pt}{0pt}{cDef},coltitle=cDef,title={#1}}
+\newtcolorbox{ucadex}[1][Exemple]{ucadboxbase,colback=cEx!7,
+  borderline west={2.6pt}{0pt}{cEx},coltitle=cEx,title={#1}}
+\newtcolorbox{ucadpiege}[1][Piège]{ucadboxbase,colback=cPiege!8,
+  borderline west={2.6pt}{0pt}{cPiege},coltitle=cPiege,title={#1}}
+\newtcolorbox{ucadret}[1][À retenir]{ucadboxbase,colback=cRet!10,
+  borderline west={2.6pt}{0pt}{cRet},coltitle=cRet!80!black,title={#1}}
+\newtcolorbox{ucadrec}[1][En pratique]{ucadboxbase,colback=cRec!7,
+  borderline west={2.6pt}{0pt}{cRec},coltitle=cRec!75!black,title={#1}}
+\newtcolorbox{ucadfront}[1][Pour aller plus loin]{ucadboxbase,colback=cFront!7,
+  borderline west={2.6pt}{0pt}{cFront},coltitle=cFront!75!black,title={#1}}
+
+\newcommand{\ucadformula}[1]{\vskip1pt\begin{center}$\displaystyle #1$\end{center}\vskip1pt}
+
+\endinput
