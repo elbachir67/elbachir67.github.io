@@ -1,6 +1,6 @@
-# Rapport de conversion — SLIDES_S4.tex
+# Rapport de conversion — SLIDES_S5.tex
 
-Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/programmation-python/chapitres/04-fonctions-modules-robustesse.qmd`.
+Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/programmation-python/chapitres/05-programmation-orientee-objet.qmd`.
 
 ## À traiter à la main
 
@@ -8,11 +8,11 @@ Rien : tout le contenu a été converti.
 
 ## Figures
 
-- f4_fonction : insérée, texte alternatif — légende du .tex
+- f5_objet : insérée, texte alternatif — légende du .tex
 
 Nettoyage des SVG (encres en `currentColor`, fonds clairs transparents) :
 
-- `f4_fonction` : 5 encre(s), 1 fond(s), 13 police(s)
+- `f5_objet` : 23 encre(s), 3 fond(s), 22 police(s)
 
 ## Blocs de code
 
@@ -27,22 +27,19 @@ Nettoyage des SVG (encres en `currentColor`, fonds clairs transparents) :
 - bloc 9 : `python`
 - bloc 10 : `sortie`
 - bloc 11 : `python`
-- bloc 12 : `sortie`
-- bloc 13 : `python`
-- bloc 14 : `sortie`
+- bloc 12 : `python`
+- bloc 13 : `sortie`
+- bloc 14 : `python`
 - bloc 15 : `python`
 - bloc 16 : `sortie`
 - bloc 17 : `python`
 - bloc 18 : `sortie`
 - bloc 19 : `python`
-- bloc 20 : `python`
-- bloc 21 : `sortie`
-- bloc 22 : `python`
-- bloc 23 : `sortie`
-- bloc 24 : `python`
-- bloc 25 : `sortie`
-- bloc 26 : `python`
-- bloc 27 : `sortie`
+- bloc 20 : `sortie`
+- bloc 21 : `python`
+- bloc 22 : `sortie`
+- bloc 23 : `python`
+- bloc 24 : `sortie`
 
 ## Tableaux
 

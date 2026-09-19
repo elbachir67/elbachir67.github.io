@@ -1,0 +1,344 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{beamerucad}
+\usepackage{listings}
+\definecolor{ckw}{HTML}{2563AB}\definecolor{cst}{HTML}{2E8B57}\definecolor{ccm}{HTML}{8A8F98}
+\definecolor{outbg}{HTML}{F4F5F7}\definecolor{outrule}{HTML}{2E8B57}
+\lstdefinestyle{py}{language=Python,basicstyle=\ttfamily\scriptsize,
+ keywordstyle=\color{ckw}\bfseries,stringstyle=\color{cst},commentstyle=\color{ccm}\itshape,
+ showstringspaces=false,columns=fullflexible,keepspaces=true,
+ backgroundcolor=\color{ucadband!8},frame=leftline,framerule=2.5pt,rulecolor=\color{ucadband},
+ xleftmargin=8pt,aboveskip=3pt,belowskip=1pt,basewidth=0.5em}
+\lstdefinestyle{out}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{outbg},frame=leftline,framerule=2.5pt,rulecolor=\color{outrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+\lstset{style=py}
+\newcommand{\resultat}{{\scriptsize\textbf{R\'esultat}~$\rightarrow$}\par\vspace{1pt}}
+
+\title{Programmation Python — Séance 5}
+\subtitle{Programmation orientée objet}
+\author{Dr. El Hadji Bassirou TOURÉ}
+\institute{Département de Mathématiques et Informatique\\ Faculté des Sciences et Techniques\\ Université Cheikh Anta Diop de Dakar}
+\date{}
+\setucadfoot{Programmation Python — Séance 5}
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]\titlepage\end{frame}
+
+% =====================================================================
+\begin{frame}{Objectifs de la séance}
+\begin{ucaddef}[Contenu]
+{\small Jusqu'ici, les \emph{données} (variables) et les \emph{traitements} (fonctions) étaient séparés. La programmation orientée objet les \textbf{réunit} : un objet regroupe des données et les comportements qui les manipulent. C'est le style dans lequel sont écrits \texttt{numpy}, \texttt{pandas} et la plupart des bibliothèques.}
+\end{ucaddef}
+\begin{itemize}\small
+  \item \textbf{Classe} et \textbf{objet} : \texttt{class}, \texttt{\_\_init\_\_}, \texttt{self}, attributs.
+  \item \textbf{Méthodes} : les comportements de l'objet ; \texttt{\_\_str\_\_} pour l'affichage.
+  \item \textbf{Héritage} : spécialiser une classe sans la réécrire.
+  \item \textbf{Polymorphisme} : un même appel, un comportement propre à chaque classe.
+\end{itemize}
+{\small L'entraînement se fait dans le \textbf{notebook}, avec une cellule « À vous » après chaque notion.}
+\end{frame}
+
+\begin{frame}{Deux mécanismes clés}
+\figslide{0.9}{figs/f5_objet}{L'héritage (une classe fille récupère et enrichit une classe mère) et le polymorphisme (un même appel donne un résultat propre à chaque type).}
+\end{frame}
+
+% #####################################################################
+\section{Vous utilisez déjà des objets}
+
+\begin{frame}{L'idée : données + comportements}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Un \textbf{objet} réunit des \textbf{données} et les \textbf{méthodes} (fonctions attachées) qui les manipulent. Une chaîne, une liste \emph{sont} déjà des objets : les méthodes que vous appelez avec un point en sont la preuve.}
+\end{ucaddef}
+{\small La POO consiste à définir \textbf{nos propres} types d'objets, taillés pour notre problème — un compte bancaire, un patient, un produit — chacun avec ses données et ses comportements.}
+\end{frame}
+
+\begin{frame}[fragile]{Des objets que vous connaissez déjà}
+\begin{lstlisting}
+texte = "dakar"
+print(texte.upper())
+notes = [17, 12]
+notes.append(15)
+print(notes)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+DAKAR
+[17, 12, 15]
+\end{lstlisting}
+{\small \texttt{.upper()} et \texttt{.append()} sont des \textbf{méthodes} : des fonctions qui appartiennent à l'objet et agissent sur lui.}
+\end{frame}
+
+% #####################################################################
+\section{Définir une classe}
+
+\begin{frame}{L'idée : la classe, plan de l'objet}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une \textbf{classe} est le \textbf{plan} d'un objet : elle décrit ses données et ses méthodes. \texttt{\_\_init\_\_} est le \textbf{constructeur}, exécuté à la création ; \texttt{self} y désigne l'objet en train d'être construit, sur lequel on installe les attributs avec \texttt{self.x = ...}.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}{Analogie}
+\begin{ucadfront}[Le plan et l'objet]
+{\small La \textbf{classe} est comme le \emph{plan d'une maison} : un seul plan, mais on peut construire autant de maisons qu'on veut. Chaque maison bâtie est une \textbf{instance} : elle suit le plan, mais possède ses propres caractéristiques (sa couleur, ses habitants). \texttt{CompteBancaire} est le plan ; \texttt{c1}, \texttt{c2} sont des comptes concrets, chacun avec son titulaire et son solde.}
+\end{ucadfront}
+\end{frame}
+
+\begin{frame}[fragile]{Définir une classe et créer un objet}
+\begin{lstlisting}
+class CompteBancaire:
+    def __init__(self, titulaire, solde):
+        self.titulaire = titulaire
+        self.solde = solde
+
+c1 = CompteBancaire("Astou", 5000)
+print(c1.titulaire)
+print(c1.solde)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Astou
+5000
+\end{lstlisting}
+{\small \texttt{c1} est une \textbf{instance}. On accède à ses \textbf{attributs} avec un point.}
+\end{frame}
+
+\begin{frame}[fragile]{Plusieurs instances, attributs modifiables}
+\begin{lstlisting}
+c2 = CompteBancaire("Modou", 12000)
+print(c1.titulaire, c1.solde)
+print(c2.titulaire, c2.solde)
+c2.solde = 20000
+print(c2.solde)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Astou 5000
+Modou 12000
+20000
+\end{lstlisting}
+{\small Chaque instance a ses propres valeurs ; un attribut se lit et se \textbf{modifie} avec un point.}
+\end{frame}
+
+% #####################################################################
+\section{Les méthodes}
+
+\begin{frame}{L'idée : les comportements de l'objet}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une \textbf{méthode} est une fonction définie \emph{dans} la classe. Elle reçoit toujours \texttt{self} en premier paramètre, ce qui lui donne accès aux attributs de l'objet (\texttt{self.solde}). Une méthode peut \textbf{modifier} l'objet, ou \textbf{renvoyer} une valeur.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Des méthodes qui modifient l'objet}
+\begin{lstlisting}
+class CompteBancaire:
+    def __init__(self, titulaire, solde):
+        self.titulaire = titulaire
+        self.solde = solde
+    def depot(self, montant):
+        self.solde = self.solde + montant
+    def retrait(self, montant):
+        if montant <= self.solde:
+            self.solde = self.solde - montant
+        else:
+            print("Solde insuffisant")
+
+c1 = CompteBancaire("Astou", 5000)
+c1.depot(2000)
+print(c1.solde)
+c1.retrait(1000)
+print(c1.solde)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Appel de méthode, et sortie}
+{\small On appelle une méthode sur l'objet : \texttt{c1.depot(2000)}. Inutile de passer \texttt{self}, Python le fait : \texttt{self} sera \texttt{c1}.}
+\resultat
+\begin{lstlisting}[style=out]
+7000
+6000
+\end{lstlisting}
+{\small Un retrait supérieur au solde n'est pas effectué :}
+\begin{lstlisting}
+c1.retrait(50000)
+print(c1.solde)
+\end{lstlisting}
+\begin{lstlisting}[style=out]
+Solde insuffisant
+6000
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Une méthode peut renvoyer une valeur}
+\begin{ucadex}[Renvoyer plutôt que modifier]
+{\small \texttt{peut\_retirer} ne change rien : elle \textbf{renvoie} un booléen, utilisable dans un test.}
+\end{ucadex}
+\begin{lstlisting}
+    def peut_retirer(self, montant):
+        return montant <= self.solde
+\end{lstlisting}
+\begin{lstlisting}
+print(c1.peut_retirer(1000))
+print(c1.peut_retirer(999999))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+True
+False
+\end{lstlisting}
+\end{frame}
+
+% #####################################################################
+\section{Un affichage lisible}
+
+\begin{frame}[fragile]{La méthode spéciale \texttt{\_\_str\_\_}}
+\begin{ucaddef}[L'idée en une phrase]
+{\small \texttt{\_\_str\_\_} décide ce qu'affiche \texttt{print(objet)} : elle \textbf{renvoie} une chaîne. On ajoute aussi \texttt{description}, qui renvoie un libellé (utile plus loin).}
+\end{ucaddef}
+\begin{lstlisting}
+    def __str__(self):
+        return f"Compte de {self.titulaire} : {self.solde} F"
+    def description(self):
+        return "compte courant"
+\end{lstlisting}
+\begin{lstlisting}
+c1 = CompteBancaire("Astou", 5000)
+print(c1)
+print(c1.description())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Compte de Astou : 5000 F
+compte courant
+\end{lstlisting}
+\end{frame}
+
+% #####################################################################
+\section{L'héritage}
+
+\begin{frame}{L'idée : spécialiser sans réécrire}
+\begin{ucaddef}[L'idée en une phrase]
+{\small L'\textbf{héritage} crée une classe \emph{à partir d'une autre} : elle récupère tout et peut \textbf{ajouter} ce qui lui est propre. \texttt{CompteEpargne(CompteBancaire)} se lit « un compte épargne \textbf{est un} compte bancaire, spécialisé ». \texttt{super().\_\_init\_\_(...)} réutilise le constructeur du parent.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Créer une classe fille}
+\begin{lstlisting}
+class CompteEpargne(CompteBancaire):
+    def __init__(self, titulaire, solde, taux):
+        super().__init__(titulaire, solde)
+        self.taux = taux
+    def ajouter_interets(self):
+        self.solde = self.solde + self.solde * self.taux
+
+e1 = CompteEpargne("Bineta", 10000, 0.05)
+print(e1)
+e1.depot(5000)
+e1.ajouter_interets()
+print(e1.solde)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Compte de Bineta : 10000 F
+15750.0
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Tout le parent est hérité}
+{\small \texttt{print(e1)} utilise le \texttt{\_\_str\_\_} \textbf{hérité} ; \texttt{e1.depot(...)} et \texttt{e1.retrait(...)} sont des méthodes \textbf{héritées}. Seuls \texttt{taux} et \texttt{ajouter\_interets} sont propres à la classe fille.}
+\begin{lstlisting}
+e1.retrait(2000)
+print(e1.solde)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+13750.0
+\end{lstlisting}
+{\small Le retrait, écrit une seule fois dans \texttt{CompteBancaire}, fonctionne sur le compte épargne sans une ligne de plus.}
+\end{frame}
+
+% #####################################################################
+\section{Le polymorphisme}
+
+\begin{frame}{L'idée : un même appel, des résultats différents}
+\begin{ucaddef}[L'idée en une phrase]
+{\small \textbf{Surcharger} une méthode, c'est la \textbf{redéfinir} dans la classe fille. Le \textbf{polymorphisme} en découle : un \emph{même} appel de méthode produit un résultat \textbf{propre au type réel} de l'objet. Python choisit automatiquement la bonne version.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Surcharger une méthode}
+\begin{lstlisting}
+class CompteEpargne(CompteBancaire):
+    def __init__(self, titulaire, solde, taux):
+        super().__init__(titulaire, solde)
+        self.taux = taux
+    def description(self):
+        return f"compte epargne a {self.taux}"
+
+comptes = [CompteBancaire("Astou", 5000), CompteEpargne("Bineta", 10000, 0.05)]
+for c in comptes:
+    print(c.titulaire, ":", c.description())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Astou : compte courant
+Bineta : compte epargne a 0.05
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Le polymorphisme à travers une fonction}
+\begin{lstlisting}
+def presenter(compte):
+    print("Il s'agit d'un", compte.description())
+
+presenter(comptes[0])
+presenter(comptes[1])
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Il s'agit d'un compte courant
+Il s'agit d'un compte epargne a 0.05
+\end{lstlisting}
+{\small La fonction \texttt{presenter} accepte n'importe quel compte : elle appelle \texttt{description()} sans se soucier du type exact. C'est toute la souplesse du polymorphisme.}
+\end{frame}
+
+% #####################################################################
+\section{Synthèse}
+
+\begin{frame}{Pièges fréquents}
+\begin{itemize}\small
+  \item \textbf{Oublier \texttt{self}} : toute méthode le prend en premier paramètre, et l'on écrit \texttt{self.attribut} pour lire les données de l'objet.
+  \item \textbf{Confondre la classe et l'instance} : \texttt{CompteBancaire} est le plan ; \texttt{c1 = CompteBancaire(...)} est un objet concret. On appelle les méthodes sur l'\textbf{instance}.
+  \item \textbf{Méthode sans parenthèses} : \texttt{c1.description} seul désigne la méthode ; il faut \texttt{c1.description()} pour l'\textbf{exécuter}.
+  \item \textbf{Oublier \texttt{super().\_\_init\_\_}} dans une classe fille : les attributs du parent ne sont alors pas installés.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{À retenir — Séance 5}
+\begin{ucadret}[L'essentiel]
+{\small
+\textbf{Classe} : le plan d'un objet (\texttt{class}). \textbf{Instance} : un objet concret.\\[2pt]
+\textbf{\_\_init\_\_(self, ...)} : le constructeur ; installe les \textbf{attributs} (\texttt{self.x = ...}).\\[2pt]
+\textbf{self} : l'objet courant ; toute méthode le reçoit en premier.\\[2pt]
+\textbf{Méthode} : fonction dans la classe, appelée par \texttt{objet.methode(...)} ; modifie l'objet ou \textbf{renvoie} une valeur. \textbf{\_\_str\_\_} : la chaîne affichée par \texttt{print}.\\[2pt]
+\textbf{Héritage} : \texttt{class Fille(Parent)} récupère tout et ajoute ; \texttt{super().\_\_init\_\_(...)} réutilise le constructeur parent.\\[2pt]
+\textbf{Polymorphisme} : une méthode \textbf{surchargée} donne, pour un même appel, un comportement propre à chaque classe.}
+\end{ucadret}
+\end{frame}
+
+\begin{frame}{Prochaine séance}
+\begin{ucaddef}[Séance 6 — NumPy]
+{\small On sait organiser données et comportements en objets. La Séance 6 ouvre la \textbf{science des données} avec \texttt{numpy} : le \textbf{tableau} (\texttt{array}), le calcul \textbf{vectorisé} (une opération sur tout le tableau, sans boucle) et les agrégations. C'est l'outil sur lequel repose \texttt{pandas}.}
+\end{ucaddef}
+{\small À faire d'ici là : refaire les cellules « À vous » du notebook de la séance.}
+\end{frame}
+
+\begin{frame}{Références}
+\begin{itemize}\small
+  \item Severance, C. — \emph{Python for Everybody}, 2016.
+  \item Downey, A. — \emph{Think Python}, 2e éd., O'Reilly, 2015.
+  \item Matthes, E. — \emph{Python Crash Course}, 3e éd., No Starch Press, 2023.
+  \item Python Software Foundation — \emph{The Python Tutorial} (Classes), 2024.
+\end{itemize}
+\end{frame}
+
+\end{document}

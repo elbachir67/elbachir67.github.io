@@ -70,7 +70,9 @@ IGNOREES = {"vskip", "vspace", "smallskip", "medskip", "bigskip", "centering", "
 
 # Couleurs d'encre du jeu de figures : elles suivront la couleur du texte de la page.
 ENCRES = {"#000", "#000000", "black", "#1a3a5c", "#1A3A5C", "#1c2a33", "#1C2A33",
-          "#333", "#333333", "#444", "#444444", "#5a5a5a", "#5A5A5A", "#5a6b75", "#5A6B75"}
+          "#333", "#333333", "#444", "#444444", "#5a5a5a", "#5A5A5A", "#5a6b75", "#5A6B75",
+          # Encre des figures matplotlib du cours de Python (la constante DARK de ses scripts).
+          "#0f3a5e", "#0F3A5E"}
 # Fonds clairs : transparents, pour rester lisibles en mode sombre comme en projection.
 FONDS_CLAIRS = {"#fff", "#ffffff", "white", "#f8f9fb", "#fafafa", "#f7f7f7"}
 FORMES = {"rect", "circle", "ellipse", "polygon", "polyline", "path", "line"}
@@ -291,7 +293,9 @@ def figures(texte: str, conversion: Conversion) -> str:
         trouve = MOTIF_IMAGE.search(texte)
         if not trouve:
             return texte
-        nom = Path(trouve["nom"]).name
+        # Le dossier ne compte pas (les figures sont celles du cours), et l'extension non plus :
+        # le .tex cite le PDF que compile LaTeX, la page incorpore le SVG du même nom.
+        nom = Path(trouve["nom"]).stem
         mesure = re.search(r"width=([\d.]+)\\linewidth", trouve["options"] or "")
         largeur = float(mesure[1]) if mesure else None
 
@@ -533,23 +537,56 @@ def nettoyer_svg(source: Path, cible: Path) -> dict[str, int]:
     couleur, et doit le rester.
     """
     ET.register_namespace("", SVG)
+    # Les préfixes doivent être réécrits tels quels. matplotlib place ses marqueurs — les points d'un
+    # nuage — dans <defs> et les rappelle par <use xlink:href>. Sans cet enregistrement, ElementTree
+    # les réécrit « ns4:href » : légal en XML, mais la page les incorpore dans du HTML, où seul
+    # « xlink:href » est reconnu. Les marqueurs disparaissaient alors purement et simplement.
+    for prefixe, espace in (("xlink", "http://www.w3.org/1999/xlink"),
+                            ("dc", "http://purl.org/dc/elements/1.1/"),
+                            ("cc", "http://creativecommons.org/ns#"),
+                            ("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#")):
+        ET.register_namespace(prefixe, espace)
     arbre = ET.parse(source)
     compte = Counter()
+    encres = {c.lower() for c in ENCRES}
+
+    def valeur_nettoyee(propriete: str, valeur: str, balise: str) -> str | None:
+        """Ce que devient une couleur, ou None si elle doit rester telle quelle."""
+        brute = valeur.strip().lower()
+        if propriete in ("fill", "stroke") and brute in encres:
+            compte["encre"] += 1
+            return "currentColor"
+        if propriete == "fill" and balise in FORMES and brute in FONDS_CLAIRS:
+            compte["fond"] += 1
+            return "none"
+        if propriete == "font-family":
+            compte["police"] += 1
+            return "inherit"
+        return None
+
     for element in arbre.iter():
         balise = element.tag.split("}")[-1]
-        for attribut in ("fill", "stroke"):
-            valeur = element.get(attribut)
-            if valeur is None:
-                continue
-            if valeur.lower() in {c.lower() for c in ENCRES}:
-                element.set(attribut, "currentColor")
-                compte["encre"] += 1
-            elif attribut == "fill" and balise in FORMES and valeur.lower() in FONDS_CLAIRS:
-                element.set(attribut, "none")
-                compte["fond"] += 1
-        if element.get("font-family"):
-            element.set("font-family", "inherit")
-            compte["police"] += 1
+        for propriete in ("fill", "stroke", "font-family"):
+            valeur = element.get(propriete)
+            if valeur is not None:
+                remplacement = valeur_nettoyee(propriete, valeur, balise)
+                if remplacement:
+                    element.set(propriete, remplacement)
+
+        # matplotlib n'écrit pas d'attributs mais une feuille de style en ligne :
+        # style="fill: #0f3a5e; font-family: DejaVu Sans". Sans cela, ses figures gardaient
+        # leurs encres noires en mode sombre — aucune figure du cours de Python n'était adaptée.
+        style = element.get("style")
+        if not style:
+            continue
+        declarations = []
+        for declaration in style.split(";"):
+            propriete, separateur, valeur = declaration.partition(":")
+            remplacement = (valeur_nettoyee(propriete.strip().lower(), valeur, balise)
+                            if separateur else None)
+            declarations.append(f"{propriete.strip()}: {remplacement}" if remplacement
+                                else declaration.strip())
+        element.set("style", "; ".join(d for d in declarations if d))
     cible.parent.mkdir(parents=True, exist_ok=True)
     arbre.write(cible, encoding="unicode", xml_declaration=False)
     cible.write_text(cible.read_text(encoding="utf-8").rstrip() + "\n", encoding="utf-8")
