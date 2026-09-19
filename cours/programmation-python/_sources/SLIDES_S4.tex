@@ -1,0 +1,354 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{beamerucad}
+\usepackage{listings}
+\definecolor{ckw}{HTML}{2563AB}\definecolor{cst}{HTML}{2E8B57}\definecolor{ccm}{HTML}{8A8F98}
+\definecolor{outbg}{HTML}{F4F5F7}\definecolor{outrule}{HTML}{2E8B57}
+\definecolor{errbg}{HTML}{FBEDEC}\definecolor{errrule}{HTML}{C0392B}
+\lstdefinestyle{py}{language=Python,basicstyle=\ttfamily\scriptsize,
+ keywordstyle=\color{ckw}\bfseries,stringstyle=\color{cst},commentstyle=\color{ccm}\itshape,
+ showstringspaces=false,columns=fullflexible,keepspaces=true,
+ backgroundcolor=\color{ucadband!8},frame=leftline,framerule=2.5pt,rulecolor=\color{ucadband},
+ xleftmargin=8pt,aboveskip=3pt,belowskip=1pt,basewidth=0.5em}
+\lstdefinestyle{out}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{outbg},frame=leftline,framerule=2.5pt,rulecolor=\color{outrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+\lstdefinestyle{err}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{errbg},frame=leftline,framerule=2.5pt,rulecolor=\color{errrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+\lstset{style=py}
+\newcommand{\resultat}{{\scriptsize\textbf{R\'esultat}~$\rightarrow$}\par\vspace{1pt}}
+
+\title{Programmation Python — Séance 4}
+\subtitle{Fonctions, modules et robustesse}
+\author{Dr. El Hadji Bassirou TOURÉ}
+\institute{Département de Mathématiques et Informatique\\ Faculté des Sciences et Techniques\\ Université Cheikh Anta Diop de Dakar}
+\date{}
+\setucadfoot{Programmation Python — Séance 4}
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]\titlepage\end{frame}
+
+% =====================================================================
+\begin{frame}{Objectifs de la séance}
+\begin{ucaddef}[Contenu]
+{\small À mesure qu'un programme grandit, on répète du code et on rencontre des erreurs. Cette séance apprend à \textbf{organiser} (des fonctions réutilisables), à \textbf{réutiliser} (des modules tout prêts), à \textbf{conserver} (des fichiers) et à \textbf{fiabiliser} (gérer les erreurs).}
+\end{ucaddef}
+\begin{itemize}\small
+  \item \textbf{Fonctions} : \texttt{def}, \texttt{return}, paramètres, valeurs par défaut, docstrings, portée.
+  \item \textbf{Modules} : \texttt{import} pour réutiliser la bibliothèque standard.
+  \item \textbf{Fichiers} : lire et écrire des données sur le disque.
+  \item \textbf{Exceptions} : \texttt{try} / \texttt{except} pour ne pas planter.
+\end{itemize}
+{\small L'entraînement se fait dans le \textbf{notebook}, avec une cellule « À vous » après chaque notion.}
+\end{frame}
+
+\begin{frame}{Anatomie d'un appel de fonction}
+\figslide{0.9}{figs/f4_fonction}{Les arguments fournis à l'appel remplissent les paramètres ; le corps s'exécute ; \texttt{return} renvoie une valeur.}
+\end{frame}
+
+% #####################################################################
+\section{Les fonctions}
+
+\begin{frame}{L'idée : un bloc de code réutilisable}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une \textbf{fonction} est un bloc nommé qu'on définit une fois avec \texttt{def}, puis qu'on \textbf{appelle} autant de fois que nécessaire. \texttt{return} renvoie un résultat que l'on peut réutiliser.}
+\end{ucaddef}
+{\small Le bénéfice est double : on \textbf{évite de répéter} le même code (une correction se fait à un seul endroit), et on \textbf{donne un nom} à une opération, ce qui rend le programme lisible. Le corps de la fonction est un bloc indenté après les deux points.}
+\end{frame}
+
+\begin{frame}[fragile]{Définir et appeler}
+\begin{lstlisting}
+def moyenne(a, b):
+    return (a + b) / 2
+
+print(moyenne(12, 16))
+print(moyenne(9, 18))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+14.0
+13.5
+\end{lstlisting}
+{\small \texttt{a} et \texttt{b} sont les \textbf{paramètres} ; \texttt{12} et \texttt{16} les \textbf{arguments} de l'appel. La même fonction sert pour n'importe quelles valeurs.}
+\end{frame}
+
+\begin{frame}[fragile]{Plusieurs paramètres}
+\begin{lstlisting}
+def message(prenom, ville):
+    return f"{prenom} habite a {ville}."
+
+print(message("Fatou", "Dakar"))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Fatou habite a Dakar.
+\end{lstlisting}
+{\small Les arguments sont associés aux paramètres \textbf{dans l'ordre} : \texttt{prenom} reçoit « Fatou », \texttt{ville} reçoit « Dakar ».}
+\end{frame}
+
+\begin{frame}[fragile]{Valeurs par défaut}
+\begin{ucadex}[Un paramètre peut avoir une valeur par défaut]
+{\small Si l'argument n'est pas fourni, la valeur par défaut est utilisée.}
+\end{ucadex}
+\begin{lstlisting}
+def saluer(nom, politesse="Bonjour"):
+    return f"{politesse} {nom}"
+
+print(saluer("Awa"))
+print(saluer("Awa", "Bonsoir"))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Bonjour Awa
+Bonsoir Awa
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Documenter : la docstring}
+\begin{lstlisting}
+def carre(x):
+    "Renvoie le carre de x."
+    return x * x
+
+print(carre(5))
+print(carre.__doc__)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+25
+Renvoie le carre de x.
+\end{lstlisting}
+{\small La \textbf{docstring} est une courte phrase placée juste sous le \texttt{def}. Elle explique ce que fait la fonction, sans qu'on ait à lire son code.}
+\end{frame}
+
+\begin{frame}[fragile]{Piège — la portée d'une variable}
+\begin{ucadpiege}[Une variable créée dans une fonction est locale]
+{\small \texttt{resultat} n'existe que dans \texttt{calcul}. Y accéder à l'extérieur échoue.}
+\end{ucadpiege}
+\begin{lstlisting}
+def calcul():
+    resultat = 5 * 3
+
+calcul()
+print(resultat)
+\end{lstlisting}
+\begin{lstlisting}[style=err]
+NameError: name 'resultat' is not defined
+\end{lstlisting}
+{\small Pour récupérer une valeur calculée dans une fonction, il faut la \textbf{renvoyer} avec \texttt{return}.}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{return} n'est pas \texttt{print}}
+\begin{lstlisting}
+def somme(a, b):
+    return a + b
+
+def affiche_somme(a, b):
+    print(a + b)
+
+x = somme(10, 5) + 100
+print("x =", x)
+y = affiche_somme(10, 5)
+print("y =", y)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+x = 115
+15
+y = None
+\end{lstlisting}
+{\small \texttt{return} \textbf{renvoie} une valeur (réutilisable dans un calcul) ; une fonction qui se contente d'afficher renvoie \texttt{None}.}
+\end{frame}
+
+% #####################################################################
+\section{Les modules}
+
+\begin{frame}{L'idée : réutiliser du code tout prêt}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Un \textbf{module} est une bibliothèque de code déjà écrit, qu'on \textbf{importe} pour l'utiliser. Python en fournit une riche collection en standard — inutile de tout réécrire.}
+\end{ucaddef}
+{\small Le module \texttt{math} donne les outils mathématiques, \texttt{random} le hasard, \texttt{datetime} les dates, etc. On importe une fois, en haut du fichier, puis on utilise. C'est un premier pas vers l'écosystème \texttt{numpy} / \texttt{pandas} qu'on découvrira à partir de la Séance 6.}
+\end{frame}
+
+\begin{frame}[fragile]{Importer un module : \texttt{import}}
+\begin{lstlisting}
+import math
+
+print(math.sqrt(16))
+print(math.pi)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+4.0
+3.141592653589793
+\end{lstlisting}
+{\small Après \texttt{import math}, on accède à ses outils en les préfixant par \texttt{math.} — ce qui indique clairement d'où ils viennent.}
+\end{frame}
+
+\begin{frame}[fragile]{Importer un seul outil : \texttt{from ... import}}
+\begin{lstlisting}
+from math import sqrt
+
+print(sqrt(25))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+5.0
+\end{lstlisting}
+{\small On importe \textbf{seulement} ce dont on a besoin ; \texttt{sqrt} s'utilise alors directement, sans préfixe. Pratique pour quelques fonctions bien identifiées.}
+\end{frame}
+
+% #####################################################################
+\section{Les fichiers}
+
+\begin{frame}{L'idée : conserver des données sur le disque}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Les variables disparaissent à la fin du programme. Un \textbf{fichier} permet de \textbf{sauvegarder} des données et de les retrouver plus tard. On l'ouvre avec \texttt{open()} dans un bloc \texttt{with}, qui le \textbf{referme automatiquement}.}
+\end{ucaddef}
+{\small Le \textbf{mode} précise l'intention : \texttt{"w"} écrit (et écrase le contenu existant), \texttt{"a"} ajoute à la fin, \texttt{"r"} lit (c'est le mode par défaut). Un fichier texte est une simple suite de lignes, séparées par \texttt{\textbackslash n}.}
+\end{frame}
+
+\begin{frame}[fragile]{Écrire dans un fichier}
+\begin{lstlisting}
+with open("villes.txt", "w") as f:
+    f.write("Dakar\n")
+    f.write("Louga\n")
+    f.write("Mbour\n")
+
+print("fichier ecrit")
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+fichier ecrit
+\end{lstlisting}
+{\small Le bloc \texttt{with} ouvre \texttt{villes.txt} en écriture, y écrit trois lignes, puis le referme tout seul en sortant du bloc. Le \texttt{\textbackslash n} marque la fin de chaque ligne.}
+\end{frame}
+
+\begin{frame}[fragile]{Lire un fichier}
+{\small Tout le contenu d'un coup, avec \texttt{.read()} :}
+\begin{lstlisting}
+with open("villes.txt") as f:
+    contenu = f.read()
+print(contenu)
+\end{lstlisting}
+{\small Ou \textbf{ligne par ligne}, avec une boucle \texttt{for} (le plus courant) :}
+\begin{lstlisting}
+with open("villes.txt") as f:
+    for ligne in f:
+        print(ligne.strip())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Dakar
+Louga
+Mbour
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Piège — le mode d'ouverture}
+\begin{ucadpiege}[\texttt{"w"} écrase tout]
+{\small Ouvrir un fichier existant en mode \texttt{"w"} \textbf{efface son contenu} avant d'écrire. Pour \textbf{compléter} un fichier sans le vider, on utilise le mode \texttt{"a"} (append). Pour seulement le lire, \texttt{"r"} (ou rien, c'est le défaut) — et écrire dans un fichier ouvert en lecture lève une erreur.}
+\end{ucadpiege}
+{\small Toujours privilégier le bloc \texttt{with} : il garantit que le fichier est refermé, même si une erreur survient au milieu.}
+\end{frame}
+
+% #####################################################################
+\section{Les exceptions}
+
+\begin{frame}[fragile]{L'idée : rattraper une erreur au lieu de planter}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Certaines opérations \textbf{échouent} à l'exécution. Sans précaution, le programme s'arrête net :}
+\end{ucaddef}
+\begin{lstlisting}
+nombre = int("abc")
+\end{lstlisting}
+\begin{lstlisting}[style=err]
+ValueError: invalid literal for int() with base 10: 'abc'
+\end{lstlisting}
+{\small On \textbf{essaie} le code risqué dans un bloc \texttt{try}, et on \textbf{rattrape} l'erreur dans un bloc \texttt{except} — le programme continue au lieu de s'interrompre.}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{try} / \texttt{except}}
+\begin{lstlisting}
+try:
+    nombre = int("abc")
+    print(nombre)
+except ValueError:
+    print("Ce n'est pas un nombre valide.")
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+Ce n'est pas un nombre valide.
+\end{lstlisting}
+{\small Le code du \texttt{try} s'exécute ; dès qu'une \texttt{ValueError} survient, on saute au \texttt{except}, qui affiche un message clair. Le programme n'a pas planté.}
+\end{frame}
+
+\begin{frame}[fragile]{Une fonction robuste}
+\begin{ucadex}[Renvoyer une valeur de repli plutôt que planter]
+{\small On précise \textbf{quelle} erreur on rattrape (\texttt{ZeroDivisionError}).}
+\end{ucadex}
+\begin{lstlisting}
+def division_sure(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        return "impossible"
+
+print(division_sure(10, 2))
+print(division_sure(10, 0))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+5.0
+impossible
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Piège — ne pas tout masquer}
+\begin{ucadpiege}[Rattraper l'erreur attendue, pas toutes]
+{\small On indique l'erreur précise qu'on sait gérer (\texttt{ValueError}, \texttt{ZeroDivisionError}, \texttt{FileNotFoundError}\ldots). Un \texttt{except} \textbf{sans type}, qui rattrape \emph{tout}, cache aussi les erreurs qu'on n'avait pas prévues (une faute de frappe dans un nom, par exemple) et rend les bugs très difficiles à trouver.}
+\end{ucadpiege}
+{\small Régle : rattraper le \textbf{moins} possible — seulement ce que l'on sait traiter — et laisser remonter le reste.}
+\end{frame}
+
+% #####################################################################
+\section{Synthèse}
+
+\begin{frame}{À retenir — Séance 4}
+\begin{ucadret}[L'essentiel]
+{\small
+\textbf{Fonction} : \texttt{def nom(parametres):} + \texttt{return} ; appelée avec des \textbf{arguments} ; peut avoir des \textbf{valeurs par défaut} et une \textbf{docstring}.\\[2pt]
+\textbf{Portée} : une variable définie dans une fonction est \textbf{locale} ; pour en sortir une valeur, on la \texttt{return}. \texttt{return} $\neq$ \texttt{print}.\\[2pt]
+\textbf{Modules} : \texttt{import math} puis \texttt{math.sqrt}, ou \texttt{from math import sqrt}.\\[2pt]
+\textbf{Fichiers} : \texttt{with open("f.txt", "w") as f:} pour écrire, \texttt{"r"} pour lire ; \texttt{.read()} ou boucle \texttt{for} ligne par ligne ; \texttt{"w"} écrase, \texttt{"a"} ajoute.\\[2pt]
+\textbf{Exceptions} : \texttt{try:} le code risqué, \texttt{except} l'erreur \textbf{précise} ; ne pas tout masquer.}
+\end{ucadret}
+\end{frame}
+
+\begin{frame}{Pièges fréquents}
+\begin{itemize}\small
+  \item Utiliser dehors une variable \textbf{locale} à une fonction : \texttt{NameError} — la \texttt{return}.
+  \item Attendre une valeur d'une fonction qui fait \texttt{print} au lieu de \texttt{return} (elle renvoie \texttt{None}).
+  \item Oublier les deux points \texttt{:} ou l'indentation du corps de la fonction.
+  \item Ouvrir en mode \texttt{"w"} un fichier qu'on voulait compléter : son contenu est \textbf{effacé}.
+  \item Rattraper \textbf{toutes} les erreurs avec un \texttt{except} nu : les vrais bugs deviennent invisibles.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Prochaine séance}
+\begin{ucaddef}[Séance 5 — Programmation orientée objet]
+{\small On sait écrire des fonctions. La Séance 5 introduit les \textbf{objets} : regrouper des données \emph{et} les fonctions qui les manipulent dans une même \textbf{classe} (\texttt{class}, \texttt{\_\_init\_\_}, \texttt{self}, méthodes), puis \textbf{spécialiser} une classe par \textbf{héritage} et \textbf{polymorphisme}.}
+\end{ucaddef}
+{\small À faire d'ici là : refaire les cellules « À vous » du notebook de la séance.}
+\end{frame}
+
+\begin{frame}{Références}
+\begin{itemize}\small
+  \item Severance, C. — \emph{Python for Everybody}, 2016.
+  \item Downey, A. — \emph{Think Python}, 2e éd., O'Reilly, 2015.
+  \item Matthes, E. — \emph{Python Crash Course}, 3e éd., No Starch Press, 2023.
+  \item Python Software Foundation — \emph{The Python Tutorial} (Functions, Modules, Errors and Exceptions), 2024.
+\end{itemize}
+\end{frame}
+
+\end{document}
