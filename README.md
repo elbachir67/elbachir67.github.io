@@ -402,6 +402,18 @@ Les libellés sont traduits (`TD` → `Tutorial`, `Corrigé` → `Solution`) et 
 qui les affiche. Les pages de cours étant monolingues (voir « Cours »), ils s'affichent aujourd'hui en
 français ; le jour où une page de cours existera en anglais, rien ne sera à changer.
 
+### Figures : ce que la CI vérifie
+
+Une figure publiée vide est un **défaut silencieux** : la page se rend, les liens sont bons, et
+l'étudiant voit un cadre blanc. `scripts/verifier_figures.py` (US-54) compare chaque figure publiée à
+sa source et échoue si des éléments dessinés ont disparu, si la figure ne dessine plus rien, ou si un
+`<use>` porte un préfixe que le HTML ne résout pas.
+
+Ce dernier point mérite d'être connu : matplotlib place ses marqueurs dans `<defs>` et les rappelle
+par `<use xlink:href>`. Réécrit `ns4:href`, c'est du **XML valide** — mais la page *incorpore* le SVG,
+et l'analyseur HTML n'y résout que `xlink:href` et `href`. Les 45 points d'un nuage avaient ainsi
+disparu sans qu'aucun contrôle ne bronche.
+
 ### PDF des séances
 
 Chaque séance est imprimée en PDF **au rendu**, à côté de sa page (`…/01-<slug>.pdf`) :
