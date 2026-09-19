@@ -122,10 +122,13 @@ Trois enseignements :
 | 40 étudiants | 400 questions | 1,32 $ |
 | 80 étudiants | 800 questions | 2,63 $ |
 
-**Proposition au PO : un plafond de 10 $ par mois**, soit environ 3 000 questions — sept fois ce qu'une
+**Plafond retenu par le PO : 10 $ par mois**, soit environ 3 000 questions — sept fois ce qu'une
 promotion de 40 étudiants consommerait à dix questions chacun. La marge n'est pas du luxe : elle absorbe
 la veille d'examen, et surtout elle laisse le temps de voir venir un abus sans couper le service en
-pleine séance. Le PO tranche dans la PR ; tout le dimensionnement d'US-30 en découle.
+pleine séance. Tout le dimensionnement d'US-30 en découle.
+
+> **Décision du PO, 19/09/2026 :** plafond fixé à **10 $ par mois**, **à reprendre le jour où EP6
+> reviendra** — les prix des modèles et la taille des promotions auront pu changer d'ici là.
 
 ## Stratégie anti-abus
 
@@ -170,7 +173,8 @@ tuteur sera indisponible pour les autres ce jour-là. La parade est de changer l
 
 ## Ce que cet ADR ne décide pas
 
-- Le **plafond mensuel** : proposé à 10 $, tranché par le PO.
+(Le plafond mensuel, lui, est tranché : 10 $, à revoir au retour d'EP6.)
+
 - Le **prompt système** et la posture socratique : US-30, où il sera versionné et relu.
 - La **forme du contexte** (titres, encadrés, code, légendes) : US-28, qui le produira depuis les sources.
 - L'**hébergement du service** : Cloudflare Worker, déjà fixé par le sprint (US-27, US-31).

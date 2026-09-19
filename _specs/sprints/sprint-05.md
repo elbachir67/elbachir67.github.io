@@ -1,112 +1,77 @@
-# Sprint 5 — Tuteur IA du cours pilote
+# Sprint 5 — Du contenu
 
-**Objectif :** sur les séances du cours pilote, un étudiant peut poser une question et obtenir
-une réponse ancrée dans le cours, encadrée, à un coût maîtrisé et connu d'avance.
-**Capacité :** 22 points
+**Objectif :** le site cesse d'être une vitrine avec un cours de démonstration : un deuxième cours
+y est en ligne, et les labs et TD accompagnent les séances.
+
+> **Décision du PO, 19/09/2026 :** le **nom de domaine est reporté**. US-05 quitte le sprint et retourne
+> au backlog, sans sprint ; la capacité passe de 19 à 17 points. Le titre du sprint, « Du contenu, et un
+> nom à soi », devient « Du contenu ».
+
+**Capacité :** 17 points
 
 ## Entrées PO
 
-- [ ] Clé API Anthropic (jamais commitée : secret Cloudflare et GitHub Secret).
-- [ ] Compte Cloudflare pour le Worker.
-- [ ] **Plafond de dépense mensuel**, en dollars : c'est la donnée qui dimensionne tous les garde-fous.
-- [ ] **Code d'accès** du cours pilote pour le semestre en cours (choisi par le PO, communiqué en amphi).
-
-## Principes non négociables
-
-- **Accès par code, pas par compte.** Le tuteur s'ouvre avec un code donné en amphi, valable un
-  semestre et changeable en une commande. Aucune inscription, aucun email, aucun mot de passe,
-  aucune base d'utilisateurs : le site reste statique et sans données personnelles.
-- **Activé cours par cours.** Un champ dans `cours.yml` décide si un cours a un tuteur ; par défaut, non.
-- Le tuteur **ne donne jamais** le corrigé d'un exercice, d'un TD ou d'un examen : il guide par questions.
-- Il répond **uniquement** à partir du contenu du cours ; hors sujet, il le dit et renvoie à l'enseignant.
-- Il **dit qu'il est une IA** et peut se tromper ; l'enseignant reste la référence.
-- **Aucune donnée personnelle** n'est demandée ni stockée dans ce sprint (la journalisation est US-32).
-- Le site reste **utilisable sans le tuteur** : si le service est indisponible ou le plafond atteint, la page fonctionne normalement.
+- [ ] **Deuxième cours à migrer** : ses sources LaTeX (séances, et labs si disponibles), déposées dans `_import/`.
+- [ ] **Labs, TD, notebooks** du cours pilote, pour US-49 et US-50.
 
 ## Ordre d'exécution
 
-US-26 → US-27 → US-31 → US-28 → US-30 → US-29.
+US-49 → US-48 → US-43 → US-51 → US-50. (US-51 passe avant US-50 : décision du PO — les
+notebooks seront d'abord téléchargeables, et deviendront des pages ensuite.)
 
 ---
 
-### US-26 — Spike + ADR-0004 : architecture du tuteur (2 pts)
+### US-49 — Ressources par séance (3 pts)
 
-En tant que PO, je veux une décision documentée avant d'écrire le service,
-afin de ne pas découvrir la facture ou une faille après coup.
+En tant qu'étudiant, je veux trouver le lab et le TD à côté de la séance,
+afin de ne pas chercher ailleurs ce qui va ensemble.
 
-- [ ] Options comparées : contenu du cours injecté dans le contexte avec mise en cache des prompts, contre recherche vectorielle (RAG). Critères : coût par question, complexité, qualité attendue sur un corpus de deux séances.
-- [ ] Modèle choisi et justifié (famille Haiku ou Sonnet), avec le **coût estimé par question** et le nombre de questions que permet le plafond mensuel.
-- [ ] Stratégie anti-abus décidée : le tuteur est public, n'importe qui peut consommer le budget.
-- [ ] `_specs/adr/0004-architecture-tuteur.md` : contexte, options, décision, conséquences, coûts.
-- [ ] Livré en PR de specs, sans code de service.
+- [ ] Champ `ressources` dans `_sources/import.toml` : chaque entrée a un type (`lab`, `td`, `notebook`, `corrige`), un titre et un fichier.
+- [ ] Fichiers rangés dans le dossier du cours ; liste affichée sur la page de la séance et sur la page du cours, dans les deux langues, avec le type et le poids du fichier.
+- [ ] **Un corrigé n'est jamais publié à côté de son énoncé** : le type `corrige` exige une date de publication, et la ressource reste absente du site avant cette date. La CI échoue si un corrigé est publiable sans date.
+- [ ] Ajouter une ressource ne demande aucune modification de page.
 
-### US-27 — Service proxy sécurisé (5 pts)
+### US-48 — Page de garde des PDF (2 pts)
 
-En tant que PO, je veux que la clé API ne soit jamais exposée,
-afin qu'un site statique public puisse appeler un modèle sans risque.
+En tant qu'étudiant qui reçoit un PDF par messagerie, je veux savoir d'où il vient,
+afin de retrouver le cours en ligne.
 
-- [ ] Cloudflare Worker dans `worker/`, appelant l'API Anthropic ; la clé vient d'un secret Cloudflare, jamais du dépôt.
-- [ ] CORS limité au domaine du site ; toute autre origine reçoit un refus.
-- [ ] Code d'accès exigé avant la première question : le Worker le vérifie contre un secret Cloudflare et renvoie un jeton de session de durée limitée ; le code n'est jamais dans le dépôt ni dans le site.
-- [ ] Changer le code se fait en une commande, sans redéploiement du site ; les sessions en cours expirent normalement.
-- [ ] Le Worker n'accepte que les champs attendus (question, identifiant de séance) et rejette toute tentative de fixer le prompt système ou le modèle depuis le client.
-- [ ] Réponse en flux si possible ; sinon délai maximal fixé et message d'attente côté page.
-- [ ] Erreurs distinctes et lisibles : service indisponible, quota atteint, question refusée.
-- [ ] Un contrôle de la CI échoue si une chaîne ressemblant à une clé API apparaît dans le dépôt.
+- [ ] Première page : titre du cours, titre et numéro de la séance, nom et affiliation de l'enseignant, URL de la séance, date de génération.
+- [ ] Style accordé à la charte ; la pagination reste correcte.
 
-### US-31 — Déploiement continu du Worker (2 pts)
+### US-43 — Contrôle de débordement des slides (2 pts)
 
-En tant que PO, je veux que le service se déploie comme le site,
-afin de ne pas avoir de manipulation manuelle à retenir.
+En tant que PO, je veux qu'une slide trop chargée soit signalée à l'import,
+afin de ne pas la découvrir en amphi.
 
-- [ ] Workflow déclenché sur les changements de `worker/**`, déploiement par wrangler, jeton en GitHub Secret.
-- [ ] Le déploiement du site et celui du Worker sont indépendants : un échec de l'un ne bloque pas l'autre.
-- [ ] Environnement de test séparé de la production, ou justification de son absence.
+- [ ] Contrôle exécuté en CI : échec si une slide dépasse la hauteur du cadre, avec le numéro et le titre de la slide.
+- [ ] La commande `/importer-chapitre` fait le même contrôle et le signale avant d'ouvrir la PR.
+- [ ] Testé sur une slide volontairement trop longue.
 
-### US-28 — Contexte du cours (5 pts)
+### US-50 — Notebooks rendus en page (5 pts)
 
-En tant qu'étudiant, je veux que le tuteur parle de ma séance,
-afin de ne pas recevoir des généralités trouvées ailleurs.
+En tant qu'étudiant, je veux lire un lab de mon cours d'IA sans rien installer,
+afin de le consulter depuis mon téléphone.
 
-- [ ] Le rendu produit, pour chaque séance, un fichier de contexte (titre, plan, texte des slides, encadrés, code, légendes des figures) consommé par le Worker.
-- [ ] Le contexte est construit depuis les sources du site : aucune ressaisie, et il se met à jour au déploiement.
-- [ ] La taille du contexte et le coût associé sont mesurés et indiqués dans la PR.
-- [ ] La mise en cache des prompts est activée et son effet sur le coût est mesuré.
-- [ ] Les corrigés éventuels sont exclus du contexte, par construction.
+- [ ] Un `.ipynb` déclaré comme ressource est rendu en page HTML : code coloré, sorties, figures.
+- [ ] Deux boutons : télécharger le notebook, ouvrir dans Google Colab.
+- [ ] Les sorties viennent du notebook tel quel : rien n'est réexécuté en CI (règle du gel d'US-18).
+- [ ] Rendu correct à 375 px ; tableaux et sorties larges défilent dans leur cadre ; axe-core sans violation.
 
-### US-30 — Garde-fous pédagogiques et budgétaires (5 pts)
+### US-51 — Migration d'un deuxième cours (5 pts)
 
-En tant qu'enseignant, je veux que le tuteur aide sans faire le travail à la place,
-et qu'il ne puisse pas dépasser mon budget.
+En tant qu'étudiant d'un autre cours, je veux aussi trouver mes séances en ligne,
+afin que le site serve à toute ma promotion.
 
-- [ ] Prompt système : posture socratique, réponses courtes, en français, ancrées dans le contexte fourni, renvoi à l'enseignant hors sujet. Le prompt est versionné et relu par le PO.
-- [ ] Refus des demandes de corrigé, reformulées en questions guidantes ; testé sur une liste d'au moins dix questions pièges, jointe à la PR.
-- [ ] Limite de questions par session et par jour, par code d'accès, plus un **plafond global quotidien** aligné sur le budget mensuel ; au-delà, message clair et site intact.
-- [ ] Un code diffusé largement ne peut pas faire exploser le budget : le plafond global prime sur tout le reste.
-- [ ] Compteur de consommation consultable par le PO (page ou commande), sans données personnelles.
-- [ ] Le Worker refuse les questions manifestement hors cours et les tentatives de détourner le prompt.
-
-### US-29 — Widget de discussion (3 pts)
-
-En tant qu'étudiant sur mon téléphone, je veux poser ma question sans quitter la séance,
-afin d'obtenir une explication au moment où je bloque.
-
-- [ ] Widget présent uniquement sur les pages de séance des cours dont `cours.yml` active le tuteur ; absent partout ailleurs.
-- [ ] Première ouverture : demande du code d'accès, avec un message expliquant où l'obtenir (en cours). Code refusé : message clair, sans blocage de la page.
-- [ ] Utilisable au clavier, annoncé aux lecteurs d'écran, lisible en mode clair et sombre, correct à 375 px ; axe-core sans violation.
-- [ ] Mention visible : réponses produites par une IA, pouvant contenir des erreurs, l'enseignant reste la référence.
-- [ ] Aucun appel réseau avant que l'étudiant n'ouvre le widget.
-- [ ] La conversation reste dans la page : rien n'est stocké côté serveur dans ce sprint.
-- [ ] Vérification en ligne après déploiement (règle `Refs #N`).
+- [ ] Cours créé avec son `cours.yml` (niveaux, semestre, objectifs, prérequis fournis par le PO).
+- [ ] Séances importées avec `/importer-chapitre`, une PR par séance, les textes alternatifs demandés au PO.
+- [ ] Le cours passe au statut `en-ligne` et apparaît dans le catalogue, dans les deux langues.
+- [ ] Tout élément que la chaîne ne sait pas encore convertir est signalé, jamais converti à la main en silence : c'est ce qui fera évoluer le script.
 
 ---
-
-## Hors périmètre, au backlog
-
-Journalisation anonymisée des questions et consentement (US-32), tableau de bord enseignant (US-33),
-extension du tuteur à un second cours, et rapprochement éventuel avec IA4Nieup lorsque la plateforme
-sera opérationnelle (le tuteur du site reste volontairement léger et sans comptes).
 
 ## Bilan
 
 Rédigé par Claude Code en fin de sprint : `_specs/sprints/sprint-05-bilan.md` (CLAUDE.md §11).
+Il indiquera en particulier le **temps réel de migration d'une séance**, donnée qui dimensionnera
+les sprints de contenu suivants.
