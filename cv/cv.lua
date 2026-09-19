@@ -4,6 +4,41 @@
 
 local INSECABLE = "\u{A0}"
 
+-- Sceau de l'UCAD, en haut à droite du CV comme sur les decks Beamer du PO. Le texte alternatif est
+-- le même partout : c'est un emblème institutionnel, pas une décoration.
+local SCEAU = "/assets/img/ucad-sceau.png"
+local SCEAU_ALT = {
+  fr = "Sceau de l'Université Cheikh Anta Diop de Dakar",
+  en = "Seal of Université Cheikh Anta Diop de Dakar",
+}
+
+--- « ../ » autant de fois qu'il faut pour remonter du dossier de la page à la racine du projet.
+local function remonte()
+  local dossier = pandoc.path.directory(quarto.doc.input_file)
+  local racine = quarto.project.directory
+  local relatif = dossier:sub(#racine + 2)
+  local chemins = ""
+  for _ in relatif:gmatch("[^/]+") do
+    chemins = chemins .. "../"
+  end
+  return chemins
+end
+
+--- Bloc du sceau, dans la forme que le format attend.
+local function sceau(langue)
+  local alt = SCEAU_ALT[langue] or SCEAU_ALT.fr
+  if quarto.doc.is_format("typst") then
+    -- Posé sur la page, sans occuper de place dans le flux : le titre reste à sa hauteur.
+    return pandoc.RawBlock("typst",
+      -- Chemin relatif au .typ, écrit à côté de la page : Typst refuse de lire hors de sa racine.
+      -- La profondeur se calcule, parce que le CV français est à un niveau et l'anglais à deux.
+      '#place(top + right, dy: -2.9cm, image("' .. remonte() .. SCEAU:sub(2) ..
+      '", width: 2.1cm, alt: "' .. alt .. '"))')
+  end
+  local image = pandoc.Image(pandoc.Inlines(alt), SCEAU, alt)
+  return pandoc.Div(pandoc.Plain(pandoc.Inlines({ image })), { class = "sceau-ucad" })
+end
+
 local LIBELLES = {
   fr = { parcours = "Parcours", formation = "Formation", mention = "Mention ",
          responsabilites = "Responsabilités scientifiques et associatives",
@@ -150,5 +185,6 @@ function Pandoc(doc)
       end
     end,
   })
+  doc.blocks:insert(1, sceau(langue))
   return doc
 end
