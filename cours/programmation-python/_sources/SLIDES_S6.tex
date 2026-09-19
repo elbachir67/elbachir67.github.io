@@ -1,0 +1,333 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{beamerucad}
+\usepackage{listings}
+\definecolor{ckw}{HTML}{2563AB}\definecolor{cst}{HTML}{2E8B57}\definecolor{ccm}{HTML}{8A8F98}
+\definecolor{outbg}{HTML}{F4F5F7}\definecolor{outrule}{HTML}{2E8B57}
+\lstdefinestyle{py}{language=Python,basicstyle=\ttfamily\scriptsize,
+ keywordstyle=\color{ckw}\bfseries,stringstyle=\color{cst},commentstyle=\color{ccm}\itshape,
+ showstringspaces=false,columns=fullflexible,keepspaces=true,
+ backgroundcolor=\color{ucadband!8},frame=leftline,framerule=2.5pt,rulecolor=\color{ucadband},
+ xleftmargin=8pt,aboveskip=3pt,belowskip=1pt,basewidth=0.5em}
+\lstdefinestyle{out}{basicstyle=\ttfamily\scriptsize\color{black!82},
+ backgroundcolor=\color{outbg},frame=leftline,framerule=2.5pt,rulecolor=\color{outrule},
+ xleftmargin=8pt,aboveskip=2pt,belowskip=1pt,columns=fullflexible,keepspaces=true}
+\lstset{style=py}
+\newcommand{\resultat}{{\scriptsize\textbf{R\'esultat}~$\rightarrow$}\par\vspace{1pt}}
+
+\title{Programmation Python — Séance 6}
+\subtitle{NumPy}
+\author{Dr. El Hadji Bassirou TOURÉ}
+\institute{Département de Mathématiques et Informatique\\ Faculté des Sciences et Techniques\\ Université Cheikh Anta Diop de Dakar}
+\date{}
+\setucadfoot{Programmation Python — Séance 6}
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]\titlepage\end{frame}
+
+% =====================================================================
+\begin{frame}{Objectifs de la séance}
+\begin{ucaddef}[Contenu]
+{\small On entre dans la \textbf{science des données} avec un exemple de \textbf{morphométrie} : des mesures relevées sur des spécimens de pinsons (bec, aile, masse). \texttt{numpy} fournit le \textbf{tableau} (\texttt{array}), sur lequel on calcule \textbf{sans boucle}. C'est l'outil sur lequel repose \texttt{pandas} (Séance 7) et, plus loin, le Machine Learning.}
+\end{ucaddef}
+\begin{itemize}\small
+  \item \textbf{Le tableau} : \texttt{np.array}, types homogènes.
+  \item \textbf{Vectorisation}, \textbf{agrégations}, \textbf{filtrage} sur une mesure (1D).
+  \item \textbf{Tableaux 2D} et \textbf{axis} : la table complète spécimens $\times$ mesures.
+  \item \textbf{Broadcasting} et \textbf{normalisation (z-score)} : le pont vers le ML.
+\end{itemize}
+{\small L'entraînement se fait dans le \textbf{notebook}, avec une cellule « À vous » après chaque notion.}
+\end{frame}
+
+\begin{frame}{Deux idées centrales}
+\figslide{0.94}{figs/f6_numpy}{La vectorisation (une opération agit sur chaque valeur, sans boucle) et l'argument \texttt{axis} (résumer la table par mesure ou par spécimen).}
+\end{frame}
+
+% #####################################################################
+\section{Le tableau NumPy}
+
+\begin{frame}{L'idée : un tableau pour le calcul}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Un \textbf{tableau} NumPy est une collection de nombres \textbf{de même type}, conçue pour le calcul. On importe NumPy sous le nom \texttt{np}, et on crée un tableau avec \texttt{np.array(...)}. Ici, la \textbf{masse} (en g) de 6 spécimens de pinsons.}
+\end{ucaddef}
+{\small Le tableau ressemble à une liste, mais il autorise des opérations \textbf{globales} (sur tous les éléments à la fois) qui n'existent pas sur les listes.}
+\end{frame}
+
+\begin{frame}[fragile]{Créer un tableau}
+\begin{lstlisting}
+import numpy as np
+
+masse = np.array([15, 16, 21, 22, 28, 27])
+print(masse)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[15 16 21 22 28 27]
+\end{lstlisting}
+{\small \texttt{np} est le nom conventionnel de NumPy. Le tableau s'affiche sans virgules.}
+\end{frame}
+
+\begin{frame}[fragile]{Des éléments de même type}
+\begin{lstlisting}
+bec = np.array([9.1, 8.0, 12.8])
+print(bec)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[ 9.1  8.  12.8]
+\end{lstlisting}
+{\small Un tableau ne contient qu'un seul type. Comme les mesures de bec sont décimales, tout le tableau est \textbf{flottant} (le point après chaque nombre le signale).}
+\end{frame}
+
+% #####################################################################
+\section{La vectorisation}
+
+\begin{frame}{L'idée : calculer sans boucle}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Une opération sur un tableau (\texttt{+}, \texttt{*}, une comparaison) s'applique \textbf{à chaque élément d'un seul coup}, sans boucle. C'est la \textbf{vectorisation} : un code plus court, plus lisible, et bien plus rapide.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Opérer sur tout le tableau}
+\begin{lstlisting}
+print(masse + 2)
+print(masse * 2)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[17 18 23 24 30 29]
+[30 32 42 44 56 54]
+\end{lstlisting}
+{\small \texttt{masse + 2} ajoute 2 à chaque masse ; \texttt{masse * 2} double chaque masse. Aucune boucle.}
+\end{frame}
+
+\begin{frame}[fragile]{La boucle de la Séance 3, en une ligne}
+\begin{lstlisting}
+# Facon Seance 3 : une boucle
+total = 0
+for m in masse:
+    total = total + m
+print(total)
+
+# Facon NumPy : vectorise
+print(masse.sum())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+129
+129
+\end{lstlisting}
+{\small Même résultat : NumPy remplace la boucle d'accumulation par un simple \texttt{.sum()}.}
+\end{frame}
+
+\begin{frame}[fragile]{Piège — \texttt{*} agit élément par élément}
+\begin{ucadpiege}[Ce n'est pas un produit matriciel]
+{\small \texttt{masse * masse} élève \textbf{chaque} masse au carré, case par case.}
+\end{ucadpiege}
+\begin{lstlisting}
+print(masse * masse)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[225 256 441 484 784 729]
+\end{lstlisting}
+{\small $15^2 = 225$, $16^2 = 256$, etc. Le produit matriciel, lui, s'écrit avec \texttt{@} — hors de notre programme.}
+\end{frame}
+
+% #####################################################################
+\section{Les agrégations}
+
+\begin{frame}[fragile]{Résumer un tableau en un nombre}
+\begin{lstlisting}
+print(masse.sum())
+print(masse.mean())
+print(masse.min())
+print(masse.max())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+129
+21.5
+15
+28
+\end{lstlisting}
+{\small La masse \textbf{moyenne} vaut 21.5 g. L'\textbf{écart-type} mesure la dispersion ; il tombe rarement rond, on l'arrondit :}
+\begin{lstlisting}
+print(round(masse.std(), 2))
+\end{lstlisting}
+\begin{lstlisting}[style=out]
+4.92
+\end{lstlisting}
+\end{frame}
+
+% #####################################################################
+\section{Le filtrage booléen}
+
+\begin{frame}[fragile]{Sélectionner des spécimens : un masque}
+\begin{lstlisting}
+print(masse >= 20)
+print(masse[masse >= 20])
+print((masse >= 20).sum())
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[False False  True  True  True  True]
+[21 22 28 27]
+4
+\end{lstlisting}
+{\small La comparaison produit un \textbf{masque} de \texttt{True}/\texttt{False} ; placé entre crochets, il \textbf{sélectionne} les spécimens d'au moins 20 g ; \texttt{.sum()} sur un masque les \textbf{compte} (4, sans doute les plus grandes espèces).}
+\end{frame}
+
+% #####################################################################
+\section{Les tableaux 2D}
+
+\begin{frame}{L'idée : la table complète}
+\begin{ucaddef}[L'idée en une phrase]
+{\small On a mesuré \textbf{4 caractères} par spécimen. On les range dans un tableau \textbf{2D} : une \textbf{ligne} par spécimen, une \textbf{colonne} par mesure (longueur de bec, hauteur de bec, aile, masse). \texttt{shape} donne le format \texttt{(spécimens, mesures)}.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Créer un tableau 2D}
+\begin{lstlisting}
+# colonnes : bec_long, bec_haut, aile, masse
+X = np.array([[ 9.1,  8.0, 67, 15],
+              [ 9.4,  8.3, 68, 16],
+              [12.8, 10.5, 74, 21],
+              [13.2, 10.9, 75, 22],
+              [16.1, 14.2, 80, 28],
+              [15.7, 13.8, 79, 27]])
+print(X)
+print(X.shape)
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[[ 9.1  8.  67.  15. ]
+ [ 9.4  8.3 68.  16. ]
+ [12.8 10.5 74.  21. ]
+ [13.2 10.9 75.  22. ]
+ [16.1 14.2 80.  28. ]
+ [15.7 13.8 79.  27. ]]
+(6, 4)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Accéder aux spécimens et aux mesures}
+\begin{lstlisting}
+print(X[0, 0])
+print(X[0])
+print(X[:, 0])
+print(X[:, 3])
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+9.1
+[ 9.1  8.  67.  15. ]
+[ 9.1  9.4 12.8 13.2 16.1 15.7]
+[15. 16. 21. 22. 28. 27.]
+\end{lstlisting}
+{\small \texttt{[spécimen, mesure]} pour une valeur ; \texttt{X[0]} un spécimen entier ; \texttt{X[:, 0]} la colonne des becs ; \texttt{X[:, 3]} celle des masses (le \texttt{:} veut dire « tous les spécimens »).}
+\end{frame}
+
+% #####################################################################
+\section{L'argument axis}
+
+\begin{frame}{L'idée : dans quel sens résumer}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Sur un tableau 2D, une agrégation se fait \textbf{par colonne} ou \textbf{par ligne}, selon \texttt{axis}. \texttt{axis=0} descend les \textbf{colonnes} : une valeur par \textbf{mesure}. \texttt{axis=1} parcourt les \textbf{lignes} : une valeur par \textbf{spécimen}.}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Moyenne par mesure, moyenne par spécimen}
+\begin{lstlisting}
+print(X.mean(axis=0).round(2))
+print(X.mean(axis=1).round(2))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[12.72 10.95 73.83 21.5 ]
+[24.78 25.42 29.58 30.28 34.58 33.88]
+\end{lstlisting}
+{\small \texttt{axis=0} : moyenne de \textbf{chaque mesure} (bec 12.72 mm, aile 73.83 mm, masse 21.5 g) — ce qui a un sens. \texttt{axis=1} mélange des unités (mm et g) : correct, mais \textbf{peu parlant} — d'où la normalisation, juste après.}
+\end{frame}
+
+% #####################################################################
+\section{Broadcasting et normalisation}
+
+\begin{frame}{L'idée : opérer entre un tableau et un vecteur}
+\begin{ucaddef}[L'idée en une phrase]
+{\small Le \textbf{broadcasting} permet d'opérer entre un tableau 2D et un vecteur : le vecteur est appliqué à chaque ligne. Ici, on retire à \textbf{chaque mesure} sa propre moyenne (calculée par \texttt{axis=0}).}
+\end{ucaddef}
+\end{frame}
+
+\begin{frame}[fragile]{Retirer à chaque mesure sa moyenne}
+\begin{lstlisting}
+print((X - X.mean(axis=0)).round(2))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[[-3.62 -2.95 -6.83 -6.5 ]
+ [-3.32 -2.65 -5.83 -5.5 ]
+ [ 0.08 -0.45  0.17 -0.5 ]
+ [ 0.48 -0.05  1.17  0.5 ]
+ [ 3.38  3.25  6.17  6.5 ]
+ [ 2.98  2.85  5.17  5.5 ]]
+\end{lstlisting}
+{\small Le vecteur des moyennes par colonne est soustrait à \textbf{chaque ligne} : NumPy l'étend automatiquement à toute la hauteur du tableau.}
+\end{frame}
+
+\begin{frame}[fragile]{Normaliser (z-score) : le pont vers le ML}
+\begin{ucadex}[Des unités différentes]
+{\small Bec et aile en mm, masse en g : pour comparer les mesures, on \textbf{normalise} chaque colonne — retirer la moyenne, diviser par l'écart-type.}
+\end{ucadex}
+\begin{lstlisting}
+X_reduit = (X - X.mean(axis=0)) / X.std(axis=0)
+print(X_reduit.std(axis=0).round(2))
+\end{lstlisting}
+\resultat
+\begin{lstlisting}[style=out]
+[1. 1. 1. 1.]
+\end{lstlisting}
+{\small Après normalisation, \textbf{chaque mesure} a une moyenne de 0 et un écart-type de 1 : toutes sont ramenées à une échelle commune, quelle que soit leur unité. Ce geste est \textbf{systématique} en morphométrie comme avant d'entraîner un modèle.}
+\end{frame}
+
+% #####################################################################
+\section{Synthèse}
+
+\begin{frame}{Pièges fréquents}
+\begin{itemize}\small
+  \item \texttt{*} n'est \textbf{pas} le produit matriciel : il multiplie \textbf{élément par élément}.
+  \item Le sens de \texttt{axis} : \texttt{axis=0} \textbf{par mesure} (colonne), \texttt{axis=1} \textbf{par spécimen} (ligne).
+  \item \textbf{Mélanger des unités} : moyenner des mesures d'unités différentes (mm et g) n'a pas de sens ; on \textbf{normalise} d'abord.
+  \item Un tableau a des \textbf{types homogènes} : mélanger entiers et flottants donne des flottants.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{À retenir — Séance 6}
+\begin{ucadret}[L'essentiel]
+{\small
+\textbf{Créer} : \texttt{import numpy as np} puis \texttt{np.array([...])} ; éléments de \textbf{même type}.\\[2pt]
+\textbf{Vectorisation} : une opération s'applique à \textbf{tout le tableau}, sans boucle.\\[2pt]
+\textbf{Agrégations} : \texttt{.sum()}, \texttt{.mean()}, \texttt{.std()}, \texttt{.min()}, \texttt{.max()}.\\[2pt]
+\textbf{Filtrage} : masque \texttt{tableau >= v}, puis \texttt{tableau[masque]}.\\[2pt]
+\textbf{2D} : \texttt{shape} donne \texttt{(spécimens, mesures)} ; accès \texttt{[i, j]}, \texttt{[:, j]} (mesure), \texttt{[i, :]} (spécimen).\\[2pt]
+\textbf{axis} : \texttt{axis=0} par mesure, \texttt{axis=1} par spécimen.\\[2pt]
+\textbf{Normalisation (z-score)} : \texttt{(X - X.mean(axis=0)) / X.std(axis=0)} ramène chaque mesure à une moyenne de 0 et un écart-type de 1.}
+\end{ucadret}
+\end{frame}
+
+\begin{frame}{Prochaine séance}
+\begin{ucaddef}[Séance 7 — pandas]
+{\small NumPy calcule sur des tableaux de nombres. \texttt{pandas}, bâti sur NumPy, ajoute des \textbf{colonnes nommées} et une colonne \texttt{espece} : le \textbf{DataFrame}, la table de données de la bio-informatique. On y manipulera la table complète des pinsons — tris, groupes par espèce, valeurs manquantes.}
+\end{ucaddef}
+{\small À faire d'ici là : refaire les cellules « À vous » du notebook de la séance.}
+\end{frame}
+
+\begin{frame}{Références}
+\begin{itemize}\small
+  \item Harris, C. et al. — \emph{Array programming with NumPy}, Nature, 2020.
+  \item VanderPlas, J. — \emph{Python Data Science Handbook}, 2e éd., O'Reilly, 2023.
+  \item McKinney, W. — \emph{Python for Data Analysis}, 3e éd., O'Reilly, 2022.
+  \item NumPy — \emph{NumPy: the absolute basics for beginners} (documentation), 2024.
+\end{itemize}
+\end{frame}
+
+\end{document}
