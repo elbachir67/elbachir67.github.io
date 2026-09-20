@@ -66,18 +66,18 @@ d'un tuteur IA encadré.
 | US-38 | EP2 | Page Contact bilingue (formulaire non requis : email protégé, affiliations) | S | 2 | — |
 | US-39 | EP1 | Traduire les données du CV et du catalogue des cours (et non les seuls libellés) | S | 3 | — |
 | US-40 | EP3 | Page rédigée par chapitre, en complément du deck de slides | S | 5 | — |
-| US-43 | EP3 | Contrôle de débordement des slides (échec si une slide dépasse le cadre) | S | 2 | 5 |
+| US-43 | EP3 | Contrôle de débordement des slides (échec si une slide dépasse le cadre) | S | 2 | livrée |
 | US-44 | EP3 | Style matplotlib accordé à la charte, partagé par les cours | C | 2 | — |
 | US-45 | EP3 | Notes du présentateur (`\note{}` → `::: {.notes}`) | C | 1 | — |
 | US-46 | EP3 | Numérotation automatique des chapitres depuis le nom de fichier | C | 1 | — |
 | US-47 | EP1 | Index de recherche par langue, sans ajustement du décalage Quarto | C | 2 | — |
-| US-48 | EP3 | Page de garde des PDF de séance | S | 2 | 5 |
-| US-49 | EP3 | Ressources par séance (lab, TD, notebook, corrigé) | M | 3 | 5 |
-| US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | 5 |
-| US-51 | EP3 | Migration d'un deuxième cours : Programmation Python (L1) | M | 5 | 5 |
+| US-48 | EP3 | Page de garde des PDF de séance | S | 2 | livrée |
+| US-49 | EP3 | Ressources par séance (lab, TD, notebook, corrigé) | M | 3 | livrée |
+| US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | — |
+| US-51 | EP3 | Migration d'un deuxième cours : Programmation Python (L1) | M | 5 | livrée |
 | US-52 | EP1 | Déploiement quotidien programmé (les dates de publication s'appliquent seules) | C | 1 | — |
 | US-53 | EP3 | Un manifeste d'import par séance (séances vraiment indépendantes) | C | 3 | — |
-| US-54 | EP3 | Contrôle de figure vide (écart d'éléments dessinés, références illisibles) | M | 2 | 5 |
+| US-54 | EP3 | Contrôle de figure vide (écart d'éléments dessinés, références illisibles) | M | 2 | livrée |
 
 ### Stories décrites par le PO
 
@@ -99,6 +99,11 @@ sur ce fichier, ce qui a conduit à enchaîner leurs PR, avec les dégâts const
 fichier par séance supprimerait la cause. Il faudrait adapter `preparer_chapitre.py`,
 `verifier_conversion.py` et `rendre.py`, qui lisent tous le manifeste.
 
+**US-50 — Notebooks rendus en page.** Dernière de l'ordre d'exécution du Sprint 5, elle n'a pas été
+atteinte. Les huit notebooks du cours de Python sont **en ligne comme ressources téléchargeables**
+(US-49) : il manque la page HTML, avec le téléchargement et l'ouverture dans Colab. Première
+candidate pour le sprint suivant (voir [le bilan](sprints/sprint-05-bilan.md)).
+
 **Cours faits de CM rédigés.** *Programmation C avancée* et *Structures de Données* ne sont pas
 candidats à US-51 : ce sont des **CM rédigés**, et non des decks. Ils attendent deux choses, dans un
 sprint ultérieur : **US-40** (page rédigée par chapitre, en complément du deck) et la **conversion des
@@ -112,7 +117,7 @@ figures TikZ**, que la chaîne d'import ne sait pas encore faire.
 | 2 | Vitrine académique complète | 17 |
 | 3 | Bilingue et premier cours natif | 30 |
 | 4 | Chaîne de publication et blog | 23 |
-| 5 | Du contenu : un deuxième cours en ligne (nom de domaine et tuteur IA reportés) | 19 |
+| 5 | Du contenu : un deuxième cours en ligne | 14 livrés sur 19 |
 | 6 | Automatisation avancée + analytics | 21 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
