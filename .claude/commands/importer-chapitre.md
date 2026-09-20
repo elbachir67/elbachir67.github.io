@@ -50,12 +50,16 @@ python3 scripts/rendre.py                 # les deux langues
 python3 scripts/verifier_conversion.py    # la page correspond à ses sources, et son gel existe
 node scripts/verifier_accessibilite.js    # WCAG A et AA, pages et slides
 python3 scripts/verifier_metadonnees.py && python3 scripts/verifier_bilingue.py && python3 scripts/verifier_telephone.py
+python3 scripts/verifier_latex.py        # aucun reste de LaTeX dans les pages
+python3 scripts/verifier_figures.py      # aucune figure vidée en chemin
+node scripts/verifier_debordement.js     # aucune slide ne dépasse le cadre
 ```
 
-Puis regarder la séance dans un navigateur : **les slides doivent tenir dans le cadre sans défilement**
-(1050 × 700 unités, voir `assets/css/slides.scss`), les encadrés porter les bonnes couleurs, les figures
-s'afficher, et le repli du code s'ouvrir. Signaler au PO toute slide trop chargée : c'est une décision
-pédagogique, pas un réglage.
+Le contrôle de débordement mesure lui-même les slides : quand il en signale une, **ne pas ouvrir la
+PR** — alléger une slide trop chargée est une décision pédagogique, qui revient au PO.
+
+Regarder ensuite la séance dans un navigateur : les encadrés doivent porter les bonnes couleurs, les
+figures s'afficher, et le repli du code s'ouvrir.
 
 ## 4. Ouvrir la PR
 
