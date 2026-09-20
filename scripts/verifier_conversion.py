@@ -145,6 +145,33 @@ def corriges_publies(site: Path) -> list[tuple[Path, str]]:
     return ecarts
 
 
+# Lien d'une ressource dans une page rendue : on en veut l'adresse et les attributs.
+LIEN_RESSOURCE = re.compile(r'<a\b[^>]*class="[^"]*seance-ressource[^"]*"[^>]*>')
+ADRESSE = re.compile(r'href="([^"]*)"')
+
+
+def ressources_sans_telechargement(site: Path) -> list[tuple[Path, str]]:
+    """Un lien de ressource qui n'est pas un PDF doit porter « download ».
+
+    Sans lui, le navigateur ouvre le fichier : un notebook s'affiche alors en JSON brut, et le lien
+    paraît cassé. Un PDF, lui, s'ouvre correctement — et c'est ce qu'on veut.
+    """
+    if not site.is_dir():
+        return []
+    ecarts = []
+    for page in sorted(site.rglob("*.html")):
+        if "site_libs" in str(page):
+            continue
+        for balise in LIEN_RESSOURCE.findall(page.read_text(encoding="utf-8", errors="ignore")):
+            adresse = (ADRESSE.search(balise) or [None, ""])[1]
+            if adresse.lower().endswith(".pdf") or "download" in balise:
+                continue
+            ecarts.append((page, f"la ressource « {adresse.rsplit('/', 1)[-1]} » n'est pas un PDF "
+                                 "et son lien ne porte pas « download » : le navigateur l'ouvrira "
+                                 "au lieu de l'enregistrer"))
+    return ecarts
+
+
 def gel_manquant(page: Path) -> str | None:
     """Une page à code exécutable doit avoir son résultat gelé dans _freeze/."""
     if "```{python}" not in page.read_text(encoding="utf-8"):
@@ -174,6 +201,7 @@ def main() -> int:
                 ecarts += rejouer(cours, chapitre, Path(dossier))
 
     ecarts += corriges_publies(RACINE / "_site")
+    ecarts += ressources_sans_telechargement(RACINE / "_site")
     pages = sorted(RACINE.glob("cours/*/chapitres/*.qmd"))
     for page in pages:
         manquant = gel_manquant(page)

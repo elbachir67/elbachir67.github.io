@@ -423,8 +423,9 @@ disparu sans qu'aucun contrôle ne bronche.
 
 Chaque séance est imprimée en PDF **au rendu**, à côté de sa page (`…/01-<slug>.pdf`) :
 `scripts/generer_pdf.js` ouvre la présentation en mode impression et laisse le navigateur l'imprimer — même
-source, même style, texte sélectionnable, figures vectorielles. Le lien de téléchargement apparaît sur la
-page du cours et sur la slide de titre.
+source, même style, texte sélectionnable, figures vectorielles. Le lien apparaît sur la page du cours
+et sur la slide de titre ; **il ouvre le PDF dans la visionneuse**, le lecteur l'enregistrant s'il le
+veut — comme une ressource en PDF, pour que les deux liens d'une même ligne s'accordent.
 
 - L'impression demande les paquets Node (`npm ci`). Sans eux, `scripts/rendre.py` saute cette étape et le
   dit ; le lien de la slide de titre ne s'affiche alors pas, puisqu'il vérifie que le fichier existe.

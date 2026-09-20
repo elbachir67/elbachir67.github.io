@@ -105,7 +105,7 @@ local function seances(doc)
       local titre = meta and meta.title or pandoc.Inlines(nom)
       local description = meta and meta.description or pandoc.Inlines("")
       local formats = pandoc.Inlines({
-        pandoc.Link(mots_pdf(), pdf, "", { class = "seance-pdf", download = "" }),
+        pandoc.Link(mots_pdf(), pdf, "", { class = "seance-pdf" }),
       })
       for _, ressource in ipairs(R.publiables(meta and meta.ressources)) do
         formats:insert(pandoc.Str(" · "))
