@@ -427,6 +427,15 @@ source, même style, texte sélectionnable, figures vectorielles. Le lien appara
 et sur la slide de titre ; **il ouvre le PDF dans la visionneuse**, le lecteur l'enregistrant s'il le
 veut — comme une ressource en PDF, pour que les deux liens d'une même ligne s'accordent.
 
+**Page de garde et pieds de page** (US-48) : le PDF s'ouvre sur une page qui dit d'où il vient — titre
+du cours, numéro et titre de la séance, nom et affiliation de l'enseignant, **adresse de la séance en
+ligne**, date de génération, et le sceau de l'UCAD en haut à droite. Chaque page suivante porte un
+pied discret : le cours et la séance à gauche, le numéro de page à droite.
+
+Les deux sont ajoutés **au seul PDF**, par `scripts/generer_pdf.js` au moment de l'impression : ni la
+présentation ni la page publiée ne les portent. Le numéro de slide de revealjs leur laisse la place,
+pour qu'il n'y ait qu'une numérotation — celle que le lecteur voit dans sa visionneuse.
+
 - L'impression demande les paquets Node (`npm ci`). Sans eux, `scripts/rendre.py` saute cette étape et le
   dit ; le lien de la slide de titre ne s'affiche alors pas, puisqu'il vérifie que le fichier existe.
 - Aucune dépendance nouvelle : le Chrome déjà installé suffit (decktape, l'outil habituel pour revealjs,
