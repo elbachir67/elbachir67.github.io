@@ -407,6 +407,17 @@ Les libellés sont traduits (`TD` → `Tutorial`, `Corrigé` → `Solution`) et 
 qui les affiche. Les pages de cours étant monolingues (voir « Cours »), ils s'affichent aujourd'hui en
 français ; le jour où une page de cours existera en anglais, rien ne sera à changer.
 
+### Débordement des slides
+
+Une slide trop chargée ne se voit pas au rendu : revealjs la laisse défiler, et l'enseignant la
+découvre en amphi, quand la dernière ligne est sous le bord de l'écran.
+`scripts/verifier_debordement.js` (US-43) mesure chaque slide comme si elle était affichée et échoue
+en nommant celles qui dépassent le cadre de 1050 × 700, avec leur numéro, leur titre et le nombre de
+pixels de trop. Il tourne en CI et dans `/importer-chapitre`.
+
+Quand il signale une slide, **la PR n'est pas ouverte** : alléger une slide est une décision
+pédagogique, qui revient au PO.
+
 ### Figures : ce que la CI vérifie
 
 Une figure publiée vide est un **défaut silencieux** : la page se rend, les liens sont bons, et
@@ -429,8 +440,14 @@ veut — comme une ressource en PDF, pour que les deux liens d'une même ligne s
 
 **Page de garde et pieds de page** (US-48) : le PDF s'ouvre sur une page qui dit d'où il vient — titre
 du cours, numéro et titre de la séance, nom et affiliation de l'enseignant, **adresse de la séance en
-ligne**, date de génération, et le sceau de l'UCAD en haut à droite. Chaque page suivante porte un
-pied discret : le cours et la séance à gauche, le numéro de page à droite.
+ligne** et son **QR code** (« Version en ligne »), date de génération, la capsule vidéo si la séance en
+déclare une, et le sceau de l'UCAD en haut à droite. Chaque page suivante porte un pied discret : le
+cours, la séance et le nom abrégé de l'enseignant à gauche, le numéro de page à droite.
+
+Le QR code est dessiné par [`qrcode`](https://www.npmjs.com/package/qrcode) (version épinglée), côté
+Node : la bibliothèque n'entre jamais dans le site. Un PDF imprimé est l'usage réel des étudiants, et
+une adresse sur papier ne se clique pas — le code a été **décodé depuis un rendu noir et blanc à
+300 ppp** pour s'en assurer, chaque module mesurant 0,74 mm.
 
 Les deux sont ajoutés **au seul PDF**, par `scripts/generer_pdf.js` au moment de l'impression : ni la
 présentation ni la page publiée ne les portent. Le numéro de slide de revealjs leur laisse la place,

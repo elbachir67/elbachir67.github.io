@@ -17,6 +17,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { chromium } = require("playwright-core");
+const QRCode = require("qrcode");
 const { servir } = require("./serveur_local.js");
 
 // Le cadre d'une slide, en points : 960 × 540 pt, soit le 16:9 des decks.
@@ -35,10 +36,16 @@ function adresseDuSite() {
 // Le sceau de l'UCAD est en haut à droite, comme sur les decks Beamer du PO.
 async function poserLaPageDeGarde(page, adresse, site) {
   const url = site ? site + adresse.replace(/\.html$/, ".html") : "";
+  // Un QR code noir sur blanc, sans marge propre : la garde lui en donne une. Le niveau de
+  // correction « M » suffit sur du papier, et garde les modules assez gros pour être lus.
+  const qr = url
+    ? await QRCode.toString(url, { type: "svg", margin: 0, errorCorrectionLevel: "M",
+                                   color: { dark: "#000000", light: "#ffffff" } })
+    : "";
   const numero = (adresse.match(/\/(\d+)-[^/]*\.html$/) || [, ""])[1];
   const dossierDuCours = adresse.replace(/\/chapitres\/[^/]*$/, "/");
 
-  return page.evaluate(async ({ url, numero, dossierDuCours }) => {
+  return page.evaluate(async ({ url, numero, dossierDuCours, qr }) => {
     const texte = (selecteur) => {
       const element = document.querySelector(selecteur);
       return element ? element.textContent.replace(/\s+/g, " ").trim() : "";
@@ -55,6 +62,9 @@ async function poserLaPageDeGarde(page, adresse, site) {
     } catch (erreur) { /* sans elle, la garde se passe du nom du cours */ }
 
     const seance = texte("#title-slide .subtitle");
+    // Capsule vidéo de la séance, quand elle en déclare une (US-19) : le bouton porte l'identifiant.
+    const capsule = document.querySelector(".capsule-declencheur");
+    const video = capsule ? capsule.getAttribute("data-video") : "";
     const auteur = texte("#title-slide .quarto-title-author-name");
     const affiliation = texte("#title-slide .quarto-title-affiliation");
     const date = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -82,9 +92,20 @@ async function poserLaPageDeGarde(page, adresse, site) {
       </h1>
       <p style="margin:0;font-size:1.25em;font-weight:600">${auteur}</p>
       <p style="margin:.2em 0 0;font-size:1em;color:#5a6b75;max-width:34em">${affiliation}</p>
-      <div style="margin-top:auto;padding-top:1.4em;border-top:2px solid #1F6FB5;font-size:.95em">
-        <p style="margin:0;color:#1F6FB5">${url}</p>
-        <p style="margin:.15em 0 0;color:#5a6b75">Version du ${date}</p>
+      <div style="margin-top:auto;padding-top:1.2em;border-top:2px solid #1F6FB5;font-size:.95em;
+                  display:flex;align-items:flex-end;justify-content:space-between;gap:2em">
+        <div>
+          <p style="margin:0;color:#1F6FB5">${url}</p>
+          ${video ? `<p style="margin:.15em 0 0;color:#5a6b75">Capsule vidéo&nbsp;:
+                        https://youtu.be/${video}</p>` : ""}
+          <p style="margin:.15em 0 0;color:#5a6b75">Version du ${date}</p>
+        </div>
+        ${qr ? `<figure style="margin:0;text-align:center;flex:none">
+                  <div style="width:${Math.round(parseFloat(style.height) * 0.16)}px;
+                              height:${Math.round(parseFloat(style.height) * 0.16)}px">${qr}</div>
+                  <figcaption style="margin-top:.35em;font-size:.8em;color:#5a6b75">Version en
+                    ligne</figcaption>
+                </figure>` : ""}
       </div>`;
     premiere.parentElement.insertBefore(garde, premiere);
 
@@ -92,7 +113,21 @@ async function poserLaPageDeGarde(page, adresse, site) {
     // où l'on en est. Le numéro de revealjs, qui ne compte que les slides, laisse la place au nôtre,
     // aligné sur la pagination du PDF — c'est celle que voit le lecteur dans sa visionneuse.
     const pages = [...document.querySelectorAll(".reveal .slides .pdf-page")];
-    const rappel = [cours, numero ? `Séance\u00a0${Number(numero)}` : ""].filter(Boolean).join(" — ");
+    // Nom abrégé pour le pied de page : le titre, l'initiale du premier et du dernier prénom, puis
+    // le nom. « Dr. El Hadji Bassirou TOURÉ » donne « Dr. E.B. TOURÉ ».
+    const abreger = (nom) => {
+      const mots = nom.replace(/\u00a0/g, " ").split(/\s+/).filter(Boolean);
+      if (mots.length < 2) return nom;
+      const civilite = mots[0].endsWith(".") ? mots.shift() : "";
+      const famille = mots.pop();
+      const initiales = mots.length
+        ? [mots[0], mots[mots.length - 1]].filter((m, i, t) => i === 0 || m !== t[0])
+            .map((m) => m[0].toUpperCase() + ".").join("")
+        : "";
+      return [civilite, initiales, famille].filter(Boolean).join(" ");
+    };
+    const rappel = [cours, numero ? `Séance\u00a0${Number(numero)}` : "", abreger(auteur)]
+      .filter(Boolean).join(" — ");
     pages.forEach((feuille, index) => {
       feuille.querySelectorAll(".slide-number, .slide-number-pdf").forEach((n) => n.remove());
       if (index === 0) return;                       // la page de garde n'en porte pas
@@ -107,7 +142,7 @@ async function poserLaPageDeGarde(page, adresse, site) {
       feuille.appendChild(pied);
     });
     return true;
-  }, { url, numero, dossierDuCours });
+  }, { url, numero, dossierDuCours, qr });
 }
 
 function presentations(dossier) {
