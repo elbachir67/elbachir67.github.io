@@ -27,7 +27,8 @@ import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from importer_chapitre import langage_declare  # noqa: E402  (même dossier)
+from brouillons_alt import brouillons, presentation  # noqa: E402  (même dossier)
+from importer_chapitre import langage_declare  # noqa: E402
 
 RACINE = Path(__file__).resolve().parent.parent
 BESOIN_DU_PO = 2
@@ -97,11 +98,41 @@ def ecrire_textes_alternatifs(cours: Path, textes: dict[str, str]) -> Path | Non
         return None
     existants = tomllib.loads(fichier.read_text(encoding="utf-8")) if fichier.is_file() else {}
     existants.update(textes)
-    lignes = ["# Textes alternatifs des figures qui n'ont pas de légende dans le .tex, fournis par le PO.",
+    lignes = ["# Textes alternatifs des figures qui n'ont pas de légende dans le .tex, validés par le PO.",
+              "#",
+              "# Un brouillon (US-58) ne suffit pas : rien n'arrive ici sans que le PO l'ait accepté,",
+              "# corrigé ou réécrit. Le manifeste dit, figure par figure, laquelle de ces trois.",
               ""]
-    lignes += [f'{nom} = "{texte}"' for nom, texte in sorted(existants.items())]
+    lignes += [f'{nom} = "{echapper(texte)}"' for nom, texte in sorted(existants.items())]
     fichier.write_text("\n".join(lignes) + "\n", encoding="utf-8")
     return fichier
+
+
+def echapper(texte: str) -> str:
+    """Chaîne TOML : un guillemet ou une barre oblique inverse dans le texte du PO casserait le fichier."""
+    return texte.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def origines_des_textes(rapport: str, valides: dict[str, str], proposes: dict[str, str]) -> dict[str, str]:
+    """D'où vient le texte alternatif de chaque figure (US-58).
+
+    Trois origines, et le manifeste les distingue : la **légende du .tex**, quand la source en portait
+    une ; le **brouillon validé**, quand le PO a accepté la phrase proposée sans la toucher ; le
+    **texte du PO**, quand il l'a corrigée ou écrite lui-même. C'est ce qui permettra de dire, au
+    bilan, ce que les brouillons ont réellement fait gagner.
+    """
+    origines = {}
+    for ligne in rapport.splitlines():
+        trouve = re.match(r"- (\S+) : .*texte alternatif — (.+)$", ligne)
+        if not trouve:
+            continue
+        nom, origine = trouve[1], trouve[2].strip()
+        if origine == "légende du .tex":
+            origines[nom] = origine
+        elif nom in valides:
+            origines[nom] = ("brouillon validé" if valides[nom] == proposes.get(nom)
+                             else "texte du PO")
+    return origines
 
 
 def ressources_demandees(brutes: list[str]) -> list[dict]:
@@ -173,7 +204,7 @@ def ajouter_au_manifeste(cours: Path, entree: dict) -> None:
         avant, apres = texte[:debut], (texte[suivant:] if suivant != -1 else "")
     bloc = ["", "[[chapitres]]"]
     bloc += [f'{cle} = "{valeur}"' for cle, valeur in entree.items()
-             if cle not in ("figures_python", "ressources", "encadres")]
+             if cle not in ("figures_python", "ressources", "encadres", "origine_alt")]
     if entree.get("figures_python"):
         bloc += ["", "[chapitres.figures_python]"]
         bloc += [f'{nom} = "{script}"' for nom, script in entree["figures_python"].items()]
@@ -181,6 +212,11 @@ def ajouter_au_manifeste(cours: Path, entree: dict) -> None:
         # Le sens d'un encadré est une décision du PO : le manifeste le garde, la CI le rejoue.
         bloc += ["", "[chapitres.encadres]"]
         bloc += [f'{nom} = "{callout}"' for nom, callout in entree["encadres"].items()]
+    if entree.get("origine_alt"):
+        # D'où vient chaque texte alternatif (US-58). Le rejeu de la CI n'en a pas besoin : c'est la
+        # trace de ce que le PO a validé, corrigé ou écrit.
+        bloc += ["", "[chapitres.origine_alt]"]
+        bloc += [f'{nom} = "{origine}"' for nom, origine in sorted(entree["origine_alt"].items())]
     for ressource in entree.get("ressources", []):
         bloc += ["", "[[chapitres.ressources]]"]
         bloc += [f'{cle} = "{valeur}"' for cle, valeur in ressource.items()]
@@ -314,6 +350,15 @@ def main() -> int:
     non_convertis = [ligne for ligne in rapport.splitlines()
                      if ligne.startswith("- **") and "`" in ligne]
 
+    # Brouillons de textes alternatifs (US-58) : rédigés à partir de la source des figures, jamais
+    # écrits dans le site. Ils servent à deux choses — les proposer au PO quand il en manque, et dire
+    # au manifeste si le texte retenu est un brouillon accepté tel quel ou une phrase du PO.
+    proposes = {b.nom: b.texte for b in brouillons(
+        source, f"{numero}-{slug}", {nom: Path(cours / script) for nom, script in scripts_python.items()},
+        [args.figures_source or args.tex.parent, args.tex.parent / "figs", cours / "_sources" / "figs"])
+        if b.texte}
+    valides = tomllib.loads(alt.read_text(encoding="utf-8")) if alt else {}
+
     ajouter_au_manifeste(cours, {
         "tex": str(tex.relative_to(cours)),
         "sortie": str(sortie.relative_to(cours)),
@@ -328,13 +373,27 @@ def main() -> int:
         **({"video": video} if video else {}),
         **({"ressources": ressources} if ressources else {}),
         "figures_python": scripts_python,
+        "origine_alt": origines_des_textes(rapport, valides, proposes),
     })
 
     print(f"\nSéance préparée : {sortie.relative_to(RACINE)}")
     print(f"Rapport : {(cours / '_sources' / f'rapport-{numero}-{slug}.md').relative_to(RACINE)}")
     if manquants or sans_alt:
-        print("\nÀ demander au PO — texte alternatif manquant pour : " + ", ".join(manquants or ["(voir le rapport)"]))
-        print("Relancer ensuite la commande avec --alt \"nom=phrase du PO\" : le script n'invente pas de description.")
+        # Les brouillons sont présentés **en une seule fois** (US-58) : trente-trois allers-retours
+        # coûtaient une soirée au PO. Ceux des figures déjà validées ne sont pas reproposés.
+        a_proposer = [b for b in brouillons(
+            source, f"{numero}-{slug}",
+            {nom: Path(cours / script) for nom, script in scripts_python.items()},
+            [args.figures_source or args.tex.parent, args.tex.parent / "figs",
+             cours / "_sources" / "figs"]) if b.nom in manquants or not manquants]
+        if a_proposer:
+            print()
+            print(presentation(a_proposer, f"{Path(sys.argv[0]).name} {args.cours} {args.tex} "
+                                           "--alt 'NOM=phrase validée' …"))
+        else:
+            print("\nÀ demander au PO — texte alternatif manquant pour : " + ", ".join(manquants))
+        print("Aucun brouillon n'est écrit dans le site : la page garde son TODO(PO) tant que le PO "
+              "n'a pas validé.")
     if non_convertis:
         print(f"\nÉléments non convertis ({len(non_convertis)}), à soumettre au PO avant toute PR :")
         for ligne in non_convertis:
