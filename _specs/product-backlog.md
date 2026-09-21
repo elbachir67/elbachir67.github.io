@@ -65,7 +65,7 @@ d'un tuteur IA encadré.
 | US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | — |
 | US-38 | EP2 | Page Contact bilingue (formulaire non requis : email protégé, affiliations) | S | 2 | — |
 | US-39 | EP1 | Traduire les données du CV et du catalogue des cours (et non les seuls libellés) | S | 3 | — |
-| US-40 | EP3 | Conversion d'un CM rédigé en page de cours (structure, maths, callouts) | M | 8 | 6 |
+| US-40 | EP3 | Conversion d'un CM rédigé en page de cours (structure, maths, callouts) | M | 8 | livrée |
 | US-43 | EP3 | Contrôle de débordement des slides (échec si une slide dépasse le cadre) | S | 2 | livrée |
 | US-44 | EP3 | Style matplotlib accordé à la charte, partagé par les cours | C | 2 | — |
 | US-45 | EP3 | Notes du présentateur (`\note{}` → `::: {.notes}`) | C | 1 | — |
@@ -73,14 +73,18 @@ d'un tuteur IA encadré.
 | US-47 | EP1 | Index de recherche par langue, sans ajustement du décalage Quarto | C | 2 | — |
 | US-48 | EP3 | Page de garde des PDF de séance | S | 2 | livrée |
 | US-49 | EP3 | Ressources par séance (lab, TD, notebook, corrigé) | M | 3 | livrée |
-| US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | 6 |
+| US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | livrée |
 | US-51 | EP3 | Migration d'un deuxième cours : Programmation Python (L1) | M | 5 | livrée |
 | US-52 | EP1 | Déploiement quotidien programmé (les dates de publication s'appliquent seules) | C | 1 | — |
 | US-53 | EP3 | Un manifeste d'import par séance (séances vraiment indépendantes) | C | 3 | — |
 | US-54 | EP3 | Contrôle de figure vide (écart d'éléments dessinés, références illisibles) | M | 2 | livrée |
-| US-55 | EP3 | Conversion des figures TikZ en SVG nettoyé | M | 5 | 6 |
-| US-56 | EP3 | Migration du premier chapitre de Programmation C avancée | M | 5 | 6 |
-| US-57 | EP2 | Catalogue des cours : cartes lisibles et distinctes (couleur par domaine) | S | 3 | 6 |
+| US-55 | EP3 | Conversion des figures TikZ en SVG nettoyé | M | 5 | livrée |
+| US-56 | EP3 | Migration du premier chapitre de Programmation C avancée | M | 5 | livrée |
+| US-57 | EP2 | Catalogue des cours : cartes lisibles et distinctes (couleur par domaine) | S | 3 | livrée |
+| US-58 | EP4 | Brouillons de textes alternatifs soumis à la validation du PO | M | 2 | 7 |
+| US-59 | EP3 | Cours de Programmation C avancée, chapitres 0 à 3 | M | 8 | 7 |
+| US-60 | EP3 | Migration d'Introduction au ML (onze séances en decks) | M | 5 | 7 |
+| US-61 | EP3 | Flottants et mathématiques hors ligne (ouvre SD et Intro IA) | M | 5 | 7 |
 
 ### Stories décrites par le PO
 
@@ -109,12 +113,20 @@ candidate pour le sprint suivant (voir [le bilan](sprints/sprint-05-bilan.md)).
 
 **Cours faits de CM rédigés.** *Programmation C avancée*, *Structures de Données* et *Introduction à
 l'IA* sont des **documents rédigés**, et non des decks : la chaîne ne savait pas les traiter. Le
-**Sprint 6** lève ce blocage — US-40 pour la conversion d'un CM en page, US-55 pour ses figures TikZ,
-US-56 pour le premier chapitre de C, qui sert de preuve.
+**Sprint 6** a levé ce blocage — US-40 pour la conversion d'un CM en page, US-55 pour ses figures
+TikZ, US-56 pour le premier chapitre de C, qui sert de preuve. Le **Sprint 7** achève le cours de C
+(US-59) et traite ce qui manque encore aux deux autres cours : flottants et mathématiques hors ligne
+(US-61).
 
-**Introduction au ML, hors sprint.** Ce cours-là est déjà en decks Beamer : sa migration ne demande
-aucune capacité nouvelle, c'est une répétition de `/importer-chapitre`. **Ses sources sont déjà dans
-`_import/ML/`** (onze séances) : à lancer quand une respiration se présente, une PR par lot.
+**Introduction au ML entre au Sprint 7 (US-60).** Ce cours-là est déjà en decks Beamer : sa migration
+ne demande aucune capacité nouvelle, c'est une répétition de `/importer-chapitre`. **Ses sources sont
+déjà dans `_import/ML/`** (onze séances). Il était hors sprint depuis le Sprint 6, faute de
+respiration ; le Sprint 7 lui en donne une.
+
+**La part du PO, et US-58.** Le bilan du Sprint 6 a mesuré que la machine travaille quatre minutes
+par chapitre : le reste est de la lecture et des **décisions du PO** — 33 textes alternatifs pour les
+seuls chapitres de C, une table d'encadrés par cours rédigé. US-58 déplace cette part : la chaîne
+rédige un brouillon à partir de la source de la figure, le PO valide, corrige ou réécrit.
 
 ## Roadmap
 
@@ -125,7 +137,7 @@ aucune capacité nouvelle, c'est une répétition de `/importer-chapitre`. **Ses
 | 3 | Bilingue et premier cours natif | 30 |
 | 4 | Chaîne de publication et blog | 23 |
 | 5 | Du contenu : un deuxième cours en ligne | 14 livrés sur 19 |
-| 6 | Les cours rédigés entrent dans la chaîne | 26 |
-| 7 | Automatisation avancée + analytics | 21 |
+| 6 | Les cours rédigés entrent dans la chaîne | 26 livrés sur 26 |
+| 7 | Achever le C, publier le ML, préparer les cours rédigés | 20 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
