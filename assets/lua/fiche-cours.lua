@@ -104,11 +104,17 @@ local function seances(doc)
       local pdf = "chapitres/" .. nom:gsub("%.qmd$", ".pdf")
       local titre = meta and meta.title or pandoc.Inlines(nom)
       local description = meta and meta.description or pandoc.Inlines("")
-      local formats = pandoc.Inlines({
-        pandoc.Link(mots_pdf(), pdf, "", { class = "seance-pdf" }),
-      })
+      -- Une séance en slides est imprimée en PDF au rendu ; une page rédigée, non : son PDF est
+      -- celui que LaTeX a compilé, attaché en ressource (US-40).
+      local page_redigee = meta and meta.cible and pandoc.utils.stringify(meta.cible) == "page"
+      local formats = pandoc.Inlines({})
+      if not page_redigee then
+        formats:insert(pandoc.Link(mots_pdf(), pdf, "", { class = "seance-pdf" }))
+      end
       for _, ressource in ipairs(R.publiables(meta and meta.ressources)) do
-        formats:insert(pandoc.Str(" · "))
+        if #formats > 0 then
+          formats:insert(pandoc.Str(" · "))
+        end
         formats:extend(R.lien(ressource, langue, cours, true))
       end
       table.insert(lignes, {
@@ -140,7 +146,9 @@ function Pandoc(doc)
       if div.identifier == "fiche" then
         return fiche(cours)
       end
-      if div.identifier == "seances" then
+      -- « seances » pour un cours en slides, « chapitres » pour un cours rédigé : le même tableau,
+      -- sous le mot qui convient au cours.
+      if div.identifier == "seances" or div.identifier == "chapitres" then
         return seances(doc)
       end
     end,

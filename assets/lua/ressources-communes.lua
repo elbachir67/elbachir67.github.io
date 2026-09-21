@@ -10,8 +10,9 @@ local M = {}
 
 -- Libellé par type et par langue. `corrige` n'apparaît qu'à partir de sa date.
 local LIBELLES = {
-  fr = { lab = "Lab", td = "TD", notebook = "Notebook", corrige = "Corrigé" },
-  en = { lab = "Lab", td = "Tutorial", notebook = "Notebook", corrige = "Solution" },
+  fr = { lab = "Lab", td = "TD", notebook = "Notebook", pdf = "PDF du cours", corrige = "Corrigé" },
+  en = { lab = "Lab", td = "Tutorial", notebook = "Notebook", pdf = "Course PDF",
+         corrige = "Solution" },
 }
 
 local UNITES = {

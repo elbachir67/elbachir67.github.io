@@ -39,6 +39,9 @@ RESSOURCES = {
     "lab": {"fr": "Lab", "en": "Lab"},
     "td": {"fr": "TD", "en": "Tutorial"},
     "notebook": {"fr": "Notebook", "en": "Notebook"},
+    # Le document du cours lui-même, compilé par LaTeX : une page rédigée n'est pas imprimée
+    # depuis le site, c'est ce PDF-là qui fait foi (US-40).
+    "pdf": {"fr": "PDF du cours", "en": "Course PDF"},
 }
 CORRIGE = "corrige"
 
@@ -758,6 +761,9 @@ def entete_page(entete: dict[str, str], description: str, numero: str,
     lignes = ["---", f"title: {guillemets(entete.get('title', 'TODO(PO): titre'))}"]
     if entete.get("subtitle"):
         lignes.append(f"subtitle: {guillemets(entete['subtitle'])}")
+    # Une page rédigée n'est pas imprimée en PDF depuis le site : c'est le PDF de LaTeX qui fait
+    # foi, attaché en ressource. La table des séances a besoin de le savoir.
+    lignes.append('cible: "page"')
     if numero:
         lignes.append(f"numero: {guillemets(numero)}")
     lignes += ressources_yaml(ressources)
