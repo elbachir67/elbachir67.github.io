@@ -441,6 +441,43 @@ python3 scripts/preparer_chapitre.py <cours-slug> <fichier.tex> --cible page \
   à `0`, et le nom du fichier ne sert qu'à ordonner. Sans numéro, la page porte son seul titre.
 - Les `tikzpicture` ne sont pas encore convertis : ils sont **signalés**, jamais bricolés (US-55).
 
+### Schémas TikZ (US-55)
+
+Les cours rédigés dessinent avec TikZ. `scripts/figures_tikz.py` compile chaque `tikzpicture` en SVG,
+**en local et jamais en CI** — comme les figures matplotlib, le résultat est commité :
+
+```bash
+python3 scripts/figures_tikz.py _import/c-avance/ch-1/CM_Ch-1_Introduction.tex \
+    --sortie cours/<slug>/figures --prefixe introduction
+```
+
+Chaque schéma devient `<prefixe>-NN.svg`, dans son ordre d'apparition : `importer_chapitre.py` emploie
+la même numérotation, ce qui évite une table de correspondance que quelqu'un finirait par
+désynchroniser.
+
+**Dépendances** : une distribution LaTeX fournissant `lualatex`, `dvisvgm`, `tikz`, `fontspec` et la
+police **Source Sans 3** (TeX Live l'inclut). Sur macOS, MacTeX suffit ; le script s'arrête en le
+disant si l'un des deux outils manque.
+
+**La chaîne, et pourquoi elle est celle-là** :
+
+| Étape | Ce qu'elle apporte |
+|---|---|
+| `\def\pgfsysdriver{pgfsys-dvisvgm.def}` | pgf écrit des instructions **SVG** dans le DVI ; sans lui, il écrit du PostScript que `dvisvgm` ne sait pas lire sans Ghostscript, et le dessin se perd |
+| `lualatex` + `fontspec` + Source Sans 3 | **LaTeX compose le schéma dans la police du site**, en plaçant chaque glyphe avec les bonnes métriques |
+| `dvisvgm --font-format=woff2` | le texte reste du **texte**, sélectionnable et lisible aux lecteurs d'écran, au lieu de tracés |
+
+**Ce que ces schémas ne subissent pas, et c'est voulu.** Le nettoyage des autres figures ne s'applique
+pas ici :
+
+- remplacer la **police** dans le SVG décalerait chaque glyphe — « UNIX réécrit en C » devenait
+  « UNIXréécritenC », constaté à l'écran ;
+- passer les **encres** en `currentColor` rendrait illisible le texte posé dans une boîte de couleur
+  claire, qui deviendrait clair sur clair en mode sombre.
+
+Le schéma garde donc les couleurs dessinées et porte la classe `schema-tikz` : en mode sombre, la
+page le pose sur un fond clair, comme une planche.
+
 ### Figures : ce que la CI vérifie
 
 Une figure publiée vide est un **défaut silencieux** : la page se rend, les liens sont bons, et
