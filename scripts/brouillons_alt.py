@@ -853,19 +853,37 @@ def courbes(corps: str) -> list[str]:
 
 
 def corps_de_figure(script: str, nom: str) -> str:
-    """Portion du script qui produit `nom.pdf` : de sa fonction à son `savefig`.
+    """Portion du script qui produit `nom` : le code qui précède l'appel qui la nomme.
 
-    Un générateur de chapitre tient toutes ses figures dans un fichier (1411 lignes pour le chapitre 2
-    du cours de C) : lire le fichier entier donnerait les libellés de vingt figures pour une seule.
+    Trois écritures cohabitent dans les cours du PO, et il faut les trois :
+
+    - une **fonction par figure**, qui se termine par `savefig("…fig01_memoire.pdf")` — chapitre 2 du
+      cours de C, 1411 lignes pour vingt figures ;
+    - un **fichier par figure** — chapitre 1 du même cours ;
+    - un script **linéaire**, où chaque figure se termine par `save(fig, "f4_zeros")` et où le code
+      d'une figure est simplement ce qui sépare son appel du précédent — cours d'Introduction au ML.
+
+    Lire le fichier entier donnerait les libellés de toutes les figures pour une seule.
     """
-    depart = 0
-    for trouve in re.finditer(r"^def\s+(\w+)\s*\(", script, re.M):
+    fonctions = list(re.finditer(r"^def\s+\w+\s*\(", script, re.M))
+    for trouve in fonctions:
         fin = script.find("\ndef ", trouve.end())
         bloc = script[trouve.start():fin if fin != -1 else len(script)]
         if re.search(rf"savefig\(\s*[\"'][^\"']*{re.escape(nom)}\.", bloc):
             return bloc
-        depart = trouve.end()
-    return script if depart == 0 else ""
+
+    # Script linéaire : les appels qui nomment une figure, dans l'ordre. Celui qui porte `nom`
+    # termine son code ; le précédent termine celui d'avant.
+    appels = list(re.finditer(r"\b\w+\s*\([^()]*[\"']([\w.-]+?)(?:\.\w+)?[\"'][^()]*\)", script))
+    bornes = [(a.start(), a.end(), a[1]) for a in appels
+              if re.search(r"\bsave\w*\s*\(", script[a.start():a.end()])]
+    for position, (debut, fin, trouve_nom) in enumerate(bornes):
+        if trouve_nom != nom:
+            continue
+        precedent = bornes[position - 1][1] if position > 0 else 0
+        return script[precedent:fin]
+
+    return script if not fonctions else ""
 
 
 def brouillon_matplotlib(script: str, nom: str) -> str:
@@ -953,6 +971,10 @@ def script_de_la_figure(nom: str, dossiers: list[Path]) -> Path | None:
         for candidat in sorted(dossier.glob("*.py")):
             texte = candidat.read_text(encoding="utf-8", errors="ignore")
             if re.search(rf"savefig\(\s*[\"'][^\"']*{re.escape(nom)}\.", texte):
+                return candidat
+            # Un générateur linéaire enregistre par un auxiliaire — `save(fig, "f4_zeros")` — et son
+            # `savefig` ne voit qu'une variable. C'est le nom cité en clair qui le désigne.
+            if re.search(rf"[\"']{re.escape(nom)}[\"']", texte):
                 return candidat
     return None
 

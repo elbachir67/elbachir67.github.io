@@ -73,6 +73,8 @@ ENCADRES = {
 
 # Commandes de mise en page sans équivalent en HTML : le style s'en charge.
 IGNOREES = {"vskip", "vspace", "smallskip", "medskip", "bigskip", "centering", "par", "vfill",
+            # Apparitions progressives d'une slide Beamer : une page HTML montre tout d'un coup.
+            "pause",
             "toprule", "midrule", "bottomrule", "hline", "addlinespace", "small", "scriptsize", "footnotesize",
             "normalsize", "large", "Large", "raggedright", "noindent", "titlepage", "maketitle"}
 
@@ -203,6 +205,11 @@ def macros_du_theme(texte: str) -> str:
     `\\figslide{largeur}{fichier}{légende}` place une figure et sa légende : on le récrit sous la
     forme que le reste du script connaît déjà, pour que la légende serve de texte alternatif.
     `\\resultat` annonce la sortie du programme qui suit.
+
+    `\\ucadformula{…}` est l'encadré de formule du cours d'Introduction au ML. Sa définition dit ce
+    qu'il est : `\\begin{center}$\\displaystyle #1$\\end{center}`, soit une **formule hors ligne**.
+    Sans cette règle, la macro n'était pas reconnue et son contenu s'échappait : chaque `\\frac`,
+    `\\sum` ou `\\text` qu'elle contient était alors signalé un à un, 57 fois sur neuf séances.
     """
     motif = re.compile(r"\\figslideb?\{([^}]*)\}\{([^}]*)\}\{", re.S)
     while True:
@@ -219,7 +226,55 @@ def macros_du_theme(texte: str) -> str:
                  + f"\\begin{{center}}\\includegraphics[width={largeur}\\linewidth]{{{fichier}}}\n"
                    f"{{\\scriptsize {legende}}}\\end{{center}}"
                  + texte[fin + 1:])
+    # Deux écritures des colonnes Beamer coexistent dans le même cours : `\column{0.5\linewidth}`
+    # et `\begin{column}{0.5\textwidth}…\end{column}`. On ramène la seconde à la première, pour que
+    # `colonnes()` n'ait qu'une forme à connaître.
+    texte = re.sub(r"\\begin\{column\}\s*\{([^}]*)\}", r"\\column{\1}", texte)
+    texte = texte.replace("\\end{column}", "")
+
+    # `\figduo{l1}{f1}{l2}{f2}{légende}` : deux figures côte à côte sous une même légende. Elles
+    # deviennent deux colonnes, et la légende suit — c'est elle qui fera le texte alternatif.
+    motif_duo = re.compile(r"\\figduo\{([^}]*)\}\{([^}]*)\}\{([^}]*)\}\{([^}]*)\}\{", re.S)
+    while True:
+        trouve = motif_duo.search(texte)
+        if not trouve:
+            break
+        fin = accolade(texte, trouve.end() - 1)
+        l1, f1, l2, f2 = trouve[1], trouve[2], trouve[3], trouve[4]
+        legende = texte[trouve.end():fin]
+        texte = (texte[:trouve.start()]
+                 + f"\\begin{{center}}\\includegraphics[width={l1}\\linewidth]{{{f1}}}\n"
+                   f"\\includegraphics[width={l2}\\linewidth]{{{f2}}}\n"
+                   f"{{\\scriptsize {legende}}}\\end{{center}}"
+                 + texte[fin + 1:])
+
+    # Réglages de mise en page à deux arguments : ils n'ont pas de contenu, et laissés en place ils
+    # se signalent comme non convertis. `\renewcommand{\arraystretch}{1.2}` espace les lignes d'un
+    # tableau ; en HTML c'est la feuille de style qui s'en charge.
+    for commande in ("renewcommand", "setlength", "addtolength"):
+        motif_reglage = re.compile(rf"\\{commande}\s*\{{")
+        while True:
+            trouve = motif_reglage.search(texte)
+            if not trouve:
+                break
+            fin = accolade(texte, trouve.end() - 1)
+            suivant = re.match(r"\s*\{", texte[fin + 1:])
+            fin = accolade(texte, fin + 1 + suivant.end() - 1) if suivant else fin
+            texte = texte[:trouve.start()] + texte[fin + 1:]
+
     texte = texte.replace("\\resultat", "\n\n**Résultat →**\n\n")
+
+    # `\ucadformula{…}` -> formule hors ligne. Le contenu se lit en comptant les accolades : une
+    # formule en contient (`\frac{1}{n}`), et une expression régulière s'arrêterait à la première.
+    motif = re.compile(r"\\ucadformula\s*\{")
+    while True:
+        trouve = motif.search(texte)
+        if not trouve:
+            break
+        fin = accolade(texte, trouve.end() - 1)
+        formule = texte[trouve.end():fin].strip()
+        texte = texte[:trouve.start()] + f"\n\n$$ {formule} $$\n\n" + texte[fin + 1:]
+
     return texte.replace("\\quad", " ")
 
 
@@ -390,6 +445,28 @@ def inline(texte: str, conversion: Conversion) -> str:
         return f"\x00{len(formules) - 1}\x00"
 
     texte = MOTIF_MATHS.sub(garder, texte)
+
+    # `\textcolor{couleur}{texte}` : la couleur est de la mise en forme, le texte reste. Le
+    # traitement vient **après** la mise de côté des mathématiques : dans une formule, `\textcolor`
+    # est rendu par MathJax, et le retirer effacerait ce que le PO a mis en couleur — le point
+    # binaire rouge du chapitre 1 du cours de C, par exemple.
+    # `\texorpdfstring{beau}{brut}` : la première forme est celle qu'on lit.
+    for commande, garde in (("textcolor", 2), ("texorpdfstring", 1)):
+        motif_deux = re.compile(rf"\\{commande}\s*\{{")
+        while True:
+            trouve = motif_deux.search(texte)
+            if not trouve:
+                break
+            fin_un = accolade(texte, trouve.end() - 1)
+            suivant = re.match(r"\s*\{", texte[fin_un + 1:])
+            if not suivant:
+                texte = texte[:trouve.start()] + texte[trouve.end():fin_un] + texte[fin_un + 1:]
+                continue
+            debut_deux = fin_un + 1 + suivant.end() - 1
+            fin_deux = accolade(texte, debut_deux)
+            garde_texte = (texte[debut_deux + 1:fin_deux] if garde == 2
+                           else texte[trouve.end():fin_un])
+            texte = texte[:trouve.start()] + garde_texte + texte[fin_deux + 1:]
 
     # Guillemets de LaTeX : « ``mot'' ». En Markdown, un double accent grave **ouvre un code en
     # ligne** et avale tout ce qui suit, barres d'un tableau comprises : la ligne cessait d'être une
@@ -563,6 +640,28 @@ def code(contenu: str, conversion: Conversion, options: str | None = None) -> st
     return f"```{langage}\n{corps}\n```"
 
 
+def colonnes(contenu: str, conversion: Conversion) -> str:
+    """`columns` de Beamer -> colonnes Quarto, largeurs comprises (US-60).
+
+    Le cours d'Introduction au ML pose une figure à côté de son commentaire. Jusqu'ici les deux
+    colonnes étaient converties l'une après l'autre : le texte passait sous la figure, et la slide
+    perdait sa mise en page. Les largeurs sont écrites dans la source (`0.54\\linewidth`), en
+    fractions ; Quarto les veut en pourcentages.
+    """
+    morceaux = re.split(r"\\column\s*\{([^}]*)\}", contenu)
+    if len(morceaux) < 3:
+        return convertir(contenu, conversion)
+    blocs = ["::: {.columns}"]
+    for largeur, corps in zip(morceaux[1::2], morceaux[2::2]):
+        fraction = re.match(r"\s*([0-9.]+)\s*\\(?:linewidth|textwidth)", largeur)
+        pourcent = f'{round(float(fraction[1]) * 100)}%' if fraction else "50%"
+        blocs.append(f'::: {{.column width="{pourcent}"}}')
+        blocs.append(convertir(corps, conversion))
+        blocs.append(":::")
+    blocs.append(":::")
+    return "\n".join(blocs)
+
+
 def convertir(texte: str, conversion: Conversion) -> str:
     """Convertit un fragment : environnements connus, puis texte courant."""
     # Les commandes de taille sont retirées ici aussi : « {\small\begin{tabular}… } » entoure parfois
@@ -626,7 +725,18 @@ def convertir(texte: str, conversion: Conversion) -> str:
             morceaux.append(tableau(contenu, conversion))
         elif nom == "tikzpicture":
             morceaux.append(conversion.proteger(schema_tikz(conversion)))
-        elif nom in ("center", "block", "columns", "column"):
+        elif nom in ("align", "align*", "equation", "equation*", "gather", "gather*"):
+            # Mathématiques hors ligne : MathJax les rend telles quelles dans un bloc « $$ ».
+            # `align` se compose en `aligned`, qui est sa forme utilisable à l'intérieur de « $$ ».
+            interne = {"align": "aligned", "align*": "aligned", "gather": "gathered",
+                       "gather*": "gathered"}.get(nom)
+            corps = contenu.strip()
+            if interne:
+                corps = f"\\begin{{{interne}}}\n{corps}\n\\end{{{interne}}}"
+            morceaux.append(conversion.proteger(f"$$\n{corps}\n$$"))
+        elif nom == "columns":
+            morceaux.append(conversion.proteger(colonnes(contenu, conversion)))
+        elif nom in ("center", "block", "column"):
             morceaux.append(convertir(contenu, conversion))
         else:
             morceaux.append(conversion.non_converti(f"\\begin{{{nom}}} … \\end{{{nom}}}"))
