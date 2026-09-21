@@ -58,10 +58,10 @@ d'un tuteur IA encadré.
 | US-29 | EP6 | Widget de discussion sur les pages de séance (code d'accès, accessible) | M | 3 | — |
 | US-30 | EP6 | Garde-fous pédagogiques et budgétaires (plafond global prioritaire) | M | 5 | — |
 | US-31 | EP6 | Déploiement continu du Worker | M | 2 | — |
-| US-23 | EP4 | GitHub Action Claude : issue labellisée → PR | C | 5 | 6 |
-| US-24 | EP4 | Aperçu déployé par PR | C | 3 | 6 |
-| US-32 | EP6 | Journalisation anonymisée des questions + consentement | S | 5 | 6 |
-| US-33 | EP6 | Tableau de bord enseignant (concepts bloquants) | C | 8 | 6 |
+| US-23 | EP4 | GitHub Action Claude : issue labellisée → PR | C | 5 | — |
+| US-24 | EP4 | Aperçu déployé par PR | C | 3 | — |
+| US-32 | EP6 | Journalisation anonymisée des questions + consentement | S | 5 | — |
+| US-33 | EP6 | Tableau de bord enseignant (concepts bloquants) | C | 8 | — |
 | US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | — |
 | US-38 | EP2 | Page Contact bilingue (formulaire non requis : email protégé, affiliations) | S | 2 | — |
 | US-39 | EP1 | Traduire les données du CV et du catalogue des cours (et non les seuls libellés) | S | 3 | — |
@@ -122,6 +122,12 @@ TikZ, US-56 pour le premier chapitre de C, qui sert de preuve. Le **Sprint 7** a
 ne demande aucune capacité nouvelle, c'est une répétition de `/importer-chapitre`. **Ses sources sont
 déjà dans `_import/ML/`** (onze séances). Il était hors sprint depuis le Sprint 6, faute de
 respiration ; le Sprint 7 lui en donne une.
+
+**Automatisation avancée et analytics : au backlog, sans sprint.** US-23 (Action Claude :
+issue → PR), US-24 (aperçu déployé par PR), US-32 (journalisation anonymisée) et US-33 (tableau de
+bord enseignant) forment ce thème, 21 points au total — c'est lui qui occupait la ligne 7 de la
+roadmap. Le PO a tranché : **ce n'est pas une priorité**. Les quatre stories repassent donc « sans
+sprint », et aucune issue ne leur est ouverte.
 
 **La part du PO, et US-58.** Le bilan du Sprint 6 a mesuré que la machine travaille quatre minutes
 par chapitre : le reste est de la lecture et des **décisions du PO** — 33 textes alternatifs pour les
