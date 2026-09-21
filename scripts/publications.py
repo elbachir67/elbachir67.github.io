@@ -59,9 +59,6 @@ MOTS = {
         "titre": "Publications",
         "description": ("Publications d'El Hadji Bassirou Touré : articles classés par année de conférence, "
                         "avec liens DOI, puis posters et communications."),
-        "intro": ("Articles classés par année de conférence, du plus récent au plus ancien ; chaque article "
-                  "publié renvoie à la version de l'éditeur par son DOI. Suivent les posters et "
-                  "communications, par date décroissante."),
         "articles": "Articles",
         "presentations": "Posters et communications",
         "a_paraitre": "à paraître",
@@ -74,8 +71,6 @@ MOTS = {
         "titre": "Publications",
         "description": ("Publications by El Hadji Bassirou Touré: articles grouped by conference year, with "
                         "DOI links, followed by posters and talks."),
-        "intro": ("Articles are grouped by conference year, most recent first; each published article links "
-                  "to the publisher version through its DOI. Posters and talks follow, by descending date."),
         "articles": "Articles",
         "presentations": "Posters and talks",
         "a_paraitre": "forthcoming",
@@ -455,7 +450,6 @@ def ecrire_page(langue: str, po: dict, entrees: list[tuple[str, dict[str, str]]]
         "# Ne pas modifier à la main : voir la section « Publications » du README.md.",
         "---",
         "",
-        mots["intro"],
         "",
         f"## {mots['articles']} {{#articles}}",
     ]
