@@ -37,6 +37,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from importer_chapitre import identifiants_uniques  # noqa: E402  (même dossier)
+
 # Paquets du préambule utiles au dessin. La mise en page de l'article, elle, n'a rien à faire dans
 # un schéma autonome — et `inputenc`/`fontenc` sont incompatibles avec fontspec.
 GARDES = re.compile(r"\s*\\(usepackage|usetikzlibrary|definecolor|tcbuselibrary|pgfplotsset)")
@@ -115,13 +118,19 @@ def compiler(dessin: str, preambule: list[str], cible: Path) -> str | None:
         # Le schéma garde donc les couleurs que le PO a dessinées, et porte une classe qui permet à
         # la page de le poser sur un fond clair quand elle passe en mode sombre.
         cible.parent.mkdir(parents=True, exist_ok=True)
-        cible.write_text(marquer(contenu), encoding="utf-8")
+        cible.write_text(marquer(contenu, cible.stem), encoding="utf-8")
     return None
 
 
-def marquer(svg: str) -> str:
-    """Ajoute la classe `schema-tikz` à la racine : la page sait alors comment le présenter."""
-    return re.sub(r"<svg\b", '<svg class="schema-tikz"', svg, count=1)
+def marquer(svg: str, nom: str) -> str:
+    """Classe `schema-tikz` à la racine, et identifiants internes préfixés par le nom du schéma.
+
+    Une page de chapitre porte jusqu'à seize schémas. dvisvgm nomme le sien `page1` — le même pour
+    tous —, et un identifiant en double dans une page est un défaut : le navigateur en choisit un, et
+    toute référence désigne alors le mauvais. C'est ce qui avait brouillé les figures matplotlib.
+    """
+    svg = re.sub(r"<svg\b", '<svg class="schema-tikz"', svg, count=1)
+    return identifiants_uniques(svg, nom)
 
 
 def main() -> int:

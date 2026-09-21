@@ -70,6 +70,12 @@ jobs:
           command -v pdftotext >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils; }
           python scripts/verifier_telephone.py _site
 
+      # Un identifiant ne paraît qu'une fois par page (US-59), SVG incorporés compris. Deux figures
+      # d'une même page définissaient les mêmes identifiants de glyphes, et toutes les lettres des
+      # figures suivantes venaient de la première.
+      - name: Vérifier l'unicité des identifiants
+        run: python scripts/verifier_identifiants.py _site
+
       # Rien de non publiable dans le site (US-59) : documents réservés à l'enseignant — repérés par
       # leur nom de fichier, et par les liens qui y mènent — et termes que le PO ne veut pas voir
       # publiés. La correction se fait à la source, puis l'import est rejoué.
