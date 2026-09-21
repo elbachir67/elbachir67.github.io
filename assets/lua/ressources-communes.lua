@@ -10,8 +10,9 @@ local M = {}
 
 -- Libellé par type et par langue. `corrige` n'apparaît qu'à partir de sa date.
 local LIBELLES = {
-  fr = { lab = "Lab", td = "TD", notebook = "Notebook", pdf = "PDF du cours", corrige = "Corrigé" },
-  en = { lab = "Lab", td = "Tutorial", notebook = "Notebook", pdf = "Course PDF",
+  fr = { lab = "Lab", tp = "TP", td = "TD", notebook = "Notebook", pdf = "PDF du cours",
+         corrige = "Corrigé" },
+  en = { lab = "Lab", tp = "Lab", td = "Tutorial", notebook = "Notebook", pdf = "Course PDF",
          corrige = "Solution" },
 }
 
@@ -78,10 +79,20 @@ end
 --- n'aide personne. L'attribut `download` lui dit d'enregistrer le fichier au lieu de l'ouvrir.
 local function attributs(ressource)
   local extension = (ressource.chemin:match("%.(%w+)$") or ""):lower()
-  if extension == "pdf" then
+  -- Un PDF s'ouvre dans la visionneuse ; un notebook a maintenant sa page lisible (US-50), où
+  -- deux boutons proposent le téléchargement et Colab. Le reste s'enregistre.
+  if extension == "pdf" or extension == "ipynb" then
     return { class = "seance-ressource" }
   end
   return { class = "seance-ressource", download = "" }
+end
+
+--- Adresse publique d'une ressource : un notebook mène à sa page, les autres à leur fichier.
+local function adresse(ressource)
+  if ressource.chemin:lower():match("%.ipynb$") then
+    return (ressource.chemin:gsub("%.ipynb$", ".html"))
+  end
+  return ressource.chemin
 end
 
 function M.lien(ressource, langue, cours, court)
@@ -89,11 +100,11 @@ function M.lien(ressource, langue, cours, court)
   local inlines = pandoc.Inlines({})
   local attr = attributs(ressource)
   if court then
-    inlines:insert(pandoc.Link(pandoc.Inlines(libelle), ressource.chemin, ressource.titre, attr))
+    inlines:insert(pandoc.Link(pandoc.Inlines(libelle), adresse(ressource), ressource.titre, attr))
   else
     inlines:insert(pandoc.Strong(pandoc.Inlines(libelle)))
     inlines:insert(pandoc.Str(" · "))
-    inlines:insert(pandoc.Link(pandoc.Inlines(ressource.titre), ressource.chemin, ressource.titre,
+    inlines:insert(pandoc.Link(pandoc.Inlines(ressource.titre), adresse(ressource), ressource.titre,
       attr))
   end
   local poids = M.poids(pandoc.path.join({ cours, ressource.fichier }), langue)
