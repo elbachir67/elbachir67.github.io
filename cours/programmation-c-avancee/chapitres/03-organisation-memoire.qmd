@@ -161,7 +161,7 @@ z = &y + 3;          /* z = 0x18 + 3*4 = 0x24 */
 *z = y;              /* Écrit y à l'adresse 0x24 */
 ```
 
-{{< svg ../figures/fig06_memory_evolution.svg alt="Figure portant « Étape …: … », « Addr », « +… », « Variable », « (Mémoire non initialisée) », « x est initialisé à 0x3CD02700 (stocké en little-endian : 00 27 D0 3C) », « y = x + 3 = 0x3CD02700 + 3 = 0x3CD02703 », « z est déclaré mais NON initialisé (contient une valeur indéterminée) »…" >}}
+{{< svg ../figures/fig06_memory_evolution.svg alt="Évolution de la mémoire, étape par étape : x vaut 0x3CD02700, stocké en little-endian ; y = x + 3 ; z est déclaré sans valeur ; z = &y + 3 pointe 12 octets plus loin, en 0x24, où *z = y écrit la valeur de y." >}}
 
 L'instruction `z = &y + 3` illustre l'arithmétique des pointeurs : on ajoute 3 à un pointeur vers `int`, ce qui ajoute $3 \times 4 = 12$ octets à l'adresse. Ainsi, `0x18 + 0x0C = 0x24`.
 
@@ -526,7 +526,7 @@ Toute opération arithmétique sur un pointeur est **dimensionnée** par la tail
 
 Cette règle permet de parcourir un tableau naturellement : `p + 1` pointe toujours vers l'élément suivant, quelle que soit la taille des éléments.
 
-{{< svg ../figures/fig15_pointer_arithmetic.svg alt="Figure portant « Arithmétique selon le type du pointeur », « Adresse », « 0x… », « int *p », « → sauts de 4 octets », « short *s », « → sauts de 2 octets », « char *c », et 2 autre(s)." >}}
+{{< svg ../figures/fig15_pointer_arithmetic.svg alt="Arithmétique des pointeurs selon le type : un int* avance de 4 octets, un short* de 2, un char* de 1. p + n ajoute n × sizeof(*p) octets à l'adresse." >}}
 
 ### Opérations Valides et Exemples
 
@@ -607,7 +607,7 @@ arr = ptr;     /* ERREUR de compilation : arr n'est pas modifiable */
 ptr = arr;     /* OK : ptr peut pointer vers une autre adresse */
 ```
 
-{{< svg ../figures/fig18_array_vs_string_pointer.svg alt="Figure portant « Tableau vs Pointeur sur chaîne », « char arr[] = "Hello" », « Stocké sur la pile (stack) », « → MODIFIABLE », « char *ptr = "Hello" », « 0x402010 », « ptr (sur la pile) », « Segment .rodata », et 1 autre(s)." >}}
+{{< svg ../figures/fig18_array_vs_string_pointer.svg alt="char arr[] = "Hello" est stocké sur la pile et modifiable. char *ptr = "Hello" est sur la pile, mais pointe vers le segment .rodata, en lecture seule." >}}
 
 ### Fonctions Standard de Manipulation
 
