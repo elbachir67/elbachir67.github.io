@@ -58,6 +58,15 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
         commande += ["--alt", str(cours / chapitre["alt"])]
     if chapitre.get("langage"):
         commande += ["--langage-code", chapitre["langage"]]
+    # Un CM rédigé se rejoue avec sa cible, son titre, son numéro affiché et ses encadrés (US-40).
+    if chapitre.get("cible"):
+        commande += ["--cible", chapitre["cible"]]
+    if chapitre.get("titre"):
+        commande += ["--titre", chapitre["titre"]]
+    if chapitre.get("numero"):
+        commande += ["--numero", chapitre["numero"]]
+    for nom, encadre in (chapitre.get("encadres") or {}).items():
+        commande += ["--encadre", f"{nom}={encadre}"]
     if chapitre.get("video"):
         commande += ["--video", chapitre["video"]]
     for ressource in chapitre.get("ressources", []):
