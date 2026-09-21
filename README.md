@@ -441,6 +441,27 @@ python3 scripts/preparer_chapitre.py <cours-slug> <fichier.tex> --cible page \
   à `0`, et le nom du fichier ne sert qu'à ordonner. Sans numéro, la page porte son seul titre.
 - Les `tikzpicture` ne sont pas encore convertis : ils sont **signalés**, jamais bricolés (US-55).
 
+### Notebooks de TP rendus en page (US-50)
+
+Un notebook déclaré comme ressource est **rendu en page lisible** : code coloré, sorties, figures.
+Le lien de la séance mène à cette page, qui porte deux boutons — **télécharger le notebook** et
+**ouvrir dans Colab**.
+
+- **Rien n'est réexécuté**, ni en local ni en CI : les sorties sont celles que le PO a enregistrées.
+  `_quarto-fr.yml` ajoute `cours/*/ressources/*.ipynb` au rendu, et `_quarto.yml` les copie
+  **aussi** tels quels, pour que le bouton de téléchargement donne bien le fichier d'origine.
+- **Un piège, et sa raison** : un notebook dont une cellule Markdown commence par `---` fait échouer
+  le rendu du projet entier — Quarto y lit un bloc de métadonnées YAML. Les séparateurs sont donc
+  normalisés en `***`, qui est la règle horizontale explicite de Markdown : même affichage dans
+  Jupyter, et le rendu passe. L'erreur, elle, désignait un *autre* fichier que celui en cause.
+- **Les figures de sortie** reçoivent un texte alternatif qui dit **d'où elles viennent** — « Figure
+  produite par le code de la cellule précédente » — et non ce qu'elles montrent : les décrire
+  reviendrait à inventer.
+- **Les zones qui défilent** (blocs de code, tableaux pandas) deviennent atteignables au clavier,
+  par `assets/js/notebook-defilement.js`. Le réglage est **inconditionnel** : savoir si un bloc
+  déborde dépend de la fenêtre et des métriques de la police, au point qu'un bloc tenait en local et
+  débordait en CI. Quelques tabulations de plus, mais jamais un bloc inatteignable au clavier.
+
 ### Schémas TikZ (US-55)
 
 Les cours rédigés dessinent avec TikZ. `scripts/figures_tikz.py` compile chaque `tikzpicture` en SVG,

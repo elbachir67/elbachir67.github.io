@@ -164,8 +164,10 @@ ADRESSE = re.compile(r'href="([^"]*)"')
 def ressources_sans_telechargement(site: Path) -> list[tuple[Path, str]]:
     """Un lien de ressource qui n'est pas un PDF doit porter « download ».
 
-    Sans lui, le navigateur ouvre le fichier : un notebook s'affiche alors en JSON brut, et le lien
-    paraît cassé. Un PDF, lui, s'ouvre correctement — et c'est ce qu'on veut.
+    Sans lui, le navigateur ouvre le fichier : un fichier de données s'afficherait en clair, et le
+    lien paraîtrait cassé. Deux exceptions, où l'ouverture est justement ce qu'on veut : un **PDF**,
+    que la visionneuse affiche, et une **page** — depuis US-50, un notebook a la sienne, avec ses
+    deux boutons.
     """
     if not site.is_dir():
         return []
@@ -175,7 +177,7 @@ def ressources_sans_telechargement(site: Path) -> list[tuple[Path, str]]:
             continue
         for balise in LIEN_RESSOURCE.findall(page.read_text(encoding="utf-8", errors="ignore")):
             adresse = (ADRESSE.search(balise) or [None, ""])[1]
-            if adresse.lower().endswith(".pdf") or "download" in balise:
+            if adresse.lower().endswith((".pdf", ".html")) or "download" in balise:
                 continue
             ecarts.append((page, f"la ressource « {adresse.rsplit('/', 1)[-1]} » n'est pas un PDF "
                                  "et son lien ne porte pas « download » : le navigateur l'ouvrira "

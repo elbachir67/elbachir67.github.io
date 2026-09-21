@@ -38,6 +38,7 @@ SVG = "http://www.w3.org/2000/svg"
 RESSOURCES = {
     "lab": {"fr": "Lab", "en": "Lab"},
     "td": {"fr": "TD", "en": "Tutorial"},
+    "tp": {"fr": "TP", "en": "Lab"},
     "notebook": {"fr": "Notebook", "en": "Notebook"},
     # Le document du cours lui-même, compilé par LaTeX : une page rédigée n'est pas imprimée
     # depuis le site, c'est ce PDF-là qui fait foi (US-40).
