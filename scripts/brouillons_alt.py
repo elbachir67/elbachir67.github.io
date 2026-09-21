@@ -36,6 +36,10 @@ from pathlib import Path
 
 LONGUEUR_MAXIMALE = 300   # au-delà, un texte alternatif n'est plus lu : on coupe la liste des libellés
 LIBELLES_CITES = 8        # nombre de libellés cités avant « … »
+# Un brouillon tronqué se lit mal à voix haute : « et 3 autre(s) » n'apprend rien, et un texte qui
+# s'arrête sur « … » laisse le lecteur au milieu d'une phrase. Sur demande du PO, le brouillon cite
+# alors **tout** ce que la source contient, quitte à faire deux phrases.
+COMPLET = False
 
 # Commandes de mise en forme sans contenu propre : elles disparaissent d'un libellé.
 MISE_EN_FORME = re.compile(
@@ -161,7 +165,7 @@ def contenu_accolade(texte: str, ouvrante: int) -> str:
 
 
 def liste_citee(libelles: list[str]) -> str:
-    cites = libelles[:LIBELLES_CITES]
+    cites = libelles if COMPLET else libelles[:LIBELLES_CITES]
     liste = ", ".join(f"« {libelle} »" for libelle in cites)
     if len(libelles) > len(cites):
         liste += f", et {len(libelles) - len(cites)} autre(s)"
@@ -174,14 +178,14 @@ def serie(cases: list[str]) -> str:
     Les seize colonnes d'une table hexadécimale ne valent pas « 0, 1, 2 et 13 autres » : elles vont
     de « 0 » à « F », et c'est cela qu'un lecteur a besoin d'entendre.
     """
-    if len(cases) <= LIBELLES_CITES:
+    if COMPLET or len(cases) <= LIBELLES_CITES:
         return enumerer(cases)
     return ", ".join(cases[:LIBELLES_CITES - 2]) + f", jusqu'à {cases[-1]}"
 
 
 def enumerer(elements: list[str]) -> str:
     """« A, B et C » : une énumération française, et non une liste à puces dans une phrase."""
-    cites = elements[:LIBELLES_CITES]
+    cites = elements if COMPLET else elements[:LIBELLES_CITES]
     reste = len(elements) - len(cites)
     if reste > 0:
         return ", ".join(cites) + f" et {reste} autre(s)"
@@ -191,11 +195,50 @@ def enumerer(elements: list[str]) -> str:
 
 
 def tronquer(texte: str) -> str:
-    """Un texte alternatif trop long n'est plus lu : on coupe à la virgule qui précède la limite."""
+    """Un texte alternatif trop long n'est plus lu : on coupe à la virgule qui précède la limite.
+
+    En mode complet, rien n'est coupé : le texte est seulement **découpé en phrases**, aux
+    points-virgules, pour rester dicible d'un trait par un lecteur d'écran.
+    """
+    if COMPLET:
+        return phraser(texte)
     if len(texte) <= LONGUEUR_MAXIMALE:
         return texte
     coupe = texte.rfind(", ", 0, LONGUEUR_MAXIMALE)
     return (texte[:coupe] if coupe > 0 else texte[:LONGUEUR_MAXIMALE]) + "…"
+
+
+# Articulations d'un brouillon : c'est là qu'une phrase peut se terminer sans rien couper en deux.
+ARTICULATIONS = {" ; ": ". ", ", libellés : ": ". Libellés : ", ", séries : ": ". Séries : "}
+
+
+def phraser(texte: str) -> str:
+    """Coupe un long brouillon en phrases, à ses articulations.
+
+    Une phrase de six cents caractères est indicible d'un trait. On coupe là où le brouillon
+    s'articule — un point-virgule, l'entrée en matière des libellés ou des séries — et jamais au
+    milieu d'une énumération. Quand il n'y a aucune articulation, la coupure se fait entre deux
+    libellés et la seconde phrase reprend par « Elle porte aussi ».
+    """
+    if len(texte) <= LONGUEUR_MAXIMALE:
+        return texte
+    nu = texte.rstrip(".")
+    morceaux = re.split("(" + "|".join(re.escape(a) for a in ARTICULATIONS) + ")", nu)
+    if len(morceaux) > 1:
+        phrases, phrase = [], morceaux[0]
+        for separateur, suite in zip(morceaux[1::2], morceaux[2::2]):
+            if len(phrase) + len(separateur) + len(suite) > LONGUEUR_MAXIMALE:
+                phrases.append(phrase)
+                phrase = ARTICULATIONS[separateur].lstrip(". ") + suite
+            else:
+                phrase += separateur + suite
+        phrases.append(phrase)
+    else:
+        elements = nu.split(", «")
+        milieu = len(elements) // 2
+        phrases = [", «".join(elements[:milieu]),
+                   "Elle porte aussi «" + ", «".join(elements[milieu:])]
+    return " ".join(p.strip()[0].upper() + p.strip()[1:] + "." for p in phrases if p.strip())
 
 
 # --- Schémas TikZ : les relations que la source décrit ---------------------------------------------
@@ -979,7 +1022,13 @@ def main() -> int:
                                 "cherché à côté du .tex)")
     analyseur.add_argument("--figures-source", type=Path,
                            help="dossier des figures (par défaut : celui du .tex, et figs/)")
+    analyseur.add_argument("--complet", action="store_true",
+                           help="cite tout ce que la source contient, sans « et N autre(s) » ni "
+                                "troncature, quitte à faire deux phrases")
     args = analyseur.parse_args()
+
+    global COMPLET
+    COMPLET = args.complet
 
     scripts = {}
     for morceau in args.script:
