@@ -114,10 +114,79 @@ i.callout-icon {
   color: var(--bs-secondary-color);
 }
 
-// Catalogue des cours (cartes produites par enseignement/cours.lua).
+// Catalogue des cours (cartes produites par enseignement/cours.lua, US-11 puis US-57).
+//
+// Chaque domaine a sa couleur, dérivée de la charte : le bleu du site, et les deux teintes déjà
+// employées par les encadrés des slides. La couleur ne porte jamais l'information seule — le domaine
+// est écrit sur la carte et le statut garde son libellé (WCAG 1.4.1).
 .cours-carte {
-  .card-body p:last-child {
+  --cours-domaine: #{$primary};
+
+  &[data-domaine="genie-logiciel-architecture"] { --cours-domaine: #1F6FB5; }
+  &[data-domaine="ia-data"] { --cours-domaine: #1F776C; }
+  &[data-domaine="programmation-web-mobile"] { --cours-domaine: #A15716; }
+
+  border-top: 4px solid var(--cours-domaine);
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .card-body p {
     margin-bottom: 0;
+  }
+
+  // Le titre prime, le domaine le précède en plus petit, le niveau suit en retrait.
+  // « GÉNIE LOGICIEL & ARCHITECTURE » est le plus long des trois domaines : en capitales espacées,
+  // il se repliait sur deux lignes dès que la carte descendait sous 250 px — c'est-à-dire sur la
+  // grille à deux colonnes. Corps et interlettrage sont réglés pour qu'il tienne sur une ligne, aux
+  // trois largeurs, mesuré dans le navigateur. Pas de « nowrap » : un domaine plus long, un jour,
+  // se replierait — ce qui reste lisible, là où un débordement couperait le texte.
+  .cours-domaine {
+    color: var(--cours-domaine);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  .card-body p:nth-child(2) {
+    font-size: 1.05rem;
+    line-height: 1.3;
+  }
+
+  .cours-statut {
+    align-self: flex-start;
+    margin-top: 0.35rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.2rem 0.7rem;
+  }
+
+  // Un cours en ligne se voit : pastille pleine, dans la couleur de son domaine.
+  .cours-statut-en-ligne {
+    background: var(--cours-domaine);
+    color: #fff;
+  }
+
+  // Un cours à venir reste discret, mais lisible : contour, pas de fond.
+  .cours-statut-a-venir {
+    border: 1px solid currentColor;
+    color: var(--bs-secondary-color, #5a6b75);
+  }
+}
+
+// Mode sombre : les mêmes couleurs, éclaircies pour rester lisibles sur le fond foncé.
+.quarto-dark .cours-carte {
+  &[data-domaine="genie-logiciel-architecture"] { --cours-domaine: #6BAEE8; }
+  &[data-domaine="ia-data"] { --cours-domaine: #45A99C; }
+  &[data-domaine="programmation-web-mobile"] { --cours-domaine: #D98F45; }
+
+  .cours-statut-en-ligne {
+    color: #12181d;
   }
 }
 

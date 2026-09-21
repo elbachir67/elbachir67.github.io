@@ -10,8 +10,10 @@ local INSECABLE = "\u{A0}"
 local STATUTS = { ["a-venir"] = true, ["en-ligne"] = true }
 
 local LIBELLES = {
-  fr = { niveau = "Niveau", niveaux = "Niveaux", a_venir = "Bientôt en ligne" },
-  en = { niveau = "Level", niveaux = "Levels", a_venir = "Coming soon" },
+  fr = { niveau = "Niveau", niveaux = "Niveaux", a_venir = "Bientôt en ligne",
+         en_ligne = "En ligne", seance = "séance", seances = "séances" },
+  en = { niveau = "Level", niveaux = "Levels", a_venir = "Coming soon",
+         en_ligne = "Online", seance = "session", seances = "sessions" },
 }
 
 -- cours.yml est lu comme un bloc de métadonnées : le Markdown en ligne des valeurs est interprété.
@@ -22,6 +24,23 @@ local function lire_donnees(doc)
   local texte = fichier:read("a")
   fichier:close()
   return pandoc.read("---\n" .. texte .. "\n---\n", "markdown").meta
+end
+
+-- Séances publiées d'un cours : le catalogue l'annonce sur la carte, pour qu'un étudiant sache ce
+-- qui l'attend sans ouvrir la page (US-57).
+local function nombre_de_seances(slug)
+  local dossier = pandoc.path.join({ quarto.project.directory, "cours", slug, "chapitres" })
+  local ok, entrees = pcall(pandoc.system.list_directory, dossier)
+  if not ok then
+    return 0
+  end
+  local compte = 0
+  for _, nom in ipairs(entrees) do
+    if nom:match("^%d%d%-.*%.qmd$") then
+      compte = compte + 1
+    end
+  end
+  return compte
 end
 
 -- Cours publiés : un dossier par cours sous cours/, avec son propre cours.yml (US-14).
@@ -41,6 +60,7 @@ local function cours_publies()
       local cours = pandoc.read("---\n" .. contenu .. "\n---\n", "markdown").meta
       -- Lien depuis la racine du site : la même carte sert aux deux langues du catalogue.
       cours.lien = pandoc.Inlines("/cours/" .. slug .. "/")
+      cours.seances = nombre_de_seances(slug)
       table.insert(publies, cours)
     end
   end
@@ -67,9 +87,10 @@ local function carte(cours, mots)
   if not STATUTS[statut] then
     error("cours.yml : statut inconnu « " .. statut .. " » pour « " .. texte(cours.titre) .. " »")
   end
+  local en_ligne = statut == "en-ligne"
 
   local titre = pandoc.Strong(cours.titre)
-  if statut == "en-ligne" then
+  if en_ligne then
     if not cours.lien then
       error("cours.yml : « lien » manquant pour le cours en ligne « " .. texte(cours.titre) .. " »")
     end
@@ -82,17 +103,32 @@ local function carte(cours, mots)
   end
   local libelle_niveaux = #niveaux > 1 and mots.niveaux or mots.niveau
 
+  -- Le domaine est **écrit** sur la carte : sa couleur ne fait que le redire, jamais le remplacer
+  -- (US-57, WCAG 1.4.1).
+  local domaine = texte(cours.domaine)
+  local entete = pandoc.Para({ pandoc.Span(domaine, { class = "cours-domaine" }) })
+
+  -- Le statut garde son libellé, et un cours en ligne annonce ce qui l'attend.
+  local seances = en_ligne and math.floor(tonumber(texte(cours.seances)) or 0) or 0
+  local libelle = en_ligne
+    and (mots.en_ligne .. (seances > 0
+      and (" " .. INSECABLE .. "· " .. seances .. INSECABLE .. (seances > 1 and mots.seances or mots.seance))
+      or ""))
+    or mots.a_venir
+  local pastille = pandoc.Span(libelle,
+    { class = "cours-statut " .. (en_ligne and "cours-statut-en-ligne" or "cours-statut-a-venir") })
+
+  local blocs = {
+    entete,
+    pandoc.Para({ titre }),
+    pandoc.Para(pandoc.Inlines(libelle_niveaux .. INSECABLE .. ": " .. table.concat(niveaux, ", "))),
+    pandoc.Para({ pastille }),
+  }
+
   -- Le champ skill de cours.yml n'est jamais affiché.
-  local details = pandoc.Inlines(libelle_niveaux .. INSECABLE .. ": " .. table.concat(niveaux, ", "))
-
-  local blocs = { pandoc.Para({ titre }), pandoc.Para(details) }
-  if statut == "a-venir" then
-    -- Pas de lien tant que le cours natif n'est pas publié.
-    table.insert(blocs, pandoc.Para({ pandoc.Span(mots.a_venir, { class = "badge text-bg-secondary" }) }))
-  end
-
   local corps = pandoc.Div(blocs, { class = "card-body" })
-  return pandoc.Div({ pandoc.Div({ corps }, { class = "card h-100 cours-carte" }) },
+  return pandoc.Div({ pandoc.Div({ corps },
+      { class = "card h-100 cours-carte", ["data-domaine"] = identifiant(domaine) }) },
     { class = "g-col-12 g-col-md-6 g-col-lg-4" })
 end
 
