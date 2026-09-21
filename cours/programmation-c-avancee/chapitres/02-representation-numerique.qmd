@@ -16,6 +16,10 @@ ressources:
     titre: "TP — Représentation numérique"
     fichier: "ressources/tp-representation-numerique.pdf"
     chemin: "/cours/programmation-c-avancee/ressources/tp-representation-numerique.pdf"
+  - type: "tp"
+    titre: "TP — Pistes de résolution"
+    fichier: "ressources/tp-pistes-representation-numerique.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/tp-pistes-representation-numerique.pdf"
 description: "Chapitre 1 de Programmation C avancée : bases binaire et hexadécimale, entiers signés et non signés, complément à deux, et nombres flottants IEEE 754."
 author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
 toc: true
@@ -193,7 +197,7 @@ $\boxed{b_m b_{m-1} \ldots b_1 b_0 \textcolor{red}{.} b_{-1} b_{-2} \ldots b_{-n
 Bits à gauche du point : poids $2^0, 2^1, 2^2, ...$<br>Bits à droite du point : poids $2^{-1} = 0.5$, $2^{-2} = 0.25$, $2^{-3} = 0.125$, ...
 :::
 
-{{< svg ../figures/fig_01_binary_weights.svg alt="Figure intitulée « Représentation binaire fractionnaire : 101.1101_2 = 5.8125_10 », libellés : « point binaire », « 2^… », « Valeur = … », « = … », « Partie entière », « Partie fractionnaire », « Bits », « Poids », et 1 autre(s)." >}}
+{{< svg ../figures/fig_01_binary_weights.svg alt="Le nombre binaire 101.1101 vaut 5,8125 en décimal : chaque bit, de part et d'autre du point binaire, porte son poids en puissance de 2." >}}
 
 ::: {.callout-tip .encadre-examplebox title="Exemple : $101.11_2 = ?$"}
 $101.11_2 = 1 \times 2^2 + 0 \times 2^1 + 1 \times 2^0 + 1 \times 2^{-1} + 1 \times 2^{-2} = 4 + 0 + 1 + 0.5 + 0.25 = \mathbf{5.75}$
@@ -283,7 +287,7 @@ float b = 3.14f + (1e10f - 1e10f);   // = 3.14
 
 ### Application en Intelligence Artificielle
 
-{{< svg ../figures/fig_05_softmax_underflow.svg alt="Figure intitulée « La fonction exponentielle: croissance explosive », « x » en abscisse, « exp(x) [échelle log] » en ordonnée, séries : « Softmax naïf », « Softmax stable », la courbe tracée est croissante, libellés : « exp(710) ≈ ∞ (overflow float64) », « exp(-745) ≈ 0 (underflow float64) »…" >}}
+{{< svg ../figures/fig_05_softmax_underflow.svg alt="La courbe de exp(x), en échelle logarithmique, compare softmax naïf et softmax stable : exp(710) dépasse la limite des float64, exp(-745) tombe à zéro." >}}
 
 ::: {.callout-note .encadre-infobox title="Le problème du softmax"}
 $\text{softmax}(x)_i = \frac{e^{x_i}}{\sum_{j} e^{x_j}}$ est utilisé partout en IA.<br>**Problème :** $e^{1000} = +\infty$ (overflow), $e^{-1000} = 0$ (underflow) → NaN<br>**Solution :** Soustraire le maximum avant de calculer (numériquement stable).
