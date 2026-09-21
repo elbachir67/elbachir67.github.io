@@ -66,7 +66,7 @@ ENCADRES = {
 # Commandes de mise en page sans équivalent en HTML : le style s'en charge.
 IGNOREES = {"vskip", "vspace", "smallskip", "medskip", "bigskip", "centering", "par", "vfill",
             "toprule", "midrule", "bottomrule", "hline", "addlinespace", "small", "scriptsize", "footnotesize",
-            "normalsize", "large", "Large", "raggedright", "noindent", "titlepage"}
+            "normalsize", "large", "Large", "raggedright", "noindent", "titlepage", "maketitle"}
 
 # Couleurs d'encre du jeu de figures : elles suivront la couleur du texte de la page.
 ENCRES = {"#000", "#000000", "black", "#1a3a5c", "#1A3A5C", "#1c2a33", "#1C2A33",
@@ -91,6 +91,7 @@ class Conversion:
         self.alternatifs = alternatifs          # textes alternatifs fournis par le PO, par figure
         self.prefixe_figures = prefixe_figures  # chemin des figures, relatif au .qmd produit
         self.langage = langage                  # langage des blocs de code, déclaré par le .tex
+        self.encadres: dict[str, tuple[str, str, str]] = {}   # encadrés du document (US-40)
         self.insertions: list[str] = []         # blocs déjà finalisés, à l'abri de la conversion
         self.scripts: dict[str, Path] = {}      # figures calculées : script Python, par nom de figure
         self.non_convertis: list[tuple[str, str]] = []
@@ -505,9 +506,19 @@ def convertir(texte: str, conversion: Conversion) -> str:
         titre, position = option(reste, position)
         if nom == "tabular":  # la spécification des colonnes ne sert qu'à LaTeX
             _, position = argument(reste, position)
+        elif nom in conversion.encadres and position < len(reste) and reste[position] == "{":
+            # Un encadré `tcolorbox` porte son titre entre accolades, là où un encadré Beamer le met
+            # entre crochets : `\begin{definitionbox}{Le langage C}`.
+            titre, position = argument(reste, position)
         contenu, suite = environnement(reste, nom, position)
 
-        if nom in ENCADRES:
+        if nom in conversion.encadres:
+            genre, classe, defaut = conversion.encadres[nom]
+            corps = convertir(contenu, conversion)
+            entete = (f'::: {{.callout-{genre} .{classe} '
+                      f'title="{titre_de_callout(titre, conversion) or defaut}"}}')
+            morceaux.append(f"{entete}\n{corps}\n:::")
+        elif nom in ENCADRES:
             genre, classe, defaut = ENCADRES[nom]
             corps = convertir(contenu, conversion)
             entete = (f'::: {{.callout-{genre} .{classe} '
@@ -525,6 +536,38 @@ def convertir(texte: str, conversion: Conversion) -> str:
             morceaux.append(conversion.non_converti(f"\\begin{{{nom}}} … \\end{{{nom}}}"))
         reste = reste[suite:]
     return re.sub(r"\n{3,}", "\n\n", "\n\n".join(m for m in morceaux if m.strip())).strip()
+
+
+def page(corps: str, conversion: Conversion) -> list[str]:
+    """Un CM rédigé donne une page : ses sections en deviennent les titres (US-40).
+
+    Le document est un `article`, et non un deck : il n'y a pas de frames à découper, mais une
+    hiérarchie à préserver. `\\section` devient un titre de niveau 2 — le niveau 1 est le titre de la
+    page —, `\\subsection` un niveau 3, et le texte entre deux titres est converti tel quel.
+    """
+    niveaux = {"section": "##", "subsection": "###", "subsubsection": "####"}
+    motif = re.compile(r"\\(section|subsection|subsubsection)\*?\{")
+    sorties = []
+
+    def morceau(texte: str, titre: str) -> None:
+        conversion.slide = titre or "(avant la première section)"
+        # Les figures sont traitées sur le texte d'origine : la légende qui suit l'image y est
+        # encore reconnaissable, avant que les commandes de taille ne soient retirées.
+        converti = convertir(figures(texte, conversion), conversion)
+        if converti.strip():
+            sorties.append(conversion.restaurer(converti))
+
+    trouve = motif.search(corps)
+    if trouve and corps[:trouve.start()].strip():
+        morceau(corps[:trouve.start()], "")
+
+    while trouve:
+        titre, position = argument(corps, trouve.end() - 1)
+        suivant = motif.search(corps, position)
+        sorties.append(f"{niveaux[trouve[1]]} {inline(titre, conversion)}")
+        morceau(corps[position:suivant.start() if suivant else len(corps)], titre)
+        trouve = suivant
+    return sorties
 
 
 def slides(corps: str, conversion: Conversion) -> list[str]:
@@ -671,16 +714,66 @@ def slide_ressources(ressources: list[dict]) -> str:
     return "::: {#ressources-seance}\n:::" if ressources else ""
 
 
+def section_ressources(ressources: list[dict]) -> str:
+    """Même emplacement, en fin de page rédigée : le filtre le remplit au rendu (US-40, US-49)."""
+    return "::: {#ressources-seance}\n:::" if ressources else ""
+
+
 def slide_capsule(video: str, titre: str) -> str:
     """Dernière slide : la capsule vidéo de la séance, chargée seulement au clic (US-19)."""
     return f'## Capsule vidéo\n\n{{{{< capsule {video} titre="{titre}" >}}}}'
 
 
+def guillemets(valeur: str) -> str:
+    return '"' + valeur.replace('"', '\\"') + '"'
+
+
+def entete_page(entete: dict[str, str], description: str, numero: str,
+                ressources: list[dict] | None = None) -> str:
+    """En-tête d'un CM rédigé (US-40) : une page, et non une présentation.
+
+    Le **numéro affiché** est une donnée à part : un cours peut commencer à -1 ou à 0 — le chapitre
+    d'introduction de Programmation C avancée est le « -1 » —, et le nom du fichier ne sert qu'à
+    ordonner. Sans numéro, la page porte son seul titre.
+    """
+    lignes = ["---", f"title: {guillemets(entete.get('title', 'TODO(PO): titre'))}"]
+    if entete.get("subtitle"):
+        lignes.append(f"subtitle: {guillemets(entete['subtitle'])}")
+    if numero:
+        lignes.append(f"numero: {guillemets(numero)}")
+    lignes += ressources_yaml(ressources)
+    lignes += [
+        f"description: {guillemets(description)}",
+        f"author: {guillemets(entete.get('author', ''))}",
+        # Un chapitre rédigé est long : la table des matières latérale est ce qui le rend navigable.
+        "toc: true",
+        "toc-location: left",
+        "---",
+        "",
+    ]
+    return "\n".join(lignes)
+
+
+def ressources_yaml(ressources: list[dict] | None) -> list[str]:
+    """Bloc `ressources:` de l'en-tête, le même pour une page et pour un deck (US-49).
+
+    `fichier` est relatif au dossier du cours — c'est ce qui permet au filtre d'en lire le poids ;
+    `chemin` est l'adresse publique. Un corrigé porte en plus sa date de publication : avant elle,
+    ni le filtre ni le rendu ne le laissent apparaître.
+    """
+    lignes = []
+    for ressource in ressources or []:
+        lignes.append(f"  - type: {guillemets(ressource['type'])}")
+        lignes.append(f"    titre: {guillemets(ressource['titre'])}")
+        lignes.append(f"    fichier: {guillemets(ressource['fichier'])}")
+        lignes.append(f"    chemin: {guillemets(ressource['chemin'])}")
+        if ressource.get("date"):
+            lignes.append(f"    date: {guillemets(ressource['date'])}")
+    return ["ressources:"] + lignes if lignes else []
+
+
 def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: str = "",
                 ressources: list[dict] | None = None) -> str:
-    def guillemets(valeur: str) -> str:
-        return '"' + valeur.replace('"', '\\"') + '"'
-
     lignes = [
         "---",
         f"title: {guillemets(entete.get('title', 'TODO(PO): titre'))}",
@@ -690,19 +783,8 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: s
     if video:
         # Métadonnée de la séance : la capsule est aussi une slide, en fin de deck.
         lignes.append(f"video: {guillemets(video)}")
-    if ressources:
-        # Métadonnée de la séance : la slide de fin et la page du cours y lisent les ressources (US-49).
-        # `fichier` est relatif au dossier du cours — c'est ce qui permet au filtre d'en lire le poids ;
-        # `chemin` est l'adresse publique. Un corrigé porte en plus sa date de publication : avant elle,
-        # ni le filtre ni le rendu ne le laissent apparaître.
-        lignes.append("ressources:")
-        for ressource in ressources:
-            lignes.append(f"  - type: {guillemets(ressource['type'])}")
-            lignes.append(f"    titre: {guillemets(ressource['titre'])}")
-            lignes.append(f"    fichier: {guillemets(ressource['fichier'])}")
-            lignes.append(f"    chemin: {guillemets(ressource['chemin'])}")
-            if ressource.get("date"):
-                lignes.append(f"    date: {guillemets(ressource['date'])}")
+    # Métadonnée de la séance : la slide de fin et la page du cours y lisent les ressources (US-49).
+    lignes += ressources_yaml(ressources)
     lignes += [
         f"description: {guillemets(description)}",
         f"author: {guillemets(entete.get('author', ''))}",
@@ -797,6 +879,17 @@ def main() -> int:
                            help="ressource de la séance : lab, td, notebook ou corrige, son fichier dans "
                                 "le dépôt et son titre ; un corrigé exige en plus sa date de publication "
                                 "(AAAA-MM-JJ). Répétable (US-49)")
+    analyseur.add_argument("--titre",
+                           help="titre de la page, quand celui du .tex est une couverture LaTeX "
+                                "(« Chapitre -1 : Introduction, Programmation C Avancée - L3 GLSI »)")
+    analyseur.add_argument("--cible", choices=("slides", "page"), default="slides",
+                           help="slides revealjs (un deck Beamer) ou page rédigée (un CM, US-40)")
+    analyseur.add_argument("--numero", default="",
+                           help="numéro affiché de la séance : « 1 », « 0 », « -1 »… Vide, la page "
+                                "porte son seul titre. Le nom du fichier, lui, ne sert qu'à ordonner.")
+    analyseur.add_argument("--encadre", action="append", default=[], metavar="NOM=GENRE|TITRE",
+                           help="environnement d'encadré du document et le callout qui lui répond, "
+                                "par exemple « definitionbox=note|Définition » (répétable, US-40)")
     analyseur.add_argument("--langage-code",
                            help="langage des blocs lstlisting (par défaut : celui que le .tex déclare, "
                                 "sinon java). Une commande shell reste du shell.")
@@ -810,25 +903,46 @@ def main() -> int:
     prefixe = args.prefixe_figures or os.path.relpath(args.figures, args.sortie.parent)
     conversion = Conversion(alternatifs, prefixe,
                             args.langage_code or langage_declare(source) or "java")
+    # Encadrés propres au document : leur sens est une décision du PO, jamais une déduction. Ils sont
+    # déclarés à l'import et enregistrés dans le manifeste, que la CI rejoue.
+    for brute in args.encadre:
+        nom, _, reste = brute.partition("=")
+        genre, _, titre = reste.partition("|")
+        if genre not in ("note", "tip", "warning", "important", "caution"):
+            sys.exit(f"Encadré « {nom} » : genre de callout inconnu « {genre} » "
+                     "(note, tip, warning, important ou caution).")
+        conversion.encadres[nom] = (genre, f"encadre-{nom}", titre or nom)
     for couple in args.figure_python:
         nom, _, script = couple.partition("=")
         conversion.scripts[nom] = Path(script)
 
     debut = source.index("\\begin{document}") + len("\\begin{document}")
     corps = macros_du_theme(source[debut:source.index("\\end{document}")])
-    pages = slides(corps, conversion)
 
     entete = preambule(source)
+    if args.titre:
+        entete["title"] = args.titre
     description = args.description or entete.get("subtitle", "")
     ressources = [ressource(brute) for brute in args.ressource]
-    slide = slide_ressources(ressources)
-    if slide:
-        pages.append(slide)
-    if args.video:
-        pages.append(slide_capsule(args.video, entete.get("title", "Capsule vidéo")))
+
+    if args.cible == "page":
+        # Un CM rédigé : les ressources sont une section de fin, et non une slide.
+        morceaux = page(corps, conversion)
+        fin = section_ressources(ressources)
+        if fin:
+            morceaux.append(fin)
+        contenu = entete_page(entete, description, args.numero, ressources)
+    else:
+        morceaux = slides(corps, conversion)
+        slide = slide_ressources(ressources)
+        if slide:
+            morceaux.append(slide)
+        if args.video:
+            morceaux.append(slide_capsule(args.video, entete.get("title", "Capsule vidéo")))
+        contenu = entete_yaml(entete, description, args.feuille, args.video, ressources)
+
     args.sortie.parent.mkdir(parents=True, exist_ok=True)
-    args.sortie.write_text(entete_yaml(entete, description, args.feuille, args.video, ressources)
-                           + "\n\n".join(pages) + "\n", encoding="utf-8")
+    args.sortie.write_text(contenu + "\n\n".join(morceaux) + "\n", encoding="utf-8")
 
     nettoyees = {}
     dossier_figures = args.source.parent / "figs"
@@ -841,7 +955,8 @@ def main() -> int:
     if args.rapport:
         ecrire_rapport(args.rapport, args.source, args.sortie, conversion, nettoyees)
 
-    print(f"{len(pages)} slide(s) -> {args.sortie}")
+    unite = "section(s)" if args.cible == "page" else "slide(s)"
+    print(f"{len(morceaux)} {unite} -> {args.sortie}")
     print(f"{len(nettoyees)} figure(s) nettoyée(s) -> {args.figures}")
     if conversion.non_convertis:
         print(f"{len(conversion.non_convertis)} élément(s) à traiter à la main "

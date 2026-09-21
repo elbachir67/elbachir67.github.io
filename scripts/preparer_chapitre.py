@@ -173,10 +173,14 @@ def ajouter_au_manifeste(cours: Path, entree: dict) -> None:
         avant, apres = texte[:debut], (texte[suivant:] if suivant != -1 else "")
     bloc = ["", "[[chapitres]]"]
     bloc += [f'{cle} = "{valeur}"' for cle, valeur in entree.items()
-             if cle not in ("figures_python", "ressources")]
+             if cle not in ("figures_python", "ressources", "encadres")]
     if entree.get("figures_python"):
         bloc += ["", "[chapitres.figures_python]"]
         bloc += [f'{nom} = "{script}"' for nom, script in entree["figures_python"].items()]
+    if entree.get("encadres"):
+        # Le sens d'un encadré est une décision du PO : le manifeste le garde, la CI le rejoue.
+        bloc += ["", "[chapitres.encadres]"]
+        bloc += [f'{nom} = "{callout}"' for nom, callout in entree["encadres"].items()]
     for ressource in entree.get("ressources", []):
         bloc += ["", "[[chapitres.ressources]]"]
         bloc += [f'{cle} = "{valeur}"' for cle, valeur in ressource.items()]
@@ -199,6 +203,13 @@ def main() -> int:
                            help="texte alternatif d'une figure sans légende, fourni par le PO")
     analyseur.add_argument("--figure-python", action="append", default=[], metavar="NOM=SCRIPT.py",
                            help="figure produite par un bloc Python exécuté, au lieu d'être importée")
+    analyseur.add_argument("--cible", choices=("slides", "page"), default=None,
+                           help="slides revealjs (défaut) ou page rédigée, pour un CM (US-40)")
+    analyseur.add_argument("--titre", help="titre de la page, quand celui du .tex est une couverture")
+    analyseur.add_argument("--numero-affiche", default=None,
+                           help="numéro montré au lecteur : « 1 », « 0 », « -1 », ou vide")
+    analyseur.add_argument("--encadre", action="append", default=[], metavar="NOM=GENRE|TITRE",
+                           help="encadré du document et le callout qui lui répond (répétable)")
     analyseur.add_argument("--langage-code", help="langage des blocs de code (par défaut : celui que "
                                                   "le .tex déclare)")
     analyseur.add_argument("--video", help="identifiant YouTube de la capsule de la séance (US-19)")
@@ -250,6 +261,22 @@ def main() -> int:
     langage = (args.langage_code or (precedente or {}).get("langage")
                or langage_declare(source) or "java")
     commande += ["--langage-code", langage]
+
+    # Cible et encadrés : décidés par le PO, donc conservés d'une relance à l'autre.
+    cible = args.cible or (precedente or {}).get("cible", "slides")
+    titre = args.titre or (precedente or {}).get("titre", "")
+    numero_affiche = (args.numero_affiche if args.numero_affiche is not None
+                      else (precedente or {}).get("numero", ""))
+    encadres = dict(morceau.split("=", 1) for morceau in args.encadre) \
+        or (precedente or {}).get("encadres", {})
+    if cible != "slides":
+        commande += ["--cible", cible]
+    if titre:
+        commande += ["--titre", titre]
+    if numero_affiche:
+        commande += ["--numero", numero_affiche]
+    for nom, encadre in encadres.items():
+        commande += ["--encadre", f"{nom}={encadre}"]
     video = args.video or (precedente or {}).get("video", "")
     if video:
         commande += ["--video", video]
@@ -282,6 +309,10 @@ def main() -> int:
         **({"alt": str(alt.relative_to(cours))} if alt else {}),
         "description": description,
         "langage": langage,
+        **({"cible": cible} if cible != "slides" else {}),
+        **({"titre": titre} if titre else {}),
+        **({"numero": numero_affiche} if numero_affiche else {}),
+        **({"encadres": encadres} if encadres else {}),
         **({"video": video} if video else {}),
         **({"ressources": ressources} if ressources else {}),
         "figures_python": scripts_python,

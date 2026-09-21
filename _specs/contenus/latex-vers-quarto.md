@@ -98,3 +98,21 @@ ajoute pour cela portent un `aria-label` interdit sur un lien sans cible (relev�
 - Elle ne découpe pas une slide trop chargée : c'est un choix pédagogique, pas un choix de conversion.
 - Elle ne produit pas de PDF. Un deck s'imprime depuis le navigateur (`?print-pdf`) ; la génération
   automatisée est prévue en US-17.
+
+## Un CM rédigé vers une page (US-40)
+
+Le document est un `article`, et non un deck : `--cible page` produit une **page** de cours, avec sa
+table des matières latérale, là où la cible par défaut produit des slides.
+
+| LaTeX | Quarto | Remarque |
+|---|---|---|
+| `\section{…}` | `## …` | le niveau 1 est le titre de la page |
+| `\subsection{…}` | `### …` | et `\subsubsection` un niveau de plus |
+| `\maketitle` | *(retiré)* | l'en-tête YAML porte le titre |
+| `\title{…}` | `title:` | souvent une **couverture** LaTeX, avec le sous-titre et la promotion : `--titre` le remplace par le titre de la page |
+| `\begin{monencadre}{Titre}` | `::: {.callout-… title="Titre"}` | déclaré par `--encadre nom=genre\|titre` : le sens d'un encadré est une décision du PO, jamais une déduction. Le titre est ici entre **accolades**, là où Beamer le met entre crochets |
+| `\begin{tikzpicture}` | *(non converti)* | US-55 |
+
+Le **numéro affiché** d'un chapitre est une donnée à part (`--numero`) : un cours peut commencer à
+`-1` ou à `0` — le chapitre d'introduction de *Programmation C avancée* est le « -1 » —, et le nom du
+fichier ne sert qu'à ordonner. Sans numéro, la page porte son seul titre.

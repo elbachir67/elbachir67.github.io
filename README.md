@@ -418,6 +418,29 @@ pixels de trop. Il tourne en CI et dans `/importer-chapitre`.
 Quand il signale une slide, **la PR n'est pas ouverte** : alléger une slide est une décision
 pédagogique, qui revient au PO.
 
+### Un CM rédigé devient une page (US-40)
+
+Les cours de *Programmation C avancée*, *Structures de Données* et *Introduction à l'IA* ne sont pas
+des decks mais des **documents rédigés**. `--cible page` les convertit en **page** de cours, avec sa
+table des matières latérale, là où la cible par défaut produit des slides :
+
+```bash
+python3 scripts/preparer_chapitre.py <cours-slug> <fichier.tex> --cible page \
+    --titre "Introduction" --numero-affiche "-1" \
+    --encadre "definitionbox=note|Définition" --encadre "warningbox=warning|Attention"
+```
+
+- `\section` devient un titre de niveau 2, `\subsection` un niveau 3 : la structure du document est
+  la structure de la page.
+- **Le sens d'un encadré ne se devine pas.** `--encadre nom=genre|titre` associe chaque environnement
+  du document à un callout Quarto ; le manifeste le garde et la CI le rejoue. Un `tcolorbox` porte son
+  titre entre **accolades**, là où un encadré Beamer le met entre crochets.
+- `--titre` remplace le titre du `.tex`, qui est souvent une **couverture** LaTeX (« Chapitre -1 :
+  Introduction, Programmation C Avancée - L3 GLSI ») plutôt qu'un titre de page.
+- **Le numéro affiché est une donnée à part** (`--numero-affiche`) : un cours peut commencer à `-1` ou
+  à `0`, et le nom du fichier ne sert qu'à ordonner. Sans numéro, la page porte son seul titre.
+- Les `tikzpicture` ne sont pas encore convertis : ils sont **signalés**, jamais bricolés (US-55).
+
 ### Figures : ce que la CI vérifie
 
 Une figure publiée vide est un **défaut silencieux** : la page se rend, les liens sont bons, et
