@@ -85,6 +85,7 @@ d'un tuteur IA encadré.
 | US-59 | EP3 | Cours de Programmation C avancée, chapitres 0 à 3 | M | 8 | 7 |
 | US-60 | EP3 | Migration d'Introduction au ML (onze séances en decks) | M | 5 | 7 |
 | US-61 | EP3 | Flottants et mathématiques hors ligne (ouvre SD et Intro IA) | M | 5 | 7 |
+| US-62 | EP3 | Contrôle des figures par comparaison des références de glyphes | S | 3 | — |
 
 ### Stories décrites par le PO
 
@@ -128,6 +129,14 @@ issue → PR), US-24 (aperçu déployé par PR), US-32 (journalisation anonymis�
 bord enseignant) forment ce thème, 21 points au total — c'est lui qui occupait la ligne 7 de la
 roadmap. Le PO a tranché : **ce n'est pas une priorité**. Les quatre stories repassent donc « sans
 sprint », et aucune issue ne leur est ouverte.
+
+**US-62 — Comparer les glyphes, et non les pixels.** La comparaison d'images d'une figure à son PDF
+a été écrite, calibrée et mesurée : elle ne sépare pas le signal du bruit. Sur trois figures du
+chapitre 2 du cours de C, l'écart entre une figure brouillée et la même figure juste va de 0 à 7
+points, quand l'écart dû au rendu seul — anticrénelage, encres du mode sombre, mise à l'échelle — en
+vaut le double. L'angle proposé est exact et sans seuil : comparer les **références de glyphes**
+d'une figure incorporée à celles que sa source définit. `verifier_identifiants.py` couvre déjà la
+famille de défauts qui a frappé ; celle-ci irait plus loin. Pas une priorité (US-59).
 
 **La part du PO, et US-58.** Le bilan du Sprint 6 a mesuré que la machine travaille quatre minutes
 par chapitre : le reste est de la lecture et des **décisions du PO** — 33 textes alternatifs pour les

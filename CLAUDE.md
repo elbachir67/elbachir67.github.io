@@ -109,9 +109,12 @@ l'issue soi-même ; sinon, la laisser ouverte et prévenir le PO.
   schéma de texte se compresse environ huit fois. Mesurer avec `gzip -9 -c fichier | wc -c`.
 - **Vérification visuelle d'une page de cours.** Mesurer des largeurs, des débordements et des
   attributs ne suffit pas : cela ne regarde pas les images. Toute vérification visuelle d'une page de
-  cours **inclut une capture de chaque figure, comparée à sa source**. Les figures des chapitres 1 et
-  2 de Programmation C avancée sont parties en ligne avec tous leurs textes brouillés, et la
-  vérification dans Chrome les avait déclarées bonnes sans jamais les avoir regardées.
+  cours **inclut une capture de chaque figure, comparée à sa source — en la regardant**, et non en
+  comparant des pixels. La comparaison automatique a été essayée et mesurée : l'écart entre une
+  figure juste et la même figure brouillée était plus petit que l'écart dû au rendu lui-même
+  (anticrénelage, encres du mode sombre, mise à l'échelle). Les figures des chapitres 1 et 2 de
+  Programmation C avancée sont parties en ligne avec tous leurs textes brouillés, et la vérification
+  dans Chrome les avait déclarées bonnes sans jamais les avoir regardées.
 - **Rien de non publiable sur le site.** Un document réservé à l'enseignant — guide pédagogique,
   grille de correction, barème — n'est jamais attaché en ressource, et aucun lien n'y mène. Le sigle
   de filière « GLSI » n'apparaît pas : « L3 GLSI » s'écrit « L3 ». Toute correction se fait **à la
