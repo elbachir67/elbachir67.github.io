@@ -458,8 +458,9 @@ Le lien de la séance mène à cette page, qui porte deux boutons — **téléch
   produite par le code de la cellule précédente » — et non ce qu'elles montrent : les décrire
   reviendrait à inventer.
 - **Les zones qui défilent** (blocs de code, tableaux pandas) deviennent atteignables au clavier,
-  par `assets/js/notebook-defilement.js`. Ce réglage dépend de la largeur de l'écran, donc du
-  navigateur : la même sortie défile sur un téléphone et tient sur un grand écran.
+  par `assets/js/notebook-defilement.js`. Le réglage est **inconditionnel** : savoir si un bloc
+  déborde dépend de la fenêtre et des métriques de la police, au point qu'un bloc tenait en local et
+  débordait en CI. Quelques tabulations de plus, mais jamais un bloc inatteignable au clavier.
 
 ### Schémas TikZ (US-55)
 

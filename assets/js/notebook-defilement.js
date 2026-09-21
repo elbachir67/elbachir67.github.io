@@ -8,36 +8,22 @@
 // la même sortie défile sur un téléphone et tient sur un grand écran. Le script ajoute donc
 // `tabindex` aux seules zones qui défilent vraiment, et le retire quand elles cessent de déborder.
 (() => {
-  // La zone qui défile n'est pas toujours la même : selon le bloc, c'est le <pre>, le div que
-  // Quarto met autour pour le bouton de copie, ou la sortie elle-même.
+  // Ces conteneurs portent « overflow: auto » : ils défilent dès que leur contenu dépasse. Savoir
+  // *s'ils* dépassent dépend de la largeur de la fenêtre et des métriques de la police — qui
+  // diffèrent d'une machine à l'autre, au point qu'un bloc tenait sur mon écran et débordait en
+  // intégration continue. Le réglage est donc **inconditionnel** : quelques tabulations de plus sur
+  // une page de notebook, mais jamais un bloc qu'on ne peut pas atteindre au clavier.
   const ZONES = ".cell-output, .cell pre, div.sourceCode, .code-with-copy";
   const ETIQUETTE = document.documentElement.lang === "en"
     ? "Horizontally scrollable region"
     : "Zone défilante horizontalement";
 
-  // Quelques conteneurs portent « overflow: auto » en permanence : axe-core les signale dès lors,
-  // que leur contenu déborde ou non. Ceux-là sont rendus atteignables une fois pour toutes.
-  const TOUJOURS = ".code-with-copy";
-
-  function ajuster() {
-    for (const zone of document.querySelectorAll(ZONES)) {
-      const deborde = zone.matches(TOUJOURS)
-        || zone.scrollWidth > zone.clientWidth + 1;
-      if (deborde) {
-        zone.setAttribute("tabindex", "0");
-        zone.setAttribute("role", "region");
-        zone.setAttribute("aria-label", ETIQUETTE);
-      } else {
-        zone.removeAttribute("tabindex");
-        zone.removeAttribute("role");
-        zone.removeAttribute("aria-label");
-      }
-    }
-  }
-
   // Une page sans cellule de notebook n'est pas concernée : le script s'arrête aussitôt.
   if (!document.querySelector(".cell")) return;
 
-  ajuster();
-  window.addEventListener("resize", ajuster);
+  for (const zone of document.querySelectorAll(ZONES)) {
+    zone.setAttribute("tabindex", "0");
+    zone.setAttribute("role", "region");
+    zone.setAttribute("aria-label", ETIQUETTE);
+  }
 })();
