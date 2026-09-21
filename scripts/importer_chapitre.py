@@ -92,6 +92,8 @@ class Conversion:
         self.prefixe_figures = prefixe_figures  # chemin des figures, relatif au .qmd produit
         self.langage = langage                  # langage des blocs de code, déclaré par le .tex
         self.encadres: dict[str, tuple[str, str, str]] = {}   # encadrés du document (US-40)
+        self.prefixe_tikz = ""                  # préfixe des schémas TikZ compilés (US-55)
+        self.tikz = 0                           # numéro du schéma en cours
         self.insertions: list[str] = []         # blocs déjà finalisés, à l'abri de la conversion
         self.scripts: dict[str, Path] = {}      # figures calculées : script Python, par nom de figure
         self.non_convertis: list[tuple[str, str]] = []
@@ -472,6 +474,21 @@ def langage_declare(source: str) -> str:
     return trouve[1].lower() if trouve else ""
 
 
+def schema_tikz(conversion: Conversion) -> str:
+    """Un `tikzpicture` devient le SVG que `scripts/figures_tikz.py` en a compilé (US-55).
+
+    La numérotation est la même des deux côtés — l'ordre d'apparition dans le document —, ce qui
+    évite une table de correspondance que quelqu'un finirait par désynchroniser.
+    """
+    conversion.tikz += 1
+    nom = f"{conversion.prefixe_tikz}-{conversion.tikz:02d}"
+    alt = conversion.alternatifs.get(nom, "")
+    origine = "texte fourni par le PO" if alt else "TODO(PO)"
+    conversion.figures.append(f"{nom} : schéma TikZ, texte alternatif — {origine}")
+    return (f'{{{{< svg {conversion.prefixe_figures}/{nom}.svg '
+            f'alt="{alt or "TODO(PO): description du schéma"}" >}}}}')
+
+
 def code(contenu: str, conversion: Conversion, options: str | None = None) -> str:
     """lstlisting -> bloc de code, dans le langage du cours ; une sortie de programme reste nue.
 
@@ -530,6 +547,8 @@ def convertir(texte: str, conversion: Conversion) -> str:
             morceaux.append(code(contenu, conversion, titre))
         elif nom == "tabular":
             morceaux.append(tableau(contenu, conversion))
+        elif nom == "tikzpicture":
+            morceaux.append(conversion.proteger(schema_tikz(conversion)))
         elif nom in ("center", "block", "columns", "column"):
             morceaux.append(convertir(contenu, conversion))
         else:
@@ -879,6 +898,9 @@ def main() -> int:
                            help="ressource de la séance : lab, td, notebook ou corrige, son fichier dans "
                                 "le dépôt et son titre ; un corrigé exige en plus sa date de publication "
                                 "(AAAA-MM-JJ). Répétable (US-49)")
+    analyseur.add_argument("--prefixe-tikz",
+                           help="préfixe des schémas TikZ compilés (US-55) ; par défaut, le nom du "
+                                "fichier de sortie")
     analyseur.add_argument("--titre",
                            help="titre de la page, quand celui du .tex est une couverture LaTeX "
                                 "(« Chapitre -1 : Introduction, Programmation C Avancée - L3 GLSI »)")
@@ -903,6 +925,7 @@ def main() -> int:
     prefixe = args.prefixe_figures or os.path.relpath(args.figures, args.sortie.parent)
     conversion = Conversion(alternatifs, prefixe,
                             args.langage_code or langage_declare(source) or "java")
+    conversion.prefixe_tikz = args.prefixe_tikz or args.sortie.stem
     # Encadrés propres au document : leur sens est une décision du PO, jamais une déduction. Ils sont
     # déclarés à l'import et enregistrés dans le manifeste, que la CI rejoue.
     for brute in args.encadre:
