@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Jusqu’ici, les données (variables) et les traitements (fonctions) étaient séparés.">
+
+<title>Programmation Python — Séance 5 : Programmation orientée objet – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-25b6290780fe54dfa8eee498e52c14c6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-135fa0547a387092e949b5f69572bbf7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-25b6290780fe54dfa8eee498e52c14c6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+
+<meta property="og:title" content="Programmation Python — Séance 5 : Programmation orientée objet – El Hadji Bassirou Touré">
+<meta property="og:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
+<meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="Programmation Python — Séance 5 : Programmation orientée objet – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
+<meta name="twitter:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#vous-utilisez-déjà-des-objets" id="toc-vous-utilisez-déjà-des-objets" class="nav-link active" data-scroll-target="#vous-utilisez-déjà-des-objets">1. Vous utilisez déjà des objets</a></li>
+  <li><a href="#définir-une-classe" id="toc-définir-une-classe" class="nav-link" data-scroll-target="#définir-une-classe">2. Définir une classe</a></li>
+  <li><a href="#les-méthodes" id="toc-les-méthodes" class="nav-link" data-scroll-target="#les-méthodes">3. Les méthodes</a></li>
+  <li><a href="#un-affichage-lisible-__str__" id="toc-un-affichage-lisible-__str__" class="nav-link" data-scroll-target="#un-affichage-lisible-__str__">4. Un affichage lisible : <code>__str__</code></a></li>
+  <li><a href="#lhéritage-spécialiser-sans-réécrire" id="toc-lhéritage-spécialiser-sans-réécrire" class="nav-link" data-scroll-target="#lhéritage-spécialiser-sans-réécrire">5. L’héritage : spécialiser sans réécrire</a></li>
+  <li><a href="#le-polymorphisme-un-même-appel-des-comportements-différents" id="toc-le-polymorphisme-un-même-appel-des-comportements-différents" class="nav-link" data-scroll-target="#le-polymorphisme-un-même-appel-des-comportements-différents">6. Le polymorphisme : un même appel, des comportements différents</a></li>
+  <li><a href="#pièges-fréquents" id="toc-pièges-fréquents" class="nav-link" data-scroll-target="#pièges-fréquents">7. Pièges fréquents</a></li>
+  <li><a href="#récapitulatif" id="toc-récapitulatif" class="nav-link" data-scroll-target="#récapitulatif">Récapitulatif</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Programmation Python — Séance 5 : Programmation orientée objet</h1>
+</div>
+
+<div>
+  <div class="description">
+    Jusqu’ici, les données (variables) et les traitements (fonctions) étaient séparés.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="notebook-boutons">
+<a href="../../../cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html" class="btn btn-primary btn-sm" download="" title="Télécharger le notebook">Télécharger le notebook</a> <a href="https://colab.research.google.com/github/elbachir67/elbachir67.github.io/blob/main/cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.ipynb" class="btn btn-outline-primary btn-sm" title="Ouvrir dans Colab">Ouvrir dans Colab</a>
+<em>Les sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.</em>
+</div>
+<p><strong>DMI · FST · UCAD</strong></p>
+<p>Jusqu’ici, les données (variables) et les traitements (fonctions) étaient séparés. La <strong>programmation orientée objet</strong> les réunit : un <strong>objet</strong> regroupe des <strong>données</strong> et les <strong>comportements</strong> qui vont avec. Cette séance construit ses propres objets avec <code>class</code>, puis les spécialise par <strong>héritage</strong> et <strong>polymorphisme</strong>. Exécutez chaque cellule avec <strong>Maj + Entrée</strong>. Les cellules <strong>À vous</strong> sont à compléter.</p>
+<hr>
+<section id="vous-utilisez-déjà-des-objets" class="level2">
+<h2 class="anchored" data-anchor-id="vous-utilisez-déjà-des-objets">1. Vous utilisez déjà des objets</h2>
+<p>Une chaîne, une liste sont déjà des <strong>objets</strong> : ils portent des <strong>données</strong> (leur contenu) et des <strong>méthodes</strong> (des fonctions attachées, appelées avec un point). <code>"dakar".upper()</code> et <code>notes.append(15)</code> sont des méthodes d’objets que vous employez depuis le début.</p>
+<div id="cell-3" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>texte <span class="op">=</span> <span class="st">"dakar"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(texte.upper())</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>notes <span class="op">=</span> [<span class="dv">17</span>, <span class="dv">12</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>notes.append(<span class="dv">15</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(notes)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DAKAR
+[17, 12, 15]</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Avec <code>mot = "SENEGAL"</code>, affichez sa version en minuscules grâce à la méthode <code>.lower()</code>.</p>
+<div id="cell-5" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : avec mot = "SENEGAL", affichez mot.lower()</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Une méthode peut aussi <strong>renvoyer</strong> un résultat. <code>"Dakar-Thies-Mbour".split("-")</code> renvoie une liste.</p>
+<div id="cell-7" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>villes <span class="op">=</span> <span class="st">"Dakar-Thies-Mbour"</span>.split(<span class="st">"-"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(villes)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">len</span>(villes))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>['Dakar', 'Thies', 'Mbour']
+3</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Découpez la chaîne <code>"Astou;Modou;Bineta"</code> sur le <code>";"</code> avec <code>.split(";")</code> et affichez la liste obtenue.</p>
+<div id="cell-9" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : affichez "Astou;Modou;Bineta".split(";")</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>L’idée de la POO est d’écrire <strong>nos propres</strong> types d’objets, adaptés à notre problème — un compte bancaire, un patient, un produit — avec leurs données et leurs méthodes.</p>
+<hr>
+</section>
+<section id="définir-une-classe" class="level2">
+<h2 class="anchored" data-anchor-id="définir-une-classe">2. Définir une classe</h2>
+<p>Une <strong>classe</strong> est le <strong>plan</strong> d’un objet : elle décrit ses données et ses méthodes. On la définit avec <code>class</code>. La méthode spéciale <code>__init__</code> est le <strong>constructeur</strong> : elle s’exécute à la création et installe les données de l’objet. Le premier paramètre, <code>self</code>, désigne <strong>l’objet en cours de construction</strong>.</p>
+<div id="cell-12" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CompteBancaire:</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, titulaire, solde):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.titulaire <span class="op">=</span> titulaire</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.solde <span class="op">=</span> solde</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>c1 <span class="op">=</span> CompteBancaire(<span class="st">"Astou"</span>, <span class="dv">5000</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1.titulaire)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1.solde)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Astou
+5000</code></pre>
+</div>
+</div>
+<p><code>c1</code> est une <strong>instance</strong> de la classe <code>CompteBancaire</code>. On accède à ses données (ses <strong>attributs</strong>) avec un point : <code>c1.titulaire</code>, <code>c1.solde</code>. Chaque instance possède ses propres valeurs.</p>
+<div id="cell-14" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>c2 <span class="op">=</span> CompteBancaire(<span class="st">"Modou"</span>, <span class="dv">12000</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1.titulaire, c1.solde)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c2.titulaire, c2.solde)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Astou 5000
+Modou 12000</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Créez une instance <code>c3</code> de <code>CompteBancaire</code> pour le titulaire <code>"Bineta"</code> avec un solde de <code>8000</code>, puis affichez son titulaire et son solde.</p>
+<div id="cell-16" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : creez c3 = CompteBancaire("Bineta", 8000), puis affichez c3.titulaire et c3.solde</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Un attribut se lit, mais se <strong>modifie</strong> aussi directement avec un point.</p>
+<div id="cell-18" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>c2.solde <span class="op">=</span> <span class="dv">20000</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c2.solde)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>20000</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Modifiez le solde de <code>c3</code> pour le porter à <code>9500</code>, puis affichez-le.</p>
+<div id="cell-20" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : mettez c3.solde a 9500, puis affichez c3.solde</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+<section id="les-méthodes" class="level2">
+<h2 class="anchored" data-anchor-id="les-méthodes">3. Les méthodes</h2>
+<p>Une <strong>méthode</strong> est une fonction définie <strong>dans</strong> la classe : c’est un comportement de l’objet. Elle reçoit toujours <code>self</code> en premier paramètre, ce qui lui permet de lire et de modifier les attributs. Ici, <code>depot</code> et <code>retrait</code> modifient le solde ; <code>peut_retirer</code> <strong>renvoie</strong> un booléen.</p>
+<div id="cell-22" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CompteBancaire:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, titulaire, solde):</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.titulaire <span class="op">=</span> titulaire</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.solde <span class="op">=</span> solde</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> depot(<span class="va">self</span>, montant):</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.solde <span class="op">=</span> <span class="va">self</span>.solde <span class="op">+</span> montant</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> retrait(<span class="va">self</span>, montant):</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> montant <span class="op">&lt;=</span> <span class="va">self</span>.solde:</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.solde <span class="op">=</span> <span class="va">self</span>.solde <span class="op">-</span> montant</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"Solde insuffisant"</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> peut_retirer(<span class="va">self</span>, montant):</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> montant <span class="op">&lt;=</span> <span class="va">self</span>.solde</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>c1 <span class="op">=</span> CompteBancaire(<span class="st">"Astou"</span>, <span class="dv">5000</span>)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>c1.depot(<span class="dv">2000</span>)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1.solde)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>c1.retrait(<span class="dv">1000</span>)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1.solde)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>7000
+6000</code></pre>
+</div>
+</div>
+<p>On appelle une méthode sur l’objet : <code>c1.depot(2000)</code>. Inutile de passer <code>self</code>, Python s’en charge : <code>self</code> sera <code>c1</code>. Si le retrait dépasse le solde, la méthode affiche un message au lieu de l’effectuer.</p>
+<div id="cell-24" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>c1.retrait(<span class="dv">50000</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1.solde)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Solde insuffisant
+6000</code></pre>
+</div>
+</div>
+<p>La méthode <code>peut_retirer</code> ne modifie rien : elle <strong>renvoie</strong> <code>True</code> ou <code>False</code>, qu’on peut utiliser dans un test.</p>
+<div id="cell-26" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1.peut_retirer(<span class="dv">1000</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1.peut_retirer(<span class="dv">999999</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>True
+False</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Créez un compte <code>c4</code> pour <code>"Modou"</code> avec <code>3000</code>, effectuez un dépôt de <code>1500</code>, puis affichez son solde.</p>
+<div id="cell-28" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : creez c4 = CompteBancaire("Modou", 3000), faites c4.depot(1500), puis affichez c4.solde</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+<section id="un-affichage-lisible-__str__" class="level2">
+<h2 class="anchored" data-anchor-id="un-affichage-lisible-__str__">4. Un affichage lisible : <code>__str__</code></h2>
+<p>Par défaut, <code>print(objet)</code> donne une ligne peu lisible. La méthode spéciale <code>__str__</code> décide ce qui s’affiche : elle doit <strong>renvoyer</strong> une chaîne, et <code>print</code> l’utilise automatiquement. On ajoute aussi une méthode <code>description</code> qui renvoie un libellé — elle nous servira plus loin.</p>
+<div id="cell-30" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CompteBancaire:</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, titulaire, solde):</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.titulaire <span class="op">=</span> titulaire</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.solde <span class="op">=</span> solde</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> depot(<span class="va">self</span>, montant):</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.solde <span class="op">=</span> <span class="va">self</span>.solde <span class="op">+</span> montant</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> retrait(<span class="va">self</span>, montant):</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> montant <span class="op">&lt;=</span> <span class="va">self</span>.solde:</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.solde <span class="op">=</span> <span class="va">self</span>.solde <span class="op">-</span> montant</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"Solde insuffisant"</span>)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> peut_retirer(<span class="va">self</span>, montant):</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> montant <span class="op">&lt;=</span> <span class="va">self</span>.solde</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__str__</span>(<span class="va">self</span>):</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f"Compte de </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>titulaire<span class="sc">}</span><span class="ss"> : </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>solde<span class="sc">}</span><span class="ss"> F"</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> description(<span class="va">self</span>):</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"compte courant"</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>c1 <span class="op">=</span> CompteBancaire(<span class="st">"Astou"</span>, <span class="dv">5000</span>)</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1)</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>c1.depot(<span class="dv">2000</span>)</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1)</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(c1.description())</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Compte de Astou : 5000 F
+Compte de Astou : 7000 F
+compte courant</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Créez un compte pour <code>"Bineta"</code> avec <code>9000</code> et affichez-le directement avec <code>print</code>.</p>
+<div id="cell-32" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : creez un compte pour "Bineta" avec 9000, puis affichez-le avec print(...)</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+<section id="lhéritage-spécialiser-sans-réécrire" class="level2">
+<h2 class="anchored" data-anchor-id="lhéritage-spécialiser-sans-réécrire">5. L’héritage : spécialiser sans réécrire</h2>
+<p>L’<strong>héritage</strong> crée une classe <strong>à partir d’une autre</strong> : elle récupère tout (attributs et méthodes) et peut <strong>ajouter</strong> ce qui lui est propre. <code>CompteEpargne(CompteBancaire)</code> se lit « un compte épargne <strong>est un</strong> compte bancaire, en plus spécialisé ». <code>super().__init__(...)</code> appelle le constructeur du parent pour ne pas réécrire l’installation des données communes.</p>
+<div id="cell-34" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CompteEpargne(CompteBancaire):</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, titulaire, solde, taux):</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(titulaire, solde)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.taux <span class="op">=</span> taux</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> ajouter_interets(<span class="va">self</span>):</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.solde <span class="op">=</span> <span class="va">self</span>.solde <span class="op">+</span> <span class="va">self</span>.solde <span class="op">*</span> <span class="va">self</span>.taux</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>e1 <span class="op">=</span> CompteEpargne(<span class="st">"Bineta"</span>, <span class="dv">10000</span>, <span class="fl">0.05</span>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(e1)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>e1.depot(<span class="dv">5000</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>e1.ajouter_interets()</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(e1.solde)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Compte de Bineta : 10000 F
+15750.0</code></pre>
+</div>
+</div>
+<p><code>e1</code> profite de tout <code>CompteBancaire</code> : <code>print(e1)</code> utilise le <code>__str__</code> <strong>hérité</strong>, et <code>e1.depot(5000)</code> la méthode <code>depot</code> <strong>héritée</strong>. <code>ajouter_interets</code> et l’attribut <code>taux</code> lui sont <strong>propres</strong>. Après le dépôt (solde 15000), les intérêts à 5 % portent le solde à 15750.</p>
+<div id="cell-36" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>e1.retrait(<span class="dv">2000</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(e1.solde)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>13750.0</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Créez un compte épargne <code>e2</code> pour <code>"Modou"</code> avec <code>20000</code> et un taux de <code>0.03</code>, appliquez <code>ajouter_interets()</code>, puis affichez son solde.</p>
+<div id="cell-38" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : creez e2 = CompteEpargne("Modou", 20000, 0.03), faites e2.ajouter_interets(), puis affichez e2.solde</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+<section id="le-polymorphisme-un-même-appel-des-comportements-différents" class="level2">
+<h2 class="anchored" data-anchor-id="le-polymorphisme-un-même-appel-des-comportements-différents">6. Le polymorphisme : un même appel, des comportements différents</h2>
+<p><strong>Redéfinir</strong> dans la classe fille une méthode du parent s’appelle <strong>surcharger</strong>. Le <strong>polymorphisme</strong> en découle : un <strong>même appel</strong> produit un <strong>résultat différent</strong> selon le type réel de l’objet. On surcharge <code>description</code> dans <code>CompteEpargne</code>, puis on parcourt une liste mélangée.</p>
+<div id="cell-40" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CompteEpargne(CompteBancaire):</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, titulaire, solde, taux):</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(titulaire, solde)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.taux <span class="op">=</span> taux</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> ajouter_interets(<span class="va">self</span>):</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.solde <span class="op">=</span> <span class="va">self</span>.solde <span class="op">+</span> <span class="va">self</span>.solde <span class="op">*</span> <span class="va">self</span>.taux</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> description(<span class="va">self</span>):</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f"compte epargne a </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>taux<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>comptes <span class="op">=</span> [CompteBancaire(<span class="st">"Astou"</span>, <span class="dv">5000</span>), CompteEpargne(<span class="st">"Bineta"</span>, <span class="dv">10000</span>, <span class="fl">0.05</span>)]</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> c <span class="kw">in</span> comptes:</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(c.titulaire, <span class="st">":"</span>, c.description())</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Astou : compte courant
+Bineta : compte epargne a 0.05</code></pre>
+</div>
+</div>
+<p>La boucle appelle exactement le même <code>c.description()</code> à chaque tour, mais Python choisit la version qui correspond au <strong>type réel</strong> de l’objet : « compte courant » pour l’un, « compte epargne » pour l’autre. C’est le polymorphisme.</p>
+<p><strong>À vous.</strong> Construisez une liste <code>mes_comptes</code> contenant un <code>CompteBancaire</code> et un <code>CompteEpargne</code> de votre choix, puis affichez la <code>description()</code> de chacun avec une boucle <code>for</code>.</p>
+<div id="cell-43" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : creez mes_comptes = [ ... , ... ], puis parcourez-la et affichez c.description() pour chaque c</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Le polymorphisme fonctionne aussi à travers une <strong>fonction</strong> : elle accepte n’importe quel compte et appelle <code>description()</code>, sans se soucier du type exact.</p>
+<div id="cell-45" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> presenter(compte):</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Il s'agit d'un"</span>, compte.description())</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>presenter(comptes[<span class="dv">0</span>])</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>presenter(comptes[<span class="dv">1</span>])</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Il s'agit d'un compte courant
+Il s'agit d'un compte epargne a 0.05</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Écrivez une fonction <code>resume(compte)</code> qui affiche le titulaire suivi de la description du compte, puis appelez-la sur <code>comptes[0]</code> et <code>comptes[1]</code>.</p>
+<div id="cell-47" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : definissez resume(compte) qui affiche compte.titulaire et compte.description(), puis appelez-la</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+<section id="pièges-fréquents" class="level2">
+<h2 class="anchored" data-anchor-id="pièges-fréquents">7. Pièges fréquents</h2>
+<ul>
+<li><strong>Oublier <code>self</code></strong> : toute méthode prend <code>self</code> en premier paramètre, et l’on écrit <code>self.attribut</code> pour accéder aux données de l’objet. L’oubli provoque une erreur.</li>
+<li><strong>Confondre la classe et l’instance</strong> : <code>CompteBancaire</code> est le plan ; <code>c1 = CompteBancaire(...)</code> est un objet concret. Les méthodes s’appellent sur l’<strong>instance</strong>.</li>
+<li><strong>Appeler une méthode sans parenthèses</strong> : <code>c1.description</code> seul ne fait rien (il désigne la méthode) ; il faut écrire <code>c1.description()</code> pour l’<strong>exécuter</strong>.</li>
+</ul>
+<hr>
+</section>
+<section id="récapitulatif" class="level2">
+<h2 class="anchored" data-anchor-id="récapitulatif">Récapitulatif</h2>
+<ul>
+<li><strong>Classe</strong> : le plan d’un objet (<code>class</code>). <strong>Instance</strong> : un objet concret créé à partir du plan.</li>
+<li><strong><code>__init__(self, ...)</code></strong> : le constructeur ; installe les <strong>attributs</strong> (<code>self.x = ...</code>).</li>
+<li><strong><code>self</code></strong> : l’objet courant ; toute méthode le reçoit en premier paramètre.</li>
+<li><strong>Méthode</strong> : une fonction définie dans la classe ; s’appelle avec <code>objet.methode(...)</code> ; peut modifier l’objet ou <strong>renvoyer</strong> une valeur.</li>
+<li><strong><code>__str__</code></strong> : renvoie la chaîne affichée par <code>print(objet)</code>.</li>
+<li><strong>Héritage</strong> : <code>class Fille(Parent)</code> récupère tout et ajoute ; <code>super().__init__(...)</code> réutilise le constructeur parent.</li>
+<li><strong>Polymorphisme</strong> : une méthode <strong>surchargée</strong> donne, pour un même appel, un comportement propre à chaque classe.</li>
+</ul>
+<p><strong>Prochaine séance — S6 :</strong> NumPy et le calcul sur des tableaux, premier outil de la science des données.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/elbachir67\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/notebook-defilement.js"></script>
+
+
+
+
+</body></html>

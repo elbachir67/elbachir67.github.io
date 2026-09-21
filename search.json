@@ -1,5 +1,236 @@
 [
   {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "",
+    "text": "Télécharger le notebook Ouvrir dans Colab\nLes sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.\nDMI · FST · UCAD\nDernière séance. Un tableau de chiffres ne montre pas la forme des données ; un graphique, si. On travaille sur un jeu très concret — des fruits du marché (mangues, bananes, oranges), pesés et mesurés — puis on fait le pont vers le Machine Learning.\nComment travailler. Exécutez chaque cellule avec Maj + Entrée. Les cellules À vous sont à compléter : c’est là que vous apprenez. Elles vont de la simple répétition à l’analyse complète, et la dernière section est un exercice de synthèse où vous menez l’analyse de bout en bout.\nRappel des trois graphiques : | La question | Le graphique | La fonction | |—|—|—| | Comment se répartit une mesure ? | histogramme | plt.hist | | Quel groupe a la plus grande valeur ? | barres | plt.bar | | Deux mesures sont-elles liées ? | nuage de points | plt.scatter |"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html#le-jeu-de-données",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html#le-jeu-de-données",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "1. Le jeu de données",
+    "text": "1. Le jeu de données\n30 fruits : 10 mangues, 10 bananes, 10 oranges. Pour chacun, la masse (g), la longueur (cm) et le taux de sucre (%).\n\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\ndata = {\n    \"fruit\": [\"mangue\"]*10 + [\"banane\"]*10 + [\"orange\"]*10,\n    \"masse\": [301, 313, 277, 283, 272, 329, 321, 326, 310, 312,\n              137, 117, 120, 122, 119, 114, 126, 106, 114, 115,\n              201, 223, 206, 210, 196, 205, 197, 177, 230, 198],\n    \"longueur\": [10.3, 12.1, 10.3, 10.6, 10.8, 10.5, 11.5, 10.9, 11.0, 10.9,\n                 18.4, 19.1, 19.1, 19.0, 18.9, 19.3, 20.0, 19.6, 17.1, 19.7,\n                 8.1, 8.8, 8.1, 8.1, 8.3, 7.3, 8.9, 8.2, 7.6, 8.6],\n    \"sucre\": [14.7, 13.7, 13.9, 14.2, 13.2, 13.8, 14.3, 14.6, 14.1, 13.7,\n              11.1, 11.1, 12.1, 11.3, 12.8, 12.3, 11.6, 11.2, 12.2, 12.6,\n              9.2, 8.5, 9.1, 9.0, 9.2, 9.2, 9.4, 8.4, 9.0, 8.5],\n}\ndf = pd.DataFrame(data)\nprint(df.shape)\nprint(df.head())\n\n(30, 4)\n    fruit  masse  longueur  sucre\n0  mangue    301      10.3   14.7\n1  mangue    313      12.1   13.7\n2  mangue    277      10.3   13.9\n3  mangue    283      10.6   14.2\n4  mangue    272      10.8   13.2\n\n\n\nprint(df[\"fruit\"].value_counts())\n\nfruit\nmangue    10\nbanane    10\norange    10\nName: count, dtype: int64\n\n\nUn coup d’oeil aux masses : la plus petite, la plus grande, la moyenne.\n\nprint(df[\"masse\"].min())\nprint(df[\"masse\"].max())\nprint(df[\"masse\"].mean().round(1))\n\n106\n329\n209.2\n\n\nÀ vous (A). Affichez la longueur minimale et la longueur maximale de la table.\n\n# À vous : affichez df[\"longueur\"].min() et df[\"longueur\"].max()\n\nÀ vous (B). Affichez le résumé statistique des mesures avec df.describe().round(2).\n\n# À vous : affichez df.describe().round(2)"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html#lhistogramme-comment-se-répartit-une-mesure",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html#lhistogramme-comment-se-répartit-une-mesure",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "2. L’histogramme : comment se répartit une mesure",
+    "text": "2. L’histogramme : comment se répartit une mesure\nUn histogramme découpe l’axe en tranches et compte combien de fruits tombent dans chacune. On légende toujours : xlabel, ylabel, title.\n\nplt.hist(df[\"masse\"], bins=range(100, 360, 20), color=\"#2563AB\", edgecolor=\"white\")\nplt.xlabel(\"masse (g)\")\nplt.ylabel(\"nombre de fruits\")\nplt.title(\"Distribution des masses\")\n\n\n\n\n\n\n\n\nTrois amas apparaissent : autour de 120 g, de 200 g et de 300 g. Ce sont les bananes, les oranges et les mangues — le tableau de chiffres ne le montrait pas aussi vite.\nL’argument bins fixe les tranches : ici, une barre tous les 20 g. Des tranches plus fines montrent plus de detail, au risque du bruit.\nÀ vous (1). Tracez l’histogramme de la colonne sucre, avec un titre et des axes légendés.\n\n# À vous : plt.hist(df[\"sucre\"], ...) avec xlabel, ylabel, title\n\nÀ vous (2). Tracez l’histogramme de la colonne longueur. Combien d’amas voyez-vous ? Écrivez votre réponse en commentaire dans la cellule.\n\n# À vous : histogramme de longueur, puis en commentaire : combien d'amas ?\n\nÀ vous (3). Reprenez l’histogramme des masses avec des tranches plus larges : bins=range(100, 360, 60). Les trois amas sont-ils encore visibles ?\n\n# À vous : plt.hist(df[\"masse\"], bins=range(100, 360, 60)) puis legendes"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html#le-diagramme-en-barres-comparer-les-groupes",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html#le-diagramme-en-barres-comparer-les-groupes",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "3. Le diagramme en barres : comparer les groupes",
+    "text": "3. Le diagramme en barres : comparer les groupes\nPour comparer une valeur par fruit, on part d’un groupby (Séance 7), puis on trace des barres.\n\nmasse_moy = df.groupby(\"fruit\")[\"masse\"].mean().round(1)\nprint(masse_moy)\n\nfruit\nbanane    119.0\nmangue    304.4\norange    204.3\nName: masse, dtype: float64\n\n\n\nmasse_moy = df.groupby(\"fruit\")[\"masse\"].mean()\nplt.bar(masse_moy.index, masse_moy.values, color=[\"#C9A227\", \"#D9822B\", \"#2563AB\"])\nplt.ylabel(\"masse moyenne (g)\")\nplt.title(\"Masse moyenne par fruit\")\n\n\n\n\n\n\n\n\nUne mangue pèse en moyenne 304 g, une orange 204 g, une banane 119 g. Le graphique rend la comparaison immédiate.\nMeme principe pour n’importe quelle mesure. Avec la longueur moyenne :\n\nlong_moy = df.groupby(\"fruit\")[\"longueur\"].mean()\nplt.bar(long_moy.index, long_moy.values, color=[\"#C9A227\", \"#D9822B\", \"#2563AB\"])\nplt.ylabel(\"longueur moyenne (cm)\")\nplt.title(\"Longueur moyenne par fruit\")\n\n\n\n\n\n\n\n\nLa banane se detache nettement : c’est le fruit le plus long du panier.\nÀ vous (4). Tracez un diagramme en barres du taux de sucre moyen par fruit (calculez d’abord df.groupby(\"fruit\")[\"sucre\"].mean()).\n\n# À vous : barres de df.groupby(\"fruit\")[\"sucre\"].mean()\n\nÀ vous (5). Tracez un diagramme en barres de la masse maximale par fruit (.max() au lieu de .mean()). Comparez avec le graphique des moyennes : les fruits gardent-ils le même ordre ?\n\n# À vous : barres de df.groupby(\"fruit\")[\"masse\"].max()"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html#le-nuage-de-points-deux-mesures-à-la-fois",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html#le-nuage-de-points-deux-mesures-à-la-fois",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "4. Le nuage de points : deux mesures à la fois",
+    "text": "4. Le nuage de points : deux mesures à la fois\nLe nuage de points (scatter) place chaque fruit selon deux mesures. En colorant par fruit, les groupes apparaissent. On trace une couche par fruit, avec sa couleur et son label.\n\ncouleurs = {\"mangue\": \"#D9822B\", \"banane\": \"#C9A227\", \"orange\": \"#2563AB\"}\nfor nom, coul in couleurs.items():\n    sous = df[df[\"fruit\"] == nom]\n    plt.scatter(sous[\"longueur\"], sous[\"masse\"], c=coul, label=nom)\nplt.xlabel(\"longueur (cm)\")\nplt.ylabel(\"masse (g)\")\nplt.title(\"Masse selon la longueur\")\nplt.legend()\n\n\n\n\n\n\n\n\nTrois amas nettement séparés. La banane est longue et légère ; la mangue, courte et lourde ; l’orange, courte et moyenne. Avec ces deux mesures, on reconnaît le fruit sans le voir — c’est exactement l’idée du Machine Learning.\nÀ vous (6). Tracez un nuage de points de sucre (axe des x) contre masse (axe des y), coloré par fruit, avec une légende.\n\n# À vous : scatter de sucre (x) contre masse (y), colore par fruit, avec legende\n\nÀ vous (7). Tracez le nuage longueur contre sucre, coloré par fruit. Les trois groupes sont-ils aussi bien séparés qu’avec longueur et masse ? Répondez en commentaire.\n\n# À vous : scatter de longueur (x) contre sucre (y), colore par fruit\n\nÀ vous (8). Sans couleur cette fois : tracez longueur contre masse en un seul plt.scatter, sans boucle. Voit-on encore quel groupe est quel fruit ?\n\n# À vous : plt.scatter(df[\"longueur\"], df[\"masse\"]) puis legendes des axes"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html#une-mini-analyse-exploratoire",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html#une-mini-analyse-exploratoire",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "5. Une mini-analyse exploratoire",
+    "text": "5. Une mini-analyse exploratoire\nL’analyse exploratoire (EDA) enchaîne toujours les mêmes gestes : charger, décrire, tracer, observer. Le profil moyen de chaque fruit résume la table.\n\nprint(df.groupby(\"fruit\")[[\"masse\", \"longueur\", \"sucre\"]].mean().round(1))\n\n        masse  longueur  sucre\nfruit                         \nbanane  119.0      19.0   11.8\nmangue  304.4      10.9   14.0\norange  204.3       8.2    9.0\n\n\nOn observe : la mangue est la plus lourde et la plus sucrée ; la banane est la plus longue ; l’orange est la moins sucrée. Chaque mesure aide à distinguer les fruits.\nÀ vous (9). Affichez la masse maximale par fruit avec df.groupby(\"fruit\")[\"masse\"].max().\n\n# À vous : affichez df.groupby(\"fruit\")[\"masse\"].max()\n\nÀ vous (10). Un client veut le fruit le plus sucré. Affichez le taux de sucre moyen par fruit, trié du plus sucré au moins sucré (.sort_values(ascending=False)).\n\n# À vous : df.groupby(\"fruit\")[\"sucre\"].mean().sort_values(ascending=False)\n\nÀ vous (11). Combien de fruits pèsent plus de 250 g ? Utilisez un filtre (Séance 7) puis len(...).\n\n# À vous : len(df[df[\"masse\"] &gt; 250])"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html#le-pont-vers-le-machine-learning",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html#le-pont-vers-le-machine-learning",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "6. Le pont vers le Machine Learning",
+    "text": "6. Le pont vers le Machine Learning\nReconnaître le fruit à partir de ses mesures, c’est le travail d’un modèle. On lui présente deux objets : une matrice X (les mesures, un fruit par ligne) et un vecteur y (ce qu’on veut prédire, ici le nom du fruit).\n\nX = df[[\"masse\", \"longueur\", \"sucre\"]].values\ny = df[\"fruit\"].values\nprint(\"X shape :\", X.shape)\nprint(\"y shape :\", y.shape)\nprint(\"premier fruit  X[0] :\", X[0])\nprint(\"son nom        y[0] :\", y[0])\n\nX shape : (30, 3)\ny shape : (30,)\npremier fruit  X[0] : [301.   10.3  14.7]\nson nom        y[0] : mangue\n\n\nX a la forme (30, 3) : 30 fruits, 3 mesures. y a la forme (30,) : un nom par fruit. C’est exactement ce qu’attend une bibliothèque de Machine Learning comme scikit-learn. Le code ci-dessous n’est pas exécuté ici (il appartient au cours de ML) ; il montre la suite :\nfrom sklearn.tree import DecisionTreeClassifier\n\nmodele = DecisionTreeClassifier()\nmodele.fit(X, y)          # le modele APPREND le lien X -&gt; y\nmodele.predict([[300, 11, 14]])   # un fruit de 300 g, 11 cm, 14 % : mangue ?\nDeux méthodes suffisent : fit pour apprendre, predict pour prédire.\nLes trois premieres lignes de X : un fruit par ligne, trois mesures par colonne.\n\nprint(X[:3])\n\n[[301.   10.3  14.7]\n [313.   12.1  13.7]\n [277.   10.3  13.9]]\n\n\nÀ vous (12). Construisez une matrice X2 ne contenant que masse et longueur, puis affichez sa forme avec X2.shape.\n\n# À vous : X2 = df[[\"masse\", \"longueur\"]].values, puis affichez X2.shape\n\nÀ vous (13). Construisez le vecteur y2 = df[\"fruit\"].values et affichez ses 5 premières valeurs avec y2[:5].\n\n# À vous : y2 = df[\"fruit\"].values, puis affichez y2[:5]\n\nÀ vous (14). Vérifiez que X et y ont bien le même nombre de lignes : affichez X.shape[0] == y.shape[0]. Pourquoi est-ce indispensable ?\n\n# À vous : affichez X.shape[0] == y.shape[0]"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html#exercice-de-synthèse-une-analyse-de-bout-en-bout",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html#exercice-de-synthèse-une-analyse-de-bout-en-bout",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "7. Exercice de synthèse : une analyse de bout en bout",
+    "text": "7. Exercice de synthèse : une analyse de bout en bout\nUn maraîcher vous confie un nouveau relevé : 18 fruits, avec les mêmes mesures. À vous de mener l’analyse seul, en suivant les quatre gestes de l’EDA : charger → décrire → tracer → observer.\n\npanier = pd.DataFrame({\n    \"fruit\": [\"mangue\"]*6 + [\"banane\"]*6 + [\"orange\"]*6,\n    \"masse\": [295, 318, 288, 306, 299, 324,\n              128, 115, 121, 109, 133, 118,\n              212, 195, 208, 221, 187, 203],\n    \"longueur\": [11.2, 10.6, 10.9, 11.4, 10.2, 11.8,\n                 18.7, 19.4, 18.2, 20.1, 17.9, 19.0,\n                 8.4, 7.9, 8.7, 8.0, 8.9, 8.2],\n    \"sucre\": [13.9, 14.4, 13.5, 14.8, 13.2, 14.1,\n              12.4, 11.7, 12.9, 11.2, 12.1, 11.9,\n              9.3, 8.7, 9.6, 8.9, 9.1, 8.4],\n})\nprint(panier.shape)\n\n(18, 4)\n\n\nSynthèse 1 — Charger. Affichez les 5 premières lignes de panier, puis le nombre de fruits de chaque type.\n\n# À vous : panier.head() puis panier[\"fruit\"].value_counts()\n\nSynthèse 2 — Décrire. Affichez le résumé statistique des mesures, arrondi à 2 décimales.\n\n# À vous : panier.describe().round(2)\n\nSynthèse 3 — Décrire. Affichez le profil moyen de chaque fruit (les trois mesures d’un coup, arrondies à 1 décimale).\n\n# À vous : panier.groupby(\"fruit\")[[\"masse\", \"longueur\", \"sucre\"]].mean().round(1)\n\nSynthèse 4 — Tracer. Tracez l’histogramme des masses de panier. Retrouve-t-on les trois amas ?\n\n# À vous : histogramme des masses de panier, avec les trois legendes\n\nSynthèse 5 — Tracer. Tracez le diagramme en barres de la longueur moyenne par fruit.\n\n# À vous : barres de panier.groupby(\"fruit\")[\"longueur\"].mean()\n\nSynthèse 6 — Tracer. Tracez le nuage longueur contre masse, coloré par fruit, avec une légende.\n\n# À vous : scatter longueur (x) contre masse (y), colore par fruit\n\nSynthèse 7 — Observer. En trois phrases, dans la cellule markdown ci-dessous, décrivez ce que vous avez compris de ce panier : la forme des masses, le fruit le plus long, et si les groupes sont séparables.\n(Écrivez votre réponse ici — double-cliquez sur cette cellule pour l’éditer.)\n\n\n\n\n\nSynthèse 8 — Le pont ML. Construisez X_panier (les trois mesures) et y_panier (le fruit), puis affichez leurs formes.\n\n# À vous : X_panier = ..., y_panier = ..., puis affichez les deux shapes"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html#pièges-fréquents",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html#pièges-fréquents",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "8. Pièges fréquents",
+    "text": "8. Pièges fréquents\n\nUn graphique sans légende est illisible : toujours xlabel, ylabel, title (et legend() s’il y a des groupes).\nColorer par catégorie demande une boucle : une couche scatter par fruit, chacune avec sa couleur et son label.\n.values transforme des colonnes en tableau NumPy : le format attendu pour X et y.\nLa forme compte : X est (n_fruits, n_mesures), y est (n_fruits,)."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S8_visualisation.html#récapitulatif-et-bilan-du-cours",
+    "href": "cours/programmation-python/ressources/TP_S8_visualisation.html#récapitulatif-et-bilan-du-cours",
+    "title": "Programmation Python — Séance 8 : Visualiser et faire le pont",
+    "section": "Récapitulatif — et bilan du cours",
+    "text": "Récapitulatif — et bilan du cours\n\nVisualiser : plt.hist (répartition), plt.bar (comparer des groupes), plt.scatter (deux mesures, coloré par catégorie) ; toujours légender.\nMini-EDA : charger → décrire → tracer → observer.\nPont ML : la table devient X (les mesures) et y (à prédire) ; un modèle s’utilise avec fit puis predict.\n\nBilan du cours. Des valeurs et des types (S1) aux structures (S2), au contrôle du flux (S3), aux fonctions (S4), aux objets (S5), puis à NumPy (S6), pandas (S7) et à la visualisation (S8) : vous savez désormais charger, explorer et préparer des données — et vous êtes prêts pour le Machine Learning."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "",
+    "text": "Télécharger le notebook Ouvrir dans Colab\nLes sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.\nDMI · FST · UCAD\nOn entre dans la science des données avec un exemple de morphométrie : des mesures relevées sur des spécimens de pinsons (les célèbres pinsons de Darwin). NumPy fournit le tableau (array), sur lequel on calcule sans boucle (la vectorisation). C’est l’outil sur lequel repose pandas (Séance 7). Exécutez chaque cellule avec Maj + Entrée. Les cellules À vous sont à compléter."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html#le-tableau-numpy",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html#le-tableau-numpy",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "1. Le tableau NumPy",
+    "text": "1. Le tableau NumPy\nOn importe NumPy sous le nom conventionnel np, et on crée un tableau avec np.array(...) à partir d’une liste. Ici, la masse (en grammes) de 6 spécimens capturés sur le terrain.\n\nimport numpy as np\n\nmasse = np.array([15, 16, 21, 22, 28, 27])\nprint(masse)\n\n[15 16 21 22 28 27]\n\n\nÀ vous. Créez un tableau aile contenant les longueurs d’aile (en mm) [67, 68, 74, 75, 80, 79] des mêmes spécimens, puis affichez-le.\n\n# À vous : creez aile = np.array([67, 68, 74, 75, 80, 79]) puis affichez-le\n\nUn tableau contient des éléments de même type. Si l’on mélange entiers et décimaux, tout devient flottant (le point après chaque nombre le signale).\n\nbec = np.array([9.1, 8.0, 12.8])\nprint(bec)\n\n[ 9.1  8.  12.8]\n\n\nÀ vous. Créez un tableau bec_haut contenant les hauteurs de bec [8.0, 8.3, 10.5] et affichez-le.\n\n# À vous : creez bec_haut = np.array([8.0, 8.3, 10.5]) puis affichez-le"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html#la-vectorisation-calculer-sans-boucle",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html#la-vectorisation-calculer-sans-boucle",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "2. La vectorisation : calculer sans boucle",
+    "text": "2. La vectorisation : calculer sans boucle\nUne opération sur un tableau s’applique à chaque élément d’un coup, sans écrire de boucle. C’est plus court, plus lisible, et beaucoup plus rapide.\n\nprint(masse + 2)\nprint(masse * 2)\n\n[17 18 23 24 30 29]\n[30 32 42 44 56 54]\n\n\nComparons avec la Séance 3. Pour additionner toutes les masses, on écrivait une boucle ; avec NumPy, une seule expression suffit — et donne le même résultat.\n\n# Facon Seance 3 : une boucle\ntotal = 0\nfor m in masse:\n    total = total + m\nprint(total)\n\n# Facon NumPy : vectorise\nprint(masse.sum())\n\n129\n129\n\n\nÀ vous. À partir de masse, ajoutez 5 à chaque valeur sans boucle et affichez le résultat.\n\n# À vous : affichez masse + 5 (sans boucle)\n\n\nPiège. L’opérateur * agit élément par élément : masse * masse élève chaque masse au carré, ce n’est pas un produit matriciel.\n\n\nprint(masse * masse)\n\n[225 256 441 484 784 729]"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html#les-agrégations",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html#les-agrégations",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "3. Les agrégations",
+    "text": "3. Les agrégations\nUn tableau sait se résumer en un nombre : somme, moyenne, minimum, maximum. Ce sont des méthodes appelées avec un point.\n\nprint(masse.sum())\nprint(masse.mean())\nprint(masse.min())\nprint(masse.max())\n\n129\n21.5\n15\n28\n\n\nLa masse moyenne de l’échantillon est 21.5 g. L’écart-type (std) mesure la dispersion des masses ; il tombe rarement rond, on l’arrondit.\n\nprint(round(masse.std(), 2))\n\n4.92\n\n\nÀ vous. Affichez la moyenne et le maximum du tableau aile que vous avez créé plus haut.\n\n# À vous : affichez aile.mean() et aile.max()"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html#le-filtrage-booléen-sélectionner-des-spécimens",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html#le-filtrage-booléen-sélectionner-des-spécimens",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "4. Le filtrage booléen : sélectionner des spécimens",
+    "text": "4. Le filtrage booléen : sélectionner des spécimens\nUne comparaison sur un tableau renvoie un masque de True/False, un par élément. Placé entre crochets, ce masque sélectionne les éléments qui vérifient la condition — par exemple les spécimens les plus lourds.\n\nprint(masse &gt;= 20)\n\n[False False  True  True  True  True]\n\n\n\nprint(masse[masse &gt;= 20])\nprint((masse &gt;= 20).sum())\n\n[21 22 28 27]\n4\n\n\nLe masque masse &gt;= 20 marque les spécimens d’au moins 20 g ; masse[masque] ne garde que leurs masses ; .sum() sur un masque compte les True (ici 4 spécimens, sans doute les plus grandes espèces).\nÀ vous. Affichez les masses des spécimens strictement inférieurs à 20 g (les plus petits), puis comptez-les.\n\n# À vous : affichez masse[masse &lt; 20] puis (masse &lt; 20).sum()"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html#la-table-complète-un-tableau-à-deux-dimensions",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html#la-table-complète-un-tableau-à-deux-dimensions",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "5. La table complète : un tableau à deux dimensions",
+    "text": "5. La table complète : un tableau à deux dimensions\nEn réalité, on a mesuré 4 caractères par spécimen. On les range dans un tableau 2D : une ligne par spécimen, une colonne par mesure — longueur de bec, hauteur de bec, longueur d’aile, masse. shape donne le format (lignes, colonnes).\n\n# colonnes : bec_long, bec_haut, aile, masse\nX = np.array([[ 9.1,  8.0, 67, 15],\n              [ 9.4,  8.3, 68, 16],\n              [12.8, 10.5, 74, 21],\n              [13.2, 10.9, 75, 22],\n              [16.1, 14.2, 80, 28],\n              [15.7, 13.8, 79, 27]])\nprint(X)\nprint(X.shape)\n\n[[ 9.1  8.  67.  15. ]\n [ 9.4  8.3 68.  16. ]\n [12.8 10.5 74.  21. ]\n [13.2 10.9 75.  22. ]\n [16.1 14.2 80.  28. ]\n [15.7 13.8 79.  27. ]]\n(6, 4)\n\n\nOn accède à une valeur par [ligne, colonne], soit [specimen, mesure]. X[0] donne toutes les mesures du spécimen 0 ; X[:, 0] donne la colonne des longueurs de bec (le : signifie « tous les spécimens »).\n\nprint(X[0, 0])\nprint(X[0])\nprint(X[:, 0])\nprint(X[:, 3])\n\n9.1\n[ 9.1  8.  67.  15. ]\n[ 9.1  9.4 12.8 13.2 16.1 15.7]\n[15. 16. 21. 22. 28. 27.]\n\n\nÀ vous. Affichez la hauteur de bec du spécimen 2 (X[2, 1]), puis toute la colonne des ailes (X[:, 2]).\n\n# À vous : affichez X[2, 1] puis X[:, 2]"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html#largument-axis-dans-quel-sens-résumer",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html#largument-axis-dans-quel-sens-résumer",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "6. L’argument axis : dans quel sens résumer",
+    "text": "6. L’argument axis : dans quel sens résumer\nSur un tableau 2D, une agrégation se fait par colonne ou par ligne, selon axis. axis=0 descend les colonnes : une valeur par mesure (moyenne des becs, des ailes…). axis=1 parcourt les lignes : une valeur par spécimen.\n\nprint(X.mean(axis=0).round(2))\nprint(X.mean(axis=1).round(2))\n\n[12.72 10.95 73.83 21.5 ]\n[24.78 25.42 29.58 30.28 34.58 33.88]\n\n\naxis=0 donne la moyenne de chaque mesure sur tous les spécimens (bec 12.72 mm, aile 73.83 mm, masse 21.5 g…) — c’est ce qui a un sens ici. axis=1 mélange des unités différentes (mm et g) : le calcul est correct mais biologiquement peu parlant — d’où l’intérêt de normaliser, juste après.\n\nprint(X.sum(axis=0))\n\n[ 76.3  65.7 443.  129. ]\n\n\nÀ vous. Affichez le maximum de chaque mesure avec X.max(axis=0), puis le maximum de chaque spécimen avec X.max(axis=1).\n\n# À vous : affichez X.max(axis=0) puis X.max(axis=1)"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html#broadcasting-et-normalisation-z-score",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html#broadcasting-et-normalisation-z-score",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "7. Broadcasting et normalisation (z-score)",
+    "text": "7. Broadcasting et normalisation (z-score)\nLe broadcasting permet d’opérer entre un tableau 2D et un vecteur : le vecteur est appliqué à chaque ligne. Ici, on retire à chaque mesure sa propre moyenne (calculée par axis=0).\n\nprint((X - X.mean(axis=0)).round(2))\n\n[[-3.62 -2.95 -6.83 -6.5 ]\n [-3.32 -2.65 -5.83 -5.5 ]\n [ 0.08 -0.45  0.17 -0.5 ]\n [ 0.48 -0.05  1.17  0.5 ]\n [ 3.38  3.25  6.17  6.5 ]\n [ 2.98  2.85  5.17  5.5 ]]\n\n\nLes mesures sont dans des unités différentes : des mm pour le bec et l’aile, des g pour la masse. Pour les rendre comparables, on normalise chaque colonne — c’est le z-score : retirer la moyenne, puis diviser par l’écart-type.\n\nX_reduit = (X - X.mean(axis=0)) / X.std(axis=0)\nprint(X_reduit.round(2))\nprint(\"ecart-type par mesure :\", X_reduit.std(axis=0).round(2))\n\n[[-1.33 -1.23 -1.38 -1.32]\n [-1.22 -1.1  -1.18 -1.12]\n [ 0.03 -0.19  0.03 -0.1 ]\n [ 0.18 -0.02  0.24  0.1 ]\n [ 1.24  1.35  1.25  1.32]\n [ 1.09  1.19  1.04  1.12]]\necart-type par mesure : [1. 1. 1. 1.]\n\n\nAprès normalisation, chaque mesure a une moyenne de 0 et un écart-type de 1 : toutes sont ramenées à une échelle commune, quelle que soit leur unité. C’est un geste systématique en morphométrie comme en apprentissage automatique — un premier pas concret vers le cours de Machine Learning, où l’on normalisera les variables avant d’entraîner un modèle.\nÀ vous. Normalisez la seule colonne des masses : calculez (X[:, 3] - X[:, 3].mean()) / X[:, 3].std() et affichez le résultat arrondi avec .round(2).\n\n# À vous : affichez ((X[:, 3] - X[:, 3].mean()) / X[:, 3].std()).round(2)"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html#pièges-fréquents",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html#pièges-fréquents",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "8. Pièges fréquents",
+    "text": "8. Pièges fréquents\n\n* n’est pas le produit matriciel : il multiplie élément par élément.\nLe sens de axis : axis=0 agit sur les colonnes (par mesure), axis=1 sur les lignes (par spécimen).\nMélanger des unités : additionner ou moyenner des mesures d’unités différentes (mm et g) n’a pas de sens biologique ; on normalise d’abord.\nLes types homogènes : un tableau ne contient qu’un seul type ; mélanger entiers et flottants donne des flottants."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S6_numpy.html#récapitulatif",
+    "href": "cours/programmation-python/ressources/TP_S6_numpy.html#récapitulatif",
+    "title": "Programmation Python — Séance 6 : NumPy",
+    "section": "Récapitulatif",
+    "text": "Récapitulatif\n\nCréer : import numpy as np puis np.array([...]) ; éléments de même type.\nVectorisation : une opération s’applique à tout le tableau, sans boucle.\nAgrégations : .sum(), .mean(), .std(), .min(), .max().\nFiltrage : un masque booléen (tableau &gt;= v) puis tableau[masque].\n2D : shape donne (spécimens, mesures) ; accès [i, j], [:, j] (une mesure), [i, :] (un spécimen).\naxis : axis=0 par mesure (colonne), axis=1 par spécimen (ligne).\nNormalisation (z-score) (X - X.mean(axis=0)) / X.std(axis=0) : ramène chaque mesure à une moyenne de 0 et un écart-type de 1 — pont vers le ML.\n\nProchaine séance — S7 : pandas, pour manipuler la table des pinsons avec des colonnes nommées et une colonne espece."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html",
+    "href": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html",
+    "title": "Programmation Python — Séance 4 : Fonctions, modules et robustesse",
+    "section": "",
+    "text": "Télécharger le notebook Ouvrir dans Colab\nLes sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.\nDMI · FST · UCAD\nOn sait décider et répéter. Cette séance apprend à organiser le code en fonctions réutilisables, à réutiliser des modules tout prêts, à lire et écrire des fichiers, et à gérer les erreurs proprement avec try / except. Exécutez chaque cellule avec Maj + Entrée. Les cellules À vous sont à compléter."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#les-fonctions",
+    "href": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#les-fonctions",
+    "title": "Programmation Python — Séance 4 : Fonctions, modules et robustesse",
+    "section": "1. Les fonctions",
+    "text": "1. Les fonctions\nUne fonction est un bloc de code nommé et réutilisable. On la définit une fois avec def, puis on l’appelle autant de fois qu’on veut. return renvoie une valeur que l’on peut réutiliser. Comme pour if et for, le corps est un bloc indenté après les deux points.\n\ndef moyenne(a, b):\n    return (a + b) / 2\n\nprint(moyenne(12, 16))\nprint(moyenne(9, 18))\n\n14.0\n13.5\n\n\nÀ vous. Écrivez une fonction double(n) qui renvoie n * 2, puis affichez double(7).\n\n# À vous : definissez double(n) qui renvoie n * 2, puis affichez double(7)\n\nUne fonction peut prendre plusieurs paramètres. À l’appel, on fournit les arguments dans le même ordre.\n\ndef message(prenom, ville):\n    return f\"{prenom} habite a {ville}.\"\n\nprint(message(\"Fatou\", \"Dakar\"))\n\nFatou habite a Dakar.\n\n\nÀ vous. Écrivez une fonction presentation(nom, age) qui renvoie une phrase du type « Awa a 25 ans. », puis affichez le résultat pour un nom et un âge.\n\n# À vous : definissez presentation(nom, age) qui renvoie une phrase, puis affichez-la\n\nUn paramètre peut avoir une valeur par défaut : si l’argument n’est pas fourni à l’appel, la valeur par défaut est utilisée.\n\ndef saluer(nom, politesse=\"Bonjour\"):\n    return f\"{politesse} {nom}\"\n\nprint(saluer(\"Awa\"))\nprint(saluer(\"Awa\", \"Bonsoir\"))\n\nBonjour Awa\nBonsoir Awa\n\n\nÀ vous. Écrivez une fonction prix_ttc(prix, taux=0.18) qui renvoie prix * (1 + taux), puis appelez-la une fois avec le taux par défaut et une fois avec taux=0.10.\n\n# À vous : definissez prix_ttc(prix, taux=0.18), puis appelez-la avec et sans le taux\n\nOn documente une fonction avec une docstring : une courte phrase entre guillemets, juste sous le def. On la retrouve via .__doc__.\n\ndef carre(x):\n    \"Renvoie le carre de x.\"\n    return x * x\n\nprint(carre(5))\nprint(carre.__doc__)\n\n25\nRenvoie le carre de x.\n\n\nUne variable créée dans une fonction est locale : elle n’existe que le temps de l’exécution de la fonction, et n’est pas accessible à l’extérieur (c’est la portée).\n\ndef calcul():\n    resultat = 5 * 3\n    print(\"dans la fonction :\", resultat)\n\ncalcul()\n\ndans la fonction : 15\n\n\n\nPortée. La variable resultat ci-dessus n’existe pas en dehors de calcul : y accéder après l’appel provoquerait une NameError. Pour récupérer une valeur calculée dans une fonction, il faut la renvoyer avec return.\n\nAttention à la différence entre return et print : return renvoie une valeur réutilisable dans un calcul ; une fonction qui se contente d’afficher renvoie None.\n\ndef somme(a, b):\n    return a + b\n\ndef affiche_somme(a, b):\n    print(a + b)\n\nx = somme(10, 5) + 100\nprint(\"x =\", x)\ny = affiche_somme(10, 5)\nprint(\"y =\", y)\n\nx = 115\n15\ny = None\n\n\nÀ vous. Écrivez une fonction triple(n) qui renvoie n * 3 (avec return, pas print), puis utilisez-la dans un calcul : affichez triple(4) + 1.\n\n# À vous : definissez triple(n) avec return, puis affichez triple(4) + 1"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#les-modules",
+    "href": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#les-modules",
+    "title": "Programmation Python — Séance 4 : Fonctions, modules et robustesse",
+    "section": "2. Les modules",
+    "text": "2. Les modules\nUn module est une bibliothèque de code déjà écrit, qu’on importe pour la réutiliser. Python en fournit beaucoup en standard. import math donne accès aux outils mathématiques via math..\n\nimport math\n\nprint(math.sqrt(16))\nprint(math.pi)\n\n4.0\n3.141592653589793\n\n\nÀ vous. Importez math et affichez la racine carrée de 81 avec math.sqrt.\n\n# À vous : importez math et affichez math.sqrt(81)\n\nOn peut aussi importer seulement ce dont on a besoin, avec from module import nom. On l’utilise alors directement, sans le préfixe.\n\nfrom math import sqrt\n\nprint(sqrt(25))\n\n5.0\n\n\nÀ vous. Importez uniquement la fonction sqrt depuis math, puis affichez sqrt(49).\n\n# À vous : from math import sqrt, puis affichez sqrt(49)"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#lire-et-écrire-des-fichiers",
+    "href": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#lire-et-écrire-des-fichiers",
+    "title": "Programmation Python — Séance 4 : Fonctions, modules et robustesse",
+    "section": "3. Lire et écrire des fichiers",
+    "text": "3. Lire et écrire des fichiers\nUn programme peut sauvegarder des données dans un fichier pour les retrouver plus tard. On ouvre un fichier avec open(), dans un bloc with qui le referme automatiquement à la fin. Le mode \"w\" écrit (et écrase), \"r\" lit (mode par défaut).\n\nwith open(\"villes.txt\", \"w\") as f:\n    f.write(\"Dakar\\n\")\n    f.write(\"Louga\\n\")\n    f.write(\"Mbour\\n\")\n\nprint(\"fichier ecrit\")\n\nfichier ecrit\n\n\n\\n marque une fin de ligne. On relit tout le contenu d’un coup avec .read().\n\nwith open(\"villes.txt\") as f:\n    contenu = f.read()\n\nprint(contenu)\n\nDakar\nLouga\nMbour\n\n\nÀ vous. Écrivez dans un fichier notes.txt trois notes (par exemple 12, 15, 18), une par ligne.\n\n# À vous : ouvrez notes.txt en mode \"w\" et ecrivez trois notes, une par ligne (avec \\n)\n\nLe plus souvent, on parcourt un fichier ligne par ligne avec une boucle for. Chaque ligne se termine par \\n, qu’on enlève avec .strip().\n\nwith open(\"villes.txt\") as f:\n    for ligne in f:\n        print(ligne.strip())\n\nDakar\nLouga\nMbour\n\n\nÀ vous. Ouvrez villes.txt et affichez chaque ligne débarrassée de ses espaces de fin, avec une boucle for et .strip().\n\n# À vous : parcourez villes.txt ligne par ligne et affichez chaque ligne avec .strip()"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#gérer-les-erreurs-try-except",
+    "href": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#gérer-les-erreurs-try-except",
+    "title": "Programmation Python — Séance 4 : Fonctions, modules et robustesse",
+    "section": "4. Gérer les erreurs : try / except",
+    "text": "4. Gérer les erreurs : try / except\nCertaines opérations peuvent échouer à l’exécution (convertir un texte non numérique, diviser par zéro, ouvrir un fichier absent). Plutôt que de laisser le programme planter, on essaie le code dans un bloc try, et on rattrape l’erreur dans un bloc except.\n\ntry:\n    nombre = int(\"abc\")\n    print(nombre)\nexcept ValueError:\n    print(\"Ce n'est pas un nombre valide.\")\n\nCe n'est pas un nombre valide.\n\n\nÀ vous. Mettez int(\"12x\") dans un try, et affichez un message dans un except ValueError.\n\n# À vous : try: int(\"12x\") ... except ValueError: affichez un message\n\nOn précise quelle erreur on rattrape (ici ZeroDivisionError). Cela évite de masquer des erreurs qu’on n’avait pas prévues.\n\ntry:\n    resultat = 10 / 0\nexcept ZeroDivisionError:\n    print(\"Division par zero impossible.\")\n\nDivision par zero impossible.\n\n\nUne fonction peut intégrer un try / except pour rester robuste : elle renvoie une valeur de repli au lieu de planter.\n\ndef division_sure(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return \"impossible\"\n\nprint(division_sure(10, 2))\nprint(division_sure(10, 0))\n\n5.0\nimpossible\n\n\nÀ vous. Écrivez un try / except ZeroDivisionError qui tente d’afficher 20 / 0 et, en cas d’échec, affiche « division impossible ».\n\n# À vous : try: print(20 / 0) ... except ZeroDivisionError: affichez un message"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#récapitulatif",
+    "href": "cours/programmation-python/ressources/TP_S4_fonctions_modules_robustesse.html#récapitulatif",
+    "title": "Programmation Python — Séance 4 : Fonctions, modules et robustesse",
+    "section": "Récapitulatif",
+    "text": "Récapitulatif\n\nFonction : def nom(parametres): + return ; s’appelle avec des arguments ; peut avoir des valeurs par défaut et une docstring.\nPortée : une variable définie dans une fonction est locale ; pour en sortir une valeur, on la return.\nreturn vs print : return renvoie une valeur réutilisable ; print affiche seulement (et la fonction renvoie None).\nModules : import math (puis math.sqrt), ou from math import sqrt.\nFichiers : with open(\"f.txt\", \"w\") as f: pour écrire, \"r\" pour lire ; .read() ou une boucle for ligne par ligne ; with referme automatiquement.\nExceptions : try: le code risqué, except TypeErreur: le rattrapage ; préciser l’erreur attendue.\n\nProchaine séance — S5 : la programmation orientée objet (classes, objets, __init__, méthodes, héritage, polymorphisme)."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html",
+    "href": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html",
+    "title": "Programmation Python — Séance 2 : Structures de données",
+    "section": "",
+    "text": "Télécharger le notebook Ouvrir dans Colab\nLes sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.\nDMI · FST · UCAD\nOn sait manipuler des valeurs isolées. Cette séance regroupe plusieurs valeurs dans une même structure : listes, tuples, dictionnaires, ensembles, puis les compréhensions. Exécutez chaque cellule avec Maj + Entrée. Les cellules À vous sont à compléter."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-listes",
+    "href": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-listes",
+    "title": "Programmation Python — Séance 2 : Structures de données",
+    "section": "1. Les listes",
+    "text": "1. Les listes\nUne liste est une collection ordonnée et modifiable de valeurs, écrite entre crochets [ ]. On y accède par position, exactement comme pour les chaînes : l’indice commence à 0, et -1 désigne le dernier.\n\nvilles = [\"Dakar\", \"Louga\", \"Mbour\", \"Kaolack\"]\nprint(villes)\nprint(\"nombre :\", len(villes))\nprint(\"premiere :\", villes[0])\nprint(\"derniere :\", villes[-1])\nprint(\"tranche  :\", villes[1:3])\n\n['Dakar', 'Louga', 'Mbour', 'Kaolack']\nnombre : 4\npremiere : Dakar\nderniere : Kaolack\ntranche  : ['Louga', 'Mbour']\n\n\nÀ vous. Créez une liste prenoms contenant trois prénoms, puis affichez le premier et le dernier.\n\n# À vous : créez prenoms (trois prénoms), puis affichez le premier [0] et le dernier [-1]\n\nContrairement à une chaîne, une liste est modifiable : on peut remplacer un élément, en ajouter à la fin avec .append(), ou en insérer à une position avec .insert().\n\nvilles[0] = \"Thies\"\nvilles.append(\"Touba\")\nvilles.insert(1, \"Saint-Louis\")\nprint(villes)\n\n['Thies', 'Saint-Louis', 'Louga', 'Mbour', 'Kaolack', 'Touba']\n\n\nÀ vous. Ajoutez la ville \"Ziguinchor\" à la fin de villes avec .append(), puis affichez la liste.\n\n# À vous : ajoutez \"Ziguinchor\" à la fin de villes avec .append(), puis affichez villes\n\nOn retire un élément par sa valeur avec .remove(), ou par sa position avec .pop() (qui renvoie l’élément retiré).\n\nvilles.remove(\"Touba\")\ndernier = villes.pop()\nprint(\"retire :\", dernier)\nprint(villes)\n\nretire : Kaolack\n['Thies', 'Saint-Louis', 'Louga', 'Mbour']\n\n\nQuelques outils fréquents : .sort() trie la liste, len() compte les éléments, et in teste la présence d’une valeur.\n\nnombres = [5, 2, 8, 1]\nnombres.sort()\nprint(nombres)\nprint(\"taille :\", len(nombres))\nprint(8 in nombres)\n\n[1, 2, 5, 8]\ntaille : 4\nTrue\n\n\nAttention : .sort() modifie la liste en place et ne renvoie rien (None). Il ne faut donc pas écrire nombres = nombres.sort().\n\nvaleurs = [3, 1, 2]\nresultat = valeurs.sort()\nprint(\"renvoye par sort() :\", resultat)\nprint(\"liste triee        :\", valeurs)\n\nrenvoye par sort() : None\nliste triee        : [1, 2, 3]\n\n\nÀ vous. Créez une liste notes de quatre nombres, triez-la avec .sort(), puis affichez-la.\n\n# À vous : créez notes (quatre nombres), triez avec .sort(), puis affichez notes"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-tuples",
+    "href": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-tuples",
+    "title": "Programmation Python — Séance 2 : Structures de données",
+    "section": "2. Les tuples",
+    "text": "2. Les tuples\nUn tuple est une collection ordonnée mais figée : une fois créé, on ne peut plus le modifier. On l’écrit entre parenthèses ( ). Il sert à représenter un groupe de valeurs qui vont ensemble (des coordonnées, par exemple).\n\ncoord = (14.69, -17.44)\nprint(coord)\nprint(\"latitude  :\", coord[0])\nprint(\"longitude :\", coord[1])\n\n(14.69, -17.44)\nlatitude  : 14.69\nlongitude : -17.44\n\n\nOn peut déballer un tuple dans plusieurs variables en une seule ligne (c’est le unpacking).\n\nlatitude, longitude = coord\nprint(\"lat =\", latitude)\nprint(\"lon =\", longitude)\n\nlat = 14.69\nlon = -17.44\n\n\nÀ vous. Créez un tuple personne contenant un prénom et un âge, puis déballez-le dans deux variables prenom et age que vous afficherez.\n\n# À vous : créez le tuple personne = (prenom, age), déballez-le dans prenom, age puis affichez-les"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-dictionnaires",
+    "href": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-dictionnaires",
+    "title": "Programmation Python — Séance 2 : Structures de données",
+    "section": "3. Les dictionnaires",
+    "text": "3. Les dictionnaires\nUn dictionnaire associe des clés à des valeurs, entre accolades { }. On n’accède plus par position mais par clé. C’est la structure idéale pour décrire un objet par ses attributs.\n\npatient = {\"nom\": \"Fatou\", \"age\": 30, \"ville\": \"Dakar\"}\nprint(patient)\nprint(\"nom   :\", patient[\"nom\"])\nprint(\"ville :\", patient[\"ville\"])\n\n{'nom': 'Fatou', 'age': 30, 'ville': 'Dakar'}\nnom   : Fatou\nville : Dakar\n\n\nÀ vous. Créez un dictionnaire etudiant avec les clés \"nom\" et \"age\", puis affichez la valeur associée à \"nom\".\n\n# À vous : créez etudiant = {\"nom\": ..., \"age\": ...}, puis affichez etudiant[\"nom\"]\n\nOn ajoute ou modifie une valeur en affectant une clé. Si la clé existe, elle est mise à jour ; sinon elle est créée.\n\npatient[\"tel\"] = \"77 123 45 67\"\npatient[\"age\"] = 31\nprint(patient)\n\n{'nom': 'Fatou', 'age': 31, 'ville': 'Dakar', 'tel': '77 123 45 67'}\n\n\nAccéder à une clé absente provoque une erreur. La méthode .get(cle, defaut) renvoie une valeur par défaut au lieu de planter, et in teste la présence d’une clé.\n\nprint(patient.get(\"email\", \"non renseigne\"))\nprint(\"nom\" in patient)\nprint(\"email\" in patient)\n\nnon renseigne\nTrue\nFalse\n\n\nÀ vous. Avec .get(), affichez la valeur de la clé \"pays\" (absente) en renvoyant \"inconnu\" par défaut.\n\n# À vous : affichez patient.get(\"pays\", \"inconnu\")\n\nEnfin, .keys(), .values() et .items() donnent respectivement les clés, les valeurs, et les couples clé-valeur.\n\nprint(patient.keys())\nprint(patient.values())\nprint(patient.items())\n\ndict_keys(['nom', 'age', 'ville', 'tel'])\ndict_values(['Fatou', 31, 'Dakar', '77 123 45 67'])\ndict_items([('nom', 'Fatou'), ('age', 31), ('ville', 'Dakar'), ('tel', '77 123 45 67')])"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-ensembles",
+    "href": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-ensembles",
+    "title": "Programmation Python — Séance 2 : Structures de données",
+    "section": "4. Les ensembles",
+    "text": "4. Les ensembles\nUn ensemble (set) est une collection non ordonnée et sans doublons, écrite entre accolades { }. Il sert à éliminer les répétitions et à tester très vite l’appartenance. Comme l’ordre n’est pas garanti, on affiche son contenu trié avec sorted().\n\nliste = [\"Dakar\", \"Louga\", \"Dakar\", \"Mbour\", \"Louga\"]\nuniques = set(liste)\nprint(\"nombre d'uniques :\", len(uniques))\nprint(\"contenu trie     :\", sorted(uniques))\nprint(\"Dakar present ?  :\", \"Dakar\" in uniques)\n\nnombre d'uniques : 3\ncontenu trie     : ['Dakar', 'Louga', 'Mbour']\nDakar present ?  : True\n\n\nOn combine deux ensembles avec | (union : tout) et & (intersection : les communs).\n\na = {\"Dakar\", \"Thies\", \"Louga\"}\nb = {\"Louga\", \"Mbour\", \"Dakar\"}\nprint(\"union        :\", sorted(a | b))\nprint(\"intersection :\", sorted(a & b))\n\nunion        : ['Dakar', 'Louga', 'Mbour', 'Thies']\nintersection : ['Dakar', 'Louga']\n\n\nÀ vous. À partir de la liste notes = [12, 15, 12, 18, 15], construisez un ensemble pour retirer les doublons, puis affichez son contenu trié avec sorted().\n\n# À vous : construisez set(notes) pour retirer les doublons, puis affichez sorted(...)"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-compréhensions",
+    "href": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#les-compréhensions",
+    "title": "Programmation Python — Séance 2 : Structures de données",
+    "section": "5. Les compréhensions",
+    "text": "5. Les compréhensions\nUne compréhension de liste construit une liste de façon concise, en une ligne, à partir d’une autre collection. La forme est : [ expression for element in collection ]. (La boucle for complète est détaillée en Séance 3 ; ici, on l’utilise seulement dans cette écriture compacte.)\n\nnombres = [1, 2, 3, 4]\ndoubles = [n * 2 for n in nombres]\nprint(doubles)\n\n[2, 4, 6, 8]\n\n\nÀ vous. Construisez la liste des carrés des nombres [1, 2, 3, 4, 5] avec une compréhension.\n\n# À vous : carres = [ ... for n in [1, 2, 3, 4, 5] ], puis affichez carres\n\nOn peut filtrer en ajoutant une condition if à la fin : seuls les éléments qui la vérifient sont gardés.\n\nvilles = [\"Dakar\", \"Saint-Louis\", \"Mbour\", \"Ziguinchor\", \"Louga\"]\nlongues = [v for v in villes if len(v) &gt; 5]\nprint(longues)\n\n['Saint-Louis', 'Ziguinchor']\n\n\nÀ vous. À partir de valeurs = [4, 9, 2, 7, 1, 8], gardez avec une compréhension uniquement les nombres supérieurs à 5.\n\n# À vous : grands = [ v for v in [4, 9, 2, 7, 1, 8] if ... ], puis affichez grands"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#récapitulatif",
+    "href": "cours/programmation-python/ressources/TP_S2_structures_de_donnees.html#récapitulatif",
+    "title": "Programmation Python — Séance 2 : Structures de données",
+    "section": "Récapitulatif",
+    "text": "Récapitulatif\n\n\n\nStructure\nSyntaxe\nAccès\nModifiable\nDoublons\n\n\n\n\nListe\n[ ]\npar indice\noui\nautorisés\n\n\nTuple\n( )\npar indice\nnon (figé)\nautorisés\n\n\nDictionnaire\n{cle: valeur}\npar clé\noui\nclés uniques\n\n\nEnsemble\n{ } / set()\nsans indice\noui\ninterdits\n\n\n\n\nListe : collection ordonnée et modifiable ; .append, .insert, .remove, .pop, .sort (en place, renvoie None).\nTuple : comme une liste mais figé ; pratique pour un groupe de valeurs et le unpacking.\nDictionnaire : clé → valeur ; accès d[cle], .get, in, .keys/.values/.items.\nEnsemble : valeurs uniques, non ordonnées ; | union, & intersection.\nCompréhension : [expression for element in collection if condition].\n\nProchaine séance — S3 : le contrôle du flux (if/elif/else, boucles for/while)."
+  },
+  {
     "objectID": "recherche/index.html",
     "href": "recherche/index.html",
     "title": "Recherche",
@@ -2096,7 +2327,7 @@
     "href": "cours/programmation-c-avancee/index.html#chapitres",
     "title": "Programmation C avancée",
     "section": "Chapitres",
-    "text": "Chapitres\n\n\n\nSéance\nContenu\nFormat\n\n\n\n\nIntroduction\nChapitre d’introduction du cours de Programmation C avancée : pourquoi le C, son histoire, la structure du cours, les prérequis et l’environnement de travail.\nPDF du cours (151 Ko) · Lab (211 Ko)",
+    "text": "Chapitres\n\n\n\nSéance\nContenu\nFormat\n\n\n\n\nIntroduction\nChapitre d’introduction du cours de Programmation C avancée : pourquoi le C, son histoire, la structure du cours, les prérequis et l’environnement de travail.\nPDF du cours (151 Ko) · TP (211 Ko)",
     "crumbs": [
       "Présentation"
     ]
@@ -3236,5 +3467,250 @@
     "title": "Publications",
     "section": "Posters et communications",
     "text": "Posters et communications\n\nIA4Nieup: Teacher-Centric, AI-Powered Adaptive Learning for Computing and STEM Education in Africa\nE. H. B. Touré, A. Yadav, I. Sarr\nPoster · AAP Annual Meeting 2026, University of Dar es Salaam, Tanzania, septembre 2026.\n\n\nA generic solution for managing scalability in modern software development\nE. H. B. Touré\nCommunication orale · 3e Journées scientifiques du Laboratoire d’Informatique et d’Ingénierie pour l’Innovation (LI3), Université Assane Seck de Ziguinchor, 23 février 2023.\n\n\nApproche orientée langage pour la maintenance de mégamodèles\nE. H. B. Touré, I. Fall, A. Bah, M. S. Camara, M. Ba, A. Fall\nCommunication orale · CNRIA 2019, Université Gaston Berger, Saint-Louis, avril 2019."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html",
+    "href": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html",
+    "title": "Programmation Python — Séance 1 : Valeurs, types et chaînes",
+    "section": "",
+    "text": "Télécharger le notebook Ouvrir dans Colab\nLes sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.\nDMI · FST · UCAD\nCe notebook est le terrain d’entraînement de la séance. Exécutez chaque cellule avec Maj + Entrée, dans l’ordre, et lisez la sortie qui s’affiche en dessous. Les cellules marquées À vous sont à compléter : remplacez le commentaire par votre code, puis exécutez."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#variables-et-types",
+    "href": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#variables-et-types",
+    "title": "Programmation Python — Séance 1 : Valeurs, types et chaînes",
+    "section": "1. Variables et types",
+    "text": "1. Variables et types\nUne variable est un nom auquel on attache une valeur, avec le signe =. Ce signe n’est pas l’égalité des mathématiques : c’est une affectation (« range cette valeur sous ce nom »). Chaque valeur a un type : texte (str), entier (int), décimal (float) ou booléen (bool).\n\nnom = \"Fatou\"\nage = 23\nmoyenne = 14.5\nville = \"Dakar\"\nest_etudiant = True\n\nprint(nom)\nprint(age)\nprint(moyenne)\nprint(ville)\nprint(est_etudiant)\n\nFatou\n23\n14.5\nDakar\nTrue\n\n\nLa fonction type() révèle le type d’une valeur. Python le devine tout seul à partir de la façon dont la valeur est écrite (guillemets, point décimal, True/False).\n\nprint(type(nom))\nprint(type(age))\nprint(type(moyenne))\nprint(type(est_etudiant))\n\n&lt;class 'str'&gt;\n&lt;class 'int'&gt;\n&lt;class 'float'&gt;\n&lt;class 'bool'&gt;\n\n\nÀ vous. Créez une variable pays (un texte) et une variable population (un entier), puis affichez le type de chacune.\n\n# À vous : créez pays (un texte) et population (un entier), puis affichez le type de chaque variable"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#opérations",
+    "href": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#opérations",
+    "title": "Programmation Python — Séance 1 : Valeurs, types et chaînes",
+    "section": "2. Opérations",
+    "text": "2. Opérations\nOn calcule avec les opérateurs habituels. Deux subtilités utiles : / donne toujours un résultat décimal, // est la division entière (on garde la partie entière), et % donne le reste.\n\na = 7\nb = 2\nprint(\"somme        :\", a + b)\nprint(\"difference   :\", a - b)\nprint(\"produit      :\", a * b)\nprint(\"division     :\", a / b)\nprint(\"div. entiere :\", a // b)\nprint(\"reste        :\", a % b)\nprint(\"puissance    :\", a ** b)\n\nsomme        : 9\ndifference   : 5\nproduit      : 14\ndivision     : 3.5\ndiv. entiere : 3\nreste        : 1\npuissance    : 49\n\n\nÀ vous. À partir de heures = 100, affichez combien de jours entiers cela représente (avec //) et combien d’heures restent (avec %).\n\n# À vous : à partir de heures = 100, affichez le nombre de jours entiers (//) et les heures restantes (%)\n\nLes comparaisons (==, !=, &lt;, &gt;, &lt;=, &gt;=) produisent un booléen : True ou False. Attention : = affecte, == compare.\n\nx = 14\nprint(x &gt;= 10)\nprint(x == 10)\nprint(x != 10)\n\nTrue\nFalse\nTrue\n\n\nOn combine des conditions avec and (et), or (ou), not (non).\n\nnote = 12\nassiduite = True\nadmis = note &gt;= 10 and assiduite\nprint(\"Admis ?\", admis)\nprint(\"Pas admis ?\", not admis)\n\nAdmis ? True\nPas admis ? False\n\n\nÀ vous. Avec temperature = 32, affichez le résultat du test : la température est-elle à la fois supérieure à 30 et inférieure à 40 ?\n\n# À vous : avec temperature = 32, affichez le résultat de  temperature &gt; 30 and temperature &lt; 40"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#afficher-proprement-avec-les-f-strings",
+    "href": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#afficher-proprement-avec-les-f-strings",
+    "title": "Programmation Python — Séance 1 : Valeurs, types et chaînes",
+    "section": "3. Afficher proprement avec les f-strings",
+    "text": "3. Afficher proprement avec les f-strings\nUne f-string (préfixe f devant les guillemets) insère des variables dans du texte, entre accolades { }. C’est la façon propre d’afficher un message qui mélange texte et valeurs.\n\nprenom = \"Awa\"\nville = \"Thiès\"\nprint(f\"Je m'appelle {prenom} et j'habite à {ville}.\")\n\nJe m'appelle Awa et j'habite à Thiès.\n\n\nOn peut aussi mettre en forme une valeur dans l’accolade. Par exemple :.2f affiche un décimal avec deux chiffres après la virgule.\n\nmoyenne = 14.567\nprint(f\"Moyenne : {moyenne:.2f}\")\n\nMoyenne : 14.57\n\n\nRappel de la Séance 0 : l’opérateur + ne « colle » que du texte. Coller un nombre à du texte avec + provoque une TypeError. La f-string règle le problème en insérant la valeur entre accolades, comme dans f\"Age : {age}\".\nÀ vous. Créez cfa = 1500, puis affichez avec une f-string le message : « Le repas coûte 1500 FCFA. » en insérant la variable (sans réécrire le nombre à la main).\n\n# À vous : avec cfa = 1500, affichez avec une f-string  \"Le repas coûte 1500 FCFA.\"  en insérant la variable"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#les-chaînes-de-caractères",
+    "href": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#les-chaînes-de-caractères",
+    "title": "Programmation Python — Séance 1 : Valeurs, types et chaînes",
+    "section": "4. Les chaînes de caractères",
+    "text": "4. Les chaînes de caractères\nUne chaîne (str) est une séquence de caractères. len() donne sa longueur. On accède à un caractère par sa position entre crochets : la position commence à 0, et -1 désigne le dernier.\n\nville = \"Saint-Louis\"\nprint(\"longueur :\", len(ville))\nprint(\"premier  :\", ville[0])\nprint(\"dernier  :\", ville[-1])\n\nlongueur : 11\npremier  : S\ndernier  : s\n\n\nÀ vous. Avec mot = \"Sénégal\", affichez sa longueur, son premier caractère, puis son dernier caractère.\n\n# À vous : avec mot = \"Sénégal\", affichez sa longueur, son premier caractère et son dernier\n\nOn extrait un morceau par découpage (slicing) : [debut:fin] prend les caractères de debut jusqu’à fin exclu. On peut omettre l’un des deux bornes.\n\nville = \"Saint-Louis\"\nprint(ville[0:5])\nprint(ville[6:])\nprint(ville[:5])\n\nSaint\nLouis\nSaint\n\n\nÀ vous. Avec code = \"DK-2024\", extrayez d’abord \"DK\", puis \"2024\", par découpage.\n\n# À vous : avec code = \"DK-2024\", extrayez \"DK\" puis \"2024\" par découpage\n\nLes chaînes offrent des méthodes (des outils attachés à la valeur, appelés avec un point). Les plus utiles : .strip() enlève les espaces aux bords, .upper() / .lower() changent la casse, .replace(a, b) remplace.\n\nphrase = \"  Bonjour Dakar  \"\nprint(phrase.strip())\nprint(phrase.strip().upper())\nprint(phrase.strip().lower())\nprint(phrase.strip().replace(\"Dakar\", \"Thiès\"))\n\nBonjour Dakar\nBONJOUR DAKAR\nbonjour dakar\nBonjour Thiès\n\n\nImportant : une méthode de chaîne renvoie une nouvelle chaîne ; l’originale ne change pas (on dit qu’une chaîne est immuable).\n\nmot = \"dakar\"\nprint(mot.upper())\nprint(mot)\n\nDAKAR\ndakar\n\n\nEnfin, .split(sep) découpe une chaîne en une liste de morceaux, selon un séparateur. C’est très utilisé pour lire des données.\n\nvilles = \"Dakar,Thiès,Kaolack\".split(\",\")\nprint(villes)\nprint(\"nombre de villes :\", len(villes))\n\n['Dakar', 'Thiès', 'Kaolack']\nnombre de villes : 3\n\n\nÀ vous. Avec noms = \"Fatou;Amadou;Cheikh\", séparez les prénoms (séparateur ;) avec .split, puis affichez la liste obtenue.\n\n# À vous : avec noms = \"Fatou;Amadou;Cheikh\", séparez les prénoms avec .split puis affichez la liste"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#récapitulatif",
+    "href": "cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html#récapitulatif",
+    "title": "Programmation Python — Séance 1 : Valeurs, types et chaînes",
+    "section": "Récapitulatif",
+    "text": "Récapitulatif\n\nUne variable (=) attache une valeur à un nom ; chaque valeur a un type (str, int, float, bool), révélé par type().\nLes opérations : arithmétique (+ - * / // % **), comparaisons et booléens (and/or/not) produisent True/False.\nLes f-strings (f\"... {variable} ...\") affichent proprement texte et valeurs ; :.2f met en forme.\nUne chaîne est une séquence : len, indexation [i], découpage [a:b], méthodes .strip/.upper/.lower/.replace/.split ; elle est immuable.\n\nProchaine séance — S2 : les structures de données (listes, tuples, dictionnaires, ensembles)."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html",
+    "href": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html",
+    "title": "Programmation Python — Séance 3 : Contrôle du flux",
+    "section": "",
+    "text": "Télécharger le notebook Ouvrir dans Colab\nLes sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.\nDMI · FST · UCAD\nOn sait stocker des données. Cette séance apprend à décider (if/elif/else) et à répéter (for, while), puis à parcourir intelligemment avec enumerate et zip, et à contrôler une boucle avec break/continue. Exécutez chaque cellule avec Maj + Entrée. Les cellules À vous sont à compléter."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#les-conditions-if-else",
+    "href": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#les-conditions-if-else",
+    "title": "Programmation Python — Séance 3 : Contrôle du flux",
+    "section": "1. Les conditions : if / else",
+    "text": "1. Les conditions : if / else\nUne condition exécute un bloc de code seulement si un test est vrai. Le test est un booléen (rappel de la Séance 1). La syntaxe repose sur deux points : et sur l’indentation (le décalage) : le bloc décalé appartient au if.\n\nnote = 12\nif note &gt;= 10:\n    print(\"Admis\")\nelse:\n    print(\"Recale\")\n\nAdmis\n\n\nÀ vous. Avec temperature = 34, affichez \"Chaud\" si la température dépasse 30, sinon \"Doux\".\n\n# À vous : si temperature &gt; 30 afficher \"Chaud\", sinon \"Doux\"\n\nPour distinguer plusieurs cas, on enchaîne avec elif (sinon si). Python teste les conditions dans l’ordre et s’arrête à la première vraie.\n\nnote = 14\nif note &gt;= 16:\n    mention = \"Tres bien\"\nelif note &gt;= 14:\n    mention = \"Bien\"\nelif note &gt;= 10:\n    mention = \"Passable\"\nelse:\n    mention = \"Insuffisant\"\nprint(mention)\n\nBien\n\n\nÀ vous. Avec age = 25, affichez \"Enfant\" si l’âge est inférieur à 18, \"Adulte\" s’il est inférieur à 65, sinon \"Senior\".\n\n# À vous : if age &lt; 18 \"Enfant\", elif age &lt; 65 \"Adulte\", else \"Senior\"\n\nOn peut combiner des conditions avec and, or, not (Séance 1). Le bloc n’est indenté qu’une fois — l’oubli des deux points : ou de l’indentation est l’erreur la plus fréquente ici.\n\nnote = 15\nassiduite = True\nif note &gt;= 10 and assiduite:\n    print(\"Valide\")\nelse:\n    print(\"A revoir\")\n\nValide"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#la-boucle-for",
+    "href": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#la-boucle-for",
+    "title": "Programmation Python — Séance 3 : Contrôle du flux",
+    "section": "2. La boucle for",
+    "text": "2. La boucle for\nUne boucle for répète un bloc pour chaque élément d’une collection. À chaque tour, la variable de boucle prend la valeur de l’élément courant.\n\nvilles = [\"Dakar\", \"Louga\", \"Mbour\"]\nfor ville in villes:\n    print(ville)\n\nDakar\nLouga\nMbour\n\n\nÀ vous. Créez une liste prenoms de trois prénoms et affichez chacun avec une boucle for.\n\n# À vous : parcourez prenoms avec une boucle for et affichez chaque prenom\n\nPour répéter un nombre fixé de fois, on utilise range(). range(n) produit les entiers de 0 à n-1 ; range(a, b) va de a à b exclu.\n\nfor i in range(5):\n    print(i)\n\n0\n1\n2\n3\n4\n\n\n\nfor i in range(1, 4):\n    print(\"tour\", i)\n\ntour 1\ntour 2\ntour 3\n\n\nÀ vous. Affichez les nombres de 1 à 10 avec range().\n\n# À vous : affichez les nombres de 1 a 10 avec range(1, 11)\n\nLe motif le plus utile est l’accumulation : on prépare une variable avant la boucle, puis on la met à jour à chaque tour. Ici, on calcule une somme.\n\nnotes = [12, 15, 9, 18]\ntotal = 0\nfor note in notes:\n    total = total + note\nprint(\"total :\", total)\nprint(\"moyenne :\", total / len(notes))\n\ntotal : 54\nmoyenne : 13.5\n\n\nMême principe pour compter : on incrémente un compteur quand une condition est remplie.\n\nvilles = [\"Dakar\", \"Saint-Louis\", \"Mbour\", \"Ziguinchor\"]\ngrandes = 0\nfor ville in villes:\n    if len(ville) &gt; 5:\n        grandes = grandes + 1\nprint(\"villes de plus de 5 lettres :\", grandes)\n\nvilles de plus de 5 lettres : 2\n\n\nÀ vous. Avec prix = [500, 1200, 300, 800], calculez la somme totale par accumulation, puis affichez-la.\n\n# À vous : total = 0 puis accumulez chaque valeur de prix dans une boucle for"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#parcourir-intelligemment-enumerate-et-zip",
+    "href": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#parcourir-intelligemment-enumerate-et-zip",
+    "title": "Programmation Python — Séance 3 : Contrôle du flux",
+    "section": "3. Parcourir intelligemment : enumerate et zip",
+    "text": "3. Parcourir intelligemment : enumerate et zip\nenumerate() donne à la fois l’indice et la valeur de chaque élément — pratique pour numéroter.\n\nvilles = [\"Dakar\", \"Louga\", \"Mbour\"]\nfor i, ville in enumerate(villes):\n    print(i, ville)\n\n0 Dakar\n1 Louga\n2 Mbour\n\n\nÀ vous. Affichez chaque prénom de prenoms = [\"Fatou\", \"Awa\", \"Cheikh\"] précédé de son indice, avec enumerate.\n\n# À vous : parcourez prenoms avec enumerate et affichez  indice, prenom\n\nzip() parcourt deux listes en parallèle, élément par élément — idéal pour associer des données qui se correspondent.\n\nvilles = [\"Dakar\", \"Thies\", \"Kaolack\"]\npopulation = [1200000, 320000, 240000]\nfor ville, hab in zip(villes, population):\n    print(ville, \":\", hab)\n\nDakar : 1200000\nThies : 320000\nKaolack : 240000\n\n\nÀ vous. Avec prenoms = [\"Fatou\", \"Awa\"] et ages = [30, 25], affichez chaque prénom suivi de son âge, avec zip.\n\n# À vous : parcourez prenoms et ages en parallele avec zip et affichez  prenom, age"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#la-boucle-while",
+    "href": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#la-boucle-while",
+    "title": "Programmation Python — Séance 3 : Contrôle du flux",
+    "section": "4. La boucle while",
+    "text": "4. La boucle while\nUne boucle while répète un bloc tant qu’une condition reste vraie. Il faut absolument faire évoluer cette condition à l’intérieur de la boucle, sinon elle ne s’arrête jamais.\n\ncompteur = 0\nwhile compteur &lt; 3:\n    print(\"compteur =\", compteur)\n    compteur = compteur + 1\nprint(\"fin\")\n\ncompteur = 0\ncompteur = 1\ncompteur = 2\nfin\n\n\n\nPiège — la boucle infinie. Si la condition ne devient jamais fausse (par exemple si on oublie compteur = compteur + 1), la boucle tourne sans fin. Vérifiez toujours qu’une variable avance vers la sortie. On interrompt une boucle emballée avec le bouton Interrupt du noyau.\n\nÀ vous. Avec une boucle while, affichez le compte à rebours 5, 4, 3, 2, 1 (partez de 5 et décrémentez).\n\n# À vous : n = 5 puis while n &gt;= 1 : afficher n et decrementer n"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#contrôler-une-boucle-break-et-continue",
+    "href": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#contrôler-une-boucle-break-et-continue",
+    "title": "Programmation Python — Séance 3 : Contrôle du flux",
+    "section": "5. Contrôler une boucle : break et continue",
+    "text": "5. Contrôler une boucle : break et continue\nbreak arrête complètement la boucle ; continue saute au tour suivant sans exécuter la suite du bloc.\n\nfor n in [1, 2, 3, 4, 5]:\n    if n == 3:\n        break\n    print(n)\n\n1\n2\n\n\nIci la boucle s’arrête dès que n vaut 3. Avec continue, au contraire, on saute certains éléments mais on continue :\n\nfor n in [1, 2, 3, 4, 5]:\n    if n % 2 == 0:\n        continue\n    print(n)\n\n1\n3\n5\n\n\nÀ vous. Parcourez valeurs = [4, 7, -2, 9, -5] et arrêtez la boucle (break) au premier nombre négatif, après avoir affiché les précédents.\n\n# À vous : parcourez valeurs, affichez chaque nombre, et break au premier nombre negatif"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#retour-sur-les-compréhensions",
+    "href": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#retour-sur-les-compréhensions",
+    "title": "Programmation Python — Séance 3 : Contrôle du flux",
+    "section": "6. Retour sur les compréhensions",
+    "text": "6. Retour sur les compréhensions\nUne compréhension de liste (Séance 2) est simplement une boucle for écrite de façon compacte. Les deux versions ci-dessous produisent exactement le même résultat.\n\n# Version longue : boucle for + append\ncarres = []\nfor n in [1, 2, 3, 4]:\n    carres.append(n * n)\nprint(carres)\n\n# Version compacte : comprehension\ncarres2 = [n * n for n in [1, 2, 3, 4]]\nprint(carres2)\n\n[1, 4, 9, 16]\n[1, 4, 9, 16]"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#récapitulatif",
+    "href": "cours/programmation-python/ressources/TP_S3_controle_du_flux.html#récapitulatif",
+    "title": "Programmation Python — Séance 3 : Contrôle du flux",
+    "section": "Récapitulatif",
+    "text": "Récapitulatif\n\nConditions : if / elif / else ; le bloc est indenté après les deux points :.\nBoucle for : for element in collection: répète pour chaque élément ; range(n) répète n fois.\nAccumulation : préparer une variable avant la boucle, la mettre à jour à chaque tour (somme, compteur).\nenumerate : indice + valeur. zip : deux listes en parallèle.\nBoucle while : while condition: répète tant que c’est vrai ; faire évoluer la condition (piège : boucle infinie).\nbreak arrête la boucle ; continue saute au tour suivant.\nUne compréhension est un for compact.\n\nProchaine séance — S4 : les fonctions, les modules, la lecture de fichiers et les exceptions."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html",
+    "href": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html",
+    "title": "Programmation Python — Séance 5 : Programmation orientée objet",
+    "section": "",
+    "text": "Télécharger le notebook Ouvrir dans Colab\nLes sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.\nDMI · FST · UCAD\nJusqu’ici, les données (variables) et les traitements (fonctions) étaient séparés. La programmation orientée objet les réunit : un objet regroupe des données et les comportements qui vont avec. Cette séance construit ses propres objets avec class, puis les spécialise par héritage et polymorphisme. Exécutez chaque cellule avec Maj + Entrée. Les cellules À vous sont à compléter."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#vous-utilisez-déjà-des-objets",
+    "href": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#vous-utilisez-déjà-des-objets",
+    "title": "Programmation Python — Séance 5 : Programmation orientée objet",
+    "section": "1. Vous utilisez déjà des objets",
+    "text": "1. Vous utilisez déjà des objets\nUne chaîne, une liste sont déjà des objets : ils portent des données (leur contenu) et des méthodes (des fonctions attachées, appelées avec un point). \"dakar\".upper() et notes.append(15) sont des méthodes d’objets que vous employez depuis le début.\n\ntexte = \"dakar\"\nprint(texte.upper())\n\nnotes = [17, 12]\nnotes.append(15)\nprint(notes)\n\nDAKAR\n[17, 12, 15]\n\n\nÀ vous. Avec mot = \"SENEGAL\", affichez sa version en minuscules grâce à la méthode .lower().\n\n# À vous : avec mot = \"SENEGAL\", affichez mot.lower()\n\nUne méthode peut aussi renvoyer un résultat. \"Dakar-Thies-Mbour\".split(\"-\") renvoie une liste.\n\nvilles = \"Dakar-Thies-Mbour\".split(\"-\")\nprint(villes)\nprint(len(villes))\n\n['Dakar', 'Thies', 'Mbour']\n3\n\n\nÀ vous. Découpez la chaîne \"Astou;Modou;Bineta\" sur le \";\" avec .split(\";\") et affichez la liste obtenue.\n\n# À vous : affichez \"Astou;Modou;Bineta\".split(\";\")\n\nL’idée de la POO est d’écrire nos propres types d’objets, adaptés à notre problème — un compte bancaire, un patient, un produit — avec leurs données et leurs méthodes."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#définir-une-classe",
+    "href": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#définir-une-classe",
+    "title": "Programmation Python — Séance 5 : Programmation orientée objet",
+    "section": "2. Définir une classe",
+    "text": "2. Définir une classe\nUne classe est le plan d’un objet : elle décrit ses données et ses méthodes. On la définit avec class. La méthode spéciale __init__ est le constructeur : elle s’exécute à la création et installe les données de l’objet. Le premier paramètre, self, désigne l’objet en cours de construction.\n\nclass CompteBancaire:\n    def __init__(self, titulaire, solde):\n        self.titulaire = titulaire\n        self.solde = solde\n\nc1 = CompteBancaire(\"Astou\", 5000)\nprint(c1.titulaire)\nprint(c1.solde)\n\nAstou\n5000\n\n\nc1 est une instance de la classe CompteBancaire. On accède à ses données (ses attributs) avec un point : c1.titulaire, c1.solde. Chaque instance possède ses propres valeurs.\n\nc2 = CompteBancaire(\"Modou\", 12000)\nprint(c1.titulaire, c1.solde)\nprint(c2.titulaire, c2.solde)\n\nAstou 5000\nModou 12000\n\n\nÀ vous. Créez une instance c3 de CompteBancaire pour le titulaire \"Bineta\" avec un solde de 8000, puis affichez son titulaire et son solde.\n\n# À vous : creez c3 = CompteBancaire(\"Bineta\", 8000), puis affichez c3.titulaire et c3.solde\n\nUn attribut se lit, mais se modifie aussi directement avec un point.\n\nc2.solde = 20000\nprint(c2.solde)\n\n20000\n\n\nÀ vous. Modifiez le solde de c3 pour le porter à 9500, puis affichez-le.\n\n# À vous : mettez c3.solde a 9500, puis affichez c3.solde"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#les-méthodes",
+    "href": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#les-méthodes",
+    "title": "Programmation Python — Séance 5 : Programmation orientée objet",
+    "section": "3. Les méthodes",
+    "text": "3. Les méthodes\nUne méthode est une fonction définie dans la classe : c’est un comportement de l’objet. Elle reçoit toujours self en premier paramètre, ce qui lui permet de lire et de modifier les attributs. Ici, depot et retrait modifient le solde ; peut_retirer renvoie un booléen.\n\nclass CompteBancaire:\n    def __init__(self, titulaire, solde):\n        self.titulaire = titulaire\n        self.solde = solde\n    def depot(self, montant):\n        self.solde = self.solde + montant\n    def retrait(self, montant):\n        if montant &lt;= self.solde:\n            self.solde = self.solde - montant\n        else:\n            print(\"Solde insuffisant\")\n    def peut_retirer(self, montant):\n        return montant &lt;= self.solde\n\nc1 = CompteBancaire(\"Astou\", 5000)\nc1.depot(2000)\nprint(c1.solde)\nc1.retrait(1000)\nprint(c1.solde)\n\n7000\n6000\n\n\nOn appelle une méthode sur l’objet : c1.depot(2000). Inutile de passer self, Python s’en charge : self sera c1. Si le retrait dépasse le solde, la méthode affiche un message au lieu de l’effectuer.\n\nc1.retrait(50000)\nprint(c1.solde)\n\nSolde insuffisant\n6000\n\n\nLa méthode peut_retirer ne modifie rien : elle renvoie True ou False, qu’on peut utiliser dans un test.\n\nprint(c1.peut_retirer(1000))\nprint(c1.peut_retirer(999999))\n\nTrue\nFalse\n\n\nÀ vous. Créez un compte c4 pour \"Modou\" avec 3000, effectuez un dépôt de 1500, puis affichez son solde.\n\n# À vous : creez c4 = CompteBancaire(\"Modou\", 3000), faites c4.depot(1500), puis affichez c4.solde"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#un-affichage-lisible-__str__",
+    "href": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#un-affichage-lisible-__str__",
+    "title": "Programmation Python — Séance 5 : Programmation orientée objet",
+    "section": "4. Un affichage lisible : __str__",
+    "text": "4. Un affichage lisible : __str__\nPar défaut, print(objet) donne une ligne peu lisible. La méthode spéciale __str__ décide ce qui s’affiche : elle doit renvoyer une chaîne, et print l’utilise automatiquement. On ajoute aussi une méthode description qui renvoie un libellé — elle nous servira plus loin.\n\nclass CompteBancaire:\n    def __init__(self, titulaire, solde):\n        self.titulaire = titulaire\n        self.solde = solde\n    def depot(self, montant):\n        self.solde = self.solde + montant\n    def retrait(self, montant):\n        if montant &lt;= self.solde:\n            self.solde = self.solde - montant\n        else:\n            print(\"Solde insuffisant\")\n    def peut_retirer(self, montant):\n        return montant &lt;= self.solde\n    def __str__(self):\n        return f\"Compte de {self.titulaire} : {self.solde} F\"\n    def description(self):\n        return \"compte courant\"\n\nc1 = CompteBancaire(\"Astou\", 5000)\nprint(c1)\nc1.depot(2000)\nprint(c1)\nprint(c1.description())\n\nCompte de Astou : 5000 F\nCompte de Astou : 7000 F\ncompte courant\n\n\nÀ vous. Créez un compte pour \"Bineta\" avec 9000 et affichez-le directement avec print.\n\n# À vous : creez un compte pour \"Bineta\" avec 9000, puis affichez-le avec print(...)"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#lhéritage-spécialiser-sans-réécrire",
+    "href": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#lhéritage-spécialiser-sans-réécrire",
+    "title": "Programmation Python — Séance 5 : Programmation orientée objet",
+    "section": "5. L’héritage : spécialiser sans réécrire",
+    "text": "5. L’héritage : spécialiser sans réécrire\nL’héritage crée une classe à partir d’une autre : elle récupère tout (attributs et méthodes) et peut ajouter ce qui lui est propre. CompteEpargne(CompteBancaire) se lit « un compte épargne est un compte bancaire, en plus spécialisé ». super().__init__(...) appelle le constructeur du parent pour ne pas réécrire l’installation des données communes.\n\nclass CompteEpargne(CompteBancaire):\n    def __init__(self, titulaire, solde, taux):\n        super().__init__(titulaire, solde)\n        self.taux = taux\n    def ajouter_interets(self):\n        self.solde = self.solde + self.solde * self.taux\n\ne1 = CompteEpargne(\"Bineta\", 10000, 0.05)\nprint(e1)\ne1.depot(5000)\ne1.ajouter_interets()\nprint(e1.solde)\n\nCompte de Bineta : 10000 F\n15750.0\n\n\ne1 profite de tout CompteBancaire : print(e1) utilise le __str__ hérité, et e1.depot(5000) la méthode depot héritée. ajouter_interets et l’attribut taux lui sont propres. Après le dépôt (solde 15000), les intérêts à 5 % portent le solde à 15750.\n\ne1.retrait(2000)\nprint(e1.solde)\n\n13750.0\n\n\nÀ vous. Créez un compte épargne e2 pour \"Modou\" avec 20000 et un taux de 0.03, appliquez ajouter_interets(), puis affichez son solde.\n\n# À vous : creez e2 = CompteEpargne(\"Modou\", 20000, 0.03), faites e2.ajouter_interets(), puis affichez e2.solde"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#le-polymorphisme-un-même-appel-des-comportements-différents",
+    "href": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#le-polymorphisme-un-même-appel-des-comportements-différents",
+    "title": "Programmation Python — Séance 5 : Programmation orientée objet",
+    "section": "6. Le polymorphisme : un même appel, des comportements différents",
+    "text": "6. Le polymorphisme : un même appel, des comportements différents\nRedéfinir dans la classe fille une méthode du parent s’appelle surcharger. Le polymorphisme en découle : un même appel produit un résultat différent selon le type réel de l’objet. On surcharge description dans CompteEpargne, puis on parcourt une liste mélangée.\n\nclass CompteEpargne(CompteBancaire):\n    def __init__(self, titulaire, solde, taux):\n        super().__init__(titulaire, solde)\n        self.taux = taux\n    def ajouter_interets(self):\n        self.solde = self.solde + self.solde * self.taux\n    def description(self):\n        return f\"compte epargne a {self.taux}\"\n\ncomptes = [CompteBancaire(\"Astou\", 5000), CompteEpargne(\"Bineta\", 10000, 0.05)]\nfor c in comptes:\n    print(c.titulaire, \":\", c.description())\n\nAstou : compte courant\nBineta : compte epargne a 0.05\n\n\nLa boucle appelle exactement le même c.description() à chaque tour, mais Python choisit la version qui correspond au type réel de l’objet : « compte courant » pour l’un, « compte epargne » pour l’autre. C’est le polymorphisme.\nÀ vous. Construisez une liste mes_comptes contenant un CompteBancaire et un CompteEpargne de votre choix, puis affichez la description() de chacun avec une boucle for.\n\n# À vous : creez mes_comptes = [ ... , ... ], puis parcourez-la et affichez c.description() pour chaque c\n\nLe polymorphisme fonctionne aussi à travers une fonction : elle accepte n’importe quel compte et appelle description(), sans se soucier du type exact.\n\ndef presenter(compte):\n    print(\"Il s'agit d'un\", compte.description())\n\npresenter(comptes[0])\npresenter(comptes[1])\n\nIl s'agit d'un compte courant\nIl s'agit d'un compte epargne a 0.05\n\n\nÀ vous. Écrivez une fonction resume(compte) qui affiche le titulaire suivi de la description du compte, puis appelez-la sur comptes[0] et comptes[1].\n\n# À vous : definissez resume(compte) qui affiche compte.titulaire et compte.description(), puis appelez-la"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#pièges-fréquents",
+    "href": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#pièges-fréquents",
+    "title": "Programmation Python — Séance 5 : Programmation orientée objet",
+    "section": "7. Pièges fréquents",
+    "text": "7. Pièges fréquents\n\nOublier self : toute méthode prend self en premier paramètre, et l’on écrit self.attribut pour accéder aux données de l’objet. L’oubli provoque une erreur.\nConfondre la classe et l’instance : CompteBancaire est le plan ; c1 = CompteBancaire(...) est un objet concret. Les méthodes s’appellent sur l’instance.\nAppeler une méthode sans parenthèses : c1.description seul ne fait rien (il désigne la méthode) ; il faut écrire c1.description() pour l’exécuter."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#récapitulatif",
+    "href": "cours/programmation-python/ressources/TP_S5_programmation_orientee_objet.html#récapitulatif",
+    "title": "Programmation Python — Séance 5 : Programmation orientée objet",
+    "section": "Récapitulatif",
+    "text": "Récapitulatif\n\nClasse : le plan d’un objet (class). Instance : un objet concret créé à partir du plan.\n__init__(self, ...) : le constructeur ; installe les attributs (self.x = ...).\nself : l’objet courant ; toute méthode le reçoit en premier paramètre.\nMéthode : une fonction définie dans la classe ; s’appelle avec objet.methode(...) ; peut modifier l’objet ou renvoyer une valeur.\n__str__ : renvoie la chaîne affichée par print(objet).\nHéritage : class Fille(Parent) récupère tout et ajoute ; super().__init__(...) réutilise le constructeur parent.\nPolymorphisme : une méthode surchargée donne, pour un même appel, un comportement propre à chaque classe.\n\nProchaine séance — S6 : NumPy et le calcul sur des tableaux, premier outil de la science des données."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "",
+    "text": "Télécharger le notebook Ouvrir dans Colab\nLes sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.\nDMI · FST · UCAD\nNumPy calcule sur des tableaux de nombres. pandas, bâti sur NumPy, ajoute des colonnes nommées et des lignes étiquetées : le DataFrame, la table de données de la bio-informatique. On y manipule notre jeu de morphométrie de pinsons — cette fois avec une colonne espece. Exécutez chaque cellule avec Maj + Entrée. Les cellules À vous sont à compléter."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#series-et-dataframe",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#series-et-dataframe",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "1. Series et DataFrame",
+    "text": "1. Series et DataFrame\nUne Series est une colonne : des valeurs avec une étiquette (l’index). Un DataFrame est un ensemble de colonnes partageant le même index — une table. On importe pandas sous le nom pd.\n\nimport pandas as pd\n\nmasse_moy = pd.Series([15.2, 21.5, 28.0],\n                      index=[\"fuliginosa\", \"fortis\", \"magnirostris\"])\nprint(masse_moy)\n\nfuliginosa      15.2\nfortis          21.5\nmagnirostris    28.0\ndtype: float64\n\n\nÀ vous. Créez une Series aile_moy valant [67.4, 74.8, 80.0] avec le même index des trois espèces, puis affichez-la.\n\n# À vous : creez aile_moy = pd.Series([67.4, 74.8, 80.0], index=[\"fuliginosa\", \"fortis\", \"magnirostris\"])"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#créer-un-dataframe",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#créer-un-dataframe",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "2. Créer un DataFrame",
+    "text": "2. Créer un DataFrame\nOn construit un DataFrame à partir d’un dictionnaire : chaque clé devient une colonne. Ici, 15 spécimens de 3 espèces, avec 4 mesures. head() en montre les premières lignes.\n\nimport numpy as np\n\ndata = {\n    \"espece\":   [\"fuliginosa\"]*5 + [\"fortis\"]*6 + [\"magnirostris\"]*4,\n    \"bec_long\": [9.1, 9.4, 8.9, 9.6, 9.2, 12.8, 13.2, 12.5, 13.5, 12.9, 13.0, 16.1, 15.7, 16.5, 15.9],\n    \"bec_haut\": [8.0, 8.3, 7.8, 8.5, 8.1, 10.5, 10.9, 10.2, 11.1, 10.6, 10.7, 14.2, 13.8, 14.6, 14.0],\n    \"aile\":     [67, 68, 66, 69, 67, 74, 75, np.nan, 76, 74, 75, 80, 79, 81, 80],\n    \"masse\":    [15, 16, 14, 16, 15, 21, 22, 20, 23, 21, 22, 28, 27, 29, 28],\n}\ndf = pd.DataFrame(data)\nprint(df.head())\n\n       espece  bec_long  bec_haut  aile  masse\n0  fuliginosa       9.1       8.0  67.0     15\n1  fuliginosa       9.4       8.3  68.0     16\n2  fuliginosa       8.9       7.8  66.0     14\n3  fuliginosa       9.6       8.5  69.0     16\n4  fuliginosa       9.2       8.1  67.0     15\n\n\nEn pratique, les données arrivent souvent dans un fichier CSV. On sauvegarde avec to_csv et on recharge avec read_csv — le point de départ de presque toute analyse.\n\ndf.to_csv(\"pinsons.csv\", index=False)\ndf2 = pd.read_csv(\"pinsons.csv\")\nprint(df2.head())\n\n       espece  bec_long  bec_haut  aile  masse\n0  fuliginosa       9.1       8.0  67.0     15\n1  fuliginosa       9.4       8.3  68.0     16\n2  fuliginosa       8.9       7.8  66.0     14\n3  fuliginosa       9.6       8.5  69.0     16\n4  fuliginosa       9.2       8.1  67.0     15\n\n\nÀ vous. Construisez un petit DataFrame oiseaux à partir du dictionnaire {\"nom\": [\"merle\", \"pinson\"], \"taille\": [24, 15]}, puis affichez-le.\n\n# À vous : creez oiseaux = pd.DataFrame({\"nom\": [\"merle\", \"pinson\"], \"taille\": [24, 15]}) puis affichez-le"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#explorer-une-table",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#explorer-une-table",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "3. Explorer une table",
+    "text": "3. Explorer une table\nAvant tout calcul, on regarde la table : shape (dimensions), info() (colonnes et types), describe() (résumé statistique des colonnes numériques).\n\nprint(df.shape)\n\n(15, 5)\n\n\n\ndf.info()\n\n&lt;class 'pandas.DataFrame'&gt;\nRangeIndex: 15 entries, 0 to 14\nData columns (total 5 columns):\n #   Column    Non-Null Count  Dtype  \n---  ------    --------------  -----  \n 0   espece    15 non-null     str    \n 1   bec_long  15 non-null     float64\n 2   bec_haut  15 non-null     float64\n 3   aile      14 non-null     float64\n 4   masse     15 non-null     int64  \ndtypes: float64(3), int64(1), str(1)\nmemory usage: 732.0 bytes\n\n\n\nprint(df.describe().round(2))\n\n       bec_long  bec_haut   aile  masse\ncount     15.00     15.00  14.00  15.00\nmean      12.55     10.75  73.64  21.13\nstd        2.75      2.41   5.36   5.18\nmin        8.90      7.80  66.00  14.00\n25%        9.50      8.40  68.25  16.00\n50%       12.90     10.60  74.50  21.00\n75%       14.60     12.45  78.25  25.00\nmax       16.50     14.60  81.00  29.00\n\n\ndescribe() livre d’un coup moyenne, écart-type, minimum, maximum et quartiles de chaque mesure. On remarque que aile n’a que 14 valeurs (count) au lieu de 15 : une mesure manque — on y reviendra.\nÀ vous. Affichez la shape du DataFrame df, puis ses 3 premières lignes avec df.head(3).\n\n# À vous : affichez df.shape puis df.head(3)"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#sélectionner-des-colonnes-et-des-lignes",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#sélectionner-des-colonnes-et-des-lignes",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "4. Sélectionner des colonnes et des lignes",
+    "text": "4. Sélectionner des colonnes et des lignes\nUne colonne se prend par son nom : df[\"masse\"] (c’est une Series). Plusieurs colonnes : une liste de noms. Une ligne se prend par son étiquette avec loc.\n\nprint(df[\"masse\"].head())\n\n0    15\n1    16\n2    14\n3    16\n4    15\nName: masse, dtype: int64\n\n\n\nprint(df[[\"espece\", \"masse\"]].head())\n\n       espece  masse\n0  fuliginosa     15\n1  fuliginosa     16\n2  fuliginosa     14\n3  fuliginosa     16\n4  fuliginosa     15\n\n\n\nprint(df.loc[0])\nprint(df.loc[0, \"espece\"])\n\nespece      fuliginosa\nbec_long           9.1\nbec_haut           8.0\naile              67.0\nmasse               15\nName: 0, dtype: object\nfuliginosa\n\n\nÀ vous. Affichez la colonne bec_long (avec .head()), puis les deux colonnes espece et aile ensemble (avec .head()).\n\n# À vous : affichez df[\"bec_long\"].head() puis df[[\"espece\", \"aile\"]].head()"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#filtrer-avec-un-masque",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#filtrer-avec-un-masque",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "5. Filtrer avec un masque",
+    "text": "5. Filtrer avec un masque\nComme avec NumPy, une comparaison produit un masque booléen ; placé entre crochets, il ne garde que les lignes qui vérifient la condition. Ici, les spécimens de plus de 25 g.\n\nprint(df[df[\"masse\"] &gt; 25])\n\n          espece  bec_long  bec_haut  aile  masse\n11  magnirostris      16.1      14.2  80.0     28\n12  magnirostris      15.7      13.8  79.0     27\n13  magnirostris      16.5      14.6  81.0     29\n14  magnirostris      15.9      14.0  80.0     28\n\n\nTous les spécimens de plus de 25 g sont des magnirostris : le filtre a isolé la plus grande espèce, sans qu’on l’ait nommée.\nÀ vous. Affichez les spécimens dont la bec_long est supérieure à 14 mm.\n\n# À vous : affichez df[df[\"bec_long\"] &gt; 14]"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#créer-une-colonne",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#créer-une-colonne",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "6. Créer une colonne",
+    "text": "6. Créer une colonne\nOn calcule une nouvelle colonne à partir des colonnes existantes — l’opération est vectorisée, exactement comme avec NumPy. Ici, un rapport de forme du bec (longueur sur hauteur).\n\ndf[\"rapport_bec\"] = (df[\"bec_long\"] / df[\"bec_haut\"]).round(2)\nprint(df[[\"espece\", \"bec_long\", \"bec_haut\", \"rapport_bec\"]].head())\n\n       espece  bec_long  bec_haut  rapport_bec\n0  fuliginosa       9.1       8.0         1.14\n1  fuliginosa       9.4       8.3         1.13\n2  fuliginosa       8.9       7.8         1.14\n3  fuliginosa       9.6       8.5         1.13\n4  fuliginosa       9.2       8.1         1.14\n\n\nÀ vous. Créez une colonne masse_mg égale à la masse convertie en milligrammes (df[\"masse\"] * 1000), puis affichez df[[\"espece\", \"masse\", \"masse_mg\"]].head().\n\n# À vous : df[\"masse_mg\"] = df[\"masse\"] * 1000, puis affichez df[[\"espece\", \"masse\", \"masse_mg\"]].head()"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#trier",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#trier",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "7. Trier",
+    "text": "7. Trier\nsort_values(\"colonne\") réordonne les lignes selon une colonne. Par défaut, du plus petit au plus grand.\n\nprint(df.sort_values(\"masse\").head())\n\n       espece  bec_long  bec_haut  aile  masse  rapport_bec\n2  fuliginosa       8.9       7.8  66.0     14         1.14\n0  fuliginosa       9.1       8.0  67.0     15         1.14\n4  fuliginosa       9.2       8.1  67.0     15         1.14\n1  fuliginosa       9.4       8.3  68.0     16         1.13\n3  fuliginosa       9.6       8.5  69.0     16         1.13\n\n\nÀ vous. Affichez les lignes triées par bec_long (avec .head()).\n\n# À vous : affichez df.sort_values(\"bec_long\").head()"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#les-valeurs-manquantes",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#les-valeurs-manquantes",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "8. Les valeurs manquantes",
+    "text": "8. Les valeurs manquantes\nUne mesure absente est notée NaN. isna() la repère, .sum() compte les valeurs manquantes. On peut ensuite supprimer les lignes concernées (dropna) ou combler le trou (fillna).\n\nprint(df[\"aile\"].isna().sum())\n\n1\n\n\n\nprint(df[df[\"aile\"].isna()])\n\n   espece  bec_long  bec_haut  aile  masse  rapport_bec\n7  fortis      12.5      10.2   NaN     20         1.23\n\n\nUne seule mesure manque : l’aile d’un fortis. Plutôt que de jeter toute la ligne, on peut combler le trou par la moyenne des ailes connues.\n\naile_pleine = df[\"aile\"].fillna(df[\"aile\"].mean())\nprint(round(df[\"aile\"].mean(), 2))\nprint(aile_pleine.isna().sum())\n\n73.64\n0\n\n\nÀ vous. Comptez les valeurs manquantes de la colonne bec_long avec df[\"bec_long\"].isna().sum().\n\n# À vous : affichez df[\"bec_long\"].isna().sum()"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#grouper-le-cœur-de-pandas",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#grouper-le-cœur-de-pandas",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "9. Grouper : le cœur de pandas",
+    "text": "9. Grouper : le cœur de pandas\nvalue_counts() compte les occurrences de chaque valeur d’une colonne. groupby(\"espece\") rassemble les lignes par espèce ; on applique ensuite une agrégation (mean, sum…) à chaque groupe.\n\nprint(df[\"espece\"].value_counts())\n\nespece\nfortis          6\nfuliginosa      5\nmagnirostris    4\nName: count, dtype: int64\n\n\n\nprint(df.groupby(\"espece\")[\"masse\"].mean().round(2))\n\nespece\nfortis          21.5\nfuliginosa      15.2\nmagnirostris    28.0\nName: masse, dtype: float64\n\n\n\nprint(df.groupby(\"espece\")[[\"bec_long\", \"aile\", \"masse\"]].mean().round(2))\n\n              bec_long  aile  masse\nespece                             \nfortis           12.98  74.8   21.5\nfuliginosa        9.24  67.4   15.2\nmagnirostris     16.05  80.0   28.0\n\n\nEn une ligne, groupby révèle le profil de chaque espèce : magnirostris a le bec le plus long, l’aile la plus grande et la masse la plus élevée ; fuliginosa est la plus petite sur les trois mesures. C’est exactement le genre de résumé qu’on cherche en analyse de données.\nÀ vous. Affichez la hauteur de bec moyenne par espèce avec df.groupby(\"espece\")[\"bec_haut\"].mean().round(2).\n\n# À vous : affichez df.groupby(\"espece\")[\"bec_haut\"].mean().round(2)"
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#pièges-fréquents",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#pièges-fréquents",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "10. Pièges fréquents",
+    "text": "10. Pièges fréquents\n\nUne colonne est une Series : df[\"masse\"] (crochets simples). Avec une liste de noms, df[[\"espece\", \"masse\"]], on obtient un DataFrame (crochets doubles).\nloc (étiquette) vs iloc (position) : df.loc[0] cible l’étiquette 0 ; df.iloc[0] la première ligne, quelle que soit son étiquette.\nNaN se propage : une valeur manquante n’est pas 0 ; il faut la traiter (dropna, fillna) avant certains calculs.\nUn filtre ne modifie pas la table : df[df[\"masse\"] &gt; 25] renvoie une nouvelle vue ; pour garder le résultat, on l’affecte à une variable."
+  },
+  {
+    "objectID": "cours/programmation-python/ressources/TP_S7_pandas.html#récapitulatif",
+    "href": "cours/programmation-python/ressources/TP_S7_pandas.html#récapitulatif",
+    "title": "Programmation Python — Séance 7 : pandas",
+    "section": "Récapitulatif",
+    "text": "Récapitulatif\n\nDataFrame : une table à colonnes nommées, bâtie sur NumPy ; Series : une colonne.\nCréer / charger : pd.DataFrame({...}), read_csv, to_csv.\nExplorer : shape, info(), describe(), head().\nSélectionner : df[\"col\"], df[[\"c1\", \"c2\"]], df.loc[...].\nFiltrer : masque booléen df[df[\"col\"] &gt; v].\nCréer une colonne : à partir des colonnes existantes (vectorisé).\nTrier : sort_values(\"col\").\nValeurs manquantes : isna, dropna, fillna.\nGrouper : value_counts(), groupby(\"col\").mean().\n\nProchaine séance — S8 : visualiser ces données (histogrammes, nuages de points) et faire le pont vers le Machine Learning."
   }
 ]

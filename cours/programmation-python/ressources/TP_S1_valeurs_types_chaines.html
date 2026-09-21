@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Comment je construis un cours : l’intuition d’abord, le formalisme ensuite, et jamais de résultat inventé.">
+<meta name="description" content="Ce notebook est le terrain d’entraînement de la séance.">
 
-<title>Une analogie, une formule, un exemple chiffré – El Hadji Bassirou Touré</title>
+<title>Programmation Python — Séance 1 : Valeurs, types et chaînes – El Hadji Bassirou Touré</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -83,13 +118,13 @@ ul.task-list li input[type="checkbox"] {
 <link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
 
 
-<meta property="og:title" content="Une analogie, une formule, un exemple chiffré – El Hadji Bassirou Touré">
-<meta property="og:description" content="Comment je construis un cours : l’intuition d’abord, le formalisme ensuite, et jamais de résultat inventé.">
+<meta property="og:title" content="Programmation Python — Séance 1 : Valeurs, types et chaînes – El Hadji Bassirou Touré">
+<meta property="og:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
 <meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
 <meta property="og:site_name" content="El Hadji Bassirou Touré">
 <meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
-<meta name="twitter:title" content="Une analogie, une formule, un exemple chiffré – El Hadji Bassirou Touré">
-<meta name="twitter:description" content="Comment je construis un cours : l’intuition d’abord, le formalisme ensuite, et jamais de résultat inventé.">
+<meta name="twitter:title" content="Programmation Python — Séance 1 : Valeurs, types et chaînes – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
 <meta name="twitter:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
@@ -322,11 +357,11 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Sur cette page</h2>
    
   <ul>
-  <li><a href="#commencer-par-une-image" id="toc-commencer-par-une-image" class="nav-link active" data-scroll-target="#commencer-par-une-image">Commencer par une image</a></li>
-  <li><a href="#ne-pas-sarrêter-là" id="toc-ne-pas-sarrêter-là" class="nav-link" data-scroll-target="#ne-pas-sarrêter-là">Ne pas s’arrêter là</a></li>
-  <li><a href="#rien-ne-sinvente" id="toc-rien-ne-sinvente" class="nav-link" data-scroll-target="#rien-ne-sinvente">Rien ne s’invente</a></li>
-  <li><a href="#raconter-une-histoire-pas-dérouler-un-programme" id="toc-raconter-une-histoire-pas-dérouler-un-programme" class="nav-link" data-scroll-target="#raconter-une-histoire-pas-dérouler-un-programme">Raconter une histoire, pas dérouler un programme</a></li>
-  <li><a href="#ce-que-ça-coûte" id="toc-ce-que-ça-coûte" class="nav-link" data-scroll-target="#ce-que-ça-coûte">Ce que ça coûte</a></li>
+  <li><a href="#variables-et-types" id="toc-variables-et-types" class="nav-link active" data-scroll-target="#variables-et-types">1. Variables et types</a></li>
+  <li><a href="#opérations" id="toc-opérations" class="nav-link" data-scroll-target="#opérations">2. Opérations</a></li>
+  <li><a href="#afficher-proprement-avec-les-f-strings" id="toc-afficher-proprement-avec-les-f-strings" class="nav-link" data-scroll-target="#afficher-proprement-avec-les-f-strings">3. Afficher proprement avec les f-strings</a></li>
+  <li><a href="#les-chaînes-de-caractères" id="toc-les-chaînes-de-caractères" class="nav-link" data-scroll-target="#les-chaînes-de-caractères">4. Les chaînes de caractères</a></li>
+  <li><a href="#récapitulatif" id="toc-récapitulatif" class="nav-link" data-scroll-target="#récapitulatif">Récapitulatif</a></li>
   </ul>
 </nav>
     </div>
@@ -336,16 +371,12 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Une analogie, une formule, un exemple chiffré</h1>
-  <div class="quarto-categories">
-    <div class="quarto-category">pédagogie</div>
-    <div class="quarto-category">enseignement</div>
-  </div>
-  </div>
+<h1 class="title">Programmation Python — Séance 1 : Valeurs, types et chaînes</h1>
+</div>
 
 <div>
   <div class="description">
-    Comment je construis un cours : l’intuition d’abord, le formalisme ensuite, et jamais de résultat inventé.
+    Ce notebook est le terrain d’entraînement de la séance.
   </div>
 </div>
 
@@ -353,12 +384,6 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-title-meta">
 
     
-    <div>
-    <div class="quarto-title-meta-heading">Date de publication</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">18 septembre 2026</p>
-    </div>
-  </div>
   
     
   </div>
@@ -368,35 +393,221 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Richard Feynman raconte qu’il savait compter les secondes dans sa tête tout en lisant, mais qu’il en était incapable dès qu’il parlait. Son collègue John Tukey faisait exactement l’inverse : lui comptait en voyant défiler un ruban de chiffres, et pouvait donc parler en même temps. Même tâche, deux mécaniques mentales incompatibles. Et chacun avait supposé jusque-là que tout le monde faisait comme lui.</p>
-<p>Je pense souvent à cette histoire devant un amphithéâtre. Quand une explication ne passe pas, mon premier réflexe est de la redonner, plus lentement. Sauf que l’étudiant qui décroche n’est pas plus lent que les autres. On lui a proposé une porte qui ne s’ouvre pas pour lui, et on lui repropose la même.</p>
-<section id="commencer-par-une-image" class="level2">
-<h2 class="anchored" data-anchor-id="commencer-par-une-image">Commencer par une image</h2>
-<p>Alors j’entre par une analogie. Pour le compromis biais-variance, je parle de deux tailleurs : l’un coupe le même costume pour tout le monde, l’autre recommence entièrement dès que son client change de posture. Les étudiants rient, et surtout ils retiennent. L’image devient une rampe à laquelle se tenir quand la formule arrive.</p>
-<p>Ensuite, avant toute notation, je dis la chose en une phrase. L’entropie, c’est le désordre, la surprise moyenne. Gini, c’est la probabilité de se tromper en classant au hasard. Cette étape est aussi un test pour moi : quand je n’y arrive pas, c’est que je n’ai pas encore compris la notion assez bien pour l’enseigner.</p>
+<div class="notebook-boutons">
+<a href="../../../cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.html" class="btn btn-primary btn-sm" download="" title="Télécharger le notebook">Télécharger le notebook</a> <a href="https://colab.research.google.com/github/elbachir67/elbachir67.github.io/blob/main/cours/programmation-python/ressources/TP_S1_valeurs_types_chaines.ipynb" class="btn btn-outline-primary btn-sm" title="Ouvrir dans Colab">Ouvrir dans Colab</a>
+<em>Les sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.</em>
+</div>
+<p><strong>DMI · FST · UCAD</strong></p>
+<p>Ce notebook est le terrain d’entraînement de la séance. Exécutez chaque cellule avec <strong>Maj + Entrée</strong>, dans l’ordre, et lisez la sortie qui s’affiche en dessous. Les cellules marquées <strong>À vous</strong> sont à compléter : remplacez le commentaire par votre code, puis exécutez.</p>
+<hr>
+<section id="variables-et-types" class="level2">
+<h2 class="anchored" data-anchor-id="variables-et-types">1. Variables et types</h2>
+<p>Une <strong>variable</strong> est un nom auquel on attache une valeur, avec le signe <code>=</code>. Ce signe n’est pas l’égalité des mathématiques : c’est une <strong>affectation</strong> (« range cette valeur sous ce nom »). Chaque valeur a un <strong>type</strong> : texte (<code>str</code>), entier (<code>int</code>), décimal (<code>float</code>) ou booléen (<code>bool</code>).</p>
+<div id="cell-3" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>nom <span class="op">=</span> <span class="st">"Fatou"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>age <span class="op">=</span> <span class="dv">23</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>moyenne <span class="op">=</span> <span class="fl">14.5</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ville <span class="op">=</span> <span class="st">"Dakar"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>est_etudiant <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nom)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(age)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(moyenne)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ville)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(est_etudiant)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Fatou
+23
+14.5
+Dakar
+True</code></pre>
+</div>
+</div>
+<p>La fonction <code>type()</code> révèle le type d’une valeur. Python le devine tout seul à partir de la façon dont la valeur est écrite (guillemets, point décimal, <code>True</code>/<code>False</code>).</p>
+<div id="cell-5" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(nom))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(age))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(moyenne))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(est_etudiant))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'str'&gt;
+&lt;class 'int'&gt;
+&lt;class 'float'&gt;
+&lt;class 'bool'&gt;</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Créez une variable <code>pays</code> (un texte) et une variable <code>population</code> (un entier), puis affichez le type de chacune.</p>
+<div id="cell-7" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : créez pays (un texte) et population (un entier), puis affichez le type de chaque variable</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
 </section>
-<section id="ne-pas-sarrêter-là" class="level2">
-<h2 class="anchored" data-anchor-id="ne-pas-sarrêter-là">Ne pas s’arrêter là</h2>
-<p>C’est ici que beaucoup de cours « accessibles » s’arrêtent, et c’est exactement ce que je veux éviter. Après l’image vient la vraie formule, entière, sans version édulcorée. L’étudiant à qui on a seulement raconté une métaphore se retrouve démuni devant un article ou un sujet d’examen. L’intuition prépare le formalisme ; elle ne le remplace pas.</p>
-<p>Je décortique donc la formule symbole par symbole, et je glisse les rappels de mathématiques au moment précis où ils servent : le logarithme en base 2 juste sous l’entropie, la dérivée juste avant la descente de gradient. Placés dans un chapitre préliminaire, personne ne les relit.</p>
-<p>Puis j’applique, sur des nombres. Dans mon cours d’apprentissage automatique, l’arbre de décision est construit devant eux sur huit patients : la première coupure, le duel entre les candidates, le calcul du gain, la récursion, les feuilles. À la fin, on lance scikit-learn et on obtient le même arbre. Ce moment-là vaut dix diapositives d’explication : l’objet s’est fabriqué sous leurs yeux, ils ne l’ont pas reçu tout fait.</p>
-<p>Suit un exercice, corrigé dans la foulée, et le piège que je sais qu’ils vont rencontrer : la fuite de données dans une validation croisée, la standardisation calculée avant d’avoir séparé les jeux.</p>
+<section id="opérations" class="level2">
+<h2 class="anchored" data-anchor-id="opérations">2. Opérations</h2>
+<p>On calcule avec les opérateurs habituels. Deux subtilités utiles : <code>/</code> donne <strong>toujours</strong> un résultat décimal, <code>//</code> est la <strong>division entière</strong> (on garde la partie entière), et <code>%</code> donne le <strong>reste</strong>.</p>
+<div id="cell-9" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> <span class="dv">7</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"somme        :"</span>, a <span class="op">+</span> b)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"difference   :"</span>, a <span class="op">-</span> b)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"produit      :"</span>, a <span class="op">*</span> b)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"division     :"</span>, a <span class="op">/</span> b)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"div. entiere :"</span>, a <span class="op">//</span> b)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"reste        :"</span>, a <span class="op">%</span> b)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"puissance    :"</span>, a <span class="op">**</span> b)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>somme        : 9
+difference   : 5
+produit      : 14
+division     : 3.5
+div. entiere : 3
+reste        : 1
+puissance    : 49</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> À partir de <code>heures = 100</code>, affichez combien de <strong>jours</strong> entiers cela représente (avec <code>//</code>) et combien d’<strong>heures</strong> restent (avec <code>%</code>).</p>
+<div id="cell-11" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : à partir de heures = 100, affichez le nombre de jours entiers (//) et les heures restantes (%)</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Les <strong>comparaisons</strong> (<code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>) produisent un booléen : <code>True</code> ou <code>False</code>. Attention : <code>=</code> affecte, <code>==</code> compare.</p>
+<div id="cell-13" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="dv">14</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(x <span class="op">&gt;=</span> <span class="dv">10</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(x <span class="op">==</span> <span class="dv">10</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(x <span class="op">!=</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>True
+False
+True</code></pre>
+</div>
+</div>
+<p>On combine des conditions avec <code>and</code> (et), <code>or</code> (ou), <code>not</code> (non).</p>
+<div id="cell-15" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>note <span class="op">=</span> <span class="dv">12</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>assiduite <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>admis <span class="op">=</span> note <span class="op">&gt;=</span> <span class="dv">10</span> <span class="kw">and</span> assiduite</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Admis ?"</span>, admis)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Pas admis ?"</span>, <span class="kw">not</span> admis)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Admis ? True
+Pas admis ? False</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Avec <code>temperature = 32</code>, affichez le résultat du test : la température est-elle à la fois supérieure à 30 <strong>et</strong> inférieure à 40 ?</p>
+<div id="cell-17" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : avec temperature = 32, affichez le résultat de  temperature &gt; 30 and temperature &lt; 40</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
 </section>
-<section id="rien-ne-sinvente" class="level2">
-<h2 class="anchored" data-anchor-id="rien-ne-sinvente">Rien ne s’invente</h2>
-<p>Sur ce point, je ne transige pas : aucune sortie de programme, aucun message d’erreur, aucun résultat chiffré n’est écrit de mémoire sur mes supports. Tout vient d’une exécution réelle. Même les messages d’erreur sont produits exprès, sur du vrai code, avant d’être montrés.</p>
-<p>En pratique, cela m’oblige à écrire et exécuter le carnet de code d’abord, et les diapositives ensuite, à partir de ce que j’ai réellement obtenu. C’est plus long, mais la raison est simple : un étudiant qui tape le code du cours et n’obtient pas le résultat annoncé ne se dit pas que le support est faux. Il se dit qu’il est mauvais. Une valeur approximative peut lui coûter des semaines de confiance.</p>
+<section id="afficher-proprement-avec-les-f-strings" class="level2">
+<h2 class="anchored" data-anchor-id="afficher-proprement-avec-les-f-strings">3. Afficher proprement avec les f-strings</h2>
+<p>Une <strong>f-string</strong> (préfixe <code>f</code> devant les guillemets) insère des variables dans du texte, entre accolades <code>{ }</code>. C’est la façon propre d’afficher un message qui mélange texte et valeurs.</p>
+<div id="cell-19" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>prenom <span class="op">=</span> <span class="st">"Awa"</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ville <span class="op">=</span> <span class="st">"Thiès"</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Je m'appelle </span><span class="sc">{</span>prenom<span class="sc">}</span><span class="ss"> et j'habite à </span><span class="sc">{</span>ville<span class="sc">}</span><span class="ss">."</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Je m'appelle Awa et j'habite à Thiès.</code></pre>
+</div>
+</div>
+<p>On peut aussi <strong>mettre en forme</strong> une valeur dans l’accolade. Par exemple <code>:.2f</code> affiche un décimal avec deux chiffres après la virgule.</p>
+<div id="cell-21" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>moyenne <span class="op">=</span> <span class="fl">14.567</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Moyenne : </span><span class="sc">{</span>moyenne<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Moyenne : 14.57</code></pre>
+</div>
+</div>
+<p>Rappel de la Séance 0 : l’opérateur <code>+</code> ne « colle » que du <strong>texte</strong>. Coller un nombre à du texte avec <code>+</code> provoque une <code>TypeError</code>. La f-string règle le problème en insérant la valeur entre accolades, comme dans <code>f"Age : {age}"</code>.</p>
+<p><strong>À vous.</strong> Créez <code>cfa = 1500</code>, puis affichez avec une f-string le message : « Le repas coûte 1500 FCFA. » en <strong>insérant</strong> la variable (sans réécrire le nombre à la main).</p>
+<div id="cell-24" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : avec cfa = 1500, affichez avec une f-string  "Le repas coûte 1500 FCFA."  en insérant la variable</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
 </section>
-<section id="raconter-une-histoire-pas-dérouler-un-programme" class="level2">
-<h2 class="anchored" data-anchor-id="raconter-une-histoire-pas-dérouler-un-programme">Raconter une histoire, pas dérouler un programme</h2>
-<p>Une séance ne se tient pas toute seule. Chacune commence par rappeler ce qu’on sait déjà faire et où l’on bute, et se termine en annonçant la limite que la prochaine va lever. « On sait trouver le chemin optimal — à condition de disposer de la carte complète. Que fait-on quand on ignore où sont les obstacles ? » Le cours avance alors comme un récit, avec une tension, au lieu d’être une liste de techniques.</p>
-<p>Les mêmes exemples reviennent d’une séance à l’autre. Un jeu de données minuscule croisé au chapitre des arbres réapparaît dans la régression, puis dans les métriques d’évaluation — où l’on découvre qu’un modèle qu’on avait jugé médiocre était simplement mal évalué. Ces retrouvailles font plus pour la compréhension que n’importe quel récapitulatif de fin de chapitre.</p>
+<section id="les-chaînes-de-caractères" class="level2">
+<h2 class="anchored" data-anchor-id="les-chaînes-de-caractères">4. Les chaînes de caractères</h2>
+<p>Une chaîne (<code>str</code>) est une <strong>séquence de caractères</strong>. <code>len()</code> donne sa longueur. On accède à un caractère par sa <strong>position</strong> entre crochets : la position commence à <strong>0</strong>, et <code>-1</code> désigne le dernier.</p>
+<div id="cell-26" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ville <span class="op">=</span> <span class="st">"Saint-Louis"</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"longueur :"</span>, <span class="bu">len</span>(ville))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"premier  :"</span>, ville[<span class="dv">0</span>])</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"dernier  :"</span>, ville[<span class="op">-</span><span class="dv">1</span>])</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>longueur : 11
+premier  : S
+dernier  : s</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Avec <code>mot = "Sénégal"</code>, affichez sa longueur, son premier caractère, puis son dernier caractère.</p>
+<div id="cell-28" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : avec mot = "Sénégal", affichez sa longueur, son premier caractère et son dernier</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>On extrait un morceau par <strong>découpage</strong> (<code>slicing</code>) : <code>[debut:fin]</code> prend les caractères de <code>debut</code> jusqu’à <code>fin</code> <strong>exclu</strong>. On peut omettre l’un des deux bornes.</p>
+<div id="cell-30" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ville <span class="op">=</span> <span class="st">"Saint-Louis"</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ville[<span class="dv">0</span>:<span class="dv">5</span>])</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ville[<span class="dv">6</span>:])</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ville[:<span class="dv">5</span>])</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Saint
+Louis
+Saint</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Avec <code>code = "DK-2024"</code>, extrayez d’abord <code>"DK"</code>, puis <code>"2024"</code>, par découpage.</p>
+<div id="cell-32" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : avec code = "DK-2024", extrayez "DK" puis "2024" par découpage</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Les chaînes offrent des <strong>méthodes</strong> (des outils attachés à la valeur, appelés avec un point). Les plus utiles : <code>.strip()</code> enlève les espaces aux bords, <code>.upper()</code> / <code>.lower()</code> changent la casse, <code>.replace(a, b)</code> remplace.</p>
+<div id="cell-34" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>phrase <span class="op">=</span> <span class="st">"  Bonjour Dakar  "</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(phrase.strip())</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(phrase.strip().upper())</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(phrase.strip().lower())</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(phrase.strip().replace(<span class="st">"Dakar"</span>, <span class="st">"Thiès"</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Bonjour Dakar
+BONJOUR DAKAR
+bonjour dakar
+Bonjour Thiès</code></pre>
+</div>
+</div>
+<p>Important : une méthode de chaîne renvoie une <strong>nouvelle</strong> chaîne ; l’originale ne change pas (on dit qu’une chaîne est <strong>immuable</strong>).</p>
+<div id="cell-36" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>mot <span class="op">=</span> <span class="st">"dakar"</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mot.upper())</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mot)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DAKAR
+dakar</code></pre>
+</div>
+</div>
+<p>Enfin, <code>.split(sep)</code> découpe une chaîne en une <strong>liste</strong> de morceaux, selon un séparateur. C’est très utilisé pour lire des données.</p>
+<div id="cell-38" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>villes <span class="op">=</span> <span class="st">"Dakar,Thiès,Kaolack"</span>.split(<span class="st">","</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(villes)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"nombre de villes :"</span>, <span class="bu">len</span>(villes))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>['Dakar', 'Thiès', 'Kaolack']
+nombre de villes : 3</code></pre>
+</div>
+</div>
+<p><strong>À vous.</strong> Avec <code>noms = "Fatou;Amadou;Cheikh"</code>, séparez les prénoms (séparateur <code>;</code>) avec <code>.split</code>, puis affichez la liste obtenue.</p>
+<div id="cell-40" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À vous : avec noms = "Fatou;Amadou;Cheikh", séparez les prénoms avec .split puis affichez la liste</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
 </section>
-<section id="ce-que-ça-coûte" class="level2">
-<h2 class="anchored" data-anchor-id="ce-que-ça-coûte">Ce que ça coûte</h2>
-<p>Beaucoup de temps, je ne vais pas le cacher. Un concept traité ainsi demande six passages au lieu d’un, les exemples doivent être calculés à la main puis vérifiés par le code, et les bonnes analogies se cherchent longtemps.</p>
-<p>Mais un cours construit comme ça résiste. Ceux qui n’entrent pas par l’image entrent par les chiffres. Ceux que la formule rebute la retrouvent après avoir manipulé l’objet. Plusieurs portes valent mieux qu’une seule, répétée plus fort.</p>
-<p>C’est aussi ce que nous essayons de mettre dans la plateforme d’apprentissage adaptatif que nous développons à l’UCAD : adapter non pas la vitesse d’une explication unique, mais la porte par laquelle on entre. Feynman et Tukey l’avaient remarqué en comptant des secondes. Il nous reste à en tirer les conséquences dans nos amphithéâtres.</p>
+<section id="récapitulatif" class="level2">
+<h2 class="anchored" data-anchor-id="récapitulatif">Récapitulatif</h2>
+<ul>
+<li>Une <strong>variable</strong> (<code>=</code>) attache une valeur à un nom ; chaque valeur a un <strong>type</strong> (<code>str</code>, <code>int</code>, <code>float</code>, <code>bool</code>), révélé par <code>type()</code>.</li>
+<li>Les <strong>opérations</strong> : arithmétique (<code>+ - * / // % **</code>), comparaisons et booléens (<code>and</code>/<code>or</code>/<code>not</code>) produisent <code>True</code>/<code>False</code>.</li>
+<li>Les <strong>f-strings</strong> (<code>f"... {variable} ..."</code>) affichent proprement texte et valeurs ; <code>:.2f</code> met en forme.</li>
+<li>Une <strong>chaîne</strong> est une séquence : <code>len</code>, indexation <code>[i]</code>, découpage <code>[a:b]</code>, méthodes <code>.strip/.upper/.lower/.replace/.split</code> ; elle est <strong>immuable</strong>.</li>
+</ul>
+<p><strong>Prochaine séance — S2 :</strong> les structures de données (listes, tuples, dictionnaires, ensembles).</p>
 
 
 </section>
@@ -830,6 +1041,7 @@ ul.task-list li input[type="checkbox"] {
   </div>
 </footer>
 <script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/notebook-defilement.js"></script>
 
 
 
