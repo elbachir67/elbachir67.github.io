@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dr.&nbsp;El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar">
+<meta name="description" content="Chapitre d’introduction du cours de Programmation C avancée : pourquoi le C, son histoire, la structure du cours, les prérequis et l’environnement de travail.">
+
+<title>Introduction – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../cours/programmation-c-avancee/index.html" rel="prev">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-ce85f4202dd8a1055704826867d57db7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-40cf4fd44fdc13925f8f75c48bbebe90.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-ce85f4202dd8a1055704826867d57db7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+
+<meta property="og:title" content="Introduction – El Hadji Bassirou Touré">
+<meta property="og:description" content="Chapitre d’introduction du cours de Programmation C avancée : pourquoi le C, son histoire, la structure du cours, les prérequis et l’environnement de travail.">
+<meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="Introduction – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Chapitre d’introduction du cours de Programmation C avancée : pourquoi le C, son histoire, la structure du cours, les prérequis et l’environnement de travail.">
+<meta name="twitter:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../cours/programmation-c-avancee/chapitres/00-introduction.html">Chapitres</a></li><li class="breadcrumb-item"><a href="../../../cours/programmation-c-avancee/chapitres/00-introduction.html">Introduction</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../cours/programmation-c-avancee/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Présentation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Chapitres</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../cours/programmation-c-avancee/chapitres/00-introduction.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#pourquoi-le-c" id="toc-pourquoi-le-c" class="nav-link" data-scroll-target="#pourquoi-le-c">Pourquoi le C</a></li>
+  <li><a href="#histoire-du-c" id="toc-histoire-du-c" class="nav-link" data-scroll-target="#histoire-du-c">Histoire du C</a>
+  <ul class="collapse">
+  <li><a href="#versions-majeures" id="toc-versions-majeures" class="nav-link" data-scroll-target="#versions-majeures">Versions Majeures</a></li>
+  <li><a href="#influence-et-philosophie" id="toc-influence-et-philosophie" class="nav-link" data-scroll-target="#influence-et-philosophie">Influence et Philosophie</a></li>
+  </ul></li>
+  <li><a href="#structure-du-cours" id="toc-structure-du-cours" class="nav-link" data-scroll-target="#structure-du-cours">Structure du Cours</a>
+  <ul class="collapse">
+  <li><a href="#détail-des-parties" id="toc-détail-des-parties" class="nav-link" data-scroll-target="#détail-des-parties">Détail des Parties</a></li>
+  <li><a href="#objectifs-du-cours" id="toc-objectifs-du-cours" class="nav-link" data-scroll-target="#objectifs-du-cours">Objectifs du Cours</a></li>
+  </ul></li>
+  <li><a href="#prérequis" id="toc-prérequis" class="nav-link" data-scroll-target="#prérequis">Prérequis</a></li>
+  <li><a href="#environnement-de-travail" id="toc-environnement-de-travail" class="nav-link" data-scroll-target="#environnement-de-travail">Environnement de Travail</a></li>
+  <li><a href="#organisation-pédagogique" id="toc-organisation-pédagogique" class="nav-link" data-scroll-target="#organisation-pédagogique">Organisation Pédagogique</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li>Ressources du chapitre</li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../cours/programmation-c-avancee/chapitres/00-introduction.html">Chapitres</a></li><li class="breadcrumb-item"><a href="../../../cours/programmation-c-avancee/chapitres/00-introduction.html">Introduction</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Introduction</h1>
+</div>
+
+<div>
+  <div class="description">
+    Chapitre d’introduction du cours de Programmation C avancée : pourquoi le C, son histoire, la structure du cours, les prérequis et l’environnement de travail.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Auteur·rice</div>
+    <div class="quarto-title-meta-contents">
+             <p>Dr.&nbsp;El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Ce cours couvre la programmation C avancée pour les étudiants de L3 GLSI. L’objectif est la compréhension approfondie des mécanismes sous-jacents du langage C, de l’organisation mémoire, et des techniques de programmation système.</p>
+</section>
+<section id="pourquoi-le-c" class="level2">
+<h2 class="anchored" data-anchor-id="pourquoi-le-c">Pourquoi le C</h2>
+<p>Le langage C reste pertinent pour plusieurs domaines critiques:</p>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Systèmes d'exploitation">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Systèmes d’exploitation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le noyau Linux (30+ millions de lignes), Windows NT kernel, macOS/iOS kernel (XNU), et les drivers matériels sont écrits en C. La compréhension du C permet de comprendre les interfaces système (POSIX) et le fonctionnement des OS.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Systèmes embarqués">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Systèmes embarqués
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Firmware des microcontrôleurs (ARM Cortex, AVR, PIC), systèmes temps réel (FreeRTOS, Zephyr), dispositifs IoT, équipements médicaux, et systèmes automobiles (CAN bus, ECU) utilisent le C pour son efficacité et son contrôle direct du matériel.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Performance critique">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Performance critique
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Moteurs de bases de données (PostgreSQL, MySQL, SQLite), runtimes de langages (CPython interpreter, JVM Hotspot), serveurs web (nginx, Apache), bibliothèques numériques (BLAS, LAPACK, FFTW), et codecs multimédia (FFmpeg, x264) sont implémentés en C.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Infrastructure logicielle">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Infrastructure logicielle
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Compilateurs (GCC, Clang/LLVM), interpréteurs (Lua, Ruby MRI), shells (bash, zsh), utilitaires système (coreutils), et protocoles réseau (OpenSSH, OpenSSL, curl) sont écrits en C.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Backends AI/ML">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Backends AI/ML
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Les couches de calcul de TensorFlow, PyTorch (ATen/C10), ONNX Runtime, cuDNN (NVIDIA), et OpenBLAS utilisent du C/C++ pour les opérations matricielles et le calcul GPU.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Sécurité et cryptographie">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Sécurité et cryptographie
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>OpenSSL, libsodium, WireGuard, et les implémentations de TLS/SSL sont en C pour minimiser la surface d’attaque et garantir la performance.</p>
+</div>
+</div>
+<div class="encadre-techbox callout callout-style-default callout-important callout-titled" title="Caractéristiques du C">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Caractéristiques du C
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le C offre un contrôle précis de la mémoire, une prédictibilité des performances, et une portabilité maximale. Ce cours forme des ingénieurs capables de comprendre et maintenir du code système, d’optimiser les performances, et de débugger efficacement.</p>
+</div>
+</div>
+</section>
+<section id="histoire-du-c" class="level2">
+<h2 class="anchored" data-anchor-id="histoire-du-c">Histoire du C</h2>
+<p>Le langage C a été développé entre 1969 et 1973 par Dennis Ritchie aux Bell Labs (AT&amp;T). L’objectif initial était de réécrire le système d’exploitation UNIX, précédemment écrit en assembleur.</p>
+<p><span class="figure-cours"><svg role="img" aria-label="Frise de l'histoire du C : BCPL puis B mènent au C, qui sert à réécrire UNIX." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="307.291248pt" height="125.122222pt" viewbox="-70.007476 -70.007476 307.291248 125.122222">
+<style type="text/css">
+@font-face{font-family:nf0;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAi8AAoAAAAAD0QAAAhxAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgUQKlVCQQAtOAAE2AiQDgRgEIAWCIAcgG7ULUZRtUg3kR2JsrLbxioN6ascWWEZExBcZPH/qvffTFBnA1llSaQHLSAU4pQOZDpDyk13v6mve3ScVDQ4Rii6ldBsDg0id6sT/1Zra3wCARhA2QsXJDQAUABWDratTN6+KqF/YCldjq2tktY9sl+G1qw6PFx8BhjJkMlwAOpee+x+JSViJvK3sEETcAR0bCGGAgeyq2jyxvTdesfD/jJEFknSE6FSdzjhPbdMtqizBlCxs7PBGF8+cG3zARRDCEAEJlEiCChroYUIGclCAclSjFq+cThvUVfIRCiJ2PFvnnoV8lKDy58x569qVSxdPHj1y+NDB/du3bdm4YX00CLqsJ0ACFSygS/svtbZxA4/qZdbwGdNv4ydpvnGSIWtTumY6HOCIy0KxwRAbEhQYExhoOfxjwyEwODAwPCwuKCoc+UdGWEHJ4RAUBqHp0UH+kX5EyvmK9XE+RxDSr9RcSQeEmMeJ70b81pv29bhN10AHE+lqACzQQFeKzZXd53hh803VIwThHD/sAY1IWdxxWNgqY6+kulLpc98gPrJdi7IHd/He+7qlGT5DxFIP5ePS5ZO0SBE+XV7rHSo5PqnA1mEI1Efm0J0ax5tiOfbOEV22KpH0Hh/3QOZ33CZCsWMcmeeYScrPTwkyh9fOooU80CxInysxstA0S6qTpDbKh4pa39D1HFSs7ZohwtQ7jimsdBpx0tZwpXsGYDfyYA0qTs2HLQhesJA5N4Nhl3CSbheaESYEkdRMJz2SCsLLqkVYhAwTBE0TzMgkI63EZiuQ7tSQNYlPYKEhBBOKoaj5QvB6gJSdLWHgciNKMSY+SeX2VuW2X70JGyj9Eqc2I5wnbX++etNiVOuN7mSmpe0VkdtnPI/qYFmwDpWYN+k4niNmXBj3OKXLcFxoc2IdMAhqRNkmKWt4n0Zm8kFTYd+zRgNMMMb7jsw9ah+ecwhMIDdVjS2Sxgm1ZBmVbzePLVx0J2XoRs74FhCrctpV+/OFxjmWlGjWh4opSe/lGZGmTkofb2fhA+gALzWIpB2vycOX+g5Z/USm711PmsYX9Nw1bcHzqsf7PFx/i8xEOmOggYaMbbdhf07ZJfCAmzAvuPJ3jmcQhT+cbZnW/cvR/bNlem39pLpvv+u+1k/WLGdrxuP1X3/Xf+P+p2pbp3f9dHT90mZDfARyRlSaTmRqo7rXf59ZTUNKWnuWdMMnaM2KHfe0obrGrm9zOv1u/501ruqV19qRmwcDsc041LdPteCYEp8gEfkhX5cfUPnXKnuz26dKqiDMhUbM4i0PUTHrj2mt/pONBXqSzImNz7mQrIWYGPumwyO5s8L7b5ODdbRJbAKGRClCLJn2eWQBPTx5dTYRJPTc/8QhIDKSVsea822En48hMxtZJK20HBvYWywNM4fKFcuC84f49p1X3NXOWoE+J4RRioNder3/NTtYRxCbYGrBS+q59tniydhlDGLm/hgJ+raQTVJLKpKRZZ9PFtBDk1fD5jiZC3siMYTwEz7/USRBRLLHZFYNHpKlT4xgRSQFJiK/TY0xtTfEtP8WUgMLZzDqt9JldMmS7UNxMCXgyhOzhqShYqKzfGoGLIiVbqzL5MPmWDkP9ashWrRhNgzSxBpUj3NWj6xBorCid4wuI6o2qvRLzs+L0k7aqkZdazqMnkq/tHhgHndsS0UrIUYudKgquQqXnFBHnSV2sDDEEcAu51ZqkVPe1/eUdI9zLSCFKRpa9a7ecyAHxWniDxyswCgTKSH5I3LLyzxUOesIxinMEUakuz/75XwM1pM8JKjSpE1W90ivb9+/Q0aFgw4RaUOTUIEXptOKN4ozJsRxCsiIIWT+JP0UUmVIFRMxMaaSqimaSWT+8CFofMSyTZJadfPoDrN5jWWH4oghNXNrZFFoUcZWHOcI1AqIoZlhXNA40E9W74jveMTNO8tzoxnaEqTwpf1LVF6txVKxYGT/hrlRnd0YtOXkYsgIYqd1o0dmIY1xmSZ9JIE+b502TwoJvSO6h3+QipIRsNP+9jFG+Ao7vWJ0B/S3pGPeJni1lUgiJaxjfakqF3qLPAuNd34clnokMXRK3uE8jBhJ7LT/8NEmpCPbXtw2PNFVa9EL5Qh+LugF3S3dCZrTLTmgyxxCD0ZhHhmVRj2PS/Oh+4w/5xnbvgv816f/Mh7R7SZvHs89GNHK/1uYFHhxFoHFCoyy0QhxQj5uSKFh0pjy2UEq7kTJLTmpGD6C2mnd8JH7BogggYz5KWIBEvLWxaWhiTkC09BeOiobE6Dy3JiGrJG1dNCAsUaIiTSUGFb241xMyoMNmphMKQ7KhS6y0Nn9LjNPVIY4Opubynu2/ygKXt8b1zjlRC7JOG4EOF1bCr33LdYLOjQwJamRSreWtRDi4c6OmP5+i0VIhLE2LT4GJkFgQnwTpSCB5bFQtmikdGSzhnxfx7n283Fg8yeW2q7XFO6UlHbaDZ828ObDquErbcr6hehyJP+SRhe2T0trHP3NjWEBSk6uoEo/PVFwaQ7PVgsYNRo4/5kFIx2edIFiRyh0w0AvOCEm/6AGT2gPfAgg+VALbFSJEFqLlUlDKq0G+Ey9FNJZIAH5u3uiI50OM22IxpSFIHIFvWg4eOQvuDQAOjiFjFGXKS/O+kk7dCQL6NahI7GgLbmPBtrRZTV5oieYUwi6GQ8MBJFDQzaZYYFBQ8riAg6aWNhg0P5mD7RBJzAgLHcQtEOos7DAhsriglYwWNhgo3jaAzxUfhBcr80oreoSVJrL+yLXwefy/La/q58gu7agqjavpEsQNxRalKEGlchCDrpAiwyUogpdEIRS5IIHA3JQiSoUoAyl6AI+uOBBCnLEIxodGaiu0tnQkYl+lWM2alGAqo48lHAGg8DFOu29Aw==) format('woff2');}
+
+</style>
+<g id="page1">
+<g stroke-miterlimit="10" transform="translate(22.29653,-58.469612)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g fill="#ccf">
+<g fill="#ccf">
+<path d="M-35.56593-11.38113H35.56594V11.38114H-35.56593Z"></path>
+</g>
+<g transform="translate(-11.05501,-3.28)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="22.29653" y="-58.469612">BCPL</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(42.1442,-1.946)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="22.29653" y="-58.469612">1966<tspan x="37.555304">(M.</tspan><tspan x="47.869619">Richar</tspan><tspan x="66.392152">ds)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#ccf">
+<path d="M-35.56593-62.59572H35.56594V-39.83345H-35.56593Z"></path>
+</g>
+<g transform="translate(-2.94,-54.49458)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="22.29653" y="-58.469612">B</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(42.1442,-53.05887)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="22.29653" y="-58.469612">1969<tspan x="37.555304">(K.</tspan><tspan x="46.837489">Thompson)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#ccf">
+<path d="M-35.56593-113.8103H35.56594V-91.04803H-35.56593Z"></path>
+</g>
+<g transform="translate(-2.855,-105.70917)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="22.29653" y="-58.469612">C</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(-89.31717,-104.37477)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="22.29653" y="-58.469612">1972<tspan x="37.555304">(D.</tspan><tspan x="47.088548">Rit</tspan><tspan x="55.031754">chie)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#ccf">
+<path d="M115.32077-113.8103H191.96677V-91.04803H115.32077Z"></path>
+</g>
+<g transform="translate(118.65375,-106.04417)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="22.29653" y="-58.469612">UNIX<tspan x="44.891798">r</tspan><tspan x="48.249202">éécrit</tspan><tspan x="73.94285">en</tspan><tspan x="86.326412">C</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(198.54445,-104.66177)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="22.29653" y="-58.469612">1973</text>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M0-11.58107V-37.03334" fill="none"></path>
+<g transform="matrix(0.0,-1.0,1.0,0.0,0.0,-37.03334)">
+<path d="M2.59995 0L-1.55997 2.07996L0 0L-1.55997-2.07996" stroke="none"></path>
+</g>
+<g transform="translate(3.73297,-28.05219)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="22.29653" y="-58.469612">inspir<tspan x="45.708728">e</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M0-62.79547V-88.24774" fill="none"></path>
+<g transform="matrix(0.0,-1.0,1.0,0.0,0.0,-88.24774)">
+<path d="M2.59995 0L-1.55997 2.07996L0 0L-1.55997-2.07996" stroke="none"></path>
+</g>
+<g transform="translate(3.73297,-80.43658)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(22.29653,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="22.29653" y="-58.469612">dériv<tspan x="43.28782">é</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M35.76578-102.42877H112.52039" fill="none"></path>
+<g transform="translate(112.52039,-102.42877)">
+<path d="M2.59995 0L-1.55997 2.07996L0 0L-1.55997-2.07996" stroke="none"></path>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+<p>Le C est directement dérivé du langage B (Ken Thompson, 1969), lui-même inspiré de BCPL (Basic Combined Programming Language, Martin Richards, 1966).</p>
+<section id="versions-majeures" class="level3">
+<h3 class="anchored" data-anchor-id="versions-majeures">Versions Majeures</h3>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="K&amp;R C (1978)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>K&amp;R C (1978)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Première définition du langage dans “The C Programming Language” par Brian Kernighan et Dennis Ritchie. Standard de facto sans normalisation formelle.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="ANSI C / C89 (1989)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>ANSI C / C89 (1989)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Première standardisation par l’ANSI (American National Standards Institute). Ajout de prototypes de fonctions, qualificateurs <code>const</code> et <code>volatile</code>, bibliothèque standard.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="C99 (1999)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>C99 (1999)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Types <code>long long</code>, <code>_Bool</code>, nombres complexes. Commentaires <code>//</code>. Déclarations mixtes code/variables. Tableaux de longueur variable (VLA). Fonctions <code>inline</code>.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="C11 (2011)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>C11 (2011)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Support multithreading natif (<code>&lt;threads.h&gt;</code>), assertions statiques (<code>_Static_assert</code>), types atomiques (<code>&lt;stdatomic.h&gt;</code>), amélioration Unicode.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="C17 (2018)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>C17 (2018)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Corrections techniques, pas de nouvelles fonctionnalités majeures.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="C23 (2023)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>C23 (2023)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Dernière version. Ajout de <code>typeof</code>, attributs standards (<code>[[nodiscard]]</code>), <code>_BitInt(N)</code> pour entiers de largeur arbitraire, amélioration des préprocesseur.</p>
+</div>
+</div>
+<p><span class="figure-cours"><svg role="img" aria-label="Filiation du C depuis le K&amp;R : les normes successives, de C89 à C23." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="388.744707pt" height="47.386899pt" viewbox="-70.007476 -70.007471 388.744707 47.386899">
+<style type="text/css">
+@font-face{font-family:nf0;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAASsAAoAAAAAB4gAAARhAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAXAqIGIZVCxoAATYCJAMwBCAFgiAHIBv6BREVo7cB/EiwYyL/BzIaqguN8JIP/532586keW2mMNJ6HQAlFwIHT/wzUtv/ATBxTf2wt2iLBLDqVei0sVJpOIsGHO98A55NR4pTN8aFOIXWZbkVBgp2B2gqh6yGH0BtpV78H4lVZ458mzUoJwEAJQZoAnwHOsdN7IEY2XCI8P9ZQARi4RV9vsRTAGgxEjQIKoKuGQx/UE8ZLUc/KGGEQ2Xco6So/kTffvXhW74rIAhIIA7FAggHSAFA3gcCJwLQpkGBbB5+CCVJYwICAuOygmOZQCY2JjDYv2VP6TUhZc7JpbebeN4jCNbr3bwPOLCs6Q43SPAyrIvTu3jPddazh2ME50tecfm2m+fnCcu4uazngTCPX8rO5RjC0BIiGBkRA4YIgncOrznPFg6+JWg5zs2yrkdaBm6eL1Ye4ZYJGft4DxGE9DlvJaxNwQOWNXazugfsPkb4yBtIgiBjN8eyrm2efcKAq3y6IHg5JpJ7Jal/S//rxD1c3SMhY6/lL7O4t2E2p14mlPjB+2zTQz5fecfNCd7jrGRp16Jl6nIb383+ItlbD8vO5ty+S36dZfyYuh7GVSepdwFHAt0qryOhaGaZdw7vktwJeu/jbxVKJvlD7cMSZQPGthM3UZgaFPlO6KByetXkc7V2IJE3NG6K8Db/MdiePNaaOc82TFcii1JpI+w1iqa8Kzfj9PIaFdkvaejM7v8D/mfaMeKkYcSxB1VgAP1t8tmqeUmqWePM2P89zINds+GLiVWekBKZdrEGeeVrV+68D3O/gerPZ6sK7nw3s6nydQO6e+AhjRvuTJ40XvZAj58YM3orfz14y1Y4UT9EnNCsGgd5NxxKkfRgpY0++cDZULja2+cmVmawseuV1Qkl8U5uxSnxufqg9rla3YGK3jn5k7cNT5suOgQf04QJ7cSSrPP+bazQ0cTYVW+DG60tMEVW2/98qjATGQxjWktHKPtDWzZAZnu9KSTOMyhUO1s9mErskunippRqAsVmFSY9kg/Q3U7V5f4XfnsGwWBTbaTUknX8m70yoiFts+itf9gK8tztnegkzSPGWNExfTvZQd1ZfRT1zGzsOU8doPbtuzgXt5uK3n1V5yAtGLPSN3ptG+oxWH16RnspGne7iS3W1vrG9/OulseN4xZxaNz9thez3aQHJluLOvRoZuuehKmJbWN2U3MUzioLxgAAQAAQwPCqOqclZOBv/rQIecT3M7WDOg4M4xiqBFOB0bYhEiCiWkEGq1kGQY1GGvmvuAbtYDaYABaB+b+cR+lRSdnRSGnRCAIgEFWgAWACaEswE4QBBsGkLQKNICz7gUGoLAaNhNMSxCIZNIgoAATxqMKyCGLYZD9EwyMLYvHwlkQ6dl056WwbOS61fGS3dGFXLy2W+sJP+t7OiX3jJvaMoD6vuArOURPGdnSlOttGjkstH9kt9XSNHdc3amRqabG0HdQah8XRt43v6qy3T7F650TViXETe0aklhd/uzUDAAA=) format('woff2');}
+
+</style>
+<g id="page1">
+<g stroke-miterlimit="10" transform="translate(-52.800396,-52.800396)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g fill="#b3b3ff">
+<g fill="#b3b3ff">
+<path d="M17.07161 0C17.07161 9.4285 9.4285 17.07161 0 17.07161S-17.07161 9.4285-17.07161 0S-9.4285-17.07161 0-17.07161S17.07161-9.4285 17.07161 0ZM0 0"></path>
+</g>
+<g transform="translate(-7.9065,-2.952)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="8.966376" x="-52.800396" y="-52.800396">K&amp;R</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(-4.97,-26.90002)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="4.98132" x="-52.800396" y="-52.800396">1978</text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#b3b3ff">
+<g fill="#b3b3ff">
+<path d="M88.20346 0C88.20346 9.4285 80.56035 17.07161 71.13185 17.07161S54.06024 9.4285 54.06024 0S61.70335-17.07161 71.13185-17.07161S88.20346-9.4285 88.20346 0ZM71.13185 0"></path>
+</g>
+<g transform="translate(64.08934,-2.952)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="8.966376" x="-52.800396" y="-52.800396">C89</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(66.16185,-26.90002)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="4.98132" x="-52.800396" y="-52.800396">1989</text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#b3b3ff">
+<g fill="#b3b3ff">
+<path d="M159.33533 0C159.33533 9.4285 151.69221 17.07161 142.26372 17.07161C132.83522 17.07161 125.19211 9.4285 125.19211 0S132.83522-17.07161 142.26372-17.07161C151.69221-17.07161 159.33533-9.4285 159.33533 0ZM142.26372 0"></path>
+</g>
+<g transform="translate(135.2212,-2.952)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="8.966376" x="-52.800396" y="-52.800396">C99</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(137.29372,-26.90002)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="4.98132" x="-52.800396" y="-52.800396">1999</text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#b3b3ff">
+<g fill="#b3b3ff">
+<path d="M230.46718 0C230.46718 9.4285 222.82407 17.07161 213.39557 17.07161S196.32396 9.4285 196.32396 0S203.96707-17.07161 213.39557-17.07161S230.46718-9.4285 230.46718 0ZM213.39557 0"></path>
+</g>
+<g transform="translate(206.35306,-2.952)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="8.966376" x="-52.800396" y="-52.800396">C11</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(208.42557,-26.90002)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="4.98132" x="-52.800396" y="-52.800396">2011</text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#b3b3ff">
+<g fill="#b3b3ff">
+<path d="M301.59904 0C301.59904 9.4285 293.95593 17.07161 284.52744 17.07161C275.09894 17.07161 267.45583 9.4285 267.45583 0S275.09894-17.07161 284.52744-17.07161C293.95593-17.07161 301.59904-9.4285 301.59904 0ZM284.52744 0"></path>
+</g>
+<g transform="translate(277.48492,-2.952)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="8.966376" x="-52.800396" y="-52.800396">C17</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(279.55743,-26.90002)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="4.98132" x="-52.800396" y="-52.800396">2018</text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#b3b3ff">
+<g fill="#b3b3ff">
+<path d="M372.7309 0C372.7309 9.4285 365.08778 17.07161 355.65929 17.07161C346.23079 17.07161 338.58768 9.4285 338.58768 0S346.23079-17.07161 355.65929-17.07161C365.08778-17.07161 372.7309-9.4285 372.7309 0ZM355.65929 0"></path>
+</g>
+<g transform="translate(348.61678,-2.952)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="8.966376" x="-52.800396" y="-52.800396">C23</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(350.68929,-26.90002)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-52.800396,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="4.98132" x="-52.800396" y="-52.800396">2023</text>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M17.2716 0H53.06026" fill="none"></path>
+<g transform="translate(53.46025,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M88.40346 0H124.19212" fill="none"></path>
+<g transform="translate(124.59212,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M159.53532 0H195.32397" fill="none"></path>
+<g transform="translate(195.72397,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M230.66718 0H266.45584" fill="none"></path>
+<g transform="translate(266.85583,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M301.79904 0H337.58769" fill="none"></path>
+<g transform="translate(337.98769,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+</section>
+<section id="influence-et-philosophie" class="level3">
+<h3 class="anchored" data-anchor-id="influence-et-philosophie">Influence et Philosophie</h3>
+<div class="encadre-examplebox callout callout-style-default callout-tip callout-titled" title="Influence du C">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Influence du C
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le C a directement influencé C++, Objective-C, C#, Java, JavaScript, Go, et Rust. La syntaxe du C (accolades, opérateurs, structures de contrôle) est devenue le standard de facto pour les langages impératifs.</p>
+</div>
+</div>
+<div class="encadre-techbox callout callout-style-default callout-important callout-titled" title="Philosophie de design">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Philosophie de design
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Principes fondamentaux:</strong></p>
+<ul>
+<li>Confiance au programmeur</li>
+<li>Pas de vérifications inutiles au runtime</li>
+<li>Correspondance proche avec le matériel</li>
+<li>Langage minimal avec bibliothèque standard riche</li>
+</ul>
+<p>Ces choix expliquent la performance du C mais aussi ses pièges (UB, gestion manuelle de la mémoire).</p>
+</div>
+</div>
+</section>
+</section>
+<section id="structure-du-cours" class="level2">
+<h2 class="anchored" data-anchor-id="structure-du-cours">Structure du Cours</h2>
+<p>Le cours est organisé en 6 grandes parties couvrant 13 chapitres obligatoires:</p>
+<p><span class="figure-cours"><svg role="img" aria-label="Les six parties du cours, des fondamentaux du langage jusqu'à l'exécution des programmes." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="278.195049pt" height="102.447103pt" viewbox="-70.007476 -70.007473 278.195049 102.447103">
+<style type="text/css">
+@font-face{font-family:nf0;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:nf1;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAMwAAoAAAAABXAAAALkAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAbAqEBIMdCxQAATYCJAMkBCAFgiAHIBtGBFGUDUYP4kdibKNma1KlSE2d2G2B4H9G5dS9k+TaUhjIEAJ6FRB+BGR7kl+BmKev29udj3YnfCaZZdp4aIWl3OVFaayjHt3UH+AF9IsDwDYeeA/YEsysx9YACSOPesGILN2m7GiPxkDD08d2gMnjLMIBvXvzM7DwJnnjkhUJ4IjAJfAO1Fx99RBJ1TP4tw9Y5LTBf0EBBTCKAQZhwFIA9Og82kGlyiFTqVajLj2/0Gpnn5222mS95ZZFQL4kwXrTGoA5gJsAAFh6CYqgaDcZQcwbimcYshItw2MCJ7B+t1opffBAxoMR1LJJVQIvlAmFSqm8WCiRqlQylVquks0pkKnlainl7Y48kB+OJg9umK6v33HDRpg8p2hD6lalEutMNDYrg+dmS80sMAItm3Nq8vTckxMn6n+odL96rmPBjks3fGilSiUnPJHLBQjgoUye6yw9kr1uxTpkr3vaQZZV0j7as7StFfmPitKGgUb/WI8zSTh1Ye2mtGDTRqvmIGVe8Joba3FOSEK2DDHImVW4XBvxWTQ62T2wqjKqn14k9Lnd8H73JHtRz4cQWRb/XcMbxksfFu4/6FpptaEdC2aRcToyb24ZWkjzzCZe4T2V4r0nLManuKnMAvF/VvxJT3KaSpnOmE6ZQvyfIQ3FvXTf3FCL8dpF1+KcwfElyGuE4mZSRyanu3Z03WDf4HWad9dMYdI4qRAAgAAItLyfp8q1I76KGRY6+f992fk+AWIUABCYsJQ+DY0fi43PBgBIeh6ykd0q2Q39/3MWcKseHGOO0KwSn1l0EYCEJQrA/GjeGAKsSYlmMTRLxhHoMBGG+TTPhBUGGQkIM0HGWCI5jGNExkREWjKej64VJZ9f2dZt499W57sjgK+XD2v/vVfX9DV299W32vh7BSFfu15dqtWyka9Sm242/LWp40umFlPdGrVrY8OXF5+Dk/22UCv1qFUDVQYTtUafRt0Pr9fKhj8vQRgCAAAA) format('woff2');}
+
+</style>
+<g id="page1">
+<g stroke-miterlimit="10" transform="translate(-27.288552,-55.635012)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g fill="#ccf">
+<g fill="#fcc">
+<g fill="#ccf">
+<g fill="#fcc">
+<path d="M38.67912 14.22636H-38.67912C-40.88829 14.22636-42.67912 12.43553-42.67912 10.22636V-10.22636C-42.67912-12.43553-40.88829-14.22636-38.67912-14.22636H38.67912C40.88829-14.22636 42.67912-12.43553 42.67912-10.22636V10.22636C42.67912 12.43553 40.88829 14.22636 38.67912 14.22636ZM-42.67912-14.22636"></path>
+</g>
+</g>
+<g transform="translate(-14.2425,-3.1995)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf1" font-size="8.966376" x="-27.288552" y="-55.635012">P<tspan x="-22.249449">artie</tspan><tspan x="-1.608848">I</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(-24.78697,-24.36574)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-27.288552" y="-55.635012">F<tspan x="-23.941112">ondament</tspan><tspan x="6.304463">aux</tspan><tspan x="18.118156">C</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#ffe6cc">
+<g fill="#ccf">
+<g fill="#ffe6cc">
+<path d="M135.41914 14.22636H58.0609C55.85173 14.22636 54.0609 12.43553 54.0609 10.22636V-10.22636C54.0609-12.43553 55.85173-14.22636 58.0609-14.22636H135.41914C137.62831-14.22636 139.41914-12.43553 139.41914-10.22636V10.22636C139.41914 12.43553 137.62831 14.22636 135.41914 14.22636ZM54.0609-14.22636"></path>
+</g>
+</g>
+<g transform="translate(81.14302,-3.1995)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf1" font-size="8.966376" x="-27.288552" y="-55.635012">P<tspan x="-22.249449">artie</tspan><tspan x="-1.608848">II</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(74.39049,-24.52673)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-27.288552" y="-55.635012">R<tspan x="-23.390179">epr</tspan><tspan x="-13.710485">ésent</tspan><tspan x="2.155016">a</tspan><tspan x="5.572195">tion</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#ffc">
+<g fill="#ccf">
+<g fill="#ffc">
+<path d="M232.15916 14.22636H154.80092C152.59175 14.22636 150.80092 12.43553 150.80092 10.22636V-10.22636C150.80092-12.43553 152.59175-14.22636 154.80092-14.22636H232.15916C234.36833-14.22636 236.15916-12.43553 236.15916-10.22636V10.22636C236.15916 12.43553 234.36833 14.22636 232.15916 14.22636ZM150.80092-14.22636"></path>
+</g>
+</g>
+<g transform="translate(176.52855,-3.1995)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf1" font-size="8.966376" x="-27.288552" y="-55.635012">P<tspan x="-22.249449">artie</tspan><tspan x="-1.608848">III</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(180.62045,-24.52675)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-27.288552" y="-55.635012">Mémoir<tspan x="-5.132644">e</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#cfc">
+<g fill="#ccf">
+<g fill="#cfc">
+<path d="M38.67912-46.23613H-38.67912C-40.88829-46.23613-42.67912-48.02696-42.67912-50.23613V-70.68886C-42.67912-72.89803-40.88829-74.68886-38.67912-74.68886H38.67912C40.88829-74.68886 42.67912-72.89803 42.67912-70.68886V-50.23613C42.67912-48.02696 40.88829-46.23613 38.67912-46.23613ZM-42.67912-74.68886"></path>
+</g>
+</g>
+<g transform="translate(-16.74449,-63.66199)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf1" font-size="8.966376" x="-27.288552" y="-55.635012">P<tspan x="-22.249449">artie</tspan><tspan x="-1.608848">IV</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(-15.11649,-84.51894)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-27.288552" y="-55.635012">S<tspan x="-23.731889">truc</tspan><tspan x="-12.050701">tur</tspan><tspan x="-3.549587">es</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#cff">
+<g fill="#ccf">
+<g fill="#cff">
+<path d="M135.41914-46.23613H58.0609C55.85173-46.23613 54.0609-48.02696 54.0609-50.23613V-70.68886C54.0609-72.89803 55.85173-74.68886 58.0609-74.68886H135.41914C137.62831-74.68886 139.41914-72.89803 139.41914-70.68886V-50.23613C139.41914-48.02696 137.62831-46.23613 135.41914-46.23613ZM54.0609-74.68886"></path>
+</g>
+</g>
+<g transform="translate(81.35002,-63.66199)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf1" font-size="8.966376" x="-27.288552" y="-55.635012">P<tspan x="-22.249449">artie</tspan><tspan x="-1.608848">V</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(82.40897,-84.98795)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-27.288552" y="-55.635012">E<tspan x="-23.829519">x</tspan><tspan x="-20.837741">écution</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#ccf">
+<g fill="#ccf">
+<g fill="#ccf">
+<path d="M232.15916-46.23613H154.80092C152.59175-46.23613 150.80092-48.02696 150.80092-50.23613V-70.68886C150.80092-72.89803 152.59175-74.68886 154.80092-74.68886H232.15916C234.36833-74.68886 236.15916-72.89803 236.15916-70.68886V-50.23613C236.15916-48.02696 234.36833-46.23613 232.15916-46.23613ZM150.80092-74.68886"></path>
+</g>
+</g>
+<g transform="translate(176.73555,-63.66199)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf1" font-size="8.966376" x="-27.288552" y="-55.635012">P<tspan x="-22.249449">artie</tspan><tspan x="-1.608848">VI</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(184.84496,-84.82693)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-55.635012)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-27.288552" y="-55.635012">Outils</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+<section id="détail-des-parties" class="level3">
+<h3 class="anchored" data-anchor-id="détail-des-parties">Détail des Parties</h3>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Partie I: Fondamentaux C">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Partie I: Fondamentaux C
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Maîtrise complète de la syntaxe C (structures de contrôle, types, opérateurs, fonctions, compilation).</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Partie II: Représentation">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Partie II: Représentation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Représentation numérique (binaire, hexadécimal, virgule flottante IEEE 754).</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="{Partie III: Mémoire, Pointeurs, Tableaux}">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>{Partie III: Mémoire, Pointeurs, Tableaux}
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Organisation mémoire, adressage, pointeurs, tableaux 1D/2D, chaînes de caractères.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Partie IV: Structures et Allocation">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Partie IV: Structures et Allocation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Structures, unions, alignement, allocation dynamique (malloc/free).</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Partie V: Exécution et Système">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Partie V: Exécution et Système
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Stack frames, layout mémoire, hiérarchie cache, fichiers POSIX.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="Partie VI: Outils et Techniques">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Partie VI: Outils et Techniques
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Makefiles, linking, pointeurs de fonctions, préprocesseur, optimisation.</p>
+</div>
+</div>
+<div class="encadre-warningbox callout callout-style-default callout-warning callout-titled" title="Chapitres optionnels">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Chapitres optionnels
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Deux chapitres optionnels couvrent le multithreading et les sockets réseau.</p>
+</div>
+</div>
+</section>
+<section id="objectifs-du-cours" class="level3">
+<h3 class="anchored" data-anchor-id="objectifs-du-cours">Objectifs du Cours</h3>
+<div class="encadre-techbox callout callout-style-default callout-important callout-titled" title="Compétences visées">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Compétences visées
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Comprendre les mécanismes sous-jacents du C (pas seulement la syntaxe)</li>
+<li>Maîtriser l’organisation mémoire et l’adressage</li>
+<li>Debugger efficacement (GDB, Valgrind)</li>
+<li>Optimiser les performances (cache, algorithmes)</li>
+<li>Développer du code système robuste</li>
+<li>Utiliser les outils professionnels (Make, Docker)</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="prérequis" class="level2">
+<h2 class="anchored" data-anchor-id="prérequis">Prérequis</h2>
+<div class="encadre-warningbox callout callout-style-default callout-warning callout-titled" title="Connaissances requises">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Connaissances requises
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Les étudiants doivent avoir des connaissances basiques en C:</p>
+<ul>
+<li>Variables et types de base (int, float, char)</li>
+<li>Structures de contrôle simples (if, for, while)</li>
+<li>Fonctions et passage de paramètres</li>
+<li>Pointeurs simples (déclaration, déréférencement)</li>
+<li>Compilation basique avec gcc</li>
+</ul>
+<p><strong>Ce cours n’est pas une introduction au C.</strong> Les concepts de base sont supposés acquis.</p>
+</div>
+</div>
+</section>
+<section id="environnement-de-travail" class="level2">
+<h2 class="anchored" data-anchor-id="environnement-de-travail">Environnement de Travail</h2>
+<p>Tous les travaux pratiques (TP) utilisent un environnement Docker standardisé. Le TP-1 couvre l’installation et la configuration de cet environnement.</p>
+<div class="encadre-infobox callout callout-style-default callout-note callout-titled" title="Avantages de Docker">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Avantages de Docker
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>L’utilisation de Docker garantit un environnement identique pour tous les étudiants, indépendamment du système d’exploitation (Windows, macOS, Linux).</p>
+</div>
+</div>
+<p><span class="figure-cours"><svg role="img" aria-label="L'environnement de travail : Windows, Linux et macOS convergent vers un même conteneur Docker, qui unifie les outils de tous les étudiants." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="170.477589pt" height="122.288697pt" viewbox="-70.007476 -70.007472 170.477589 122.288697">
+<style type="text/css">
+@font-face{font-family:nf0;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+
+</style>
+<g id="page1">
+<g stroke-miterlimit="10" transform="translate(-41.461782,-58.469612)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g fill="#ccf">
+<g fill="#ccf">
+<path d="M24.45274 11.38113H-24.45274C-26.66191 11.38113-28.45274 9.5903-28.45274 7.38113V-7.38113C-28.45274-9.5903-26.66191-11.38113-24.45274-11.38113H24.45274C26.66191-11.38113 28.45274-9.5903 28.45274-7.38113V7.38113C28.45274 9.5903 26.66191 11.38113 24.45274 11.38113ZM-28.45274-11.38113"></path>
+</g>
+<g transform="translate(-19.05,-3.5)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-41.461782,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="-41.461782" y="-58.469612">Windo<tspan x="-14.841601">ws</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#ccf">
+<path d="M81.35843 11.38113H32.45294C30.24377 11.38113 28.45294 9.5903 28.45294 7.38113V-7.38113C28.45294-9.5903 30.24377-11.38113 32.45294-11.38113H81.35843C83.5676-11.38113 85.35843-9.5903 85.35843-7.38113V7.38113C85.35843 9.5903 83.5676 11.38113 81.35843 11.38113ZM28.45294-11.38113"></path>
+</g>
+<g transform="translate(41.9707,-3.28)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-41.461782,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="-41.461782" y="-58.469612">macOS</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ccf">
+<g fill="#ccf">
+<path d="M138.26414 11.38113H89.35866C87.14949 11.38113 85.35866 9.5903 85.35866 7.38113V-7.38113C85.35866-9.5903 87.14949-11.38113 89.35866-11.38113H138.26414C140.47331-11.38113 142.26414-9.5903 142.26414-7.38113V7.38113C142.26414 9.5903 140.47331 11.38113 138.26414 11.38113ZM85.35866-11.38113"></path>
+</g>
+<g transform="translate(102.4664,-3.41)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-41.461782,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="-41.461782" y="-58.469612">Linux</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#b3ffb3">
+<g fill="#b3ffb3">
+<path d="M138.26395-28.45294H-24.45258C-26.66174-28.45294-28.45258-30.24377-28.45258-32.45294V-81.35843C-28.45258-83.5676-26.66174-85.35843-24.45258-85.35843H138.26395C140.47311-85.35843 142.26395-83.5676 142.26395-81.35843V-32.45294C142.26395-30.24377 140.47311-28.45294 138.26395-28.45294ZM-28.45258-85.35843"></path>
+</g>
+<g transform="translate(-8.94434,-60.52069)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-41.461782,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="9.96264" x="-41.461782" y="-58.469612">Dock<tspan x="-20.639857">er</tspan><tspan x="-10.248823">—</tspan><tspan x="-.286183">Envir</tspan><tspan x="20.874458">onnement</tspan><tspan x="66.12477">unifié</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ffc">
+<g fill="#ffc">
+<path d="M-21.33955-110.96616H21.33956V-93.89435H-21.33955Z"></path>
+</g>
+<g transform="translate(-4.8335,-103.38925)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-41.461782,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-41.461782" y="-58.469612">g<tspan x="-38.044604">c</tspan><tspan x="-35.010983">c</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ffc">
+<g fill="#ffc">
+<path d="M12.80385-110.96616H55.48296V-93.89435H12.80385Z"></path>
+</g>
+<g transform="translate(28.55042,-104.13824)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-41.461782,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-41.461782" y="-58.469612">g<tspan x="-38.044604">db</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ffc">
+<g fill="#ffc">
+<path d="M46.94728-110.96616H89.62639V-93.89435H46.94728Z"></path>
+</g>
+<g transform="translate(56.36934,-104.13824)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-41.461782,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-41.461782" y="-58.469612">v<tspan x="-38.344471">algrind</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ffc">
+<g fill="#ffc">
+<path d="M81.0907-110.96616H123.76981V-93.89435H81.0907Z"></path>
+</g>
+<g transform="translate(94.35927,-104.88025)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-41.461782,-58.469612)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-41.461782" y="-58.469612">mak<tspan x="-28.839124">e</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M11.58595-11.58173L27.70518-27.68898" fill="none"></path>
+<g transform="matrix(0.70734,-0.70683,0.70683,0.70734,27.98811,-27.9717)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M56.91026-11.58173L56.90996-27.45445" fill="none"></path>
+<g transform="matrix(-0.00002,-0.99998,0.99998,-0.00002,56.90997,-27.85445)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M102.23512-11.58173L86.11522-27.68898" fill="none"></path>
+<g transform="matrix(-0.70737,-0.70682,0.70682,-0.70737,85.83229,-27.9717)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M21.09698-85.56291L11.54144-93.19987" fill="none"></path>
+<g transform="matrix(-0.78111,-0.62428,0.62428,-0.78111,11.22902,-93.44957)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M42.58592-85.56291L38.87029-92.984" fill="none"></path>
+<g transform="matrix(-0.44768,-0.89413,0.89413,-0.44768,38.69122,-93.34163)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M64.07397-85.56291L65.91382-92.92319" fill="none"></path>
+<g transform="matrix(0.2425,-0.97014,0.97014,0.2425,66.01082,-93.31123)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M85.56291-85.56291L93.1376-93.13377" fill="none"></path>
+<g transform="matrix(0.70726,-0.70691,0.70691,0.70726,93.4205,-93.41652)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+<div class="encadre-techbox callout callout-style-default callout-important callout-titled" title="Contenu de l'image Docker">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Contenu de l’image Docker
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>L’image Docker (<code>elbachirtoure/c-advanced-course:v2.0</code>) contient:</p>
+<ul>
+<li><strong>Compilateurs:</strong> gcc, g++</li>
+<li><strong>Debuggers:</strong> gdb (avec gdb-dashboard pour meilleure visualisation)</li>
+<li><strong>Outils mémoire:</strong> valgrind, AddressSanitizer</li>
+<li><strong>Éditeurs:</strong> vim, nano</li>
+<li><strong>Outils de build:</strong> make, cmake</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="organisation-pédagogique" class="level2">
+<h2 class="anchored" data-anchor-id="organisation-pédagogique">Organisation Pédagogique</h2>
+<p>Pour chaque chapitre, le cours comprend trois composantes:</p>
+<p><span class="figure-cours"><svg role="img" aria-label="L'organisation pédagogique : cours magistral, travaux dirigés et travaux pratiques." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="312.209405pt" height="49.359761pt" viewbox="-70.007476 -70.007475 312.209405 49.359761">
+<style type="text/css">
+@font-face{font-family:nf0;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAXEAAoAAAAACdgAAAV5AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgRQKjACJJQsqAAE2AiQDUAQgBYIgByAbogdRlEtSDPDjMHZDv4knVqOdolEdsLCJa70JHvjvtD93JioApEpBLIB0v57EL1g9nCMDj7lHAkkLPKCase1kK8yQ4JKs/zd84w5dk39RFAnyBWDL0qP3KFuW+Eg6aFaBBTbRjQYmA6apG8sfEurCf3UPLRCkJZDFH+IYSpAuSC//n0eO+hHxrWCIEgZgVIFJhjXompjWoSKLrxT8fwcoEKWAQGn3EJSiKWtkBGsUrH4rZ8yRMSabEsqpRks3OvoYZIRpZvlqD5CFkCy4z+Qeuu+OC84647STjjvmqBYErMpD0URqBdCbCOxgCiYwQWGWYPBSTYXH7VI0RUBXLk5V5TWmmiSkAqTmCPOagpxUs6S8RK1z2nvzwbZP/dWIgVXeTD9HSARr/6PU4H3otGjzrvcO3oQEwcNaI9fEhj5hCTvreqsQhWAcrIZD8tCCphOhUJHTzpvQLdzHpplnftFayUTNY9SxoYjlJ34cfIgy3a2NgmctCYrSPBL8UjfGNzhnntYce9V41VUgnuJBPSAfVogyGrlcdvgJgCeIG4/+hX+j38Gfde8rnRTnB76Xn7DAge1EV8Nr8ZXgsnImERJONDZWn5+uLx6yT8+sTYSB3afmMvaNYlhshytBsREb/hdRBs+6DXXLD8b18qK4iF2sxunZP+rTL3rSDXx1Nee8sStjP/X95+Tyj/4vVgWonDNcUGOAAEI6/gYuNHY/vi1FwNDEvyb9tyj0c4QNWFdmE9ZgU4O61WlAKqGlfCm3smMgX25AQHbvswvs3LmHh/yDx1pC3vxkvVK0MXZkb/SElkZSc25b6oigWX/dRXZvIPPqreeozSmZYvLg3uT2FCXd0YPLutADNvm2GVS/X18+Hpqv7I7VLzWmGmGMPkQ1GjqO+2UeG2OnXgyJ3q2e0RHD8u6bBQfzGxLqaOeL+hfyv8l/sZ5njNIr8smi8nTdZbPIoNxdfZHLkxr/Tt/bGqgaoiUiZ36o3M8uKycrfXvepCfJTSNjdt+PpTmGpbJ0XPeEjq1tsSjNb+6rp52uxUGH+BJ1VWNNRh7Rn6eH8c+nLSPZpIflRM4kmJmmnfbONhYV/S0lHHvh5gyd0EqZoqy7sQS/8Cd9NUOR2pvlefK2tJP33fbI8E2NDw2/EreWT1WiRmRo5doP7eOM1IWhVP984QKMw3eR36/4HTdpmoQ0OFE9Z6MVt6ixMWplc0talJY2tx8mi2upWpr4LVnpFOtuZvN6ie7mOhx5/Xa54aViXz1ePbTF/7f5xf11BGa5OB/JeupNyE7MVjw9K5X3UNOY10n1z7mahiMFMXq3Bos8H6cfM6NvSeNto1GRl619pg6MPGwy/B++VpPubFxfWkGrdNeIdQYf3ufCqe/vbMwQGanNVfyoKSW9niLzgvRiheGV3KvbOduWJhGB+pedNvjU6IKQHk2uCRf7WiXfZ4M6qn/OVZfEl4Tx6B0/1bU6hh0PPd7iWHXrT5hek09/1zT1WN9s0lD96d/1fzetvhRVnzXxZdKeKN+8rrlg98oSBPEadEGJ77SZJf+mkRWornuxy9JPgAYp0rEkJ0hfYrz3HzuUc6ixtXQZpAJipGmakRYLZTfywUVSECX+JdRXhLKbXKGkQgoiTIonXHRSLW7GRTTiIIVQKN7HWDyPaYxzYdekINcAgWIMWUYgIBOxYBTImDCjxAjzOqxCxmmyIfa4IiMUBggciT1gBSrKYSW21MIqVAzShoQzvv9PrdIOT7hHDfeEb8BBRGh4zvmZwu+a7puY1g1BB4bGUsUIU4zTSTfuKVbLMBO4E+ULewinlm4EmKAPmzqMOxGEEi5QnkVsGLyWSbrpAh3MefgupuljIlHHEO5EETqr4hUA) format('woff2');}
+@font-face{font-family:nf1;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAKYAAoAAAAABIQAAAJPAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAATAqCSIIjCw4AATYCJAMYBCAFgiAHIBugAyAehU1ZN1Z4kiQJ2/d2dwTPk1v2PgOEHU7VY67VqXeiWosRiuq6tNtueJ68vf0N44S7m3iUjQKOPOgGMUdS/wPQ+/6/m3ygG2iC2OG9s6znH7StmNikNYACSTwyC2qbowgWN3w9DbVIDVA5KiexYDzG99AITkwvfWXQSwC4DSFYQM5Vl49tu5hG6ClMsgMC3K97DaDACIqAEUxrgOYwGHY4KELML2yXb81Lzz1JgLGNHQDCQBI4DgBMACCM3HgNOGNcx8k83Bvn+/GetzHm4+F/MZ4X62+P/edaru/F/vun41zP7+yN0WvDEp8sjU92TS3X4uNjYnRcXKwHbxynUcLFDbTjV9EyGN0K3J4n99VtdfPZiy62yN1GhCeFjoxKySZ/lB/gYP2zLyE2nfD5/jJPXrkr9x5dP7ewcWIsuWdfbkqsTCR83i6cs37RzKaCObeuHg4qa6fbsOZRaighJbTykW6wdq4IEj7/V8jZTKPOqDlTVkr0l7SvGQr71gWfd/F74qt2u/31RAAQIDh8t41PH7wh6CgTOvU/34zbgMMAIHjHGmphnLH5ePOL8w3GweIcJrwOIDxZhGct4wiwjTmsAtDaiAEMBFKalIHS4hoibcr4DtoYkyjSAohxVpHSZIuQllHipM1WAtoSVc1/MjqzrHrK8rK8pd13tHTRkij8pD4gp66wui6/dMryRauIVq5WlWy5poiWqUy1KZYrk2epOLmqVCtUrswUSy2yxDbaHcpY7Ew1cuV8fJZGU+SoU6hanXylplhukVUUAA==) format('woff2');}
+
+</style>
+<g id="page1">
+<g stroke-miterlimit="10" transform="translate(-27.288552,-52.800396)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g fill="#fcc">
+<g fill="#fcc">
+<path d="M38.67912 17.07161H-38.67912C-40.88829 17.07161-42.67912 15.28078-42.67912 13.07161V-13.07161C-42.67912-15.28078-40.88829-17.07161-38.67912-17.07161H38.67912C40.88829-17.07161 42.67912-15.28078 42.67912-13.07161V13.07161C42.67912 15.28078 40.88829 17.07161 38.67912 17.07161ZM-42.67912-17.07161"></path>
+</g>
+<g transform="translate(-6.72,-3.26)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf1" font-size="9.96264" x="-27.288552" y="-52.800396">CM</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#ffe6cc">
+<g fill="#ffe6cc">
+<path d="M152.4901 17.07161H75.13185C72.92268 17.07161 71.13185 15.28078 71.13185 13.07161V-13.07161C71.13185-15.28078 72.92268-17.07161 75.13185-17.07161H152.4901C154.69926-17.07161 156.4901-15.28078 156.4901-13.07161V13.07161C156.4901 15.28078 154.69926 17.07161 152.4901 17.07161ZM71.13185-17.07161"></path>
+</g>
+<g transform="translate(107.85597,-3.26)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf1" font-size="9.96264" x="-27.288552" y="-52.800396">TD</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#cfc">
+<g fill="#cfc">
+<path d="M266.30107 17.07161H188.94283C186.73366 17.07161 184.94283 15.28078 184.94283 13.07161V-13.07161C184.94283-15.28078 186.73366-17.07161 188.94283-17.07161H266.30107C268.51024-17.07161 270.30107-15.28078 270.30107-13.07161V13.07161C270.30107 15.28078 268.51024 17.07161 266.30107 17.07161ZM184.94283-17.07161"></path>
+</g>
+<g transform="translate(221.86195,-3.26)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf1" font-size="9.96264" x="-27.288552" y="-52.800396">TP</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(-22.46649,-27.21127)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-27.288552" y="-52.800396">Cour<tspan x="-13.340856">s</tspan><tspan x="-9.02405">Magis</tspan><tspan x="7.573709">tr</tspan><tspan x="12.183423">al</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(91.70149,-27.37228)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-27.288552" y="-52.800396">T<tspan x="-23.871373">r</tspan><tspan x="-21.618819">av</tspan><tspan x="-14.986689">aux</tspan><tspan x="-3.172997">Dirig</tspan><tspan x="10.384157">és</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(201.59947,-27.0853)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-27.288552,-52.800396)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="nf0" font-size="6.973848" x="-27.288552" y="-52.800396">T<tspan x="-23.871373">r</tspan><tspan x="-21.618819">av</tspan><tspan x="-14.986689">aux</tspan><tspan x="-3.172997">Pr</tspan><tspan x="3.026755">a</tspan><tspan x="6.443933">tiques</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="CM (Cours Magistral)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>CM (Cours Magistral)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Présentation des concepts avec visualisations mémoire et exemples techniques.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="TD (Travaux Dirigés)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>TD (Travaux Dirigés)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Exercices d’analyse et de compréhension approfondie des mécanismes. Inclut des exercices forensics d’analyse de dumps hexadécimaux.</p>
+</div>
+</div>
+<div class="encadre-definitionbox callout callout-style-default callout-note callout-titled" title="TP (Travaux Pratiques)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>TP (Travaux Pratiques)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Mise en pratique avec compilation, debugging, et implémentation de programmes. Utilisation intensive de GDB et Valgrind.</p>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Ce cours vise à former des ingénieurs capables de:</p>
+<ul>
+<li>Comprendre en profondeur le fonctionnement du C</li>
+<li>Analyser et optimiser du code système</li>
+<li>Debugger efficacement des problèmes complexes</li>
+<li>Développer du code robuste et performant</li>
+</ul>
+</section>
+<section class="level2">
+<h2 class="anchored" data-anchor-id="">Ressources du chapitre</h2>
+<ul>
+<li><strong>PDF du cours</strong> · <a href="../../../cours/programmation-c-avancee/ressources/cm-introduction.pdf" class="seance-ressource" title="Le chapitre en PDF">Le chapitre en PDF</a> <span class="ressource-poids">(151 Ko)</span></li>
+<li><strong>Lab</strong> · <a href="../../../cours/programmation-c-avancee/ressources/tp-1-environnement.pdf" class="seance-ressource" title="TP 1 — Mise en place de l’environnement">TP 1 — Mise en place de l’environnement</a> <span class="ressource-poids">(211 Ko)</span></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/elbachir67\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../cours/programmation-c-avancee/index.html" class="pagination-link" aria-label="Présentation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Présentation</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+
+
+
+
+</body></html>
