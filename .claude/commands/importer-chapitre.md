@@ -31,10 +31,14 @@ Le script copie les sources dans `cours/<slug>/_sources/`, importe la séance en
 
 **Code de sortie 2 : il manque une entrée du PO.** Deux cas, et dans les deux on s'arrête :
 
-- **Texte alternatif manquant** : une figure n'a pas de légende dans le `.tex`. Demander au PO **une phrase
-  par figure**, en lui donnant le titre de la slide et la légende voisine pour qu'il sache de quoi il
-  s'agit. Relancer ensuite la même commande avec `--alt 'nom_de_la_figure=phrase du PO'` (une fois par
-  figure). Ne jamais écrire de `TODO(PO)` à sa place : la story l'interdit.
+- **Texte alternatif manquant** : une figure n'a pas de légende dans le `.tex`. Le script affiche alors
+  un **brouillon par figure** (US-58), rédigé à partir de la source de la figure — libellés et flèches
+  d'un TikZ, titre, axes et séries d'un script matplotlib — avec le titre de la section où elle
+  apparaît. **Présenter au PO la liste entière en une seule fois**, sans en écrire aucune dans le
+  site : il accepte, corrige ou réécrit. Relancer ensuite la même commande avec
+  `--alt 'nom_de_la_figure=phrase validée'` (une fois par figure). Ne jamais écrire de `TODO(PO)` à sa
+  place, et ne jamais prendre un brouillon pour une validation : la story l'interdit.
+  Le brouillon seul se relit avec `python3 scripts/brouillons_alt.py <fichier.tex> --prefixe NN-slug`.
 - **Bloc non converti** (`<!-- NON CONVERTI: … -->` dans la page, listé dans le rapport) : montrer au PO
   l'extrait LaTeX concerné et lui demander quoi en faire — l'écrire autrement dans le `.tex`, l'abandonner,
   ou étendre `scripts/importer_chapitre.py`. **Ne pas ouvrir la PR tant qu'il en reste un.**
@@ -68,7 +72,8 @@ figures s'afficher, et le repli du code s'ouvrir.
 - `gh pr create` avec le template du dépôt, en indiquant :
   - le nombre de slides, d'encadrés, de blocs de code, de figures ;
   - le rapport de conversion (`_sources/rapport-NN-<slug>.md`) : ce qui a été ignoré, ce qui a été traduit ;
-  - la provenance de chaque texte alternatif (légende du `.tex`, ou phrase du PO) ;
+  - la provenance de chaque texte alternatif, telle que `[chapitres.origine_alt]` l'enregistre :
+    légende du `.tex`, brouillon validé, ou texte du PO ;
   - les résultats des contrôles ci-dessus ;
   - `Closes #<issue>` si une issue suit cette séance, sinon rien.
 - **STOP.** Donner au PO : cinq lignes de résumé, le lien de la PR, et ce qu'il doit relire — le contenu de
