@@ -391,6 +391,12 @@ def inline(texte: str, conversion: Conversion) -> str:
 
     texte = MOTIF_MATHS.sub(garder, texte)
 
+    # Guillemets de LaTeX : « ``mot'' ». En Markdown, un double accent grave **ouvre un code en
+    # ligne** et avale tout ce qui suit, barres d'un tableau comprises : la ligne cessait d'être une
+    # ligne de tableau, et Pandoc rendait le tout en bloc de lignes, barres verticales apparentes.
+    # Constaté sur le chapitre 2 du cours de C ; 189 occurrences dans les quatre chapitres.
+    texte = re.sub(r"``\s*(.+?)\s*''", "« \\1 »", texte, flags=re.S)
+
     # Mise en forme.
     remplacements = [
         (r"\\textbf\{", "**", "**"), (r"\\alert\{", "**", "**"),
@@ -832,6 +838,10 @@ def entete_page(entete: dict[str, str], description: str, numero: str,
     # Une page rédigée n'est pas imprimée en PDF depuis le site : c'est le PDF de LaTeX qui fait
     # foi, attaché en ressource. La table des séances a besoin de le savoir.
     lignes.append('cible: "page"')
+    # Marque la page pour la feuille de style et le script de défilement (US-59) : un chapitre rédigé
+    # porte des tableaux et des figures plus larges qu'un téléphone, qui doivent défiler dans leur
+    # cadre plutôt qu'élargir la page.
+    lignes.append("body-classes: cours-page")
     if numero:
         lignes.append(f"numero: {guillemets(numero)}")
     lignes += ressources_yaml(ressources)

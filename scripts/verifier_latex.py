@@ -35,7 +35,15 @@ HORS_PERIMETRE = ("site_libs",)
 
 CODE = re.compile(r"<(code|pre|script|style)\b[^>]*>.*?</\1>", re.S | re.I)
 BLOCS = re.compile(r"<(pre|script|style)\b[^>]*>.*?</\1>", re.S | re.I)
+# Les mathématiques sont du LaTeX **voulu** : Quarto laisse `\(x \in \{0,1\}\)` dans la page et
+# MathJax le rend dans le navigateur. Les chercher ici ferait échouer tout chapitre qui écrit un
+# ensemble ou une accolade — le chapitre 1 du cours de C en compte six.
+MATHS = re.compile(r'<span class="math[^"]*"[^>]*>.*?</span>', re.S | re.I)
 RESTES = re.compile(r"\\\\\*?(?:\[[^\]]*\])?|\\\[")
+# Guillemets de LaTeX laissés en clair. Un double accent grave **ouvre un code en ligne** en
+# Markdown : il avalait les barres d'un tableau, qui sortait alors en texte brut (chapitre 2 du
+# cours de C, 189 occurrences). Hors des blocs et des codes en ligne, ils n'ont rien à faire ici.
+GUILLEMETS = re.compile(r"``|(?<![\w'])''(?!\w)")
 # Les caractères que LaTeX échappe : dans une page rendue, la barre oblique n'a rien à faire devant.
 ECHAPPES = re.compile(r"\\[{}\[\]$%&_#~^]")
 CONTEXTE = 60
@@ -49,8 +57,10 @@ def autour_de(texte: str, trouve: re.Match[str]) -> str:
 
 def restes_de_la_page(page: Path) -> list[str]:
     """Restes de LaTeX visibles dans une page, avec ce qui les entoure."""
-    html = page.read_text(encoding="utf-8", errors="ignore")
-    trouves = [autour_de(t.string, t) for t in RESTES.finditer(CODE.sub(" ", html))]
+    html = MATHS.sub(" ", page.read_text(encoding="utf-8", errors="ignore"))
+    sans_code = CODE.sub(" ", html)
+    trouves = [autour_de(t.string, t) for t in RESTES.finditer(sans_code)]
+    trouves += [autour_de(t.string, t) for t in GUILLEMETS.finditer(sans_code)]
     # Les caractères échappés sont cherchés jusque dans les codes en ligne : c'est là qu'ils se
     # voyaient, un code en ligne rendant son contenu tel quel.
     trouves += [autour_de(t.string, t) for t in ECHAPPES.finditer(BLOCS.sub(" ", html))]
