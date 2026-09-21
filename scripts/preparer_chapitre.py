@@ -288,6 +288,18 @@ def main() -> int:
     for nom, script in scripts_python.items():
         commande += ["--figure-python", f"{nom}={cours / script}"]
 
+    # Schémas TikZ : compilés avant l'import, sous le nom que la page leur donnera (US-55). La
+    # compilation demande LaTeX et ne tourne jamais en CI ; les SVG sont commités.
+    if "\\begin{tikzpicture}" in source:
+        tikz = subprocess.run(
+            [sys.executable, str(RACINE / "scripts" / "figures_tikz.py"), str(tex),
+             "--sortie", str(figures), "--prefixe", f"{numero}-{slug}"],
+            capture_output=True, text=True)
+        print(tikz.stdout.strip())
+        if tikz.returncode != 0:
+            print(tikz.stderr.strip())
+            return 1
+
     execution = subprocess.run(commande, capture_output=True, text=True)
     print(execution.stdout.strip())
     if execution.returncode != 0:

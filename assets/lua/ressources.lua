@@ -7,7 +7,11 @@
 package.path = package.path .. ";" .. pandoc.path.directory(PANDOC_SCRIPT_FILE) .. "/?.lua"
 local R = require("ressources-communes")
 
-local TITRES = { fr = "Ressources de la séance", en = "Session resources" }
+-- Une séance en slides, un chapitre en page rédigée : le mot suit ce que le cours est.
+local TITRES = {
+  seance = { fr = "Ressources de la séance", en = "Session resources" },
+  page = { fr = "Ressources du chapitre", en = "Chapter resources" },
+}
 
 local langue, cours
 
@@ -25,7 +29,9 @@ function Pandoc(doc)
         for _, ressource in ipairs(visibles) do
           table.insert(items, pandoc.Plain(R.lien(ressource, langue, cours, false)))
         end
-        blocs:insert(pandoc.Header(2, pandoc.Inlines(TITRES[langue])))
+        local forme = doc.meta.cible and pandoc.utils.stringify(doc.meta.cible) == "page"
+          and "page" or "seance"
+        blocs:insert(pandoc.Header(2, pandoc.Inlines(TITRES[forme][langue])))
         blocs:insert(pandoc.BulletList(items))
       end
     else

@@ -53,6 +53,8 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
         # Les figures sont citées dans le .qmd par un chemin relatif : il doit être celui du fichier
         # commité, et non celui du dossier temporaire.
         "--prefixe-figures", os.path.relpath(figures, sortie.parent),
+        # Les schémas TikZ portent le nom du chapitre, et non celui du fichier temporaire.
+        "--prefixe-tikz", sortie.stem,
     ]
     if chapitre.get("alt"):
         commande += ["--alt", str(cours / chapitre["alt"])]

@@ -1,0 +1,216 @@
+---
+title: "Introduction"
+cible: "page"
+ressources:
+  - type: "pdf"
+    titre: "Le chapitre en PDF"
+    fichier: "ressources/cm-introduction.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/cm-introduction.pdf"
+  - type: "lab"
+    titre: "TP 1 — Mise en place de l'environnement"
+    fichier: "ressources/tp-1-environnement.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/tp-1-environnement.pdf"
+description: "Chapitre d'introduction du cours de Programmation C avancée : pourquoi le C, son histoire, la structure du cours, les prérequis et l'environnement de travail."
+author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+## Introduction
+
+Ce cours couvre la programmation C avancée pour les étudiants de L3 GLSI. L'objectif est la compréhension approfondie des mécanismes sous-jacents du langage C, de l'organisation mémoire, et des techniques de programmation système.
+
+## Pourquoi le C
+
+Le langage C reste pertinent pour plusieurs domaines critiques:
+
+::: {.callout-note .encadre-definitionbox title="Systèmes d'exploitation"}
+Le noyau Linux (30+ millions de lignes), Windows NT kernel, macOS/iOS kernel (XNU), et les drivers matériels sont écrits en C. La compréhension du C permet de comprendre les interfaces système (POSIX) et le fonctionnement des OS.
+:::
+
+::: {.callout-note .encadre-definitionbox title="Systèmes embarqués"}
+Firmware des microcontrôleurs (ARM Cortex, AVR, PIC), systèmes temps réel (FreeRTOS, Zephyr), dispositifs IoT, équipements médicaux, et systèmes automobiles (CAN bus, ECU) utilisent le C pour son efficacité et son contrôle direct du matériel.
+:::
+
+::: {.callout-note .encadre-definitionbox title="Performance critique"}
+Moteurs de bases de données (PostgreSQL, MySQL, SQLite), runtimes de langages (CPython interpreter, JVM Hotspot), serveurs web (nginx, Apache), bibliothèques numériques (BLAS, LAPACK, FFTW), et codecs multimédia (FFmpeg, x264) sont implémentés en C.
+:::
+
+::: {.callout-note .encadre-definitionbox title="Infrastructure logicielle"}
+Compilateurs (GCC, Clang/LLVM), interpréteurs (Lua, Ruby MRI), shells (bash, zsh), utilitaires système (coreutils), et protocoles réseau (OpenSSH, OpenSSL, curl) sont écrits en C.
+:::
+
+::: {.callout-note .encadre-definitionbox title="Backends AI/ML"}
+Les couches de calcul de TensorFlow, PyTorch (ATen/C10), ONNX Runtime, cuDNN (NVIDIA), et OpenBLAS utilisent du C/C++ pour les opérations matricielles et le calcul GPU.
+:::
+
+::: {.callout-note .encadre-definitionbox title="Sécurité et cryptographie"}
+OpenSSL, libsodium, WireGuard, et les implémentations de TLS/SSL sont en C pour minimiser la surface d'attaque et garantir la performance.
+:::
+
+::: {.callout-important .encadre-techbox title="Caractéristiques du C"}
+Le C offre un contrôle précis de la mémoire, une prédictibilité des performances, et une portabilité maximale. Ce cours forme des ingénieurs capables de comprendre et maintenir du code système, d'optimiser les performances, et de débugger efficacement.
+:::
+
+## Histoire du C
+
+Le langage C a été développé entre 1969 et 1973 par Dennis Ritchie aux Bell Labs (AT&T). L'objectif initial était de réécrire le système d'exploitation UNIX, précédemment écrit en assembleur.
+
+{{< svg ../figures/00-introduction-01.svg alt="Frise de l'histoire du C : BCPL puis B mènent au C, qui sert à réécrire UNIX." >}}
+
+Le C est directement dérivé du langage B (Ken Thompson, 1969), lui-même inspiré de BCPL (Basic Combined Programming Language, Martin Richards, 1966).
+
+### Versions Majeures
+
+::: {.callout-note .encadre-definitionbox title="K&R C (1978)"}
+Première définition du langage dans "The C Programming Language" par Brian Kernighan et Dennis Ritchie. Standard de facto sans normalisation formelle.
+:::
+
+::: {.callout-note .encadre-definitionbox title="ANSI C / C89 (1989)"}
+Première standardisation par l'ANSI (American National Standards Institute). Ajout de prototypes de fonctions, qualificateurs `const` et `volatile`, bibliothèque standard.
+:::
+
+::: {.callout-note .encadre-definitionbox title="C99 (1999)"}
+Types `long long`, `_Bool`, nombres complexes. Commentaires `//`. Déclarations mixtes code/variables. Tableaux de longueur variable (VLA). Fonctions `inline`.
+:::
+
+::: {.callout-note .encadre-definitionbox title="C11 (2011)"}
+Support multithreading natif (`<threads.h>`), assertions statiques (`_Static_assert`), types atomiques (`<stdatomic.h>`), amélioration Unicode.
+:::
+
+::: {.callout-note .encadre-definitionbox title="C17 (2018)"}
+Corrections techniques, pas de nouvelles fonctionnalités majeures.
+:::
+
+::: {.callout-note .encadre-definitionbox title="C23 (2023)"}
+Dernière version. Ajout de `typeof`, attributs standards (`[[nodiscard]]`), `_BitInt(N)` pour entiers de largeur arbitraire, amélioration des préprocesseur.
+:::
+
+{{< svg ../figures/00-introduction-02.svg alt="Filiation du C depuis le K&R : les normes successives, de C89 à C23." >}}
+
+### Influence et Philosophie
+
+::: {.callout-tip .encadre-examplebox title="Influence du C"}
+Le C a directement influencé C++, Objective-C, C\#, Java, JavaScript, Go, et Rust. La syntaxe du C (accolades, opérateurs, structures de contrôle) est devenue le standard de facto pour les langages impératifs.
+:::
+
+::: {.callout-important .encadre-techbox title="Philosophie de design"}
+**Principes fondamentaux:**
+
+- Confiance au programmeur
+- Pas de vérifications inutiles au runtime
+- Correspondance proche avec le matériel
+- Langage minimal avec bibliothèque standard riche
+
+Ces choix expliquent la performance du C mais aussi ses pièges (UB, gestion manuelle de la mémoire).
+:::
+
+## Structure du Cours
+
+Le cours est organisé en 6 grandes parties couvrant 13 chapitres obligatoires:
+
+{{< svg ../figures/00-introduction-03.svg alt="Les six parties du cours, des fondamentaux du langage jusqu'à l'exécution des programmes." >}}
+
+### Détail des Parties
+
+::: {.callout-note .encadre-definitionbox title="Partie I: Fondamentaux C"}
+Maîtrise complète de la syntaxe C (structures de contrôle, types, opérateurs, fonctions, compilation).
+:::
+
+::: {.callout-note .encadre-definitionbox title="Partie II: Représentation"}
+Représentation numérique (binaire, hexadécimal, virgule flottante IEEE 754).
+:::
+
+::: {.callout-note .encadre-definitionbox title="{Partie III: Mémoire, Pointeurs, Tableaux}"}
+Organisation mémoire, adressage, pointeurs, tableaux 1D/2D, chaînes de caractères.
+:::
+
+::: {.callout-note .encadre-definitionbox title="Partie IV: Structures et Allocation"}
+Structures, unions, alignement, allocation dynamique (malloc/free).
+:::
+
+::: {.callout-note .encadre-definitionbox title="Partie V: Exécution et Système"}
+Stack frames, layout mémoire, hiérarchie cache, fichiers POSIX.
+:::
+
+::: {.callout-note .encadre-definitionbox title="Partie VI: Outils et Techniques"}
+Makefiles, linking, pointeurs de fonctions, préprocesseur, optimisation.
+:::
+
+::: {.callout-warning .encadre-warningbox title="Chapitres optionnels"}
+Deux chapitres optionnels couvrent le multithreading et les sockets réseau.
+:::
+
+### Objectifs du Cours
+
+::: {.callout-important .encadre-techbox title="Compétences visées"}
+- Comprendre les mécanismes sous-jacents du C (pas seulement la syntaxe)
+- Maîtriser l'organisation mémoire et l'adressage
+- Debugger efficacement (GDB, Valgrind)
+- Optimiser les performances (cache, algorithmes)
+- Développer du code système robuste
+- Utiliser les outils professionnels (Make, Docker)
+:::
+
+## Prérequis
+
+::: {.callout-warning .encadre-warningbox title="Connaissances requises"}
+Les étudiants doivent avoir des connaissances basiques en C:
+
+- Variables et types de base (int, float, char)
+- Structures de contrôle simples (if, for, while)
+- Fonctions et passage de paramètres
+- Pointeurs simples (déclaration, déréférencement)
+- Compilation basique avec gcc
+
+**Ce cours n'est pas une introduction au C.** Les concepts de base sont supposés acquis.
+:::
+
+## Environnement de Travail
+
+Tous les travaux pratiques (TP) utilisent un environnement Docker standardisé. Le TP-1 couvre l'installation et la configuration de cet environnement.
+
+::: {.callout-note .encadre-infobox title="Avantages de Docker"}
+L'utilisation de Docker garantit un environnement identique pour tous les étudiants, indépendamment du système d'exploitation (Windows, macOS, Linux).
+:::
+
+{{< svg ../figures/00-introduction-04.svg alt="L'environnement de travail : Windows, Linux et macOS convergent vers un même conteneur Docker, qui unifie les outils de tous les étudiants." >}}
+
+::: {.callout-important .encadre-techbox title="Contenu de l'image Docker"}
+L'image Docker (`elbachirtoure/c-advanced-course:v2.0`) contient:
+
+- **Compilateurs:** gcc, g++
+- **Debuggers:** gdb (avec gdb-dashboard pour meilleure visualisation)
+- **Outils mémoire:** valgrind, AddressSanitizer
+- **Éditeurs:** vim, nano
+- **Outils de build:** make, cmake
+:::
+
+## Organisation Pédagogique
+
+Pour chaque chapitre, le cours comprend trois composantes:
+
+{{< svg ../figures/00-introduction-05.svg alt="L'organisation pédagogique : cours magistral, travaux dirigés et travaux pratiques." >}}
+
+::: {.callout-note .encadre-definitionbox title="CM (Cours Magistral)"}
+Présentation des concepts avec visualisations mémoire et exemples techniques.
+:::
+
+::: {.callout-note .encadre-definitionbox title="TD (Travaux Dirigés)"}
+Exercices d'analyse et de compréhension approfondie des mécanismes. Inclut des exercices forensics d'analyse de dumps hexadécimaux.
+:::
+
+::: {.callout-note .encadre-definitionbox title="TP (Travaux Pratiques)"}
+Mise en pratique avec compilation, debugging, et implémentation de programmes. Utilisation intensive de GDB et Valgrind.
+:::
+
+## Conclusion
+
+Ce cours vise à former des ingénieurs capables de:
+
+- Comprendre en profondeur le fonctionnement du C
+- Analyser et optimiser du code système
+- Debugger efficacement des problèmes complexes
+- Développer du code robuste et performant
+
+::: {#ressources-seance}
+:::
