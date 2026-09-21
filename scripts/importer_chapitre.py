@@ -887,13 +887,18 @@ def identifiants_uniques(svg: str, prefixe: str) -> str:
     seule, est parfaitement valide. Il n'apparaît qu'une fois plusieurs figures posées dans la même
     page.
     """
-    identifiants = set(re.findall(r'\bid="([^"]+)"', svg))
+    # Les deux écritures existent dans les figures de ce site : pdftocairo met des guillemets,
+    # dvisvgm des apostrophes. Le navigateur les lit pareil, une expression régulière non.
+    identifiants = set(re.findall(r"""\bid=["']([^"']+)["']""", svg))
     if not identifiants:
         return svg
     for identifiant in sorted(identifiants, key=len, reverse=True):
         nouveau = f"{prefixe}-{identifiant}"
-        svg = svg.replace(f'id="{identifiant}"', f'id="{nouveau}"')
-        svg = svg.replace(f'href="#{identifiant}"', f'href="#{nouveau}"')
+        for guillemet in ('"', "'"):
+            svg = svg.replace(f"id={guillemet}{identifiant}{guillemet}",
+                              f"id={guillemet}{nouveau}{guillemet}")
+            svg = svg.replace(f"href={guillemet}#{identifiant}{guillemet}",
+                              f"href={guillemet}#{nouveau}{guillemet}")
         svg = svg.replace(f"url(#{identifiant})", f"url(#{nouveau})")
     return svg
 
