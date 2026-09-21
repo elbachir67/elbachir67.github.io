@@ -436,7 +436,7 @@ python3 scripts/preparer_chapitre.py <cours-slug> <fichier.tex> --cible page \
   du document à un callout Quarto ; le manifeste le garde et la CI le rejoue. Un `tcolorbox` porte son
   titre entre **accolades**, là où un encadré Beamer le met entre crochets.
 - `--titre` remplace le titre du `.tex`, qui est souvent une **couverture** LaTeX (« Chapitre -1 :
-  Introduction, Programmation C Avancée - L3 GLSI ») plutôt qu'un titre de page.
+  Introduction, Programmation C Avancée - L3 ») plutôt qu'un titre de page.
 - **Le numéro affiché est une donnée à part** (`--numero-affiche`) : un cours peut commencer à `-1` ou
   à `0`, et le nom du fichier ne sert qu'à ordonner. Sans numéro, la page porte son seul titre.
 - Les `tikzpicture` ne sont pas encore convertis : ils sont **signalés**, jamais bricolés (US-55).
