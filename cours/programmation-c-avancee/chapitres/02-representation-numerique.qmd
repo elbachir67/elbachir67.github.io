@@ -1,0 +1,337 @@
+---
+title: "Représentation numérique"
+cible: "page"
+body-classes: cours-page
+numero: "1"
+ressources:
+  - type: "pdf"
+    titre: "Le chapitre en PDF"
+    fichier: "ressources/cm-representation-numerique.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/cm-representation-numerique.pdf"
+  - type: "td"
+    titre: "TD — Représentation numérique"
+    fichier: "ressources/td-representation-numerique.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/td-representation-numerique.pdf"
+  - type: "tp"
+    titre: "TP — Représentation numérique"
+    fichier: "ressources/tp-representation-numerique.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/tp-representation-numerique.pdf"
+description: "Chapitre 1 de Programmation C avancée : bases binaire et hexadécimale, entiers signés et non signés, complément à deux, et nombres flottants IEEE 754."
+author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+## Systèmes de Numération
+
+### Base Binaire
+
+::: {.callout-note .encadre-definitionbox title="Notation binaire"}
+En base 2, chaque position représente une puissance de 2. Un nombre binaire $b_{n-1}b_{n-2}...b_1b_0$ correspond à $\sum_{i=0}^{n-1} b_i \cdot 2^i$ où $b_i \in \{0,1\}$. Le bit de poids fort (MSB) est à gauche, le bit de poids faible (LSB) à droite.
+:::
+
+{{< svg ../figures/02-representation-numerique-01.svg alt="Une flèche mène à 8+0+2+1=11_10 ; s'y ajoutent, de haut en bas : 1011_2 = ?_10 ; puis MSB et LSB ; une suite de 4 cases s'y répète." >}}
+
+::: {.callout-important .encadre-techbox title="Conversion décimal $\rightarrow$ binaire"}
+Division successive par 2, en conservant les restes. Lire les restes de bas en haut (dernier reste = MSB).
+:::
+
+{{< svg ../figures/02-representation-numerique-02.svg alt="Une flèche mène à 1101_2 ; s'y ajoutent, de haut en bas : 13_10 → binaire, 13 ÷ 2 = 6 reste 1 (LSB), 6 ÷ 2 = 3 reste 0, 3 ÷ 2 = 1 reste 1 et 1 ÷ 2 = 0 reste 1 (MSB)." >}}
+
+### Base Hexadécimale
+
+::: {.callout-note .encadre-definitionbox title="Notation hexadécimale"}
+Base 16 utilise les symboles 0-9 et A-F (A=10, B=11, C=12, D=13, E=14, F=15). Préfixe `0x` en C. Chaque chiffre hex = 4 bits exactement.
+:::
+
+{{< svg ../figures/02-representation-numerique-03.svg alt="Tableau de 3 lignes et 17 colonnes, en-tête Hex, 0, 1, 2, 3, 4, jusqu'à F, première colonne Hex, Dec et Bin." >}}
+
+::: {.callout-important .encadre-techbox title="Conversion binaire $\leftrightarrow$ hexadécimal"}
+Grouper par 4 bits depuis la droite. Chaque groupe = 1 chiffre hex. Ajouter des zéros à gauche si nécessaire.
+:::
+
+{{< svg ../figures/02-representation-numerique-04.svg alt="1011 mène à B (11) ; 1010 mène à A (10) ; s'y ajoutent, de haut en bas : 10111010_2 → hex et = 0xBA." >}}
+
+```c
+unsigned int x = 0x3A;      // 3A hex = 0011 1010 bin = 58 dec
+unsigned int y = 0xFF;      // FF hex = 1111 1111 bin = 255 dec
+printf("%02X\n", x);        // Affiche "3A" (toujours 2 caractères par octet)
+```
+
+## Représentation des Entiers
+
+### Entiers Non Signés (Unsigned)
+
+::: {.callout-note .encadre-definitionbox title="Unsigned sur $w$ bits"}
+$\boxed{B2U_w(\vec{x}) = \sum_{i=0}^{w-1} x_i \cdot 2^i}$   où $x_i \in \{0,1\}$ est le bit à la position $i$.<br>
+**Plage :** $[0, 2^w-1]$. Aucun nombre négatif représentable.
+:::
+
+{{< svg ../figures/02-representation-numerique-05.svg alt="De haut en bas : unsigned char : 11011011_2 et = 128+64+16+8+2+1 = 219 ; une suite de 8 cases s'y répète." >}}
+
+{{< svg ../figures/02-representation-numerique-06.svg alt="Tableau de 5 lignes et 4 colonnes, en-tête Type, Bits, Min et Max, première colonne Type, unsigned char, unsigned short, unsigned int et unsigned long ; s'y ajoutent Plages des types unsigned." >}}
+
+### Complément à Deux (Two's Complement)
+
+::: {.callout-note .encadre-definitionbox title="Two's complement sur $w$ bits"}
+$\boxed{B2T_w(\vec{x}) = -x_{w-1} \cdot 2^{w-1} + \sum_{i=0}^{w-2} x_i \cdot 2^i}$<br>
+Le bit de poids fort (MSB) $x_{w-1}$ est le **bit de signe** : 0 = positif, 1 = négatif.<br>
+**Plage :** $[-2^{w-1}, 2^{w-1}-1]$. **Asymétrie :** $|T_{min}| = |T_{max}| + 1$.
+:::
+
+{{< svg ../figures/02-representation-numerique-07.svg alt="De haut en bas : signed char: -3, signe, = -128+64+32+16+8+4+1 = -3, signed char: +120 et = 0+64+32+16+8+0+0+0 = 120 ; une suite de 16 cases s'y répète." >}}
+
+::: {.callout-important .encadre-techbox title="Valeurs remarquables (8 bits)"}
+**$-1$ :** Tous les bits à 1 $\rightarrow$ `0xFF` $= 11111111_2$<br>**$T_{min} = -128$ :** Bit de signe à 1, reste à 0 $\rightarrow$ `0x80` $= 10000000_2$<br>**$T_{max} = 127$ :** Bit de signe à 0, reste à 1 $\rightarrow$ `0x7F` $= 01111111_2$<br>**Négation :** $-x = \sim x + 1$ (inverser tous les bits, ajouter 1)
+:::
+
+{{< svg ../figures/02-representation-numerique-08.svg alt="De haut en bas : Négation : 5 → -5 (8 bits) ; puis x = 5 et 0x05 ; puis x et 0xFA ; puis x + 1 et 0xFB = -5 ; une suite de 24 cases s'y répète." >}}
+
+## Conversions Signed $\leftrightarrow$ Unsigned
+
+::: {.callout-note .encadre-definitionbox title="Principe de conversion"}
+La conversion entre signed et unsigned **préserve le motif binaire** mais change son interprétation. Aucun bit n'est modifié.
+:::
+
+{{< svg ../figures/02-representation-numerique-09.svg alt="De haut en bas : Même motif binaire, deux interprétations ; puis 0xFD ; puis unsigned: 253 et signed: -3 ; une suite de 8 cases s'y répète." >}}
+
+::: {.callout-important .encadre-techbox title="Formules de conversion (sur $w$ bits)"}
+**Signed $\rightarrow$ Unsigned :** $T2U_w(x) = \begin{cases} x & \text{si } x \geq 0 \\ x + 2^w & \text{si } x < 0 \end{cases}$<br>
+**Unsigned $\rightarrow$ Signed :** $U2T_w(u) = \begin{cases} u & \text{si } u \leq T_{max} \\ u - 2^w & \text{si } u > T_{max} \end{cases}$
+:::
+
+```c
+signed char sc = -1;              // 0xFF en mémoire
+unsigned char uc = (unsigned char)sc;  // Toujours 0xFF, interprété comme 255
+int x = -1;
+unsigned int y = 0;
+if (x < y)   // FAUX! x converti en unsigned: 0xFFFFFFFF > 0
+    printf("x < y\n");  // N'est PAS exécuté!
+```
+
+::: {.callout-warning .encadre-warningbox title="Comparaisons signed/unsigned"}
+Quand un opérande est signed et l'autre unsigned, le signed est **implicitement converti en unsigned**. Cela peut inverser le résultat attendu des comparaisons.
+:::
+
+{{< svg ../figures/02-representation-numerique-10.svg alt="Tableau de 5 lignes et 4 colonnes, en-tête Expression, Type, Évaluation et Résultat, première colonne Expression, -1 < 0U, -1 > -2, 2147483647 > -2147483648 et 2147483647U > -2147483648 ; s'y ajoutent Pièges de comparaison (32 bits)." >}}
+
+## Extension de Signe
+
+::: {.callout-note .encadre-definitionbox title="Extension lors de la promotion de type"}
+Quand on convertit un entier de $w$ bits vers $w'$ bits ($w' > w$) :<br>**Unsigned :** Extension par zéros (zero extension)   **Signed :** Extension du bit de signe (sign extension)
+:::
+
+{{< svg ../figures/02-representation-numerique-11.svg alt="De haut en bas : Extension unsigned : 8 → 16 bits ; puis uint8: 250 et 0xFA ; puis uint16: 250 et 0x00FA ; une suite de 24 cases s'y répète." >}}
+
+{{< svg ../figures/02-representation-numerique-12.svg alt="De haut en bas : Extension signed : 8 → 16 bits ; puis int8: -6 et 0xFA ; puis int16: -6 et 0xFFFA ; puis bit de signe répliqué ; une suite de 24 cases s'y répète." >}}
+
+```c
+int8_t x = -6;           // 0xFA
+int16_t y = x;           // 0xFFFA (bit de signe étendu)
+uint8_t a = 250;         // 0xFA
+uint16_t b = a;          // 0x00FA (zéros ajoutés)
+int8_t neg = -1;         // 0xFF
+uint32_t big = (uint8_t)neg;  // 0x000000FF (255), pas 0xFFFFFFFF
+```
+
+## Dépassements et Débordements
+
+### Overflow Unsigned
+
+::: {.callout-note .encadre-definitionbox title="Comportement unsigned (défini par la norme C)"}
+L'arithmétique unsigned est définie **modulo $2^w$**. Le débordement "wrap around" est **garanti**.
+$\boxed{\text{Résultat} = (\text{valeur mathématique}) \mod 2^w}$
+:::
+
+{{< svg ../figures/02-representation-numerique-13.svg alt="carry mène à perdu ; s'y ajoutent, de haut en bas : Wrap-around unsigned 8 bits : le carry perdu ; puis 255 et 0xFF ; puis + 1 ; puis =, 1 et 0x00 = 0 ; une suite de 24 cases s'y répète." >}}
+
+```c
+unsigned char x = 255;
+x++;                      // x = 0 (défini, wrap-around: 256 mod 256 = 0)
+unsigned char y = 0;
+y--;                      // y = 255 (défini: -1 + 256 = 255)
+// Détection d'overflow AVANT addition (sûr)
+if (b > UINT_MAX - a)     // Vérifie si a + b dépasserait UINT_MAX
+    printf("Overflow would occur!\n");
+```
+
+### Overflow Signed
+
+::: {.callout-warning .encadre-warningbox title="Comportement signed (Undefined Behavior)"}
+Le débordement d'entiers signés est un **Undefined Behavior** (UB) en C. Le compilateur peut supposer qu'il ne se produit jamais et optimiser le code en conséquence. Le résultat est **imprévisible**.
+:::
+
+{{< svg ../figures/02-representation-numerique-14.svg alt="De haut en bas : Overflow signed 8 bits (UB) : changement de signe ; puis 127 et T_max ; puis + 1 ; puis = et = -128 (UB!) ; une suite de 24 cases s'y répète." >}}
+
+```c
+#include <limits.h>
+int a = 2000000000, b = 1000000000;
+if ((b > 0 && a > INT_MAX - b) || (b < 0 && a < INT_MIN - b)) {
+    printf("Overflow se produirait!\n");
+} else {
+    int sum = a + b;  // Safe
+}
+```
+
+::: {.callout-warning .encadre-warningbox title="Bugs de sécurité réels (CVE)"}
+**CVE-2009-1385 (Linux kernel e1000 driver):** Un overflow d'entier permettait un buffer overflow.<br>**CVE-2021-43267 (Linux kernel TIPC):** Un overflow dans la validation de taille permettait une exécution de code.
+:::
+
+## Représentation IEEE 754 (Flottants)
+
+### Pourquoi les flottants ?
+
+Les entiers ne suffisent pas pour : très grands nombres ($1.5 \times 10^{11}$ m), très petits nombres ($9.11 \times 10^{-31}$ kg), nombres fractionnaires ($\pi$, 19.99 €).
+
+::: {.callout-tip .encadre-examplebox title="Le problème de la virgule fixe"}
+Virgule fixe gaspille des bits : pour $0.000001$ la partie entière est inutile, pour $10^{15}$ la partie fractionnaire est inutile. **Solution :** Faire "flotter" la virgule → virgule **flottante**.
+:::
+
+### Nombres binaires fractionnaires
+
+::: {.callout-note .encadre-definitionbox title="Représentation binaire fractionnaire"}
+$\boxed{b_m b_{m-1} \ldots b_1 b_0 \textcolor{red}{.} b_{-1} b_{-2} \ldots b_{-n} = \sum_{i=-n}^{m} b_i \times 2^i}$<br>
+Bits à gauche du point : poids $2^0, 2^1, 2^2, ...$<br>Bits à droite du point : poids $2^{-1} = 0.5$, $2^{-2} = 0.25$, $2^{-3} = 0.125$, ...
+:::
+
+{{< svg ../figures/fig_01_binary_weights.svg alt="Figure intitulée « Représentation binaire fractionnaire : 101.1101_2 = 5.8125_10 », libellés : « point binaire », « 2^… », « Valeur = … », « = … », « Partie entière », « Partie fractionnaire », « Bits », « Poids », et 1 autre(s)." >}}
+
+::: {.callout-tip .encadre-examplebox title="Exemple : $101.11_2 = ?$"}
+$101.11_2 = 1 \times 2^2 + 0 \times 2^1 + 1 \times 2^0 + 1 \times 2^{-1} + 1 \times 2^{-2} = 4 + 0 + 1 + 0.5 + 0.25 = \mathbf{5.75}$
+:::
+
+### Formule IEEE 754
+
+::: {.callout-note .encadre-definitionbox title="Formule IEEE 754"}
+$\boxed{V = (-1)^s \times M \times 2^E}$<br>
+$s$ = Signe (0 = positif, 1 = négatif), $M$ = Mantisse (chiffres significatifs), $E$ = Exposant (puissance de 2)
+:::
+
+### Structure d'un float (32 bits)
+
+{{< svg ../figures/02-representation-numerique-15.svg alt="De haut en bas : s, exposant et fraction (mantisse) ; puis 1 bit, 8 bits et 23 bits." >}}
+
+::: {.callout-important .encadre-techbox title="Décodage des champs"}
+**Signe :** $s = 0$ → positif, $s = 1$ → négatif<br>**Exposant biaisé :** $\text{exposant stocké} = E + 127$ donc $E = \text{exposant stocké} - 127$<br>**Mantisse avec "1 implicite" :** $M = 1.\text{fraction}$ (le "1." n'est pas stocké)
+:::
+
+### Exemple : convertir 13.0 en float
+
+1. **Signe :** $13.0$ positif → $s = 0$
+2. **Binaire :** $13 = 1101_2$ donc $13.0 = 1101.0_2$
+3. **Normaliser :** $1101.0_2 = 1.101_2 \times 2^3$ → $E = 3$
+4. **Exposant biaisé :** $3 + 127 = 130 = 10000010_2$
+5. **Fraction :** $101$ + 20 zéros
+
+{{< svg ../figures/02-representation-numerique-16.svg alt="De haut en bas : 0, 10000010 et 10100000000000000000000 ; puis s=0, exp=130 et frac." >}}
+
+**Résultat :** `0x41500000`. **Vérification :** $(-1)^0 \times 1.101_2 \times 2^3 = 1.625 \times 8 = 13.0$ ✓
+
+### Exemple : $-13.625$
+
+{{< svg ../figures/fig_02_ieee754_anatomy.svg alt="Figure intitulée « Structure IEEE 754 simple précision : … = … », libellés : « signe (1 bit) », « exposant (8 bits) », « fraction (mantisse) (23 bits) », « Signe », « Exposant (biaisé) », « Fraction (1 implicite) »." >}}
+
+::: {.callout-tip .encadre-examplebox title="Décorticage de $-13.625$"}
+**1.** Signe : négatif → $s = 1$<br>**2.** Binaire : $13 = 1101_2$, $0.625 = 0.101_2$ → $13.625 = 1101.101_2$<br>**3.** Normalisation : $1.101101_2 \times 2^3$<br>**4.** Exposant : $3 + 127 = 130 = 10000010_2$<br>**5.** Fraction : $101101$ + 17 zéros<br>**Résultat :** `0xC15A0000`
+:::
+
+### Valeurs spéciales
+
+| **Valeur** | **Quand ?** | **Exemple en C** |
+| --- | --- | --- |
+| $+0$ et $-0$ | Deux représentations de zéro | `0.0f`, `-0.0f` |
+| $+\infty$ et $-\infty$ | Dépassement de capacité | `1.0f / 0.0f` |
+| **NaN** | Opération indéfinie | `0.0f / 0.0f`, `sqrt(-1)` |
+
+::: {.callout-warning .encadre-warningbox title="NaN : Not a Number"}
+NaN n'est égal à rien, même pas à lui-même ! Utiliser `isnan(x)` pour tester.
+
+```c
+float x = 0.0f / 0.0f;   // x est NaN
+if (x == x)              // FAUX! NaN != NaN
+if (isnan(x))            // Correct
+```
+:::
+
+### Les pièges des flottants
+
+::: {.callout-warning .encadre-warningbox title="Piège n°1 : Représentation inexacte"}
+$0.1_{10} = 0.0001100110011..._2$ (infini !). Le motif "0011" se répète → erreur d'arrondi.
+:::
+
+::: {.callout-warning .encadre-warningbox title="Piège n°2 : Ne JAMAIS comparer avec =="}
+```c
+float a = 0.1f + 0.2f, b = 0.3f;
+if (a == b) ...               // DANGER! Peut être faux
+if (fabsf(a - b) < 0.00001f)  // Correct: comparer avec tolérance
+```
+:::
+
+::: {.callout-warning .encadre-warningbox title="Piège n°3 : Addition non associative"}
+```c
+float a = (3.14f + 1e10f) - 1e10f;   // = 0.0 !
+float b = 3.14f + (1e10f - 1e10f);   // = 3.14
+```
+:::
+
+### Cas réel : Patriot Missile (1991)
+
+{{< svg ../figures/fig_04_patriot_missile.svg alt="Figure intitulée « 0.1₁₀ = 0.000110011001100110011...₂ (période infinie !) », « Position du bit (après la virgule) » en abscisse, « Valeur du bit » en ordonnée, séries : « Erreur cumulée », libellés : « Début du motif répétitif "0011" », « … s (… m) »." >}}
+
+::: {.callout-note .encadre-infobox title="Ce qui s'est passé"}
+**Date :** 25 février 1991, Guerre du Golfe, Dhahran, Arabie Saoudite.<br>**Bug :** L'horloge comptait en incréments de $0.1$ s approximé sur 24 bits.<br>**Après 100 heures :** Erreur cumulée $\approx 0.34$ s. À $1676$ m/s → erreur de $\approx 570$ m.<br>**Conséquence :** Le Scud n'a pas été intercepté. **28 soldats tués.**
+:::
+
+### Application en Intelligence Artificielle
+
+{{< svg ../figures/fig_05_softmax_underflow.svg alt="Figure intitulée « La fonction exponentielle: croissance explosive », « x » en abscisse, « exp(x) [échelle log] » en ordonnée, séries : « Softmax naïf », « Softmax stable », la courbe tracée est croissante, libellés : « exp(710) ≈ ∞ (overflow float64) », « exp(-745) ≈ 0 (underflow float64) »…" >}}
+
+::: {.callout-note .encadre-infobox title="Le problème du softmax"}
+$\text{softmax}(x)_i = \frac{e^{x_i}}{\sum_{j} e^{x_j}}$ est utilisé partout en IA.<br>**Problème :** $e^{1000} = +\infty$ (overflow), $e^{-1000} = 0$ (underflow) → NaN<br>**Solution :** Soustraire le maximum avant de calculer (numériquement stable).
+:::
+
+::: {.callout-important .encadre-techbox title="Formats modernes pour l'IA"}
+| **Format** | **Bits** | **Usage** |
+| --- | --- | --- |
+| float32 | 32 | Standard, haute précision |
+| float16 | 16 | Entraînement GPU accéléré |
+| bfloat16 | 16 | Google TPU |
+| int8 | 8 | Inférence quantifiée |
+:::
+
+## Bonnes Pratiques
+
+### Types portables
+
+::: {.callout-important .encadre-techbox title="Utiliser les types de taille fixe (`<stdint.h>`)"}
+| **Type signé** | **Type non signé** | **Taille** |
+| --- | --- | --- |
+| `int8_t` | `uint8_t` | 8 bits |
+| `int16_t` | `uint16_t` | 16 bits |
+| `int32_t` | `uint32_t` | 32 bits |
+| `int64_t` | `uint64_t` | 64 bits |
+:::
+
+```c
+#include <stdint.h>
+#include <inttypes.h>
+uint32_t counter = 0;
+printf("counter = %" PRIu32 "\n", counter);
+```
+
+### Éviter les pièges signed/unsigned
+
+```c
+int index = -1;
+unsigned int limit = 100;
+if (index >= 0 && (unsigned int)index < limit)  // BON: cast explicite
+    printf("Index valide\n");
+```
+
+### Options de compilation recommandées
+
+```c
+gcc -Wall -Wextra -Werror -Wsign-compare -fsanitize=undefined -g prog.c
+```
+
+::: {#ressources-seance}
+:::

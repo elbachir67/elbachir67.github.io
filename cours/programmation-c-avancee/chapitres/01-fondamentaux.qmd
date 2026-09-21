@@ -1,0 +1,1028 @@
+---
+title: "Fondamentaux du C"
+cible: "page"
+body-classes: cours-page
+numero: "0"
+ressources:
+  - type: "pdf"
+    titre: "Le chapitre en PDF"
+    fichier: "ressources/cm-fondamentaux.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/cm-fondamentaux.pdf"
+  - type: "td"
+    titre: "TD — Fondamentaux du C"
+    fichier: "ressources/td-fondamentaux.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/td-fondamentaux.pdf"
+  - type: "tp"
+    titre: "TP — Fondamentaux du C"
+    fichier: "ressources/tp-fondamentaux.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/tp-fondamentaux.pdf"
+description: "Chapitre 0 de Programmation C avancée : types, opérateurs, structures de contrôle, fonctions et chaîne de compilation."
+author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+## Types et Représentation
+
+### Types Entiers
+
+Le C fournit plusieurs types entiers de tailles différentes. La taille exacte dépend de l'architecture.
+
+::: {.callout-important .encadre-techbox title="Types entiers signés"}
+`signed char` (au moins 8 bits), `short` (au moins 16 bits), `int` (au moins 16 bits, généralement 32), `long` (au moins 32 bits), `long long` (au moins 64 bits).
+:::
+
+::: {.callout-important .encadre-techbox title="Types entiers non signés"}
+Préfixe `unsigned` : `unsigned char`, `unsigned short`, `unsigned int`, `unsigned long`, `unsigned long long`.
+:::
+
+{{< svg ../figures/01-fondamentaux-01.svg alt="Tableau de 6 lignes et 3 colonnes, en-tête Type, Taille (x86-64) et Min/Max, première colonne Type, char, short, int, long et long long." >}}
+
+::: {.callout-warning .encadre-warningbox title="Garanties du standard"}
+Le standard C garantit uniquement : `sizeof(char)` $\leq$ `sizeof(short)` $\leq$ `sizeof(int)` $\leq$ `sizeof(long)` $\leq$ `sizeof(long long)`. Sur certaines architectures 32 bits, `long` = 4 bytes.
+:::
+
+### Types Flottants
+
+::: {.callout-note .encadre-definitionbox title="Types à virgule flottante"}
+`float` (généralement 32 bits IEEE 754 simple précision), `double` (généralement 64 bits IEEE 754 double précision), `long double` (80 ou 128 bits selon architecture).
+:::
+
+{{< svg ../figures/01-fondamentaux-02.svg alt="double (64 bits) est relié à S ; s'y ajoutent, de haut en bas : float (32 bits) ; puis Exposant (8 bits) et Mantisse (23 bits) ; puis S, Exposant (11 bits) et Mantisse (52 bits) ; une suite de 5 cases s'y répète." >}}
+
+### Type `char` et Signedness
+
+::: {.callout-warning .encadre-warningbox title="Ambiguïté du type char"}
+Le standard C ne spécifie PAS si `char` est signé ou non signé. Sur x86-64 (gcc), `char` est signé par défaut. Sur ARM, il est souvent non signé. Utiliser explicitement `signed char` ou `unsigned char` pour la portabilité.
+:::
+
+```c
+char c = 200;  // Comportement non portable
+// x86-64 gcc: c = -56 (dépassement en signé)
+// ARM gcc: c = 200 (non signé)
+
+// Portable:
+unsigned char uc = 200;  // Toujours 200
+signed char sc = 200;    // Overflow défini: wrap around
+```
+
+### Conversions Implicites
+
+::: {.callout-note .encadre-definitionbox title="Promotion entière"}
+Les types plus petits que `int` sont automatiquement promus à `int` dans les expressions. Ceci s'appelle la "promotion entière intégrale".
+:::
+
+```c
+short a = 10, b = 20;
+int c = a + b;  // a et b promus en int avant addition
+
+unsigned char uc = 255;
+int i = uc + 1;  // uc promu en int, résultat = 256
+
+// Conversion signé/non-signé (dangereux)
+int si = -1;
+unsigned int ui = 1;
+if (si < ui)  // FAUX! si converti en unsigned: 0xFFFFFFFF > 1
+    printf("si < ui\n");
+else
+    printf("si >= ui\n");  // S'exécute!
+```
+
+{{< svg ../figures/01-fondamentaux-03.svg alt="char et short mènent à int, qui mène à long ; les flèches portent « promotion » et « conversion »." >}}
+
+### Opérateur `sizeof`
+
+::: {.callout-note .encadre-definitionbox title="sizeof"}
+Opérateur (pas une fonction) qui retourne la taille en bytes d'un type ou d'une expression. Évalué à la compilation. Retourne un `size_t` (entier non signé).
+:::
+
+```c
+// Sur des types
+printf("%zu\n", sizeof(int));       // 4 (x86-64)
+printf("%zu\n", sizeof(char));      // 1 (toujours)
+printf("%zu\n", sizeof(double));    // 8
+
+// Sur des variables (parenthèses optionnelles)
+int x = 42;
+printf("%zu\n", sizeof(x));         // 4
+printf("%zu\n", sizeof x);          // 4 (valide sans parenthèses)
+
+// Sur des expressions (non évaluées!)
+int a = 5;
+printf("%zu\n", sizeof(a++));       // 4, et a reste 5!
+```
+
+::: {.callout-warning .encadre-warningbox title="sizeof et expressions"}
+L'expression dans `sizeof` n'est PAS évaluée. Seul le type est déterminé à la compilation. Donc `sizeof(a++)` ne modifie pas `a`.
+:::
+
+```c
+int arr[10];
+int *ptr = arr;
+
+printf("%zu\n", sizeof(arr));  // 40 (10 * 4 bytes)
+printf("%zu\n", sizeof(ptr));  // 8 (taille d'un pointeur x86-64)
+
+// Nombre d'éléments d'un tableau
+size_t n = sizeof(arr) / sizeof(arr[0]);  // 10
+```
+
+## Variables et Classes de Stockage
+
+### Déclaration, Définition et Initialisation
+
+::: {.callout-note .encadre-definitionbox title="Déclaration vs Définition"}
+**Déclaration** : introduit un identifiant et son type, sans allouer de mémoire.<br>**Définition** : déclaration + allocation mémoire. Toute définition est une déclaration.
+:::
+
+```c
+// Définition (déclaration + allocation)
+int x;              // Définition, valeur indéterminée
+int y = 42;         // Définition + initialisation
+
+// Déclaration pure (pas d'allocation ici)
+extern int z;       // Déclaré ici, défini ailleurs
+
+// Pour les fonctions
+int add(int, int);  // Déclaration (prototype)
+int add(int a, int b) { return a + b; }  // Définition
+```
+
+::: {.callout-warning .encadre-warningbox title="Variables non initialisées"}
+Une variable locale non initialisée a une valeur **indéterminée**. La lire est un comportement indéfini (UB). Les variables globales et `static` sont initialisées à zéro par défaut.
+:::
+
+```c
+int a;           // Global: initialisé à 0
+static int b;    // Static: initialisé à 0
+
+int main() {
+    int c;       // Local: valeur INDÉTERMINÉE (UB si lu)
+    int d = 0;   // Local: initialisé explicitement
+    
+    static int e;  // Static local: initialisé à 0
+    
+    printf("%d\n", c);  // UB! Valeur imprévisible
+    return 0;
+}
+```
+
+### Portée et Durée de Vie
+
+::: {.callout-note .encadre-definitionbox title="Portée (scope)"}
+**Portée de bloc** : variable visible du point de déclaration jusqu'à la fin du bloc `{}`.<br>**Portée de fichier** : variable déclarée hors de toute fonction, visible dans tout le fichier.
+:::
+
+```c
+int x = 10;  // Portée fichier (globale)
+
+void foo() {
+    int x = 20;  // Masque le x global
+    printf("%d\n", x);  // 20
+    
+    {
+        int x = 30;  // Masque le x de foo
+        printf("%d\n", x);  // 30
+    }
+    
+    printf("%d\n", x);  // 20 (x de foo)
+}
+
+int main() {
+    printf("%d\n", x);  // 10 (x global)
+    foo();
+    return 0;
+}
+```
+
+::: {.callout-important .encadre-techbox title="Durée de vie"}
+**Automatique** : durée du bloc (variables locales).<br>**Statique** : durée du programme (globales et `static`).
+:::
+
+### Classes de Stockage
+
+::: {.callout-note .encadre-definitionbox title="auto (implicite)"}
+Classe par défaut pour les variables locales. Allocation sur la pile, durée de vie = bloc englobant.
+:::
+
+```c
+void foo() {
+    auto int x = 5;  // Équivalent à: int x = 5;
+    // auto est implicite pour les locales
+}
+```
+
+::: {.callout-note .encadre-definitionbox title="static"}
+**Variable locale static** : durée de vie = programme, portée = bloc.<br>**Variable globale static** : portée limitée au fichier (liaison interne).<br>**Fonction static** : visible uniquement dans le fichier.
+:::
+
+```c
+void counter() {
+    static int count = 0;  // Initialisé UNE seule fois
+    count++;
+    printf("Appel #%d\n", count);
+}
+
+int main() {
+    counter();  // Appel #1
+    counter();  // Appel #2
+    counter();  // Appel #3
+    return 0;
+}
+```
+
+```c
+// fichier: module.c
+static int internal_counter = 0;  // Invisible hors de ce fichier
+static void helper() { }          // Fonction interne
+
+void public_api() {  // Visible partout
+    internal_counter++;
+    helper();
+}
+```
+
+::: {.callout-note .encadre-definitionbox title="extern"}
+Déclare une variable ou fonction définie dans un autre fichier (liaison externe). Pas d'allocation, juste une référence.
+:::
+
+```c
+// === config.h ===
+#ifndef CONFIG_H
+#define CONFIG_H
+extern int global_count;    // Déclaration
+extern void increment();    // Déclaration (extern implicite)
+#endif
+
+// === config.c ===
+#include "config.h"
+int global_count = 0;       // Définition (une seule fois)
+
+void increment() {          // Définition
+    global_count++;
+}
+
+// === main.c ===
+#include <stdio.h>
+#include "config.h"
+
+int main() {
+    printf("%d\n", global_count);  // 0
+    increment();
+    increment();
+    printf("%d\n", global_count);  // 2
+    return 0;
+}
+
+// Compilation: gcc -o prog main.c config.c
+```
+
+::: {.callout-warning .encadre-warningbox title="Erreurs courantes avec extern"}
+- Oublier la définition : erreur de linkage "undefined reference"
+- Définir plusieurs fois : erreur "multiple definition"
+- Initialiser dans la déclaration extern : devient une définition!
+:::
+
+```c
+// ERREUR: extern avec initialisation = définition
+extern int x = 5;  // C'est une DÉFINITION, pas une déclaration
+
+// CORRECT
+extern int x;      // Déclaration
+int x = 5;         // Définition (dans un autre fichier ou plus bas)
+```
+
+### Constantes : `const` vs `#define`
+
+::: {.callout-important .encadre-techbox title="const"}
+Qualificateur de type. La variable est en lecture seule après initialisation. Typée, scopée, visible au débogueur.
+:::
+
+::: {.callout-important .encadre-techbox title="\#define"}
+Directive préprocesseur. Substitution textuelle avant compilation. Pas de type, portée = fin du fichier (ou `#undef`).
+:::
+
+```c
+#define MAX_MACRO 100       // Substitution textuelle
+const int MAX_CONST = 100;  // Variable constante
+
+// Typage
+#define PI_MACRO 3.14159
+const double PI_CONST = 3.14159;
+
+// Scope
+void foo() {
+    #define LOCAL_MACRO 42  // Visible PARTOUT après cette ligne!
+    const int LOCAL_CONST = 42;  // Visible seulement dans foo
+}
+
+// Débogage
+// gdb peut afficher MAX_CONST, pas MAX_MACRO (disparu après préprocesseur)
+```
+
+```c
+#define SQUARE(x) x * x
+
+int a = SQUARE(3);      // 3 * 3 = 9, OK
+int b = SQUARE(1 + 2);  // 1 + 2 * 1 + 2 = 5, FAUX!
+
+// Solution: parenthèses
+#define SQUARE_SAFE(x) ((x) * (x))
+int c = SQUARE_SAFE(1 + 2);  // ((1 + 2) * (1 + 2)) = 9, OK
+
+// Mais toujours des problèmes
+int d = SQUARE_SAFE(a++);  // ((a++) * (a++)) : a incrémenté 2 fois!
+```
+
+::: {.callout-warning .encadre-warningbox title="Recommandation"}
+Préférer `const` à `#define` pour les constantes. Utiliser `#define` pour la compilation conditionnelle et les macros complexes uniquement.
+:::
+
+## Opérateurs et Évaluation
+
+### Opérateurs Arithmétiques
+
+::: {.callout-important .encadre-techbox title="Opérateurs arithmétiques"}
+`+`, `-`, `*`, `/`, `%` (modulo, entiers seulement).<br>Division entière : `7 / 2 = 3`, `-7 / 2 = -3` (troncature vers zéro en C99).<br>Modulo : signe du résultat = signe du dividende.
+:::
+
+```c
+int a = 7 / 2;      // 3
+int b = -7 / 2;     // -3 (C99: troncature vers zéro)
+int c = 7 % 2;      // 1
+int d = -7 % 2;     // -1 (signe de -7)
+int e = 7 % -2;     // 1 (signe de 7)
+
+// Attention au type!
+float f = 7 / 2;    // 3.0 (division entière puis conversion)
+float g = 7.0 / 2;  // 3.5 (division flottante)
+```
+
+### Opérateurs Bit à Bit
+
+::: {.callout-important .encadre-techbox title="Opérateurs bit à bit (entiers seulement)"}
+`&` (AND), `|` (OR), `^` (XOR), `~` (NOT), `<<` (shift gauche), `>>` (shift droite).
+:::
+
+```c
+unsigned int x = 0x89AB;  // 1000 1001 1010 1011
+unsigned int y = 0x1234;  // 0001 0010 0011 0100
+
+unsigned int a = x & y;   // 0x0020 (AND)
+unsigned int b = x | y;   // 0x9BBF (OR)
+unsigned int c = x ^ y;   // 0x9B9F (XOR)
+unsigned int d = ~x;      // 0xFFFF7654 (NOT, 32 bits)
+
+// Shifts
+unsigned int e = x << 2;  // 0x226AC (shift gauche, * 4)
+unsigned int f = x >> 2;  // 0x226A (shift droite logique, / 4)
+
+// Shift droite signé vs non-signé
+int si = -8;              // 0xFFFFFFF8
+int g = si >> 1;          // -4 (shift arithmétique: sign extend)
+unsigned int ui = -8;
+unsigned int h = ui >> 1; // 0x7FFFFFFC (shift logique: zéro extend)
+```
+
+::: {.callout-warning .encadre-warningbox title="Shift droite et type signé"}
+Le comportement de `>>` sur les types signés est défini par l'implémentation (généralement arithmétique avec extension de signe). Utiliser des types non signés pour des manipulations de bits prévisibles.
+:::
+
+### Opérateurs Logiques et Court-Circuit
+
+::: {.callout-note .encadre-definitionbox title="Opérateurs logiques"}
+`&&` (AND logique), `||` (OR logique), `!` (NOT logique). Évaluation en court-circuit : `&&` s'arrête au premier faux, `||` au premier vrai.
+:::
+
+```c
+int a = 0, b = 0;
+
+// && court-circuite
+if (a != 0 && b/a > 2) {  // b/a non évalué car a == 0
+    printf("OK\n");
+}
+
+// Ordre d'évaluation garanti
+int c = 0;
+if (++c > 0 && ++c > 1) {  // c = 2 après évaluation
+    printf("c = %d\n", c);
+}
+
+// Erreur classique: & au lieu de &&
+if (a != 0 & b/a > 2) {  // ERREUR: & évalue les deux côtés!
+    printf("Crash si a == 0\n");
+}
+```
+
+### Opérateurs d'Incrémentation
+
+::: {.callout-important .encadre-techbox title="Incrémentation et décrémentation"}
+`++x` (pré-incrémentation : incrémente puis retourne), `x++` (post-incrémentation : retourne puis incrémente). Idem pour `-{}-`.
+:::
+
+```c
+int a = 5, b, c;
+
+b = ++a;  // a = 6, b = 6 (pré-incrémentation)
+c = a++;  // c = 6, a = 7 (post-incrémentation)
+
+// Danger: modification multiple dans une expression
+int x = 5;
+int y = (x++) + (++x);  // COMPORTEMENT INDÉFINI (UB)!
+// x modifié deux fois sans sequence point
+```
+
+### Opérateur Ternaire
+
+::: {.callout-note .encadre-definitionbox title="Opérateur ternaire"}
+`condition ? valeur_si_vrai : valeur_si_faux`. Seule l'expression sélectionnée est évaluée.
+:::
+
+```c
+int a = 10, b = 20;
+int max = (a > b) ? a : b;  // max = 20
+
+// Side-effect dans une seule branche
+int c = 0;
+int d = (a > b) ? ++c : ++a;  // Seulement ++a exécuté
+// c = 0, a = 11, d = 11
+```
+
+### Précédence et Associativité
+
+{{< svg ../figures/01-fondamentaux-04.svg alt="Tableau de 15 lignes et 5 colonnes, en-tête Priorité, Opérateurs et Associativité, première colonne Priorité, Haute et Basse." >}}
+
+```c
+int a = 5, b = 10, c;
+
+// Priorité inattendue
+c = a & b == 5;  // Équivalent à: a & (b == 5)
+// NON (a & b) == 5 !
+
+// Shift et addition
+c = 1 << 2 + 3;  // Équivalent à: 1 << (2 + 3) = 32
+// NON (1 << 2) + 3 = 7 !
+```
+
+## Structures de Contrôle
+
+### Conditionnelle `if-else`
+
+::: {.callout-note .encadre-definitionbox title="Syntaxe if-else"}
+`if (condition) instruction;` ou `if (condition) {...} else {...}`. La condition est vraie si non nulle.
+:::
+
+```c
+int a = 10, b = 20, c = 30;
+
+// Bloc simple
+if (a > b)
+    printf("a > b\n");
+
+// Dangling else (associé au if le plus proche)
+if (a > 5)
+    if (b > 15)
+        printf("Les deux\n");
+    else  // Ce else est associé au deuxième if!
+        printf("Seulement b <= 15\n");
+
+// Solution: accolades explicites
+if (a > 5) {
+    if (b > 15)
+        printf("Les deux\n");
+} else {
+    printf("a <= 5\n");
+}
+```
+
+### Conditionnelle `switch`
+
+::: {.callout-note .encadre-definitionbox title="Syntaxe switch"}
+`switch (expression) { case constante: ... break; default: ... }`. L'expression doit être de type entier. Le `break` est nécessaire pour éviter le fall-through.
+:::
+
+```c
+int day = 3;
+
+switch (day) {
+    case 1:
+        printf("Lundi\n");
+        break;
+    case 2:
+        printf("Mardi\n");
+        break;
+    case 3:
+        printf("Mercredi\n");
+        // OUBLI de break: fall-through!
+    case 4:
+        printf("Jeudi\n");  // Exécuté aussi!
+        break;
+    default:
+        printf("Autre jour\n");
+}
+
+// Fall-through intentionnel
+switch (day) {
+    case 1: case 2: case 3: case 4: case 5:
+        printf("Jour de semaine\n");
+        break;
+    case 6: case 7:
+        printf("Weekend\n");
+        break;
+}
+```
+
+::: {.callout-warning .encadre-warningbox title="Limites du switch"}
+Les étiquettes `case` doivent être des constantes de compilation. Pas de `case x:` si `x` est une variable. Pas de `case 1...5:` (extension gcc).
+:::
+
+### Boucle `while`
+
+::: {.callout-note .encadre-definitionbox title="Syntaxe while"}
+`while (condition) instruction;`. La condition est évaluée AVANT chaque itération. Si fausse initialement, le corps ne s'exécute jamais.
+:::
+
+```c
+int i = 0;
+while (i < 10) {
+    printf("%d ", i);
+    i++;
+}  // Affiche: 0 1 2 3 4 5 6 7 8 9
+
+// Boucle infinie
+while (1) {
+    // ...
+    if (condition)
+        break;  // Sortie de la boucle
+}
+```
+
+### Boucle `do-while`
+
+::: {.callout-note .encadre-definitionbox title="Syntaxe do-while"}
+`do instruction; while (condition);`. La condition est évaluée APRÈS chaque itération. Le corps s'exécute au moins une fois.
+:::
+
+```c
+int i = 10;
+
+// while: ne s'exécute pas
+while (i < 10) {
+    printf("while: %d\n", i);
+}
+
+// do-while: s'exécute une fois
+do {
+    printf("do-while: %d\n", i);  // Affiche une fois
+} while (i < 10);
+```
+
+### Boucle `for`
+
+::: {.callout-note .encadre-definitionbox title="Syntaxe for"}
+`for (initialisation; condition; incrémentation) instruction;`. Équivalent à un `while` avec initialisation et incrémentation intégrées.
+:::
+
+```c
+// Forme classique
+for (int i = 0; i < 10; i++) {
+    printf("%d ", i);
+}
+
+// Équivalent while
+{
+    int i = 0;
+    while (i < 10) {
+        printf("%d ", i);
+        i++;
+    }
+}
+
+// Sections optionnelles
+int i = 0;
+for (; i < 10; ) {  // Init et incr omises
+    printf("%d ", i);
+    i++;
+}
+
+// Boucle infinie
+for (;;) {  // Toutes sections omises
+    // ...
+}
+```
+
+### Instructions `break` et `continue`
+
+::: {.callout-important .encadre-techbox title="Break et continue"}
+`break` : sort de la boucle ou du `switch` englobant.<br>`continue` : passe à l'itération suivante de la boucle englobante.
+:::
+
+```c
+// Break: sortie de boucle
+for (int i = 0; i < 10; i++) {
+    if (i == 5)
+        break;  // Sort de la boucle
+    printf("%d ", i);
+}  // Affiche: 0 1 2 3 4
+
+// Continue: itération suivante
+for (int i = 0; i < 10; i++) {
+    if (i % 2 == 0)
+        continue;  // Passe aux nombres impairs
+    printf("%d ", i);
+}  // Affiche: 1 3 5 7 9
+
+// Boucles imbriquées: break sort de la boucle IMMÉDIATE
+for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+        if (j == 1)
+            break;  // Sort de la boucle j, pas i
+        printf("(%d,%d) ", i, j);
+    }
+}  // Affiche: (0,0) (1,0) (2,0)
+```
+
+### Instruction `goto`
+
+::: {.callout-note .encadre-definitionbox title="Syntaxe goto"}
+`goto étiquette;` suivi de `étiquette:` ailleurs dans la même fonction. Saut inconditionnel vers l'étiquette.
+:::
+
+::: {.callout-warning .encadre-warningbox title="Usage de goto (Dijkstra, 1968)"}
+Edsger W. Dijkstra, dans son article "Go To Statement Considered Harmful" (1968), a démontré que `goto` rend le code difficile à comprendre et à maintenir. L'utilisation de `goto` est généralement déconseillée en programmation moderne.
+
+**Cas acceptables (rares):**
+
+- Sortie de boucles profondément imbriquées
+- Gestion d'erreurs avec nettoyage (pattern Linux kernel)
+
+**À éviter absolument:**
+
+- Sauts en arrière créant des boucles (utiliser `while`, `for`)
+- Sauts complexes rendant le flux de contrôle illisible
+:::
+
+```c
+// Problème: break ne sort que d'une boucle
+int found = 0;
+for (int i = 0; i < 10 && !found; i++) {
+    for (int j = 0; j < 10; j++) {
+        if (condition(i, j)) {
+            found = 1;
+            break;  // Sort seulement de la boucle j
+        }
+    }
+}
+
+// Solution avec goto (acceptable)
+for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < 10; j++) {
+        if (condition(i, j)) {
+            goto found;  // Sort des deux boucles
+        }
+    }
+}
+found:
+printf("Trouvé\n");
+```
+
+```c
+int process_data(void) {
+    int *buffer1 = malloc_int();
+    if (buffer1 == NULL)
+        goto error_buffer1;
+    
+    int *buffer2 = malloc_int();
+    if (buffer2 == NULL)
+        goto error_buffer2;
+    
+    int *buffer3 = malloc_int();
+    if (buffer3 == NULL)
+        goto error_buffer3;
+    
+    // Traitement normal
+    process(buffer1, buffer2, buffer3);
+    
+    // Nettoyage normal
+    free_int(buffer3);
+error_buffer3:
+    free_int(buffer2);
+error_buffer2:
+    free_int(buffer1);
+error_buffer1:
+    return -1;  // Ou code d'erreur approprié
+}
+```
+
+```c
+// Avec goto (à éviter: boucle déguisée)
+int i = 0;
+loop_start:
+    printf("%d ", i);
+    i++;
+    if (i < 10)
+        goto loop_start;
+
+// Sans goto (préférable)
+for (int i = 0; i < 10; i++) {
+    printf("%d ", i);
+}
+
+// Avec goto (acceptable: sortie multiple)
+for (int i = 0; i < 100; i++) {
+    for (int j = 0; j < 100; j++) {
+        if (i * j > 500)
+            goto end;  // Sortie propre
+    }
+}
+end:
+printf("Terminé\n");
+
+// Sans goto (avec flag, moins lisible)
+int done = 0;
+for (int i = 0; i < 100 && !done; i++) {
+    for (int j = 0; j < 100; j++) {
+        if (i * j > 500) {
+            done = 1;
+            break;
+        }
+    }
+}
+printf("Terminé\n");
+```
+
+```c
+// MAUVAIS: goto en arrière créant une boucle
+int i = 0;
+start:
+    printf("%d ", i);
+    i++;
+    if (i < 10)
+        goto start;  // Utiliser for/while à la place!
+
+// MAUVAIS: sauts croisés illisibles
+if (condition1)
+    goto label2;
+// code
+label1:
+    // code
+    if (condition2)
+        goto label3;
+label2:
+    // code
+    goto label1;
+label3:
+    // Spaghetti code!
+
+// MAUVAIS: saut dans un bloc
+if (condition) {
+    // code
+label:  // Sauter ici depuis l'extérieur est dangereux
+    // code
+}
+goto label;  // Variables locales non initialisées!
+```
+
+## Fonctions
+
+### Déclaration et Définition
+
+::: {.callout-note .encadre-definitionbox title="Déclaration vs définition"}
+**Déclaration** : prototype de fonction (signature uniquement).<br>**Définition** : implémentation complète de la fonction.
+:::
+
+```c
+// Déclaration (prototype)
+int add(int a, int b);  // Noms des paramètres optionnels
+
+// Définition
+int add(int a, int b) {
+    return a + b;
+}
+
+// Déclaration sans prototype (K&R style, obsolète)
+int multiply();  // Pas d'info sur les paramètres
+
+// Appel
+int x = add(5, 10);
+```
+
+### Passage par Valeur
+
+::: {.callout-important .encadre-techbox title="Passage par valeur"}
+En C, les arguments sont TOUJOURS passés par valeur. Une copie de la valeur est transmise à la fonction. Modifications locales n'affectent pas l'appelant.
+:::
+
+```c
+void increment(int x) {
+    x++;  // Modifie la copie locale
+}
+
+int main() {
+    int a = 5;
+    increment(a);
+    printf("%d\n", a);  // Affiche: 5 (inchangé)
+    return 0;
+}
+
+// Pour modifier: passer l'adresse (pointeur)
+void increment_ptr(int *x) {
+    (*x)++;
+}
+
+int main() {
+    int a = 5;
+    increment_ptr(&a);
+    printf("%d\n", a);  // Affiche: 6
+    return 0;
+}
+```
+
+### Valeur de Retour
+
+::: {.callout-important .encadre-techbox title="Return"}
+`return expression;` termine la fonction et retourne une valeur. Type de retour doit correspondre à la déclaration. `return;` pour fonctions `void`.
+:::
+
+```c
+int max(int a, int b) {
+    if (a > b)
+        return a;
+    return b;  // Un seul return possible par exécution
+}
+
+// Fonction void
+void print_max(int a, int b) {
+    printf("Max: %d\n", max(a, b));
+    return;  // Optionnel pour void
+}
+
+// Return dans boucle
+int find_first_positive(int arr[], int size) {
+    for (int i = 0; i < size; i++) {
+        if (arr[i] > 0)
+            return i;  // Retour immédiat
+    }
+    return -1;  // Non trouvé
+}
+```
+
+### Fonctions Récursives
+
+::: {.callout-note .encadre-definitionbox title="Récursion"}
+Une fonction peut s'appeler elle-même. Nécessite un cas de base pour éviter la récursion infinie. La pile d'appels stocke les contextes d'exécution.
+:::
+
+```c
+// Factorielle
+int factorial(int n) {
+    if (n <= 1)  // Cas de base
+        return 1;
+    return n * factorial(n - 1);  // Appel récursif
+}
+
+// Fibonacci
+int fibonacci(int n) {
+    if (n <= 1)
+        return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+// Danger: récursion infinie
+int infinite(int n) {
+    return infinite(n);  // Stack overflow!
+}
+```
+
+## Compilation
+
+### Phases de Compilation
+
+{{< svg ../figures/01-fondamentaux-05.svg alt="prog.c Source C mène à Préprocesseur (cpp), puis prog.i Source étendu, Compilateur (cc1), prog.s Assembleur, Assembleur (as), prog.o Objet relocatable, Lieur (ld) et prog Exécutable." >}}
+
+### Préprocesseur
+
+::: {.callout-important .encadre-techbox title="Directives du préprocesseur"}
+`#include`, `#define`, `#ifdef`, `#ifndef`, `#endif`, `#if`, `#else`, `#elif`. Traitement textuel avant compilation.
+:::
+
+```c
+#include <stdio.h>  // Inclusion de header standard
+#include "myheader.h"  // Inclusion de header local
+
+#define MAX 100  // Macro constante
+#define SQUARE(x) ((x) * (x))  // Macro fonction
+
+// Compilation conditionnelle
+#ifdef DEBUG
+    printf("Debug mode\n");
+#endif
+
+// Afficher le résultat du préprocesseur
+// gcc -E prog.c -o prog.i
+```
+
+### Options de Compilation
+
+::: {.callout-important .encadre-techbox title="Options gcc importantes"}
+`-Wall` (warnings), `-Wextra`, `-Werror`, `-std=c99`, `-O0/-O1/-O2/-O3` (optimisation), `-g` (debug), `-S` (assembleur), `-c` (objet).
+:::
+
+```bash
+# Compilation complète
+gcc -Wall -Wextra -O2 -o prog prog.c
+
+# Compilation séparée
+gcc -c -Wall file1.c  # Génère file1.o
+gcc -c -Wall file2.c  # Génère file2.o
+gcc -o prog file1.o file2.o  # Linkage
+
+# Voir l'assembleur
+gcc -S -O0 prog.c  # Génère prog.s
+
+# Debug avec gdb
+gcc -g -o prog prog.c
+gdb prog
+```
+
+## Comportement Indéfini (UB)
+
+### Définition
+
+::: {.callout-warning .encadre-warningbox title="Undefined Behavior"}
+Comportement indéfini (UB) : le standard C ne spécifie PAS ce qui se passe. Le compilateur peut faire n'importe quoi : crash, résultat inattendu, code optimisé incorrectement, démons nasaux.
+:::
+
+### Exemples Classiques
+
+```c
+// 1. Division par zéro
+int a = 5 / 0;  // UB
+
+// 2. Dépassement d'entier signé
+int x = INT_MAX + 1;  // UB (entiers signés)
+unsigned int y = UINT_MAX + 1;  // Défini: wrap around
+
+// 3. Accès hors limites
+int arr[10];
+arr[15] = 42;  // UB
+
+// 4. Déréférencement de pointeur NULL
+int *p = NULL;
+*p = 42;  // UB
+
+// 5. Modification multiple sans sequence point
+int i = 0;
+i = i++ + ++i;  // UB
+
+// 6. Shift négatif ou >= largeur du type
+int x = 1 << 32;  // UB sur int 32 bits
+int y = 1 << -1;  // UB
+
+// 7. Utilisation de variable non initialisée
+int x;
+printf("%d\n", x);  // UB
+
+// 8. Return sans valeur dans fonction non-void
+int foo() {
+    // Oubli de return
+}  // UB si valeur utilisée
+```
+
+### Séquence Points
+
+::: {.callout-note .encadre-definitionbox title="Sequence Points"}
+Points dans le programme où toutes les modifications précédentes sont garanties terminées. Exemples : `;`, `&&`, `||`, `?:`, `,` (virgule opérateur), appel de fonction.
+:::
+
+```c
+int x = 5;
+
+// OK: sequence point après ;
+x = x + 1;
+printf("%d\n", x);
+
+// UB: x modifié deux fois sans sequence point
+x = x++ + x++;
+
+// OK: && est un sequence point
+if (x++ > 5 && x < 10) { }
+
+// UB: ordre d'évaluation non spécifié (pas de SP)
+int y = foo() + bar();  // Quel ordre d'appel? Non défini
+```
+
+## Bonnes Pratiques
+
+::: {.callout-important .encadre-techbox title="Recommandations"}
+- Utiliser `-Wall -Wextra -Werror` pour détecter les erreurs
+- Initialiser toutes les variables
+- Utiliser `unsigned` pour les manipulations de bits
+- Éviter les modifications multiples dans une expression
+- Utiliser des parenthèses pour clarifier la précédence
+- Privilégier `for` pour les compteurs, `while` pour les conditions
+- Toujours mettre `break` dans les `case` (sauf fall-through intentionnel)
+- Utiliser des noms descriptifs pour les variables et fonctions
+:::
+
+::: {#ressources-seance}
+:::

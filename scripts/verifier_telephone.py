@@ -30,12 +30,17 @@ from pathlib import Path
 
 MOTIFS = {
     "indicatif +221": re.compile(r"(?<![\w+])\+\s*221"),
-    "indicatif 00221": re.compile(r"(?<!\d)00\s*221"),
+    # Ni chiffre ni point avant : « y="1205.002214" », dans un SVG, contient « 00221 ».
+    "indicatif 00221": re.compile(r"(?<![\d.])00\s*221"),
     # Ni lettre ni chiffre autour : exclut les empreintes hexadécimales des noms de fichiers
     # (bootstrap-cba6febe789600312bd9….min.css), qui changent à chaque modification du CSS.
     "9 chiffres consécutifs": re.compile(r"(?<![\w.])\d{9}(?!\w)"),
     "numéro par groupes": re.compile(r"(?<![\d/.\-])(?:7[05678]|3[03])[ .\-]\d{3}[ .\-]\d{2}[ .\-]\d{2}(?!\d)"),
 }
+# Un littéral binaire n'est pas un numéro : « 10111010\u2082 » ressort de pdftotext en « 101110102 »,
+# neuf chiffres d'affilée. Aucun numéro sénégalais ne commence par 0 ou 1, et aucun ne s'écrit avec
+# les seuls chiffres 0 et 1 : le chapitre 1 du cours de C en produisait neuf faux positifs.
+BINAIRE = re.compile(r"^[01]{8}2?$")
 EXTENSIONS_TEXTE = {".html", ".xml", ".json", ".txt"}
 EXCLUS = {"site_libs"}
 # Blocs de code d'une page : <pre> englobe le code coloré de Quarto, <code> les extraits en ligne.
@@ -98,7 +103,7 @@ def main() -> int:
             tolerance = tolerés
         for nom, motif in MOTIFS.items():
             for m in motif.finditer(texte):
-                if m.group(0) in tolerance:
+                if m.group(0) in tolerance or BINAIRE.match(m.group(0)):
                     continue
                 trouves += 1
                 ligne = texte.count("\n", 0, m.start()) + 1

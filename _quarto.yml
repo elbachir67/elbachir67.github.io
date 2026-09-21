@@ -13,9 +13,12 @@ project:
     - assets/js/bascule-langue.js
     - assets/js/slides-accessibilite.js
     - assets/js/notebook-defilement.js
+    - assets/js/defilement-cours.js
     - assets/js/slides-pdf.js
-    # Consignes aux robots d'indexation, avec l'adresse du plan du site (US-13).
-    - robots.txt
+    # Consignes aux robots d'indexation, avec l'adresse du plan du site (US-13). Le chemin est
+    # ancré à la racine : sans la barre oblique, Quarto cherchait « robots.txt » partout dans
+    # l'arborescence et recopiait celui des fixtures de tornado, au fond de .venv/.
+    - /robots.txt
     # Les notebooks sont rendus en pages **et** copiés tels quels : la page les donne à lire,
     # le bouton les donne à télécharger (US-50).
     - cours/*/ressources/*.ipynb
@@ -41,6 +44,11 @@ website:
   # Un brouillon (draft: true) n'est pas publié du tout : sans cela, Quarto le rend quand même, simplement
   # non listé, et la page reste atteignable par son adresse (US-21).
   draft-mode: gone
+  # Retour en haut de page (US-40, critère constaté en défaut après le déploiement du Sprint 6) :
+  # un chapitre rédigé fait plusieurs écrans, et sur un téléphone la table des matières est repliée
+  # tout en haut. Sans ce bouton, il faut remonter au doigt sur toute la hauteur de la page. C'est
+  # une option de `website`, et non de `format: html` : posée là, elle n'a aucun effet.
+  back-to-top-navigation: true
   title: "El Hadji Bassirou Touré"
   # Référencement et partage (US-13). site-url produit sitemap.xml et les URL absolues des métadonnées.
   site-url: *site-url
@@ -80,3 +88,4 @@ format:
     include-after-body:
       text: |
         <script src="/assets/js/bascule-langue.js"></script>
+        <script src="/assets/js/defilement-cours.js"></script>

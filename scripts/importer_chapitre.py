@@ -49,7 +49,11 @@ CORRIGE = "corrige"
 # Commandes qui ne produisent qu'un caractère. `\textbackslash` apparaît dans ces cours à l'intérieur
 # d'un `\texttt{}`, donc dans un code en ligne, où la barre oblique inverse ne s'échappe pas.
 CARACTERES = {"oe": "œ", "ldots": "\u2026", "dots": "\u2026", "textbackslash": "\\",
-              "textasciitilde": "~", "textasciicircum": "^"}
+              "textasciitilde": "~", "textasciicircum": "^",
+              # Symboles employés **hors** mathématiques dans les CM rédigés : une flèche de prose,
+              # une coche de validation. Les laisser passer les faisait signaler comme non convertis.
+              "checkmark": "✓", "rightarrow": "→", "leftarrow": "←", "leftrightarrow": "↔",
+              "Rightarrow": "⇒", "times": "×", "pm": "±", "bullet": "•", "degree": "°"}
 
 # Styles de `lstlisting` définis par beamerucad.sty : « out » et « err » sont des sorties de
 # programme, « sh » une commande shell. Sans style, c'est du code dans le langage du cours.
@@ -387,6 +391,12 @@ def inline(texte: str, conversion: Conversion) -> str:
 
     texte = MOTIF_MATHS.sub(garder, texte)
 
+    # Guillemets de LaTeX : « ``mot'' ». En Markdown, un double accent grave **ouvre un code en
+    # ligne** et avale tout ce qui suit, barres d'un tableau comprises : la ligne cessait d'être une
+    # ligne de tableau, et Pandoc rendait le tout en bloc de lignes, barres verticales apparentes.
+    # Constaté sur le chapitre 2 du cours de C ; 189 occurrences dans les quatre chapitres.
+    texte = re.sub(r"``\s*(.+?)\s*''", "« \\1 »", texte, flags=re.S)
+
     # Mise en forme.
     remplacements = [
         (r"\\textbf\{", "**", "**"), (r"\\alert\{", "**", "**"),
@@ -435,15 +445,57 @@ def titre_de_callout(titre: str | None, conversion: Conversion) -> str:
     return inline(titre, conversion).replace("\n", " ").replace('"', '\\"').strip()
 
 
+def cellules_de_tableau(contenu: str) -> list[list[str]]:
+    """Découpe un `tabular` en lignes et en cellules, comme LaTeX les lit.
+
+    Découper naïvement sur « & » coupait `\\texttt{\\&x}` en deux : une **esperluette échappée** n'est
+    pas un séparateur de colonne, et la moitié de cellule qui en sortait laissait une accolade
+    ouverte. L'import du chapitre 2 du cours de C s'arrêtait là, sur « accolade non fermée ».
+
+    Trois règles suffisent : une barre oblique inverse protège le caractère suivant, un séparateur ne
+    compte qu'en dehors des accolades, et « \\\\ » termine la ligne — l'espacement optionnel compris.
+    """
+    lignes: list[list[str]] = []
+    ligne: list[str] = []
+    tampon: list[str] = []
+    profondeur = position = 0
+    while position < len(contenu):
+        caractere = contenu[position]
+        if caractere == "\\" and position + 1 < len(contenu):
+            if contenu[position + 1] == "\\" and profondeur == 0:
+                ligne.append("".join(tampon))
+                lignes.append(ligne)
+                ligne, tampon = [], []
+                position += 2
+                # Une ligne peut finir par « \\[2pt] » : l'espacement n'appartient à aucune cellule.
+                espacement = re.match(r"\s*\[[^\]]*\]", contenu[position:])
+                position += espacement.end() if espacement else 0
+                continue
+            tampon.append(contenu[position:position + 2])
+            position += 2
+            continue
+        if caractere == "{":
+            profondeur += 1
+        elif caractere == "}":
+            profondeur -= 1
+        elif caractere == "&" and profondeur == 0:
+            ligne.append("".join(tampon))
+            tampon = []
+            position += 1
+            continue
+        tampon.append(caractere)
+        position += 1
+    ligne.append("".join(tampon))
+    lignes.append(ligne)
+    return lignes
+
+
 def tableau(contenu: str, conversion: Conversion) -> str:
     """tabular -> tableau Markdown ; les filets de booktabs disparaissent."""
     conversion.tableaux += 1
     lignes = []
-    for brute in contenu.split("\\\\"):
-        # Une ligne peut finir par « \\[2pt] » : l'espacement reste collé au début de la suivante.
-        brute = re.sub(r"^\s*\[[^\]]*\]", "", brute)
-        cellules = [inline(c, conversion).replace("\n", " ").strip()
-                    for c in brute.split("&")]
+    for brute in cellules_de_tableau(contenu):
+        cellules = [inline(c, conversion).replace("\n", " ").strip() for c in brute]
         if any(cellules):
             lignes.append(cellules)
     if not lignes:
@@ -516,12 +568,27 @@ def convertir(texte: str, conversion: Conversion) -> str:
     # Les commandes de taille sont retirées ici aussi : « {\small\begin{tabular}… } » entoure parfois
     # un environnement, et ses accolades traverseraient sinon la conversion.
     morceaux, reste = [], retirer_tailles(sans_commentaires(texte))
+
+    # Les mathématiques sont mises de côté **avant** de chercher les environnements : `\begin{cases}`
+    # vit à l'intérieur d'un `$…$`, et le prendre pour un environnement du document coupait la
+    # formule en deux — c'est ce qui laissait deux `cases` et un `\rightarrow` non convertis au
+    # chapitre 1 du cours de C. `inline` les protégera de nouveau, à sa façon.
+    formules: list[str] = []
+
+    def mettre_de_cote(trouve: re.Match[str]) -> str:
+        formules.append(trouve[0])
+        return f"\x02{len(formules) - 1}\x02"
+
+    def rendre(fragment: str) -> str:
+        return re.sub(r"\x02(\d+)\x02", lambda t: formules[int(t[1])], fragment)
+
+    reste = MOTIF_MATHS.sub(mettre_de_cote, reste)
     while True:
         trouve = re.search(r"\\begin\{([A-Za-z*]+)\}", reste)
         if not trouve:
-            morceaux.append(inline(reste, conversion))
+            morceaux.append(inline(rendre(reste), conversion))
             break
-        morceaux.append(inline(reste[:trouve.start()], conversion))
+        morceaux.append(inline(rendre(reste[:trouve.start()]), conversion))
         nom = trouve[1]
         position = trouve.end()
         titre, position = option(reste, position)
@@ -532,6 +599,7 @@ def convertir(texte: str, conversion: Conversion) -> str:
             # entre crochets : `\begin{definitionbox}{Le langage C}`.
             titre, position = argument(reste, position)
         contenu, suite = environnement(reste, nom, position)
+        contenu, titre = rendre(contenu), (rendre(titre) if titre else titre)
 
         if nom in conversion.encadres:
             genre, classe, defaut = conversion.encadres[nom]
@@ -549,6 +617,11 @@ def convertir(texte: str, conversion: Conversion) -> str:
             morceaux.append(liste(contenu, nom == "enumerate", conversion))
         elif nom == "lstlisting":
             morceaux.append(code(contenu, conversion, titre))
+        elif nom == "verbatim":
+            # `verbatim` n'a ni langage ni style : c'est du texte tel quel — une trace d'exécution, un
+            # schéma en caractères. Le colorer comme du C inventerait une syntaxe qu'il n'a pas.
+            conversion.codes.append("sortie")
+            morceaux.append(conversion.proteger("```\n" + contenu.strip("\n") + "\n```"))
         elif nom == "tabular":
             morceaux.append(tableau(contenu, conversion))
         elif nom == "tikzpicture":
@@ -765,6 +838,10 @@ def entete_page(entete: dict[str, str], description: str, numero: str,
     # Une page rédigée n'est pas imprimée en PDF depuis le site : c'est le PDF de LaTeX qui fait
     # foi, attaché en ressource. La table des séances a besoin de le savoir.
     lignes.append('cible: "page"')
+    # Marque la page pour la feuille de style et le script de défilement (US-59) : un chapitre rédigé
+    # porte des tableaux et des figures plus larges qu'un téléphone, qui doivent défiler dans leur
+    # cadre plutôt qu'élargir la page.
+    lignes.append("body-classes: cours-page")
     if numero:
         lignes.append(f"numero: {guillemets(numero)}")
     lignes += ressources_yaml(ressources)
