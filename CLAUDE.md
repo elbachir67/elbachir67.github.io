@@ -104,7 +104,14 @@ l'issue soi-même ; sinon, la laisser ouverte et prévenir le PO.
 - Aucun secret, clé ou token dans le dépôt. Secrets uniquement via GitHub Secrets.
 - Aucune nouvelle dépendance sans justification dans la PR.
 - Code exécutable : `execute: freeze: auto` ; le dossier `_freeze/` est commité.
-- Images : texte alternatif obligatoire, poids < 300 Ko.
+- Images : texte alternatif obligatoire, **poids transféré** < 300 Ko. C'est ce qu'un lecteur
+  télécharge qui compte, et non le poids du fichier : GitHub Pages sert les SVG compressés, et un
+  schéma de texte se compresse environ huit fois. Mesurer avec `gzip -9 -c fichier | wc -c`.
+- **Rien de non publiable sur le site.** Un document réservé à l'enseignant — guide pédagogique,
+  grille de correction, barème — n'est jamais attaché en ressource, et aucun lien n'y mène. Le sigle
+  de filière « GLSI » n'apparaît pas : « L3 GLSI » s'écrit « L3 ». Toute correction se fait **à la
+  source** (le `.tex` du cours et sa copie dans `_import/`), puis l'import est rejoué : sans cela, le
+  terme revient au prochain import. `scripts/verifier_non_publiable.py` le vérifie en CI.
 - Langue : le site est bilingue depuis US-36. Les pages françaises sont à la racine, leurs équivalents
   anglais sous `en/` (adresse `/en/…`, avec un nom de dossier anglais quand le mot diffère :
   `/recherche/` ↔ `/en/research/`, `/enseignement/` ↔ `/en/teaching/`). Les pages sous `en/` sont
