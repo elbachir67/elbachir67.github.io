@@ -16,6 +16,10 @@ ressources:
     titre: "TP — Structures et unions"
     fichier: "ressources/tp-structures-unions.pdf"
     chemin: "/cours/programmation-c-avancee/ressources/tp-structures-unions.pdf"
+  - type: "tp"
+    titre: "TP — Pistes de résolution"
+    fichier: "ressources/tp-pistes-structures-unions.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/tp-pistes-structures-unions.pdf"
 description: "Chapitre 3 de Programmation C avancée : structures, alignement et padding, unions, champs de bits et membres de tableau flexibles."
 author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
 toc: true
@@ -145,7 +149,7 @@ struct S1 {
 };              // taille totale: 12 (padding final: 3)
 ```
 
-{{< svg ../figures/04-structures-unions-02.svg alt="Le schéma porte struct S1 (sizeof = 12), a, P, P, P, b, b, b et 7 autre(s) ; une suite de 3 cases s'y répète." >}}
+{{< svg ../figures/04-structures-unions-02.svg alt="Disposition en mémoire de struct S1, 12 octets : a, puis 3 octets de padding, b sur 4 octets, c, puis 3 octets de padding." >}}
 
 ### Optimisation par Réorganisation
 
@@ -190,7 +194,7 @@ Dump mémoire (little-endian, adresse 0x1000):
 ```
 :::
 
-{{< svg ../figures/04-structures-unions-04.svg alt="Le schéma porte struct Data en mémoire, 41, 00, 00, 00, 78, 56, 34 et 5 autre(s) ; une suite de 12 cases s'y répète." >}}
+{{< svg ../figures/04-structures-unions-04.svg alt="Les 12 octets de struct Data en mémoire : 41 00 00 00, puis 78 56 34 12, puis CD AB 00 00." >}}
 
 ## Structures Imbriquées
 
@@ -229,7 +233,7 @@ int x0 = p->x;            // 0
 int x1 = (p+1)->x;        // 10
 ```
 
-{{< svg ../figures/04-structures-unions-06.svg alt="Le schéma porte points[3] en mémoire, 0, 0, 10, 20, 30, 40, points[0] et 2 autre(s) ; une suite de 3 cases s'y répète." >}}
+{{< svg ../figures/04-structures-unions-06.svg alt="Le tableau points[3] en mémoire : points[0] vaut (0, 0), points[1] (10, 20) et points[2] (30, 40), rangés à la suite." >}}
 
 ## Unions
 
@@ -308,7 +312,7 @@ struct Flags f = {1, 5, 12};
 // Layout possible: [priority:4][mode:3][active:1] = 0xC5
 ```
 
-{{< svg ../figures/04-structures-unions-09.svg alt="Le schéma porte Représentation en bits, 1, 1, 0, 0, 1, 0, 1 et 1 autre(s) ; une suite de 8 cases s'y répète." >}}
+{{< svg ../figures/04-structures-unions-09.svg alt="Représentation en bits : 1 1 0 0 1 0 1 1." >}}
 
 ::: {.callout-warning .encadre-warningbox title="Portabilité des Bit Fields"}
 L'ordre des bits, l'alignement, et le packing des bit fields sont définis par l'implémentation. Le code utilisant des bit fields pour des protocoles réseau ou des formats de fichiers n'est pas portable. Préférer les masques et décalages explicites pour le code portable.
@@ -378,7 +382,7 @@ void destroy_container(Container *c) {
 }
 ```
 
-{{< svg ../figures/04-structures-unions-11.svg alt="name mène à t ; data mène à [0] ; s'y ajoutent, Container (sur heap), size: 4, "test", e, s, t, 0, data[4] et 3 autre(s)." >}}
+{{< svg ../figures/04-structures-unions-11.svg alt="Une structure Container sur le tas : size vaut 4, name pointe vers la chaîne "test", et data vers un tableau de quatre cases, de [0] à [3]." >}}
 
 ### Flexible Array Member (C99)
 
