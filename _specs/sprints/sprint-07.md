@@ -72,6 +72,16 @@ afin d'ouvrir Structures de Données et Introduction à l'IA.
 
 ---
 
+## À reprendre tel quel dans le bilan
+
+Le PO l'a demandé explicitement, et cela ne doit pas se perdre :
+
+> Ma vérification dans Chrome n'a jamais regardé les images. Elle mesurait des largeurs, des
+> débordements, des attributs `aria-label`, des zones défilantes — jamais un pixel de figure. J'ai
+> rapporté « aucune figure sans texte alternatif » et « rendu vérifié à 375 px et 1440 px », et
+> c'était vrai ; cela laissait entendre que les figures avaient été regardées, et elles ne l'avaient
+> pas été.
+
 ## Bilan
 
 Rédigé par Claude Code en fin de sprint : `_specs/sprints/sprint-07-bilan.md` (CLAUDE.md §11).
