@@ -22,6 +22,7 @@ Bibliothèque standard uniquement : ce contrôle n'ajoute aucune dépendance à 
 from __future__ import annotations
 
 import datetime as dt
+import json
 import os
 import re
 import subprocess
@@ -185,6 +186,35 @@ def ressources_sans_telechargement(site: Path) -> list[tuple[Path, str]]:
     return ecarts
 
 
+def notebooks_illisibles() -> list[tuple[Path, str]]:
+    """Un notebook dont une cellule Markdown commence par « --- » fait tomber le rendu (US-50).
+
+    Quarto y lit un bloc de métadonnées YAML. Le coût n'est pas la panne, c'est la **recherche** :
+    l'erreur désigne un autre fichier que celui en cause, parce que le rendu parcourt toute la liste
+    des entrées. Une heure y est passée une fois ; ce contrôle la rend à qui vient après.
+
+    La correction est mécanique : « *** » est la règle horizontale explicite de Markdown, et
+    s'affiche de la même façon dans Jupyter.
+    """
+    ecarts = []
+    for notebook in sorted(RACINE.glob("cours/*/ressources/*.ipynb")):
+        try:
+            cellules = json.loads(notebook.read_text(encoding="utf-8")).get("cells", [])
+        except (json.JSONDecodeError, UnicodeDecodeError) as erreur:
+            ecarts.append((notebook, f"notebook illisible : {erreur}"))
+            continue
+        for numero, cellule in enumerate(cellules, start=1):
+            if cellule.get("cell_type") != "markdown":
+                continue
+            for ligne in cellule.get("source", []):
+                if ligne.strip() == "---":
+                    ecarts.append((notebook, f"cellule {numero} : un « --- » y sépare des sections, "
+                                             "et Quarto y lit un bloc YAML — le rendu du projet "
+                                             "entier échoue. Écrire « *** »."))
+                    break
+    return ecarts
+
+
 def gel_manquant(page: Path) -> str | None:
     """Une page à code exécutable doit avoir son résultat gelé dans _freeze/."""
     if "```{python}" not in page.read_text(encoding="utf-8"):
@@ -215,6 +245,7 @@ def main() -> int:
 
     ecarts += corriges_publies(RACINE / "_site")
     ecarts += ressources_sans_telechargement(RACINE / "_site")
+    ecarts += notebooks_illisibles()
     pages = sorted(RACINE.glob("cours/*/chapitres/*.qmd"))
     for page in pages:
         manquant = gel_manquant(page)
