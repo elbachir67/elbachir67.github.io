@@ -1,0 +1,727 @@
+---
+title: "Organisation de la mémoire"
+cible: "page"
+body-classes: cours-page
+numero: "2"
+ressources:
+  - type: "pdf"
+    titre: "Le chapitre en PDF"
+    fichier: "ressources/cm-organisation-memoire.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/cm-organisation-memoire.pdf"
+  - type: "td"
+    titre: "TD — Organisation de la mémoire"
+    fichier: "ressources/td-organisation-memoire.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/td-organisation-memoire.pdf"
+  - type: "tp"
+    titre: "TP — Organisation de la mémoire"
+    fichier: "ressources/tp-organisation-memoire.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/tp-organisation-memoire.pdf"
+description: "Chapitre 2 de Programmation C avancée : adressage, boutisme, pointeurs, tableaux, allocation dynamique et chaînes de caractères."
+author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+## Le Mot Machine et l'Organisation de la Mémoire
+
+### Définition du Mot Machine
+
+::: {.callout-note .encadre-definitionbox title="Mot machine (word)"}
+Un **mot** (mot machine ou *word*) est l'unité de base manipulée par un microprocesseur. La taille d'un mot s'exprime en bits et sert à classer les architectures : 32 bits ou 64 bits. Cette taille détermine la largeur des registres du processeur, la taille des adresses mémoire, et la quantité de données traitées en un cycle.
+:::
+
+La taille du mot machine a des implications directes sur les capacités du système. Sur une architecture 32 bits, les adresses sont codées sur 32 bits, ce qui limite l'espace d'adressage à $2^{32} = 4$ Go. Sur une architecture 64 bits, l'espace d'adressage théorique est de $2^{64}$ octets, bien que les systèmes actuels n'utilisent que 48 bits d'adresse (256 To).
+
+### Vue de la Mémoire par un Programme
+
+Un programme machine perçoit la mémoire comme un très grand tableau linéaire d'octets appelé **mémoire virtuelle**. Chaque octet possède une adresse unique, et l'ensemble des adresses possibles constitue l'**espace d'adressage virtuel**.
+
+{{< svg ../figures/fig01_memory_organization.svg alt="Figure portant « Organisation mémoire : 1 mot = 8 octets (64 bits) », « +… », « un mot = 8 octets », « Rappel Hexadécimal »." >}}
+
+## Adressage et Représentation des Données
+
+### Concepts Fondamentaux de l'Adressage
+
+::: {.callout-note .encadre-definitionbox title="Adresse et Zone Mémoire"}
+- Une **adresse** est un nombre qui identifie de manière unique un octet en mémoire
+- Lorsqu'un objet occupe plusieurs octets, son **adresse** est celle de son premier octet (l'octet à l'adresse la plus basse)
+- Pour accéder à un objet en mémoire, on a besoin de deux informations : son **adresse** et sa **taille**
+:::
+
+En C, l'opérateur `&` permet d'obtenir l'adresse d'une variable. Cette adresse est toujours celle du premier octet occupé par la variable. Par exemple, si une variable `int x` est stockée aux adresses 0x1000 à 0x1003, alors `&x` vaut `0x1000`.
+
+{{< svg ../figures/fig02_address_multioctet.svg alt="Figure portant « Adresse d'un objet multi-octets », « 0x100… », « Variable x (4 octets) », « &x = 0x1000 », « L'adresse de x est 0x1000 (adresse du premier octet) », « Little-Endian: 0x12345678 »." >}}
+
+### Taille des Types selon l'Architecture
+
+La taille des types primitifs en C dépend de l'architecture et du compilateur. Le standard C garantit seulement des tailles minimales et des relations d'ordre : `sizeof(char) $\leq$ sizeof(short) $\leq$ sizeof(int) $\leq$ sizeof(long)`.
+
+{{< svg ../figures/fig03_type_sizes.svg alt="Figure intitulée « Taille des types selon l'architecture »." >}}
+
+::: {.callout-warning .encadre-warningbox title="Portabilité"}
+La différence de taille de `long` entre 32 et 64 bits est source de bugs. Pour un code portable, utilisez les types de `<stdint.h>` : `int32_t`, `int64_t`, `uint8_t`, etc.
+:::
+
+La taille d'un pointeur correspond **toujours** à la taille du mot machine : 4 octets sur 32 bits, 8 octets sur 64 bits. C'est logique : un pointeur stocke une adresse, et une adresse occupe exactement un mot machine.
+
+## Endianness : Ordre des Octets en Mémoire
+
+### Le Problème de l'Ordre des Octets
+
+Lorsqu'une donnée occupe plusieurs octets (comme un `int` de 4 octets), une question se pose : dans quel ordre sont stockés ces octets en mémoire ? Deux conventions existent, appelées **endianness** (du roman *Les Voyages de Gulliver* de Jonathan Swift).
+
+::: {.callout-note .encadre-definitionbox title="Little-Endian vs Big-Endian"}
+- **Little-Endian** (« petit-boutiste ») : l'octet de **poids faible** (LSB - Least Significant Byte) est stocké à l'adresse la plus basse
+- **Big-Endian** (« gros-boutiste ») : l'octet de **poids fort** (MSB - Most Significant Byte) est stocké à l'adresse la plus basse
+:::
+
+### Exemple Détaillé
+
+Considérons la valeur hexadécimale `0x01234567` stockée à l'adresse `0x100`. Cette valeur se décompose en 4 octets : `01` (MSB), `23`, `45`, `67` (LSB).
+
+{{< svg ../figures/fig04_endianness.svg alt="séries : « MSB », « LSB », libellés : « Stockage de 0x01234567 à l'adresse 0x100 », « Big-Endian », « (IBM, Oracle SPARC, Réseau) », « 0x10… », « L'octet le plus significatif est à l'adresse la plus basse », « Little-Endian », « (Intel x86/x64, ARM) »…" >}}
+
+### Quand l'Endianness Importe
+
+L'endianness devient critique dans trois situations :
+
+1. **Communication réseau** : lorsqu'on envoie des données binaires entre machines de conventions différentes
+2. **Lecture de fichiers binaires** : un fichier créé sur une machine big-endian sera mal lu sur une machine little-endian
+3. **Réinterprétation mémoire** : lorsqu'on lit une zone mémoire avec un type différent de celui utilisé pour l'écrire
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+
+int is_little_endian(void) {
+    uint32_t x = 1;  /* En mémoire : 01 00 00 00 (LE) ou 00 00 00 01 (BE) */
+    uint8_t *p = (uint8_t *)&x;
+    return p[0] == 1;  /* Si le premier octet vaut 1, c'est little-endian */
+}
+
+int main(void) {
+    if (is_little_endian())
+        printf("Cette machine est Little-Endian\n");
+    else
+        printf("Cette machine est Big-Endian\n");
+    return 0;
+}
+```
+
+## Les Pointeurs : Variables Contenant des Adresses
+
+### Définition et Déclaration
+
+::: {.callout-note .encadre-definitionbox title="Pointeur"}
+Un **pointeur** est une variable dont la valeur est une adresse mémoire. Le type du pointeur indique au compilateur comment interpréter les données à cette adresse et comment effectuer l'arithmétique des pointeurs.
+:::
+
+La déclaration d'un pointeur utilise l'opérateur `*` :
+
+```c
+int x = 42;       /* Variable entière */
+int *p;           /* Déclaration : p est un pointeur vers un int */
+p = &x;           /* p contient maintenant l'adresse de x */
+
+printf("x = %d\n", x);       /* Affiche : x = 42 */
+printf("&x = %p\n", &x);     /* Affiche l'adresse de x */
+printf("p = %p\n", p);       /* Même adresse que &x */
+printf("*p = %d\n", *p);     /* Déréférencement : affiche 42 */
+```
+
+### Les Deux Aspects d'un Pointeur
+
+Comme toute variable, un pointeur possède deux aspects :
+
+{{< svg ../figures/fig05_pointer_aspects.svg alt="Figure portant « Les deux aspects d'un pointeur », « Adresse », « 0x1000 », « int x = 42 », « (0x2A = 42 en little-endian) », « 0x2000 », « int *p = &x », « (p contient 0x1000) »." >}}
+
+### Opérateurs sur les Pointeurs
+
+::: {.callout-important .encadre-techbox title="Opérateurs fondamentaux"}
+| `&x` | Opérateur « adresse de » | Retourne l'adresse de la variable x |
+| --- | --- | --- |
+| `*p` | Opérateur de déréférencement | Accède à la valeur à l'adresse p |
+| `p + n` | Addition d'un entier | Avance de n $\times$ sizeof(*p) octets |
+| `p - n` | Soustraction d'un entier | Recule de n $\times$ sizeof(*p) octets |
+| `p - q` | Différence de pointeurs | Nombre d'éléments entre p et q |
+:::
+
+### Exemple Pas à Pas : Évolution de la Mémoire
+
+Suivons l'exécution du code suivant sur une machine 32 bits little-endian :
+
+```c
+int x = 0x3CD02700;  /* &x = 0x04 */
+int y = x + 3;       /* &y = 0x18, y = 0x3CD02703 */
+int *z;              /* &z = 0x20 */
+z = &y + 3;          /* z = 0x18 + 3*4 = 0x24 */
+*z = y;              /* Écrit y à l'adresse 0x24 */
+```
+
+{{< svg ../figures/fig06_memory_evolution.svg alt="Figure portant « Étape …: … », « Addr », « +… », « Variable », « (Mémoire non initialisée) », « x est initialisé à 0x3CD02700 (stocké en little-endian : 00 27 D0 3C) », « y = x + 3 = 0x3CD02700 + 3 = 0x3CD02703 », « z est déclaré mais NON initialisé (contient une valeur indéterminée) »…" >}}
+
+L'instruction `z = &y + 3` illustre l'arithmétique des pointeurs : on ajoute 3 à un pointeur vers `int`, ce qui ajoute $3 \times 4 = 12$ octets à l'adresse. Ainsi, `0x18 + 0x0C = 0x24`.
+
+## Les Tableaux : Zones Mémoire Contiguës
+
+### Définition et Représentation en Mémoire
+
+::: {.callout-note .encadre-definitionbox title="Tableau"}
+Un **tableau** est une séquence d'emplacements mémoire **consécutifs** stockant des éléments de même type. Les éléments sont indexés de 0 à $n-1$ où $n$ est la taille du tableau. Un tableau ne connaît pas sa propre taille.
+:::
+
+```c
+int arr[5] = {10, 20, 30, 40, 50};
+/* Si &arr[0] = 0x1000, alors :
+   arr[0] est à 0x1000, arr[1] à 0x1004, arr[2] à 0x1008, etc. */
+```
+
+{{< svg ../figures/fig07_array_memory.svg alt="Figure portant « Tableau int arr[5] en mémoire (32 bits, little-endian) », « arr[…] », « 5 éléments × 4 octets = 20 octets total »." >}}
+
+### Absence de Contrôle de Débordement
+
+::: {.callout-warning .encadre-warningbox title="Danger : Pas de vérification des bornes"}
+Le C ne vérifie **jamais** si un accès tableau est dans les limites. Un accès hors bornes compile sans erreur et s'exécute, mais corrompt la mémoire ou provoque un crash.
+:::
+
+```c
+int notes[20];
+for (int i = 0; i < 40; i++)  /* Boucle jusqu'à 40 au lieu de 20 ! */
+    notes[i] = 0;              /* Écrase 80 octets au-delà du tableau */
+/* Ce code compile sans warning et peut corrompre la pile */
+```
+
+Les conséquences d'un débordement dépendent de ce qui se trouve après le tableau en mémoire : autres variables, adresse de retour, etc. C'est une source majeure de vulnérabilités de sécurité (buffer overflow).
+
+::: {.callout-tip .encadre-examplebox title="Exemple pas à pas : Tableaux, pointeurs et débordements"}
+La figure suivante illustre l'évolution de la mémoire lors de manipulations de tableaux et de pointeurs, incluant des accès hors bornes dangereux.
+:::
+
+{{< svg ../figures/fig20_array_overflow_evolution.svg alt="Figure intitulée « Évolution mémoire : Tableaux et débordements (64 bits) », libellés : « ⚠ Buffer Overflow! », « ⚠ Écrit AVANT le tableau! »." >}}
+
+- **Étapes 0-1** : Déclaration de `int a[6]` et affectations légales
+- **Étape 2** : `a[6] = 0xBAD` écrit **après** le tableau (buffer overflow)
+- **Étape 3** : `a[-1] = 0xBAD` écrit **avant** le tableau (aucune erreur !)
+- **Étapes 4-5** : Manipulation via pointeur `p` et arithmétique des pointeurs
+
+### Tableaux à Plusieurs Dimensions
+
+Un tableau 2D est stocké en mémoire de manière linéaire, ligne par ligne (row-major order).
+
+```c
+int mat[2][3] = {{1, 2, 3}, {4, 5, 6}};
+/* En mémoire : 1, 2, 3, 4, 5, 6 (consécutifs) */
+```
+
+{{< svg ../figures/fig08_array_2d.svg alt="Figure portant « Tableau mat[2][3] en mémoire (row-major order) », « Vue logique », « […] », « Vue physique (mémoire linéaire) », « 0x00 », « 0x14 », « Ligne 0 », « Ligne 1 », et 1 autre(s)." >}}
+
+## Relation Fondamentale Pointeurs-Tableaux
+
+### Conversion Tableau vers Pointeur
+
+En C, le nom d'un tableau est automatiquement converti en pointeur vers son premier élément dans la plupart des contextes. Cette conversion est appelée *array decay*.
+
+::: {.callout-note .encadre-definitionbox title="Équivalences fondamentales"}
+| `arr` | $\equiv$ | `&arr[0]` |
+| --- | --- | --- |
+| `arr + i` | $\equiv$ | `&arr[i]` |
+| `*(arr + i)` | $\equiv$ | `arr[i]` |
+| `p[i]` | $\equiv$ | `*(p + i)` |
+:::
+
+Ces équivalences expliquent pourquoi la syntaxe `i[arr]` est valide en C : elle est interprétée comme `*(i + arr)`, ce qui est identique à `*(arr + i)` = `arr[i]`.
+
+```c
+int arr[5] = {10, 20, 30, 40, 50};
+int *p = arr;  /* Équivalent à : int *p = &arr[0]; */
+
+/* Toutes ces expressions sont équivalentes et valent 30 : */
+printf("%d\n", arr[2]);     /* Notation tableau */
+printf("%d\n", *(arr + 2)); /* Arithmétique pointeur */
+printf("%d\n", p[2]);       /* Pointeur avec notation tableau */
+printf("%d\n", *(p + 2));   /* Pointeur avec déréférencement */
+printf("%d\n", 2[arr]);     /* Syntaxe exotique mais valide ! */
+```
+
+### Visualisation de Pointeurs sur un Tableau
+
+{{< svg ../figures/fig09_pointers_array.svg alt="Figure portant « Pointeurs p et q sur le tableau arr », « arr[…] », « p = 0x1000 », « q = 0x100C »." >}}
+
+### Différences entre Tableau et Pointeur
+
+Bien que très similaires dans leur utilisation, tableau et pointeur ne sont pas identiques :
+
+{{< svg ../figures/fig10_array_vs_pointer.svg alt="Figure intitulée « Différences entre tableau et pointeur »." >}}
+
+## Classes de Stockage et Durée de Vie des Tableaux
+
+### Les Trois Classes de Stockage
+
+En C, un tableau peut être stocké dans trois zones mémoire différentes, chacune avec ses caractéristiques propres.
+
+{{< svg ../figures/fig11_process_memory.svg alt="Figure portant « Organisation mémoire d'un processus », « 0xFF », « 0x00 », « Classes de stockage », « … (…) »." >}}
+
+::: {.callout-important .encadre-techbox title="Comparaison des classes de stockage"}
+| **Classe** | **Zone** | **Durée de vie** | **Taille** |
+| --- | --- | --- | --- |
+| Automatique | Pile (stack) | Durée du bloc \{\} | Fixe à la compilation |
+| Statique | Segment data | Toute l'exécution | Fixe à la compilation |
+| Dynamique | Tas (heap) | Jusqu'à `free()` | Variable à l'exécution |
+:::
+
+```c
+int global[100];              /* Statique : segment data, existe toujours */
+
+void exemple(int n) {
+    int local[10];            /* Automatique : sur la pile, détruit à la fin */
+    static int persistant[5]; /* Statique : segment data, conservé entre appels */
+    int *dynamique = malloc(n * sizeof(int));  /* Dynamique : sur le tas */
+    
+    /* ... utilisation ... */
+    
+    free(dynamique);          /* Libération obligatoire */
+}   /* local est détruit ici, persistant survit */
+```
+
+### Le Problème du Retour de Tableau
+
+Une erreur classique consiste à retourner un pointeur vers un tableau local (automatique).
+
+```c
+/* ERREUR : retourne un pointeur vers une zone mémoire invalide */
+int *creer_tableau_FAUX(void) {
+    int tab[5] = {1, 2, 3, 4, 5};  /* Alloué sur la pile */
+    return tab;  /* Retourne l'adresse de tab */
+}   /* tab est détruit ici ! Le pointeur retourné est invalide */
+
+int main(void) {
+    int *p = creer_tableau_FAUX();
+    printf("%d\n", p[0]);  /* Comportement indéfini ! */
+    return 0;
+}
+```
+
+{{< svg ../figures/fig12_return_local_array.svg alt="Figure portant « Pendant l'appel », « main() », « creer_tableau_FAUX() », « tab[5] = 1,2,3,4,5 », « ✓ tab existe, pointeur valide », « Après le retour », « Zone libérée ! », « ✗ p pointe vers une zone invalide ! »." >}}
+
+### Solutions pour Retourner un Tableau
+
+**Solution 1 : Tableau statique** -- La fonction retourne un pointeur vers un tableau qui persiste.
+
+```c
+/* OK mais attention : un seul tableau partagé par tous les appels */
+int *creer_tableau_static(void) {
+    static int tab[5] = {1, 2, 3, 4, 5};  /* Segment data */
+    return tab;  /* Valide : tab existe toujours */
+}
+
+int main(void) {
+    int *p = creer_tableau_static();
+    printf("%d\n", p[0]);  /* OK : affiche 1 */
+    
+    /* ATTENTION : tous les appels partagent le même tableau */
+    int *q = creer_tableau_static();
+    q[0] = 99;
+    printf("%d\n", p[0]);  /* Affiche 99 ! p et q pointent au même endroit */
+    return 0;
+}
+```
+
+**Solution 2 : Allocation dynamique** -- Chaque appel crée un nouveau tableau.
+
+```c
+/* OK : chaque appel alloue un nouveau tableau */
+int *creer_tableau_dynamique(int n) {
+    int *tab = malloc(n * sizeof(int));  /* Sur le tas */
+    if (tab == NULL) return NULL;        /* Vérifier l'allocation */
+    for (int i = 0; i < n; i++)
+        tab[i] = i + 1;
+    return tab;  /* Valide : le tas n'est pas libéré au retour */
+}
+
+int main(void) {
+    int *p = creer_tableau_dynamique(5);
+    int *q = creer_tableau_dynamique(5);  /* Deux tableaux distincts */
+    
+    q[0] = 99;
+    printf("%d\n", p[0]);  /* Affiche 1 : p et q sont indépendants */
+    
+    free(p);  /* OBLIGATOIRE : libérer la mémoire */
+    free(q);
+    return 0;
+}
+```
+
+**Solution 3 : Passage par paramètre** -- L'appelant fournit le tableau.
+
+```c
+/* L'appelant gère l'allocation */
+void remplir_tableau(int *tab, int n) {
+    for (int i = 0; i < n; i++)
+        tab[i] = i + 1;
+}
+
+int main(void) {
+    int local[5];              /* Automatique */
+    remplir_tableau(local, 5); /* La fonction remplit le tableau fourni */
+    printf("%d\n", local[0]);  /* OK : affiche 1 */
+    return 0;
+}
+```
+
+## Allocation Dynamique : malloc, calloc, realloc, free
+
+### Principe de l'Allocation Dynamique
+
+L'allocation dynamique permet de créer des zones mémoire dont la taille est déterminée à l'exécution. Ces zones sont allouées sur le **tas** (heap) et persistent jusqu'à leur libération explicite.
+
+::: {.callout-important .encadre-techbox title="Fonctions d'allocation (<stdlib.h>)"}
+| `malloc(size)` | Alloue `size` octets (non initialisés) |
+| --- | --- |
+| `calloc(n, size)` | Alloue `n × size` octets (initialisés à 0) |
+| `realloc(ptr, size)` | Redimensionne la zone pointée par `ptr` |
+| `free(ptr)` | Libère la zone pointée par `ptr` |
+:::
+
+```c
+#include <stdlib.h>
+
+/* Allocation d'un tableau de n entiers */
+int *tab = malloc(n * sizeof(int));  /* n * 4 octets (si int = 4) */
+
+/* TOUJOURS vérifier le retour de malloc */
+if (tab == NULL) {
+    fprintf(stderr, "Erreur allocation\n");
+    return 1;
+}
+
+/* Utilisation */
+for (int i = 0; i < n; i++)
+    tab[i] = i * 10;
+
+/* Libération OBLIGATOIRE */
+free(tab);
+tab = NULL;  /* Bonne pratique : évite les accès après free */
+```
+
+### malloc vs calloc
+
+```c
+/* malloc : mémoire NON initialisée (contient des valeurs aléatoires) */
+int *p = malloc(5 * sizeof(int));
+/* p[0], p[1], ... contiennent des valeurs indéterminées */
+
+/* calloc : mémoire initialisée à ZÉRO */
+int *q = calloc(5, sizeof(int));
+/* q[0] = q[1] = ... = q[4] = 0 */
+```
+
+{{< svg ../figures/fig13_malloc_vs_calloc.svg alt="Figure portant « malloc vs calloc », « malloc(5 × sizeof(int)) », « ?? », « Contenu INDÉTERMINÉ », « calloc(5, sizeof(int)) », « 00 », « Initialisé à ZÉRO », « calloc = allocation + initialisation à zéro »." >}}
+
+### Redimensionnement avec realloc
+
+```c
+int *tab = malloc(5 * sizeof(int));
+/* ... remplissage de tab[0] à tab[4] ... */
+
+/* Agrandir à 10 éléments */
+int *nouveau = realloc(tab, 10 * sizeof(int));
+if (nouveau == NULL) {
+    /* Échec : tab est toujours valide, mais pas agrandi */
+    free(tab);
+    return 1;
+}
+tab = nouveau;  /* Succès : utiliser le nouveau pointeur */
+/* tab[0]..tab[4] conservés, tab[5]..tab[9] non initialisés */
+
+free(tab);
+```
+
+### Erreurs Classiques
+
+```c
+/* 1. Oublier de vérifier malloc */
+int *p = malloc(1000000000000);  /* Peut échouer ! */
+p[0] = 42;  /* Crash si p == NULL */
+
+/* 2. Oublier free (fuite mémoire) */
+void fuite(void) {
+    int *p = malloc(100);
+    /* ... pas de free(p) ... */
+}   /* Mémoire perdue à chaque appel */
+
+/* 3. Double free */
+int *p = malloc(10);
+free(p);
+free(p);  /* Comportement indéfini ! */
+
+/* 4. Accès après free (use-after-free) */
+int *p = malloc(10);
+free(p);
+p[0] = 42;  /* Comportement indéfini ! */
+```
+
+## Tableaux à Longueur Variable (VLA)
+
+### Syntaxe et Utilisation
+
+Depuis C99, il est possible de déclarer des tableaux dont la taille est une variable (et non une constante).
+
+```c
+void traiter(int n) {
+    int tab[n];  /* VLA : taille déterminée à l'exécution */
+    
+    for (int i = 0; i < n; i++)
+        tab[i] = i * i;
+    
+    /* tab est automatique : détruit à la fin de la fonction */
+}
+
+int main(void) {
+    int taille;
+    printf("Taille : ");
+    scanf("%d", &taille);
+    
+    int donnees[taille];  /* VLA : alloué sur la pile */
+    /* ... */
+    return 0;
+}
+```
+
+### VLA vs Allocation Dynamique
+
+{{< svg ../figures/fig14_vla_vs_malloc.svg alt="Figure intitulée « VLA vs Allocation Dynamique »." >}}
+
+::: {.callout-warning .encadre-warningbox title="Limitations des VLA"}
+- Les VLA sont alloués sur la **pile**, dont la taille est limitée (typiquement 8 Mo). Un VLA trop grand provoque un *stack overflow*.
+- Les VLA ne peuvent pas être `static` ni globaux.
+- Les VLA sont optionnels depuis C11 (macro `__STDC_NO_VLA__`).
+- Pour de grands tableaux ou une durée de vie contrôlée, préférer `malloc`.
+:::
+
+```c
+/* Danger : VLA trop grand */
+void danger(int n) {
+    int enorme[n];  /* Si n = 10000000, stack overflow probable */
+}
+
+/* Solution : utiliser malloc pour les grands tableaux */
+void safe(int n) {
+    int *tab = malloc(n * sizeof(int));
+    if (tab == NULL) { /* gérer l'erreur */ }
+    /* ... */
+    free(tab);
+}
+```
+
+## Arithmétique des Pointeurs en Détail
+
+### Règle Fondamentale
+
+::: {.callout-note .encadre-definitionbox title="Arithmétique dimensionnée"}
+Toute opération arithmétique sur un pointeur est **dimensionnée** par la taille du type pointé. Ajouter $n$ à un pointeur de type `T*` ajoute $n \times \texttt{sizeof(T)}$ octets à l'adresse.
+:::
+
+Cette règle permet de parcourir un tableau naturellement : `p + 1` pointe toujours vers l'élément suivant, quelle que soit la taille des éléments.
+
+{{< svg ../figures/fig15_pointer_arithmetic.svg alt="Figure portant « Arithmétique selon le type du pointeur », « Adresse », « 0x… », « int *p », « → sauts de 4 octets », « short *s », « → sauts de 2 octets », « char *c », et 2 autre(s)." >}}
+
+### Opérations Valides et Exemples
+
+```c
+int arr[5] = {10, 20, 30, 40, 50};  /* &arr[0] = 0x1000 */
+int *p = arr;       /* p = 0x1000 */
+int *q = &arr[3];   /* q = 0x100C */
+
+/* Addition et soustraction d'entiers */
+printf("p + 2 = %p\n", (void*)(p + 2));   /* 0x1008 (+8 octets) */
+printf("q - 1 = %p\n", (void*)(q - 1));   /* 0x1008 (-4 octets) */
+
+/* Différence de pointeurs : résultat en ÉLÉMENTS, pas en octets */
+printf("q - p = %ld\n", q - p);           /* 3 (éléments) */
+
+/* Pour obtenir la différence en octets, cast vers char* */
+printf("(char*)q - (char*)p = %ld\n", (char*)q - (char*)p);  /* 12 octets */
+
+/* Comparaisons */
+if (p < q) printf("p est avant q en mémoire\n");
+
+/* Incrémentation */
+p++;  /* p passe de 0x1000 à 0x1004 */
+```
+
+### Réinterprétation Mémoire par Cast
+
+Un cast de pointeur permet de réinterpréter une zone mémoire avec un type différent. C'est utile pour examiner la représentation interne des données.
+
+```c
+int x = 0x11223344;
+char *cp = (char *)&x;  /* Vue de x comme séquence d'octets */
+
+printf("Octets de x en mémoire:\n");
+for (int i = 0; i < 4; i++) {
+    printf("  octet %d: 0x%02X\n", i, (unsigned char)cp[i]);
+}
+/* Sur little-endian : 44 33 22 11 */
+/* Sur big-endian    : 11 22 33 44 */
+```
+
+{{< svg ../figures/fig19_memory_reinterpretation.svg alt="Figure portant « Réinterprétation de 0x11223344 via char* », « cp[…] », « +… », « (little-endian) »." >}}
+
+## Les Chaînes de Caractères
+
+### Définition et Représentation
+
+::: {.callout-note .encadre-definitionbox title="Chaîne de caractères en C"}
+Une **chaîne de caractères** est un tableau de `char` terminé par le caractère nul `'\0'` (code ASCII 0x00). Ce caractère de terminaison permet aux fonctions de déterminer où finit la chaîne.
+:::
+
+```c
+char str1[] = "Hello";       /* Tableau de 6 chars : H e l l o \0 */
+char str2[10] = "Hi";        /* Tableau de 10 chars : H i \0 ? ? ? ? ? ? ? */
+char str3[] = {'A', 'B', 0}; /* Équivalent à "AB" */
+```
+
+{{< svg ../figures/fig16_string_memory.svg alt="Figure portant « Représentation de "Hello" en mémoire », « '…' », « 0x… », « str[…] », « strlen(str) = 5 », « sizeof(str) = 6 », « ← Terminateur nul (fin de chaîne) »." >}}
+
+### Table ASCII Partielle
+
+Les caractères sont stockés selon leur code ASCII (American Standard Code for Information Interchange).
+
+{{< svg ../figures/fig17_ascii_table.svg alt="Figure intitulée « Table ASCII partielle », libellés : « 'A'=0x41, 'a'=0x61, différence=0x20 | Chiffres '0'-'9' : 0x30-0x39 »." >}}
+
+Relations utiles : `'A'` = 0x41, `'a'` = 0x61, différence = 0x20. Les chiffres `'0'` à `'9'` sont aux codes 0x30 à 0x39.
+
+### Différence Capitale : Tableau vs Pointeur sur Chaîne
+
+```c
+char arr[] = "Hello";    /* Tableau alloué sur la pile, MODIFIABLE */
+char *ptr = "Hello";     /* Pointeur vers le segment de données, LECTURE SEULE */
+
+arr[0] = 'J';  /* OK : modifie la copie locale -> "Jello" */
+ptr[0] = 'J';  /* ERREUR : segfault ! Le segment données est protégé */
+
+arr = ptr;     /* ERREUR de compilation : arr n'est pas modifiable */
+ptr = arr;     /* OK : ptr peut pointer vers une autre adresse */
+```
+
+{{< svg ../figures/fig18_array_vs_string_pointer.svg alt="Figure portant « Tableau vs Pointeur sur chaîne », « char arr[] = "Hello" », « Stocké sur la pile (stack) », « → MODIFIABLE », « char *ptr = "Hello" », « 0x402010 », « ptr (sur la pile) », « Segment .rodata », et 1 autre(s)." >}}
+
+### Fonctions Standard de Manipulation
+
+Les fonctions de `<string.h>` opèrent sur des chaînes terminées par `'\0'`.
+
+::: {.callout-important .encadre-techbox title="Fonctions de <string.h>"}
+| `strlen(s)` | Longueur de s | Ne compte pas le `'\0'` |
+| --- | --- | --- |
+| `strcpy(dst, src)` | Copie src dans dst | Danger si dst trop petit |
+| `strncpy(dst, src, n)` | Copie au plus n chars | Plus sûr |
+| `strcat(dst, src)` | Concatène src à dst | Danger si dst trop petit |
+| `strcmp(s1, s2)` | Compare s1 et s2 | 0 si égales, <0 si s1<s2, >0 si s1>s2 |
+| `strchr(s, c)` | Cherche c dans s | Retourne pointeur ou NULL |
+:::
+
+```c
+#include <string.h>
+
+char dest[20];
+strcpy(dest, "Hello");     /* dest = "Hello" */
+strcat(dest, " World");    /* dest = "Hello World" */
+printf("Longueur: %zu\n", strlen(dest));  /* 11 */
+printf("Taille: %zu\n", sizeof(dest));    /* 20 */
+
+if (strcmp(dest, "Hello World") == 0)
+    printf("Chaînes identiques\n");
+```
+
+## Visualisation de la Mémoire en C
+
+Le programme suivant permet d'examiner la représentation mémoire des données.
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+
+typedef unsigned char *byte_pointer;
+
+/* Affiche len octets à partir de start, 2 caractères par octet */
+void show_bytes(byte_pointer start, size_t len) {
+    printf("  ");
+    for (size_t i = 0; i < len; i++)
+        printf("%.2x ", start[i]);
+    printf("\n");
+}
+
+void show_int(int x) {
+    printf("int %d (0x%X):\n", x, x);
+    show_bytes((byte_pointer)&x, sizeof(int));
+}
+
+void show_float(float x) {
+    printf("float %f:\n", x);
+    show_bytes((byte_pointer)&x, sizeof(float));
+}
+
+void show_pointer(void *x) {
+    printf("pointer %p:\n", x);
+    show_bytes((byte_pointer)&x, sizeof(void *));
+}
+
+int main(void) {
+    int val = 0x12345678;
+    float f = 1.0f;
+    
+    show_int(val);
+    show_float(f);
+    show_pointer(&val);
+    
+    /* Vérification endianness */
+    printf("\nCette machine est ");
+    uint32_t test = 1;
+    if (*(uint8_t*)&test == 1)
+        printf("Little-Endian\n");
+    else
+        printf("Big-Endian\n");
+    
+    return 0;
+}
+```
+
+::: {.callout-tip .encadre-examplebox title="Sortie typique (64 bits, Little-Endian)"}
+```
+int 305419896 (0x12345678):
+  78 56 34 12 
+float 1.000000:
+  00 00 80 3f 
+pointer 0x7ffd5c9fa9ac:
+  ac a9 9f 5c fd 7f 00 00 
+
+Cette machine est Little-Endian
+```
+:::
+
+## Récapitulatif du Chapitre
+
+::: {.callout-note .encadre-infobox title="Points clés à retenir"}
+1. Le **mot machine** (32 ou 64 bits) détermine la taille des adresses et des pointeurs
+2. La mémoire est un tableau linéaire d'octets ; chaque octet a une adresse unique
+3. L'**adresse d'un objet** est l'adresse de son premier octet
+4. **Endianness** : Little-Endian (Intel) stocke le LSB à l'adresse basse ; Big-Endian fait l'inverse
+5. Un **tableau** occupe des cases mémoire consécutives ; le C ne vérifie pas les débordements
+6. Le **nom d'un tableau** est converti en pointeur vers son premier élément
+7. **Équivalences** : `arr[i]` $\equiv$ `*(arr+i)` et `&arr[i]` $\equiv$ `arr+i`
+8. L'**arithmétique des pointeurs** est dimensionnée par `sizeof(type pointé)`
+9. Une **chaîne** est un tableau de `char` terminé par `'\0'`
+10. **Tableau vs pointeur sur chaîne** : le tableau est modifiable, le littéral ne l'est pas
+:::
+
+::: {.callout-important .encadre-techbox title="Formules et syntaxes essentielles"}
+| Adresse de `arr[i]` | `&arr[0] + i * sizeof(arr[0])` |
+| --- | --- |
+| `ptr + n` | Ajoute `n * sizeof(*ptr)` octets |
+| `ptr1 - ptr2` | Nombre d'éléments (pas d'octets) |
+| `strlen(s)` | Nombre de caractères avant `'\0'` |
+| `sizeof(arr)` | Taille totale du tableau en octets |
+| `sizeof(ptr)` | Taille du pointeur (4 ou 8) |
+:::
+
+::: {#ressources-seance}
+:::
