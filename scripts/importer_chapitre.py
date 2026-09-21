@@ -758,8 +758,34 @@ def nettoyer_svg(source: Path, cible: Path) -> dict[str, int]:
         element.set("style", "; ".join(d for d in declarations if d))
     cible.parent.mkdir(parents=True, exist_ok=True)
     arbre.write(cible, encoding="unicode", xml_declaration=False)
-    cible.write_text(cible.read_text(encoding="utf-8").rstrip() + "\n", encoding="utf-8")
+    cible.write_text(identifiants_uniques(cible.read_text(encoding="utf-8"), cible.stem).rstrip()
+                     + "\n", encoding="utf-8")
     return compte
+
+
+def identifiants_uniques(svg: str, prefixe: str) -> str:
+    """Préfixe les identifiants internes d'une figure par son nom.
+
+    Une figure incorporée dans la page partage l'espace des identifiants avec **toutes les autres**
+    de cette page. `pdftocairo` nomme ses glyphes `glyph-0-0`, `glyph-0-1`… et recommence à zéro pour
+    chaque figure : sur une page qui en porte vingt, `glyph-0-0` est défini vingt fois, et chaque
+    `<use href="#glyph-0-0">` désigne celui de la **première**. Tous les textes des figures suivantes
+    s'écrivaient donc avec les lettres de la première — c'est ce que le PO a vu sur les chapitres 1
+    et 2 du cours de C.
+
+    Le défaut ne se voit ni dans le SVG isolé, ni dans un contrôle de structure : chaque figure, prise
+    seule, est parfaitement valide. Il n'apparaît qu'une fois plusieurs figures posées dans la même
+    page.
+    """
+    identifiants = set(re.findall(r'\bid="([^"]+)"', svg))
+    if not identifiants:
+        return svg
+    for identifiant in sorted(identifiants, key=len, reverse=True):
+        nouveau = f"{prefixe}-{identifiant}"
+        svg = svg.replace(f'id="{identifiant}"', f'id="{nouveau}"')
+        svg = svg.replace(f'href="#{identifiant}"', f'href="#{nouveau}"')
+        svg = svg.replace(f"url(#{identifiant})", f"url(#{nouveau})")
+    return svg
 
 
 # --------------------------------------------------------------------------------------------------
