@@ -66,7 +66,7 @@ Le **clustering** répond à « quels exemples se ressemblent ? » — utile pou
 Deux exemples sont des points dans l'espace des variables. Leur **distance euclidienne** mesure à quel point ils se ressemblent : petite distance, exemples proches (similaires) ; grande distance, exemples éloignés.
 :::
 
-$$ d(\vx, \vx') = \sqrt{\sum_{j=1}^{d}(x_j - x'_j)^2} $$
+$$ d(\mathbf{x}, \mathbf{x}') = \sqrt{\sum_{j=1}^{d}(x_j - x'_j)^2} $$
 
 C'est la distance de la Séance 4 (celle du k-NN), généralisation du théorème de Pythagore à $d$ dimensions. Tout le non-supervisé s'appuie dessus : un cluster regroupe des points *proches* ; un axe principal capte la direction où les points *s'étalent* le plus. Exemple : entre $\mathbf{x} = (1; 2)$ et $\mathbf{x}' = (4; 6)$, $d = \sqrt{3^2 + 4^2} = \sqrt{25} = 5$.
 
@@ -102,7 +102,7 @@ C'est tout. L'étape (1) utilise la distance ; l'étape (2) une simple moyenne. 
 Pour $k$ centres $\mathbf{c}_1, \dots, \mathbf{c}_k$. **Affectation** : chaque point $\mathbf{x}_i$ rejoint le cluster du centre le plus proche. **Mise à jour** : chaque centre devient la moyenne des points de son cluster.
 :::
 
-$$ \text{affectation} : \; a_i = \arg\min_{k} \; \lVert \vx_i - \vc_k \rVert^2 \qquad \text{mise à jour} : \; \vc_k = \frac{1}{|C_k|}\sum_{i \in C_k} \vx_i $$
+$$ \text{affectation} : \; a_i = \arg\min_{k} \; \lVert \mathbf{x}_i - \mathbf{c}_k \rVert^2 \qquad \text{mise à jour} : \; \mathbf{c}_k = \frac{1}{|C_k|}\sum_{i \in C_k} \mathbf{x}_i $$
 
 La première équation attribue à chaque point l'indice $a_i$ du centre le plus proche (au sens de la distance au carré). La seconde recalcule chaque centre $\mathbf{c}_k$ comme le barycentre (la moyenne) des points $C_k$ qui lui sont affectés. On boucle entre les deux jusqu'à ce que les affectations ne changent plus. La répétition de ces deux gestes — proche, moyenne — *est* l'algorithme.
 
@@ -112,7 +112,7 @@ La première équation attribue à chaque point l'indice $a_i$ du centre le plus
 Six points : $(1,1), (2,1), (1,2)$ en bas à gauche, $(5,6), (6,5), (6,6)$ en haut à droite. On vise $k = 2$ clusters. Initialisation *volontairement médiocre* : $\mathbf{c}_1 = (1,1)$, $\mathbf{c}_2 = (2,1)$ (les deux centres collés en bas).
 
 - **Affectation 1** : chaque point au centre le plus proche $\to$ labels $[0,1,0,1,1,1]$ (les trois points du haut rejoignent $\mathbf{c}_2$, plus proche). Inertie $= 108$.
-- **Mise à jour 1** : $\mathbf{c}_1 = $ moyenne de $\{(1,1),(1,2)\} = (1;\ 1{,}5)$ ; $\mathbf{c}_2 = $ moyenne des quatre autres $= (4{,}75;\ 4{,}5)$.
+- **Mise à jour 1** : $\mathbf{c}_1 =$ moyenne de $\{(1,1),(1,2)\} = (1;\ 1{,}5)$ ; $\mathbf{c}_2 =$ moyenne des quatre autres $= (4{,}75;\ 4{,}5)$.
 
 Les centres ont bougé : on recommence.
 :::
@@ -141,7 +141,7 @@ De gauche à droite : l'initialisation médiocre (centres collés), puis le dép
 L'**inertie** (ou inertie intra-cluster) est la somme des distances au carré entre chaque point et le centre de son cluster. C'est la mesure de *compacité* des clusters : plus elle est faible, plus les points sont serrés autour de leur centre.
 :::
 
-$$ \mathcal{I} = \sum_{k=1}^{K}\sum_{i \in C_k} \lVert \vx_i - \vc_k \rVert^2 $$
+$$ \mathcal{I} = \sum_{k=1}^{K}\sum_{i \in C_k} \lVert \mathbf{x}_i - \mathbf{c}_k \rVert^2 $$
 
 Chaque étape de k-means *diminue* l'inertie : l'affectation place chaque point près de son centre le plus proche (baisse) ; la mise à jour recentre chaque centre sur ses points (baisse encore). Comme l'inertie est positive et décroît à chaque étape, l'algorithme converge. *Attention* : il converge vers un **minimum local**, pas forcément le meilleur — d'où l'usage de plusieurs initialisations (option `n_init` de scikit-learn), dont on garde la meilleure.
 

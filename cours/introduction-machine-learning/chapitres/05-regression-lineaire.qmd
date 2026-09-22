@@ -38,7 +38,7 @@ Cette séance construit le deuxième pilier du cours : prédire une **quantité*
 - Lire **MAE**, **RMSE** et **R²** ; diagnostiquer par les résidus.
 - Le degré d'un polynôme comme bouton de complexité ; la **courbe en U** ; **Ridge** pour dompter le sur-ajustement.
 
-# Prédire : le modèle linéaire]{Prédire une quantité : le modèle linéaire
+# Prédire une quantité : le modèle linéaire
 
 ## La régression : prédire un nombre
 
@@ -65,7 +65,7 @@ La matrice de design $X$ est inchangée depuis la Séance 3 ; la seule nouveaut�
 ## Ce qui change depuis la Séance 3 : $y$ vit dans $\mathbb{R}$
 
 ::: {.callout-tip .ucad-ex title="$X$ et $y$ de DataSANTÉ-221"}
-\[ X=\begin{pmatrix} 47 & 9{,}3 & 11{,}8 & 38{,}0 & 0\\ 18 & 5{,}1 & 13{,}0 & 39{,}5 & 1\\ 56 & 7{,}2 & 9{,}5 & 37{,}1 & 1\\ \vdots & \vdots & \vdots & \vdots & \vdots \end{pmatrix} \in \mathbb{R}^{10000\times 5} \qquad y=\begin{pmatrix} 3{,}8\\ 0{,}5\\ 6{,}5\\ \vdots \end{pmatrix} \in \mathbb{R}^{10000} \]
+$$X=\begin{pmatrix} 47 & 9{,}3 & 11{,}8 & 38{,}0 & 0\\ 18 & 5{,}1 & 13{,}0 & 39{,}5 & 1\\ 56 & 7{,}2 & 9{,}5 & 37{,}1 & 1\\ \vdots & \vdots & \vdots & \vdots & \vdots \end{pmatrix} \in \mathbb{R}^{10000\times 5} \qquad y=\begin{pmatrix} 3{,}8\\ 0{,}5\\ 6{,}5\\ \vdots \end{pmatrix} \in \mathbb{R}^{10000}$$
 :::
 
 ## Exercice — régression ou classification ?
@@ -147,7 +147,7 @@ Avec le modèle ci-dessus ($w_{\text{glycémie}} = 0{,}566$, $w_{\text{saison}} 
 **(a)** $\Delta\hat y = 0{,}566 \times 2 = \mathbf{+1{,}13}$ jour. **(b)** s'y ajoute $1{,}379 \times 1$, soit au total $1{,}13 + 1{,}38 = \mathbf{+2{,}51}$ jours. La linéarité rend ces effets *additifs* : chaque variable pousse la prédiction indépendamment des autres.
 :::
 
-# La meilleure droite]{La meilleure droite : la MSE
+# La meilleure droite : la MSE
 
 ## Que veut dire la meilleure droite ?
 
@@ -183,7 +183,7 @@ Vérifier la valeur $1{,}688$ : calculer les quatre résidus de la droite $\hat 
 Résidus : $2-3{,}25 = -1{,}25$ ; $-1{,}25$ ; $0{,}75$ ; $1{,}75$. Carrés : $1{,}5625$ ; $1{,}5625$ ; $0{,}5625$ ; $3{,}0625$. Somme $= 6{,}75$, MSE $= 6{,}75/4 = \mathbf{1{,}6875}$. À noter : ce $6{,}75$ resservira tel quel dans le calcul du R².
 :::
 
-# L'équation normale]{L'équation normale : le minimum exact
+# L'équation normale : le minimum exact
 
 ## Le cas d'une variable, formellement
 
@@ -225,18 +225,18 @@ Lecture terme à terme : $\tilde X^{\top} y$ confronte chaque colonne aux cibles
 
 ::: {.callout-tip .ucad-ex title="Construire les deux blocs"}
 Jouet à une variable : la matrice augmentée $\tilde X$ a deux colonnes (les 1, puis $x$).
-\[ \tilde X = \begin{pmatrix} 1 & 1\\ 1 & 2\\ 1 & 3\\ 1 & 4 \end{pmatrix}, \qquad
+$$\tilde X = \begin{pmatrix} 1 & 1\\ 1 & 2\\ 1 & 3\\ 1 & 4 \end{pmatrix}, \qquad
 \tilde X^{\top}\tilde X = \begin{pmatrix} 4 & 10\\ 10 & 30 \end{pmatrix}, \qquad
-\tilde X^{\top} y = \begin{pmatrix} 13\\ 38 \end{pmatrix} \]
-Chaque case se lit : $4 = $ nombre de patients, $10 = \sum x_i$, $30 = \sum x_i^2$ ; côté cibles, $13 = \sum y_i$ et $38 = \sum x_i y_i$. Tout est déjà là : effectifs, sommes, co-variations.
+\tilde X^{\top} y = \begin{pmatrix} 13\\ 38 \end{pmatrix}$$
+Chaque case se lit : $4 =$ nombre de patients, $10 = \sum x_i$, $30 = \sum x_i^2$ ; côté cibles, $13 = \sum y_i$ et $38 = \sum x_i y_i$. Tout est déjà là : effectifs, sommes, co-variations.
 :::
 
 ## Exemple — l'équation normale sur le jouet, étape 2
 
 ::: {.callout-tip .ucad-ex title="Inverser puis multiplier"}
 Inverse d'une matrice $2\times 2$ : échanger la diagonale, changer le signe du reste, diviser par le déterminant $4\times 30 - 10\times 10 = \mathbf{20}$ :
-\[ \big(\tilde X^{\top}\tilde X\big)^{-1} = \frac{1}{20}\begin{pmatrix} 30 & -10\\ -10 & 4 \end{pmatrix} = \begin{pmatrix} 1{,}5 & -0{,}5\\ -0{,}5 & 0{,}2 \end{pmatrix} \]
-\[ \hat\theta = \begin{pmatrix} 1{,}5 & -0{,}5\\ -0{,}5 & 0{,}2 \end{pmatrix}\begin{pmatrix} 13\\ 38 \end{pmatrix} = \begin{pmatrix} 1{,}5\times 13 - 0{,}5\times 38\\ -0{,}5\times 13 + 0{,}2\times 38 \end{pmatrix} = \begin{pmatrix} \mathbf{0{,}5}\\ \mathbf{1{,}1} \end{pmatrix} \]
+$$\big(\tilde X^{\top}\tilde X\big)^{-1} = \frac{1}{20}\begin{pmatrix} 30 & -10\\ -10 & 4 \end{pmatrix} = \begin{pmatrix} 1{,}5 & -0{,}5\\ -0{,}5 & 0{,}2 \end{pmatrix}$$
+$$\hat\theta = \begin{pmatrix} 1{,}5 & -0{,}5\\ -0{,}5 & 0{,}2 \end{pmatrix}\begin{pmatrix} 13\\ 38 \end{pmatrix} = \begin{pmatrix} 1{,}5\times 13 - 0{,}5\times 38\\ -0{,}5\times 13 + 0{,}2\times 38 \end{pmatrix} = \begin{pmatrix} \mathbf{0{,}5}\\ \mathbf{1{,}1} \end{pmatrix}$$
 Le même $(\hat b, \hat w) = (0{,}5\,;\,1{,}1)$ que les formules fermées — l'équation normale les généralise à $d$ variables. `LinearRegression` applique exactement ce calcul.
 :::
 
@@ -406,7 +406,7 @@ Si l'âge varie de $5$ à $85$ et la glycémie de $3$ à $18$, la cuvette de $J$
 
 D'où le `X_train_std` du code précédent : `SGDRegressor` se place toujours *après* un `StandardScaler` dans le Pipeline.
 
-# Mesurer : MAE, RMSE, R²]{Mesurer : MAE, RMSE, R² — et le verdict sur DataSANTÉ-221
+# Mesurer : MAE, RMSE, R² — et le verdict sur DataSANTÉ-221
 
 ## MAE et RMSE, formellement
 
@@ -455,7 +455,7 @@ Numérateur : l'erreur (quadratique) du modèle ; dénominateur : celle de la mo
 
 ::: {.callout-tip .ucad-ex title="Les deux sommes sont déjà connues"}
 Pour la droite $\hat y = 0{,}5 + 1{,}1x$ : la somme des carrés des résidus vaut $0{,}70$ (calcul de la MSE). Pour la moyenne : $6{,}75$ (l'exercice de la droite plate).
-\[ R^2 = 1 - \frac{0{,}70}{6{,}75} = 1 - 0{,}104 = \mathbf{0{,}896} \]
+$$R^2 = 1 - \frac{0{,}70}{6{,}75} = 1 - 0{,}104 = \mathbf{0{,}896}$$
 La droite efface $89{,}6\,\%$ de l'erreur quadratique du prédicteur-moyenne. `r2_score` de `scikit-learn` retourne la même valeur — et c'est ce que `score()` calcule pour tout régresseur.
 :::
 
@@ -510,7 +510,7 @@ Le linéaire se trompe de $1{,}35$ jour en moyenne et efface $60\,\%$ de l'erreu
 
 À gauche : le nuage longe la diagonale « prédiction parfaite » — avec un écrasement sur les longues durées, que le modèle sous-estime. À droite : les résidus en fonction du prédit, centrés sur $0$ (pas de biais systématique). Toute *forme* dans ce nuage — courbure, entonnoir — signalerait un motif que la droite n'a pas capté.
 
-# Le degré]{Le degré : sous- et sur-ajustement
+# Le degré : sous- et sur-ajustement
 
 ## Au-delà de la droite : l'expansion polynomiale
 
@@ -572,7 +572,7 @@ Trois polynômes sur un même jeu : $A$ — RMSE train $0{,}60$, validation $0{,
 $A$ : deux erreurs *hautes et proches* — trop simple, sous-ajustement. $C$ : train minuscule, validation catastrophique — mémorisation, sur-ajustement. $B$ : erreurs basses et voisines — le bon dosage, c'est lui que l'on déploie. Le diagnostic se lit toujours dans l'*écart* entre les deux scores, jamais dans le train seul.
 :::
 
-# Ridge]{Ridge : dompter le sur-ajustement
+# Ridge : dompter le sur-ajustement
 
 ## L'idée : punir les coefficients géants
 
