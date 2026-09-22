@@ -72,7 +72,7 @@ d'un tuteur IA encadré.
 | US-46 | EP3 | Numérotation automatique des chapitres depuis le nom de fichier | C | 1 | — |
 | US-47 | EP1 | Index de recherche par langue, sans ajustement du décalage Quarto | C | 2 | — |
 | US-48 | EP3 | Page de garde des PDF de séance | S | 2 | livrée |
-| US-49 | EP3 | Ressources par séance (lab, TD, notebook, corrigé) | M | 3 | livrée |
+| US-49 | EP3 | Ressources par séance (lab, TD, TP, notebook, PDF du cours) | M | 3 | livrée |
 | US-50 | EP3 | Notebooks de lab rendus en page, avec téléchargement et ouverture dans Colab | S | 5 | livrée |
 | US-51 | EP3 | Migration d'un deuxième cours : Programmation Python (L1) | M | 5 | livrée |
 | US-52 | EP1 | Déploiement quotidien programmé (les dates de publication s'appliquent seules) | C | 1 | — |
@@ -86,6 +86,7 @@ d'un tuteur IA encadré.
 | US-60 | EP3 | Migration d'Introduction au ML (onze séances en decks) | M | 5 | 7 |
 | US-61 | EP3 | Flottants et mathématiques hors ligne (ouvre SD et Intro IA) | M | 5 | 7 |
 | US-62 | EP3 | Contrôle des figures par comparaison des références de glyphes | S | 3 | — |
+| US-63 | EP3 | Audit d'accessibilité ciblé sur la PR, audit complet hebdomadaire sur `main` | M | 3 | — |
 
 ### Stories décrites par le PO
 
@@ -137,6 +138,23 @@ points, quand l'écart dû au rendu seul — anticrénelage, encres du mode somb
 vaut le double. L'angle proposé est exact et sans seuil : comparer les **références de glyphes**
 d'une figure incorporée à celles que sa source définit. `verifier_identifiants.py` couvre déjà la
 famille de défauts qui a frappé ; celle-ci irait plus loin. Pas une priorité (US-59).
+
+**La publication datée des corrigés est supprimée (US-49).** Décision du PO : aucun corrigé, aucune
+piste, aucune indication de correction n'est publié ni versionné — sans date, sans délai, sans
+exception. Trois « pistes de résolution » et le corrigé d'un devoir surveillé étaient en ligne,
+déclarés comme des TP. La machinerie d'US-49 disparaît (dossier `_corriges/`, date sur une
+ressource, type `corrige`), et trois barrières la remplacent : l'import refuse, la conversion
+refuse, et `verifier_non_publiable.py` refuse — dans le dépôt autant que dans le site. La règle est
+écrite dans CLAUDE.md §7.
+
+**US-63 — L'accessibilité ne peut plus être vérifiée en entier à chaque PR.** Le contrôle examine
+chaque page et chaque slide en deux langues, deux thèmes et deux largeurs : l'arrivée du cours de ML
+l'a porté à 2102 combinaisons et douze minutes, et le job de CI, coupé à quinze, a été rapporté comme
+un échec alors que ses seize étapes précédentes passaient. Le délai est monté à quarante minutes, ce
+qui est un sursis et non une réponse : chaque séance ajoutée allonge encore le contrôle. La story
+demande deux régimes — sur une PR, l'audit ne porte que sur les **pages touchées** par la PR ; sur
+`main`, l'audit **complet** tourne une fois par semaine, et son échec ouvre une issue. Priorité
+**Must** : le PO l'a demandée comme telle.
 
 **La part du PO, et US-58.** Le bilan du Sprint 6 a mesuré que la machine travaille quatre minutes
 par chapitre : le reste est de la lecture et des **décisions du PO** — 33 textes alternatifs pour les

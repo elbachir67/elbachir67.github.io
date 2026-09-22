@@ -120,6 +120,14 @@ l'issue soi-même ; sinon, la laisser ouverte et prévenir le PO.
   de filière « GLSI » n'apparaît pas : « L3 GLSI » s'écrit « L3 ». Toute correction se fait **à la
   source** (le `.tex` du cours et sa copie dans `_import/`), puis l'import est rejoué : sans cela, le
   terme revient au prochain import. `scripts/verifier_non_publiable.py` le vérifie en CI.
+- **Aucun corrigé, aucune piste, aucune indication de correction** n'est publié sur le site **ni
+  versionné dans le dépôt** — sans date, sans délai, sans exception. Cette règle remplace la
+  publication datée d'US-49, dont la machinerie est supprimée : il n'y a plus de dossier
+  `_corriges/`, plus de date sur une ressource, plus de type `corrige`. Un fichier dont le nom
+  contient « corrige », « correction », « pistes » ou « solution » est refusé à l'import et par
+  `scripts/verifier_non_publiable.py`, qui examine les fichiers suivis par Git autant que le site
+  rendu : un corrigé commité mais non lié reste lisible dans l'historique public. Ces documents
+  vivent hors du dépôt, chez le PO, et ne passent pas non plus par `_import/`.
 - Langue : le site est bilingue depuis US-36. Les pages françaises sont à la racine, leurs équivalents
   anglais sous `en/` (adresse `/en/…`, avec un nom de dossier anglais quand le mot diffère :
   `/recherche/` ↔ `/en/research/`, `/enseignement/` ↔ `/en/teaching/`). Les pages sous `en/` sont
