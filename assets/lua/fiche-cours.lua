@@ -7,7 +7,7 @@
 
 local INSECABLE = "\u{A0}"
 
--- Ressources des séances (US-49) : le poids des fichiers et la date des corrigés sont lus au rendu.
+-- Ressources des séances (US-49) : le poids des fichiers est lu au rendu.
 package.path = package.path .. ";" .. pandoc.path.directory(PANDOC_SCRIPT_FILE) .. "/?.lua"
 local R = require("ressources-communes")
 
@@ -69,10 +69,9 @@ local function fiche(cours)
   return blocs
 end
 
--- Ressources du cours entier, et non d'un chapitre (US-59) : un corrigé de devoir surveillé ne
--- relève d'aucun chapitre, mais de tout le cours. Elles se déclarent dans `cours.yml`, sous la même
--- forme que celles d'une séance, et suivent les mêmes règles — un corrigé n'apparaît qu'à partir de
--- sa date de publication.
+-- Ressources du cours entier, et non d'un chapitre (US-59) : un sujet d'examen, par exemple, ne
+-- relève d'aucun chapitre mais de tout le cours. Elles se déclarent dans `cours.yml`, sous la même
+-- forme que celles d'une séance, et suivent les mêmes règles.
 local function ressources_du_cours(cours, dossier)
   local publiables = R.publiables(cours.ressources)
   if #publiables == 0 then

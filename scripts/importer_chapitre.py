@@ -26,6 +26,7 @@ import argparse
 import os
 import re
 import sys
+import unicodedata
 import tomllib
 import xml.etree.ElementTree as ET
 from collections import Counter
@@ -33,8 +34,7 @@ from pathlib import Path
 
 SVG = "http://www.w3.org/2000/svg"
 
-# Ressources d'une séance (US-49) : libellé par type, dans les deux langues. Un corrigé n'a pas de
-# libellé ici : c'est `assets/lua/ressources.lua` qui l'affiche, et seulement à partir de sa date.
+# Ressources d'une séance (US-49) : libellé par type, dans les deux langues.
 RESSOURCES = {
     "lab": {"fr": "Lab", "en": "Lab"},
     "td": {"fr": "TD", "en": "Tutorial"},
@@ -44,7 +44,14 @@ RESSOURCES = {
     # depuis le site, c'est ce PDF-là qui fait foi (US-40).
     "pdf": {"fr": "PDF du cours", "en": "Course PDF"},
 }
-CORRIGE = "corrige"
+# Aucun corrigé, aucune piste, aucune indication de correction ne paraît sur le site ni ne vit
+# dans le dépôt : décision du PO, qui remplace la publication datée d'US-49. Le type `corrige` et
+# tout fichier dont le nom l'annonce sont refusés ici, à l'import, et de nouveau par
+# `scripts/verifier_non_publiable.py` sur le dépôt et sur le site rendu.
+TYPE_REFUSE = "corrige"
+# Le motif doit **commencer un mot** : « fig_05_resolution_preuve » est une figure, et non une
+# solution. Les accents sont pliés, la fin du mot reste libre (« corriges », « solutions »).
+MOTS_DE_CORRECTION = re.compile(r"(?:^|[^a-z0-9])(corrige|correction|pistes|solution)")
 
 # Commandes qui ne produisent qu'un caractère. `\textbackslash` apparaît dans ces cours à l'intérieur
 # d'un `\texttt{}`, donc dans un code en ligne, où la barre oblique inverse ne s'échappe pas.
@@ -58,7 +65,6 @@ CARACTERES = {"oe": "œ", "ldots": "\u2026", "dots": "\u2026", "textbackslash": 
 # Styles de `lstlisting` définis par beamerucad.sty : « out » et « err » sont des sorties de
 # programme, « sh » une commande shell. Sans style, c'est du code dans le langage du cours.
 STYLES_CODE = {"out": "", "err": "", "sh": "bash"}
-ISO = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # Encadrés de beamerucad.sty : type de callout Quarto, classe de couleur, titre par défaut.
 ENCADRES = {
@@ -1050,25 +1056,27 @@ def identifiants_uniques(svg: str, prefixe: str) -> str:
 # --------------------------------------------------------------------------------------------------
 
 def ressource(brute: str) -> dict:
-    """« lab|cours/x/ressources/lab1.pdf|Lab 1 » -> l'entrée écrite dans l'en-tête de la séance.
-
-    Un corrigé a un quatrième champ, sa **date de publication** : il est obligatoire, et c'est lui qui
-    décide du jour où le corrigé rejoint le site. Son fichier vit dans `_corriges/`, que Quarto ne rend
-    pas ; il est copié à l'assemblage, sous `corriges/`, le jour venu seulement.
-    """
+    """« lab|cours/x/ressources/lab1.pdf|Lab 1 » -> l'entrée écrite dans l'en-tête de la séance."""
     champs = brute.split("|")
     if len(champs) < 3:
-        sys.exit(f"Ressource mal formée : « {brute} » (attendu : type|fichier|titre[|date]).")
+        sys.exit(f"Ressource mal formée : « {brute} » (attendu : type|fichier|titre).")
     type_, fichier, titre = champs[0], champs[1], champs[2]
-    date = champs[3] if len(champs) > 3 else ""
-    if type_ not in RESSOURCES and type_ != CORRIGE:
+    if type_ == TYPE_REFUSE:
+        sys.exit("Un corrigé ne se publie pas et ne vit pas dans le dépôt : le type "
+                 f"« {TYPE_REFUSE} » est refusé (décision du PO, qui remplace la règle d'US-49).")
+    if type_ not in RESSOURCES:
         sys.exit(f"Type de ressource inconnu : « {type_} » "
-                 f"(attendu : {', '.join(sorted(RESSOURCES))} ou {CORRIGE}).")
-    if type_ == CORRIGE and not ISO.fullmatch(date):
-        sys.exit(f"Le corrigé « {titre} » n'a pas de date de publication (type|fichier|titre|AAAA-MM-JJ). "
-                 "Sans date, un corrigé ne peut pas être publié : c'est la règle d'US-49.")
-    if type_ != CORRIGE and date:
-        sys.exit(f"Seul un corrigé porte une date de publication (ici : « {type_} »).")
+                 f"(attendu : {', '.join(sorted(RESSOURCES))}).")
+    # Un corrigé passé sous un autre type — « tp|…/tp-pistes-ch1.pdf » — dit ce qu'il est par son
+    # nom de fichier. C'est ainsi que trois pistes du cours de C étaient parties en ligne.
+    minuscule = "".join(c for c in unicodedata.normalize("NFD", Path(fichier).name.lower())
+                        if not unicodedata.combining(c))
+    if MOTS_DE_CORRECTION.search(minuscule):
+        sys.exit(f"« {Path(fichier).name} » annonce une correction par son nom : aucun corrigé, "
+                 "aucune piste, aucune indication de correction ne se publie (décision du PO).")
+    if len(champs) > 3 and champs[3]:
+        sys.exit("Une ressource ne porte pas de date : la publication datée des corrigés "
+                 "(US-49) est supprimée.")
 
     # Chemins : `fichier` est relatif au dossier du cours (le filtre y lit le poids), `chemin` est
     # l'adresse publique. Ils se déduisent du chemin donné, et non de `--sortie` : le contrôle de
@@ -1077,18 +1085,15 @@ def ressource(brute: str) -> dict:
     if len(parties) < 3 or parties[0] != "cours":
         sys.exit(f"Ressource hors d'un cours : {fichier} (attendu : cours/<slug>/…).")
     slug, relatif = parties[1], str(Path(*parties[2:]))
-    publie = f"corriges/{Path(relatif).name}" if type_ == CORRIGE else relatif
     return {"type": type_, "titre": titre or Path(relatif).name, "fichier": relatif,
-            "chemin": f"/cours/{slug}/{publie}", "date": date}
+            "chemin": f"/cours/{slug}/{relatif}"}
 
 
 def slide_ressources(ressources: list[dict]) -> str:
     """Dernière slide : les ressources de la séance (US-49).
 
     La slide n'est qu'un emplacement : c'est `assets/lua/ressources.lua` qui la remplit **au rendu**,
-    parce que deux de ses données ne sont connues qu'à ce moment-là — le poids de chaque fichier, et le
-    fait qu'un corrigé ait atteint ou non sa date de publication. Un corrigé avant sa date n'apparaît
-    donc nulle part, pas même en commentaire dans la page.
+    parce que le poids de chaque fichier n'est connu qu'à ce moment-là.
     """
     return "::: {#ressources-seance}\n:::" if ressources else ""
 
@@ -1144,8 +1149,7 @@ def ressources_yaml(ressources: list[dict] | None) -> list[str]:
     """Bloc `ressources:` de l'en-tête, le même pour une page et pour un deck (US-49).
 
     `fichier` est relatif au dossier du cours — c'est ce qui permet au filtre d'en lire le poids ;
-    `chemin` est l'adresse publique. Un corrigé porte en plus sa date de publication : avant elle,
-    ni le filtre ni le rendu ne le laissent apparaître.
+    `chemin` est l'adresse publique.
     """
     lignes = []
     for ressource in ressources or []:
@@ -1153,8 +1157,6 @@ def ressources_yaml(ressources: list[dict] | None) -> list[str]:
         lignes.append(f"    titre: {guillemets(ressource['titre'])}")
         lignes.append(f"    fichier: {guillemets(ressource['fichier'])}")
         lignes.append(f"    chemin: {guillemets(ressource['chemin'])}")
-        if ressource.get("date"):
-            lignes.append(f"    date: {guillemets(ressource['date'])}")
     return ["ressources:"] + lignes if lignes else []
 
 
@@ -1264,10 +1266,10 @@ def main() -> int:
     analyseur.add_argument("--video", default="",
                            help="identifiant YouTube de la capsule de la séance (slide finale, US-19)")
     analyseur.add_argument("--ressource", action="append", default=[],
-                           metavar="TYPE|FICHIER|TITRE[|DATE]",
-                           help="ressource de la séance : lab, td, notebook ou corrige, son fichier dans "
-                                "le dépôt et son titre ; un corrigé exige en plus sa date de publication "
-                                "(AAAA-MM-JJ). Répétable (US-49)")
+                           metavar="TYPE|FICHIER|TITRE",
+                           help="ressource de la séance : lab, td, tp, notebook ou pdf, son fichier "
+                                "dans le dépôt et son titre. Un corrigé, une piste ou une "
+                                "correction est refusé. Répétable (US-49)")
     analyseur.add_argument("--prefixe-tikz",
                            help="préfixe des schémas TikZ compilés (US-55) ; par défaut, le nom du "
                                 "fichier de sortie")
