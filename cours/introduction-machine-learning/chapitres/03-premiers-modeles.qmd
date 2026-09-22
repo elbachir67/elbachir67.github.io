@@ -1,0 +1,487 @@
+---
+title: "Introduction au ML — Séance 3"
+subtitle: "Un premier modèle de bout en bout : l'arbre de décision"
+ressources:
+  - type: "notebook"
+    titre: "TP 3 — Premier modèle"
+    fichier: "ressources/TP_S3_premier_modele.ipynb"
+    chemin: "/cours/introduction-machine-learning/ressources/TP_S3_premier_modele.ipynb"
+  - type: "td"
+    titre: "Fiche d'exercices 3"
+    fichier: "ressources/fiche-exos-s3.pdf"
+    chemin: "/cours/introduction-machine-learning/ressources/fiche-exos-s3.pdf"
+description: "Séance 3 d'Introduction au Machine Learning : apprentissage supervisé, arbres de décision, sur-apprentissage et compromis biais-variance."
+author: "Dr. El Hadji Bassirou TOURÉ"
+institute: "Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+format:
+  revealjs:
+    theme: [default, ../../../assets/css/slides.scss]
+    slide-number: true
+    center: true
+    code-line-numbers: false
+    navigation-mode: linear
+    smaller: true
+    scrollable: true
+    history: false
+    include-after-body:
+      text: '<script src="/assets/js/slides-accessibilite.js"></script><script src="/assets/js/slides-pdf.js"></script>'
+---
+## Objectifs de la séance
+
+::: {.callout-note .ucad-def title="Contenu"}
+Cette séance construit un premier modèle de Machine Learning complet : formulation du problème, entraînement, évaluation et diagnostic d'un **arbre de décision** sur les données DataSANTÉ-221.
+:::
+
+- Formuler un problème d'**apprentissage supervisé** : la fonction $f$, la matrice $X$, la cible $y$.
+- Le protocole **train/test** et la mesure de la performance (accuracy, risque empirique).
+- Le fonctionnement de l'arbre : régions, coupures, gain d'information.
+- Le diagnostic central du ML : **sous-apprentissage** et **sur-apprentissage** ; le compromis **biais-variance**.
+
+# Apprendre à partir d'exemples
+
+## Le problème
+
+::: {.callout-note .ucad-def title="La question médicale"}
+À l'admission d'un patient, peut-on prédire si son séjour hospitalier sera **long** (au-dessus de la durée médiane) à partir de cinq mesures : âge, glycémie, hémoglobine, fièvre, saison ?
+:::
+
+{{< svg ../figures/f_supervised.svg alt="Apprentissage supervisé : trouver f telle que f(X) ≈ y. Un tableau X de caractéristiques — âge, glycémie, hémoglobine, fièvre, saison — mène à un modèle f appris sur (X, y), qui mène à l'étiquette y : séjour long ? 0 ou 1." largeur="58%" >}}
+
+Le registre contient $10\,000$ patients pour lesquels la réponse est *connue*. L'objectif est d'en extraire une règle de prédiction applicable aux patients futurs.
+
+## L'apprentissage supervisé, formellement
+
+::: {.callout-note .ucad-def title="Définition"}
+L'**apprentissage supervisé** consiste à construire, à partir d'exemples étiquetés $(x_i, y_i)$, une fonction de prédiction qui associe à toute entrée une sortie.
+:::
+
+$$ f : \mathcal{X} \longrightarrow \mathcal{Y}, \qquad f(x) \approx y $$
+
+$\mathcal{X}$ est l'espace des entrées (ici, les mesures d'un patient) et $\mathcal{Y}$ l'espace des sorties (ici, $\{0,1\}$ : séjour court ou long). Le modèle *est* la fonction $f$ ; l'apprentissage consiste à la choisir à partir des données.
+
+## Les données : la matrice de design $X$
+
+::: {.callout-note .ucad-def title="Organisation des données"}
+Les $n$ exemples s'empilent dans une matrice $X \in \mathbb{R}^{n\times d}$ — une **ligne** par exemple, une **colonne** par caractéristique — et leurs réponses dans le vecteur $y$. Le couple $(X,y)$ est le jeu d'apprentissage.
+:::
+
+::: {.callout-tip .ucad-ex title="Premières lignes réelles de DataSANTÉ-221"}
+|  | âge | glycémie | hémoglobine | fièvre | saison | séjour long |
+| --- | --- | --- | --- | --- | --- | --- |
+| $x_1$ | $47$ | $9{,}3$ | $11{,}8$ | $38{,}0$ | $0$ | $y_1 = 0$ |
+| $x_2$ | $18$ | $5{,}1$ | $13{,}0$ | $39{,}5$ | $1$ | $y_2 = 0$ |
+| $x_3$ | $56$ | $7{,}2$ | $9{,}5$ | $37{,}1$ | $1$ | $y_3 = 1$ |
+
+\[ X=\begin{pmatrix} 47 & 9{,}3 & 11{,}8 & 38{,}0 & 0\\ 18 & 5{,}1 & 13{,}0 & 39{,}5 & 1\\ 56 & 7{,}2 & 9{,}5 & 37{,}1 & 1\\ \vdots & \vdots & \vdots & \vdots & \vdots \end{pmatrix} \in \mathbb{R}^{10000\times 5} \qquad y=\begin{pmatrix} 0\\ 0\\ 1\\ \vdots \end{pmatrix} \in \{0,1\}^{10000} \]
+:::
+
+# Entraîner et évaluer
+
+## Le protocole scikit-learn : fit, predict, score
+
+```python
+from sklearn.tree import DecisionTreeClassifier
+
+modele = DecisionTreeClassifier(max_depth=4, random_state=0)
+modele.fit(X_train, y_train)        # apprendre f a partir des exemples
+y_pred = modele.predict(X_test)     # appliquer f a de nouveaux patients
+modele.score(X_test, y_test)        # mesurer la qualite des predictions
+```
+
+Ce triptyque `fit` / `predict` / `score` est identique pour tous les modèles de `scikit-learn` ; seule la classe instanciée change.
+
+## Mesurer la qualité : perte et risque empirique
+
+::: {.callout-note .ucad-def title="La perte 0/1"}
+Pour une prédiction donnée, la **perte** vaut $0$ si elle est correcte, $1$ sinon. Le **risque empirique** est la moyenne des pertes sur un jeu de données.
+:::
+
+$$ \widehat{R}(f) = \frac{1}{n}\sum_{i=1}^{n} \mathbf{1}\big[f(x_i) \neq y_i\big] \qquad \text{accuracy} = 1 - \widehat{R}(f) $$
+
+La somme compte les erreurs ; la division par $n$ en donne la proportion. L'accuracy est la proportion complémentaire : celle des prédictions correctes.
+
+## Exemple — comparer $y$ et $\hat y$
+
+::: {.callout-tip .ucad-ex title="Exemple numérique"}
+Cinq patients du test : comparaison composante par composante du vecteur des réponses $y$ et du vecteur des prédictions $\hat y = f(X_{\text{test}})$.
+
+| patient | $1$ | $2$ | $3$ | $4$ | $5$ |
+| --- | --- | --- | --- | --- | --- |
+| réponse $y_i$ | $1$ | $0$ | $1$ | $1$ | $0$ |
+| prédiction $\hat y_i$ | $1$ | $0$ | $0$ | $1$ | $1$ |
+| correcte ? | oui | oui | **non** | oui | **non** |
+
+Trois prédictions correctes sur cinq : accuracy $= \dfrac{3}{5} = \mathbf{0{,}60}$ ; risque $= \dfrac{2}{5} = \mathbf{0{,}40}$.
+:::
+
+La mesure repose toujours sur cette comparaison des deux vecteurs — c'est elle que `score` automatise.
+
+## Exercice — calcul d'une accuracy
+
+::: {.callout-tip .ucad-rec title="Énoncé"}
+Sur $60$ patients du jeu de test, le modèle commet $15$ erreurs. Calculer l'accuracy et le risque empirique.
+:::
+
+::: {.callout-tip .ucad-ex title="Correction"}
+Prédictions correctes $= 60-15 = 45$, d'où accuracy $= \dfrac{45}{60} = \mathbf{0{,}75}$ et risque $= \dfrac{15}{60} = \mathbf{0{,}25}$. Les deux quantités sont complémentaires : $\text{accuracy} = 1 - \widehat{R}$.
+:::
+
+## Le protocole train/test
+
+::: {.callout-note .ucad-def title="Pourquoi séparer les données"}
+La performance qui importe est celle sur des patients **jamais vus** : la **généralisation**. On réserve donc une fraction des données (le **test**, ici $20\,\%$), exclue de l'apprentissage, pour estimer cette performance honnêtement.
+:::
+
+{{< svg ../figures/f_traintest.svg alt="train_test_split : estimer la généralisation sur un examen tenu à l'écart. Deux blocs côte à côte, le premier quatre fois plus large : Train (80 %) — réviser, « le modèle apprend ici » ; Test (20 %), « examen jamais vu »." largeur="82%" >}}
+
+Découpage *aléatoire* et *stratifié* : $8000$ patients pour apprendre, $2000$ pour évaluer. Un score mesuré sur le jeu d'entraînement lui-même serait systématiquement optimiste.
+
+## Exercice — dimensions et découpage
+
+::: {.callout-tip .ucad-rec title="Énoncé"}
+DataSANTÉ-221 : $n=10\,000$ patients, $d=5$ caractéristiques. **(a)** Quelle est la taille de la matrice $X$ ? **(b)** Si l'on choisissait plutôt `test_size=0.25`, combien de patients iraient dans le jeu d'entraînement et dans le jeu de test ?
+:::
+
+::: {.callout-tip .ucad-ex title="Correction"}
+**(a)** $X \in \mathbb{R}^{10000\times 5}$ : une ligne par patient, une colonne par caractéristique. **(b)** Test $=25\,\%$ de $10\,000 = \mathbf{2500}$ ; entraînement $= \mathbf{7500}$.
+:::
+
+## La référence minimale : la baseline
+
+::: {.callout-note .ucad-def title="Définition"}
+La **baseline** est le prédicteur trivial qui répond toujours la classe majoritaire. Tout modèle digne d'intérêt doit la dépasser ; un score ne s'interprète que *relativement* à elle.
+:::
+
+::: {.callout-tip .ucad-ex title="Exemple numérique"}
+Sur DataSANTÉ-221, les classes sont quasi équilibrées ($5045$ contre $4955$) : la baseline atteint $\mathbf{0{,}5045}$. L'arbre de profondeur $4$ obtient $0{,}7655$ sur le test — soit $26$ points au-dessus de la baseline : le modèle a réellement appris.
+:::
+
+# L'arbre de décision
+
+## Le principe : une suite de questions
+
+::: {.callout-note .ucad-front title="Analogie"}
+Aux urgences, le médecin de tri ne résout pas d'équation : il pose une question, puis une autre — « la glycémie dépasse-t-elle $7$ ? », « plus de $60$ ans ? » — et chaque réponse rétrécit le champ des possibles, jusqu'au pronostic. L'arbre de décision reproduit ce geste, à une différence près : l'ordre des questions et la valeur des seuils ne viennent pas de l'expérience du praticien — ils sont *calculés à partir des données*.
+:::
+
+{{< svg ../figures/f_boundary.svg alt="Frontière de décision d'un arbre : un découpage en rectangles. Nuage de points, âge en abscisse et glycémie en ordonnée, deux classes : court (0) en bleu, long (1) en orange. Le fond est découpé en rectangles, et une ligne en tirets rouges marque la première coupure, glycémie ≈ 7,35." largeur="27%" >}}
+
+Chaque question trace une frontière verticale ou horizontale : l'arbre découpe le plan en **rectangles** de décision.
+
+## L'arbre, formellement
+
+::: {.callout-note .ucad-def title="Modèle"}
+Un arbre partitionne l'espace des entrées en $M$ régions disjointes $R_1, \dots, R_M$ (les feuilles) et prédit une valeur constante dans chacune.
+:::
+
+$$ f(x) = \sum_{m=1}^{M} \hat c_m \, \mathbf{1}\big[x \in R_m\big] $$
+
+L'indicatrice $\mathbf{1}[\cdot]$ sélectionne la région contenant $x$ ; $\hat c_m$ est la classe majoritaire des exemples d'entraînement tombés dans $R_m$. Chaque nœud interne applique une **coupure** $(j, s)$ : « la caractéristique $j$ dépasse-t-elle le seuil $s$ ? »
+
+## Exemple — évaluer $f(x)$ terme à terme
+
+::: {.callout-tip .ucad-ex title="Un arbre à trois régions"}
+Un petit arbre découpe le plan (glycémie, âge) en $M=3$ régions, avec leurs classes majoritaires :
+
+$R_1 = \{\text{glycémie} \le 7\}$, $\hat c_1 = 0$ ;  
+$R_2 = \{\text{glycémie} > 7,\ \text{âge} \le 50\}$, $\hat c_2 = 0$ ;  
+$R_3 = \{\text{glycémie} > 7,\ \text{âge} > 50\}$, $\hat c_3 = 1$.
+
+Patient $x = (\text{glycémie } 9{,}0,\ \text{âge } 62)$ : il n'appartient qu'à $R_3$, donc $\mathbf{1}[x \in R_1] = 0$, $\mathbf{1}[x \in R_2] = 0$, $\mathbf{1}[x \in R_3] = 1$.
+\[ f(x) = \hat c_1 \times 0 + \hat c_2 \times 0 + \hat c_3 \times 1 = 0 + 0 + 1 = \mathbf{1}   \text{(séjour long).} \]
+:::
+
+Les régions étant disjointes, une seule indicatrice vaut $1$ : la somme *sélectionne* la prédiction de la région où tombe $x$. Autre patient, $x' = (5{,}2,\ 70)$ : indicatrices $(1, 0, 0)$, d'où $f(x') = \hat c_1 = \mathbf{0}$.
+
+## La pureté d'un nœud : l'idée
+
+::: {.callout-note .ucad-def title="Les chiffres d'abord"}
+Un groupe est **pur** lorsqu'il ne contient qu'une seule classe. L'**impureté** mesure son désordre : $0$ pour un groupe pur, $0{,}88$ bit pour un mélange $70/30$, $1$ bit pour un mélange $50/50$ — le désordre maximal.
+:::
+
+{{< svg ../figures/f_impurity.svg alt="Impureté d'un nœud : nulle si pur, maximale si 50/50. Deux courbes en cloche sur la proportion de la classe « long », de 0 à 1 : l'entropie H culmine à 1,0 bit, le Gini à 0,5. Les deux sont nulles aux extrémités et maximales en 0,5, où figure « max d'impureté (50/50) »." largeur="38%" >}}
+
+L'**entropie** $H$ et l'**indice de Gini** $G$ selon la proportion $p$ : nulles aux extrêmes (pureté), maximales à $p=0{,}5$.
+
+## L'entropie, formellement
+
+::: {.callout-note .ucad-def title="L'idée en une phrase"}
+L'entropie mesure le **désordre** d'un nœud — la surprise moyenne de son contenu : nulle quand l'issue est jouée d'avance (nœud pur), maximale quand les deux classes sont à égalité.
+:::
+
+$$ H(p) \;=\; -\,p\,\log_2 p \;-\; (1-p)\,\log_2(1-p) $$
+
+$p$ est la proportion d'une classe dans le nœud ; l'unité est le **bit**. Rappel : $\log_2 x$ est l'exposant à donner à $2$ pour obtenir $x$ ($\log_2 4 = 2$, $\log_2 0{,}25 = -2$) — négatif pour $0<x<1$, d'où les signes moins.
+
+::: {.callout-tip .ucad-ex title="Exemple numérique"}
+Nœud à $25\,\%$ de séjours longs ($p=0{,}25$) :
+$H = -0{,}25\log_2 0{,}25 - 0{,}75\log_2 0{,}75 = 0{,}25\times 2 + 0{,}75\times 0{,}415 = 0{,}5 + 0{,}311 = \mathbf{0{,}811}$ bit.
+:::
+
+## Exercice — calcul d'une entropie
+
+::: {.callout-tip .ucad-rec title="Énoncé"}
+Un nœud contient $90\,\%$ de séjours longs ($p = 0{,}9$). Calculer son entropie, sachant que $\log_2 0{,}9 = -0{,}152$ et $\log_2 0{,}1 = -3{,}322$. Commenter le résultat.
+:::
+
+::: {.callout-tip .ucad-ex title="Correction"}
+$H = -0{,}9\times(-0{,}152) - 0{,}1\times(-3{,}322) = 0{,}137 + 0{,}332 = \mathbf{0{,}469}$ bit. Le nœud est déjà bien ordonné ($90/10$) : son impureté est moins de la moitié du maximum — il reste peu de désordre à réduire.
+:::
+
+## L'indice de Gini
+
+::: {.callout-note .ucad-def title="L'idée en une phrase"}
+L'indice de Gini mesure le même désordre par une question simple : si l'on classait un patient **au hasard**, selon les proportions du nœud, quelle serait la probabilité de se tromper ?
+:::
+
+$$ G(p) \;=\; 1 - p^2 - (1-p)^2 \;=\; 2\,p\,(1-p) $$
+
+Maximum $0{,}5$ lorsque les classes sont à égalité ($p=0{,}5$) ; nul si le nœud est pur — il est alors impossible de se tromper.
+
+::: {.callout-tip .ucad-ex title="Exemple numérique"}
+$G(0{,}5) = 2\times 0{,}5\times 0{,}5 = \mathbf{0{,}5}$ ;   $G(0{,}25) = 2\times 0{,}25\times 0{,}75 = \mathbf{0{,}375}$ ;   $G(1) = \mathbf{0}$.
+:::
+
+Entropie et Gini classent les coupures presque toujours dans le *même ordre* ; Gini, sans logarithme, est moins coûteux — c'est le critère par défaut de `scikit-learn`. La suite utilise l'entropie, plus interprétable (en bits).
+
+## La coupure et le gain d'information
+
+::: {.callout-note .ucad-def title="Le principe de sélection"}
+Une **coupure** $(j,s)$ scinde un nœud selon « la caractéristique $j$ dépasse-t-elle le seuil $s$ ? ». Une bonne coupure produit des enfants *plus purs* que le parent : le **gain** mesure cette baisse d'impureté.
+:::
+
+$$ \text{Gain}(j,s) \;=\; H_{\text{parent}} \;-\; \big(\pi_g\, H_g + \pi_d\, H_d\big) \qquad (j^\star, s^\star) = \arg\max_{(j,s)}\, \text{Gain}(j,s) $$
+
+$\pi_g$ et $\pi_d$ sont les proportions d'exemples envoyées à gauche et à droite : l'impureté des enfants est une *moyenne pondérée*. L'algorithme évalue **toutes** les coupures possibles et retient celle du gain maximal — puis recommence dans chaque enfant, récursivement.
+
+## Construire un arbre à la main — les données
+
+::: {.callout-note .ucad-def title="Un exemple de bout en bout"}
+Pour observer l'algorithme à l'œuvre, on construit *intégralement* un arbre sur huit patients et deux caractéristiques — une **ligne** par patient, comme dans la matrice $X$.
+:::
+
+::: {.callout-tip .ucad-ex title="Les huit patients"}
+| patient | glycémie | fièvre | séjour long |
+| --- | --- | --- | --- |
+| $x_1$ | $5{,}0$ | $37{,}3$ | $y_1 = 1$ |
+| $x_2$ | $6{,}0$ | $37{,}0$ | $y_2 = 0$ |
+| $x_3$ | $6{,}5$ | $37{,}6$ | $y_3 = 0$ |
+| $x_4$ | $7{,}0$ | $38{,}2$ | $y_4 = 0$ |
+| $x_5$ | $8{,}0$ | $37{,}9$ | $y_5 = 1$ |
+| $x_6$ | $9{,}0$ | $38{,}5$ | $y_6 = 1$ |
+| $x_7$ | $10{,}0$ | $39{,}1$ | $y_7 = 1$ |
+| $x_8$ | $12{,}0$ | $38{,}8$ | $y_8 = 0$ |
+:::
+
+Quatre séjours longs, quatre courts : la racine est au désordre maximal, $H_{\text{racine}} = \mathbf{1{,}000}$ bit ($G = 0{,}5$).
+
+## Étape 1 — le duel des coupures candidates
+
+::: {.callout-tip .ucad-ex title="Trois candidates évaluées"}
+**A. glycémie $\le 7$** : gauche $=\{1,0,0,0\}$, droite $=\{1,1,1,0\}$ $\to$ gain $= \mathbf{0{,}189}$ bit (détail page suivante).<br>
+**B. fièvre $\le 38$** : gauche $=\{1,0,0,1\}$ ($p=0{,}5$, $H=1$), droite $=\{0,1,1,0\}$ ($p=0{,}5$, $H=1$) $\to$ gain $= 1 - \tfrac{4}{8}\cdot 1 - \tfrac{4}{8}\cdot 1 = \mathbf{0}$ bit.<br>
+**C. glycémie $\le 9{,}5$** : gauche $=\{1,0,0,0,1,1\}$ ($p=0{,}5$, $H=1$), droite $=\{1,0\}$ ($p=0{,}5$, $H=1$) $\to$ gain $= \mathbf{0}$ bit.
+:::
+
+La coupure B scinde sans trier : ses enfants restent au désordre maximal — un gain *nul* malgré la séparation. L'argmax (sur *toutes* les coupures des deux caractéristiques) retient **A : glycémie $\le 7$**.
+
+## Étape 1 — le calcul détaillé du gain retenu
+
+::: {.callout-tip .ucad-ex title="Coupure glycémie $\le 7$ pas à pas"}
+Gauche (patients $1$–$4$) : étiquettes $\{1,0,0,0\}$, $p_g = \tfrac{1}{4} = 0{,}25$, $H_g = \mathbf{0{,}811}$ (calculé plus haut).<br>Droite (patients $5$–$8$) : étiquettes $\{1,1,1,0\}$, $p_d = 0{,}75$, $H_d = \mathbf{0{,}811}$ (symétrie de $H$).<br>
+$\text{Gain} = 1{,}000 - \Big(\dfrac{4}{8}\times 0{,}811 + \dfrac{4}{8}\times 0{,}811\Big) = 1{,}000 - 0{,}811 = \mathbf{0{,}189}$ bit.
+:::
+
+Le même calcul avec Gini : $0{,}5 - 0{,}375 = \mathbf{0{,}125}$ — un autre chiffre, le *même* verdict. Les deux enfants restent impurs ($0{,}811$ bit) : la récursion continue.
+
+## Étape 2 — purifier le nœud gauche
+
+::: {.callout-tip .ucad-ex title="Nœud gauche : glycémies 5 ; 6 ; 6{,}5 ; 7 — étiquettes 1 ; 0 ; 0 ; 0"}
+Coupure **glycémie $\le 5{,}5$** : gauche $=\{1\}$ (pur, $H=0$), droite $=\{0,0,0\}$ (pur, $H=0$).<br>
+$\text{Gain} = 0{,}811 - \Big(\dfrac{1}{4}\times 0 + \dfrac{3}{4}\times 0\Big) = \mathbf{0{,}811}$ bit — tout le désordre restant est absorbé.
+:::
+
+Les deux enfants sont **purs** : ce sont des **feuilles**. La branche gauche est terminée — aucune coupure supplémentaire n'apporterait de gain.
+
+## Étape 2 — purifier le nœud droit
+
+::: {.callout-tip .ucad-ex title="Nœud droit : glycémies 8 ; 9 ; 10 ; 12 — étiquettes 1 ; 1 ; 1 ; 0"}
+Coupure **glycémie $\le 11$** : gauche $=\{1,1,1\}$ (pur), droite $=\{0\}$ (pur).<br>
+$\text{Gain} = 0{,}811 - 0 = \mathbf{0{,}811}$ bit. Deux feuilles pures : la branche droite est terminée.
+:::
+
+L'algorithme s'arrête : toutes les feuilles sont pures. L'arbre complet a été obtenu par trois applications du *même* principe — l'argmax du gain, appliqué récursivement.
+
+## L'arbre final, et sa vérification
+
+{{< svg ../figures/f_minitree.svg alt="Arbre de décision à trois niveaux. À la racine, « glycémie ≤ 7 ? » sur 4 longs et 4 courts, H = 1,000. Oui mène à « glycémie ≤ 5,5 ? » (1 long, 3 courts, H = 0,811), non à « glycémie ≤ 11 ? » (3 longs, 1 court, H = 0,811). Les quatre feuilles sont pures, H = 0 : LONG 1 patient, COURT 3 patients, LONG 3 patients, COURT 1 patient." largeur="72%" >}}
+
+`DecisionTreeClassifier(criterion="entropy")` entraîné sur ces huit patients reproduit **exactement** cet arbre (seuils aux points médians : $7{,}5$ ; $5{,}5$ ; $11$) — score $8/8$. Feuilles pures sur huit patients : l'arbre a *mémorisé* l'échantillon ; ce constat annonce la question du sur-apprentissage, traitée plus loin.
+
+## Exercice — un gain à la main
+
+::: {.callout-tip .ucad-rec title="Énoncé"}
+Sur le nœud droit (étiquettes $\{1,1,1,0\}$, $H = 0{,}811$), calculer le gain de la coupure **glycémie $\le 9{,}5$** (gauche $=\{1,1\}$, droite $=\{1,0\}$) et le comparer au gain de la coupure retenue ($0{,}811$).
+:::
+
+::: {.callout-tip .ucad-ex title="Correction"}
+$H_g = H(1) = 0$ (pur) ; $H_d = H(0{,}5) = 1$.
+$\text{Gain} = 0{,}811 - \Big(\dfrac{2}{4}\times 0 + \dfrac{2}{4}\times 1\Big) = 0{,}811 - 0{,}5 = \mathbf{0{,}311}$ bit — inférieur à $0{,}811$ : l'argmax écarte cette candidate, qui laisse un enfant au désordre maximal.
+:::
+
+## La première coupure réelle
+
+::: {.callout-tip .ucad-ex title="Exemple numérique"}
+Sur les $8000$ patients d'entraînement, la coupure optimale trouvée par l'algorithme est **glycémie $\le 7{,}35$**, avec un gain de $\mathbf{0{,}155}$ bit — la meilleure parmi toutes les coupures possibles sur les cinq caractéristiques.
+:::
+
+{{< svg ../figures/f_infogain.svg alt="Gain d'information : la coupure qui rend les groupes plus purs. 8000 patients, H = 1,00 bit (50/50), se séparent en glycémie ≤ 7,35 — 4190 patients (52 %), 28 % de longs, H = 0,85 — et glycémie > 7,35 — 3810 (48 %), 73 % de longs, H = 0,84. Gain = 1,00 − (0,52 × 0,85 + 0,48 × 0,84) = 0,155 bit." largeur="48%" >}}
+
+À gauche de la coupure, les séjours courts dominent ; à droite, les séjours longs. Même principe que sur les huit patients — appliqué à $8000$. Au TP : ce gain de $0{,}155$ bit est recalculé à la main, ainsi que la construction complète de l'arbre jouet.
+
+## Lire une prédiction : du chemin à la feuille
+
+{{< svg ../figures/f_tree.svg alt="L'arbre appris, profondeur 3 : seuils, impureté (gini) et répartition. La racine coupe à glycémie ≤ 7,35 sur 8000 échantillons, gini 0,5, classe court. Les niveaux suivants coupent sur l'âge, la saison et la glycémie, jusqu'à huit feuilles dont le gini va de 0,14 à 0,48, colorées de l'orange (court) au bleu (long)." largeur="80%" >}}
+
+Pour prédire, on suit le chemin des réponses de la racine jusqu'à une feuille. Exemple : un patient de $60$ ans, glycémie $9{,}0$ — la branche droite conduit à une feuille à $95\,\%$ « long », d'où $f(x) = 1$ avec une confiance de $0{,}95$.
+
+## Exercice — suivre un chemin
+
+::: {.callout-tip .ucad-rec title="Énoncé"}
+Arbre simplifié : racine « glycémie $\le 7{,}35$ ? » — **oui** $\to$ feuille à $88\,\%$ « court » ; **non** $\to$ « âge $\le 50$ ? » — **oui** $\to$ feuille à $60\,\%$ « long », **non** $\to$ feuille à $95\,\%$ « long ». Déterminer la prédiction et la confiance pour un patient de $45$ ans dont la glycémie vaut $8{,}2$.
+:::
+
+::: {.callout-tip .ucad-ex title="Correction"}
+$8{,}2 > 7{,}35 \to$ branche droite ; $45 \le 50 \to$ feuille « long » à $60\,\%$. Prédiction $f(x) = \mathbf{1}$, confiance $\mathbf{0{,}60}$ — une prédiction peu assurée : la feuille est presque partagée.
+:::
+
+# Sous-apprentissage et sur-apprentissage
+
+## La profondeur contrôle la complexité
+
+::: {.callout-note .ucad-def title="Un réglage central"}
+La profondeur maximale (`max_depth`) borne le nombre de questions successives. Elle détermine la **complexité** du modèle — et son comportement face aux données.
+:::
+
+::: {.callout-tip .ucad-ex title="Exemple numérique"}
+|  | score train | score test |
+| --- | --- | --- |
+| profondeur $4$ | $0{,}7738$ | $\mathbf{0{,}7655}$ |
+| profondeur illimitée | $0{,}9999$ | $0{,}6995$ |
+:::
+
+L'arbre illimité mémorise presque parfaitement le jeu d'entraînement — et prédit *moins bien* les patients nouveaux. Mémoriser n'est pas généraliser.
+
+## La courbe de complexité
+
+{{< svg ../figures/f_overfit.svg alt="La courbe du sur-apprentissage. Profondeur de l'arbre en abscisse, de 1 à 15, accuracy en ordonnée. La courbe d'entraînement monte sans cesse, de 0,72 à 0,96 ; celle de test monte jusqu'à environ 0,78 puis redescend à 0,70. Repères : premier modèle à la profondeur 4, meilleur test à la profondeur 6, baseline à 50 %, et l'annotation « sur-apprentissage : train monte, test descend »." largeur="58%" >}}
+
+Le score d'entraînement croît avec la profondeur ; le score de test culmine puis **redescend**. À gauche du sommet, le modèle est trop simple (**sous-apprentissage**) ; à droite, il apprend les particularités du jeu d'entraînement, bruit compris (**sur-apprentissage**).
+
+## Exercice — diagnostiquer un modèle
+
+::: {.callout-tip .ucad-rec title="Énoncé"}
+Trois modèles, trois couples (score train, score test) : **A** $(0{,}71;\ 0{,}70)$ ; **B** $(0{,}78;\ 0{,}76)$ ; **C** $(0{,}99;\ 0{,}68)$. Diagnostiquer chacun.
+:::
+
+::: {.callout-tip .ucad-ex title="Correction"}
+**A** : scores faibles et proches — **sous-apprentissage** (modèle trop simple). **B** : scores corrects et proches — bon compromis. **C** : écart majeur entre train et test — **sur-apprentissage** caractérisé. Le diagnostic repose toujours sur la *paire* de scores, jamais sur un seul.
+:::
+
+# Le compromis biais-variance
+
+## Deux sources d'erreur
+
+::: {.callout-note .ucad-front title="Analogie"}
+Un tailleur doit livrer un boubou à un client, après plusieurs essayages. Premier excès : il coud sur un **patron unique**, taille moyenne, sans toucher aux mesures — quel que soit l'essayage, la manche est trop courte des *mêmes* trois centimètres. L'erreur est systématique et se répète à l'identique : c'est le **biais**, l'excès de rigidité. Second excès, sur le *même* boubou : à chaque essayage, il reprend toute la coupe pour épouser les mesures du jour — y compris le pull épais que le client portait ce jour-là. Chaque version diffère de la précédente : c'est la **variance**, l'excès de sensibilité aux données du jour.
+:::
+
+Le sous-apprentissage est un excès de biais ; le sur-apprentissage, un excès de variance. Toute la pratique du ML consiste à doser entre les deux.
+
+## La cible : visualiser biais et variance
+
+{{< svg ../figures/f_dartboard.svg alt="Biais et variance : le tir sur la cible. Quatre cibles concentriques. Biais faible et variance faible : les croix sont serrées au centre. Biais faible et variance forte : elles sont dispersées autour du centre. Biais fort et variance faible : serrées, mais à l'écart du centre. Biais fort et variance forte : dispersées et à l'écart. Le centre rouge est la vérité, chaque croix une prédiction sur un échantillon différent." largeur="26%" >}}
+
+Chaque impact est un modèle entraîné sur un échantillon différent. **Biais** : impacts décalés du centre, systématiquement — le boubou au patron unique, toujours faux de la même manière. **Variance** : impacts dispersés — le boubou recousu à chaque essayage, différent à chaque fois. Le cas favorable — groupés au centre — exige de réduire les deux.
+
+## Trois ajustements, une même donnée
+
+{{< svg ../figures/f_threefits.svg alt="Mêmes données, trois complexités d'arbre. Le même nuage âge-glycémie, avec trois frontières de décision : trop simple (train 73 %, test 71 %), bon dosage (76 % et 74 %), trop complexe (86 % et 69 %), dont la frontière se morcelle." largeur="99%" >}}
+
+Profondeur $1$ : frontière trop grossière, biais dominant (test $0{,}71$). Profondeur $4$ : compromis (test $0{,}77$). Profondeur illimitée : frontière déchiquetée épousant chaque point, variance dominante (test $0{,}70$).
+
+## La décomposition de l'erreur
+
+$$ \mathbb{E}\big[\text{erreur}\big] = \underbrace{\text{biais}^2}_{\text{rigidité}} + \underbrace{\text{variance}}_{\text{instabilité}} + \underbrace{\sigma^2}_{\text{bruit irréductible}} $$
+
+L'erreur attendue d'un modèle se décompose en trois termes : l'erreur systématique (biais), la sensibilité à l'échantillon (variance), et le bruit propre aux données, qu'aucun modèle ne peut éliminer. Augmenter la complexité réduit le biais mais accroît la variance — d'où l'existence d'un optimum intermédiaire.
+
+::: {.callout-warning .ucad-piege title="Erreur fréquente"}
+Viser un score d'entraînement parfait. Le terme de bruit $\sigma^2$ rend cet objectif illusoire : un score train de $100\,\%$ signale presque toujours que la variance a explosé.
+:::
+
+# Interpréter le modèle
+
+## L'importance des caractéristiques
+
+::: {.callout-note .ucad-def title="Définition"}
+L'**importance** d'une caractéristique est la part du gain total d'impureté apportée par les coupures qui l'utilisent. Les importances sont normalisées : leur somme vaut $1$.
+:::
+
+{{< svg ../figures/f_importance.svg alt="Quelle caractéristique l'arbre utilise-t-il le plus ? Barres horizontales d'importance : glycémie 0,61 ; âge 0,26 ; saison 0,12 ; hémoglobine 0,01 ; fièvre 0,00." largeur="50%" >}}
+
+Sur DataSANTÉ-221 : glycémie $0{,}615$, âge $0{,}261$, saison $0{,}116$, hémoglobine $0{,}008$, fièvre $0{,}000$. La glycémie domine ; la fièvre n'est utilisée par aucune coupure.
+
+## Exercice — lire des importances
+
+::: {.callout-tip .ucad-rec title="Énoncé"}
+Importances de l'arbre : glycémie $0{,}615$, âge $0{,}261$, saison $0{,}116$, hémoglobine $0{,}008$, fièvre $0{,}000$. **(a)** Vérifier leur somme. **(b)** Que conclure du $0{,}000$ de la fièvre ?
+:::
+
+::: {.callout-tip .ucad-ex title="Correction"}
+**(a)** $0{,}615+0{,}261+0{,}116+0{,}008+0{,}000 = \mathbf{1{,}000}$ : les importances sont des parts du gain total. **(b)** Aucune coupure n'utilise la fièvre : *pour cette cible*, elle n'apporte aucun gain. Une variable peut être médicalement pertinente et inutile pour un problème de prédiction donné.
+:::
+
+# Synthèse
+
+## Le protocole complet d'une étude
+
+::: {.callout-important .ucad-ret title="De bout en bout"}
+**1.** Formuler le problème : $(X, y)$, espaces d'entrée et de sortie. \;**2.** Découper : `train_test_split`, le test mis de côté. \;**3.** Entraîner : `fit` sur le train. \;**4.** Évaluer : `score` sur le test, comparé à la **baseline**. \;**5.** Diagnostiquer : paire (train, test) — biais ou variance. \;**6.** Interpréter : importances, lecture de l'arbre.
+:::
+
+Ce protocole reste valable pour tous les modèles des séances suivantes ; seule l'étape 3 change de classe `scikit-learn`.
+
+## À retenir — Séance 3
+
+::: {.callout-important .ucad-ret title="L'essentiel"}
+- Un modèle est une fonction $f : \mathcal{X} \to \mathcal{Y}$ apprise des données ; celles-ci s'organisent en $X \in \mathbb{R}^{n\times d}$ et $y$.
+- La performance se mesure sur des données **jamais vues** (test) et se compare à la **baseline**.
+- L'arbre partitionne l'espace en régions par coupures successives, choisies par **gain d'impureté**.
+- Le couple (score train, score test) diagnostique **sous-** et **sur-apprentissage**.
+- L'erreur se décompose en **biais**, **variance** et bruit ; la complexité arbitre entre les deux premiers.
+:::
+
+## Pièges fréquents
+
+- Évaluer un modèle sur ses propres données d'entraînement : score systématiquement optimiste.
+- Annoncer une accuracy sans la comparer à la **baseline**.
+- Viser un score d'entraînement parfait : signature du sur-apprentissage, pas de la qualité.
+- Conclure qu'une variable « ne sert à rien » dans l'absolu parce que son importance est nulle *pour cette cible*.
+- Diagnostiquer sur un seul score : seul le *couple* (train, test) est informatif.
+
+## Prochaine séance
+
+::: {.callout-note .ucad-front title="Séance 4 — Des données propres aux distances"}
+Les données réelles comportent des valeurs manquantes, des catégories et des échelles hétérogènes. La Séance 4 introduit leur préparation rigoureuse (**Pipeline**, fuite de données) et un second modèle, les **$k$ plus proches voisins**, pour lequel la mise à l'échelle est une condition de validité.
+:::
+
+## Références
+
+- G. James, D. Witten, T. Hastie, R. Tibshirani, *An Introduction to Statistical Learning*, 2^e^ éd., Springer, 2021.
+- A. Géron, *Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow*, 3^e^ éd., O'Reilly, 2022.
+- A. C. Müller, S. Guido, *Introduction to Machine Learning with Python*, O'Reilly, 2016.
+- Cours : UW CSE 446 ; Stanford CS229.
+
+::: {#ressources-seance}
+:::
