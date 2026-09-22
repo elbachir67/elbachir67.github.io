@@ -246,19 +246,6 @@ def macros_du_theme(texte: str, preambule: str = "") -> str:
         # coupé. `\resultat`, qui vaut « Résultat $\rightarrow$ », est traité à part plus bas.
         if "$" not in corps_macro and "\\begin" not in corps_macro:
             definitions[nom] = corps_macro
-    # La substitution ne touche **que les formules**. Appliquée partout, elle entrait dans les blocs
-    # de code : le cours de Python définit des macros dont le nom apparaît dans ses exemples, et un
-    # `lstlisting` s'en trouvait coupé en deux.
-    if definitions:
-        def developper(trouve: re.Match[str]) -> str:
-            formule = trouve[0]
-            for nom in sorted(definitions, key=len, reverse=True):
-                formule = re.sub(rf"\\{nom}(?![A-Za-z])",
-                                 lambda _, c=definitions[nom]: c, formule)
-            return formule
-
-        texte = MOTIF_MATHS.sub(developper, texte)
-
     # Deux écritures des colonnes Beamer coexistent dans le même cours : `\column{0.5\linewidth}`
     # et `\begin{column}{0.5\textwidth}…\end{column}`. On ramène la seconde à la première, pour que
     # `colonnes()` n'ait qu'une forme à connaître.
@@ -322,6 +309,23 @@ def macros_du_theme(texte: str, preambule: str = "") -> str:
         fin = accolade(texte, trouve.end() - 1)
         formule = texte[trouve.end():fin].strip()
         texte = texte[:trouve.start()] + f"\n\n$$ {formule} $$\n\n" + texte[fin + 1:]
+
+    # La substitution ne touche **que les formules**, et vient **après** `\\ucadformula` : appliquée
+    # partout, elle entrait dans les blocs de code — le cours de Python définit des macros dont le
+    # nom apparaît dans ses exemples, et un `lstlisting` s'en trouvait coupé en deux. Les
+    # environnements `align`, `equation` et `gather` sont des formules sans dollars : les oublier
+    # laissait `\\vd` et `\\vz` tels quels dans les quatre équations de la rétropropagation, que
+    # MathJax affichait alors en rouge.
+    if definitions:
+        def developper(trouve: re.Match[str]) -> str:
+            formule = trouve[0]
+            for nom in sorted(definitions, key=len, reverse=True):
+                formule = re.sub(rf"\\{nom}(?![A-Za-z])",
+                                 lambda _, c=definitions[nom]: c, formule)
+            return formule
+
+        texte = MOTIF_ENVIRONNEMENTS_MATHS.sub(developper, texte)
+        texte = MOTIF_MATHS.sub(developper, texte)
 
     return texte.replace("\\quad", " ")
 
@@ -476,7 +480,32 @@ def figures(texte: str, conversion: Conversion) -> str:
         texte = texte[:trouve.start()] + bloc + texte[fin:]
 
 
-MOTIF_MATHS = re.compile(r"\$\$.+?\$\$|\$[^$]+?\$|\\\[.+?\\\]", re.S)
+# Le crochet ouvrant ne compte que s'il n'est pas lui-même précédé d'une barre oblique : « \\[2pt] »
+# est un saut de ligne avec espacement, et non le début d'une formule.
+MOTIF_MATHS = re.compile(r"\$\$.+?\$\$|\$[^$]+?\$|(?<!\\)\\\[.+?(?<!\\)\\\]", re.S)
+# Les environnements qui sont des mathématiques sans porter de dollars.
+MOTIF_ENVIRONNEMENTS_MATHS = re.compile(
+    r"\\begin\{(align|equation|gather|multline|eqnarray)(\*?)\}.*?\\end\{\1\2\}", re.S)
+
+
+def maths_en_dollars(formule: str) -> str:
+    """Écrit la formule sous la forme que Quarto sait lire.
+
+    Deux façons d'écrire des mathématiques que LaTeX accepte et que Quarto refuse :
+
+    - « \\[ … \\] » : Quarto n'active pas `tex_math_single_backslash` et voit dans `\\[` un crochet
+      échappé, non une ouverture de formule. Seuls les `\\begin{pmatrix}` intérieurs passaient en
+      mathématiques, et le lecteur lisait « [ X= », la matrice, puis « ^{10000} y= » en toutes
+      lettres — c'est ce que montrait la séance 3 du cours de ML ;
+    - « $4 = $ » : une espace collée au dollar fermant (ou au dollar ouvrant) empêche Quarto d'y
+      voir une formule, et la page affichait les dollars — séance 5 du même cours.
+    """
+    if formule.startswith("\\["):
+        return "$$" + formule[2:-2].strip() + "$$"
+    if formule.startswith("$$") or not formule.startswith("$"):
+        return formule
+    contenu = formule[1:-1].strip()
+    return f"${contenu}$" if contenu else formule
 
 
 # Caractères que LaTeX écrit échappés. Ceux de MARKDOWN_SPECIAUX doivent le rester dans le texte
@@ -520,7 +549,7 @@ def inline(texte: str, conversion: Conversion) -> str:
     texte = retirer_tailles(sans_commentaires(texte))
 
     def garder(trouve: re.Match[str]) -> str:
-        formules.append(trouve[0])
+        formules.append(maths_en_dollars(trouve[0]))
         return f"\x00{len(formules) - 1}\x00"
 
     texte = MOTIF_MATHS.sub(garder, texte)
@@ -752,6 +781,11 @@ def convertir(texte: str, conversion: Conversion) -> str:
     # chapitre 1 du cours de C. `inline` les protégera de nouveau, à sa façon.
     formules: list[str] = []
 
+    # La formule est rangée **telle quelle** : cette mise de côté balaie aussi le contenu des
+    # `verbatim` et des `lstlisting`, où un `$` est une invite shell et non une formule. La
+    # normaliser ici collait l'invite à la commande (« $ pwd » devenait « $pwd ») et soudait deux
+    # lignes de terminal du chapitre 0 du cours de Python. C'est `inline`, qui ne voit que du texte
+    # courant, qui la normalise.
     def mettre_de_cote(trouve: re.Match[str]) -> str:
         formules.append(trouve[0])
         return f"\x02{len(formules) - 1}\x02"
@@ -830,7 +864,8 @@ def page(corps: str, conversion: Conversion) -> list[str]:
     page —, `\\subsection` un niveau 3, et le texte entre deux titres est converti tel quel.
     """
     niveaux = {"section": "##", "subsection": "###", "subsubsection": "####"}
-    motif = re.compile(r"\\(section|subsection|subsubsection)\*?\{")
+    # Le titre peut être précédé d'un argument facultatif : `\section[court]{affiché}`.
+    motif = re.compile(r"\\(section|subsection|subsubsection)\*?(?=[\[{])")
     sorties = []
 
     def morceau(texte: str, titre: str) -> None:
@@ -846,7 +881,8 @@ def page(corps: str, conversion: Conversion) -> list[str]:
         morceau(corps[:trouve.start()], "")
 
     while trouve:
-        titre, position = argument(corps, trouve.end() - 1)
+        _, apres_option = option(corps, trouve.end())
+        titre, position = argument(corps, apres_option)
         suivant = motif.search(corps, position)
         sorties.append(f"{niveaux[trouve[1]]} {inline(titre, conversion)}")
         morceau(corps[position:suivant.start() if suivant else len(corps)], titre)
@@ -863,7 +899,11 @@ def slides(corps: str, conversion: Conversion) -> list[str]:
         if not trouve:
             break
         if trouve[1] == "section":
-            titre, position = argument(corps, trouve.end())
+            # `\section[titre court]{titre affiché}` : l'argument facultatif ne sert qu'à la table
+            # des matières de Beamer. Ne pas le sauter faisait lire « court]{affiché » comme un seul
+            # titre — six slides de section de la séance 5 du cours de ML s'affichaient ainsi.
+            _, apres_option = option(corps, trouve.end())
+            titre, position = argument(corps, apres_option)
             conversion.slide = titre
             sorties.append(f"# {inline(titre, conversion)}")
             continue
