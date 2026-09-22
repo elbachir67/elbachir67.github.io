@@ -52,6 +52,11 @@ RESERVES = {
     # `CORR_EXOS_S*.pdf` vivaient dans `_import/` et passaient la liste du PO, qui ne connaissait
     # que « corrige » et « correction ». Le motif est exact, pour ne pas prendre « corrélation ».
     "corr_exos": "corrigé d'exercices (décision du PO)",
+    # Les encadrés de correction des sources, nommés par le PO : un fichier qui les porte dans
+    # son nom est un corrigé, quel que soit le reste.
+    "corrbox": "encadré de correction (décision du PO)",
+    "solbox": "encadré de solution (décision du PO)",
+    "correctionbox": "encadré de correction (décision du PO)",
     "solution": "solution d'exercice : c'est une correction (décision du PO)",
 }
 # Termes que le PO ne veut pas voir sur le site, quelle que soit la page. La correction se fait

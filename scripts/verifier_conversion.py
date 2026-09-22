@@ -107,6 +107,31 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
 DOSSIER_PUBLIE = "ressources"
 
 
+def ressources_non_declarees(cours: Path, manifeste: dict) -> list[tuple[Path, str]]:
+    """Un dossier de ressources ne publie que ce que le manifeste déclare (décision du PO).
+
+    La liste des noms interdits attrape ce qu'elle connaît ; une liste blanche attrape le reste.
+    Un corrigé déposé par mégarde dans `ressources/` part en ligne quel que soit son nom : seule
+    une déclaration explicite l'autorise. Les fichiers préfixés d'un `_` sont ceux de Quarto —
+    `_metadata.yml` règle le rendu des notebooks et n'est pas une ressource.
+    """
+    dossier = cours / DOSSIER_PUBLIE
+    if not dossier.is_dir():
+        return []
+    declares = {Path(ressource["fichier"]).name
+                for chapitre in manifeste.get("chapitres", [])
+                for ressource in chapitre.get("ressources", [])}
+    fiche = cours / "cours.yml"
+    if fiche.is_file():
+        declares |= {Path(nom).name
+                     for nom in re.findall(r'fichier:\s*"([^"]+)"', fiche.read_text(encoding="utf-8"))}
+    return [(fichier, "fichier présent dans ressources/ mais déclaré nulle part : "
+                      "seul un fichier du manifeste est publié")
+            for fichier in sorted(dossier.iterdir())
+            if fichier.is_file() and not fichier.name.startswith("_")
+            and fichier.name not in declares]
+
+
 def ressources_mal_rangees(cours: Path, chapitre: dict) -> list[tuple[Path, str]]:
     """Une ressource doit exister, être bien rangée, et ne pas porter de date."""
     ecarts = []
@@ -203,7 +228,9 @@ def main() -> int:
     chapitres = 0
     for manifeste in manifestes:
         cours = manifeste.parent.parent
-        for chapitre in tomllib.loads(manifeste.read_text(encoding="utf-8"))["chapitres"]:
+        donnees = tomllib.loads(manifeste.read_text(encoding="utf-8"))
+        ecarts += ressources_non_declarees(cours, donnees)
+        for chapitre in donnees["chapitres"]:
             chapitres += 1
             ecarts += ressources_mal_rangees(cours, chapitre)
             with tempfile.TemporaryDirectory() as dossier:
