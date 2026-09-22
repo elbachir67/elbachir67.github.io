@@ -85,7 +85,8 @@ IGNOREES = {"vskip", "vspace", "smallskip", "medskip", "bigskip", "centering", "
             "normalsize", "large", "Large", "raggedright", "noindent", "titlepage", "maketitle",
             # Sommaire et sauts de page : un document HTML a sa propre table des matières (US-61).
             "tableofcontents", "listoffigures", "listoftables", "newpage", "clearpage", "cleardoublepage",
-            "hfill", "hrule", "linebreak", "nopagebreak", "pagebreak", "allowbreak", "protect"}
+            "hfill", "hrule", "linebreak", "nopagebreak", "pagebreak", "allowbreak", "protect",
+            "appendix", "cmidrule", "arraybackslash", "justifying"}
 
 # Couleurs d'encre du jeu de figures : elles suivront la couleur du texte de la page.
 ENCRES = {"#000", "#000000", "black", "#1a3a5c", "#1A3A5C", "#1c2a33", "#1C2A33",
@@ -696,7 +697,11 @@ def inline(texte: str, conversion: Conversion) -> str:
     # `\addcontentsline{toc}{section}{Références}` n'ont pas d'équivalent en HTML, et leur nom
     # seul retiré laisserait « empty » et « tocsectionRéférences » dans la page (US-61).
     for nom, arguments in (("thispagestyle", 1), ("pagestyle", 1), ("addcontentsline", 3),
-                           ("setcounter", 2), ("refstepcounter", 1), ("addtocounter", 2)):
+                           ("setcounter", 2), ("refstepcounter", 1), ("addtocounter", 2),
+                           # Espacement fantôme et alternance de couleurs d'un tableau : du style.
+                           ("phantom", 1), ("hphantom", 1), ("vphantom", 1), ("rowcolors", 3),
+                           # Couleur de cellule et filet partiel : du style de tableau.
+                           ("cellcolor", 1), ("rowcolor", 1), ("columncolor", 1)):
         motif = re.compile(rf"\\{nom}\s*\{{")
         while True:
             trouve = motif.search(texte)
@@ -1387,6 +1392,16 @@ def ecrire_rapport(chemin: Path, source: Path, sortie: Path, conversion: Convers
         lignes += [f"- **{slide}** : `{quoi}`" for slide, quoi in conversion.non_convertis]
     else:
         lignes.append("Rien : tout le contenu a été converti.")
+    if conversion.flottants:
+        lignes += ["", "## Flottants", "",
+                   *(f"- `{nom}` : {nombre} converti(s) en {'figure' if nom == 'figure' else 'tableau'}"
+                     f" Quarto, avec légende" for nom, nombre in sorted(conversion.flottants.items()))]
+    if conversion.omis:
+        # Ce qui a été écarté se lit ici, et nulle part ailleurs : un encadré `omis` ne laisse
+        # aucune trace dans la page (US-61).
+        lignes += ["", "## Encadrés écartés", "",
+                   "Déclarés `omis` à l'import : leur contenu n'est pas publié.", "",
+                   *(f"- `{nom}` : {nombre} fois" for nom, nombre in sorted(conversion.omis.items()))]
     lignes += ["", "## Figures", ""]
     lignes += [f"- {ligne}" for ligne in conversion.figures]
     if figures:
