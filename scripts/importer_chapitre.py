@@ -93,6 +93,11 @@ FORMES = {"rect", "circle", "ellipse", "polygon", "polyline", "path", "line"}
 EXPORT = re.compile(r"^\s*(matplotlib\.use\(|fig\.savefig\(|plt\.savefig\(|plt\.show\(|print\()")
 
 
+# Un bloc protégé peut en contenir un autre (une figure dans une colonne, une colonne dans une
+# slide). Trois niveaux suffisent ; la borne évite qu'un marqueur mal formé boucle sans fin.
+PROFONDEUR_INSERTIONS = 5
+
+
 class Conversion:
     """Contexte de la conversion, et compte rendu de ce qu'elle a fait ou laissé à faire."""
 
@@ -494,11 +499,6 @@ def figures(texte: str, conversion: Conversion) -> str:
 
 # Le crochet ouvrant ne compte que s'il n'est pas lui-même précédé d'une barre oblique : « \\[2pt] »
 # est un saut de ligne avec espacement, et non le début d'une formule.
-# Un bloc protégé peut en contenir un autre (une figure dans une colonne, une colonne dans une
-# slide). Trois niveaux suffisent ; la borne évite qu'un marqueur mal formé boucle sans fin.
-PROFONDEUR_INSERTIONS = 5
-
-
 MOTIF_MATHS = re.compile(r"\$\$.+?\$\$|\$[^$]+?\$|(?<!\\)\\\[.+?(?<!\\)\\\]", re.S)
 # Les environnements qui sont des mathématiques sans porter de dollars.
 MOTIF_ENVIRONNEMENTS_MATHS = re.compile(
