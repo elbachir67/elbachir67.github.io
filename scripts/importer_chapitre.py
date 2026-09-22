@@ -478,7 +478,14 @@ def figures(texte: str, conversion: Conversion) -> str:
                 # dans le crochet, Pandoc en fait une figure implicite, et le filtre revealjs de
                 # Quarto remplace `src` par `data-src` **en perdant l'attribut alt** — l'audit
                 # d'accessibilité signalait alors une image sans nom accessible.
-                attributs = [f'fig-alt="{(alt or "TODO(PO): description de la figure").replace(chr(34), "&quot;")}"']
+                # `.nostretch` : sans elle, Quarto pose `r-stretch` sur l'image, et reveal lui
+                # donne la hauteur qui reste dans la slide. Quand le texte occupe déjà la slide,
+                # cette hauteur vaut **zéro** : l'image est chargée, présente dans la page, et
+                # invisible. Les deux figures matricielles de la séance 6 du cours de ML étaient
+                # dans ce cas. `.figure-matricielle` donne à l'image un fond clair, pour qu'un
+                # PNG à fond transparent reste lisible quel que soit le fond de la page.
+                attributs = [".nostretch", ".figure-matricielle",
+                             f'fig-alt="{(alt or "TODO(PO): description de la figure").replace(chr(34), "&quot;")}"']
                 if largeur:
                     attributs.append(f'width="{round(largeur * 100)}%"')
                 insertion = (f'![]({conversion.prefixe_figures}/{nom}.png)'
@@ -1184,10 +1191,13 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: s
         "    scrollable: true",
         "    history: false",
         # Le menu de revealjs est construit à l'exécution : ce script lui donne un nom accessible et
-        # rend son panneau atteignable au clavier (US-42).
+        # rend son panneau atteignable au clavier (US-42). Le troisième charge les images tout de
+        # suite et fait recentrer les slides : reveal les positionne avant que les pixels arrivent,
+        # et ne recommence jamais.
         "    include-after-body:",
         '      text: \'<script src="/assets/js/slides-accessibilite.js"></script>'
-        '<script src="/assets/js/slides-pdf.js"></script>\'',
+        '<script src="/assets/js/slides-pdf.js"></script>'
+        '<script src="/assets/js/slides-images.js"></script>\'',
         "---",
         "",
     ]
