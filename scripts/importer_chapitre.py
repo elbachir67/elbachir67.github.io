@@ -59,7 +59,7 @@ CARACTERES = {"oe": "œ", "ldots": "\u2026", "dots": "\u2026", "textbackslash": 
               "textasciitilde": "~", "textasciicircum": "^",
               # Symboles employés **hors** mathématiques dans les CM rédigés : une flèche de prose,
               # une coche de validation. Les laisser passer les faisait signaler comme non convertis.
-              "checkmark": "✓", "rightarrow": "→", "leftarrow": "←", "leftrightarrow": "↔",
+              "checkmark": "✓", "cmark": "✓", "xmark": "✗", "rightarrow": "→", "leftarrow": "←", "leftrightarrow": "↔",
               "Rightarrow": "⇒", "times": "×", "pm": "±", "bullet": "•", "degree": "°"}
 
 # Styles de `lstlisting` définis par beamerucad.sty : « out » et « err » sont des sorties de
@@ -82,7 +82,10 @@ IGNOREES = {"vskip", "vspace", "smallskip", "medskip", "bigskip", "centering", "
             # Apparitions progressives d'une slide Beamer : une page HTML montre tout d'un coup.
             "pause",
             "toprule", "midrule", "bottomrule", "hline", "addlinespace", "small", "scriptsize", "footnotesize",
-            "normalsize", "large", "Large", "raggedright", "noindent", "titlepage", "maketitle"}
+            "normalsize", "large", "Large", "raggedright", "noindent", "titlepage", "maketitle",
+            # Sommaire et sauts de page : un document HTML a sa propre table des matières (US-61).
+            "tableofcontents", "listoffigures", "listoftables", "newpage", "clearpage", "cleardoublepage",
+            "hfill", "hrule", "linebreak", "nopagebreak", "pagebreak", "allowbreak", "protect"}
 
 # Couleurs d'encre du jeu de figures : elles suivront la couleur du texte de la page.
 ENCRES = {"#000", "#000000", "black", "#1a3a5c", "#1A3A5C", "#1c2a33", "#1C2A33",
@@ -123,6 +126,8 @@ class Conversion:
         self.figures: list[str] = []
         self.codes: list[str] = []
         self.tableaux = 0
+        self.flottants: Counter[str] = Counter()
+        self.omis: Counter[str] = Counter()
         self.slide = "(préambule)"
 
     def proteger(self, bloc: str) -> str:
@@ -350,7 +355,9 @@ def macros_du_theme(texte: str, preambule: str = "") -> str:
         texte = MOTIF_ENVIRONNEMENTS_MATHS.sub(developper, texte)
         texte = MOTIF_MATHS.sub(developper, texte)
 
-    return texte.replace("\\quad", " ")
+    # Les renvois sont résolus ici, sur le document entier : ils traversent le texte courant comme
+    # les légendes, et `\\ref` n'a pas de sens plus loin dans la chaîne (US-61).
+    return renvois(texte.replace("\\quad", " "))
 
 
 def sans_commentaires(texte: str) -> str:
@@ -372,6 +379,10 @@ def retirer_tailles(texte: str) -> str:
 
 MOTIF_IMAGE = re.compile(r"\\includegraphics(?:\[(?P<options>[^\]]*)\])?\{(?P<nom>[^}]+)\}")
 MOTIF_LEGENDE = re.compile(r"\s*\{\\(?:scriptsize|footnotesize|small)\s")
+# La légende d'un flottant, éventuellement précédée d'un `\\label` (US-61).
+MOTIF_CAPTION = re.compile(r"\s*(?:\\label\s*\{[^}]*\}\s*)?\\caption\s*\{")
+# La même étiquette, quand elle suit la légende plutôt qu'elle ne la précède.
+MOTIF_LABEL_SUIVANT = re.compile(r"\s*\\label\s*\{([^}]*)\}")
 
 
 # Commandes non alphabétiques qu'une légende contient : LaTeX les échappe, un texte alternatif les
@@ -438,7 +449,7 @@ def bloc_python(nom: str, conversion: Conversion, legende: str | None) -> tuple[
     return chunk, repli
 
 
-def figures(texte: str, conversion: Conversion) -> str:
+def figures(texte: str, conversion: Conversion, legende_flottante: str = "") -> str:
     """Remplace chaque image, et la légende qui la suit, par le shortcode et sa légende.
 
     Le texte alternatif vient de la légende du `.tex`. Quand il n'y en a pas, il vient du fichier
@@ -456,11 +467,28 @@ def figures(texte: str, conversion: Conversion) -> str:
         largeur = float(mesure[1]) if mesure else None
 
         legende, fin = None, trouve.end()
+        flottant, etiquette = False, ""
         suivante = MOTIF_LEGENDE.match(texte, trouve.end())
         if suivante:
             ouverture = texte.index("{", trouve.end())
             fermeture = accolade(texte, ouverture)
             legende, fin = texte[suivante.end():fermeture], fermeture + 1
+        else:
+            # Dans un flottant `figure`, la légende s'écrit `\caption{…}` juste après l'image
+            # (US-61). `figures()` passe sur le texte avant que `convertir()` ne voie le flottant :
+            # c'est donc ici qu'il faut la reconnaître, sans quoi la figure partait avec un
+            # TODO(PO) alors que sa légende était à deux lignes. L'étiquette `\label{fig:x}`
+            # l'entoure indifféremment avant ou après — les deux usages coexistent dans les cours.
+            apres = MOTIF_CAPTION.match(texte, trouve.end())
+            if apres:
+                fermeture = accolade(texte, apres.end() - 1)
+                legende, fin = texte[apres.end():fermeture], fermeture + 1
+                flottant = True
+                marque = (MOTIF_LABEL.search(texte, trouve.end(), apres.end())
+                          or MOTIF_LABEL_SUIVANT.match(texte, fin))
+                if marque:
+                    etiquette = identifiant_quarto(marque[1])
+                    fin = max(fin, marque.end())
 
         repli = None
         if nom in conversion.scripts:
@@ -470,9 +498,11 @@ def figures(texte: str, conversion: Conversion) -> str:
             insertion = ("<!-- FIGURE CALCULÉE (US-18) : " + nom
                          + ", à produire par le bloc Python de _sources/figs/figA.py -->")
         else:
-            alt = conversion.alternatifs.get(nom) or (sans_balises(legende) if legende else "")
+            legende_utile = legende or legende_flottante
+            alt = conversion.alternatifs.get(nom) or (sans_balises(legende_utile)
+                                                      if legende_utile else "")
             origine = ("texte fourni par le PO" if nom in conversion.alternatifs
-                       else "légende du .tex" if legende else "TODO(PO)")
+                       else "légende du .tex" if legende_utile else "TODO(PO)")
             taille = f' largeur="{round(largeur * 100)}%"' if largeur else ""
             if nom in conversion.matricielles:
                 # Figure livrée en image matricielle seulement : aucun SVG à incorporer. Elle est
@@ -503,7 +533,12 @@ def figures(texte: str, conversion: Conversion) -> str:
 
         # Seule l'insertion est mise à l'abri ; la légende, elle, suit le chemin normal du texte.
         bloc = conversion.proteger(insertion)
-        if legende:
+        if flottant and legende:
+            # Figure Quarto : numérotée, et référençable par `@fig-…` quand la source l'étiquette.
+            conversion.flottants["figure"] += 1
+            ouverture = f"::: {{#{etiquette}}}" if etiquette else "::: {.figure-flottante}"
+            bloc = f"{ouverture}\n{bloc}\n\n{legende.strip()}\n:::"
+        elif legende:
             bloc += "\n\n::: {.legende}\n" + legende.strip() + "\n:::"
         if repli:
             bloc += "\n\n" + conversion.proteger(repli)
@@ -516,6 +551,34 @@ MOTIF_MATHS = re.compile(r"\$\$.+?\$\$|\$[^$]+?\$|(?<!\\)\\\[.+?(?<!\\)\\\]", re
 # Les environnements qui sont des mathématiques sans porter de dollars.
 MOTIF_ENVIRONNEMENTS_MATHS = re.compile(
     r"\\begin\{(align|equation|gather|multline|eqnarray)(\*?)\}.*?\\end\{\1\2\}", re.S)
+
+
+# Références croisées (US-61). LaTeX étiquette avec `\label{fig:x}` et renvoie avec `\ref{fig:x}` ;
+# Quarto identifie avec `{#fig-x}` et renvoie avec `@fig-x`. Les préfixes se correspondent un à un,
+# et ce sont les trois seuls que les cours emploient : `fig:` (101 fois), `sec:` (13), `eq:` (4).
+PREFIXES_RENVOI = {"fig": "fig", "tbl": "tbl", "tab": "tbl", "sec": "sec", "eq": "eq"}
+MOTIF_LABEL = re.compile(r"\\label\s*\{([^}]*)\}")
+MOTIF_RENVOI = re.compile(r"\\(?:auto)?ref\s*\{([^}]*)\}|\\eqref\s*\{([^}]*)\}")
+
+
+def identifiant_quarto(etiquette: str) -> str:
+    """« fig:bouki_grille » -> « fig-bouki_grille ».
+
+    Un identifiant sans préfixe connu reçoit `sec-` : Quarto numérote par préfixe, et une
+    étiquette qu'il ne reconnaît pas ne se référencerait pas du tout.
+    """
+    prefixe, _, reste = etiquette.partition(":")
+    if not reste:
+        return "sec-" + re.sub(r"[^A-Za-z0-9_-]+", "-", etiquette.strip()).strip("-").lower()
+    court = PREFIXES_RENVOI.get(prefixe.strip().lower(), "sec")
+    return f"{court}-" + re.sub(r"[^A-Za-z0-9_-]+", "-", reste.strip()).strip("-").lower()
+
+
+def renvois(texte: str) -> str:
+    r"""`\ref{fig:x}` et `\eqref{eq:x}` -> `@fig-x`, que Quarto numérote et relie."""
+    def un(trouve: re.Match[str]) -> str:
+        return "@" + identifiant_quarto(trouve[1] or trouve[2])
+    return MOTIF_RENVOI.sub(un, texte)
 
 
 def maths_en_dollars(formule: str) -> str:
@@ -616,6 +679,10 @@ def inline(texte: str, conversion: Conversion) -> str:
         (r"\\textbf\{", "**", "**"), (r"\\alert\{", "**", "**"),
         (r"\\emph\{", "*", "*"), (r"\\textit\{", "*", "*"),
         (r"\\texttt\{", "`", "`"), (r"\\textsuperscript\{", "^", "^"),
+        # Petites capitales : Pandoc les rend par un attribut, et non par une commande (US-61).
+        (r"\\textsc\{", "[", "]{.smallcaps}"),
+        # Une adresse littérale devient un lien automatique.
+        (r"\\url\{", "<", ">"),
     ]
     for motif, avant, apres in remplacements:
         while True:
@@ -624,6 +691,25 @@ def inline(texte: str, conversion: Conversion) -> str:
                 break
             contenu, suite = argument(texte, trouve.end() - 1)
             texte = texte[:trouve.start()] + avant + contenu + apres + texte[suite:]
+
+    # Mise en page qui emporte ses arguments : `\thispagestyle{empty}` ou
+    # `\addcontentsline{toc}{section}{Références}` n'ont pas d'équivalent en HTML, et leur nom
+    # seul retiré laisserait « empty » et « tocsectionRéférences » dans la page (US-61).
+    for nom, arguments in (("thispagestyle", 1), ("pagestyle", 1), ("addcontentsline", 3),
+                           ("setcounter", 2), ("refstepcounter", 1), ("addtocounter", 2)):
+        motif = re.compile(rf"\\{nom}\s*\{{")
+        while True:
+            trouve = motif.search(texte)
+            if not trouve:
+                break
+            fin = trouve.start()
+            position = trouve.end() - 1
+            for _ in range(arguments):
+                if position >= len(texte) or texte[position] != "{":
+                    break
+                position = accolade(texte, position) + 1
+            conversion.ignorees[nom] += 1
+            texte = texte[:fin] + texte[position:]
 
     # Commandes de mise en page et caractères.
     def commande(trouve: re.Match[str]) -> str:
@@ -799,6 +885,54 @@ def colonnes(contenu: str, conversion: Conversion) -> str:
     return "\n".join(blocs)
 
 
+def legende_et_etiquette(contenu: str, conversion: Conversion) -> tuple[str, str, str]:
+    """Sépare d'un flottant sa légende, son étiquette et ce qu'il reste (US-61)."""
+    legende = ""
+    trouve = re.search(r"\\caption\s*\{", contenu)
+    if trouve:
+        fin = accolade(contenu, trouve.end() - 1)
+        legende = contenu[trouve.end():fin]
+        contenu = contenu[:trouve.start()] + contenu[fin + 1:]
+    etiquette = ""
+    marque = MOTIF_LABEL.search(contenu)
+    if marque:
+        etiquette = identifiant_quarto(marque[1])
+        contenu = contenu[:marque.start()] + contenu[marque.end():]
+    return contenu, legende, etiquette
+
+
+def flottant_figure(contenu: str, conversion: Conversion) -> str:
+    """`figure` de LaTeX -> figure Quarto numérotée et référençable (US-61).
+
+    Quarto numérote et relie une figure quand elle porte un identifiant `#fig-…`. L'image, elle,
+    passe par le chemin habituel — un SVG est incorporé pour suivre les encres du thème —, d'où la
+    forme en division plutôt que le crochet d'image : `::: {#fig-x}` … légende … `:::`.
+    """
+    contenu, legende, etiquette = legende_et_etiquette(contenu, conversion)
+    conversion.flottants["figure"] += 1
+    corps = convertir(figures(contenu, conversion, legende), conversion)
+    if not legende:
+        # Sans légende, rien à numéroter : Quarto exige une légende pour référencer une figure.
+        return corps
+    ligne = f"::: {{#{etiquette}}}" if etiquette else "::: {.figure-flottante}"
+    return "\n".join([ligne, corps, "", inline(legende, conversion), ":::"])
+
+
+def flottant_tableau(contenu: str, conversion: Conversion) -> str:
+    """`table` de LaTeX -> tableau Quarto avec sa légende (US-61).
+
+    La légende d'un tableau s'écrit sous lui, précédée de deux points ; l'identifiant la suit entre
+    accolades. C'est la forme que Quarto numérote et relie par `@tbl-…`.
+    """
+    contenu, legende, etiquette = legende_et_etiquette(contenu, conversion)
+    conversion.flottants["table"] += 1
+    corps = convertir(contenu, conversion)
+    if not legende:
+        return corps
+    suffixe = f" {{#{etiquette}}}" if etiquette else ""
+    return f"{corps}\n\n: {inline(legende, conversion)}{suffixe}"
+
+
 def convertir(texte: str, conversion: Conversion) -> str:
     """Convertit un fragment : environnements connus, puis texte courant."""
     # Les commandes de taille sont retirées ici aussi : « {\small\begin{tabular}… } » entoure parfois
@@ -842,6 +976,10 @@ def convertir(texte: str, conversion: Conversion) -> str:
         contenu, suite = environnement(reste, nom, position)
         contenu, titre = rendre(contenu), (rendre(titre) if titre else titre)
 
+        if nom in conversion.encadres and conversion.encadres[nom][0] == "omis":
+            conversion.omis[nom] += 1
+            reste = reste[suite:]
+            continue
         if nom in conversion.encadres:
             genre, classe, defaut = conversion.encadres[nom]
             corps = convertir(contenu, conversion)
@@ -872,10 +1010,22 @@ def convertir(texte: str, conversion: Conversion) -> str:
             # `align` se compose en `aligned`, qui est sa forme utilisable à l'intérieur de « $$ ».
             interne = {"align": "aligned", "align*": "aligned", "gather": "gathered",
                        "gather*": "gathered"}.get(nom)
+            # Une équation étiquetée se numérote et se référence : Quarto le fait quand le bloc
+            # porte `{#eq-…}` (US-61). L'étiquette est retirée du corps, où LaTeX seul la lisait.
             corps = contenu.strip()
+            etiquette = ""
+            marque = MOTIF_LABEL.search(corps)
+            if marque:
+                etiquette = identifiant_quarto(marque[1])
+                corps = (corps[:marque.start()] + corps[marque.end():]).strip()
             if interne:
                 corps = f"\\begin{{{interne}}}\n{corps}\n\\end{{{interne}}}"
-            morceaux.append(conversion.proteger(f"$$\n{corps}\n$$"))
+            suffixe = f" {{#{etiquette}}}" if etiquette else ""
+            morceaux.append(conversion.proteger(f"$$\n{corps}\n$${suffixe}"))
+        elif nom in ("figure", "figure*"):
+            morceaux.append(flottant_figure(contenu, conversion))
+        elif nom in ("table", "table*"):
+            morceaux.append(flottant_tableau(contenu, conversion))
         elif nom == "columns":
             morceaux.append(conversion.proteger(colonnes(contenu, conversion)))
         elif nom in ("center", "block", "column"):
@@ -913,8 +1063,15 @@ def page(corps: str, conversion: Conversion) -> list[str]:
     while trouve:
         _, apres_option = option(corps, trouve.end())
         titre, position = argument(corps, apres_option)
+        # `\\label{sec:x}` qui suit le titre devient l'identifiant de la section : c'est lui que
+        # `@sec-x` ira chercher (US-61).
+        marque = re.match(r"\s*\\label\s*\{([^}]*)\}", corps[position:])
+        etiquette = ""
+        if marque:
+            etiquette = f" {{#{identifiant_quarto(marque[1])}}}"
+            position += marque.end()
         suivant = motif.search(corps, position)
-        sorties.append(f"{niveaux[trouve[1]]} {inline(titre, conversion)}")
+        sorties.append(f"{niveaux[trouve[1]]} {inline(titre, conversion)}{etiquette}")
         morceau(corps[position:suivant.start() if suivant else len(corps)], titre)
         trouve = suivant
     return sorties
@@ -1310,9 +1467,13 @@ def main() -> int:
     for brute in args.encadre:
         nom, _, reste = brute.partition("=")
         genre, _, titre = reste.partition("|")
-        if genre not in ("note", "tip", "warning", "important", "caution"):
+        # `omis` : l'encadré ne passe pas du tout. C'est ce qu'il faut pour les boîtes de réponse —
+        # `appliboxR` de Structures de Données, `correctionbox`, `corrbox` et `solbox`
+        # d'Introduction à l'IA —, qu'aucun corrigé ne doit publier (décision du PO, US-61). Le
+        # rapport de conversion en tient le compte : rien ne disparaît en silence.
+        if genre not in ("note", "tip", "warning", "important", "caution", "omis"):
             sys.exit(f"Encadré « {nom} » : genre de callout inconnu « {genre} » "
-                     "(note, tip, warning, important ou caution).")
+                     "(note, tip, warning, important, caution ou omis).")
         conversion.encadres[nom] = (genre, f"encadre-{nom}", titre or nom)
     for couple in args.figure_python:
         nom, _, script = couple.partition("=")
