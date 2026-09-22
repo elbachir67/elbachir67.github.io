@@ -48,6 +48,10 @@ RESERVES = {
     "corrige": "corrigé : aucun corrigé ne se publie ni ne vit dans le dépôt (décision du PO)",
     "correction": "document de correction (décision du PO)",
     "pistes": "pistes de résolution : c'est une correction (décision du PO)",
+    # Abréviation employée par les fiches d'exercices du cours de ML : dix-huit fichiers
+    # `CORR_EXOS_S*.pdf` vivaient dans `_import/` et passaient la liste du PO, qui ne connaissait
+    # que « corrige » et « correction ». Le motif est exact, pour ne pas prendre « corrélation ».
+    "corr_exos": "corrigé d'exercices (décision du PO)",
     "solution": "solution d'exercice : c'est une correction (décision du PO)",
 }
 # Termes que le PO ne veut pas voir sur le site, quelle que soit la page. La correction se fait
