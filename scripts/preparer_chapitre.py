@@ -136,19 +136,18 @@ def origines_des_textes(rapport: str, valides: dict[str, str], proposes: dict[st
 
 
 def ressources_demandees(brutes: list[str]) -> list[dict]:
-    """« corrige|_corriges/c1.pdf|Corrigé du Lab 1|2026-10-15 » -> entrée du manifeste.
+    """« td|ressources/td1.pdf|TD 1 » -> entrée du manifeste.
 
-    La date n'existe que pour un corrigé : c'est le jour où il rejoint le site (US-49).
+    Une ressource ne porte pas de date : la publication datée des corrigés est supprimée, et un
+    corrigé est refusé par l'import (décision du PO).
     """
     ressources = []
     for brute in brutes:
         champs = brute.split("|")
         if len(champs) < 3:
-            sys.exit(f"Ressource mal formée : « {brute} » (attendu : type|fichier|titre[|date]).")
-        entree = {"type": champs[0], "fichier": champs[1], "titre": champs[2] or champs[1]}
-        if len(champs) > 3 and champs[3]:
-            entree["date"] = champs[3]
-        ressources.append(entree)
+            sys.exit(f"Ressource mal formée : « {brute} » (attendu : type|fichier|titre).")
+        ressources.append({"type": champs[0], "fichier": champs[1],
+                           "titre": champs[2] or champs[1]})
     return ressources
 
 
@@ -163,11 +162,9 @@ def chemin_dans_le_cours(cours: Path, fichier: str) -> str:
 
 
 def ligne_de_ressource(cours: Path, ressource: dict) -> str:
-    """Ce que l'import attend : le type, le fichier dans le dépôt, le titre, et la date d'un corrigé."""
-    champs = [ressource["type"], f"cours/{cours.name}/{ressource['fichier']}", ressource["titre"]]
-    if ressource.get("date"):
-        champs.append(ressource["date"])
-    return "|".join(champs)
+    """Ce que l'import attend : le type, le fichier dans le dépôt, et le titre."""
+    return "|".join([ressource["type"], f"cours/{cours.name}/{ressource['fichier']}",
+                     ressource["titre"]])
 
 
 def entree_existante(cours: Path, tex: str) -> dict | None:
@@ -250,8 +247,8 @@ def main() -> int:
                                                   "le .tex déclare)")
     analyseur.add_argument("--video", help="identifiant YouTube de la capsule de la séance (US-19)")
     analyseur.add_argument("--ressource", action="append", default=[], metavar="TYPE|FICHIER|TITRE",
-                           help="ressource de la séance : lab, td, notebook ou corrige, le fichier "
-                                "relatif au dossier du cours, et son titre (répétable, US-49)")
+                           help="ressource de la séance : lab, td, tp, notebook ou pdf, le fichier "
+                                "dans le dépôt et son titre — type|fichier|titre. Répétable (US-49)")
     analyseur.add_argument("--figures-source", type=Path,
                            help="dossier des figures (par défaut : figs/ à côté du .tex)")
     args = analyseur.parse_args()

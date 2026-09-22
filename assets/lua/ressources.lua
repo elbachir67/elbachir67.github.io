@@ -1,8 +1,8 @@
 -- Slide « Ressources de la séance » (US-49).
 --
 -- L'import laisse un emplacement vide — `::: {#ressources-seance} :::` — et ce filtre le remplit au
--- rendu, avec le poids de chaque fichier et les seuls corrigés dont la date est atteinte. Si rien
--- n'est à montrer aujourd'hui, l'emplacement disparaît : pas de slide vide en fin de deck.
+-- rendu, avec le poids de chaque fichier. Si rien n'est à montrer, l'emplacement disparaît : pas
+-- de slide vide en fin de deck.
 
 package.path = package.path .. ";" .. pandoc.path.directory(PANDOC_SCRIPT_FILE) .. "/?.lua"
 local R = require("ressources-communes")
