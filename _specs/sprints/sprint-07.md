@@ -82,6 +82,17 @@ Le PO l'a demandé explicitement, et cela ne doit pas se perdre :
 > c'était vrai ; cela laissait entendre que les figures avaient été regardées, et elles ne l'avaient
 > pas été.
 
+Et, du même ordre, ce que le PO a demandé de noter :
+
+> `verifier_debordement.js` mesurait **à zéro les slides empilées depuis sa création** (US-43). Le
+> contrôle affiche chaque slide le temps de la mesurer, mais une slide empilée vit dans une section
+> que reveal cache : un ancêtre en `display: none` met toute la descendance à zéro. Sur la séance 6
+> du cours de ML, il ne mesurait vraiment que **quatre slides sur soixante-sept** et déclarait les
+> soixante-trois autres conformes. Ses « 1023 slides tiennent dans le cadre », annoncés PR après PR
+> pendant tout l'import du cours, ne valaient rien. Le défaut n'a été trouvé qu'en cherchant
+> pourquoi une figure PNG s'affichait avec une hauteur nulle — c'est-à-dire en **regardant** une
+> slide, une fois de plus. Réparé, le contrôle a immédiatement trouvé trois slides trop chargées.
+
 ## Bilan
 
 Rédigé par Claude Code en fin de sprint : `_specs/sprints/sprint-07-bilan.md` (CLAUDE.md §11).
