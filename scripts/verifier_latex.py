@@ -79,6 +79,24 @@ COMMANDES = (
     r"textbf", r"textit", r"langle", r"rangle", r"lVert", r"rVert", r"cdots", r"vdots", r"ddots",
 )
 RESTES_ALT = re.compile(r"\\|\b(?:" + "|".join(COMMANDES) + r")\b")
+
+# Environnements que MathJax **sait** rendre : amsmath et la base. Tout autre — `psmallmatrix`,
+# `dcases`, `rcases`, le reste de `mathtools` — lui est inconnu, et il affiche alors le TeX
+# **brut dans un cadre**, au milieu de la phrase. La séance 10 du cours d'Introduction au ML en
+# portait sept. Le contrôle regarde donc **à l'intérieur** des formules, que les autres règles
+# écartent : c'est le seul endroit où ce défaut se voit.
+ENVIRONNEMENTS_MATHJAX = {
+    "array", "matrix", "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix", "smallmatrix",
+    "cases", "aligned", "alignedat", "gathered", "split", "subarray", "equation", "equation*",
+    "align", "align*", "gather", "gather*", "multline", "multline*", "eqnarray", "eqnarray*",
+    "boxed",
+}
+ENVIRONNEMENT = re.compile(r"\\begin\s*\{([A-Za-z*]+)\}")
+# Une commande LaTeX dans du texte visible ou dans un code en ligne : le lecteur la voit telle
+# quelle, et ni l'un ni l'autre n'a de raison d'en contenir.
+MOTS_LATEX = re.compile(r"\\(?:begin|end)\s*\{[A-Za-z*]+\}|\b(?:psmallmatrix|bsmallmatrix|"
+                        r"vsmallmatrix|Bsmallmatrix|Vsmallmatrix|dcases|rcases|multlined)\b")
+CODE_EN_LIGNE = re.compile(r"<code\b[^>]*>(.*?)</code>", re.S | re.I)
 CONTEXTE = 60
 
 
@@ -90,7 +108,8 @@ def autour_de(texte: str, trouve: re.Match[str]) -> str:
 
 def restes_de_la_page(page: Path) -> list[str]:
     """Restes de LaTeX visibles dans une page, avec ce qui les entoure."""
-    html = MATHS.sub(" ", page.read_text(encoding="utf-8", errors="ignore"))
+    html_brut = page.read_text(encoding="utf-8", errors="ignore")
+    html = MATHS.sub(" ", html_brut)
     sans_code = CODE.sub(" ", html)
     trouves = [autour_de(t.string, t) for t in RESTES.finditer(sans_code)]
     trouves += [autour_de(t.string, t) for t in GUILLEMETS.finditer(sans_code)]
@@ -98,6 +117,20 @@ def restes_de_la_page(page: Path) -> list[str]:
     # Les caractères échappés sont cherchés jusque dans les codes en ligne : c'est là qu'ils se
     # voyaient, un code en ligne rendant son contenu tel quel.
     trouves += [autour_de(t.string, t) for t in ECHAPPES.finditer(BLOCS.sub(" ", html))]
+    # Environnements inconnus de MathJax, cherchés **dans** les formules — que les autres règles
+    # écartent, et où ce défaut est pourtant le seul à se voir.
+    for formule in MATHS.finditer(html_brut):
+        for env in ENVIRONNEMENT.finditer(formule[0]):
+            if env[1] not in ENVIRONNEMENTS_MATHJAX:
+                trouves.append(f"« \\begin{{{env[1]}}} » : MathJax ne connaît pas cet "
+                               "environnement et affichera le TeX brut dans un cadre")
+    # Commandes LaTeX dans le texte visible, puis dans les codes en ligne.
+    visible = BALISES.sub(" ", sans_code)
+    trouves += [autour_de(visible, m) for m in MOTS_LATEX.finditer(visible)]
+    for morceau in CODE_EN_LIGNE.finditer(html):
+        for reste in MOTS_LATEX.finditer(morceau[1]):
+            entourage = " ".join(morceau[1][max(0, reste.start() - 40):reste.end() + 30].split())
+            trouves.append(f"« {reste[0]} » dans un code en ligne : …{entourage}…")
     # Les textes alternatifs ne s'affichent pas : ils s'entendent. On les examine à part, sur la
     # page entière, avant tout retrait de balises — c'est dans les balises qu'ils vivent.
     for balise in ALT.finditer(html):

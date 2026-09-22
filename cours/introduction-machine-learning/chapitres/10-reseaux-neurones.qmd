@@ -307,7 +307,7 @@ C'est le point le plus contre-intuitif de la séance. On pourrait croire qu'empi
 ::: {.callout-tip .ucad-ex title="Composition linéaire"}
 Deux couches *sans* activation : $\mathbf{a}^{[1]} = W^{[1]}\mathbf{x} + \mathbf{b}^{[1]}$, puis $\hat y = W^{[2]}\mathbf{a}^{[1]} + \mathbf{b}^{[2]}$. En substituant :
 $$\hat y = W^{[2]}\big(W^{[1]}\mathbf{x} + \mathbf{b}^{[1]}\big) + \mathbf{b}^{[2]} = \underbrace{\big(W^{[2]}W^{[1]}\big)}_{W_{\text{eq}}}\mathbf{x} + \underbrace{\big(W^{[2]}\mathbf{b}^{[1]} + \mathbf{b}^{[2]}\big)}_{\mathbf{b}_{\text{eq}}}.$$
-C'est une *unique* couche linéaire. Vérifié : avec $W^{[1]} = \begin{psmallmatrix} 2 & 1\\ 0 & 3 \end{psmallmatrix}$, $W^{[2]} = \begin{psmallmatrix} 1 & -2 \end{psmallmatrix}$, $\mathbf{x} = (1; 2)$, les deux couches donnent $-4{,}5$, exactement comme la couche équivalente ($W_{\text{eq}} = \begin{psmallmatrix} 2 & -5 \end{psmallmatrix}$). **Empiler du linéaire n'apporte rien** : il faut une activation non-linéaire entre les couches.
+C'est une *unique* couche linéaire. Vérifié : avec $W^{[1]} = \left(\begin{smallmatrix} 2 & 1\\ 0 & 3 \end{smallmatrix}\right)$, $W^{[2]} = \left(\begin{smallmatrix} 1 & -2 \end{smallmatrix}\right)$, $\mathbf{x} = (1; 2)$, les deux couches donnent $-4{,}5$, exactement comme la couche équivalente ($W_{\text{eq}} = \left(\begin{smallmatrix} 2 & -5 \end{smallmatrix}\right)$). **Empiler du linéaire n'apporte rien** : il faut une activation non-linéaire entre les couches.
 :::
 
 ## Les activations et leurs dérivées
@@ -440,7 +440,7 @@ $$
 ## Le réseau et la propagation avant
 
 ::: {.callout-tip .ucad-ex title="Un réseau $2\!-\!2\!-\!1$ en chiffres"}
-Poids : $W^{[1]} = \begin{psmallmatrix} 0{,}5 & 0{,}1\\ -0{,}3 & 0{,}8 \end{psmallmatrix}$, $\mathbf{b}^{[1]} = (0{,}1;\ -0{,}2)$, $W^{[2]} = (0{,}4;\ -0{,}6)$, $b^{[2]} = 0{,}2$. Entrée $\mathbf{x} = (1;\ 0)$, cible $y = 1$.
+Poids : $W^{[1]} = \left(\begin{smallmatrix} 0{,}5 & 0{,}1\\ -0{,}3 & 0{,}8 \end{smallmatrix}\right)$, $\mathbf{b}^{[1]} = (0{,}1;\ -0{,}2)$, $W^{[2]} = (0{,}4;\ -0{,}6)$, $b^{[2]} = 0{,}2$. Entrée $\mathbf{x} = (1;\ 0)$, cible $y = 1$.
 
 - $\mathbf{z}^{[1]} = W^{[1]}\mathbf{x} + \mathbf{b}^{[1]} = (0{,}6;\ -0{,}5)$,   $\mathbf{a}^{[1]} = \sigma(\mathbf{z}^{[1]}) = (0{,}646;\ 0{,}378)$.
 - $z^{[2]} = W^{[2]}\mathbf{a}^{[1]} + b^{[2]} = 0{,}232$,   $\hat y = \sigma(0{,}232) = \mathbf{0{,}558}$.
@@ -459,7 +459,7 @@ $$\frac{\partial L}{\partial W^{[2]}} = \delta^{[2]}\mathbf{a}^{[1]} = -0{,}442\
 
 **Éq. 2 — erreur rétropropagée** : $\boldsymbol{\delta}^{[1]} = (W^{[2]})^\top \delta^{[2]} \odot \sigma'(\mathbf{z}^{[1]}) = (-0{,}040;\ 0{,}062)$.
 
-**Éq. 3–4 — gradients de la couche cachée** : $\dfrac{\partial L}{\partial W^{[1]}} = \boldsymbol{\delta}^{[1]}\mathbf{x}^\top = \begin{psmallmatrix} -0{,}040 & 0\\ 0{,}062 & 0 \end{psmallmatrix}$, $\dfrac{\partial L}{\partial \mathbf{b}^{[1]}} = (-0{,}040;\ 0{,}062)$.
+**Éq. 3–4 — gradients de la couche cachée** : $\dfrac{\partial L}{\partial W^{[1]}} = \boldsymbol{\delta}^{[1]}\mathbf{x}^\top = \left(\begin{smallmatrix} -0{,}040 & 0\\ 0{,}062 & 0 \end{smallmatrix}\right)$, $\dfrac{\partial L}{\partial \mathbf{b}^{[1]}} = (-0{,}040;\ 0{,}062)$.
 :::
 
 ## Vérification : différences finies

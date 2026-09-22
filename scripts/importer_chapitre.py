@@ -358,7 +358,7 @@ def macros_du_theme(texte: str, preambule: str = "") -> str:
 
     # Les renvois sont résolus ici, sur le document entier : ils traversent le texte courant comme
     # les légendes, et `\\ref` n'a pas de sens plus loin dans la chaîne (US-61).
-    return renvois(texte.replace("\\quad", " "))
+    return renvois(petites_matrices(texte.replace("\\quad", " ")))
 
 
 def sans_commentaires(texte: str) -> str:
@@ -580,6 +580,27 @@ def renvois(texte: str) -> str:
     def un(trouve: re.Match[str]) -> str:
         return "@" + identifiant_quarto(trouve[1] or trouve[2])
     return MOTIF_RENVOI.sub(un, texte)
+
+
+# Matrices de `mathtools` que MathJax ne connaît pas. MathJax 2.7.9, que Quarto charge pour les
+# présentations avec la configuration `TeX-AMS_HTML-full`, embarque amsmath mais **pas**
+# mathtools : `\begin{psmallmatrix}` est pour lui un environnement inconnu, et il affiche alors le
+# TeX **brut dans un cadre**, au milieu de la phrase. C'est ce que montrait la séance 10 du cours
+# d'Introduction au ML. La forme équivalente — un `smallmatrix` d'amsmath entre délimiteurs — dit
+# la même chose et se rend correctement.
+PETITES_MATRICES = {"psmallmatrix": ("(", ")"), "bsmallmatrix": ("[", "]"),
+                    "Bsmallmatrix": ("\\{", "\\}"), "vsmallmatrix": ("|", "|"),
+                    "Vsmallmatrix": ("\\|", "\\|")}
+
+
+def petites_matrices(texte: str) -> str:
+    """« \\begin{psmallmatrix} … \\end{psmallmatrix} » -> « \\left( \\begin{smallmatrix} … » (US-60)."""
+    # Remplacement littéral : dans une expression régulière, les antislashs de la chaîne de
+    # remplacement seraient lus comme des échappements.
+    for nom, (gauche, droite) in PETITES_MATRICES.items():
+        texte = texte.replace(f"\\begin{{{nom}}}", f"\\left{gauche}\\begin{{smallmatrix}}")
+        texte = texte.replace(f"\\end{{{nom}}}", f"\\end{{smallmatrix}}\\right{droite}")
+    return texte
 
 
 def maths_en_dollars(formule: str) -> str:
