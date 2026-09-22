@@ -72,6 +72,78 @@ afin d'ouvrir Structures de Données et Introduction à l'IA.
 
 ---
 
+## Table des encadrés, validée par le PO (US-61)
+
+Elle pilotera l'import des deux cours. Les six corrections du PO sont appliquées ; le reste est
+validé tel quel.
+
+### Structures de Données — 13 types
+
+| Environnement | Fois | Callout |
+|---|---:|---|
+| `appliboxQ` | 18 | `tip` — Mini-exercice |
+| `appliboxR` | 18 | **omis** (réponses) |
+| `attentionbox` | 12 | `warning` — Attention |
+| `lienbox` | 11 | `note` — Lien avec le cours |
+| `exercicebox` | 8 | `tip` — Vérification |
+| `prereqbox` | 6 | `note` — **Navigation conceptuelle** |
+| `infobox` | 6 | `note` — Pour comprendre |
+| `definition` | 4 | `note` — Définition |
+| `retenirbox` | 2 | `important` — À retenir |
+| `objectifbox` | 2 | **`important`** — Objectifs |
+| `example` | 2 | `tip` — Exemple |
+| `proposition` | 1 | `note` — Proposition |
+| `theorembox` | 1 | `important` — Théorème |
+
+### Introduction à l'IA — 37 types
+
+| Environnement | Fois | Callout |
+|---|---:|---|
+| `exemplebox` | 132 | `tip` — Exemple |
+| `definitionbox` | 123 | `note` — Définition |
+| `exercicebox` | 62 | `tip` — Exercice |
+| `attentionbox` | 56 | `warning` — Attention |
+| `feynbox` | 43 | `note` — Autrement dit |
+| `retenirbox` | 37 | `important` — À retenir |
+| `theorembox` | 31 | `important` — Propriété |
+| `etapebox` | 29 | `note` — Étape |
+| `defbox` | 28 | `note` — Définition |
+| `keybox` | 22 | `important` — Interprétation |
+| `prereqbox` | 20 | `note` — **Navigation conceptuelle** |
+| `recipebox` | 19 | `tip` — Recette |
+| `intubox` | 15 | `note` — Intuition |
+| `rappelbox` | 14 | `note` — Rappel |
+| `correctionbox` | 13 | **omis** |
+| `attbox` | 13 | `warning` — Attention |
+| `calcbox` | 13 | `note` — Démonstration |
+| `livrerefbox` | 10 | `note` — Référence |
+| `methodebox` | 10 | `tip` — Méthode |
+| `intuitionbox` | 10 | **`tip` — Réflexion personnelle** |
+| `proposition` | 10 | `note` — Proposition |
+| `corrbox` | 10 | **omis** |
+| `exobox` | 10 | **`note` — Contexte** |
+| `linkbox` | 9 | `note` — Lien |
+| `defibox` | 7 | `tip` — Défi |
+| `pointclebox` | 6 | `important` — Points clés |
+| `definition` | 5 | `note` — Définition |
+| `exbox` | 5 | `tip` — Exemple |
+| `solbox` | 5 | **omis** |
+| `resbox` | 5 | `important` — Conclusion |
+| `coursrefbox` | 2 | `note` — Cours de référence |
+| `conceptbox` | 2 | `note` — Lectures complémentaires |
+| `synthesebox` | 2 | `important` — Synthèse |
+| `erreurbox` | 1 | `warning` — Erreurs fréquentes |
+| `bayesbox` | 1 | **`important` — Théorème de Bayes** |
+| `bridgebox` | 1 | `note` — Passerelle |
+| `pontbox` | 1 | `note` — Fil conducteur |
+
+**`tcolorbox` sort de la table.** Vérification faite à la demande du PO : les quatre occurrences
+sont **une seule et même macro de préambule**, `\espaceReponse`, qui dessine un cadre **vide** à
+lignes pour que l'étudiant écrive. Aucune n'est une boîte de réponse au sens d'un corrigé, et
+aucune n'atteint la conversion — l'import part de `\begin{document}`. Ce qui l'atteint, c'est la
+**commande** `\espaceReponse`, employée 41 fois dans quatre feuilles d'énoncés : un cadre vide
+n'ayant pas de sens sur une page, elle sera simplement écartée.
+
 ## À reprendre tel quel dans le bilan
 
 Le PO l'a demandé explicitement, et cela ne doit pas se perdre :
