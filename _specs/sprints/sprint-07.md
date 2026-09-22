@@ -93,6 +93,20 @@ Et, du même ordre, ce que le PO a demandé de noter :
 > pourquoi une figure PNG s'affichait avec une hauteur nulle — c'est-à-dire en **regardant** une
 > slide, une fois de plus. Réparé, le contrôle a immédiatement trouvé trois slides trop chargées.
 
+Et deux écarts que la vérification en ligne du cours de ML a trouvés **dans les sources du PO**, à
+reprendre par lui :
+
+> **`f5_fit`, séance 5.** La slide s'intitule « Deux droites, et le résidu qui les départage » et sa
+> légende parle de « deux droites de qualités différentes » et d'un « carré ŷᵢ posé sur la droite ».
+> La figure, elle, s'intitule « Une droite qui suit le nuage de points » et montre **une** droite
+> avec des marqueurs **ronds**. La figure des deux droites existe pourtant : c'est `f5_two_lines`,
+> employée deux slides plus loin avec son propre texte. La conversion a fidèlement reporté la
+> source ; c'est la source qu'il faut reprendre.
+>
+> **`f11_workflow`, séance 11.** Les cases ④ « Baseline » et ⑤ « Comparer les modèles » sont coupées
+> au bord droit de la figure. Le **PDF source l'est aussi**, vérifié en le rasterisant : le cadrage
+> est trop étroit à la source, et non perdu à la conversion.
+
 ## Bilan
 
 Rédigé par Claude Code en fin de sprint : `_specs/sprints/sprint-07-bilan.md` (CLAUDE.md §11).
