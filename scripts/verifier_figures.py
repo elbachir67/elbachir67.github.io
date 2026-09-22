@@ -109,6 +109,29 @@ def figures_des_cours() -> list[tuple[Path, Path | None]]:
     return couples
 
 
+def figures_orphelines() -> list[tuple[str, str]]:
+    """Figures converties et commitées qu'aucun chapitre n'affiche.
+
+    Une figure protégée à l'intérieur d'un bloc lui-même protégé perdait son marqueur à la
+    restauration : la figure restait sur le disque, passait tous les contrôles de fichier, et
+    n'apparaissait sur aucune slide. Treize figures du cours de ML étaient dans ce cas, et rien
+    ne le disait. Le contrôle est bête : le nom de chaque figure doit se lire quelque part dans
+    les chapitres du cours.
+    """
+    manquantes = []
+    for dossier in sorted(RACINE.glob("cours/*/figures")):
+        chapitres = "\n".join(p.read_text(encoding="utf-8", errors="ignore")
+                              for p in sorted(dossier.parent.glob("chapitres/*.qmd")))
+        for figure in sorted(dossier.iterdir()):
+            if figure.suffix.lower() not in (".svg", ".png", ".jpg", ".jpeg", ".webp"):
+                continue
+            if figure.stem not in chapitres:
+                manquantes.append((str(figure.relative_to(RACINE)),
+                                   "figure convertie mais citée par aucun chapitre : "
+                                   "elle ne s'affichera nulle part"))
+    return manquantes
+
+
 def controler_fichier(publiee: Path, source: Path | None) -> list[str]:
     ecarts = []
     try:
@@ -161,6 +184,8 @@ def main() -> int:
         for message in controler_fichier(publiee, source):
             ecarts.append((str(publiee.relative_to(RACINE)), message))
 
+    ecarts += figures_orphelines()
+
     incorporees = svg_du_site()
     for page, numero, morceau in incorporees:
         try:
@@ -177,10 +202,10 @@ def main() -> int:
     for fichier, message in ecarts:
         print(f"{fichier}: {message}")
     if ecarts:
-        print(f"\nÉCHEC : {len(ecarts)} figure(s) vidée(s) ou amputée(s).")
+        print(f"\nÉCHEC : {len(ecarts)} figure(s) vidée(s), amputée(s) ou jamais affichée(s).")
         return 1
     print(f"OK : {len(couples)} figure(s) de cours et {len(incorporees)} figure(s) incorporée(s) "
-          "dessinent quelque chose, sans perte au nettoyage.")
+          "dessinent quelque chose, sont toutes citées, et sans perte au nettoyage.")
     return 0
 
 

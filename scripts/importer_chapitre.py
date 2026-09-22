@@ -120,7 +120,19 @@ class Conversion:
         return f"\x01{len(self.insertions) - 1}\x01"
 
     def restaurer(self, texte: str) -> str:
-        return re.sub(r"\x01(\d+)\x01", lambda t: self.insertions[int(t[1])], texte)
+        """Rend leurs blocs aux marqueurs, y compris à ceux cachés dans un bloc déjà rendu.
+
+        Une insertion en contient parfois une autre : une figure est protégée, puis le bloc de
+        colonnes qui l'entoure l'est à son tour. Une passe unique remplaçait le marqueur extérieur
+        et laissait l'intérieur en place — la figure disparaissait de la slide, et il ne restait
+        que son numéro. Treize figures du cours de ML étaient dans ce cas.
+        """
+        for _ in range(PROFONDEUR_INSERTIONS):
+            rendu = re.sub(r"\x01(\d+)\x01", lambda t: self.insertions[int(t[1])], texte)
+            if rendu == texte:
+                break
+            texte = rendu
+        return texte
 
     def non_converti(self, quoi: str) -> str:
         self.non_convertis.append((self.slide, quoi))
@@ -482,6 +494,11 @@ def figures(texte: str, conversion: Conversion) -> str:
 
 # Le crochet ouvrant ne compte que s'il n'est pas lui-même précédé d'une barre oblique : « \\[2pt] »
 # est un saut de ligne avec espacement, et non le début d'une formule.
+# Un bloc protégé peut en contenir un autre (une figure dans une colonne, une colonne dans une
+# slide). Trois niveaux suffisent ; la borne évite qu'un marqueur mal formé boucle sans fin.
+PROFONDEUR_INSERTIONS = 5
+
+
 MOTIF_MATHS = re.compile(r"\$\$.+?\$\$|\$[^$]+?\$|(?<!\\)\\\[.+?(?<!\\)\\\]", re.S)
 # Les environnements qui sont des mathématiques sans porter de dollars.
 MOTIF_ENVIRONNEMENTS_MATHS = re.compile(
