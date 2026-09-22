@@ -9,7 +9,8 @@ Sont cherchés, dans les pages rendues et **hors des blocs de code** :
 
 - `\\\\`, avec ou sans espacement (`\\\\[2pt]`, `\\\\*`) : un saut de ligne LaTeX ;
 - `\\[` : soit le même saut de ligne mal découpé, soit une commande restée entière ;
-- une barre oblique inverse devant l'un des caractères que LaTeX échappe — `{ } [ ] $ % & _ # ~ ^`.
+- une barre oblique inverse devant l'un des caractères que LaTeX échappe — `{ } [ ] $ % & _ # ~ ^` ;
+- un `$` dans le texte visible : une formule que Quarto n'a pas lue et qui s'affiche en dollars.
 
 Les **blocs** de code (`<pre>`) sont retirés avant l'examen : un cours peut y montrer du LaTeX, une
 chaîne Python ou une commande shell. Les **codes en ligne** (`<code>`), eux, sont examinés pour le
@@ -17,8 +18,9 @@ dernier motif : c'est justement là que le défaut se logeait — « `\\{ \\}` �
 barres obliques, parce qu'un code en ligne rend son contenu littéralement. Aucune de ces onze
 séquences n'a de sens dans le Python, le shell ou le texte que ces cours montrent.
 
-Si le site publie un jour des **mathématiques hors ligne** (`\\[ … \\]`, rendues par MathJax), il faudra
-les excepter ici : aujourd'hui, le site n'en contient aucune, et les formules en ligne s'écrivent `$…$`.
+Les **mathématiques hors ligne** s'écrivent `$$ … $$` : Quarto les rend dans un `<span class="math
+display">`, que MATHS retire avant l'examen. La forme `\\[ … \\]`, elle, n'est pas lue par Quarto et
+reste donc cherchée — c'est le défaut qu'a montré la séance 3 du cours de ML.
 
 Bibliothèque standard uniquement.
 """
@@ -46,6 +48,14 @@ RESTES = re.compile(r"\\\\\*?(?:\[[^\]]*\])?|\\\[")
 GUILLEMETS = re.compile(r"``|(?<![\w'])''(?!\w)")
 # Les caractères que LaTeX échappe : dans une page rendue, la barre oblique n'a rien à faire devant.
 ECHAPPES = re.compile(r"\\[{}\[\]$%&_#~^]")
+# Un dollar encore visible est une formule que Quarto n'a pas lue. Il refuse d'y voir des
+# mathématiques dès qu'une espace touche le dollar ouvrant ou le dollar fermant : « $4 = $ » et
+# « $k = $ » s'affichaient en toutes lettres dans la séance 5 et le TP 7 du cours de ML. Les
+# formules rendues ayant déjà été retirées avec MATHS, ce qui reste ne peut être que du texte.
+# La recherche porte sur le **texte visible** : Quarto recopie le titre d'un encadré dans un
+# attribut `title=`, où le `$w$` de la source subsiste sans jamais s'afficher.
+DOLLARS = re.compile(r"\$")
+BALISES = re.compile(r"<[^>]+>")
 CONTEXTE = 60
 
 
@@ -61,6 +71,7 @@ def restes_de_la_page(page: Path) -> list[str]:
     sans_code = CODE.sub(" ", html)
     trouves = [autour_de(t.string, t) for t in RESTES.finditer(sans_code)]
     trouves += [autour_de(t.string, t) for t in GUILLEMETS.finditer(sans_code)]
+    trouves += [autour_de(t.string, t) for t in DOLLARS.finditer(BALISES.sub(" ", sans_code))]
     # Les caractères échappés sont cherchés jusque dans les codes en ligne : c'est là qu'ils se
     # voyaient, un code en ligne rendant son contenu tel quel.
     trouves += [autour_de(t.string, t) for t in ECHAPPES.finditer(BLOCS.sub(" ", html))]

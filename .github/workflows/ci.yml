@@ -22,7 +22,11 @@ jobs:
   # Ce nom de job est le check obligatoire de la protection de main.
   rendu-et-liens:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Le contrôle d'accessibilité examine chaque page et chaque slide dans les deux langues, les deux
+    # thèmes et deux largeurs : avec l'arrivée du cours de ML, cela fait 2102 combinaisons et une
+    # douzaine de minutes à lui seul. Les quinze minutes d'origine le coupaient en plein vol, et le
+    # job était rapporté comme un échec. Le seuil laisse la place à un cours de plus.
+    timeout-minutes: 40
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v7
