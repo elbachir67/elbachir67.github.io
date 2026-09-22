@@ -19,6 +19,22 @@ local MOTS = {
          sortie = "Figure produced by the code in the preceding cell." },
 }
 
+-- Une description est **lue**, jamais rendue : ni formule ni commande n'y a sa place. Un notebook du
+-- cours d'Introduction au ML ouvre sur « le paludisme ($11{,}8\\,\\%$ de positifs) » — dans la balise
+-- description, cela s'entendait « dollar 11 accolade virgule accolade 8 antislash virgule antislash
+-- pourcent dollar ».
+local PONCTUATION = { ["\\%%"] = "%%", ["\\&"] = "&", ["\\_"] = "_", ["\\#"] = "#",
+                      ["\\,"] = " ", ["\\;"] = " ", ["{,}"] = "," }
+
+local function texte_nu(phrase)
+  for motif, caractere in pairs(PONCTUATION) do
+    phrase = phrase:gsub(motif, caractere)
+  end
+  phrase = phrase:gsub("\\%a+%s*", ""):gsub("[${}]", "")
+  return (phrase:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", ""))
+end
+
+
 function Pandoc(doc)
   local entree = quarto.doc.input_file
   if not entree:match("%.ipynb$") then
@@ -46,17 +62,24 @@ function Pandoc(doc)
     pandoc.Plain({ pandoc.Emph(pandoc.Inlines(mots.note)) }),
   }, { class = "notebook-boutons" })
 
-  -- Le référencement exige une description par page. Celle-ci vient du notebook : sa première
-  -- phrase, écrite par le PO — jamais une phrase inventée ici.
+  -- Le référencement exige une description par page, et **unique**. Celle-ci vient du notebook : sa
+  -- première phrase de prose, écrite par le PO — jamais une phrase inventée ici.
+  --
+  -- La ligne de signature est écartée. Les neuf notebooks du cours d'Introduction au ML ouvrent tous
+  -- sur « Dr. El Hadji Bassirou TOURÉ · DMI · FST · UCAD » : prise comme description, elle était la
+  -- même sur les neuf pages, et le contrôle de référencement refusait le lot. Un point médian sépare
+  -- des métadonnées, pas une phrase.
   if not doc.meta.description then
     for _, bloc in ipairs(doc.blocks) do
       if bloc.t == "Para" then
         local phrase = pandoc.utils.stringify(bloc):gsub("%s+", " ")
-        local point = phrase:find("%. ")
-        phrase = point and phrase:sub(1, point) or phrase
-        if #phrase > 40 then
-          doc.meta.description = pandoc.MetaString(phrase)
-          break
+        if not phrase:find("·") then
+          local point = phrase:find("%. ")
+          phrase = point and phrase:sub(1, point) or phrase
+          if #phrase > 40 then
+            doc.meta.description = pandoc.MetaString(texte_nu(phrase))
+            break
+          end
         end
       end
     end

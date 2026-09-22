@@ -106,6 +106,7 @@ class Conversion:
         self.tikz = 0                           # numéro du schéma en cours
         self.insertions: list[str] = []         # blocs déjà finalisés, à l'abri de la conversion
         self.scripts: dict[str, Path] = {}      # figures calculées : script Python, par nom de figure
+        self.matricielles: set[str] = set()     # figures dont la source n'existe qu'en PNG
         self.non_convertis: list[tuple[str, str]] = []
         self.ignorees: Counter[str] = Counter()
         self.figures: list[str] = []
@@ -262,6 +263,21 @@ def macros_du_theme(texte: str) -> str:
             fin = accolade(texte, fin + 1 + suivant.end() - 1) if suivant else fin
             texte = texte[:trouve.start()] + texte[fin + 1:]
 
+    # `\texorpdfstring{beau}{brut}` : la première forme est celle qu'on lit. Résolue **ici**, avant
+    # tout découpage : elle apparaît dans l'argument optionnel d'un `\section[…]{…}`, que le
+    # découpage des sections coupe en deux — l'accolade restait alors ouverte et l'import s'arrêtait
+    # (séance 5 du cours d'Introduction au ML).
+    motif_tex = re.compile(r"\\texorpdfstring\s*\{")
+    while True:
+        trouve = motif_tex.search(texte)
+        if not trouve:
+            break
+        fin_un = accolade(texte, trouve.end() - 1)
+        suivant = re.match(r"\s*\{", texte[fin_un + 1:])
+        lisible = texte[trouve.end():fin_un]
+        fin = accolade(texte, fin_un + 1 + suivant.end() - 1) if suivant else fin_un
+        texte = texte[:trouve.start()] + lisible + texte[fin + 1:]
+
     texte = texte.replace("\\resultat", "\n\n**Résultat →**\n\n")
 
     # `\ucadformula{…}` -> formule hors ligne. Le contenu se lit en comptant les accolades : une
@@ -299,10 +315,25 @@ MOTIF_IMAGE = re.compile(r"\\includegraphics(?:\[(?P<options>[^\]]*)\])?\{(?P<no
 MOTIF_LEGENDE = re.compile(r"\s*\{\\(?:scriptsize|footnotesize|small)\s")
 
 
+# Commandes non alphabétiques qu'une légende contient : LaTeX les échappe, un texte alternatif les
+# veut nues. `\,` et ses variantes sont des espaces fines, sans équivalent dans du texte lu.
+PONCTUATION_LATEX = {r"\%": "%", r"\&": "&", r"\_": "_", r"\#": "#", r"\$": "$",
+                     r"\,": " ", r"\;": " ", r"\!": "", r"\ ": " "}
+
+
 def sans_balises(texte: str) -> str:
-    """Texte nu d'une légende, pour servir de texte alternatif."""
+    """Texte nu d'une légende, pour servir de texte alternatif.
+
+    Un texte alternatif est **lu à voix haute** : aucune formule n'y sera rendue, et les dollars,
+    les accolades et les commandes échappées s'y entendraient tels quels. Une légende du cours
+    d'Introduction au ML écrivait « pour atteindre $80\\,\\%$ de variance » : le lecteur d'écran
+    aurait dit « dollar 80 antislash virgule antislash pourcent dollar ».
+    """
+    for commande, caractere in PONCTUATION_LATEX.items():
+        texte = texte.replace(commande, caractere)
     texte = re.sub(r"\\[A-Za-z]+\s*\{([^{}]*)\}", r"\1", texte)
-    texte = re.sub(r"\\[A-Za-z]+\s*", "", texte).replace("{", "").replace("}", "")
+    texte = re.sub(r"\\[A-Za-z]+\s*", "", texte)
+    texte = texte.replace("{", "").replace("}", "").replace("$", "")
     return re.sub(r"\s+", " ", texte).replace('"', "«").strip()
 
 
@@ -383,10 +414,26 @@ def figures(texte: str, conversion: Conversion) -> str:
             alt = conversion.alternatifs.get(nom) or (sans_balises(legende) if legende else "")
             origine = ("texte fourni par le PO" if nom in conversion.alternatifs
                        else "légende du .tex" if legende else "TODO(PO)")
-            conversion.figures.append(f"{nom} : insérée, texte alternatif — {origine}")
             taille = f' largeur="{round(largeur * 100)}%"' if largeur else ""
-            insertion = (f'{{{{< svg {conversion.prefixe_figures}/{nom}.svg '
-                         f'alt="{alt or "TODO(PO): description de la figure"}"{taille} >}}}}')
+            if nom in conversion.matricielles:
+                # Figure livrée en image matricielle seulement : aucun SVG à incorporer. Elle est
+                # posée comme une image ordinaire, avec son texte alternatif. Elle ne suivra pas le
+                # mode sombre et se pixellisera au zoom — c'est le prix d'une source sans vectoriel.
+                conversion.figures.append(f"{nom} : insérée en PNG (aucune source vectorielle), "
+                                          f"texte alternatif — {origine}")
+                # Le texte alternatif passe par `fig-alt`, et non par le crochet de l'image : écrit
+                # dans le crochet, Pandoc en fait une figure implicite, et le filtre revealjs de
+                # Quarto remplace `src` par `data-src` **en perdant l'attribut alt** — l'audit
+                # d'accessibilité signalait alors une image sans nom accessible.
+                attributs = [f'fig-alt="{(alt or "TODO(PO): description de la figure").replace(chr(34), "&quot;")}"']
+                if largeur:
+                    attributs.append(f'width="{round(largeur * 100)}%"')
+                insertion = (f'![]({conversion.prefixe_figures}/{nom}.png)'
+                             f'{{{" ".join(attributs)}}}')
+            else:
+                conversion.figures.append(f"{nom} : insérée, texte alternatif — {origine}")
+                insertion = (f'{{{{< svg {conversion.prefixe_figures}/{nom}.svg '
+                             f'alt="{alt or "TODO(PO): description de la figure"}"{taille} >}}}}')
 
         # Seule l'insertion est mise à l'abri ; la légende, elle, suit le chemin normal du texte.
         bloc = conversion.proteger(insertion)
@@ -450,8 +497,7 @@ def inline(texte: str, conversion: Conversion) -> str:
     # traitement vient **après** la mise de côté des mathématiques : dans une formule, `\textcolor`
     # est rendu par MathJax, et le retirer effacerait ce que le PO a mis en couleur — le point
     # binaire rouge du chapitre 1 du cours de C, par exemple.
-    # `\texorpdfstring{beau}{brut}` : la première forme est celle qu'on lit.
-    for commande, garde in (("textcolor", 2), ("texorpdfstring", 1)):
+    for commande, garde in (("textcolor", 2),):
         motif_deux = re.compile(rf"\\{commande}\s*\{{")
         while True:
             trouve = motif_deux.search(texte)
@@ -1148,9 +1194,16 @@ def main() -> int:
     alternatifs = tomllib.loads(args.alt.read_text(encoding="utf-8")) if args.alt else {}
     # Les figures sont citées dans le .qmd par un chemin relatif à lui, comme un lien Markdown.
     prefixe = args.prefixe_figures or os.path.relpath(args.figures, args.sortie.parent)
+    # Les figures qui n'existent qu'en PNG sont repérées d'avance : l'insertion diffère, et la
+    # conversion a besoin de le savoir au moment où elle écrit la page.
+    figs = args.source.parent / "figs"
+    matricielles = {f.stem for f in figs.glob("*.png")
+                    if not (figs / f"{f.stem}.svg").is_file()} if figs.is_dir() else set()
+
     conversion = Conversion(alternatifs, prefixe,
                             args.langage_code or langage_declare(source) or "java")
     conversion.prefixe_tikz = args.prefixe_tikz or args.sortie.stem
+    conversion.matricielles = matricielles
     # Encadrés propres au document : leur sens est une décision du PO, jamais une déduction. Ils sont
     # déclarés à l'import et enregistrés dans le manifeste, que la CI rejoue.
     for brute in args.encadre:
@@ -1199,6 +1252,11 @@ def main() -> int:
         origine = dossier_figures / f"{nom}.svg"
         if origine.is_file():
             nettoyees[nom] = nettoyer_svg(origine, args.figures / f"{nom}.svg")
+        elif (dossier_figures / f"{nom}.png").is_file():
+            # Figure sans source vectorielle : elle est copiée telle quelle, et la page la pose
+            # comme une image ordinaire (voir `figures`).
+            args.figures.mkdir(parents=True, exist_ok=True)
+            (args.figures / f"{nom}.png").write_bytes((dossier_figures / f"{nom}.png").read_bytes())
 
     if args.rapport:
         ecrire_rapport(args.rapport, args.source, args.sortie, conversion, nettoyees)
