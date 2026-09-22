@@ -327,11 +327,11 @@ def macros_du_theme(texte: str, preambule: str = "") -> str:
         formule = texte[trouve.end():fin].strip()
         texte = texte[:trouve.start()] + f"\n\n$$ {formule} $$\n\n" + texte[fin + 1:]
 
-    # La substitution ne touche **que les formules**, et vient **après** `\\ucadformula` : appliquée
+    # La substitution ne touche **que les formules**, et vient **après** `\ucadformula` : appliquée
     # partout, elle entrait dans les blocs de code — le cours de Python définit des macros dont le
     # nom apparaît dans ses exemples, et un `lstlisting` s'en trouvait coupé en deux. Les
     # environnements `align`, `equation` et `gather` sont des formules sans dollars : les oublier
-    # laissait `\\vd` et `\\vz` tels quels dans les quatre équations de la rétropropagation, que
+    # laissait `\vd` et `\vz` tels quels dans les quatre équations de la rétropropagation, que
     # MathJax affichait alors en rouge.
     if definitions:
         def developper(trouve: re.Match[str]) -> str:
