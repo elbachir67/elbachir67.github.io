@@ -68,7 +68,7 @@ Deux exemples sont des points dans l'espace des variables. Leur **distance eucli
 
 $$ d(\vx, \vx') = \sqrt{\sum_{j=1}^{d}(x_j - x'_j)^2} $$
 
-C'est la distance de la Séance 4 (celle du k-NN), généralisation du théorème de Pythagore à $d$ dimensions. Tout le non-supervisé s'appuie dessus : un cluster regroupe des points *proches* ; un axe principal capte la direction où les points *s'étalent* le plus. Exemple : entre $\vx = (1; 2)$ et $\vx' = (4; 6)$, $d = \sqrt{3^2 + 4^2} = \sqrt{25} = 5$.
+C'est la distance de la Séance 4 (celle du k-NN), généralisation du théorème de Pythagore à $d$ dimensions. Tout le non-supervisé s'appuie dessus : un cluster regroupe des points *proches* ; un axe principal capte la direction où les points *s'étalent* le plus. Exemple : entre $\mathbf{x} = (1; 2)$ et $\mathbf{x}' = (4; 6)$, $d = \sqrt{3^2 + 4^2} = \sqrt{25} = 5$.
 
 ## La distance, en image
 
@@ -99,20 +99,20 @@ C'est tout. L'étape (1) utilise la distance ; l'étape (2) une simple moyenne. 
 ## k-means, formellement
 
 ::: {.callout-note .ucad-def title="Les deux étapes"}
-Pour $k$ centres $\vc_1, \dots, \vc_k$. **Affectation** : chaque point $\vx_i$ rejoint le cluster du centre le plus proche. **Mise à jour** : chaque centre devient la moyenne des points de son cluster.
+Pour $k$ centres $\mathbf{c}_1, \dots, \mathbf{c}_k$. **Affectation** : chaque point $\mathbf{x}_i$ rejoint le cluster du centre le plus proche. **Mise à jour** : chaque centre devient la moyenne des points de son cluster.
 :::
 
 $$ \text{affectation} : \; a_i = \arg\min_{k} \; \lVert \vx_i - \vc_k \rVert^2 \qquad \text{mise à jour} : \; \vc_k = \frac{1}{|C_k|}\sum_{i \in C_k} \vx_i $$
 
-La première équation attribue à chaque point l'indice $a_i$ du centre le plus proche (au sens de la distance au carré). La seconde recalcule chaque centre $\vc_k$ comme le barycentre (la moyenne) des points $C_k$ qui lui sont affectés. On boucle entre les deux jusqu'à ce que les affectations ne changent plus. La répétition de ces deux gestes — proche, moyenne — *est* l'algorithme.
+La première équation attribue à chaque point l'indice $a_i$ du centre le plus proche (au sens de la distance au carré). La seconde recalcule chaque centre $\mathbf{c}_k$ comme le barycentre (la moyenne) des points $C_k$ qui lui sont affectés. On boucle entre les deux jusqu'à ce que les affectations ne changent plus. La répétition de ces deux gestes — proche, moyenne — *est* l'algorithme.
 
 ## k-means à la main — 6 points, $k=2$ (1/2)
 
 ::: {.callout-tip .ucad-ex title="Affectation puis mise à jour"}
-Six points : $(1,1), (2,1), (1,2)$ en bas à gauche, $(5,6), (6,5), (6,6)$ en haut à droite. On vise $k = 2$ clusters. Initialisation *volontairement médiocre* : $\vc_1 = (1,1)$, $\vc_2 = (2,1)$ (les deux centres collés en bas).
+Six points : $(1,1), (2,1), (1,2)$ en bas à gauche, $(5,6), (6,5), (6,6)$ en haut à droite. On vise $k = 2$ clusters. Initialisation *volontairement médiocre* : $\mathbf{c}_1 = (1,1)$, $\mathbf{c}_2 = (2,1)$ (les deux centres collés en bas).
 
-- **Affectation 1** : chaque point au centre le plus proche $\to$ labels $[0,1,0,1,1,1]$ (les trois points du haut rejoignent $\vc_2$, plus proche). Inertie $= 108$.
-- **Mise à jour 1** : $\vc_1 = $ moyenne de $\{(1,1),(1,2)\} = (1;\ 1{,}5)$ ; $\vc_2 = $ moyenne des quatre autres $= (4{,}75;\ 4{,}5)$.
+- **Affectation 1** : chaque point au centre le plus proche $\to$ labels $[0,1,0,1,1,1]$ (les trois points du haut rejoignent $\mathbf{c}_2$, plus proche). Inertie $= 108$.
+- **Mise à jour 1** : $\mathbf{c}_1 = $ moyenne de $\{(1,1),(1,2)\} = (1;\ 1{,}5)$ ; $\mathbf{c}_2 = $ moyenne des quatre autres $= (4{,}75;\ 4{,}5)$.
 
 Les centres ont bougé : on recommence.
 :::
@@ -121,7 +121,7 @@ Les centres ont bougé : on recommence.
 
 ::: {.callout-tip .ucad-ex title="Convergence en deux itérations de plus"}
 - **Affectation 2** : avec les nouveaux centres, labels $= [0,0,0,1,1,1]$ — les trois points du bas ensemble, les trois du haut ensemble. Inertie $= 9{,}69$ (forte baisse).
-- **Mise à jour 2** : $\vc_1 = (1{,}33;\ 1{,}33)$, $\vc_2 = (5{,}67;\ 5{,}67)$.
+- **Mise à jour 2** : $\mathbf{c}_1 = (1{,}33;\ 1{,}33)$, $\mathbf{c}_2 = (5{,}67;\ 5{,}67)$.
 - **Affectation 3** : labels inchangés $\to$ *convergence*. Inertie finale $= \mathbf{2{,}67}$.
 
 Partant d'une initialisation médiocre, k-means a trouvé les deux groupes naturels en trois itérations. `scikit-learn` donne exactement les mêmes centres et la même inertie ($2{,}67$). L'inertie a chuté de $108$ à $2{,}67$ : c'est la mesure que l'algorithme minimise.

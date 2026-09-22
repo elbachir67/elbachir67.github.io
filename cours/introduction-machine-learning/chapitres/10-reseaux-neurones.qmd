@@ -66,8 +66,8 @@ Un neurone à trois entrées. Les valeurs $x_j$ (bleu) sont pondérées par les 
 ## Le neurone à la main
 
 ::: {.callout-tip .ucad-ex title="Somme pondérée puis activation, sur des chiffres"}
-Entrées $\vx = (2;\ 3;\ 1)$, poids $\vw = (0{,}5;\ -1;\ 2)$, biais $b = 0{,}5$.
-\[ z = \vw^\top\vx + b = (0{,}5)(2) + (-1)(3) + (2)(1) + 0{,}5 = 1 - 3 + 2 + 0{,}5 = \mathbf{0{,}5}. \]
+Entrées $\mathbf{x} = (2;\ 3;\ 1)$, poids $\mathbf{w} = (0{,}5;\ -1;\ 2)$, biais $b = 0{,}5$.
+\[ z = \mathbf{w}^\top\mathbf{x} + b = (0{,}5)(2) + (-1)(3) + (2)(1) + 0{,}5 = 1 - 3 + 2 + 0{,}5 = \mathbf{0{,}5}. \]
 Puis l'activation. Avec la **sigmoïde** : $a = \sigma(0{,}5) = \dfrac{1}{1 + e^{-0{,}5}} = \mathbf{0{,}62}$. Avec **ReLU** : $a = \max(0,\ 0{,}5) = \mathbf{0{,}5}$.
 :::
 
@@ -84,7 +84,7 @@ La sigmoïde transforme la somme pondérée $z$ en une valeur entre $0$ et $1$, 
 ## Exercice — calculer la sortie d'un neurone
 
 ::: {.callout-tip .ucad-rec title="Énoncé"}
-Un neurone à deux entrées, poids $\vw = (1{,}5;\ -2)$, biais $b = 1$. (a) Calculer $z$ pour $\vx = (2;\ 1)$. (b) Donner la sortie avec ReLU. (c) Même question pour $\vx = (0;\ 2)$.
+Un neurone à deux entrées, poids $\mathbf{w} = (1{,}5;\ -2)$, biais $b = 1$. (a) Calculer $z$ pour $\mathbf{x} = (2;\ 1)$. (b) Donner la sortie avec ReLU. (c) Même question pour $\mathbf{x} = (0;\ 2)$.
 :::
 
 ::: {.callout-tip .ucad-ex title="Correction"}
@@ -112,20 +112,20 @@ Quatre entrées alimentent trois neurones (la *largeur* de la couche). Chaque ne
 ## L'idée : ranger les poids dans une matrice
 
 ::: {.callout-note .ucad-def title="L'idée en une phrase"}
-Les poids de tous les neurones d'une couche se rangent dans une **matrice de poids** $W$ : *une ligne par neurone*, *une colonne par entrée*. Le calcul de la couche entière s'écrit alors en une seule opération : $\vz = W\vx + \vb$.
+Les poids de tous les neurones d'une couche se rangent dans une **matrice de poids** $W$ : *une ligne par neurone*, *une colonne par entrée*. Le calcul de la couche entière s'écrit alors en une seule opération : $\mathbf{z} = W\mathbf{x} + \mathbf{b}$.
 :::
 
-C'est exactement l'esprit de la **matrice $X$** de la Séance 3, où chaque ligne était un patient. Ici, chaque ligne de $W$ est un neurone, et le produit matrice-vecteur $W\vx$ calcule *simultanément* les sommes pondérées de tous les neurones. Le vecteur de biais $\vb$ ajoute un biais par neurone. Cette écriture compacte n'est pas qu'une élégance : c'est ce qui rend les réseaux calculables vite, et parallélisables sur une carte graphique.
+C'est exactement l'esprit de la **matrice $X$** de la Séance 3, où chaque ligne était un patient. Ici, chaque ligne de $W$ est un neurone, et le produit matrice-vecteur $W\mathbf{x}$ calcule *simultanément* les sommes pondérées de tous les neurones. Le vecteur de biais $\mathbf{b}$ ajoute un biais par neurone. Cette écriture compacte n'est pas qu'une élégance : c'est ce qui rend les réseaux calculables vite, et parallélisables sur une carte graphique.
 
 ## La couche, formellement
 
 ::: {.callout-note .ucad-def title="Définition"}
-Pour une couche de $m$ neurones recevant $d$ entrées : la matrice $W$ est de taille $m \times d$, le biais $\vb$ de taille $m$. La couche calcule un vecteur $\vz$ de $m$ sommes pondérées, puis applique l'activation composante par composante.
+Pour une couche de $m$ neurones recevant $d$ entrées : la matrice $W$ est de taille $m \times d$, le biais $\mathbf{b}$ de taille $m$. La couche calcule un vecteur $\mathbf{z}$ de $m$ sommes pondérées, puis applique l'activation composante par composante.
 :::
 
 $$ \vz = W\vx + \vb \qquad \va = f(\vz) \qquad W \in \mathbb{R}^{m\times d},\ \vx \in \mathbb{R}^{d},\ \vb \in \mathbb{R}^{m} $$
 
-Les dimensions s'enchaînent : $W$ ($m \times d$) fois $\vx$ ($d$) donne $\vz$ ($m$). Chaque *ligne* $i$ de $W$ contient les poids du neurone $i$ ; le produit de cette ligne par $\vx$ donne la somme pondérée $z_i$ de ce neurone. Faire le produit matriciel, c'est faire les $m$ sommes pondérées d'un seul geste. Voyons-le sur de vrais chiffres.
+Les dimensions s'enchaînent : $W$ ($m \times d$) fois $\mathbf{x}$ ($d$) donne $\mathbf{z}$ ($m$). Chaque *ligne* $i$ de $W$ contient les poids du neurone $i$ ; le produit de cette ligne par $\mathbf{x}$ donne la somme pondérée $z_i$ de ce neurone. Faire le produit matriciel, c'est faire les $m$ sommes pondérées d'un seul geste. Voyons-le sur de vrais chiffres.
 
 ## Du réseau à la matrice : la règle d'indexation
 
@@ -146,7 +146,7 @@ Ligne $1$ : les poids du neurone $h_1$ (vers les $3$ entrées). Ligne $2$ : ceux
 ## Du réseau à la matrice : les chiffres
 
 ::: {.callout-tip .ucad-ex title="On lit $W$ directement sur les arêtes"}
-Le même réseau $3 \to 2$, avec ses vrais poids. Entrée $\vx = (2;\ 1;\ 0)$, biais $\vb = (0{,}5;\ -1)$.
+Le même réseau $3 \to 2$, avec ses vrais poids. Entrée $\mathbf{x} = (2;\ 1;\ 0)$, biais $\mathbf{b} = (0{,}5;\ -1)$.
 :::
 
 ::: {.columns}
@@ -154,52 +154,52 @@ Le même réseau $3 \to 2$, avec ses vrais poids. Entrée $\vx = (2;\ 1;\ 0)$, b
 5
 :::
 ::: {.column width="48%"}
-\[ W = \begin{pmatrix} 0{,}5 & -1 & 2\\ 1 & 0{,}5 & -0{,}5 \end{pmatrix},  \vb = \begin{pmatrix} 0{,}5\\ -1 \end{pmatrix} \]
-$\vz = W\vx + \vb$ :
+\[ W = \begin{pmatrix} 0{,}5 & -1 & 2\\ 1 & 0{,}5 & -0{,}5 \end{pmatrix},  \mathbf{b} = \begin{pmatrix} 0{,}5\\ -1 \end{pmatrix} \]
+$\mathbf{z} = W\mathbf{x} + \mathbf{b}$ :
 
 - $z_1 = (0{,}5)(2) + (-1)(1) + (2)(0) + 0{,}5 = \mathbf{0{,}5}$
 - $z_2 = (1)(2) + (0{,}5)(1) + (-0{,}5)(0) - 1 = \mathbf{1{,}5}$
 
-puis $\va = \sigma(\vz) = (0{,}62;\ 0{,}82)$.
+puis $\mathbf{a} = \sigma(\mathbf{z}) = (0{,}62;\ 0{,}82)$.
 :::
 :::
 
 ## La matrice de poids, avec de vrais chiffres
 
 ::: {.callout-tip .ucad-ex title="Comme la matrice $X$ de la Séance 3"}
-Une couche de $3$ neurones sur $4$ entrées. Entrée $\vx = (1;\ 2;\ 0;\ 3)$, biais $\vb = (0{,}5;\ -1;\ 1)$ :
-\[ W = \begin{pmatrix} 0{,}5 & -1 & 2 & 0\\ 1 & 0{,}5 & -0{,}5 & 1\\ -1 & 2 & 0 & 0{,}5 \end{pmatrix}\!\!\begin{matrix}\ \leftarrow\text{neurone 1}\\ \ \leftarrow\text{neurone 2}\\ \ \leftarrow\text{neurone 3}\end{matrix} \qquad \vx = \begin{pmatrix} 1\\ 2\\ 0\\ 3 \end{pmatrix},\ \vb = \begin{pmatrix} 0{,}5\\ -1\\ 1 \end{pmatrix} \]
-Chaque ligne est un neurone, chaque colonne une entrée. Le produit $W\vx + \vb$ donne les trois sommes pondérées en une fois.
+Une couche de $3$ neurones sur $4$ entrées. Entrée $\mathbf{x} = (1;\ 2;\ 0;\ 3)$, biais $\mathbf{b} = (0{,}5;\ -1;\ 1)$ :
+\[ W = \begin{pmatrix} 0{,}5 & -1 & 2 & 0\\ 1 & 0{,}5 & -0{,}5 & 1\\ -1 & 2 & 0 & 0{,}5 \end{pmatrix}\!\!\begin{matrix}\ \leftarrow\text{neurone 1}\\ \ \leftarrow\text{neurone 2}\\ \ \leftarrow\text{neurone 3}\end{matrix} \qquad \mathbf{x} = \begin{pmatrix} 1\\ 2\\ 0\\ 3 \end{pmatrix},\ \mathbf{b} = \begin{pmatrix} 0{,}5\\ -1\\ 1 \end{pmatrix} \]
+Chaque ligne est un neurone, chaque colonne une entrée. Le produit $W\mathbf{x} + \mathbf{b}$ donne les trois sommes pondérées en une fois.
 :::
 
 ## La matrice de poids, en image
 
-{{< svg ../figures/f10_matrice_W.svg alt="La matrice W (3 4) : en bleu les poids positifs, en rouge les négatifs, en gris les nuls. À droite, le vecteur d'entrée et le vecteur de biais . Le produit W+ calcule les trois sorties = (-1; 4; 5,5) d'un seul coup. C'est le pendant, pour les poids, de la matrice X de la Séance 3." largeur="66%" >}}
+{{< svg ../figures/f10_matrice_W.svg alt="La matrice W (3 4) : en bleu les poids positifs, en rouge les négatifs, en gris les nuls. À droite, le vecteur d'entrée x et le vecteur de biais b. Le produit Wx + b calcule les trois sorties z = (-1; 4; 5,5) d'un seul coup. C'est le pendant, pour les poids, de la matrice X de la Séance 3." largeur="66%" >}}
 
 ::: {.legende}
-La matrice $W$ ($3 \times 4$) : en bleu les poids positifs, en rouge les négatifs, en gris les nuls. À droite, le vecteur d'entrée $\vx$ et le vecteur de biais $\vb$. Le produit $W\vx + \vb$ calcule les trois sorties $\vz = (-1;\ 4;\ 5{,}5)$ d'un seul coup. C'est le pendant, pour les poids, de la matrice $X$ de la Séance 3.
+La matrice $W$ ($3 \times 4$) : en bleu les poids positifs, en rouge les négatifs, en gris les nuls. À droite, le vecteur d'entrée $\mathbf{x}$ et le vecteur de biais $\mathbf{b}$. Le produit $W\mathbf{x} + \mathbf{b}$ calcule les trois sorties $\mathbf{z} = (-1;\ 4;\ 5{,}5)$ d'un seul coup. C'est le pendant, pour les poids, de la matrice $X$ de la Séance 3.
 :::
 
 ## Le calcul de la couche, terme à terme
 
-::: {.callout-tip .ucad-ex title="$\vz = W\vx + \vb$, ligne par ligne"}
-Avec $\vx = (1;\ 2;\ 0;\ 3)$ et $\vb = (0{,}5;\ -1;\ 1)$ :
+::: {.callout-tip .ucad-ex title="$\mathbf{z} = W\mathbf{x} + \mathbf{b}$, ligne par ligne"}
+Avec $\mathbf{x} = (1;\ 2;\ 0;\ 3)$ et $\mathbf{b} = (0{,}5;\ -1;\ 1)$ :
 
 - **neurone 1** : $(0{,}5)(1) + (-1)(2) + (2)(0) + (0)(3) + 0{,}5 = -1{,}5 + 0{,}5 = \mathbf{-1}$.
 - **neurone 2** : $(1)(1) + (0{,}5)(2) + (-0{,}5)(0) + (1)(3) - 1 = 5 - 1 = \mathbf{4}$.
 - **neurone 3** : $(-1)(1) + (2)(2) + (0)(0) + (0{,}5)(3) + 1 = 4{,}5 + 1 = \mathbf{5{,}5}$.
 
-Donc $\vz = (-1;\ 4;\ 5{,}5)$, puis $\va = \sigma(\vz) = (0{,}27;\ 0{,}98;\ 1{,}00)$. La couche a transformé $4$ entrées en $3$ activations — chaque neurone répondant différemment selon ses poids.
+Donc $\mathbf{z} = (-1;\ 4;\ 5{,}5)$, puis $\mathbf{a} = \sigma(\mathbf{z}) = (0{,}27;\ 0{,}98;\ 1{,}00)$. La couche a transformé $4$ entrées en $3$ activations — chaque neurone répondant différemment selon ses poids.
 :::
 
 ## Exercice — le calcul d'un neurone dans une couche
 
 ::: {.callout-tip .ucad-rec title="Énoncé"}
-Reprenons la matrice $W$ ci-dessus et $\vx = (1;\ 2;\ 0;\ 3)$, $\vb = (0{,}5;\ -1;\ 1)$. On ajoute un quatrième neurone, de poids $(2;\ 0;\ 1;\ -1)$ et de biais $0$. Calculer sa somme pondérée $z_4$, puis sa sortie sigmoïde.
+Reprenons la matrice $W$ ci-dessus et $\mathbf{x} = (1;\ 2;\ 0;\ 3)$, $\mathbf{b} = (0{,}5;\ -1;\ 1)$. On ajoute un quatrième neurone, de poids $(2;\ 0;\ 1;\ -1)$ et de biais $0$. Calculer sa somme pondérée $z_4$, puis sa sortie sigmoïde.
 :::
 
 ::: {.callout-tip .ucad-ex title="Correction"}
-$z_4 = (2)(1) + (0)(2) + (1)(0) + (-1)(3) + 0 = 2 - 3 = \mathbf{-1}$. Sortie : $\sigma(-1) = \mathbf{0{,}27}$. Pour l'ajouter à la couche, il suffit d'ajouter une *ligne* $(2, 0, 1, -1)$ à $W$ (qui devient $4 \times 4$) et une composante $0$ à $\vb$. Élargir une couche $=$ ajouter des lignes à $W$.
+$z_4 = (2)(1) + (0)(2) + (1)(0) + (-1)(3) + 0 = 2 - 3 = \mathbf{-1}$. Sortie : $\sigma(-1) = \mathbf{0{,}27}$. Pour l'ajouter à la couche, il suffit d'ajouter une *ligne* $(2, 0, 1, -1)$ à $W$ (qui devient $4 \times 4$) et une composante $0$ à $\mathbf{b}$. Élargir une couche $=$ ajouter des lignes à $W$.
 :::
 
 # La profondeur : empiler les couches
@@ -223,12 +223,12 @@ Un réseau $4\!-\!3\!-\!1$ : quatre entrées, une couche cachée de trois neuron
 ## La propagation avant, formellement
 
 ::: {.callout-note .ucad-def title="Définition"}
-On note $\va^{[0]} = \vx$ les entrées. Chaque couche $\ell$ a sa matrice $W^{[\ell]}$ et son biais $\vb^{[\ell]}$, et calcule à partir de la couche précédente :
+On note $\mathbf{a}^{[0]} = \mathbf{x}$ les entrées. Chaque couche $\ell$ a sa matrice $W^{[\ell]}$ et son biais $\mathbf{b}^{[\ell]}$, et calcule à partir de la couche précédente :
 :::
 
 $$ \vz^{[\ell]} = W^{[\ell]}\va^{[\ell-1]} + \vb^{[\ell]} \qquad \va^{[\ell]} = f\big(\vz^{[\ell]}\big) $$
 
-On enchaîne : $\vx \to (\vz^{[1]}, \va^{[1]}) \to (\vz^{[2]}, \va^{[2]}) \to \dots \to \va^{[L]} = \hat y$. Chaque couche fait ses deux gestes — combinaison linéaire $W\va + \vb$, puis activation $f$. La sortie de la dernière couche est la prédiction. Un réseau, en propagation avant, n'est donc qu'une **composition** de couches : linéaire, activation, linéaire, activation, et ainsi de suite.
+On enchaîne : $\mathbf{x} \to (\mathbf{z}^{[1]}, \mathbf{a}^{[1]}) \to (\mathbf{z}^{[2]}, \mathbf{a}^{[2]}) \to \dots \to \mathbf{a}^{[L]} = \hat y$. Chaque couche fait ses deux gestes — combinaison linéaire $W\mathbf{a} + \mathbf{b}$, puis activation $f$. La sortie de la dernière couche est la prédiction. Un réseau, en propagation avant, n'est donc qu'une **composition** de couches : linéaire, activation, linéaire, activation, et ainsi de suite.
 
 ## Un réseau profond, ce sont des matrices (en chiffres)
 
@@ -242,7 +242,7 @@ Un réseau $2\!-\!2\!-\!1$ avec ses vrais poids. Comme pour une couche, chaque j
 :::
 ::: {.column width="44%"}
 \[ W^{[1]} = \begin{pmatrix} 0{,}5 & 0{,}1\\ -0{,}3 & 0{,}8 \end{pmatrix}\!,\ \ W^{[2]} = \begin{pmatrix} 0{,}4 & -0{,}6 \end{pmatrix} \]
-$W^{[1]}$ est $2\times 2$ (2 neurones, 2 entrées) ; $W^{[2]}$ est $1\times 2$ (1 sortie, 2 neurones cachés). Prédire $=$ enchaîner $\vz^{[1]} = W^{[1]}\vx + \vb^{[1]}$ puis $\hat y = \sigma(W^{[2]}\va^{[1]} + b^{[2]})$. C'est ce réseau que l'on entraînera par rétropropagation.
+$W^{[1]}$ est $2\times 2$ (2 neurones, 2 entrées) ; $W^{[2]}$ est $1\times 2$ (1 sortie, 2 neurones cachés). Prédire $=$ enchaîner $\mathbf{z}^{[1]} = W^{[1]}\mathbf{x} + \mathbf{b}^{[1]}$ puis $\hat y = \sigma(W^{[2]}\mathbf{a}^{[1]} + b^{[2]})$. C'est ce réseau que l'on entraînera par rétropropagation.
 :::
 :::
 
@@ -301,9 +301,9 @@ C'est le point le plus contre-intuitif de la séance. On pourrait croire qu'empi
 ## La preuve : deux couches linéaires $=$ une seule
 
 ::: {.callout-tip .ucad-ex title="Composition linéaire"}
-Deux couches *sans* activation : $\va^{[1]} = W^{[1]}\vx + \vb^{[1]}$, puis $\hat y = W^{[2]}\va^{[1]} + \vb^{[2]}$. En substituant :
-\[ \hat y = W^{[2]}\big(W^{[1]}\vx + \vb^{[1]}\big) + \vb^{[2]} = \underbrace{\big(W^{[2]}W^{[1]}\big)}_{W_{\text{eq}}}\vx + \underbrace{\big(W^{[2]}\vb^{[1]} + \vb^{[2]}\big)}_{\vb_{\text{eq}}}. \]
-C'est une *unique* couche linéaire. Vérifié : avec $W^{[1]} = \begin{psmallmatrix} 2 & 1\\ 0 & 3 \end{psmallmatrix}$, $W^{[2]} = \begin{psmallmatrix} 1 & -2 \end{psmallmatrix}$, $\vx = (1; 2)$, les deux couches donnent $-4{,}5$, exactement comme la couche équivalente ($W_{\text{eq}} = \begin{psmallmatrix} 2 & -5 \end{psmallmatrix}$). **Empiler du linéaire n'apporte rien** : il faut une activation non-linéaire entre les couches.
+Deux couches *sans* activation : $\mathbf{a}^{[1]} = W^{[1]}\mathbf{x} + \mathbf{b}^{[1]}$, puis $\hat y = W^{[2]}\mathbf{a}^{[1]} + \mathbf{b}^{[2]}$. En substituant :
+\[ \hat y = W^{[2]}\big(W^{[1]}\mathbf{x} + \mathbf{b}^{[1]}\big) + \mathbf{b}^{[2]} = \underbrace{\big(W^{[2]}W^{[1]}\big)}_{W_{\text{eq}}}\mathbf{x} + \underbrace{\big(W^{[2]}\mathbf{b}^{[1]} + \mathbf{b}^{[2]}\big)}_{\mathbf{b}_{\text{eq}}}. \]
+C'est une *unique* couche linéaire. Vérifié : avec $W^{[1]} = \begin{psmallmatrix} 2 & 1\\ 0 & 3 \end{psmallmatrix}$, $W^{[2]} = \begin{psmallmatrix} 1 & -2 \end{psmallmatrix}$, $\mathbf{x} = (1; 2)$, les deux couches donnent $-4{,}5$, exactement comme la couche équivalente ($W_{\text{eq}} = \begin{psmallmatrix} 2 & -5 \end{psmallmatrix}$). **Empiler du linéaire n'apporte rien** : il faut une activation non-linéaire entre les couches.
 :::
 
 ## Les activations et leurs dérivées
@@ -378,14 +378,14 @@ La clé : ces dérivées partagent d'énormes quantités de calcul. La **rétrop
 La **rétropropagation** calcule le gradient de la perte par rapport à chaque poids en partant de la *sortie* et en remontant couche par couche vers l'*entrée*, réutilisant à chaque étape l'erreur de la couche suivante.
 :::
 
-L'image : une erreur constatée en sortie est « renvoyée » à travers le réseau ; chaque couche reçoit sa part de responsabilité — notée $\vd^{[\ell]}$, l'*erreur* de la couche $\ell$ — et en déduit comment corriger ses poids. À chaque itération, deux passes alternent : la propagation **avant** (calculer $\hat y$ et la perte), puis la propagation **arrière** (calculer tous les gradients). Établissons les quatre équations de cette passe arrière.
+L'image : une erreur constatée en sortie est « renvoyée » à travers le réseau ; chaque couche reçoit sa part de responsabilité — notée $\boldsymbol{\delta}^{[\ell]}$, l'*erreur* de la couche $\ell$ — et en déduit comment corriger ses poids. À chaque itération, deux passes alternent : la propagation **avant** (calculer $\hat y$ et la perte), puis la propagation **arrière** (calculer tous les gradients). Établissons les quatre équations de cette passe arrière.
 
 ## Les deux passes, en image
 
 {{< svg ../figures/f10_backprop.svg alt="En vert, la propagation avant : l'information va de l'entrée vers la sortie pour produire y. En rouge, la rétropropagation : l'erreur remonte de la sortie vers l'entrée, chaque couche ajustant ses poids. Les deux passes s'enchaînent à chaque itération de la descente de gradient." largeur="82%" >}}
 
 ::: {.legende}
-En **vert**, la propagation avant : l'information va de l'entrée vers la sortie pour produire $\hat y$. En **rouge**, la rétropropagation : l'erreur $\vd$ remonte de la sortie vers l'entrée, chaque couche ajustant ses poids. Les deux passes s'enchaînent à chaque itération de la descente de gradient.
+En **vert**, la propagation avant : l'information va de l'entrée vers la sortie pour produire $\hat y$. En **rouge**, la rétropropagation : l'erreur $\boldsymbol{\delta}$ remonte de la sortie vers l'entrée, chaque couche ajustant ses poids. Les deux passes s'enchaînent à chaque itération de la descente de gradient.
 :::
 
 ## L'outil : la règle de dérivation en chaîne
@@ -396,7 +396,7 @@ Si une quantité $L$ dépend de $z$, qui dépend de $w$, alors la dérivée de $
 
 $$ \frac{\partial L}{\partial w} = \frac{\partial L}{\partial z}\cdot\frac{\partial z}{\partial w} $$
 
-Pour savoir comment un poids *profond* influence la perte, on enchaîne les sensibilités le long du chemin qui les relie. La rétropropagation n'est rien d'autre que l'application *organisée* de cette règle, de la sortie vers l'entrée, en stockant les résultats intermédiaires $\vd^{[\ell]}$ pour ne jamais recalculer deux fois la même chose. Établissons d'abord l'erreur de *sortie*, puis celle des couches *cachées*.
+Pour savoir comment un poids *profond* influence la perte, on enchaîne les sensibilités le long du chemin qui les relie. La rétropropagation n'est rien d'autre que l'application *organisée* de cette règle, de la sortie vers l'entrée, en stockant les résultats intermédiaires $\boldsymbol{\delta}^{[\ell]}$ pour ne jamais recalculer deux fois la même chose. Établissons d'abord l'erreur de *sortie*, puis celle des couches *cachées*.
 
 ## Dérivation 1 — l'erreur de sortie
 
@@ -411,9 +411,9 @@ L'erreur de sortie est juste l'*écart* prédiction $-$ vérité. Toute la compl
 ## Dérivation 2 — l'erreur d'une couche cachée
 
 ::: {.callout-tip .ucad-ex title="Remonter l'erreur, couche par couche"}
-Pour une couche cachée $\ell$, l'erreur $\vd^{[\ell]} = \partial L / \partial \vz^{[\ell]}$ se déduit de celle de la couche *suivante*. Intuition : $\vz^{[\ell]}$ influence la perte *à travers* la couche $\ell+1$. La règle en chaîne donne, en propageant via les poids puis l'activation :
-\[ \boxed{\;\vd^{[\ell]} = \big(W^{[\ell+1]}\big)^\top \vd^{[\ell+1]} \,\odot\, f'\!\big(\vz^{[\ell]}\big)\;} \]
-Deux gestes : **(1)** $\big(W^{[\ell+1]}\big)^\top \vd^{[\ell+1]}$ « renvoie » l'erreur de la couche suivante vers la couche $\ell$ (transposée des poids) ; **(2)** $\odot\, f'(\vz^{[\ell]})$ la module par la pente locale de l'activation ($\odot$ : produit composante par composante). C'est ici qu'intervient la *dérivée* de l'activation.
+Pour une couche cachée $\ell$, l'erreur $\boldsymbol{\delta}^{[\ell]} = \partial L / \partial \mathbf{z}^{[\ell]}$ se déduit de celle de la couche *suivante*. Intuition : $\mathbf{z}^{[\ell]}$ influence la perte *à travers* la couche $\ell+1$. La règle en chaîne donne, en propageant via les poids puis l'activation :
+\[ \boxed{\;\boldsymbol{\delta}^{[\ell]} = \big(W^{[\ell+1]}\big)^\top \boldsymbol{\delta}^{[\ell+1]} \,\odot\, f'\!\big(\mathbf{z}^{[\ell]}\big)\;} \]
+Deux gestes : **(1)** $\big(W^{[\ell+1]}\big)^\top \boldsymbol{\delta}^{[\ell+1]}$ « renvoie » l'erreur de la couche suivante vers la couche $\ell$ (transposée des poids) ; **(2)** $\odot\, f'(\mathbf{z}^{[\ell]})$ la module par la pente locale de l'activation ($\odot$ : produit composante par composante). C'est ici qu'intervient la *dérivée* de l'activation.
 :::
 
 ## Les quatre équations de la rétropropagation
@@ -422,9 +422,9 @@ Deux gestes : **(1)** $\big(W^{[\ell+1]}\big)^\top \vd^{[\ell+1]}$ « renvoie »
 $$
 \begin{aligned}
 \textbf{(1)}  & \delta^{[L]} = \hat y - y && \text{erreur de sortie}\\[2pt]
-\textbf{(2)}  & \vd^{[\ell]} = \big(W^{[\ell+1]}\big)^\top \vd^{[\ell+1]} \odot f'(\vz^{[\ell]}) && \text{erreur rétropropagée}\\[2pt]
-\textbf{(3)}  & \frac{\partial L}{\partial W^{[\ell]}} = \vd^{[\ell]} \big(\va^{[\ell-1]}\big)^\top && \text{gradient des poids}\\[2pt]
-\textbf{(4)}  & \frac{\partial L}{\partial \vb^{[\ell]}} = \vd^{[\ell]} && \text{gradient des biais}
+\textbf{(2)}  & \boldsymbol{\delta}^{[\ell]} = \big(W^{[\ell+1]}\big)^\top \boldsymbol{\delta}^{[\ell+1]} \odot f'(\mathbf{z}^{[\ell]}) && \text{erreur rétropropagée}\\[2pt]
+\textbf{(3)}  & \frac{\partial L}{\partial W^{[\ell]}} = \boldsymbol{\delta}^{[\ell]} \big(\mathbf{a}^{[\ell-1]}\big)^\top && \text{gradient des poids}\\[2pt]
+\textbf{(4)}  & \frac{\partial L}{\partial \mathbf{b}^{[\ell]}} = \boldsymbol{\delta}^{[\ell]} && \text{gradient des biais}
 \end{aligned}
 $$
 :::
@@ -436,10 +436,10 @@ $$
 ## Le réseau et la propagation avant
 
 ::: {.callout-tip .ucad-ex title="Un réseau $2\!-\!2\!-\!1$ en chiffres"}
-Poids : $W^{[1]} = \begin{psmallmatrix} 0{,}5 & 0{,}1\\ -0{,}3 & 0{,}8 \end{psmallmatrix}$, $\vb^{[1]} = (0{,}1;\ -0{,}2)$, $W^{[2]} = (0{,}4;\ -0{,}6)$, $b^{[2]} = 0{,}2$. Entrée $\vx = (1;\ 0)$, cible $y = 1$.
+Poids : $W^{[1]} = \begin{psmallmatrix} 0{,}5 & 0{,}1\\ -0{,}3 & 0{,}8 \end{psmallmatrix}$, $\mathbf{b}^{[1]} = (0{,}1;\ -0{,}2)$, $W^{[2]} = (0{,}4;\ -0{,}6)$, $b^{[2]} = 0{,}2$. Entrée $\mathbf{x} = (1;\ 0)$, cible $y = 1$.
 
-- $\vz^{[1]} = W^{[1]}\vx + \vb^{[1]} = (0{,}6;\ -0{,}5)$,   $\va^{[1]} = \sigma(\vz^{[1]}) = (0{,}646;\ 0{,}378)$.
-- $z^{[2]} = W^{[2]}\va^{[1]} + b^{[2]} = 0{,}232$,   $\hat y = \sigma(0{,}232) = \mathbf{0{,}558}$.
+- $\mathbf{z}^{[1]} = W^{[1]}\mathbf{x} + \mathbf{b}^{[1]} = (0{,}6;\ -0{,}5)$,   $\mathbf{a}^{[1]} = \sigma(\mathbf{z}^{[1]}) = (0{,}646;\ 0{,}378)$.
+- $z^{[2]} = W^{[2]}\mathbf{a}^{[1]} + b^{[2]} = 0{,}232$,   $\hat y = \sigma(0{,}232) = \mathbf{0{,}558}$.
 - perte $L = -\ln(0{,}558) = \mathbf{0{,}584}$.
 
 La prédiction $0{,}558$ est loin de la cible $1$ : la perte est élevée. La passe arrière va dire comment corriger chaque poids.
@@ -451,11 +451,11 @@ La prédiction $0{,}558$ est loin de la cible $1$ : la perte est élevée. La pa
 **Éq. 1 — erreur de sortie** : $\delta^{[2]} = \hat y - y = 0{,}558 - 1 = \mathbf{-0{,}442}$.
 
 **Éq. 3–4 — gradients de la sortie** :
-\[ \frac{\partial L}{\partial W^{[2]}} = \delta^{[2]}\va^{[1]} = -0{,}442\,(0{,}646;\ 0{,}378) = (-0{,}286;\ -0{,}167),   \frac{\partial L}{\partial b^{[2]}} = -0{,}442. \]
+\[ \frac{\partial L}{\partial W^{[2]}} = \delta^{[2]}\mathbf{a}^{[1]} = -0{,}442\,(0{,}646;\ 0{,}378) = (-0{,}286;\ -0{,}167),   \frac{\partial L}{\partial b^{[2]}} = -0{,}442. \]
 
-**Éq. 2 — erreur rétropropagée** : $\vd^{[1]} = (W^{[2]})^\top \delta^{[2]} \odot \sigma'(\vz^{[1]}) = (-0{,}040;\ 0{,}062)$.
+**Éq. 2 — erreur rétropropagée** : $\boldsymbol{\delta}^{[1]} = (W^{[2]})^\top \delta^{[2]} \odot \sigma'(\mathbf{z}^{[1]}) = (-0{,}040;\ 0{,}062)$.
 
-**Éq. 3–4 — gradients de la couche cachée** : $\dfrac{\partial L}{\partial W^{[1]}} = \vd^{[1]}\vx^\top = \begin{psmallmatrix} -0{,}040 & 0\\ 0{,}062 & 0 \end{psmallmatrix}$, $\dfrac{\partial L}{\partial \vb^{[1]}} = (-0{,}040;\ 0{,}062)$.
+**Éq. 3–4 — gradients de la couche cachée** : $\dfrac{\partial L}{\partial W^{[1]}} = \boldsymbol{\delta}^{[1]}\mathbf{x}^\top = \begin{psmallmatrix} -0{,}040 & 0\\ 0{,}062 & 0 \end{psmallmatrix}$, $\dfrac{\partial L}{\partial \mathbf{b}^{[1]}} = (-0{,}040;\ 0{,}062)$.
 :::
 
 ## Vérification : différences finies
@@ -489,7 +489,7 @@ Après mise à jour de *tous* les poids, une nouvelle propagation avant donne un
 ## Exercice — une étape de rétropropagation
 
 ::: {.callout-tip .ucad-rec title="Énoncé"}
-Un neurone de sortie (sigmoïde) produit $\hat y = 0{,}8$ pour une cible $y = 0$. L'activation cachée précédente est $\va^{[1]} = (0{,}5;\ 1{,}0)$. (a) Calculer $\delta^{[2]} = \hat y - y$. (b) En déduire $\partial L/\partial W^{[2]} = \delta^{[2]}\va^{[1]}$. (c) Le poids $W^{[2]}_1 = 0{,}3$ : après un pas avec $\eta = 0{,}1$, que devient-il ?
+Un neurone de sortie (sigmoïde) produit $\hat y = 0{,}8$ pour une cible $y = 0$. L'activation cachée précédente est $\mathbf{a}^{[1]} = (0{,}5;\ 1{,}0)$. (a) Calculer $\delta^{[2]} = \hat y - y$. (b) En déduire $\partial L/\partial W^{[2]} = \delta^{[2]}\mathbf{a}^{[1]}$. (c) Le poids $W^{[2]}_1 = 0{,}3$ : après un pas avec $\eta = 0{,}1$, que devient-il ?
 :::
 
 ::: {.callout-tip .ucad-ex title="Correction"}
@@ -601,9 +601,9 @@ Sur ces données, aucune méthode d'ensemble ne rivalise : c'est le territoire n
 ## À retenir — Séance 10 (1/2)
 
 ::: {.callout-important .ucad-ret title="Du neurone au réseau"}
-- Un **neurone** $=$ somme pondérée $z = \vw^\top\vx + b$ suivie d'une activation $f(z)$ : c'est la régression logistique (S6) quand $f = \sigma$.
-- La **largeur** (plusieurs neurones) se range dans une **matrice de poids** $W$ ($m \times d$, une ligne par neurone) : la couche calcule $\vz = W\vx + \vb$.
-- La **profondeur** empile les couches ; prédire $=$ *propagation avant* $\vz^{[\ell]} = W^{[\ell]}\va^{[\ell-1]} + \vb^{[\ell]}$.
+- Un **neurone** $=$ somme pondérée $z = \mathbf{w}^\top\mathbf{x} + b$ suivie d'une activation $f(z)$ : c'est la régression logistique (S6) quand $f = \sigma$.
+- La **largeur** (plusieurs neurones) se range dans une **matrice de poids** $W$ ($m \times d$, une ligne par neurone) : la couche calcule $\mathbf{z} = W\mathbf{x} + \mathbf{b}$.
+- La **profondeur** empile les couches ; prédire $=$ *propagation avant* $\mathbf{z}^{[\ell]} = W^{[\ell]}\mathbf{a}^{[\ell-1]} + \mathbf{b}^{[\ell]}$.
 - L'**activation non-linéaire** est indispensable (sans elle, empiler $=$ une seule couche linéaire) ; **ReLU** domine dans les couches cachées.
 :::
 

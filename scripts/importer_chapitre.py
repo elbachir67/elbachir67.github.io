@@ -200,7 +200,7 @@ def preambule(source: str) -> dict[str, str]:
 # Conversion du texte
 # --------------------------------------------------------------------------------------------------
 
-def macros_du_theme(texte: str) -> str:
+def macros_du_theme(texte: str, preambule: str = "") -> str:
     """Développe les macros de beamerucad.sty que la conversion ne peut pas deviner.
 
     `\\figslide{largeur}{fichier}{légende}` place une figure et sa légende : on le récrit sous la
@@ -227,6 +227,38 @@ def macros_du_theme(texte: str) -> str:
                  + f"\\begin{{center}}\\includegraphics[width={largeur}\\linewidth]{{{fichier}}}\n"
                    f"{{\\scriptsize {legende}}}\\end{{center}}"
                  + texte[fin + 1:])
+    # Macros du préambule sans argument — `\newcommand{\vw}{\mathbf{w}}`. Elles vivent surtout dans
+    # les formules, et **MathJax ne les connaît pas** : il les affiche en rouge, telles quelles. Trois
+    # slides du cours d'Introduction au ML montraient « \vw », « \vx », « \vz » en rouge, et seul
+    # l'audit d'accessibilité l'a vu — par le contraste du rouge d'erreur de MathJax.
+    #
+    # Elles sont développées à la source plutôt que déclarées à MathJax : une substitution de texte
+    # ne dépend ni de la version de MathJax ni de sa configuration, et les définitions les plus
+    # longues passent d'abord, pour que `\vw` ne soit pas coupé par `\v`.
+    definitions = {}
+    for trouve in re.finditer(r"\\(?:new|renew|provide)command\s*\{\\([A-Za-z]+)\}\s*\{", preambule):
+        nom = trouve[1]
+        fin = accolade(preambule, trouve.end() - 1)
+        corps_macro = preambule[trouve.end():fin]
+        # Une définition qui contient elle-même une formule ou un environnement n'est pas une
+        # abréviation mathématique : l'injecter dans un `$…$` imbriquerait les dollars, et la
+        # structure du document se décalait — un `lstlisting` du cours de Python s'en trouvait
+        # coupé. `\resultat`, qui vaut « Résultat $\rightarrow$ », est traité à part plus bas.
+        if "$" not in corps_macro and "\\begin" not in corps_macro:
+            definitions[nom] = corps_macro
+    # La substitution ne touche **que les formules**. Appliquée partout, elle entrait dans les blocs
+    # de code : le cours de Python définit des macros dont le nom apparaît dans ses exemples, et un
+    # `lstlisting` s'en trouvait coupé en deux.
+    if definitions:
+        def developper(trouve: re.Match[str]) -> str:
+            formule = trouve[0]
+            for nom in sorted(definitions, key=len, reverse=True):
+                formule = re.sub(rf"\\{nom}(?![A-Za-z])",
+                                 lambda _, c=definitions[nom]: c, formule)
+            return formule
+
+        texte = MOTIF_MATHS.sub(developper, texte)
+
     # Deux écritures des colonnes Beamer coexistent dans le même cours : `\column{0.5\linewidth}`
     # et `\begin{column}{0.5\textwidth}…\end{column}`. On ramène la seconde à la première, pour que
     # `colonnes()` n'ait qu'une forme à connaître.
@@ -1218,7 +1250,11 @@ def main() -> int:
         conversion.scripts[nom] = Path(script)
 
     debut = source.index("\\begin{document}") + len("\\begin{document}")
-    corps = macros_du_theme(source[debut:source.index("\\end{document}")])
+    # Le préambule est passé **à part** : on y lit les `\newcommand` du document, et on les
+    # développe dans le corps. Faire traverser le préambule par le reste des substitutions cassait
+    # le cours de Python, dont les définitions contiennent les motifs que ces substitutions visent.
+    corps = macros_du_theme(source[debut:source.index("\\end{document}")],
+                            source.split("\\begin{document}", 1)[0])
 
     entete = preambule(source)
     if args.titre:
