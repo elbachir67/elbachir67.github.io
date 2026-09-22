@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Ce TP montre, en code, que le neurone artificiel est la régression logistique de la Séance 6, puis construit l’intuition des couches (le problème XOR), vérifie pourquoi l’activation non-linéaire est indispensable, et entraîne un vrai réseau avec MLPClassifier.">
+
+<title>Introduction au ML — Séance 10 (TP) – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-d1bc655fd211c2095c5a8ac6d55d7e75.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-671d4bc7ddea4032b9550f4c057f61eb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-d1bc655fd211c2095c5a8ac6d55d7e75.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Introduction au ML — Séance 10 (TP) – El Hadji Bassirou Touré">
+<meta property="og:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
+<meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="Introduction au ML — Séance 10 (TP) – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
+<meta name="twitter:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#les-réseaux-de-neurones-un-neurone-puis-des-couches" id="toc-les-réseaux-de-neurones-un-neurone-puis-des-couches" class="nav-link active" data-scroll-target="#les-réseaux-de-neurones-un-neurone-puis-des-couches">Les réseaux de neurones : un neurone, puis des couches</a></li>
+  <li><a href="#partie-0-mise-en-place" id="toc-partie-0-mise-en-place" class="nav-link" data-scroll-target="#partie-0-mise-en-place">Partie 0 — Mise en place</a></li>
+  <li><a href="#partie-1-un-neurone-à-la-main" id="toc-partie-1-un-neurone-à-la-main" class="nav-link" data-scroll-target="#partie-1-un-neurone-à-la-main">Partie 1 — Un neurone, à la main</a></li>
+  <li><a href="#partie-1bis-une-couche-de-neurones-la-matrice-de-poids-w" id="toc-partie-1bis-une-couche-de-neurones-la-matrice-de-poids-w" class="nav-link" data-scroll-target="#partie-1bis-une-couche-de-neurones-la-matrice-de-poids-w">Partie 1bis — Une couche de neurones : la matrice de poids W</a></li>
+  <li><a href="#partie-2-le-problème-xor-pourquoi-une-couche-cachée" id="toc-partie-2-le-problème-xor-pourquoi-une-couche-cachée" class="nav-link" data-scroll-target="#partie-2-le-problème-xor-pourquoi-une-couche-cachée">Partie 2 — Le problème XOR : pourquoi une couche cachée</a></li>
+  <li><a href="#partie-3-pourquoi-lactivation-non-linéaire-est-indispensable" id="toc-partie-3-pourquoi-lactivation-non-linéaire-est-indispensable" class="nav-link" data-scroll-target="#partie-3-pourquoi-lactivation-non-linéaire-est-indispensable">Partie 3 — Pourquoi l’activation non-linéaire est indispensable</a></li>
+  <li><a href="#partie-3bis-la-rétropropagation-codée-à-la-main" id="toc-partie-3bis-la-rétropropagation-codée-à-la-main" class="nav-link" data-scroll-target="#partie-3bis-la-rétropropagation-codée-à-la-main">Partie 3bis — La rétropropagation, codée à la main</a></li>
+  <li><a href="#partie-4-un-vrai-réseau-sur-datasanté" id="toc-partie-4-un-vrai-réseau-sur-datasanté" class="nav-link" data-scroll-target="#partie-4-un-vrai-réseau-sur-datasanté">Partie 4 — Un vrai réseau sur DataSANTÉ</a>
+  <ul class="collapse">
+  <li><a href="#pourquoi-la-standardisation-est-obligatoire" id="toc-pourquoi-la-standardisation-est-obligatoire" class="nav-link" data-scroll-target="#pourquoi-la-standardisation-est-obligatoire">Pourquoi la standardisation est obligatoire</a></li>
+  </ul></li>
+  <li><a href="#partie-5-la-taille-de-la-couche-un-plafond-vite-atteint" id="toc-partie-5-la-taille-de-la-couche-un-plafond-vite-atteint" class="nav-link" data-scroll-target="#partie-5-la-taille-de-la-couche-un-plafond-vite-atteint">Partie 5 — La taille de la couche : un plafond vite atteint</a>
+  <ul class="collapse">
+  <li><a href="#ce-que-le-réseau-apprend-la-frontière-sur-deux-variables" id="toc-ce-que-le-réseau-apprend-la-frontière-sur-deux-variables" class="nav-link" data-scroll-target="#ce-que-le-réseau-apprend-la-frontière-sur-deux-variables">Ce que le réseau apprend : la frontière sur deux variables</a></li>
+  </ul></li>
+  <li><a href="#mini-défi-le-réseau-bat-il-les-ensembles" id="toc-mini-défi-le-réseau-bat-il-les-ensembles" class="nav-link" data-scroll-target="#mini-défi-le-réseau-bat-il-les-ensembles">Mini-défi — Le réseau bat-il les ensembles ?</a></li>
+  <li><a href="#synthèse-à-compléter" id="toc-synthèse-à-compléter" class="nav-link" data-scroll-target="#synthèse-à-compléter">Synthèse — à compléter</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Introduction au ML — Séance 10 (TP)</h1>
+</div>
+
+<div>
+  <div class="description">
+    Ce TP montre, en code, que le neurone artificiel est la régression logistique de la Séance 6, puis construit l’intuition des couches (le problème XOR), vérifie pourquoi l’activation non-linéaire est indispensable, et entraîne un vrai réseau avec MLPClassifier.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="notebook-boutons">
+<a href="../../../cours/introduction-machine-learning/ressources/TP_S10_reseaux_neurones.html" class="btn btn-primary btn-sm" download="" title="Télécharger le notebook">Télécharger le notebook</a> <a href="https://colab.research.google.com/github/elbachir67/elbachir67.github.io/blob/main/cours/introduction-machine-learning/ressources/TP_S10_reseaux_neurones.ipynb" class="btn btn-outline-primary btn-sm" title="Ouvrir dans Colab">Ouvrir dans Colab</a>
+<em>Les sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.</em>
+</div>
+<section id="les-réseaux-de-neurones-un-neurone-puis-des-couches" class="level2">
+<h2 class="anchored" data-anchor-id="les-réseaux-de-neurones-un-neurone-puis-des-couches">Les réseaux de neurones : un neurone, puis des couches</h2>
+<p><strong>Dr.&nbsp;El Hadji Bassirou TOURÉ</strong> · DMI · FST · UCAD</p>
+<hr>
+<p>Ce TP montre, en code, que le <strong>neurone artificiel</strong> est la régression logistique de la Séance 6, puis construit l’intuition des <strong>couches</strong> (le problème XOR), vérifie pourquoi l’<strong>activation non-linéaire</strong> est indispensable, et entraîne un vrai réseau avec <code>MLPClassifier</code>. On termine par le <strong>verdict honnête</strong> : sur nos données tabulaires, le réseau bat-il les méthodes d’ensemble de la Séance 8 ?</p>
+<p><strong>Durée estimée : 1h15.</strong> Exécuter les cellules dans l’ordre.</p>
+</section>
+<section id="partie-0-mise-en-place" class="level2">
+<h2 class="anchored" data-anchor-id="partie-0-mise-en-place">Partie 0 — Mise en place</h2>
+<div id="56ba7960" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:10.900950Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:10.900774Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:11.582137Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:11.580776Z&quot;}}" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>np.set_printoptions(precision<span class="op">=</span><span class="dv">4</span>, suppress<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Outils prêts."</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Outils prêts.</code></pre>
+</div>
+</div>
+<div id="ca8e0b67" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:11.585064Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:11.584127Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:11.598250Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:11.597207Z&quot;}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Générateur officiel DataSANTÉ-221 (ne pas modifier)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_datasante221(n<span class="op">=</span><span class="dv">10_000</span>, seed<span class="op">=</span><span class="dv">221</span>):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(seed)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    age <span class="op">=</span> np.clip(rng.gamma(<span class="fl">2.5</span>, <span class="dv">14</span>, n), <span class="dv">5</span>, <span class="dv">85</span>).<span class="bu">round</span>(<span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    glycemie <span class="op">=</span> np.clip(rng.normal(<span class="fl">5.5</span> <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>age, <span class="fl">1.8</span>), <span class="fl">3.0</span>, <span class="fl">18.0</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    hemoglobine <span class="op">=</span> np.clip(rng.normal(<span class="fl">12.5</span> <span class="op">-</span> <span class="fl">0.02</span><span class="op">*</span>age, <span class="fl">1.5</span>), <span class="fl">6.0</span>, <span class="fl">17.0</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    fievre <span class="op">=</span> np.clip(rng.normal(<span class="fl">37.5</span>, <span class="fl">0.9</span>, n), <span class="fl">36.0</span>, <span class="fl">41.5</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    saison <span class="op">=</span> rng.choice([<span class="dv">0</span>, <span class="dv">1</span>], size<span class="op">=</span>n, p<span class="op">=</span>[<span class="fl">0.55</span>, <span class="fl">0.45</span>])</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    duree <span class="op">=</span> (<span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>age <span class="op">+</span> <span class="fl">0.6</span><span class="op">*</span>glycemie <span class="op">-</span> <span class="fl">0.3</span><span class="op">*</span>hemoglobine</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>             <span class="op">+</span> <span class="fl">1.5</span><span class="op">*</span>saison <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.8</span>, n)).clip(<span class="fl">0.5</span>, <span class="dv">30</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    proba_palu <span class="op">=</span> <span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span>np.exp(<span class="op">-</span>(<span class="op">-</span><span class="dv">3</span> <span class="op">+</span> <span class="fl">1.5</span><span class="op">*</span>saison <span class="op">+</span> <span class="fl">0.8</span><span class="op">*</span>(fievre<span class="op">&gt;</span><span class="fl">38.5</span>))))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    palu <span class="op">=</span> (rng.uniform(<span class="dv">0</span>,<span class="dv">1</span>,n) <span class="op">&lt;</span> proba_palu).astype(<span class="bu">int</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame({<span class="st">'age'</span>:age,<span class="st">'glycemie'</span>:glycemie,<span class="st">'hemoglobine'</span>:hemoglobine,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'fievre'</span>:fievre,<span class="st">'saison'</span>:saison,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'duree_hospit_j'</span>:duree,<span class="st">'paludisme'</span>:palu})</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> generate_datasante221()</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>colonnes <span class="op">=</span> [<span class="st">"age"</span>, <span class="st">"glycemie"</span>, <span class="st">"hemoglobine"</span>, <span class="st">"fievre"</span>, <span class="st">"saison"</span>]</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"dimensions :"</span>, df.shape)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>dimensions : (10000, 7)</code></pre>
+</div>
+</div>
+</section>
+<section id="partie-1-un-neurone-à-la-main" class="level2">
+<h2 class="anchored" data-anchor-id="partie-1-un-neurone-à-la-main">Partie 1 — Un neurone, à la main</h2>
+<p>Un neurone fait deux gestes : une <strong>somme pondérée</strong> des entrées, puis une <strong>activation</strong>. Codons-le et vérifions qu’il s’agit de la régression logistique de la Séance 6.</p>
+<div id="a6403ab7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:11.600925Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:11.600123Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:11.607242Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:11.606345Z&quot;}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La fonction d'activation sigmoïde (vue en Séance 6)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sigmoide(z):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>z))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Un neurone : somme pondérée puis activation</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> neurone(x, w, b, activation<span class="op">=</span>sigmoide):</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> np.dot(w, x) <span class="op">+</span> b      <span class="co"># somme pondérée</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> activation(z)       <span class="co"># activation</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Un patient : 3 entrées standardisées, poids et biais donnés</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.array([<span class="fl">1.2</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">2.0</span>])</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.8</span>, <span class="op">-</span><span class="fl">1.5</span>, <span class="fl">0.6</span>])</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> <span class="op">-</span><span class="fl">0.7</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> np.dot(w, x) <span class="op">+</span> b</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> sigmoide(z)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"somme pondérée z = </span><span class="sc">{</span>z<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"activation     a = </span><span class="sc">{</span>a<span class="sc">:.4f}</span><span class="ss">  (probabilité </span><span class="sc">{</span>a<span class="sc">:.1%}</span><span class="ss">)"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>somme pondérée z = 2.210
+activation     a = 0.9011  (probabilité 90.1%)</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> <span class="math inline">\(z = 0{,}96 + 0{,}75 + 1{,}20 - 0{,}70 = 2{,}21\)</span>, puis sigmoïde<span class="math inline">\((2{,}21) = 0{,}90\)</span>. Le neurone répond une probabilité de <span class="math inline">\(90\,\%\)</span>.</p>
+<div id="bf4954e0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:11.609685Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:11.608977Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:12.983226Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:12.981873Z&quot;}}" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vérifions que c'est EXACTEMENT la régression logistique de scikit-learn</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># on fabrique un mini-jeu et on FORCE les mêmes poids pour comparer le calcul</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># (ici on vérifie juste que predict_proba applique bien sigmoïde(w·x + b))</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>logit <span class="op">=</span> LogisticRegression()</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>logit.coef_ <span class="op">=</span> w.reshape(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>logit.intercept_ <span class="op">=</span> np.array([b])</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>logit.classes_ <span class="op">=</span> np.array([<span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>proba_sklearn <span class="op">=</span> logit.predict_proba(x.reshape(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>))[<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"notre neurone   : </span><span class="sc">{</span>a<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"sklearn logistic: </span><span class="sc">{</span>proba_sklearn<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"identiques — un neurone sigmoïde EST une régression logistique."</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>notre neurone   : 0.9011
+sklearn logistic: 0.9011
+identiques — un neurone sigmoïde EST une régression logistique.</code></pre>
+</div>
+</div>
+<p><strong>Exercice.</strong> Un neurone à deux entrées, poids <span class="math inline">\(w = (1{,}0,\ -2{,}0)\)</span>, biais <span class="math inline">\(b = 0{,}5\)</span>, avec activation <strong>ReLU</strong> (<span class="math inline">\(\max(0, z)\)</span>). Calculer sa sortie pour <span class="math inline">\(x = (2{,}0,\ 1{,}0)\)</span> puis pour <span class="math inline">\(x = (0{,}0,\ 1{,}0)\)</span>.</p>
+<div id="8460356e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:12.985593Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:12.985133Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:12.989356Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:12.988317Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Neurone à activation ReLU sur les deux entrées</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="partie-1bis-une-couche-de-neurones-la-matrice-de-poids-w" class="level2">
+<h2 class="anchored" data-anchor-id="partie-1bis-une-couche-de-neurones-la-matrice-de-poids-w">Partie 1bis — Une couche de neurones : la matrice de poids W</h2>
+<p>Plusieurs neurones côte à côte forment une <strong>couche</strong>. Leurs poids se rangent dans une <strong>matrice W</strong> (une ligne par neurone, une colonne par entrée), comme la matrice X de la Séance 3. Le calcul de toute la couche tient en une opération : z = W·x + b.</p>
+<div id="f3a9c579" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:12.991663Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:12.990977Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:12.998671Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:12.997655Z&quot;}}" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une couche de 3 neurones sur 4 entrées, avec de vrais chiffres</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">0.0</span>, <span class="fl">3.0</span>])              <span class="co"># 4 entrées</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> np.array([[ <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">1.0</span>,  <span class="fl">2.0</span>,  <span class="fl">0.0</span>],          <span class="co"># poids du neurone 1</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>              [ <span class="fl">1.0</span>,  <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>,  <span class="fl">1.0</span>],          <span class="co"># poids du neurone 2</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>              [<span class="op">-</span><span class="fl">1.0</span>,  <span class="fl">2.0</span>,  <span class="fl">0.0</span>,  <span class="fl">0.5</span>]])         <span class="co"># poids du neurone 3</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> np.array([<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">1.0</span>, <span class="fl">1.0</span>])                   <span class="co"># un biais par neurone</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"forme de W :"</span>, W.shape, <span class="st">"(3 neurones x 4 entrées)"</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"forme de x :"</span>, x.shape)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> W <span class="op">@</span> x <span class="op">+</span> b                                    <span class="co"># les 3 sommes pondérées d'un coup</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"z = W·x + b ="</span>, z)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>forme de W : (3, 4) (3 neurones x 4 entrées)
+forme de x : (4,)
+z = W·x + b = [-1.   4.   5.5]</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Le produit <code>W @ x</code> calcule les trois sommes pondérées simultanément. Vérifions le détail du premier neurone à la main.</p>
+<div id="55fd5953" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:13.001079Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:13.000199Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:13.006324Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:13.005322Z&quot;}}" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Détail du neurone 1 : la première ligne de W, fois x, plus son biais</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>z1 <span class="op">=</span> W[<span class="dv">0</span>] <span class="op">@</span> x <span class="op">+</span> b[<span class="dv">0</span>]</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"ligne 1 de W :"</span>, W[<span class="dv">0</span>])</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"z1 = (0.5)(1) + (-1)(2) + (2)(0) + (0)(3) + 0.5 ="</span>, z1)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co"># l'activation s'applique composante par composante</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> sigmoide(z)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"a = sigmoide(z) ="</span>, a.<span class="bu">round</span>(<span class="dv">4</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ligne 1 de W : [ 0.5 -1.   2.   0. ]
+z1 = (0.5)(1) + (-1)(2) + (2)(0) + (0)(3) + 0.5 = -1.0
+a = sigmoide(z) = [0.2689 0.982  0.9959]</code></pre>
+</div>
+</div>
+<p><strong>Exercice.</strong> Ajouter un quatrième neurone de poids <code>(2, 0, 1, -1)</code> et de biais <code>0</code> à la couche : empiler sa ligne dans <code>W</code> (avec <code>np.vstack</code>) et ajouter son biais, puis recalculer <code>z</code> et <code>a</code> pour la couche à 4 neurones.</p>
+<div id="1431759b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:13.008591Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:13.007854Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:13.011794Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:13.010684Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajouter un quatrième neurone à la couche</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="partie-2-le-problème-xor-pourquoi-une-couche-cachée" class="level2">
+<h2 class="anchored" data-anchor-id="partie-2-le-problème-xor-pourquoi-une-couche-cachée">Partie 2 — Le problème XOR : pourquoi une couche cachée</h2>
+<p>Un neurone seul ne trace qu’une droite. Montrons qu’il échoue sur XOR, là où un réseau avec une couche cachée réussit.</p>
+<div id="89deb971" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:13.013528Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:13.013356Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:13.018908Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:13.017898Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La table XOR : sortie 1 si exactement une entrée vaut 1</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>X_xor <span class="op">=</span> np.array([[<span class="dv">0</span>,<span class="dv">0</span>],[<span class="dv">0</span>,<span class="dv">1</span>],[<span class="dv">1</span>,<span class="dv">0</span>],[<span class="dv">1</span>,<span class="dv">1</span>]], dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>y_xor <span class="op">=</span> np.array([<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>])</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (a_, b_), y_ <span class="kw">in</span> <span class="bu">zip</span>(X_xor.astype(<span class="bu">int</span>), y_xor):</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  (</span><span class="sc">{</span>a_<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>b_<span class="sc">}</span><span class="ss">) -&gt; </span><span class="sc">{</span>y_<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  (0, 0) -&gt; 0
+  (0, 1) -&gt; 1
+  (1, 0) -&gt; 1
+  (1, 1) -&gt; 0</code></pre>
+</div>
+</div>
+<div id="b15424dc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:13.020655Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:13.020428Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:13.528919Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:13.527538Z&quot;}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Un seul neurone (régression logistique) : il échoue</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>logit <span class="op">=</span> LogisticRegression().fit(X_xor, y_xor)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"1 neurone (logistique) : accuracy = </span><span class="sc">{</span>logit<span class="sc">.</span>score(X_xor, y_xor)<span class="sc">:.2f}</span><span class="ss">  (hasard)"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Un réseau avec une couche cachée : il réussit</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neural_network <span class="im">import</span> MLPClassifier</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>mlp <span class="op">=</span> MLPClassifier(hidden_layer_sizes<span class="op">=</span>(<span class="dv">8</span>,), activation<span class="op">=</span><span class="st">"relu"</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>                    max_iter<span class="op">=</span><span class="dv">5000</span>, random_state<span class="op">=</span><span class="dv">0</span>).fit(X_xor, y_xor)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"réseau 1 couche cachée : accuracy = </span><span class="sc">{</span>mlp<span class="sc">.</span>score(X_xor, y_xor)<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  prédictions : </span><span class="sc">{</span>mlp<span class="sc">.</span>predict(X_xor)<span class="sc">.</span>tolist()<span class="sc">}</span><span class="ss">  (cible </span><span class="sc">{</span>y_xor<span class="sc">.</span>tolist()<span class="sc">}</span><span class="ss">)"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1 neurone (logistique) : accuracy = 0.50  (hasard)
+réseau 1 couche cachée : accuracy = 1.00
+  prédictions : [0, 1, 1, 0]  (cible [0, 1, 1, 0])</code></pre>
+</div>
+</div>
+<div id="d0b9829b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:13.530940Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:13.530742Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:13.867324Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:13.865326Z&quot;}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualisons les deux frontières de décision</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>xx, yy <span class="op">=</span> np.meshgrid(np.linspace(<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">1.3</span>, <span class="dv">200</span>), np.linspace(<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">1.3</span>, <span class="dv">200</span>))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># logistique (droite)</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>Zl <span class="op">=</span> logit.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].contourf(xx, yy, Zl, alpha<span class="op">=</span><span class="fl">0.25</span>, levels<span class="op">=</span>[<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">0.5</span>,<span class="fl">1.5</span>], colors<span class="op">=</span>[<span class="st">"#3b6fb0"</span>,<span class="st">"#c0392b"</span>])</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].scatter(X_xor[:,<span class="dv">0</span>], X_xor[:,<span class="dv">1</span>], c<span class="op">=</span>y_xor, cmap<span class="op">=</span><span class="st">"coolwarm"</span>, s<span class="op">=</span><span class="dv">200</span>, edgecolors<span class="op">=</span><span class="st">"k"</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">"1 neurone : une droite — échoue"</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co"># réseau (frontière courbe)</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>Zm <span class="op">=</span> mlp.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].contourf(xx, yy, Zm, alpha<span class="op">=</span><span class="fl">0.25</span>, levels<span class="op">=</span>[<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">0.5</span>,<span class="fl">1.5</span>], colors<span class="op">=</span>[<span class="st">"#3b6fb0"</span>,<span class="st">"#c0392b"</span>])</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].scatter(X_xor[:,<span class="dv">0</span>], X_xor[:,<span class="dv">1</span>], c<span class="op">=</span>y_xor, cmap<span class="op">=</span><span class="st">"coolwarm"</span>, s<span class="op">=</span><span class="dv">200</span>, edgecolors<span class="op">=</span><span class="st">"k"</span>)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">"couche cachée : frontière courbe — réussit"</span>)</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="TP_S10_reseaux_neurones_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img" alt="Figure produite par le code de la cellule précédente."></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Lecture.</strong> Le neurone seul ne dispose que d’une droite : impossible de séparer le damier XOR. La couche cachée combine plusieurs droites en une frontière courbe qui isole chaque classe. C’est tout l’apport de la profondeur.</p>
+</section>
+<section id="partie-3-pourquoi-lactivation-non-linéaire-est-indispensable" class="level2">
+<h2 class="anchored" data-anchor-id="partie-3-pourquoi-lactivation-non-linéaire-est-indispensable">Partie 3 — Pourquoi l’activation non-linéaire est indispensable</h2>
+<p>Empiler deux couches <strong>linéaires</strong> (sans activation) ne donne rien de plus qu’une seule couche. Vérifions-le en code.</p>
+<div id="fefad57a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:13.869681Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:13.869442Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:13.878631Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:13.877612Z&quot;}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Deux couches LINÉAIRES (sans activation)</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>W1 <span class="op">=</span> np.array([[<span class="fl">2.</span>, <span class="fl">1.</span>], [<span class="fl">0.</span>, <span class="fl">3.</span>]])<span class="op">;</span> b1 <span class="op">=</span> np.array([<span class="fl">1.</span>, <span class="op">-</span><span class="fl">1.</span>])</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>W2 <span class="op">=</span> np.array([[<span class="fl">1.</span>, <span class="op">-</span><span class="fl">2.</span>]])<span class="op">;</span>          b2 <span class="op">=</span> np.array([<span class="fl">0.5</span>])</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>x_demo <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">2.0</span>])</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># calcul couche par couche</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>h <span class="op">=</span> W1 <span class="op">@</span> x_demo <span class="op">+</span> b1            <span class="co"># couche 1 (pas d'activation)</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>sortie_2couches <span class="op">=</span> W2 <span class="op">@</span> h <span class="op">+</span> b2   <span class="co"># couche 2</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co"># couche unique équivalente : W2·W1 et W2·b1 + b2</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>W_eq <span class="op">=</span> W2 <span class="op">@</span> W1</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>b_eq <span class="op">=</span> W2 <span class="op">@</span> b1 <span class="op">+</span> b2</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>sortie_1couche <span class="op">=</span> W_eq <span class="op">@</span> x_demo <span class="op">+</span> b_eq</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"deux couches linéaires : </span><span class="sc">{</span>sortie_2couches<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"une couche équivalente : </span><span class="sc">{</span>sortie_1couche<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"W équivalent = </span><span class="sc">{</span>W_eq<span class="sc">}</span><span class="ss">,  b équivalent = </span><span class="sc">{</span>b_eq<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"IDENTIQUES : sans activation, empiler ne sert à rien."</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>deux couches linéaires : [-4.5]
+une couche équivalente : [-4.5]
+W équivalent = [[ 2. -5.]],  b équivalent = [3.5]
+IDENTIQUES : sans activation, empiler ne sert à rien.</code></pre>
+</div>
+</div>
+<div id="5af891ac" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:13.880721Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:13.880441Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:14.138953Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:14.137694Z&quot;}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Les trois activations usuelles, tracées</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">200</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.2</span>))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>plt.plot(z, sigmoide(z), label<span class="op">=</span><span class="st">"sigmoïde"</span>, lw<span class="op">=</span><span class="fl">2.4</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>plt.plot(z, np.tanh(z), label<span class="op">=</span><span class="st">"tanh"</span>, lw<span class="op">=</span><span class="fl">2.4</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>plt.plot(z, np.maximum(<span class="dv">0</span>, z), label<span class="op">=</span><span class="st">"ReLU"</span>, lw<span class="op">=</span><span class="fl">2.4</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"gray"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)<span class="op">;</span> plt.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"gray"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>plt.legend()<span class="op">;</span> plt.grid(alpha<span class="op">=</span><span class="fl">0.3</span>)<span class="op">;</span> plt.title(<span class="st">"Trois activations"</span>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="TP_S10_reseaux_neurones_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img" alt="Figure produite par le code de la cellule précédente."></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Lecture.</strong> Les deux couches linéaires donnent exactement la même sortie que la couche unique équivalente. C’est la non-linéarité (ReLU, sigmoïde, tanh) glissée entre les couches qui donne au réseau sa puissance — sans elle, la profondeur est une illusion.</p>
+</section>
+<section id="partie-3bis-la-rétropropagation-codée-à-la-main" class="level2">
+<h2 class="anchored" data-anchor-id="partie-3bis-la-rétropropagation-codée-à-la-main">Partie 3bis — La rétropropagation, codée à la main</h2>
+<p>On code la <strong>propagation avant</strong> et la <strong>rétropropagation</strong> sur le petit réseau 2-2-1 du cours, puis on vérifie les gradients par <strong>différences finies</strong> — le réflexe pour valider toute implémentation de backprop.</p>
+<div id="eaea7b5f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:14.141688Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:14.140949Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:14.149758Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:14.148787Z&quot;}}" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le réseau 2-2-1 du cours (mêmes poids)</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>x  <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.0</span>])                       <span class="co"># entrée</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>W1 <span class="op">=</span> np.array([[<span class="fl">0.5</span>, <span class="fl">0.1</span>], [<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.8</span>]])        <span class="co"># (2 cachés, 2 entrées)</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> np.array([<span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.2</span>])</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>W2 <span class="op">=</span> np.array([<span class="fl">0.4</span>, <span class="op">-</span><span class="fl">0.6</span>])                       <span class="co"># (1 sortie, 2 cachés)</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>b2 <span class="op">=</span> <span class="fl">0.2</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>y  <span class="op">=</span> <span class="fl">1.0</span>                                         <span class="co"># cible</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(x, W1, b1, W2, b2):</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    z1 <span class="op">=</span> W1 <span class="op">@</span> x <span class="op">+</span> b1</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    a1 <span class="op">=</span> sigmoide(z1)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    z2 <span class="op">=</span> W2 <span class="op">@</span> a1 <span class="op">+</span> b2</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    a2 <span class="op">=</span> sigmoide(z2)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> z1, a1, z2, a2</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>z1, a1, z2, a2 <span class="op">=</span> forward(x, W1, b1, W2, b2)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>L <span class="op">=</span> <span class="op">-</span>(y<span class="op">*</span>np.log(a2) <span class="op">+</span> (<span class="dv">1</span><span class="op">-</span>y)<span class="op">*</span>np.log(<span class="dv">1</span><span class="op">-</span>a2))</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"a1 = </span><span class="sc">{</span>a1<span class="sc">.</span><span class="bu">round</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"y_hat = </span><span class="sc">{</span>a2<span class="sc">:.4f}</span><span class="ss">   perte L = </span><span class="sc">{</span>L<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>a1 = [0.6457 0.3775]
+y_hat = 0.5577   perte L = 0.5840</code></pre>
+</div>
+</div>
+<div id="39a95f91" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:14.151801Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:14.151554Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:14.158827Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:14.157821Z&quot;}}" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rétropropagation : les 4 équations du cours</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dsigmoide(a):</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> a <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> a)             <span class="co"># dérivée en fonction de la sortie a</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="co"># (1) erreur de sortie</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>delta2 <span class="op">=</span> a2 <span class="op">-</span> y</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># (3-4) gradients couche de sortie</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>dW2 <span class="op">=</span> delta2 <span class="op">*</span> a1</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>db2 <span class="op">=</span> delta2</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="co"># (2) erreur rétropropagée vers la couche cachée</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>delta1 <span class="op">=</span> (W2 <span class="op">*</span> delta2) <span class="op">*</span> dsigmoide(a1)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="co"># (3-4) gradients couche cachée</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>dW1 <span class="op">=</span> np.outer(delta1, x)</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>db1 <span class="op">=</span> delta1</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"delta2 = y_hat - y = </span><span class="sc">{</span>delta2<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"dL/dW2 = </span><span class="sc">{</span>dW2<span class="sc">.</span><span class="bu">round</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"delta1 = </span><span class="sc">{</span>delta1<span class="sc">.</span><span class="bu">round</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"dL/dW1 =</span><span class="ch">\n</span><span class="sc">{</span>dW1<span class="sc">.</span><span class="bu">round</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>delta2 = y_hat - y = -0.4423
+dL/dW2 = [-0.2856 -0.167 ]
+delta1 = [-0.0405  0.0624]
+dL/dW1 =
+[[-0.0405 -0.    ]
+ [ 0.0624  0.    ]]</code></pre>
+</div>
+</div>
+<p><strong>Vérifions par différences finies.</strong> On perturbe chaque poids de <span class="math inline">\(\varepsilon\)</span> et on mesure la variation de perte : si le backprop est correct, les deux coïncident.</p>
+<div id="0561656f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:14.160643Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:14.160404Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:14.167524Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:14.166564Z&quot;}}" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test du gradient : backprop vs différence finie</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> perte(W1, b1, W2, b2):</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    _, _, _, a2 <span class="op">=</span> forward(x, W1, b1, W2, b2)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">-</span>(y<span class="op">*</span>np.log(a2) <span class="op">+</span> (<span class="dv">1</span><span class="op">-</span>y)<span class="op">*</span>np.log(<span class="dv">1</span><span class="op">-</span>a2))</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> <span class="fl">1e-6</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co"># vérif sur W2[0]</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>W2p <span class="op">=</span> W2.copy()<span class="op">;</span> W2p[<span class="dv">0</span>] <span class="op">+=</span> eps<span class="op">;</span> Lp <span class="op">=</span> perte(W1, b1, W2p, b2)</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>W2m <span class="op">=</span> W2.copy()<span class="op">;</span> W2m[<span class="dv">0</span>] <span class="op">-=</span> eps<span class="op">;</span> Lm <span class="op">=</span> perte(W1, b1, W2m, b2)</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>num <span class="op">=</span> (Lp <span class="op">-</span> Lm) <span class="op">/</span> (<span class="dv">2</span><span class="op">*</span>eps)</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"dL/dW2[0] : backprop = </span><span class="sc">{</span>dW2[<span class="dv">0</span>]<span class="sc">:.6f}</span><span class="ss">   diff. finie = </span><span class="sc">{</span>num<span class="sc">:.6f}</span><span class="ss">"</span>)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"           écart = </span><span class="sc">{</span><span class="bu">abs</span>(dW2[<span class="dv">0</span>]<span class="op">-</span>num)<span class="sc">:.2e}</span><span class="ss">  -&gt; backprop CORRECT"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>dL/dW2[0] : backprop = -0.285589   diff. finie = -0.285589
+           écart = 5.77e-11  -&gt; backprop CORRECT</code></pre>
+</div>
+</div>
+<div id="bb444134" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:14.169880Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:14.169189Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:14.175336Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:14.174357Z&quot;}}" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Un pas de descente de gradient : la perte baisse-t-elle ?</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>eta <span class="op">=</span> <span class="fl">0.5</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>W2_new <span class="op">=</span> W2 <span class="op">-</span> eta<span class="op">*</span>dW2</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>b2_new <span class="op">=</span> b2 <span class="op">-</span> eta<span class="op">*</span>db2</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>W1_new <span class="op">=</span> W1 <span class="op">-</span> eta<span class="op">*</span>dW1</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>b1_new <span class="op">=</span> b1 <span class="op">-</span> eta<span class="op">*</span>db1</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>L_new <span class="op">=</span> perte(W1_new, b1_new, W2_new, b2_new)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"perte avant le pas : </span><span class="sc">{</span>L<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"perte après le pas : </span><span class="sc">{</span>L_new<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"baisse : </span><span class="sc">{</span>L <span class="op">-</span> L_new<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>perte avant le pas : 0.5840
+perte après le pas : 0.4414
+baisse : 0.1426</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Le backprop calculé à la main coïncide avec les différences finies (écart <span class="math inline">\(\sim 10^{-10}\)</span>) : la dérivation est exacte. Et un seul pas de descente de gradient fait chuter la perte de <span class="math inline">\(0{,}584\)</span> à <span class="math inline">\(0{,}441\)</span> — le réseau a appris. <code>MLPClassifier</code> fait exactement cela, en boucle sur des milliers d’exemples.</p>
+<p><strong>Exercice.</strong> Modifier la cible en <code>y = 0</code> (au lieu de 1) et recalculer <code>delta2</code>, <code>dW2</code> et la perte. Le signe de <code>delta2</code> change-t-il ? Que cela signifie-t-il pour la correction des poids ?</p>
+<div id="caaabf6d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:14.177301Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:14.177120Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:14.180634Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:14.179540Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Refaire le backprop avec y = 0</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="partie-4-un-vrai-réseau-sur-datasanté" class="level2">
+<h2 class="anchored" data-anchor-id="partie-4-un-vrai-réseau-sur-datasanté">Partie 4 — Un vrai réseau sur DataSANTÉ</h2>
+<p>Entraînons un <code>MLPClassifier</code> sur le paludisme. <strong>Standardisation obligatoire</strong> (rappel Séance 9 : un réseau y est très sensible).</p>
+<div id="daa412a9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:14.182275Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:14.182097Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:14.200442Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:14.199300Z&quot;}}" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[colonnes].values</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"paludisme"</span>].values</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.25</span>, random_state<span class="op">=</span><span class="dv">42</span>, stratify<span class="op">=</span>y)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="co"># standardisation OBLIGATOIRE pour le réseau</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler().fit(X_train)</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>X_train_s <span class="op">=</span> scaler.transform(X_train)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>X_test_s <span class="op">=</span> scaler.transform(X_test)</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"données prêtes et standardisées."</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>données prêtes et standardisées.</code></pre>
+</div>
+</div>
+<div id="5860238d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:14.202792Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:14.202112Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:16.551715Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:16.550366Z&quot;}}" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Entraîner le réseau (deux couches cachées : 16 puis 8 neurones)</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>reseau <span class="op">=</span> MLPClassifier(hidden_layer_sizes<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">8</span>), activation<span class="op">=</span><span class="st">"relu"</span>,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>                       max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>reseau.fit(X_train_s, y_train)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>acc <span class="op">=</span> reseau.score(X_test_s, y_test)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>auc <span class="op">=</span> roc_auc_score(y_test, reseau.predict_proba(X_test_s)[:, <span class="dv">1</span>])</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"accuracy test : </span><span class="sc">{</span>acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"AUC test      : </span><span class="sc">{</span>auc<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>accuracy test : 0.882
+AUC test      : 0.693</code></pre>
+</div>
+</div>
+<div id="8a0ab19a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:16.553769Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:16.553562Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:16.689030Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:16.687683Z&quot;}}" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La courbe de perte : la descente de gradient en action (Séance 5)</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.2</span>))</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>plt.plot(reseau.loss_curve_, color<span class="op">=</span><span class="st">"#3b6fb0"</span>, lw<span class="op">=</span><span class="fl">2.4</span>)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"itération (epoch)"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"perte (log-loss)"</span>)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"La perte décroît : descente de gradient, couche par couche"</span>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>plt.grid(alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"perte initiale : </span><span class="sc">{</span>reseau<span class="sc">.</span>loss_curve_[<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">  -&gt;  finale : </span><span class="sc">{</span>reseau<span class="sc">.</span>loss_curve_[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="TP_S10_reseaux_neurones_files/figure-html/cell-22-output-1.png" class="img-fluid figure-img" alt="Figure produite par le code de la cellule précédente."></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>perte initiale : 0.565  -&gt;  finale : 0.328</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> La perte chute puis se stabilise : le réseau a convergé. C’est la même courbe descendante que la descente de gradient de la Séance 5, sur un modèle plus gros.</p>
+<p><strong>Exercice.</strong> Entraîner un <code>MLPClassifier</code> avec <strong>une seule</strong> couche cachée de <span class="math inline">\(4\)</span> neurones (<code>hidden_layer_sizes=(4,)</code>) sur <code>X_train_s</code>, et afficher son accuracy sur le test.</p>
+<div id="6ca1f4bd" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:16.691102Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:16.690898Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:16.694682Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:16.693670Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Réseau à une couche cachée de 4 neurones</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="pourquoi-la-standardisation-est-obligatoire" class="level3">
+<h3 class="anchored" data-anchor-id="pourquoi-la-standardisation-est-obligatoire">Pourquoi la standardisation est obligatoire</h3>
+<p>Comparons un réseau entraîné SUR données standardisées vs SANS standardisation, pour voir l’effet concret.</p>
+<div id="4aa3e07a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:16.696656Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:16.696407Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:19.978166Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:19.976987Z&quot;}}" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le même réseau, avec et sans standardisation</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>reseau_avec <span class="op">=</span> MLPClassifier(hidden_layer_sizes<span class="op">=</span>(<span class="dv">16</span>,<span class="dv">8</span>), activation<span class="op">=</span><span class="st">"relu"</span>,</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>                            max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>).fit(X_train_s, y_train)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>reseau_sans <span class="op">=</span> MLPClassifier(hidden_layer_sizes<span class="op">=</span>(<span class="dv">16</span>,<span class="dv">8</span>), activation<span class="op">=</span><span class="st">"relu"</span>,</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>                            max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>).fit(X_train, y_train)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>auc_avec <span class="op">=</span> roc_auc_score(y_test, reseau_avec.predict_proba(X_test_s)[:,<span class="dv">1</span>])</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>auc_sans <span class="op">=</span> roc_auc_score(y_test, reseau_sans.predict_proba(X_test)[:,<span class="dv">1</span>])</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"AUC AVEC standardisation : </span><span class="sc">{</span>auc_avec<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"AUC SANS standardisation : </span><span class="sc">{</span>auc_sans<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"perte finale avec : </span><span class="sc">{</span>reseau_avec<span class="sc">.</span>loss_curve_[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">  |  sans : </span><span class="sc">{</span>reseau_sans<span class="sc">.</span>loss_curve_[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>AUC AVEC standardisation : 0.693
+AUC SANS standardisation : 0.673
+perte finale avec : 0.328  |  sans : 0.336</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Sans standardisation, le réseau apprend moins bien (perte plus haute, AUC dégradée) : les variables à grande échelle (l’âge, jusqu’à 85) écrasent les autres dans la descente de gradient. C’est exactement le piège de l’échelle vu en Séance 9 — mais un réseau y est encore plus sensible qu’un autre modèle. <strong>Toujours standardiser avant un réseau.</strong></p>
+</section>
+</section>
+<section id="partie-5-la-taille-de-la-couche-un-plafond-vite-atteint" class="level2">
+<h2 class="anchored" data-anchor-id="partie-5-la-taille-de-la-couche-un-plafond-vite-atteint">Partie 5 — La taille de la couche : un plafond vite atteint</h2>
+<p>Un réseau plus gros est-il un réseau meilleur ? Testons plusieurs architectures.</p>
+<div id="5b8b3615" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:19.980623Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:19.979855Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:26.962542Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:26.961168Z&quot;}}" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Effet de la taille de la couche cachée sur l'accuracy</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> taille <span class="kw">in</span> [(<span class="dv">2</span>,), (<span class="dv">8</span>,), (<span class="dv">16</span>,), (<span class="dv">32</span>,), (<span class="dv">16</span>, <span class="dv">8</span>)]:</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> MLPClassifier(hidden_layer_sizes<span class="op">=</span>taille, activation<span class="op">=</span><span class="st">"relu"</span>,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>                      max_iter<span class="op">=</span><span class="dv">800</span>, random_state<span class="op">=</span><span class="dv">0</span>).fit(X_train_s, y_train)</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  couche(s) </span><span class="sc">{</span><span class="bu">str</span>(taille)<span class="sc">:&lt;10}</span><span class="ss"> : accuracy = </span><span class="sc">{</span>m<span class="sc">.</span>score(X_test_s, y_test)<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  couche(s) (2,)       : accuracy = 0.882
+  couche(s) (8,)       : accuracy = 0.882
+  couche(s) (16,)      : accuracy = 0.882
+  couche(s) (32,)      : accuracy = 0.882
+  couche(s) (16, 8)    : accuracy = 0.882</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> L’accuracy plafonne à <span class="math inline">\(0{,}882\)</span> quelle que soit la taille : sur ces données, agrandir le réseau n’apporte rien. La capacité utile dépend de la complexité des <strong>données</strong>, pas de l’ambition du modèle.</p>
+<section id="ce-que-le-réseau-apprend-la-frontière-sur-deux-variables" class="level3">
+<h3 class="anchored" data-anchor-id="ce-que-le-réseau-apprend-la-frontière-sur-deux-variables">Ce que le réseau apprend : la frontière sur deux variables</h3>
+<p>Pour <em>voir</em> ce qu’un réseau capture, entraînons-le sur deux variables seulement (fièvre et saison) et traçons sa frontière de décision.</p>
+<div id="dac70f45" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:26.965242Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:26.964420Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:27.725943Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:27.724548Z&quot;}}" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Réseau sur 2 variables (fièvre, saison) pour visualiser la frontière</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>deux <span class="op">=</span> [<span class="st">"fievre"</span>, <span class="st">"saison"</span>]</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>X2 <span class="op">=</span> df[deux].values</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>X2_train, X2_test, y2_train, y2_test <span class="op">=</span> train_test_split(</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    X2, y, test_size<span class="op">=</span><span class="fl">0.25</span>, random_state<span class="op">=</span><span class="dv">42</span>, stratify<span class="op">=</span>y)</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>sc2 <span class="op">=</span> StandardScaler().fit(X2_train)</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>X2_train_s, X2_test_s <span class="op">=</span> sc2.transform(X2_train), sc2.transform(X2_test)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>mlp2 <span class="op">=</span> MLPClassifier(hidden_layer_sizes<span class="op">=</span>(<span class="dv">16</span>,<span class="dv">8</span>), activation<span class="op">=</span><span class="st">"relu"</span>,</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>                     max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>).fit(X2_train_s, y2_train)</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a><span class="co"># grille de décision (en unités standardisées)</span></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>xx, yy <span class="op">=</span> np.meshgrid(np.linspace(<span class="op">-</span><span class="fl">2.5</span>, <span class="dv">3</span>, <span class="dv">200</span>), np.linspace(<span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>, <span class="dv">60</span>))</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> mlp2.predict_proba(np.c_[xx.ravel(), yy.ravel()])[:,<span class="dv">1</span>].reshape(xx.shape)</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="fl">7.5</span>, <span class="fl">3.6</span>))</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>plt.contourf(xx, yy, Z, levels<span class="op">=</span><span class="dv">20</span>, cmap<span class="op">=</span><span class="st">"RdYlBu_r"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>plt.colorbar(label<span class="op">=</span><span class="st">"probabilité de paludisme"</span>)</span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"fièvre (standardisée)"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"saison (standardisée)"</span>)</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Frontière apprise par le réseau (2 variables)"</span>)</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="TP_S10_reseaux_neurones_files/figure-html/cell-26-output-1.png" class="img-fluid figure-img" alt="Figure produite par le code de la cellule précédente."></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Lecture.</strong> Le réseau a appris une zone de probabilité élevée pour les fièvres hautes ET la saison des pluies — cohérent avec la médecine et avec ce que les modèles précédents trouvaient. Sur deux variables, sa frontière reste simple : la richesse d’un réseau ne se révèle que sur des données autrement plus complexes que les nôtres.</p>
+</section>
+</section>
+<section id="mini-défi-le-réseau-bat-il-les-ensembles" class="level2">
+<h2 class="anchored" data-anchor-id="mini-défi-le-réseau-bat-il-les-ensembles">Mini-défi — Le réseau bat-il les ensembles ?</h2>
+<p>La question décisive : sur nos données tabulaires, le réseau fait-il mieux que les méthodes d’ensemble de la Séance 8 ? Comparons honnêtement, mêmes données, même juge (AUC).</p>
+<div id="d67e022e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:27.728630Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:27.727788Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:33.458006Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:33.456834Z&quot;}}" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quatre modèles, comparés sur le même test</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier, GradientBoostingClassifier</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 neurone (Séance 6)</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>logit <span class="op">=</span> LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>).fit(X_train_s, y_train)</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="co"># réseau (Séance 10)</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>mlp <span class="op">=</span> MLPClassifier(hidden_layer_sizes<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">8</span>), activation<span class="op">=</span><span class="st">"relu"</span>,</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>                    max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>).fit(X_train_s, y_train)</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="co"># forêt (Séance 8) — pas besoin de standardiser</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>rf <span class="op">=</span> RandomForestClassifier(n_estimators<span class="op">=</span><span class="dv">300</span>, random_state<span class="op">=</span><span class="dv">0</span>).fit(X_train, y_train)</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a><span class="co"># boosting (Séance 8)</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>gb <span class="op">=</span> GradientBoostingClassifier(random_state<span class="op">=</span><span class="dv">0</span>).fit(X_train, y_train)</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>resultats <span class="op">=</span> {</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Régression logistique (1 neurone)"</span>: roc_auc_score(y_test, logit.predict_proba(X_test_s)[:,<span class="dv">1</span>]),</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Réseau (MLP 16-8)"</span>:                 roc_auc_score(y_test, mlp.predict_proba(X_test_s)[:,<span class="dv">1</span>]),</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Random Forest"</span>:                     roc_auc_score(y_test, rf.predict_proba(X_test)[:,<span class="dv">1</span>]),</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Gradient Boosting"</span>:                 roc_auc_score(y_test, gb.predict_proba(X_test)[:,<span class="dv">1</span>]),</span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nom, score <span class="kw">in</span> resultats.items():</span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>nom<span class="sc">:&lt;35}</span><span class="ss"> AUC = </span><span class="sc">{</span>score<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Régression logistique (1 neurone)   AUC = 0.698
+  Réseau (MLP 16-8)                   AUC = 0.693
+  Random Forest                       AUC = 0.662
+  Gradient Boosting                   AUC = 0.700</code></pre>
+</div>
+</div>
+<div id="86d56835" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-14T19:41:33.460736Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-14T19:41:33.459954Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-14T19:41:33.599542Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-14T19:41:33.598152Z&quot;}}" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualisons le comparatif</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">3.6</span>))</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>noms <span class="op">=</span> <span class="bu">list</span>(resultats.keys())</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> <span class="bu">list</span>(resultats.values())</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>couleurs <span class="op">=</span> [<span class="st">"#8a8f98"</span>, <span class="st">"#3b6fb0"</span>, <span class="st">"#2e8b57"</span>, <span class="st">"#e07b39"</span>]</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>bars <span class="op">=</span> ax.bar(<span class="bu">range</span>(<span class="bu">len</span>(noms)), scores, color<span class="op">=</span>couleurs, alpha<span class="op">=</span><span class="fl">0.85</span>)</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> bar, s <span class="kw">in</span> <span class="bu">zip</span>(bars, scores):</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    ax.text(bar.get_x()<span class="op">+</span>bar.get_width()<span class="op">/</span><span class="dv">2</span>, s<span class="op">+</span><span class="fl">0.004</span>, <span class="ss">f"</span><span class="sc">{</span>s<span class="sc">:.3f}</span><span class="ss">"</span>,</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>            ha<span class="op">=</span><span class="st">"center"</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(<span class="bu">range</span>(<span class="bu">len</span>(noms)))</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="st">"Logistique"</span>, <span class="st">"Réseau"</span>, <span class="st">"Forêt"</span>, <span class="st">"Boosting"</span>])</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"AUC (test)"</span>)<span class="op">;</span> ax.set_ylim(<span class="fl">0.6</span>, <span class="fl">0.73</span>)</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Réseau vs ensembles sur DataSANTÉ"</span>)</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="TP_S10_reseaux_neurones_files/figure-html/cell-28-output-1.png" class="img-fluid figure-img" alt="Figure produite par le code de la cellule précédente."></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Lecture — la leçon de la séance.</strong> Les quatre modèles se tiennent dans un mouchoir : le gradient boosting (<span class="math inline">\(0{,}700\)</span>) et même la simple régression logistique (<span class="math inline">\(0{,}698\)</span>) font aussi bien ou mieux que le réseau (<span class="math inline">\(0{,}693\)</span>). Sur données <strong>tabulaires</strong>, le réseau n’est <strong>pas</strong> magique : il égale au mieux des modèles plus simples, pour bien plus de complexité et de temps de réglage.</p>
+<p>Ce n’est pas un accident : sur les données tabulaires, les méthodes d’ensemble (forêts, boosting, XGBoost) sont régulièrement aussi bonnes ou meilleures que les réseaux. Le réseau gagne ailleurs — <strong>images, texte, son, très grands volumes</strong> — là où la structure est riche et non tabulaire. C’est la même leçon de maturité qu’en Séance 8, poussée plus loin : <strong>la popularité d’un modèle ne dit rien de sa pertinence pour votre problème.</strong></p>
+<p>La Séance 11 rassemblera tout le cours en un <strong>projet complet</strong> : formuler, préparer (S4), modéliser et comparer (S3, S5–S10), évaluer honnêtement (S6–S7), interpréter et présenter.</p>
+</section>
+<section id="synthèse-à-compléter" class="level2">
+<h2 class="anchored" data-anchor-id="synthèse-à-compléter">Synthèse — à compléter</h2>
+<ol type="1">
+<li>Un <strong>neurone</strong> <span class="math inline">\(=\)</span> une <strong>……….</strong> pondérée suivie d’une <strong>……….</strong> ; quand cette dernière est la sigmoïde, c’est la <strong>……….</strong> de la Séance 6.</li>
+<li>Un neurone seul ne trace qu’une <strong>……….</strong> ; il échoue sur <strong>……….</strong> (motif non séparable linéairement).</li>
+<li>Une <strong>……….</strong> combine plusieurs droites en une frontière <strong>……….</strong>.</li>
+<li>L’<strong>……….</strong> non-linéaire est indispensable : sans elle, empiler des couches se réduit à une seule transformation <strong>……….</strong>. La plus utilisée est <strong>……….</strong>.</li>
+<li>Un réseau apprend par <strong>……….</strong> de gradient (S5) ; il faut toujours <strong>……….</strong> les entrées.</li>
+<li>Sur données <strong>……….</strong>, les méthodes d’<strong>……….</strong> (S8) égalent ou battent les réseaux ; le réseau gagne sur <strong>……….</strong>, <strong>……….</strong>, <strong>……….</strong>.</li>
+</ol>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Retour au sommet</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/elbachir67\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/defilement-cours.js"></script>
+<script src="../../../assets/js/notebook-defilement.js"></script>
+
+
+
+
+</body></html>

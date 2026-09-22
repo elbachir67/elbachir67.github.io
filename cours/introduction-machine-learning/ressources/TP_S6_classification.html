@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="L’arbre de la Séance 3 et la régression linéaire de la Séance 5 ont tous deux échoué sur le paludisme (11,8 % de positifs) — du moins selon l’accuracy.">
+
+<title>Introduction au ML — Séance 6 (TP) – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-d1bc655fd211c2095c5a8ac6d55d7e75.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-671d4bc7ddea4032b9550f4c057f61eb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-d1bc655fd211c2095c5a8ac6d55d7e75.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Introduction au ML — Séance 6 (TP) – El Hadji Bassirou Touré">
+<meta property="og:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
+<meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="Introduction au ML — Séance 6 (TP) – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
+<meta name="twitter:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#classifier-pour-de-vrai-régression-logistique-seuil-et-métriques-honnêtes" id="toc-classifier-pour-de-vrai-régression-logistique-seuil-et-métriques-honnêtes" class="nav-link active" data-scroll-target="#classifier-pour-de-vrai-régression-logistique-seuil-et-métriques-honnêtes">Classifier pour de vrai : régression logistique, seuil et métriques honnêtes</a></li>
+  <li><a href="#partie-0-mise-en-place" id="toc-partie-0-mise-en-place" class="nav-link" data-scroll-target="#partie-0-mise-en-place">Partie 0 — Mise en place</a></li>
+  <li><a href="#partie-1-la-sigmoïde-du-score-à-la-probabilité" id="toc-partie-1-la-sigmoïde-du-score-à-la-probabilité" class="nav-link" data-scroll-target="#partie-1-la-sigmoïde-du-score-à-la-probabilité">Partie 1 — La sigmoïde : du score à la probabilité</a></li>
+  <li><a href="#partie-2-la-régression-logistique-sur-le-paludisme" id="toc-partie-2-la-régression-logistique-sur-le-paludisme" class="nav-link" data-scroll-target="#partie-2-la-régression-logistique-sur-le-paludisme">Partie 2 — La régression logistique sur le paludisme</a></li>
+  <li><a href="#partie-3-la-log-loss-à-la-main" id="toc-partie-3-la-log-loss-à-la-main" class="nav-link" data-scroll-target="#partie-3-la-log-loss-à-la-main">Partie 3 — La log-loss, à la main</a></li>
+  <li><a href="#partie-4-la-matrice-de-confusion-à-la-main" id="toc-partie-4-la-matrice-de-confusion-à-la-main" class="nav-link" data-scroll-target="#partie-4-la-matrice-de-confusion-à-la-main">Partie 4 — La matrice de confusion, à la main</a></li>
+  <li><a href="#partie-5-le-seuil-un-curseur-pas-une-constante" id="toc-partie-5-le-seuil-un-curseur-pas-une-constante" class="nav-link" data-scroll-target="#partie-5-le-seuil-un-curseur-pas-une-constante">Partie 5 — Le seuil : un curseur, pas une constante</a></li>
+  <li><a href="#partie-6-la-courbe-roc-construite-à-la-main" id="toc-partie-6-la-courbe-roc-construite-à-la-main" class="nav-link" data-scroll-target="#partie-6-la-courbe-roc-construite-à-la-main">Partie 6 — La courbe ROC, construite à la main</a></li>
+  <li><a href="#partie-7-le-déséquilibre-rééquilibrer-lentraînement" id="toc-partie-7-le-déséquilibre-rééquilibrer-lentraînement" class="nav-link" data-scroll-target="#partie-7-le-déséquilibre-rééquilibrer-lentraînement">Partie 7 — Le déséquilibre : rééquilibrer l’entraînement</a></li>
+  <li><a href="#mini-défi-régler-le-seuil-mais-sur-quelles-données" id="toc-mini-défi-régler-le-seuil-mais-sur-quelles-données" class="nav-link" data-scroll-target="#mini-défi-régler-le-seuil-mais-sur-quelles-données">Mini-défi — Régler le seuil… mais sur quelles données ?</a></li>
+  <li><a href="#synthèse-à-compléter" id="toc-synthèse-à-compléter" class="nav-link" data-scroll-target="#synthèse-à-compléter">Synthèse — à compléter</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Introduction au ML — Séance 6 (TP)</h1>
+</div>
+
+<div>
+  <div class="description">
+    L’arbre de la Séance 3 et la régression linéaire de la Séance 5 ont tous deux échoué sur le paludisme (11,8 % de positifs) — du moins selon l’accuracy.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="notebook-boutons">
+<a href="../../../cours/introduction-machine-learning/ressources/TP_S6_classification.html" class="btn btn-primary btn-sm" download="" title="Télécharger le notebook">Télécharger le notebook</a> <a href="https://colab.research.google.com/github/elbachir67/elbachir67.github.io/blob/main/cours/introduction-machine-learning/ressources/TP_S6_classification.ipynb" class="btn btn-outline-primary btn-sm" title="Ouvrir dans Colab">Ouvrir dans Colab</a>
+<em>Les sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.</em>
+</div>
+<section id="classifier-pour-de-vrai-régression-logistique-seuil-et-métriques-honnêtes" class="level2">
+<h2 class="anchored" data-anchor-id="classifier-pour-de-vrai-régression-logistique-seuil-et-métriques-honnêtes">Classifier pour de vrai : régression logistique, seuil et métriques honnêtes</h2>
+<p><strong>Dr.&nbsp;El Hadji Bassirou TOURÉ</strong> · DMI · FST · UCAD</p>
+<hr>
+<p>L’arbre de la Séance 3 et la régression linéaire de la Séance 5 ont tous deux échoué sur le <strong>paludisme</strong> (<span class="math inline">\(11{,}8\,\%\)</span> de positifs) — du moins selon l’accuracy. Ce TP reconstruit <strong>à la main</strong> : la sigmoïde, la log-loss, la matrice de confusion, precision/recall/F1, le balayage du seuil, la courbe ROC point par point et l’AUC par comptage de paires — puis confronte chaque calcul à scikit-learn, et réhabilite le « modèle inutile ».</p>
+<p><strong>Durée estimée : 1h30.</strong> Exécuter les cellules dans l’ordre, de haut en bas.</p>
+</section>
+<section id="partie-0-mise-en-place" class="level2">
+<h2 class="anchored" data-anchor-id="partie-0-mise-en-place">Partie 0 — Mise en place</h2>
+<div id="7824c45d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:44.120566Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:44.119852Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:44.634159Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:44.633233Z&quot;}}" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>np.set_printoptions(precision<span class="op">=</span><span class="dv">4</span>, suppress<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">"display.precision"</span>, <span class="dv">3</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Outils prêts. NumPy"</span>, np.__version__, <span class="st">"· pandas"</span>, pd.__version__)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Outils prêts. NumPy 2.4.4 · pandas 3.0.2</code></pre>
+</div>
+</div>
+<div id="3ec8f863" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:44.636389Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:44.635740Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:44.647056Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:44.646122Z&quot;}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ne pas modifier cette cellule : générateur officiel DataSANTÉ-221</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_datasante221(n<span class="op">=</span><span class="dv">10_000</span>, seed<span class="op">=</span><span class="dv">221</span>):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(seed)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    age <span class="op">=</span> np.clip(rng.gamma(<span class="fl">2.5</span>, <span class="dv">14</span>, n), <span class="dv">5</span>, <span class="dv">85</span>).<span class="bu">round</span>(<span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    glycemie <span class="op">=</span> np.clip(rng.normal(<span class="fl">5.5</span> <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>age, <span class="fl">1.8</span>), <span class="fl">3.0</span>, <span class="fl">18.0</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    hemoglobine <span class="op">=</span> np.clip(rng.normal(<span class="fl">12.5</span> <span class="op">-</span> <span class="fl">0.02</span><span class="op">*</span>age, <span class="fl">1.5</span>), <span class="fl">6.0</span>, <span class="fl">17.0</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    fievre <span class="op">=</span> np.clip(rng.normal(<span class="fl">37.5</span>, <span class="fl">0.9</span>, n), <span class="fl">36.0</span>, <span class="fl">41.5</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    saison <span class="op">=</span> rng.choice([<span class="dv">0</span>, <span class="dv">1</span>], size<span class="op">=</span>n, p<span class="op">=</span>[<span class="fl">0.55</span>, <span class="fl">0.45</span>])</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    duree <span class="op">=</span> (<span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>age <span class="op">+</span> <span class="fl">0.6</span><span class="op">*</span>glycemie <span class="op">-</span> <span class="fl">0.3</span><span class="op">*</span>hemoglobine</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>             <span class="op">+</span> <span class="fl">1.5</span><span class="op">*</span>saison <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.8</span>, n)).clip(<span class="fl">0.5</span>, <span class="dv">30</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    proba_palu <span class="op">=</span> <span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span>np.exp(<span class="op">-</span>(<span class="op">-</span><span class="dv">3</span> <span class="op">+</span> <span class="fl">1.5</span><span class="op">*</span>saison <span class="op">+</span> <span class="fl">0.8</span><span class="op">*</span>(fievre<span class="op">&gt;</span><span class="fl">38.5</span>))))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    palu <span class="op">=</span> (rng.uniform(<span class="dv">0</span>,<span class="dv">1</span>,n) <span class="op">&lt;</span> proba_palu).astype(<span class="bu">int</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame({<span class="st">'age'</span>:age,<span class="st">'glycemie'</span>:glycemie,<span class="st">'hemoglobine'</span>:hemoglobine,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'fievre'</span>:fievre,<span class="st">'saison'</span>:saison,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'duree_hospit_j'</span>:duree,<span class="st">'paludisme'</span>:palu})</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> generate_datasante221()</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"dimensions :"</span>, df.shape)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>dimensions : (10000, 7)</code></pre>
+</div>
+</div>
+<div id="02c1f5d6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:44.648514Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:44.648376Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:44.654755Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:44.653952Z&quot;}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La cible du jour : le paludisme — une classe rare</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[<span class="st">"paludisme"</span>].value_counts())</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">part de positifs :"</span>, <span class="bu">round</span>(df[<span class="st">"paludisme"</span>].mean(), <span class="dv">3</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"baseline « personne n'a le paludisme » :"</span>, <span class="bu">round</span>(<span class="dv">1</span> <span class="op">-</span> df[<span class="st">"paludisme"</span>].mean(), <span class="dv">4</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>paludisme
+0    8824
+1    1176
+Name: count, dtype: int64
+
+part de positifs : 0.118
+baseline « personne n'a le paludisme » : 0.8824</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> <span class="math inline">\(1\,176\)</span> malades sur <span class="math inline">\(10\,000\)</span> : prédire « jamais malade » garantit déjà <span class="math inline">\(88{,}2\,\%\)</span> d’accuracy. C’est la barre — et le piège — de toute la séance.</p>
+</section>
+<section id="partie-1-la-sigmoïde-du-score-à-la-probabilité" class="level2">
+<h2 class="anchored" data-anchor-id="partie-1-la-sigmoïde-du-score-à-la-probabilité">Partie 1 — La sigmoïde : du score à la probabilité</h2>
+<p>La régression logistique garde le score linéaire <span class="math inline">\(z = b + \mathbf{w}\cdot\mathbf{x}\)</span> de la Séance 5 et le passe dans la <strong>sigmoïde</strong> <span class="math inline">\(\sigma(z) = 1/(1+e^{-z})\)</span>, qui l’écrase dans <span class="math inline">\(]0,1[\)</span>.</p>
+<div id="32da1139" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:44.656531Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:44.655961Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:44.661462Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:44.660150Z&quot;}}" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La sigmoïde en une ligne — et ses valeurs remarquables</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sigmoide(z):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>z))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> z <span class="kw">in</span> [<span class="op">-</span><span class="dv">4</span>, <span class="op">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>]:</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"sigma(</span><span class="sc">{</span>z<span class="sc">:+d}</span><span class="ss">) = </span><span class="sc">{</span>sigmoide(z)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>sigma(-4) = 0.0180
+sigma(-2) = 0.1192
+sigma(+0) = 0.5000
+sigma(+2) = 0.8808
+sigma(+4) = 0.9820</code></pre>
+</div>
+</div>
+<div id="4a5b3279" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:44.663020Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:44.662877Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:44.774259Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:44.773218Z&quot;}}" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La courbe complète</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">300</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="fl">6.4</span>, <span class="fl">3.2</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>plt.plot(z, sigmoide(z), color<span class="op">=</span><span class="st">"#2E8B57"</span>, lw<span class="op">=</span><span class="fl">2.5</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>plt.axhline(<span class="fl">0.5</span>, color<span class="op">=</span><span class="st">"#5A6B75"</span>, ls<span class="op">=</span><span class="st">":"</span>)<span class="op">;</span> plt.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#5A6B75"</span>, ls<span class="op">=</span><span class="st">":"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"score z"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"σ(z)"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"La sigmoïde : tout réel devient une probabilité"</span>)<span class="op">;</span> plt.grid(alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="TP_S6_classification_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img" alt="Figure produite par le code de la cellule précédente."></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Lecture.</strong> <span class="math inline">\(\sigma(0) = 0{,}5\)</span> (l’indécision), <span class="math inline">\(\sigma(-z) = 1 - \sigma(z)\)</span> (la symétrie), et quatre unités de score suffisent pour passer de <span class="math inline">\(0{,}12\)</span> à <span class="math inline">\(0{,}88\)</span>. La sortie ne quitte jamais <span class="math inline">\(]0,1[\)</span> — exactement ce qui manquait à la droite nue de la Séance 5.</p>
+<p><strong>Exercice.</strong> Calculer <span class="math inline">\(\sigma(1)\)</span> et <span class="math inline">\(\sigma(-1)\)</span> avec la fonction <code>sigmoide</code>, et vérifier numériquement que leur somme vaut <span class="math inline">\(1\)</span>.</p>
+<div id="e812416d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:44.775889Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:44.775731Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:44.778936Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:44.778143Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sigma(1), sigma(-1), et la vérification de la symétrie</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="partie-2-la-régression-logistique-sur-le-paludisme" class="level2">
+<h2 class="anchored" data-anchor-id="partie-2-la-régression-logistique-sur-le-paludisme">Partie 2 — La régression logistique sur le paludisme</h2>
+<p>Le protocole habituel : split <strong>stratifié</strong> (la classe est rare, chaque moitié doit en garder la même part), Pipeline avec standardisation (la log-loss s’apprend par descente de gradient — Séance 5), puis <code>LogisticRegression</code>.</p>
+<div id="a8e9d7e9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:44.780368Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:44.780162Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.630017Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.629077Z&quot;}}" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Split stratifié + Pipeline standardisation -&gt; logistique</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>colonnes <span class="op">=</span> [<span class="st">"age"</span>, <span class="st">"glycemie"</span>, <span class="st">"hemoglobine"</span>, <span class="st">"fievre"</span>, <span class="st">"saison"</span>]</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[colonnes]</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"paludisme"</span>]</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                                                    random_state<span class="op">=</span><span class="dv">42</span>, stratify<span class="op">=</span>y)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>modele <span class="op">=</span> make_pipeline(StandardScaler(),</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                       LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>))</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>modele.fit(X_train, y_train)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"test :"</span>, <span class="bu">len</span>(y_test), <span class="st">"patients, dont"</span>, <span class="bu">int</span>(y_test.<span class="bu">sum</span>()), <span class="st">"malades"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>test : 2000 patients, dont 235 malades</code></pre>
+</div>
+</div>
+<div id="9297ae30" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.631767Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.631513Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.639029Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.638239Z&quot;}}" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Deux sorties bien distinctes : la probabilité, puis la décision</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>proba <span class="op">=</span> modele.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> modele.predict(X_test)           <span class="co"># seuil 0,5 implicite</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"probabilités : min ="</span>, proba.<span class="bu">min</span>().<span class="bu">round</span>(<span class="dv">3</span>), <span class="st">"· max ="</span>, proba.<span class="bu">max</span>().<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"positifs prédits au seuil 0,5 :"</span>, <span class="bu">int</span>(y_pred.<span class="bu">sum</span>()), <span class="st">"sur"</span>, <span class="bu">len</span>(y_pred))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>probabilités : min = 0.034 · max = 0.286
+positifs prédits au seuil 0,5 : 0 sur 2000</code></pre>
+</div>
+</div>
+<div id="23ef4a7d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.640543Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.640397Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.645935Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.645060Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Les poids appris (variables standardisées : comparables entre eux)</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>logreg <span class="op">=</span> modele.named_steps[<span class="st">"logisticregression"</span>]</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pd.Series(logreg.coef_[<span class="dv">0</span>], index<span class="op">=</span>colonnes).<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"intercept :"</span>, <span class="bu">round</span>(logreg.intercept_[<span class="dv">0</span>], <span class="dv">3</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>age            0.020
+glycemie      -0.103
+hemoglobine    0.044
+fievre         0.122
+saison         0.750
+dtype: float64
+intercept : -2.238</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Maximum des probabilités : <span class="math inline">\(0{,}286\)</span> — au seuil <span class="math inline">\(0{,}5\)</span>, <strong>zéro alerte</strong>. Les poids racontent pourquoi : seule la saison pèse vraiment (<span class="math inline">\(+0{,}75\)</span>), la fièvre un peu (<span class="math inline">\(+0{,}12\)</span>), et l’intercept très négatif (<span class="math inline">\(-2{,}24\)</span>) encode la rareté de la maladie. Le modèle est prudent par construction — reste à savoir s’il est <em>informatif</em>.</p>
+<div id="28d44cf7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.647791Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.647170Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.656345Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.655519Z&quot;}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le score z et la probabilité d'une patiente, terme à terme — à la main</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>x0_brut <span class="op">=</span> X_test.iloc[[<span class="dv">0</span>]]</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>x0_std <span class="op">=</span> modele.named_steps[<span class="st">"standardscaler"</span>].transform(x0_brut)[<span class="dv">0</span>]</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>z0 <span class="op">=</span> logreg.intercept_[<span class="dv">0</span>] <span class="op">+</span> np.dot(logreg.coef_[<span class="dv">0</span>], x0_std)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"patiente :"</span>, x0_brut.values[<span class="dv">0</span>], <span class="st">"| réalité y ="</span>, y_test.iloc[<span class="dv">0</span>])</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"x standardisé :"</span>, x0_std.<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"z ="</span>, <span class="bu">round</span>(z0, <span class="dv">3</span>), <span class="st">"-&gt;  sigma(z) ="</span>, <span class="bu">round</span>(sigmoide(z0), <span class="dv">3</span>))</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.isclose(sigmoide(z0), modele.predict_proba(x0_brut)[<span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"identique à predict_proba — vérifié."</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>patiente : [31.   3.3 14.  38.3  1. ] | réalité y = 1
+x standardisé : [-0.17  -1.949  1.403  0.895  1.123]
+z = -1.027 -&gt;  sigma(z) = 0.264
+identique à predict_proba — vérifié.</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Cette patiente <em>a</em> le paludisme (<span class="math inline">\(y = 1\)</span>) ; le modèle lui donne <span class="math inline">\(\hat p = 0{,}264\)</span> — sa plus forte conviction ou presque, et pourtant très en dessous du seuil <span class="math inline">\(0{,}5\)</span>. Retenir ce cas : il illustre tout le problème du seuil par défaut.</p>
+</section>
+<section id="partie-3-la-log-loss-à-la-main" class="level2">
+<h2 class="anchored" data-anchor-id="partie-3-la-log-loss-à-la-main">Partie 3 — La log-loss, à la main</h2>
+<p>Le critère d’entraînement de la logistique : chaque prédiction paie <span class="math inline">\(-\ln \hat p\)</span> si <span class="math inline">\(y = 1\)</span>, <span class="math inline">\(-\ln(1-\hat p)\)</span> si <span class="math inline">\(y = 0\)</span>. La confiance mal placée coûte très cher.</p>
+<div id="6e415d63" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.657718Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.657565Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.662210Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.661381Z&quot;}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quatre paris chiffrés</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p_hat, y_vrai <span class="kw">in</span> [(<span class="fl">0.9</span>, <span class="dv">1</span>), (<span class="fl">0.5</span>, <span class="dv">1</span>), (<span class="fl">0.9</span>, <span class="dv">0</span>), (<span class="fl">0.99</span>, <span class="dv">0</span>)]:</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    perte <span class="op">=</span> <span class="op">-</span>(y_vrai<span class="op">*</span>np.log(p_hat) <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> y_vrai)<span class="op">*</span>np.log(<span class="dv">1</span> <span class="op">-</span> p_hat))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"p_hat = </span><span class="sc">{</span>p_hat<span class="sc">:4}</span><span class="ss"> · y = </span><span class="sc">{</span>y_vrai<span class="sc">}</span><span class="ss"> : perte = </span><span class="sc">{</span>perte<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>p_hat =  0.9 · y = 1 : perte = 0.105
+p_hat =  0.5 · y = 1 : perte = 0.693
+p_hat =  0.9 · y = 0 : perte = 2.303
+p_hat = 0.99 · y = 0 : perte = 4.605</code></pre>
+</div>
+</div>
+<div id="06864dd2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.663608Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.663466Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.672854Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.672098Z&quot;}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La log-loss moyenne du modèle sur le test — à la main, puis sklearn</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> log_loss</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>perte_main <span class="op">=</span> <span class="op">-</span>np.mean(y_test<span class="op">*</span>np.log(proba) <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> y_test)<span class="op">*</span>np.log(<span class="dv">1</span> <span class="op">-</span> proba))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"log-loss à la main :"</span>, <span class="bu">round</span>(perte_main, <span class="dv">4</span>))</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"log_loss sklearn   :"</span>, <span class="bu">round</span>(log_loss(y_test, proba), <span class="dv">4</span>))</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.isclose(perte_main, log_loss(y_test, proba))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log-loss à la main : 0.3285
+log_loss sklearn   : 0.3285</code></pre>
+</div>
+</div>
+<p><strong>Exercice.</strong> Calculer la perte d’un modèle qui prédit <span class="math inline">\(\hat p = 0{,}8\)</span> pour un patient réellement négatif (<span class="math inline">\(y = 0\)</span>), puis pour un patient positif (<span class="math inline">\(y = 1\)</span>). Le rapport entre les deux pertes est d’environ <span class="math inline">\(7\)</span>.</p>
+<div id="66ef6656" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.674134Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.674000Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.677028Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.676230Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Les deux pertes pour p_hat = 0,8, et leur rapport</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="partie-4-la-matrice-de-confusion-à-la-main" class="level2">
+<h2 class="anchored" data-anchor-id="partie-4-la-matrice-de-confusion-à-la-main">Partie 4 — La matrice de confusion, à la main</h2>
+<p>Le jouet de la séance : six patients, leurs probabilités prédites, la réalité. Quatre cases : TP (malade alerté), FN (malade manqué), FP (fausse alerte), TN (sain rassuré).</p>
+<div id="0b3f6358" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.678566Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.678371Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.684802Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.684014Z&quot;}}" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le jouet des six patients</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>p6 <span class="op">=</span> np.array([<span class="fl">0.9</span>, <span class="fl">0.75</span>, <span class="fl">0.6</span>, <span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.1</span>])</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>y6 <span class="op">=</span> np.array([<span class="dv">1</span>,   <span class="dv">1</span>,    <span class="dv">0</span>,   <span class="dv">1</span>,   <span class="dv">0</span>,   <span class="dv">0</span>])</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>decision <span class="op">=</span> (p6 <span class="op">&gt;=</span> <span class="fl">0.5</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pd.DataFrame({<span class="st">"p_hat"</span>: p6, <span class="st">"réalité"</span>: y6, <span class="st">"décision (s=0,5)"</span>: decision},</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>                   index<span class="op">=</span>[<span class="ss">f"patient </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">7</span>)]))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           p_hat  réalité  décision (s=0,5)
+patient 1   0.90        1                 1
+patient 2   0.75        1                 1
+patient 3   0.60        0                 1
+patient 4   0.40        1                 0
+patient 5   0.30        0                 0
+patient 6   0.10        0                 0</code></pre>
+</div>
+</div>
+<div id="8af7f5ac" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.686541Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.685932Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.692325Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.691498Z&quot;}}" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Les quatre cases, comptées à la main avec des masques booléens</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>TP <span class="op">=</span> <span class="bu">int</span>(((decision <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y6 <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>FP <span class="op">=</span> <span class="bu">int</span>(((decision <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y6 <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>())</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>FN <span class="op">=</span> <span class="bu">int</span>(((decision <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y6 <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>TN <span class="op">=</span> <span class="bu">int</span>(((decision <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y6 <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>())</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"TP=</span><span class="sc">{</span>TP<span class="sc">}</span><span class="ss">  FP=</span><span class="sc">{</span>FP<span class="sc">}</span><span class="ss">  FN=</span><span class="sc">{</span>FN<span class="sc">}</span><span class="ss">  TN=</span><span class="sc">{</span>TN<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">confusion_matrix (lignes = réalité 0 puis 1) :</span><span class="ch">\n</span><span class="st">"</span>,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>      confusion_matrix(y6, decision))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>TP=2  FP=1  FN=1  TN=2
+
+confusion_matrix (lignes = réalité 0 puis 1) :
+ [[2 1]
+ [1 2]]</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Attention à la convention : <code>confusion_matrix</code> range les classes en ordre croissant, donc <strong>TN en haut à gauche</strong> et TP en bas à droite. Les quatre comptes à la main et la matrice sklearn coïncident : TP <span class="math inline">\(=2\)</span>, FP <span class="math inline">\(=1\)</span>, FN <span class="math inline">\(=1\)</span>, TN <span class="math inline">\(=2\)</span>.</p>
+<div id="1df3c6ac" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.693624Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.693487Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.703236Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.702452Z&quot;}}" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy, precision, recall, F1 — à la main puis sklearn</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score, precision_score, recall_score, f1_score</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>acc  <span class="op">=</span> (TP <span class="op">+</span> TN) <span class="op">/</span> <span class="dv">6</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>prec <span class="op">=</span> TP <span class="op">/</span> (TP <span class="op">+</span> FP)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>rec  <span class="op">=</span> TP <span class="op">/</span> (TP <span class="op">+</span> FN)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>f1   <span class="op">=</span> <span class="dv">2</span><span class="op">*</span>prec<span class="op">*</span>rec <span class="op">/</span> (prec <span class="op">+</span> rec)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"à la main : acc=</span><span class="sc">{</span>acc<span class="sc">:.3f}</span><span class="ss">  precision=</span><span class="sc">{</span>prec<span class="sc">:.3f}</span><span class="ss">  recall=</span><span class="sc">{</span>rec<span class="sc">:.3f}</span><span class="ss">  F1=</span><span class="sc">{</span>f1<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"sklearn   : acc=</span><span class="sc">{</span>accuracy_score(y6, decision)<span class="sc">:.3f}</span><span class="ss">  "</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"precision=</span><span class="sc">{</span>precision_score(y6, decision)<span class="sc">:.3f}</span><span class="ss">  "</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"recall=</span><span class="sc">{</span>recall_score(y6, decision)<span class="sc">:.3f}</span><span class="ss">  F1=</span><span class="sc">{</span>f1_score(y6, decision)<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>à la main : acc=0.667  precision=0.667  recall=0.667  F1=0.667
+sklearn   : acc=0.667  precision=0.667  recall=0.667  F1=0.667</code></pre>
+</div>
+</div>
+<p><strong>Exercice.</strong> Sur <span class="math inline">\(100\)</span> patients : TP <span class="math inline">\(= 8\)</span>, FP <span class="math inline">\(= 2\)</span>, FN <span class="math inline">\(= 4\)</span>, TN <span class="math inline">\(= 86\)</span>. Calculer les quatre métriques à la main. Les résultats attendus sont <span class="math inline">\(0{,}94\)</span> / <span class="math inline">\(0{,}80\)</span> / <span class="math inline">\(0{,}667\)</span> / <span class="math inline">\(0{,}727\)</span> — noter le contraste entre l’accuracy et le recall.</p>
+<div id="b0279128" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.704614Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.704473Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.707519Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.706675Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Les quatre métriques pour TP=8, FP=2, FN=4, TN=86</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="partie-5-le-seuil-un-curseur-pas-une-constante" class="level2">
+<h2 class="anchored" data-anchor-id="partie-5-le-seuil-un-curseur-pas-une-constante">Partie 5 — Le seuil : un curseur, pas une constante</h2>
+<p>Retour au paludisme. Le modèle produit des probabilités ; la décision dépend du seuil — et le <span class="math inline">\(0{,}5\)</span> par défaut est ici catastrophique.</p>
+<div id="a7debc89" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.708930Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.708779Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.964898Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.963852Z&quot;}}" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># L'histogramme qui explique tout : les probabilités, classe par classe</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="fl">7.6</span>, <span class="fl">3.4</span>))</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.55</span>, <span class="dv">45</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>plt.hist(proba[y_test <span class="op">==</span> <span class="dv">0</span>], bins<span class="op">=</span>bins, color<span class="op">=</span><span class="st">"#2585D6"</span>, alpha<span class="op">=</span><span class="fl">0.65</span>, label<span class="op">=</span><span class="st">"sains (1765)"</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>plt.hist(proba[y_test <span class="op">==</span> <span class="dv">1</span>], bins<span class="op">=</span>bins, color<span class="op">=</span><span class="st">"#C0392B"</span>, alpha<span class="op">=</span><span class="fl">0.75</span>, label<span class="op">=</span><span class="st">"malades (235)"</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>plt.axvline(<span class="fl">0.5</span>, color<span class="op">=</span><span class="st">"#0F3A5E"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"seuil 0,5"</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>plt.axvline(<span class="fl">0.15</span>, color<span class="op">=</span><span class="st">"#2E8B57"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"seuil 0,15"</span>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"probabilité prédite"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"patients"</span>)<span class="op">;</span> plt.legend()</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Toutes les probabilités vivent sous 0,29"</span>)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="TP_S6_classification_files/figure-html/cell-19-output-1.png" class="img-fluid figure-img" alt="Figure produite par le code de la cellule précédente."></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="a88d2c1d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.966500Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.966295Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.984219Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.983421Z&quot;}}" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le balayage du seuil, chiffré</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bilan_au_seuil(s):</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    yh <span class="op">=</span> (proba <span class="op">&gt;=</span> s).astype(<span class="bu">int</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    fp <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>())</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    fn <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    prec <span class="op">=</span> tp<span class="op">/</span>(tp <span class="op">+</span> fp) <span class="cf">if</span> tp <span class="op">+</span> fp <span class="cf">else</span> <span class="bu">float</span>(<span class="st">"nan"</span>)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"seuil"</span>: s, <span class="st">"TP"</span>: tp, <span class="st">"FP"</span>: fp, <span class="st">"FN"</span>: fn,</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"precision"</span>: <span class="bu">round</span>(prec, <span class="dv">3</span>), <span class="st">"recall"</span>: <span class="bu">round</span>(tp<span class="op">/</span>(tp <span class="op">+</span> fn), <span class="dv">3</span>),</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"accuracy"</span>: <span class="bu">round</span>(accuracy_score(y_test, yh), <span class="dv">4</span>)}</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>pd.DataFrame([bilan_au_seuil(s) <span class="cf">for</span> s <span class="kw">in</span> [<span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.15</span>, <span class="fl">0.1</span>]])</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">seuil</th>
+<th data-quarto-table-cell-role="th">TP</th>
+<th data-quarto-table-cell-role="th">FP</th>
+<th data-quarto-table-cell-role="th">FN</th>
+<th data-quarto-table-cell-role="th">precision</th>
+<th data-quarto-table-cell-role="th">recall</th>
+<th data-quarto-table-cell-role="th">accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>0.50</td>
+<td>0</td>
+<td>0</td>
+<td>235</td>
+<td>NaN</td>
+<td>0.000</td>
+<td>0.882</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>0.30</td>
+<td>0</td>
+<td>0</td>
+<td>235</td>
+<td>NaN</td>
+<td>0.000</td>
+<td>0.882</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>0.20</td>
+<td>100</td>
+<td>348</td>
+<td>135</td>
+<td>0.223</td>
+<td>0.426</td>
+<td>0.758</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>0.15</td>
+<td>184</td>
+<td>720</td>
+<td>51</td>
+<td>0.204</td>
+<td>0.783</td>
+<td>0.615</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>0.10</td>
+<td>187</td>
+<td>727</td>
+<td>48</td>
+<td>0.205</td>
+<td>0.796</td>
+<td>0.613</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><strong>Lecture.</strong> Au seuil <span class="math inline">\(0{,}5\)</span> (et même <span class="math inline">\(0{,}3\)</span>) : zéro alerte, recall nul, accuracy <span class="math inline">\(= 0{,}8825 =\)</span> la baseline — le modèle <em>semble</em> inutile. À <span class="math inline">\(0{,}15\)</span> : <span class="math inline">\(184\)</span> malades sur <span class="math inline">\(235\)</span> retrouvés (recall <span class="math inline">\(0{,}783\)</span>), au prix de <span class="math inline">\(720\)</span> fausses alertes et d’une accuracy qui <em>chute</em> à <span class="math inline">\(0{,}61\)</span>. Si la mission est « ne rien laisser circuler », le « pire » modèle au sens de l’accuracy est le meilleur au sens de la mission. Aucun paramètre n’a été réentraîné : seul le curseur a bougé.</p>
+<p><strong>Exercice.</strong> À l’aide de <code>bilan_au_seuil</code>, trouver un seuil qui donne un recall d’au moins <span class="math inline">\(0{,}60\)</span> avec la meilleure precision possible (essayer quelques valeurs entre <span class="math inline">\(0{,}15\)</span> et <span class="math inline">\(0{,}20\)</span>).</p>
+<div id="79860cda" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.985615Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.985475Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.988463Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.987665Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chercher un seuil : recall &gt;= 0,60 avec la meilleure precision</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="partie-6-la-courbe-roc-construite-à-la-main" class="level2">
+<h2 class="anchored" data-anchor-id="partie-6-la-courbe-roc-construite-à-la-main">Partie 6 — La courbe ROC, construite à la main</h2>
+<p>Juger <em>tous</em> les seuils à la fois : trier les patients par probabilité décroissante, puis descendre le curseur — chaque <strong>positif fait monter</strong> la courbe (TPR), chaque <strong>négatif la pousse à droite</strong> (FPR).</p>
+<div id="b215f99d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.989745Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.989611Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:45.995246Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:45.994441Z&quot;}}" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le mécanisme sur le jouet : tri, puis cumuls</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>ordre <span class="op">=</span> np.argsort(<span class="op">-</span>p6)                  <span class="co"># tri par probabilité décroissante</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>y_trie <span class="op">=</span> y6[ordre]</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"réalités triées par p_hat décroissante :"</span>, y_trie)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>P, N <span class="op">=</span> y6.<span class="bu">sum</span>(), (<span class="dv">1</span> <span class="op">-</span> y6).<span class="bu">sum</span>()</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>TPR <span class="op">=</span> np.concatenate([[<span class="dv">0</span>], np.cumsum(y_trie) <span class="op">/</span> P])        <span class="co"># un positif -&gt; monter</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>FPR <span class="op">=</span> np.concatenate([[<span class="dv">0</span>], np.cumsum(<span class="dv">1</span> <span class="op">-</span> y_trie) <span class="op">/</span> N])    <span class="co"># un négatif -&gt; à droite</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"TPR :"</span>, TPR.<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"FPR :"</span>, FPR.<span class="bu">round</span>(<span class="dv">3</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>réalités triées par p_hat décroissante : [1 1 0 1 0 0]
+TPR : [0.    0.333 0.667 0.667 1.    1.    1.   ]
+FPR : [0.    0.    0.    0.333 0.333 0.667 1.   ]</code></pre>
+</div>
+</div>
+<div id="eb73b423" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:45.996568Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:45.996426Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:46.109225Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:46.108270Z&quot;}}" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vérification contre roc_curve, puis le dessin</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_curve, roc_auc_score</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>fpr_sk, tpr_sk, seuils_sk <span class="op">=</span> roc_curve(y6, p6)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="fl">4.6</span>, <span class="fl">4.4</span>))</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>plt.step(FPR, TPR, where<span class="op">=</span><span class="st">"post"</span>, color<span class="op">=</span><span class="st">"#2E8B57"</span>, lw<span class="op">=</span><span class="fl">2.5</span>, label<span class="op">=</span><span class="st">"à la main"</span>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>plt.plot(fpr_sk, tpr_sk, <span class="st">"o"</span>, color<span class="op">=</span><span class="st">"#0F3A5E"</span>, ms<span class="op">=</span><span class="dv">6</span>, label<span class="op">=</span><span class="st">"roc_curve (points)"</span>)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], ls<span class="op">=</span><span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#5A6B75"</span>, label<span class="op">=</span><span class="st">"hasard"</span>)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"FPR"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"TPR"</span>)<span class="op">;</span> plt.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"La ROC du jouet"</span>)<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="TP_S6_classification_files/figure-html/cell-23-output-1.png" class="img-fluid figure-img" alt="Figure produite par le code de la cellule précédente."></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="b1c66dbc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:46.110968Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:46.110814Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:46.117669Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:46.116768Z&quot;}}" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># L'AUC par comptage de paires : la définition rendue concrète</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>paires_total, paires_bien <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">6</span>):</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">6</span>):</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> y6[i] <span class="op">==</span> <span class="dv">1</span> <span class="kw">and</span> y6[j] <span class="op">==</span> <span class="dv">0</span>:          <span class="co"># une paire (positif, négatif)</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>            paires_total <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> p6[i] <span class="op">&gt;</span> p6[j]:                  <span class="co"># le positif est-il classé au-dessus ?</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>                paires_bien <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"paires bien ordonnées : </span><span class="sc">{</span>paires_bien<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>paires_total<span class="sc">}</span><span class="ss"> = </span><span class="sc">{</span>paires_bien<span class="op">/</span>paires_total<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"roc_auc_score :"</span>, <span class="bu">round</span>(roc_auc_score(y6, p6), <span class="dv">4</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>paires bien ordonnées : 8/9 = 0.8889
+roc_auc_score : 0.8889</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Sur <span class="math inline">\(9\)</span> paires (malade, sain), une seule est inversée — le sain à <span class="math inline">\(\hat p = 0{,}6\)</span> classé au-dessus du malade à <span class="math inline">\(0{,}4\)</span> : AUC <span class="math inline">\(= 8/9 = 0{,}889\)</span>, et le comptage coïncide exactement avec <code>roc_auc_score</code>. L’AUC est <em>la probabilité de bien ordonner une paire</em> — aucune mention de seuil nulle part.</p>
+<div id="d3879eb6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:46.119576Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:46.118997Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:46.219804Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:46.218960Z&quot;}}" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La ROC du paludisme : le verdict</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>fpr, tpr, _ <span class="op">=</span> roc_curve(y_test, proba)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>auc <span class="op">=</span> roc_auc_score(y_test, proba)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="fl">4.6</span>, <span class="fl">4.4</span>))</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>plt.plot(fpr, tpr, color<span class="op">=</span><span class="st">"#2E8B57"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="ss">f"logistique (AUC </span><span class="sc">{</span>auc<span class="sc">:.3f}</span><span class="ss">)"</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], ls<span class="op">=</span><span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#5A6B75"</span>, label<span class="op">=</span><span class="st">"hasard (AUC 0,5)"</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"FPR"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"TPR"</span>)<span class="op">;</span> plt.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"La ROC du paludisme"</span>)<span class="op">;</span> plt.show()</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"AUC ="</span>, <span class="bu">round</span>(auc, <span class="dv">3</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="TP_S6_classification_files/figure-html/cell-25-output-1.png" class="img-fluid figure-img" alt="Figure produite par le code de la cellule précédente."></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>AUC = 0.714</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> AUC <span class="math inline">\(= 0{,}714\)</span> : un malade tiré au hasard est classé au-dessus d’un sain <span class="math inline">\(71\,\%\)</span> du temps. Le modèle que l’accuracy déclarait inutile <strong>classe nettement mieux que le hasard</strong> — il était mal jugé, pas mauvais.</p>
+<p><strong>Exercice.</strong> Calculer l’AUC du modèle « à l’envers » en passant <code>1 - proba</code> à <code>roc_auc_score</code>. Vérifier que les deux AUC somment à <span class="math inline">\(1\)</span>, et expliquer pourquoi une AUC de <span class="math inline">\(0{,}30\)</span> n’est pas un modèle sans valeur.</p>
+<div id="8981a1ca" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:46.221478Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:46.221321Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:46.224374Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:46.223581Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AUC de 1 - proba, et la somme des deux AUC</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="partie-7-le-déséquilibre-rééquilibrer-lentraînement" class="level2">
+<h2 class="anchored" data-anchor-id="partie-7-le-déséquilibre-rééquilibrer-lentraînement">Partie 7 — Le déséquilibre : rééquilibrer l’entraînement</h2>
+<p>Autre levier que le seuil : <code>class_weight='balanced'</code> repondère la log-loss pendant l’entraînement — chaque malade pèse autant que les <span class="math inline">\(\approx 7{,}5\)</span> sains qu’il représente.</p>
+<div id="85c02f31" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:46.225708Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:46.225559Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:46.247318Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:46.246477Z&quot;}}" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># class_weight='balanced' : effet sur la matrice et les métriques</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>modele_eq <span class="op">=</span> make_pipeline(StandardScaler(),</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                          LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>                                             class_weight<span class="op">=</span><span class="st">"balanced"</span>))</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>modele_eq.fit(X_train, y_train)</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>pred_eq <span class="op">=</span> modele_eq.predict(X_test)</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>proba_eq <span class="op">=</span> modele_eq.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>tn, fp, fn, tp <span class="op">=</span> confusion_matrix(y_test, pred_eq).ravel()</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"TP=</span><span class="sc">{</span>tp<span class="sc">}</span><span class="ss">  FP=</span><span class="sc">{</span>fp<span class="sc">}</span><span class="ss">  FN=</span><span class="sc">{</span>fn<span class="sc">}</span><span class="ss">  TN=</span><span class="sc">{</span>tn<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"recall   :"</span>, <span class="bu">round</span>(tp<span class="op">/</span>(tp <span class="op">+</span> fn), <span class="dv">3</span>))</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"accuracy :"</span>, <span class="bu">round</span>(accuracy_score(y_test, pred_eq), <span class="dv">4</span>))</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"AUC      :"</span>, <span class="bu">round</span>(roc_auc_score(y_test, proba_eq), <span class="dv">3</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>TP=187  FP=727  FN=48  TN=1038
+recall   : 0.796
+accuracy : 0.6125
+AUC      : 0.715</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Recall <span class="math inline">\(0{,}796\)</span>, accuracy <span class="math inline">\(0{,}6125\)</span> — quasi identique au modèle standard pris au seuil <span class="math inline">\(0{,}15\)</span>. Et l’AUC n’a pas bougé (<span class="math inline">\(0{,}715\)</span>) : repondérer la perte ou déplacer le curseur sont deux chemins vers le même compromis ; le <em>tri</em> des patients, lui, reste le même.</p>
+<div id="30746929" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:46.248706Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:46.248562Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:46.280560Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:46.279705Z&quot;}}" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># L'aveu C : la régularisation par défaut de LogisticRegression</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> C <span class="kw">in</span> [<span class="fl">0.001</span>, <span class="dv">1</span>, <span class="dv">1000</span>]:</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> make_pipeline(StandardScaler(),</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>                      LogisticRegression(C<span class="op">=</span>C, max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>))</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    m.fit(X_train, y_train)</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> m.named_steps[<span class="st">"logisticregression"</span>].coef_[<span class="dv">0</span>]</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> roc_auc_score(y_test, m.predict_proba(X_test)[:, <span class="dv">1</span>])</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"C = </span><span class="sc">{</span>C<span class="sc">:6}</span><span class="ss"> : max|w| = </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">abs</span>(w)<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.3f}</span><span class="ss"> · AUC = </span><span class="sc">{</span>a<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>C =  0.001 : max|w| = 0.319 · AUC = 0.715
+C =      1 : max|w| = 0.750 · AUC = 0.714
+C =   1000 : max|w| = 0.752 · AUC = 0.714</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> <code>C</code> <span class="math inline">\(= 1/\alpha\)</span> : petit <code>C</code> <span class="math inline">\(=\)</span> forte pénalité (le plus grand poids tombe de <span class="math inline">\(0{,}75\)</span> à <span class="math inline">\(0{,}32\)</span>), grand <code>C</code> <span class="math inline">\(=\)</span> pénalité quasi nulle. Ici l’AUC bouge à peine (<span class="math inline">\(5\)</span> variables seulement), mais le réflexe est pris : <strong><code>C</code> est un réglage, pas une constante de la nature</strong> — son choix rigoureux est l’affaire de la Séance 7.</p>
+</section>
+<section id="mini-défi-régler-le-seuil-mais-sur-quelles-données" class="level2">
+<h2 class="anchored" data-anchor-id="mini-défi-régler-le-seuil-mais-sur-quelles-données">Mini-défi — Régler le seuil… mais sur quelles données ?</h2>
+<p>La mission : recall <span class="math inline">\(\geq 0{,}75\)</span> avec la meilleure precision possible. Le réflexe naïf : balayer les seuils <strong>sur le test</strong> et garder le meilleur. Faisons-le — puis voyons pourquoi c’est interdit.</p>
+<div id="cacd0692" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:46.282531Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:46.281893Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:46.305347Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:46.304541Z&quot;}}" data-execution_count="28">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le réflexe naïf : choisir le seuil qui optimise la mission... sur le test</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>candidats <span class="op">=</span> np.arange(<span class="fl">0.05</span>, <span class="fl">0.30</span>, <span class="fl">0.005</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>admissibles <span class="op">=</span> []</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> candidats:</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    yh <span class="op">=</span> (proba <span class="op">&gt;=</span> s).astype(<span class="bu">int</span>)</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>    fp <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>())</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    fn <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">=</span> tp<span class="op">/</span>(tp <span class="op">+</span> fn)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> rec <span class="op">&gt;=</span> <span class="fl">0.75</span> <span class="kw">and</span> tp <span class="op">+</span> fp <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>        admissibles.append((s, tp<span class="op">/</span>(tp <span class="op">+</span> fp), rec))</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>meilleur <span class="op">=</span> <span class="bu">max</span>(admissibles, key<span class="op">=</span><span class="kw">lambda</span> t: t[<span class="dv">1</span>])</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"seuil optimal trouvé sur le test :"</span>, <span class="bu">round</span>(meilleur[<span class="dv">0</span>], <span class="dv">3</span>))</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"precision :"</span>, <span class="bu">round</span>(meilleur[<span class="dv">1</span>], <span class="dv">3</span>), <span class="st">"· recall :"</span>, <span class="bu">round</span>(meilleur[<span class="dv">2</span>], <span class="dv">3</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>seuil optimal trouvé sur le test : 0.145
+precision : 0.205 · recall : 0.791</code></pre>
+</div>
+</div>
+<div id="d2bcbbb3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-12T14:13:46.306915Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-12T14:13:46.306775Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-12T14:13:46.341233Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-12T14:13:46.340452Z&quot;}}" data-execution_count="29">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le même réglage, fait proprement : sur une tranche de validation</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>X_app, X_val, y_app, y_val <span class="op">=</span> train_test_split(X_train, y_train, test_size<span class="op">=</span><span class="fl">0.25</span>,</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>                                              random_state<span class="op">=</span><span class="dv">0</span>, stratify<span class="op">=</span>y_train)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> make_pipeline(StandardScaler(),</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>                  LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>)).fit(X_app, y_app)</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>proba_val <span class="op">=</span> m.predict_proba(X_val)[:, <span class="dv">1</span>]</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>adm <span class="op">=</span> []</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> candidats:</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>    yh <span class="op">=</span> (proba_val <span class="op">&gt;=</span> s).astype(<span class="bu">int</span>)</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_val <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>    fp <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_val <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>())</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    fn <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_val <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">=</span> tp<span class="op">/</span>(tp <span class="op">+</span> fn)</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> rec <span class="op">&gt;=</span> <span class="fl">0.75</span> <span class="kw">and</span> tp <span class="op">+</span> fp <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>        adm.append((s, tp<span class="op">/</span>(tp <span class="op">+</span> fp)))</span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>seuil_propre <span class="op">=</span> <span class="bu">max</span>(adm, key<span class="op">=</span><span class="kw">lambda</span> t: t[<span class="dv">1</span>])[<span class="dv">0</span>]</span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"seuil choisi sur la validation :"</span>, <span class="bu">round</span>(seuil_propre, <span class="dv">3</span>))</span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Verdict final, une seule fois, sur le test</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>yh <span class="op">=</span> (m.predict_proba(X_test)[:, <span class="dv">1</span>] <span class="op">&gt;=</span> seuil_propre).astype(<span class="bu">int</span>)</span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>tp <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())<span class="op">;</span> fp <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>())</span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>fn <span class="op">=</span> <span class="bu">int</span>(((yh <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>())</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"sur le test : precision = </span><span class="sc">{</span>tp<span class="op">/</span>(tp<span class="op">+</span>fp)<span class="sc">:.3f}</span><span class="ss"> · recall = </span><span class="sc">{</span>tp<span class="op">/</span>(tp<span class="op">+</span>fn)<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>seuil choisi sur la validation : 0.06
+sur le test : precision = 0.178 · recall = 0.843</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Le seuil choisi <em>en regardant le test</em> affiche forcément le plus beau chiffre possible — c’est la <strong>fuite</strong> de la Séance 4, version hyperparamètre : le test a servi de terrain d’entraînement au réglage, son verdict ne vaut plus rien. La version propre réserve une tranche de <strong>validation</strong> pour régler, et ne touche au test qu’une fois, à la fin.</p>
+<p>Mais cette tranche de validation pose ses propres questions : elle ampute l’entraînement, et son verdict dépend du hasard du découpage. Régler <code>C</code>, le seuil — et demain la profondeur d’un arbre — réclame un protocole plus solide : la <strong>validation croisée</strong>, objet de la <strong>Séance 7</strong>.</p>
+</section>
+<section id="synthèse-à-compléter" class="level2">
+<h2 class="anchored" data-anchor-id="synthèse-à-compléter">Synthèse — à compléter</h2>
+<ol type="1">
+<li>La régression logistique passe le score linéaire dans la <strong>……….</strong>, qui en fait une <strong>……….</strong> ; elle s’entraîne en minimisant la <strong>……….</strong> par descente de gradient.</li>
+<li>La matrice de confusion compte <strong>……….</strong> cases ; la precision juge les <strong>……….</strong>, le recall juge les <strong>……….</strong>.</li>
+<li>Baisser le seuil fait monter le <strong>……….</strong> et baisser la <strong>……….</strong> ; le seuil se choisit selon la <strong>……….</strong>, jamais par défaut.</li>
+<li>L’AUC est la probabilité de bien ordonner une paire (<strong>……….</strong>, <strong>……….</strong>) ; elle ne dépend d’aucun <strong>……….</strong>.</li>
+<li>Sur une classe rare, l’accuracy doit toujours être comparée à la <strong>……….</strong> majoritaire ; seuil et <code>C</code> sont des <strong>……….</strong> et se règlent sur la <strong>……….</strong>, pas sur le test.</li>
+</ol>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Retour au sommet</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/elbachir67\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/defilement-cours.js"></script>
+<script src="../../../assets/js/notebook-defilement.js"></script>
+
+
+
+
+</body></html>

@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="La Séance 7 a réglé un arbre au mieux : AUC 0,73 sur le paludisme, puis un plafond.">
+
+<title>Introduction au ML — Séance 8 (TP) – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-d1bc655fd211c2095c5a8ac6d55d7e75.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-671d4bc7ddea4032b9550f4c057f61eb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-d1bc655fd211c2095c5a8ac6d55d7e75.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Introduction au ML — Séance 8 (TP) – El Hadji Bassirou Touré">
+<meta property="og:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
+<meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="Introduction au ML — Séance 8 (TP) – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Site académique d’El Hadji Bassirou Touré, Maître de Conférences Titulaire au DMI/FST/UCAD : recherche, publications, enseignement et CV.">
+<meta name="twitter:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#la-force-du-nombre-forêts-aléatoires-et-boosting" id="toc-la-force-du-nombre-forêts-aléatoires-et-boosting" class="nav-link active" data-scroll-target="#la-force-du-nombre-forêts-aléatoires-et-boosting">La force du nombre : forêts aléatoires et boosting</a></li>
+  <li><a href="#partie-0-mise-en-place" id="toc-partie-0-mise-en-place" class="nav-link" data-scroll-target="#partie-0-mise-en-place">Partie 0 — Mise en place</a></li>
+  <li><a href="#partie-1-la-sagesse-de-la-foule-en-simulation" id="toc-partie-1-la-sagesse-de-la-foule-en-simulation" class="nav-link" data-scroll-target="#partie-1-la-sagesse-de-la-foule-en-simulation">Partie 1 — La sagesse de la foule, en simulation</a>
+  <ul class="collapse">
+  <li><a href="#la-condition-dindépendance-en-chiffres" id="toc-la-condition-dindépendance-en-chiffres" class="nav-link" data-scroll-target="#la-condition-dindépendance-en-chiffres">La condition d’indépendance, en chiffres</a></li>
+  </ul></li>
+  <li><a href="#partie-2-le-bootstrap-varier-les-données" id="toc-partie-2-le-bootstrap-varier-les-données" class="nav-link" data-scroll-target="#partie-2-le-bootstrap-varier-les-données">Partie 2 — Le bootstrap : varier les données</a></li>
+  <li><a href="#partie-3-le-bagging-et-lévaluation-out-of-bag" id="toc-partie-3-le-bagging-et-lévaluation-out-of-bag" class="nav-link" data-scroll-target="#partie-3-le-bagging-et-lévaluation-out-of-bag">Partie 3 — Le bagging et l’évaluation out-of-bag</a>
+  <ul class="collapse">
+  <li><a href="#un-bagging-fait-main-pour-comprendre-lagrégation" id="toc-un-bagging-fait-main-pour-comprendre-lagrégation" class="nav-link" data-scroll-target="#un-bagging-fait-main-pour-comprendre-lagrégation">Un bagging fait main (pour comprendre l’agrégation)</a></li>
+  </ul></li>
+  <li><a href="#partie-4-la-forêt-aléatoire" id="toc-partie-4-la-forêt-aléatoire" class="nav-link" data-scroll-target="#partie-4-la-forêt-aléatoire">Partie 4 — La forêt aléatoire</a>
+  <ul class="collapse">
+  <li><a href="#vérifier-la-formule-de-variance-dune-moyenne-corrélée" id="toc-vérifier-la-formule-de-variance-dune-moyenne-corrélée" class="nav-link" data-scroll-target="#vérifier-la-formule-de-variance-dune-moyenne-corrélée">Vérifier la formule de variance d’une moyenne corrélée</a></li>
+  </ul></li>
+  <li><a href="#partie-5-le-gradient-boosting-à-la-main" id="toc-partie-5-le-gradient-boosting-à-la-main" class="nav-link" data-scroll-target="#partie-5-le-gradient-boosting-à-la-main">Partie 5 — Le gradient boosting, à la main</a></li>
+  <li><a href="#partie-6-le-gradient-boosting-en-pratique" id="toc-partie-6-le-gradient-boosting-en-pratique" class="nav-link" data-scroll-target="#partie-6-le-gradient-boosting-en-pratique">Partie 6 — Le gradient boosting en pratique</a></li>
+  <li><a href="#partie-7-le-grand-comparatif-larc-se-referme" id="toc-partie-7-le-grand-comparatif-larc-se-referme" class="nav-link" data-scroll-target="#partie-7-le-grand-comparatif-larc-se-referme">Partie 7 — Le grand comparatif : l’arc se referme</a></li>
+  <li><a href="#mini-défi-le-plateau-de-la-forêt-contre-la-dérive-du-boosting" id="toc-mini-défi-le-plateau-de-la-forêt-contre-la-dérive-du-boosting" class="nav-link" data-scroll-target="#mini-défi-le-plateau-de-la-forêt-contre-la-dérive-du-boosting">Mini-défi — Le plateau de la forêt contre la dérive du boosting</a></li>
+  <li><a href="#synthèse-à-compléter" id="toc-synthèse-à-compléter" class="nav-link" data-scroll-target="#synthèse-à-compléter">Synthèse — à compléter</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Introduction au ML — Séance 8 (TP)</h1>
+</div>
+
+<div>
+  <div class="description">
+    La Séance 7 a réglé un arbre au mieux : AUC 0,73 sur le paludisme, puis un plafond.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="notebook-boutons">
+<a href="../../../cours/introduction-machine-learning/ressources/TP_S8_ensembles.html" class="btn btn-primary btn-sm" download="" title="Télécharger le notebook">Télécharger le notebook</a> <a href="https://colab.research.google.com/github/elbachir67/elbachir67.github.io/blob/main/cours/introduction-machine-learning/ressources/TP_S8_ensembles.ipynb" class="btn btn-outline-primary btn-sm" title="Ouvrir dans Colab">Ouvrir dans Colab</a>
+<em>Les sorties sont celles enregistrées dans le notebook : rien n'est réexécuté.</em>
+</div>
+<section id="la-force-du-nombre-forêts-aléatoires-et-boosting" class="level2">
+<h2 class="anchored" data-anchor-id="la-force-du-nombre-forêts-aléatoires-et-boosting">La force du nombre : forêts aléatoires et boosting</h2>
+<p><strong>Dr.&nbsp;El Hadji Bassirou TOURÉ</strong> · DMI · FST · UCAD</p>
+<hr>
+<p>La Séance 7 a réglé un arbre au mieux : AUC <span class="math inline">\(0{,}73\)</span> sur le paludisme, puis un plafond. Ce TP construit <strong>à la main</strong> les idées qui dépassent l’arbre unique : le <strong>vote de la foule</strong>, le <strong>bootstrap</strong> (et son <span class="math inline">\(63\,\%\)</span>), l’<strong>out-of-bag</strong>, la <strong>forêt aléatoire</strong> et son importance des variables, puis le <strong>gradient boosting</strong> déroulé résidu par résidu — avant de confronter le tout à scikit-learn et d’aboutir à une leçon contre-intuitive : sur ces données, le modèle le plus puissant n’est pas le meilleur.</p>
+<p><strong>Durée estimée : 1h30.</strong> Exécuter les cellules dans l’ordre, de haut en bas.</p>
+</section>
+<section id="partie-0-mise-en-place" class="level2">
+<h2 class="anchored" data-anchor-id="partie-0-mise-en-place">Partie 0 — Mise en place</h2>
+<div id="5d57ad7d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:39.714326Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:39.714193Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:40.212205Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:40.211196Z&quot;}}" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>np.set_printoptions(precision<span class="op">=</span><span class="dv">4</span>, suppress<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">"display.precision"</span>, <span class="dv">4</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Outils prêts. NumPy"</span>, np.__version__, <span class="st">"· pandas"</span>, pd.__version__)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Outils prêts. NumPy 2.4.4 · pandas 3.0.2</code></pre>
+</div>
+</div>
+<div id="0566d251" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:40.213857Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:40.213600Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:40.223918Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:40.223027Z&quot;}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ne pas modifier cette cellule : générateur officiel DataSANTÉ-221</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_datasante221(n<span class="op">=</span><span class="dv">10_000</span>, seed<span class="op">=</span><span class="dv">221</span>):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(seed)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    age <span class="op">=</span> np.clip(rng.gamma(<span class="fl">2.5</span>, <span class="dv">14</span>, n), <span class="dv">5</span>, <span class="dv">85</span>).<span class="bu">round</span>(<span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    glycemie <span class="op">=</span> np.clip(rng.normal(<span class="fl">5.5</span> <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>age, <span class="fl">1.8</span>), <span class="fl">3.0</span>, <span class="fl">18.0</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    hemoglobine <span class="op">=</span> np.clip(rng.normal(<span class="fl">12.5</span> <span class="op">-</span> <span class="fl">0.02</span><span class="op">*</span>age, <span class="fl">1.5</span>), <span class="fl">6.0</span>, <span class="fl">17.0</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    fievre <span class="op">=</span> np.clip(rng.normal(<span class="fl">37.5</span>, <span class="fl">0.9</span>, n), <span class="fl">36.0</span>, <span class="fl">41.5</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    saison <span class="op">=</span> rng.choice([<span class="dv">0</span>, <span class="dv">1</span>], size<span class="op">=</span>n, p<span class="op">=</span>[<span class="fl">0.55</span>, <span class="fl">0.45</span>])</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    duree <span class="op">=</span> (<span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>age <span class="op">+</span> <span class="fl">0.6</span><span class="op">*</span>glycemie <span class="op">-</span> <span class="fl">0.3</span><span class="op">*</span>hemoglobine</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>             <span class="op">+</span> <span class="fl">1.5</span><span class="op">*</span>saison <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.8</span>, n)).clip(<span class="fl">0.5</span>, <span class="dv">30</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    proba_palu <span class="op">=</span> <span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span>np.exp(<span class="op">-</span>(<span class="op">-</span><span class="dv">3</span> <span class="op">+</span> <span class="fl">1.5</span><span class="op">*</span>saison <span class="op">+</span> <span class="fl">0.8</span><span class="op">*</span>(fievre<span class="op">&gt;</span><span class="fl">38.5</span>))))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    palu <span class="op">=</span> (rng.uniform(<span class="dv">0</span>,<span class="dv">1</span>,n) <span class="op">&lt;</span> proba_palu).astype(<span class="bu">int</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame({<span class="st">'age'</span>:age,<span class="st">'glycemie'</span>:glycemie,<span class="st">'hemoglobine'</span>:hemoglobine,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'fievre'</span>:fievre,<span class="st">'saison'</span>:saison,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'duree_hospit_j'</span>:duree,<span class="st">'paludisme'</span>:palu})</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> generate_datasante221()</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>colonnes <span class="op">=</span> [<span class="st">"age"</span>, <span class="st">"glycemie"</span>, <span class="st">"hemoglobine"</span>, <span class="st">"fievre"</span>, <span class="st">"saison"</span>]</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"dimensions :"</span>, df.shape)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>dimensions : (10000, 7)</code></pre>
+</div>
+</div>
+<div id="27d906a2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:40.225280Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:40.225143Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:41.043273Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:41.042160Z&quot;}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le découpage de référence du cours (Séances 5 à 7) et la CV stratifiée</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split, StratifiedKFold</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[colonnes]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"paludisme"</span>]</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                                                    random_state<span class="op">=</span><span class="dv">42</span>, stratify<span class="op">=</span>y)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>cv5 <span class="op">=</span> StratifiedKFold(n_splits<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"train :"</span>, <span class="bu">len</span>(y_train), <span class="st">"· test :"</span>, <span class="bu">len</span>(y_test), <span class="st">"·"</span>, <span class="bu">int</span>(y_test.<span class="bu">sum</span>()), <span class="st">"positifs au test"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>train : 8000 · test : 2000 · 235 positifs au test</code></pre>
+</div>
+</div>
+</section>
+<section id="partie-1-la-sagesse-de-la-foule-en-simulation" class="level2">
+<h2 class="anchored" data-anchor-id="partie-1-la-sagesse-de-la-foule-en-simulation">Partie 1 — La sagesse de la foule, en simulation</h2>
+<p>Des jurés qui se trompent une fois sur trois, mais dont les erreurs sont <strong>indépendantes</strong> : la majorité se trompe-t-elle moins ? Vérifions par simulation.</p>
+<div id="1962e30b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:41.044903Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:41.044614Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:41.062567Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:41.061698Z&quot;}}" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Des jurés à 65 % de réussite, erreurs indépendantes, vote majoritaire</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">8</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> proba_majorite(M, p<span class="op">=</span><span class="fl">0.65</span>, essais<span class="op">=</span><span class="dv">20000</span>):</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    votes <span class="op">=</span> (rng.uniform(<span class="dv">0</span>, <span class="dv">1</span>, (essais, M)) <span class="op">&lt;</span> p).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (votes <span class="op">&gt;</span> M<span class="op">/</span><span class="dv">2</span>).mean()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> M <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">11</span>, <span class="dv">51</span>]:</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>M<span class="sc">:2d}</span><span class="ss"> jurés : la majorité a raison </span><span class="sc">{</span>proba_majorite(M)<span class="sc">:.3f}</span><span class="ss"> du temps"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 1 jurés : la majorité a raison 0.647 du temps
+ 3 jurés : la majorité a raison 0.718 du temps
+11 jurés : la majorité a raison 0.858 du temps
+51 jurés : la majorité a raison 0.987 du temps</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Un seul juré : <span class="math inline">\(0{,}65\)</span>. Onze jurés : <span class="math inline">\(\approx 0{,}85\)</span>. Cinquante et un : <span class="math inline">\(\approx 0{,}99\)</span>. Des votants médiocres mais <strong>indépendants</strong> forment un collège excellent — c’est tout le pari des ensembles. Le mot clé est <em>indépendants</em> : la Partie 2 va fabriquer cette indépendance entre arbres.</p>
+<p><strong>Exercice.</strong> Modifier <code>proba_majorite</code> pour des jurés à <span class="math inline">\(p = 0{,}55\)</span> (à peine mieux que le hasard) et afficher le résultat pour <span class="math inline">\(M = 1, 11, 101\)</span>. La foule sauve-t-elle encore des votants aussi faibles ?</p>
+<div id="c0d1dd5c" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:41.064638Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:41.064102Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:41.067470Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:41.066553Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Jurés à 55 % : proba de la majorité pour M = 1, 11, 101</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="la-condition-dindépendance-en-chiffres" class="level3">
+<h3 class="anchored" data-anchor-id="la-condition-dindépendance-en-chiffres">La condition d’indépendance, en chiffres</h3>
+<p>Le théorème de Condorcet suppose les erreurs <strong>indépendantes</strong>. Que se passe-t-il si les votants se ressemblent ? Simulons des jurés dont les votes sont corrélés.</p>
+<div id="5dab5876" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:41.069059Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:41.068906Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:41.112257Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:41.111305Z&quot;}}" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Des jurés corrélés : un "climat d'opinion" commun + un avis propre</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> proba_majorite_correlee(M, p<span class="op">=</span><span class="fl">0.65</span>, rho<span class="op">=</span><span class="fl">0.0</span>, essais<span class="op">=</span><span class="dv">20000</span>):</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># rho = poids du signal commun (0 = independants, 1 = tous identiques)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    climat <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">1</span>, (essais, <span class="dv">1</span>)) <span class="op">&lt;</span> p          <span class="co"># avis commun a tous</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    propre <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">1</span>, (essais, M)) <span class="op">&lt;</span> p          <span class="co"># avis individuel</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    tirage_commun <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">1</span>, (essais, M)) <span class="op">&lt;</span> rho <span class="co"># qui suit le climat ?</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    votes_corrects <span class="op">=</span> np.where(tirage_commun, climat, propre).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (votes_corrects <span class="op">&gt;</span> M<span class="op">/</span><span class="dv">2</span>).mean()</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> rho <span class="kw">in</span> [<span class="fl">0.0</span>, <span class="fl">0.3</span>, <span class="fl">0.9</span>]:</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    p51 <span class="op">=</span> proba_majorite_correlee(<span class="dv">51</span>, rho<span class="op">=</span>rho)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"51 jures a 65%, correlation </span><span class="sc">{</span>rho<span class="sc">}</span><span class="ss"> : majorite correcte </span><span class="sc">{</span>p51<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>51 jures a 65%, correlation 0.0 : majorite correcte 0.986
+51 jures a 65%, correlation 0.3 : majorite correcte 0.734
+51 jures a 65%, correlation 0.9 : majorite correcte 0.647</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Indépendants (<span class="math inline">\(\rho = 0\)</span>) : <span class="math inline">\(\approx 0{,}99\)</span>. Fortement corrélés (<span class="math inline">\(\rho = 0{,}9\)</span>) : à peine mieux que <span class="math inline">\(0{,}65\)</span> — les <span class="math inline">\(51\)</span> jurés ne valent presque pas mieux qu’un seul. La leçon est sans appel et prépare toute la suite : <strong>ce n’est pas le nombre de votants qui compte, mais leur indépendance</strong>. Toute la mécanique des forêts vise à fabriquer cette indépendance entre arbres.</p>
+</section>
+</section>
+<section id="partie-2-le-bootstrap-varier-les-données" class="level2">
+<h2 class="anchored" data-anchor-id="partie-2-le-bootstrap-varier-les-données">Partie 2 — Le bootstrap : varier les données</h2>
+<p>Un <strong>échantillon bootstrap</strong> tire <span class="math inline">\(n\)</span> patients avec remise parmi <span class="math inline">\(n\)</span> : certains en double, d’autres absents (les <em>out-of-bag</em>).</p>
+<div id="a9025c71" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:41.113646Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:41.113497Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:41.118941Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:41.118159Z&quot;}}" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Un tirage bootstrap sur six patients, à la main</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>patients <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>])</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>tirage <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">6</span>, <span class="dv">6</span>)              <span class="co"># 6 indices avec remise</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>echantillon <span class="op">=</span> patients[tirage]</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>vus <span class="op">=</span> np.unique(echantillon)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>oob <span class="op">=</span> np.setdiff1d(patients, vus)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"échantillon bootstrap :"</span>, <span class="bu">sorted</span>(echantillon))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"patients vus :"</span>, vus, <span class="st">"· out-of-bag :"</span>, oob)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>échantillon bootstrap : [np.int64(1), np.int64(2), np.int64(2), np.int64(4), np.int64(4), np.int64(6)]
+patients vus : [1 2 4 6] · out-of-bag : [3 5]</code></pre>
+</div>
+</div>
+<div id="88b354f3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:41.120819Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:41.120258Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:43.587702Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:43.586635Z&quot;}}" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La fraction de points uniques converge vers 1 - 1/e</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> [<span class="dv">6</span>, <span class="dv">100</span>, <span class="dv">10000</span>]:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    fractions <span class="op">=</span> [<span class="bu">len</span>(np.unique(rng.integers(<span class="dv">0</span>, n, n))) <span class="op">/</span> n <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2000</span>)]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"n = </span><span class="sc">{</span>n<span class="sc">:5d}</span><span class="ss"> : fraction unique = </span><span class="sc">{</span>np<span class="sc">.</span>mean(fractions)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">limite théorique 1 - 1/e ="</span>, <span class="bu">round</span>(<span class="dv">1</span> <span class="op">-</span> <span class="dv">1</span><span class="op">/</span>np.e, <span class="dv">4</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>n =     6 : fraction unique = 0.6677
+n =   100 : fraction unique = 0.6340
+n = 10000 : fraction unique = 0.6321
+
+limite théorique 1 - 1/e = 0.6321</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Quel que soit <span class="math inline">\(n\)</span> (pourvu qu’il soit grand), un tirage bootstrap retient environ <span class="math inline">\(\mathbf{63\,\%}\)</span> des patients ; les <span class="math inline">\(\approx 37\,\%\)</span> restants sont out-of-bag. La raison : la probabilité qu’un patient échappe aux <span class="math inline">\(n\)</span> tirages est <span class="math inline">\(\big(1 - \tfrac1n\big)^n \to 1/e \approx 0{,}368\)</span>.</p>
+<div id="4790c0a6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:43.589803Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:43.589147Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:43.594058Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:43.593170Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vérification directe de la formule (1 - 1/n)^n</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> [<span class="dv">6</span>, <span class="dv">100</span>, <span class="dv">10000</span>]:</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"n = </span><span class="sc">{</span>n<span class="sc">:5d}</span><span class="ss"> : (1 - 1/n)^n = </span><span class="sc">{</span>(<span class="dv">1</span> <span class="op">-</span> <span class="dv">1</span><span class="op">/</span>n)<span class="op">**</span>n<span class="sc">:.4f}</span><span class="ss">  -&gt; vus = </span><span class="sc">{</span><span class="dv">1</span><span class="op">-</span>(<span class="dv">1</span><span class="op">-</span><span class="dv">1</span><span class="op">/</span>n)<span class="op">**</span>n<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>n =     6 : (1 - 1/n)^n = 0.3349  -&gt; vus = 0.6651
+n =   100 : (1 - 1/n)^n = 0.3660  -&gt; vus = 0.6340
+n = 10000 : (1 - 1/n)^n = 0.3679  -&gt; vus = 0.6321</code></pre>
+</div>
+</div>
+</section>
+<section id="partie-3-le-bagging-et-lévaluation-out-of-bag" class="level2">
+<h2 class="anchored" data-anchor-id="partie-3-le-bagging-et-lévaluation-out-of-bag">Partie 3 — Le bagging et l’évaluation out-of-bag</h2>
+<p>Le bagging entraîne un arbre par échantillon bootstrap, puis agrège. Comme chaque patient est OOB pour environ un tiers des arbres, on obtient une <strong>validation gratuite</strong>.</p>
+<section id="un-bagging-fait-main-pour-comprendre-lagrégation" class="level3">
+<h3 class="anchored" data-anchor-id="un-bagging-fait-main-pour-comprendre-lagrégation">Un bagging fait main (pour comprendre l’agrégation)</h3>
+<p>Avant la version sklearn, construisons un mini-bagging nous-mêmes : tirer des échantillons bootstrap, entraîner un arbre sur chacun, puis <strong>moyenner</strong> leurs probabilités. On vérifie au passage que l’ensemble bat un arbre seul.</p>
+<div id="d7f469f8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:43.595657Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:43.595476Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:44.246218Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:44.245171Z&quot;}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bagging maison : 30 arbres profonds sur des echantillons bootstrap</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeClassifier</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(X_train)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>probas_test <span class="op">=</span> []</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> b <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">30</span>):</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> rng.integers(<span class="dv">0</span>, n, n)                       <span class="co"># echantillon bootstrap</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    arbre <span class="op">=</span> DecisionTreeClassifier(random_state<span class="op">=</span>b)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    arbre.fit(X_train.iloc[idx], y_train.iloc[idx])</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    probas_test.append(arbre.predict_proba(X_test)[:, <span class="dv">1</span>])</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co"># un arbre seul vs la moyenne des 30</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>auc_un <span class="op">=</span> roc_auc_score(y_test, probas_test[<span class="dv">0</span>])</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>auc_moyenne <span class="op">=</span> roc_auc_score(y_test, np.mean(probas_test, axis<span class="op">=</span><span class="dv">0</span>))</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"un arbre profond seul   : AUC </span><span class="sc">{</span>auc_un<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"moyenne de 30 arbres    : AUC </span><span class="sc">{</span>auc_moyenne<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>un arbre profond seul   : AUC 0.5519
+moyenne de 30 arbres    : AUC 0.6431</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Un arbre profond seul a une AUC médiocre et instable (il a tout mémorisé) ; la moyenne de trente arbres baggés la relève nettement. C’est le bagging dans sa forme la plus nue : <code>bootstrap → entraîner → moyenner</code>. La version de scikit-learn ajoute à cela le score out-of-bag.</p>
+<div id="9c7574b0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:44.248222Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:44.247638Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:45.745604Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:45.744627Z&quot;}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bagging de 100 arbres avec score out-of-bag</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> BaggingClassifier</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeClassifier</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>bag <span class="op">=</span> BaggingClassifier(DecisionTreeClassifier(random_state<span class="op">=</span><span class="dv">0</span>),</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>                        n_estimators<span class="op">=</span><span class="dv">100</span>, oob_score<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>                        random_state<span class="op">=</span><span class="dv">0</span>, n_jobs<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>bag.fit(X_train, y_train)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"score OOB (accuracy, gratuit) :"</span>, <span class="bu">round</span>(bag.oob_score_, <span class="dv">4</span>))</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"AUC test du bagging :"</span>, <span class="bu">round</span>(roc_auc_score(y_test, bag.predict_proba(X_test)[:, <span class="dv">1</span>]), <span class="dv">4</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>score OOB (accuracy, gratuit) : 0.8688
+AUC test du bagging : 0.6601</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Le score OOB (<span class="math inline">\(0{,}869\)</span>) est calculé sans toucher au test : chaque patient a été prédit par les arbres qui ne l’avaient pas vu. C’est le rôle de la validation croisée de la Séance 7, mais intégré au bagging — pratique pour un premier diagnostic.</p>
+</section>
+</section>
+<section id="partie-4-la-forêt-aléatoire" class="level2">
+<h2 class="anchored" data-anchor-id="partie-4-la-forêt-aléatoire">Partie 4 — La forêt aléatoire</h2>
+<p>La forêt ajoute un second hasard : à chaque coupure, seules <code>max_features</code> variables tirées au sort sont candidates. Les arbres se décorrèlent, et la moyenne s’améliore.</p>
+<div id="24ff2c5d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:45.747759Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:45.747171Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:54:56.984998Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:54:56.983980Z&quot;}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une forêt de 300 arbres</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>foret <span class="op">=</span> RandomForestClassifier(n_estimators<span class="op">=</span><span class="dv">300</span>, random_state<span class="op">=</span><span class="dv">0</span>, n_jobs<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>foret.fit(X_train, y_train)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>auc_cv <span class="op">=</span> cross_val_score(foret, X_train, y_train, cv<span class="op">=</span>cv5, scoring<span class="op">=</span><span class="st">"roc_auc"</span>).mean()</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"AUC CV de la forêt :"</span>, <span class="bu">round</span>(auc_cv, <span class="dv">4</span>))</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"AUC test de la forêt :"</span>, <span class="bu">round</span>(roc_auc_score(y_test, foret.predict_proba(X_test)[:, <span class="dv">1</span>]), <span class="dv">4</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>AUC CV de la forêt : 0.657
+AUC test de la forêt : 0.6807</code></pre>
+</div>
+</div>
+<div id="e2d26b60" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:54:56.987126Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:54:56.986410Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:26.295142Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:26.293995Z&quot;}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le plateau : ajouter des arbres ne sur-apprend jamais</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ne <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">300</span>, <span class="dv">500</span>]:</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> RandomForestClassifier(n_estimators<span class="op">=</span>ne, random_state<span class="op">=</span><span class="dv">0</span>, n_jobs<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> cross_val_score(m, X_train, y_train, cv<span class="op">=</span>cv5, scoring<span class="op">=</span><span class="st">"roc_auc"</span>).mean()</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>ne<span class="sc">:3d}</span><span class="ss"> arbres : AUC CV = </span><span class="sc">{</span>s<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  1 arbres : AUC CV = 0.5335
+  5 arbres : AUC CV = 0.5833
+ 20 arbres : AUC CV = 0.6293
+ 50 arbres : AUC CV = 0.6485
+100 arbres : AUC CV = 0.6516
+300 arbres : AUC CV = 0.6570
+500 arbres : AUC CV = 0.6574</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> L’AUC monte (<span class="math inline">\(0{,}53 \to 0{,}65\)</span>) puis <strong>plafonne</strong> vers <span class="math inline">\(0{,}66\)</span> : ajouter des arbres à une forêt ne fait jamais sur-apprendre. <code>n_estimators</code> n’est donc pas à régler finement — on en met « assez » (quelques centaines), le surcoût est en temps de calcul.</p>
+<section id="vérifier-la-formule-de-variance-dune-moyenne-corrélée" class="level3">
+<h3 class="anchored" data-anchor-id="vérifier-la-formule-de-variance-dune-moyenne-corrélée">Vérifier la formule de variance d’une moyenne corrélée</h3>
+<p>Le deck affirme que la variance de la moyenne de <span class="math inline">\(B\)</span> modèles corrélés tend vers <span class="math inline">\(\rho\sigma^2\)</span>, et non vers <span class="math inline">\(0\)</span>. Vérifions-le par simulation — c’est l’argument mathématique qui justifie <em>pourquoi</em> il faut décorréler les arbres.</p>
+<div id="b5cf3257" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:26.296942Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:26.296711Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:26.637287Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:26.636123Z&quot;}}" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># B variables de variance 1, correlees deux a deux a rho, via un facteur commun</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> variance_moyenne(B, rho, n<span class="op">=</span><span class="dv">40000</span>):</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    commun <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, (n, <span class="dv">1</span>))                    <span class="co"># partage par tous</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    propre <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, (n, B))                    <span class="co"># propre a chacun</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    arbres <span class="op">=</span> np.sqrt(rho)<span class="op">*</span>commun <span class="op">+</span> np.sqrt(<span class="dv">1</span><span class="op">-</span>rho)<span class="op">*</span>propre <span class="co"># correlation rho, variance 1</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    moyenne <span class="op">=</span> arbres.mean(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> moyenne.var()</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"rho   B=1     B=10    B=100   theorie B-&gt;inf (= rho)"</span>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> rho <span class="kw">in</span> [<span class="fl">0.0</span>, <span class="fl">0.3</span>, <span class="fl">0.9</span>]:</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    v1 <span class="op">=</span> variance_moyenne(<span class="dv">1</span>, rho)<span class="op">;</span> v10 <span class="op">=</span> variance_moyenne(<span class="dv">10</span>, rho)<span class="op">;</span> v100 <span class="op">=</span> variance_moyenne(<span class="dv">100</span>, rho)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>rho<span class="sc">}</span><span class="ss">   </span><span class="sc">{</span>v1<span class="sc">:.3f}</span><span class="ss">   </span><span class="sc">{</span>v10<span class="sc">:.3f}</span><span class="ss">   </span><span class="sc">{</span>v100<span class="sc">:.3f}</span><span class="ss">   </span><span class="sc">{</span>rho<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>rho   B=1     B=10    B=100   theorie B-&gt;inf (= rho)
+0.0   0.992   0.100   0.010   0.000
+0.3   1.000   0.371   0.308   0.300
+0.9   1.004   0.908   0.903   0.900</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> À <span class="math inline">\(\rho = 0\)</span> (arbres indépendants), la variance tombe comme <span class="math inline">\(1/B\)</span> : <span class="math inline">\(1 \to 0{,}1 \to 0{,}01\)</span>. À <span class="math inline">\(\rho = 0{,}9\)</span> (arbres semblables, le défaut du bagging sur une variable dominante), elle <strong>plafonne à <span class="math inline">\(0{,}90\)</span></strong> : cent arbres ne valent presque pas mieux qu’un seul. La forêt existe précisément pour faire baisser ce <span class="math inline">\(\rho\)</span> — c’est la traduction chiffrée de tout ce qui précède.</p>
+<p><strong>Exercice.</strong> Comparer une forêt standard à des <strong>extra-trees</strong> (<code>ExtraTreesClassifier</code>, qui tirent aussi les seuils au hasard, donc décorrèlent davantage) sur le paludisme, en AUC de validation croisée. L’import est <code>from sklearn.ensemble import ExtraTreesClassifier</code>.</p>
+<div id="8d3be2ff" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:26.638755Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:26.638599Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:26.642001Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:26.641271Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Forêt vs Extra-Trees (300 arbres chacun), AUC CV</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="aef73d46" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:26.643491Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:26.643305Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:26.677781Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:26.676873Z&quot;}}" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># L'importance des variables — à lire avec prudence</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>importances <span class="op">=</span> pd.Series(foret.feature_importances_, index<span class="op">=</span>colonnes).sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(importances.<span class="bu">round</span>(<span class="dv">4</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>glycemie       0.2555
+hemoglobine    0.2526
+age            0.2451
+fievre         0.1925
+saison         0.0542
+dtype: float64</code></pre>
+</div>
+</div>
+<p><strong>Lecture (le piège).</strong> La forêt désigne glycémie, hémoglobine et âge comme les plus « importantes » — alors que, par construction des données, le paludisme ne dépend que de la <strong>saison</strong> et de la <strong>fièvre</strong>. Ces variables continues offrent une multitude de seuils, et les arbres s’en servent pour fragmenter le bruit : l’importance par impureté <strong>favorise les variables à forte cardinalité</strong>, même non causales. L’importance <em>suggère</em>, elle ne <em>prouve</em> pas.</p>
+<p><strong>Exercice.</strong> Entraîner deux forêts de <span class="math inline">\(300\)</span> arbres, l’une avec <code>max_features=1</code>, l’autre avec <code>max_features=None</code> (toutes les variables à chaque coupure, donc des arbres plus corrélés). Comparer leurs AUC en validation croisée. Laquelle décorrèle le mieux ?</p>
+<div id="1a8d02e7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:26.679788Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:26.679180Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:26.682423Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:26.681617Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Deux forêts : max_features=1 contre max_features=None, AUC CV</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="partie-5-le-gradient-boosting-à-la-main" class="level2">
+<h2 class="anchored" data-anchor-id="partie-5-le-gradient-boosting-à-la-main">Partie 5 — Le gradient boosting, à la main</h2>
+<p>Le boosting enchaîne des arbres : chacun rattrape les <strong>résidus</strong> (l’erreur) de la somme des précédents. Déroulons-le sur un jouet de régression.</p>
+<div id="11916b93" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:26.684302Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:26.683701Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:26.689573Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:26.688646Z&quot;}}" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Jouet : 4 points. On boost avec des souches (arbres de profondeur 1).</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeRegressor</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>xb <span class="op">=</span> np.array([<span class="fl">1.</span>, <span class="fl">2.</span>, <span class="fl">3.</span>, <span class="fl">4.</span>]).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>yb <span class="op">=</span> np.array([<span class="fl">2.</span>, <span class="fl">3.</span>, <span class="fl">5.</span>, <span class="fl">9.</span>])</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>F0 <span class="op">=</span> np.full(<span class="dv">4</span>, yb.mean())                  <span class="co"># prédiction initiale = la moyenne</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"F0 (moyenne) :"</span>, F0)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>r1 <span class="op">=</span> yb <span class="op">-</span> F0</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"résidus r1 = y - F0 :"</span>, r1.<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE de F0 :"</span>, <span class="bu">round</span>(np.mean((yb <span class="op">-</span> F0)<span class="op">**</span><span class="dv">2</span>), <span class="dv">3</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>F0 (moyenne) : [4.75 4.75 4.75 4.75]
+résidus r1 = y - F0 : [-2.75 -1.75  0.25  4.25]
+MSE de F0 : 7.188</code></pre>
+</div>
+</div>
+<div id="1fa3e019" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:26.691465Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:26.690834Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:26.697171Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:26.696340Z&quot;}}" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Souche 1 ajustée sur les résidus r1, puis mise à jour F1 = F0 + h1</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>souche1 <span class="op">=</span> DecisionTreeRegressor(max_depth<span class="op">=</span><span class="dv">1</span>).fit(xb, r1)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>h1 <span class="op">=</span> souche1.predict(xb)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>F1 <span class="op">=</span> F0 <span class="op">+</span> h1                                 <span class="co"># learning_rate = 1 pour la démo</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"la souche 1 prédit sur r1 :"</span>, h1.<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"F1 = F0 + h1 :"</span>, F1.<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> yb <span class="op">-</span> F1</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"nouveaux résidus r2 :"</span>, r2.<span class="bu">round</span>(<span class="dv">3</span>), <span class="st">" -&gt; MSE"</span>, <span class="bu">round</span>(np.mean(r2<span class="op">**</span><span class="dv">2</span>), <span class="dv">3</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>la souche 1 prédit sur r1 : [-1.417 -1.417 -1.417  4.25 ]
+F1 = F0 + h1 : [3.333 3.333 3.333 9.   ]
+nouveaux résidus r2 : [-1.333 -0.333  1.667  0.   ]  -&gt; MSE 1.167</code></pre>
+</div>
+</div>
+<div id="3e8dc6bc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:26.698585Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:26.698429Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:26.704212Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:26.703432Z&quot;}}" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Souche 2 ajustée sur r2, puis F2 = F1 + h2</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>souche2 <span class="op">=</span> DecisionTreeRegressor(max_depth<span class="op">=</span><span class="dv">1</span>).fit(xb, r2)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>F2 <span class="op">=</span> F1 <span class="op">+</span> souche2.predict(xb)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"F2 = F1 + h2 :"</span>, F2.<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE : F0"</span>, <span class="bu">round</span>(np.mean((yb<span class="op">-</span>F0)<span class="op">**</span><span class="dv">2</span>), <span class="dv">3</span>),</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"-&gt; F1"</span>, <span class="bu">round</span>(np.mean((yb<span class="op">-</span>F1)<span class="op">**</span><span class="dv">2</span>), <span class="dv">3</span>),</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"-&gt; F2"</span>, <span class="bu">round</span>(np.mean((yb<span class="op">-</span>F2)<span class="op">**</span><span class="dv">2</span>), <span class="dv">3</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>F2 = F1 + h2 : [2.5   2.5   4.167 9.833]
+MSE : F0 7.188 -&gt; F1 1.167 -&gt; F2 0.472</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> La MSE chute <span class="math inline">\(7{,}19 \to 1{,}17 \to 0{,}47\)</span> : chaque arbre rattrape ce que le précédent a laissé. La prédiction finale est la <strong>somme</strong> des arbres (<span class="math inline">\(F_0 + h_1 +
+h_2 + \dots\)</span>), pas leur moyenne — c’est là toute la différence avec la forêt. « Gradient » vient de ce que les résidus sont, pour la MSE, l’opposé du gradient de la perte : le boosting est la descente de gradient de la Séance 5, appliquée fonction par fonction.</p>
+<p><strong>Exercice.</strong> Sur trois points, <span class="math inline">\(F_1 = (3, 5, 8)\)</span> et <span class="math inline">\(y = (4, 4, 10)\)</span>. Calculer en NumPy les résidus <span class="math inline">\(r_2 = y - F_1\)</span>, puis <span class="math inline">\(F_2 = F_1 + 0{,}5 \cdot (0{,}5, 0{,}5, 2)\)</span>, et vérifier que la somme des carrés des résidus a diminué (elle passe de <span class="math inline">\(6\)</span> à <span class="math inline">\(3{,}125\)</span>).</p>
+<div id="9f36fe58" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:26.705627Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:26.705470Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:26.708508Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:26.707713Z&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Résidus r2, mise à jour F2 avec learning_rate 0,5, et somme des carrés avant/après</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="partie-6-le-gradient-boosting-en-pratique" class="level2">
+<h2 class="anchored" data-anchor-id="partie-6-le-gradient-boosting-en-pratique">Partie 6 — Le gradient boosting en pratique</h2>
+<p>Sur le paludisme, et le couple décisif <code>learning_rate</code> × <code>n_estimators</code>.</p>
+<div id="d04870f7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:26.710013Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:26.709867Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:29.408167Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:29.407235Z&quot;}}" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Gradient boosting sur le paludisme (défauts : 100 arbres, lr=0.1, depth=3)</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> GradientBoostingClassifier</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>gb <span class="op">=</span> GradientBoostingClassifier(random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>auc_cv <span class="op">=</span> cross_val_score(gb, X_train, y_train, cv<span class="op">=</span>cv5, scoring<span class="op">=</span><span class="st">"roc_auc"</span>).mean()</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>gb.fit(X_train, y_train)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"AUC CV du gradient boosting :"</span>, <span class="bu">round</span>(auc_cv, <span class="dv">4</span>))</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"AUC test :"</span>, <span class="bu">round</span>(roc_auc_score(y_test, gb.predict_proba(X_test)[:, <span class="dv">1</span>]), <span class="dv">4</span>))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>AUC CV du gradient boosting : 0.6892
+AUC test : 0.7238</code></pre>
+</div>
+</div>
+<div id="73c317ef" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:29.409752Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:29.409598Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:55:51.026445Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:55:51.025469Z&quot;}}" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le couple learning_rate x n_estimators (AUC CV)</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lr <span class="kw">in</span> [<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>]:</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    ligne <span class="op">=</span> []</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ne <span class="kw">in</span> [<span class="dv">50</span>, <span class="dv">200</span>]:</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>        m <span class="op">=</span> GradientBoostingClassifier(learning_rate<span class="op">=</span>lr, n_estimators<span class="op">=</span>ne, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>        s <span class="op">=</span> cross_val_score(m, X_train, y_train, cv<span class="op">=</span>cv5, scoring<span class="op">=</span><span class="st">"roc_auc"</span>).mean()</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>        ligne.append(<span class="ss">f"n=</span><span class="sc">{</span>ne<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>s<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"learning_rate=</span><span class="sc">{</span>lr<span class="sc">:4}</span><span class="ss"> -&gt; "</span> <span class="op">+</span> <span class="st">" | "</span>.join(ligne))</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>learning_rate=0.01 -&gt; n=50: 0.6975 | n=200: 0.6968
+learning_rate= 0.1 -&gt; n=50: 0.6944 | n=200: 0.6815
+learning_rate= 0.5 -&gt; n=50: 0.6736 | n=200: 0.6404
+learning_rate= 1.0 -&gt; n=50: 0.6454 | n=200: 0.6101</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> Le meilleur réglage est <code>learning_rate</code> faible et peu d’arbres (<span class="math inline">\(0{,}01\)</span>, <span class="math inline">\(50\)</span> arbres : <span class="math inline">\(0{,}698\)</span>) ; un grand pas avec beaucoup d’arbres dégrade (<span class="math inline">\(1{,}0\)</span>, <span class="math inline">\(200\)</span> : <span class="math inline">\(0{,}610\)</span>). <strong>À l’opposé de la forêt</strong> : ici, ajouter des arbres à grand pas fait sur-apprendre. C’est pourquoi ce couple se règle par validation croisée (Séance 7).</p>
+</section>
+<section id="partie-7-le-grand-comparatif-larc-se-referme" class="level2">
+<h2 class="anchored" data-anchor-id="partie-7-le-grand-comparatif-larc-se-referme">Partie 7 — Le grand comparatif : l’arc se referme</h2>
+<p>Cinq modèles sur le paludisme, jugés à l’AUC en validation croisée et sur le test.</p>
+<div id="2f0293fb" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:55:51.028567Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:55:51.027937Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:56:04.940080Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:56:04.939075Z&quot;}}" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le tableau récapitulatif de tout le cours</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>modeles <span class="op">=</span> {</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"logistique (S6)"</span>: make_pipeline(StandardScaler(), LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span><span class="dv">0</span>)),</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"arbre réglé prof.3 (S7)"</span>: DecisionTreeClassifier(max_depth<span class="op">=</span><span class="dv">3</span>, random_state<span class="op">=</span><span class="dv">0</span>),</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"forêt aléatoire (300)"</span>: RandomForestClassifier(n_estimators<span class="op">=</span><span class="dv">300</span>, random_state<span class="op">=</span><span class="dv">0</span>, n_jobs<span class="op">=-</span><span class="dv">1</span>),</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gradient boosting"</span>: GradientBoostingClassifier(random_state<span class="op">=</span><span class="dv">0</span>),</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>lignes <span class="op">=</span> []</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nom, m <span class="kw">in</span> modeles.items():</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>    cv_auc <span class="op">=</span> cross_val_score(m, X_train, y_train, cv<span class="op">=</span>cv5, scoring<span class="op">=</span><span class="st">"roc_auc"</span>).mean()</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>    m.fit(X_train, y_train)</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>    te_auc <span class="op">=</span> roc_auc_score(y_test, m.predict_proba(X_test)[:, <span class="dv">1</span>])</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>    lignes.append({<span class="st">"modèle"</span>: nom, <span class="st">"AUC CV"</span>: <span class="bu">round</span>(cv_auc, <span class="dv">4</span>), <span class="st">"AUC test"</span>: <span class="bu">round</span>(te_auc, <span class="dv">4</span>)})</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(lignes)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">modèle</th>
+<th data-quarto-table-cell-role="th">AUC CV</th>
+<th data-quarto-table-cell-role="th">AUC test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>logistique (S6)</td>
+<td>0.6914</td>
+<td>0.7145</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>arbre réglé prof.3 (S7)</td>
+<td>0.6955</td>
+<td>0.7272</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>forêt aléatoire (300)</td>
+<td>0.6570</td>
+<td>0.6807</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>gradient boosting</td>
+<td>0.6892</td>
+<td>0.7238</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><strong>Lecture.</strong> Surprise : les ensembles <strong>ne dominent pas</strong>. L’arbre réglé (<span class="math inline">\(0{,}73\)</span> test) et la logistique (<span class="math inline">\(0{,}71\)</span>) font aussi bien, voire mieux que la forêt (<span class="math inline">\(0{,}68\)</span>) et le boosting (<span class="math inline">\(0{,}72\)</span>). La raison : le risque de paludisme dépend ici de deux variables de façon <strong>simple</strong> (saison, fièvre) — un petit modèle suffit, et la puissance des forêts se retourne contre elles en cherchant des interactions dans le bruit des variables continues.</p>
+<p>La morale n’est pas « les ensembles sont mauvais » (ils dominent sur quantité de problèmes réels), mais qu’<strong>aucun modèle n’est supérieur dans l’absolu</strong> : la complexité doit être justifiée par les données. À performance égale, on choisit le plus simple.</p>
+</section>
+<section id="mini-défi-le-plateau-de-la-forêt-contre-la-dérive-du-boosting" class="level2">
+<h2 class="anchored" data-anchor-id="mini-défi-le-plateau-de-la-forêt-contre-la-dérive-du-boosting">Mini-défi — Le plateau de la forêt contre la dérive du boosting</h2>
+<p>Une expérience qui résume la séance : pousser <code>n_estimators</code> pour les deux familles, et regarder l’écart entre AUC d’entraînement et AUC de test.</p>
+<div id="10f8de72" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-06-13T14:56:04.942146Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-06-13T14:56:04.941510Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-06-13T14:56:16.070857Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-06-13T14:56:16.069901Z&quot;}}" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Forêt : train et test selon n_estimators</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"FORÊT (plus d'arbres = plateau, jamais de dérive)"</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ne <span class="kw">in</span> [<span class="dv">5</span>, <span class="dv">50</span>, <span class="dv">500</span>]:</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> RandomForestClassifier(n_estimators<span class="op">=</span>ne, random_state<span class="op">=</span><span class="dv">0</span>, n_jobs<span class="op">=-</span><span class="dv">1</span>).fit(X_train, y_train)</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    tr <span class="op">=</span> roc_auc_score(y_train, m.predict_proba(X_train)[:, <span class="dv">1</span>])</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    te <span class="op">=</span> roc_auc_score(y_test, m.predict_proba(X_test)[:, <span class="dv">1</span>])</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>ne<span class="sc">:3d}</span><span class="ss"> arbres : train </span><span class="sc">{</span>tr<span class="sc">:.4f}</span><span class="ss"> / test </span><span class="sc">{</span>te<span class="sc">:.4f}</span><span class="ss">  (écart </span><span class="sc">{</span>tr<span class="op">-</span>te<span class="sc">:.3f}</span><span class="ss">)"</span>)</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Boosting à grand pas : train et test selon n_estimators</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">BOOSTING (learning_rate=0.5 : plus d'arbres = sur-apprentissage)"</span>)</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ne <span class="kw">in</span> [<span class="dv">50</span>, <span class="dv">200</span>, <span class="dv">1000</span>]:</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> GradientBoostingClassifier(learning_rate<span class="op">=</span><span class="fl">0.5</span>, n_estimators<span class="op">=</span>ne,</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>                                   random_state<span class="op">=</span><span class="dv">0</span>).fit(X_train, y_train)</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    tr <span class="op">=</span> roc_auc_score(y_train, m.predict_proba(X_train)[:, <span class="dv">1</span>])</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    te <span class="op">=</span> roc_auc_score(y_test, m.predict_proba(X_test)[:, <span class="dv">1</span>])</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>ne<span class="sc">:4d}</span><span class="ss"> arbres : train </span><span class="sc">{</span>tr<span class="sc">:.4f}</span><span class="ss"> / test </span><span class="sc">{</span>te<span class="sc">:.4f}</span><span class="ss">  (écart </span><span class="sc">{</span>tr<span class="op">-</span>te<span class="sc">:.3f}</span><span class="ss">)"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FORÊT (plus d'arbres = plateau, jamais de dérive)
+    5 arbres : train 0.9889 / test 0.6203  (écart 0.369)
+   50 arbres : train 1.0000 / test 0.6804  (écart 0.320)
+  500 arbres : train 1.0000 / test 0.6815  (écart 0.319)
+
+BOOSTING (learning_rate=0.5 : plus d'arbres = sur-apprentissage)
+    50 arbres : train 0.8109 / test 0.7059  (écart 0.105)
+   200 arbres : train 0.9102 / test 0.6713  (écart 0.239)
+  1000 arbres : train 0.9938 / test 0.6381  (écart 0.356)</code></pre>
+</div>
+</div>
+<p><strong>Lecture.</strong> La forêt sature (train <span class="math inline">\(1{,}0\)</span>, test stable autour de <span class="math inline">\(0{,}68\)</span> — l’écart ne se creuse plus). Le boosting à grand pas <strong>dérive</strong> : son train monte vers <span class="math inline">\(0{,}99\)</span> pendant que son test de <span class="math inline">\(0{,}71\)</span> à <span class="math inline">\(0{,}64\)</span> — l’écart explose, signe du sur-apprentissage. Deux mécaniques opposées, une même conclusion : la forêt pardonne l’excès d’arbres, le boosting non.</p>
+<p>La Séance 9 quittera le terrain des étiquettes : comment <strong>regrouper</strong> des patients sans cible (clustering), et <strong>résumer</strong> des données à beaucoup de variables (réduction de dimension).</p>
+</section>
+<section id="synthèse-à-compléter" class="level2">
+<h2 class="anchored" data-anchor-id="synthèse-à-compléter">Synthèse — à compléter</h2>
+<ol type="1">
+<li>Agréger des modèles <strong>……….</strong> bat chacun d’eux — à condition que leurs erreurs diffèrent (la sagesse de la foule).</li>
+<li>Un échantillon <strong>……….</strong> tire <span class="math inline">\(n\)</span> points avec remise et en retient environ <strong>……….</strong> % ; les autres sont <strong>……….</strong> et offrent une validation gratuite.</li>
+<li>La forêt aléatoire ajoute au bagging un tirage de <strong>……….</strong> à chaque coupure, pour <strong>……….</strong> les arbres ; ajouter des arbres fait <strong>……….</strong>, jamais sur-apprendre.</li>
+<li>Le boosting enchaîne des arbres <strong>……….</strong> qui rattrapent les <strong>……….</strong> des précédents ; il réduit le <strong>……….</strong> et <strong>……….</strong> sur-apprendre si le couple <code>learning_rate</code>/<code>n_estimators</code> est mal réglé.</li>
+<li>L’importance des variables <strong>……….</strong>, elle ne <strong>……….</strong> pas — et favorise les variables <strong>……….</strong>.</li>
+<li>Leçon centrale : le modèle le plus <strong>……….</strong> n’est pas toujours le meilleur ; à performance égale, choisir le plus <strong>……….</strong>.</li>
+</ol>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Retour au sommet</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/elbachir67\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/defilement-cours.js"></script>
+<script src="../../../assets/js/notebook-defilement.js"></script>
+
+
+
+
+</body></html>
