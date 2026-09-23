@@ -196,9 +196,39 @@
   </style>
   <meta name="description" content="Programmation Python — Séance 0 — Mise en place et outils du praticien">
   <script>
-    window.MathJax = window.MathJax || {};
-    window.MathJax["HTML-CSS"] = { availableFonts: [], preferredFont: null, webFont: "TeX" };
+    window.MathJax = {
+      // MathJax 2, si la version rebascule : ses propres polices TeX, et non celles du lecteur.
+      "HTML-CSS": { availableFonts: [], preferredFont: null, webFont: "TeX" },
+      // MathJax 4 : Quarto écrit les formules avec les délimiteurs de LaTeX.
+      tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["$$", "$$"], ["\\[", "\\]"]] },
+      options: { skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"] },
+      // MathJax 4 compose un peu plus grand que la version 2 : sans ce réglage, la slide
+      // « Pourquoi 63 % ? le calcul détaillé » de la séance 8 dépassait le cadre de 32 unités.
+      // C'est un réglage de taille, et non une décision de contenu.
+      chtml: { scale: 0.95 },
+      startup: {
+        ready: function () {
+          MathJax.startup.defaultReady();
+          MathJax.startup.promise.then(function () {
+            // Les formules composées changent la hauteur des slides : reveal doit les recentrer.
+            if (window.Reveal && typeof Reveal.layout === "function") { Reveal.layout(); }
+          });
+        }
+      }
+    };
+
+    // Le greffon de Quarto est neutralisé : on rend une coquille inerte à sa place. Sans cela,
+    // MathJax 2 se chargerait par-dessus et écraserait `window.MathJax`.
+    (function () {
+      var garde;
+      Object.defineProperty(window, "RevealMath", {
+        configurable: true,
+        get: function () { return { id: "mathjax-neutralise", init: function () {} }; },
+        set: function (valeur) { garde = valeur; }
+      });
+    })();
   </script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
 <meta property="og:title" content="Programmation Python — Séance 0 – El Hadji Bassirou Touré">
 <meta property="og:description" content="Programmation Python — Séance 0 — Mise en place et outils du praticien">
 <meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
