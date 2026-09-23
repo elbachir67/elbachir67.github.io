@@ -47,6 +47,38 @@ ECARTES = ("geometry", "hyperref", "inputenc", "fontenc", "babel", "fancyhdr", "
 POLICE = "Source Sans 3"
 
 
+# Mots-clés de TikZ : ils s'écrivent sans barre oblique et ne s'affichent jamais.
+MOTS_TIKZ = {"node", "child", "children", "edge", "from", "parent", "draw", "fill", "at", "to",
+             "and", "cycle", "foreach", "in", "let", "coordinate", "rectangle", "circle",
+             "ellipse", "arc", "grid", "plot", "controls", "pic", "scope", "sin", "cos", "of"}
+
+
+def porte_du_texte(dessin: str) -> bool:
+    """Le schéma affiche-t-il du texte ?
+
+    Le contrôle qui suit — « le texte est sorti en tracés » — cherchait une lettre **n'importe où**
+    dans la source. Or un schéma TikZ en contient toujours : ses options (`fill=blue!30`) et ses
+    mots-clés (`node`, `child`) en sont faits. Le quatrième schéma de la séance 3 d'Introduction à
+    l'IA dessine un arbre de recherche dont **tous les nœuds sont vides** : il n'affiche aucun
+    texte, son SVG n'en portait donc aucun, et le contrôle le refusait à tort.
+
+    Restent ici les mots qui s'afficheront : ni commentaire, ni option entre crochets, ni commande,
+    ni mot-clé de TikZ.
+    """
+    texte = re.sub(r"(?<!\\)%.*", "", dessin)
+    texte = re.sub(r"\\(?:begin|end)\s*\{[A-Za-z*]+\}", " ", texte)
+    # Les options s'imbriquent (`every node/.style={...}` dans le bloc du dessin) : on les retire
+    # du plus intérieur au plus extérieur, jusqu'à ce qu'il n'en reste plus.
+    while True:
+        reduit = re.sub(r"\[[^\[\]]*\]", " ", texte)
+        if reduit == texte:
+            break
+        texte = reduit
+    sans_commandes = re.sub(r"\\[A-Za-z]+", " ", texte)
+    return any(mot.lower() not in MOTS_TIKZ
+               for mot in re.findall(r"[A-Za-zÀ-ÿ]{2,}", sans_commandes))
+
+
 def preambule_du_dessin(source: str) -> list[str]:
     """Lignes du préambule à reprendre dans le document autonome."""
     avant = source.split(r"\begin{document}", 1)[0]
@@ -103,7 +135,7 @@ def compiler(dessin: str, preambule: list[str], cible: Path) -> str | None:
             return (svg.stderr or svg.stdout).strip().splitlines()[-1:][0]
 
         contenu = (travail / "f.svg").read_text(encoding="utf-8")
-        if "<text" not in contenu and re.search(r"[A-Za-z]", dessin):
+        if "<text" not in contenu and porte_du_texte(dessin):
             return ("le texte du schéma est sorti en tracés, et non en texte : la figure serait "
                     "illisible aux lecteurs d'écran et non sélectionnable")
         # Le nettoyage des autres figures ne s'applique pas ici, et c'est un choix mesuré :

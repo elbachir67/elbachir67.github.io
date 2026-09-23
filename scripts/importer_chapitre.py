@@ -60,7 +60,12 @@ CARACTERES = {"oe": "œ", "ldots": "\u2026", "dots": "\u2026", "textbackslash": 
               # Symboles employés **hors** mathématiques dans les CM rédigés : une flèche de prose,
               # une coche de validation. Les laisser passer les faisait signaler comme non convertis.
               "checkmark": "✓", "cmark": "✓", "xmark": "✗", "rightarrow": "→", "leftarrow": "←", "leftrightarrow": "↔",
-              "Rightarrow": "⇒", "times": "×", "pm": "±", "bullet": "•", "degree": "°"}
+              "Rightarrow": "⇒", "times": "×", "pm": "±", "bullet": "•", "degree": "°",
+              # Espaces larges **hors** formules : en HTML, une espace suffit. Dans une formule,
+              # elles ne passent jamais ici — `inline()` met les mathématiques de côté d'abord, et
+              # c'est MathJax qui les compose. Une tentative de remplacement global, au Sprint 6,
+              # avait cassé les formules de huit chapitres publiés (US-62).
+              "quad": " ", "qquad": " "}
 
 # Styles de `lstlisting` définis par beamerucad.sty : « out » et « err » sont des sorties de
 # programme, « sh » une commande shell. Sans style, c'est du code dans le langage du cours.
@@ -394,6 +399,37 @@ PONCTUATION_LATEX = {r"\%": "%", r"\&": "&", r"\_": "_", r"\#": "#", r"\$": "$",
                      r"\,": " ", r"\;": " ", r"\!": "", r"\ ": " "}
 
 
+# Ce que devient une commande mathématique dans un texte alternatif : le mot qu'on prononce.
+# Une légende d'Introduction à l'IA écrit « Value Iteration ($\\gamma=0{,}9$) » ; sans cette table,
+# la commande était simplement effacée et le lecteur d'écran disait « Value Iteration parenthèse
+# égale zéro virgule neuf ». Le PO l'a posé en règle au Sprint 7, pour les neuf textes du cours de
+# ML : on écrit les formules en toutes lettres, comme on les lit à voix haute.
+MATHS_A_VOIX_HAUTE = {
+    "alpha": "alpha", "beta": "bêta", "gamma": "gamma", "delta": "delta",
+    "epsilon": "epsilon", "varepsilon": "epsilon", "zeta": "zêta", "eta": "êta",
+    "theta": "thêta", "vartheta": "thêta", "iota": "iota", "kappa": "kappa",
+    "lambda": "lambda", "mu": "mu", "nu": "nu", "xi": "xi", "rho": "rhô", "varrho": "rhô",
+    "sigma": "sigma", "tau": "tau", "upsilon": "upsilon", "phi": "phi", "varphi": "phi",
+    "chi": "chi", "psi": "psi", "omega": "oméga", "pi": "pi", "varpi": "pi",
+    "Gamma": "Gamma", "Delta": "delta", "Theta": "thêta", "Lambda": "lambda", "Xi": "xi",
+    "Pi": "pi", "Sigma": "sigma", "Phi": "phi", "Psi": "psi", "Omega": "oméga",
+    # Opérateurs et relations : le mot, et non le signe, qu'un lecteur d'écran n'annonce pas tous.
+    "approx": "environ", "simeq": "environ", "leq": "inférieur ou égal à",
+    "geq": "supérieur ou égal à", "neq": "différent de", "times": "fois", "cdot": "fois",
+    "pm": "plus ou moins", "in": "appartient à", "neg": "non", "lnot": "non",
+    # Les flèches gardent leur signe : le site les écrit déjà ainsi dans le texte courant, et un
+    # lecteur d'écran les annonce. Les traduire par un mot donnait « pris par Awa vers va en [4] ».
+    "rightarrow": "→", "to": "→", "leftarrow": "←", "Rightarrow": "⇒", "Leftarrow": "⇐",
+    # `\\mid` sépare l'événement de sa condition : « P(A sachant B) ».
+    "mid": "sachant", "infty": "l'infini", "sum": "somme", "prod": "produit",
+    "dots": "…", "ldots": "…", "cdots": "…",
+    # Noms de fonctions : ce sont déjà des mots, et les effacer laissait « _2 n 664 » là où la
+    # légende disait « \\log_2 n ≈ 664 ».
+    "log": "log", "ln": "ln", "exp": "exp", "max": "max", "min": "min", "lim": "lim",
+    "sin": "sin", "cos": "cos", "tan": "tan", "det": "det", "arg": "arg", "deg": "deg",
+}
+
+
 def sans_balises(texte: str) -> str:
     """Texte nu d'une légende, pour servir de texte alternatif.
 
@@ -404,6 +440,15 @@ def sans_balises(texte: str) -> str:
     """
     for commande, caractere in PONCTUATION_LATEX.items():
         texte = texte.replace(commande, caractere)
+    # Guillemets de LaTeX : une légende d'Introduction à l'IA cite la logique de la séance 2 entre
+    # « ``…'' ». Lus à voix haute, ces signes s'entendraient tels quels.
+    texte = re.sub(r"``\s*(.+?)\s*''", "« \\1 »", texte, flags=re.S)
+    # Accolades échappées : `$\\{0, 1\\}$` laissait « \\0, 1\\ » dans le texte alternatif, la barre
+    # oblique survivant au retrait des accolades.
+    texte = texte.replace("\\{", "").replace("\\}", "")
+    # Les commandes qui **se prononcent** deviennent leur mot, avant que les autres soient effacées.
+    texte = re.sub(r"\\([A-Za-z]+)",
+                   lambda trouve: MATHS_A_VOIX_HAUTE.get(trouve[1], trouve[0]), texte)
     texte = re.sub(r"\\[A-Za-z]+\s*\{([^{}]*)\}", r"\1", texte)
     texte = re.sub(r"\\[A-Za-z]+\s*", "", texte)
     texte = texte.replace("{", "").replace("}", "").replace("$", "")
@@ -675,6 +720,31 @@ def inline(texte: str, conversion: Conversion) -> str:
     # traitement vient **après** la mise de côté des mathématiques : dans une formule, `\textcolor`
     # est rendu par MathJax, et le retirer effacerait ce que le PO a mis en couleur — le point
     # binaire rouge du chapitre 1 du cours de C, par exemple.
+    # `\multicolumn{3}{l}{Succès}` : une cellule qui s'étend sur trois colonnes. Markdown ne sait
+    # pas les fusionner ; le contenu, lui, est du texte du cours et doit rester. La cellule garde
+    # donc son texte et la ligne reste plus courte, `tableau()` la complétant par des cellules
+    # vides. Sans cela, cinq tableaux d'Introduction à l'IA affichaient « {3}{l}{Succès} » en
+    # clair, accolades comprises (US-64).
+    motif_multicolumn = re.compile(r"\\multicolumn\s*\{")
+    while True:
+        trouve = motif_multicolumn.search(texte)
+        if not trouve:
+            break
+        fin_portee = accolade(texte, trouve.end() - 1)
+        suivant = re.match(r"\s*\{", texte[fin_portee + 1:])
+        if not suivant:
+            texte = texte[:trouve.start()] + texte[fin_portee + 1:]
+            continue
+        debut_alignement = fin_portee + 1 + suivant.end() - 1
+        fin_alignement = accolade(texte, debut_alignement)
+        apres_alignement = re.match(r"\s*\{", texte[fin_alignement + 1:])
+        if not apres_alignement:
+            texte = texte[:trouve.start()] + texte[fin_alignement + 1:]
+            continue
+        debut_contenu = fin_alignement + 1 + apres_alignement.end() - 1
+        fin_contenu = accolade(texte, debut_contenu)
+        texte = texte[:trouve.start()] + texte[debut_contenu + 1:fin_contenu] + texte[fin_contenu + 1:]
+
     for commande, garde in (("textcolor", 2),):
         motif_deux = re.compile(rf"\\{commande}\s*\{{")
         while True:
@@ -707,6 +777,9 @@ def inline(texte: str, conversion: Conversion) -> str:
         (r"\\textsc\{", "[", "]{.smallcaps}"),
         # Une adresse littérale devient un lien automatique.
         (r"\\url\{", "<", ">"),
+        # Note de bas de page : Pandoc a une forme en ligne, qui n'oblige pas à inventer une
+        # étiquette ni à la placer en fin de document (US-62).
+        (r"\\footnote\{", "^[", "]"),
     ]
     for motif, avant, apres in remplacements:
         while True:
@@ -726,7 +799,10 @@ def inline(texte: str, conversion: Conversion) -> str:
                            # Couleur de cellule et filet partiel : du style de tableau.
                            ("cellcolor", 1), ("rowcolor", 1), ("columncolor", 1),
                            # Filet horizontal et titre de partie : de la mise en page de document.
-                           ("rule", 2), ("part", 1)):
+                           ("rule", 2), ("part", 1),
+                           # Espace horizontale : elle sépare deux blocs côte à côte, que
+                           # `colonnes_minipage()` traite en colonnes ; ici elle n'a plus d'objet.
+                           ("hspace", 1)):
         motif = re.compile(rf"\\{nom}\s*\{{")
         while True:
             trouve = motif.search(texte)
@@ -759,7 +835,21 @@ def inline(texte: str, conversion: Conversion) -> str:
     texte = re.sub(r"\\(?:vskip|vspace)\*?\s*(?:\{[^}]*\}|-?[\d.]+\s*[a-z]+)", "", texte)
     texte = re.sub(r"\\([A-Za-z]+)\s*(?:\{\})?", commande, texte)
     texte = caracteres_echappes(texte)
-    texte = re.sub(r"\x00(\d+)\x00", lambda t: formules[int(t[1])], texte)
+    # Pandoc refuse une formule en ligne **immédiatement suivie d'un chiffre** : c'est sa façon de
+    # ne pas prendre le « 5$ » et le « 3$ » d'un prix pour une formule. La page affichait donc
+    # « 3$$3 » là où la source écrit « grille 3$\\times$3 », et « $$200 cas » pour « $\\sim$200 cas ».
+    # Une espace fine insécable lève l'ambiguïté sans rien changer à la lecture. La correction se
+    # pose **ici**, où le marqueur dit exactement où commence et finit la formule : appliquée au
+    # texte restitué, une expression régulière prenait la fin d'une formule et le début de la
+    # suivante pour une seule, et cassait les deux.
+    def restituer(trouve: re.Match[str]) -> str:
+        formule = formules[int(trouve[1])]
+        chiffre = trouve[2]
+        if chiffre and formule.startswith("$") and not formule.startswith("$$"):
+            return formule + "\u202f" + chiffre
+        return formule + chiffre
+
+    texte = re.sub(r"\x00(\d+)\x00(\d?)", restituer, texte)
     return re.sub(r"\n{3,}", "\n\n", texte).strip()
 
 
@@ -838,9 +928,34 @@ def tableau(contenu: str, conversion: Conversion) -> str:
     return "\n".join([entete, separateur] + corps)
 
 
+# Découpe d'une liste : `\item`, `\begin{…}` et `\end{…}`, pour ne couper qu'au premier niveau.
+MOTIF_ELEMENTS = re.compile(r"\\item\b|\\begin\{|\\end\{")
+
+
+def elements_de_liste(contenu: str) -> list[str]:
+    """Les éléments d'une liste, sans toucher aux `\\item` des listes imbriquées.
+
+    La recette de recherche générique de la séance 3 d'Introduction à l'IA numérote ses étapes, et
+    l'une d'elles ouvre sa propre énumération. Découper sur **tous** les `\\item` coupait
+    l'énumération intérieure en deux : le fragment qui portait son `\\begin{enumerate}` n'avait
+    plus de `\\end{enumerate}`, et la conversion s'arrêtait sur « environnement non fermé ».
+    """
+    coupes, profondeur = [], 0
+    for trouve in MOTIF_ELEMENTS.finditer(contenu):
+        jeton = trouve.group()
+        if jeton == "\\begin{":
+            profondeur += 1
+        elif jeton == "\\end{":
+            profondeur -= 1
+        elif profondeur == 0:
+            coupes.append((trouve.end(), trouve.start()))
+    fins = [debut for _, debut in coupes[1:]] + [len(contenu)]
+    return [contenu[apres_item:fin] for (apres_item, _), fin in zip(coupes, fins)]
+
+
 def liste(contenu: str, ordonnee: bool, conversion: Conversion) -> str:
     puces = []
-    for element in re.split(r"\\item\b", contenu)[1:]:
+    for element in elements_de_liste(contenu):
         corps = convertir(element, conversion).strip()
         if not corps:
             continue
@@ -909,6 +1024,98 @@ def colonnes(contenu: str, conversion: Conversion) -> str:
         fraction = re.match(r"\s*([0-9.]+)\s*\\(?:linewidth|textwidth)", largeur)
         pourcent = f'{round(float(fraction[1]) * 100)}%' if fraction else "50%"
         blocs.append(f'::: {{.column width="{pourcent}"}}')
+        blocs.append(convertir(corps, conversion))
+        blocs.append(":::")
+    blocs.append(":::")
+    return "\n".join(blocs)
+
+
+def lignes_de_formule(corps: str) -> list[str]:
+    """Les lignes d'un `align`, coupées sur « \\\\ » hors accolades."""
+    lignes, profondeur, debut, i = [], 0, 0, 0
+    while i < len(corps):
+        if corps[i] == "{":
+            profondeur += 1
+        elif corps[i] == "}":
+            profondeur -= 1
+        elif corps.startswith("\\\\", i) and profondeur == 0:
+            lignes.append(corps[debut:i])
+            i += 2
+            debut = i
+            continue
+        i += 1
+    lignes.append(corps[debut:])
+    return [ligne for ligne in (l.strip() for l in lignes) if ligne]
+
+
+def equations_etiquetees(corps: str, interne: str) -> str:
+    """Un `align` qui porte **plusieurs** étiquettes devient une équation numérotée par ligne.
+
+    Quarto numérote et référence une formule hors ligne quand son bloc porte `{#eq-…}` : un bloc,
+    une étiquette. Les trois règles du Monde de Bouki, à la séance 2 d'Introduction à l'IA,
+    tiennent dans un seul `align` et portent trois `\\label` : seule la première était reprise, et
+    la page renvoyait à deux équations qui n'existaient pas — « Unable to resolve crossref
+    @eq-r2 », disait le rendu, et le lecteur voyait « (?) ».
+
+    Chaque ligne garde son environnement d'alignement, et donc ses `&` ; l'alignement d'une ligne
+    à l'autre se perd, ce qu'une page web ne montrait de toute façon pas.
+    """
+    blocs = []
+    for ligne in lignes_de_formule(corps):
+        etiquette = ""
+        marque = MOTIF_LABEL.search(ligne)
+        if marque:
+            etiquette = identifiant_quarto(marque[1])
+            ligne = (ligne[:marque.start()] + ligne[marque.end():]).strip()
+        if not ligne:
+            continue
+        suffixe = f" {{#{etiquette}}}" if etiquette else ""
+        blocs.append(f"$$\n\\begin{{{interne}}}\n{ligne}\n\\end{{{interne}}}\n$${suffixe}")
+    return "\n\n".join(blocs)
+
+
+def colonnes_minipage(contenu: str, conversion: Conversion) -> str:
+    """`minipage` -> colonne Quarto, ce qui précède formant la première colonne (US-62).
+
+    La séance 3 d'Introduction à l'IA pose son arbre de recherche à côté du décompte de la mémoire
+    qu'il occupe : un `tikzpicture`, une espace horizontale, puis un `minipage` large de la moitié
+    de la page. Converti bloc après bloc, le décompte passait sous la figure — et le `minipage`
+    n'était pas converti du tout, faute d'équivalent connu.
+
+    Les largeurs sont écrites en fractions de `\\textwidth`, comme les colonnes Beamer les écrivent
+    en fractions de `\\linewidth` ; ce qui précède prend ce qui reste.
+    """
+    morceaux: list[tuple[str, str]] = []
+    reste = contenu
+    while True:
+        trouve = re.search(r"\\begin\{minipage\}", reste)
+        if not trouve:
+            morceaux.append(("", reste))
+            break
+        morceaux.append(("", reste[:trouve.start()]))
+        position = trouve.end()
+        _, position = option(reste, position)          # alignement facultatif : [t], [b]
+        largeur, position = argument(reste, position)  # largeur : {0.5\textwidth}
+        corps, suite = environnement(reste, "minipage", position)
+        morceaux.append((largeur, corps))
+        reste = reste[suite:]
+
+    def pourcentage(largeur: str) -> int:
+        fraction = re.match(r"\s*([0-9.]+)\s*\\(?:linewidth|textwidth|columnwidth)", largeur)
+        return round(float(fraction[1]) * 100) if fraction else 50
+
+    colonnes_reelles = [(l, c) for l, c in morceaux if c.strip()]
+    if not any(l for l, _ in colonnes_reelles):
+        return convertir(contenu, conversion)
+    declarees = sum(pourcentage(l) for l, _ in colonnes_reelles if l)
+    libres = [i for i, (l, _) in enumerate(colonnes_reelles) if not l]
+    # Ce qui n'a pas de largeur déclarée — la figure, le plus souvent — se partage le reste.
+    reste_pourcent = max(100 - declarees, 20 * len(libres)) // max(len(libres), 1)
+
+    blocs = ["::: {.columns}"]
+    for largeur, corps in colonnes_reelles:
+        part = pourcentage(largeur) if largeur else reste_pourcent
+        blocs.append(f'::: {{.column width="{part}%"}}')
         blocs.append(convertir(corps, conversion))
         blocs.append(":::")
     blocs.append(":::")
@@ -999,6 +1206,8 @@ def convertir(texte: str, conversion: Conversion) -> str:
         titre, position = option(reste, position)
         if nom == "tabular":  # la spécification des colonnes ne sert qu'à LaTeX
             _, position = argument(reste, position)
+        elif nom == "minipage":  # la largeur est traitée par `colonnes_minipage()`
+            _, position = argument(reste, position)
         elif nom in conversion.encadres and position < len(reste) and reste[position] == "{":
             # Un encadré `tcolorbox` porte son titre entre accolades, là où un encadré Beamer le met
             # entre crochets : `\begin{definitionbox}{Le langage C}`.
@@ -1043,6 +1252,10 @@ def convertir(texte: str, conversion: Conversion) -> str:
             # Une équation étiquetée se numérote et se référence : Quarto le fait quand le bloc
             # porte `{#eq-…}` (US-61). L'étiquette est retirée du corps, où LaTeX seul la lisait.
             corps = contenu.strip()
+            if interne and len(MOTIF_LABEL.findall(corps)) > 1:
+                morceaux.append(conversion.proteger(equations_etiquetees(corps, interne)))
+                reste = reste[suite:]
+                continue
             etiquette = ""
             marque = MOTIF_LABEL.search(corps)
             if marque:
@@ -1059,6 +1272,13 @@ def convertir(texte: str, conversion: Conversion) -> str:
         elif nom == "columns":
             morceaux.append(conversion.proteger(colonnes(contenu, conversion)))
         elif nom in ("center", "block", "column"):
+            if "\\begin{minipage}" in contenu:
+                morceaux.append(conversion.proteger(colonnes_minipage(contenu, conversion)))
+            else:
+                morceaux.append(convertir(contenu, conversion))
+        elif nom == "minipage":
+            # Un `minipage` seul, hors d'un bloc centré : il n'y a rien à mettre à côté, son
+            # contenu suit le fil de la page.
             morceaux.append(convertir(contenu, conversion))
         else:
             morceaux.append(conversion.non_converti(f"\\begin{{{nom}}} … \\end{{{nom}}}"))

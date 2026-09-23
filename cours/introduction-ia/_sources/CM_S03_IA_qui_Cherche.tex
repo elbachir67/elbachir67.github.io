@@ -1,0 +1,1863 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc,fit,backgrounds,decorations.pathreplacing}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{pifont}
+
+% Commandes pour checkmarks
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+% Configuration des hyperliens
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+% Configuration des listings Python
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{gray!5},
+    frame=single,
+    rulecolor=\color{gray!30},
+    breaklines=true,
+    tabsize=4,
+    showstringspaces=false,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1 
+             {â}{{\^a}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ç}{{\c{c}}}1
+             {É}{{\'E}}1 {È}{{\`E}}1 {Ê}{{\^E}}1 {À}{{\`A}}1
+}
+
+% Boîtes colorées
+\newtcolorbox{definitionbox}[1][]{
+    colback=blue!5,
+    colframe=blue!50,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{exemplebox}[1][]{
+    colback=green!5,
+    colframe=green!50!black,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{attentionbox}[1][]{
+    colback=orange!5,
+    colframe=orange!70,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{retenirbox}[1][]{
+    colback=yellow!10,
+    colframe=yellow!50!black,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{theorembox}[1][]{
+    colback=purple!5,
+    colframe=purple!50,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{prereqbox}[1][]{
+    colback=cyan!5,
+    colframe=cyan!50!black,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{recipebox}[1][]{
+    colback=teal!5,
+    colframe=teal!50!black,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+% En-tête et pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small S03 -- L'IA qui Cherche}
+\fancyhead[R]{\small Introduction à l'IA -- M1}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\title{\textbf{Séance 3 : L'IA qui Cherche}\\
+\large Algorithmes de Recherche pour la Résolution de Problèmes\\[0.5cm]
+\normalsize Introduction à l'Intelligence Artificielle}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Faculté des Sciences et Techniques\\
+Université Cheikh Anta Diop de Dakar}
+\date{M1 --- Semestre 1}
+
+\begin{document}
+
+\maketitle
+
+\begin{prereqbox}[Navigation conceptuelle]
+\textbf{Prérequis :} Agents intelligents et cadre PEAS (S1). Notions de base en structures de données (files, piles).\\
+\textbf{Ouvre la voie vers :} Raisonnement sous incertitude (S5) où la recherche s'étend aux environnements stochastiques. Apprentissage par renforcement (S6) qui combine recherche et apprentissage.
+\end{prereqbox}
+
+\vspace{0.5cm}
+
+\tableofcontents
+
+\newpage
+
+%=============================================================================
+\section{Introduction : Résoudre, c'est chercher}
+%=============================================================================
+
+Dans la Séance 1, nous avons défini un agent intelligent comme une entité qui perçoit son environnement et agit de manière rationnelle pour atteindre ses objectifs. La question centrale de cette séance est : \textbf{comment un agent trouve-t-il la séquence d'actions qui mène à son but ?}
+
+La réponse tient en un mot : il \textbf{cherche}. Plus précisément, il explore systématiquement les possibilités jusqu'à trouver une solution. Cette idée, apparemment triviale, est au cœur d'une grande partie de l'Intelligence Artificielle.
+
+\subsection{La métaphore de la recherche}
+
+Un agent basé sur des buts doit considérer des séquences d'actions qui forment un chemin vers l'état but. Un problème devient ainsi un espace de possibilités à explorer.
+
+Considérons un agent GPS devant trouver un itinéraire de Dakar à Saint-Louis. L'agent ne « voit » pas directement le chemin optimal. Il dispose seulement d'une carte (un graphe) et doit explorer les différentes routes possibles. La recherche est cette exploration méthodique.
+
+\subsection{Pourquoi étudier les algorithmes de recherche ?}
+
+Les algorithmes de recherche sont fondamentaux pour plusieurs raisons :
+
+\begin{enumerate}
+    \item \textbf{Universalité.} De nombreux problèmes d'IA se formulent naturellement comme des problèmes de recherche : planification de trajets, jeux, démonstration de théorèmes, configuration optimale, ordonnancement.
+    
+    \item \textbf{Fondement des techniques avancées.} Les algorithmes de recherche sont les briques de base des systèmes plus sophistiqués. AlphaGo, qui a battu le champion du monde de Go en 2016, combine des réseaux de neurones avec une recherche arborescente Monte Carlo.
+    
+    \item \textbf{Illustration du compromis fondamental.} Les algorithmes de recherche illustrent parfaitement le compromis omniprésent en IA entre \textit{optimalité} (trouver la meilleure solution), \textit{complétude} (garantir de trouver une solution si elle existe), et \textit{efficacité} (le faire rapidement).
+\end{enumerate}
+
+\subsection{Notre exemple fil rouge : le réseau routier sénégalais}
+
+Tout au long de cette séance, nous utiliserons un même exemple pour illustrer chaque algorithme. Cet exemple unique permettra de comparer directement le comportement des différentes stratégies de recherche.
+
+\begin{exemplebox}[Exemple fil rouge -- Navigation Dakar $\rightarrow$ Saint-Louis]
+Un voyageur à Dakar souhaite rejoindre Saint-Louis. Il dispose d'une carte routière montrant les principales villes et les distances entre elles.
+
+\textbf{Objectif :} Trouver le chemin le plus court (en kilomètres) de Dakar à Saint-Louis.
+
+Le réseau routier comprend 7 villes reliées par 8 routes de longueurs variées. Le chemin optimal passe par Rufisque, Thiès et Louga pour un total de 270 km.
+\end{exemplebox}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    city/.style={circle, draw=blue!60, fill=blue!10, thick, minimum size=1.2cm, font=\small\bfseries},
+    start/.style={city, draw=green!60, fill=green!20},
+    goal/.style={city, draw=red!60, fill=red!20},
+    road/.style={thick, gray!70},
+    cost/.style={font=\footnotesize, fill=white, inner sep=2pt}
+]
+
+% Positions des villes (approximatives géographiquement)
+\node[start] (D) at (0,0) {Dakar};
+\node[city] (R) at (2.5,0.5) {Rufisque};
+\node[city] (M) at (2,-2) {Mbour};
+\node[city] (T) at (5.5,0) {Thiès};
+\node[city] (Di) at (5,-2.5) {Diourbel};
+\node[city] (L) at (8.5,0.5) {Louga};
+\node[goal] (S) at (11.5,0) {St-Louis};
+
+% Routes avec distances
+\draw[road] (D) -- node[cost, above] {30} (R);
+\draw[road] (D) -- node[cost, left] {80} (M);
+\draw[road] (R) -- node[cost, above] {50} (T);
+\draw[road] (M) -- node[cost, below] {70} (T);
+\draw[road] (M) -- node[cost, below right] {130} (Di);
+\draw[road] (T) -- node[cost, above] {120} (L);
+\draw[road] (Di) -- node[cost, right] {100} (L);
+\draw[road] (L) -- node[cost, above] {70} (S);
+
+% Légende
+\node[below=0.3cm of D, font=\scriptsize, green!60!black] {Départ};
+\node[below=0.3cm of S, font=\scriptsize, red!60!black] {Arrivée};
+
+\end{tikzpicture}
+\caption{Réseau routier sénégalais -- notre exemple fil rouge. Les nombres indiquent les distances en kilomètres. Le chemin optimal Dakar $\rightarrow$ Rufisque $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis totalise 270 km.}
+\label{fig:reseau}
+\end{figure}
+
+\subsection{Structure de la séance}
+
+Cette séance suit une progression naturelle :
+
+\begin{enumerate}
+    \item \textbf{Formulation} (§2) : Comment transformer un problème concret en un problème de recherche ?
+    \item \textbf{Stratégie générale} (§3) : Quel est le schéma commun à tous les algorithmes de recherche ?
+    \item \textbf{Recherche non informée} (§4--6) : BFS, DFS, UCS -- chercher sans information sur le but.
+    \item \textbf{Recherche informée} (§7--9) : Greedy, A* -- exploiter une estimation de la distance au but.
+    \item \textbf{Conception d'heuristiques} (§10) : Comment créer de bonnes estimations ?
+    \item \textbf{Comparaison et choix} (§11) : Quel algorithme pour quel problème ?
+    \item \textbf{Recherche locale} (§12) : Optimiser sans construire de chemin.
+\end{enumerate}
+
+%=============================================================================
+\section{Formulation d'un problème de recherche}
+%=============================================================================
+
+Avant de chercher une solution, il faut définir précisément ce qu'est le problème. La \textit{formulation} est cruciale : le processus de formulation d'un problème est aussi important que le processus de résolution.
+
+\subsection{Les cinq composants d'un problème}
+
+Pour chercher un chemin, notre agent GPS a besoin de savoir cinq choses. Où est-il maintenant ? Où veut-il aller ? Quels endroits existent sur la carte ? Quelles routes relient ces endroits ? Et combien coûte chaque route ? Ces cinq questions, posées pour n'importe quel problème, donnent les cinq composants d'un problème de recherche.
+
+\begin{definitionbox}[Définition -- Problème de recherche]
+Un \textbf{problème de recherche} est défini par un quintuplet $(S, s_0, G, A, c)$ :
+\begin{itemize}
+    \item $S$ : l'ensemble des \textbf{états} possibles (l'espace d'états)
+    \item $s_0 \in S$ : l'\textbf{état initial}
+    \item $G \subseteq S$ : l'ensemble des \textbf{états buts} (goal states)
+    \item $A$ : la fonction d'\textbf{actions} disponibles : $A(s)$ retourne les actions possibles depuis $s$
+    \item $c$ : la fonction de \textbf{coût} : $c(s, a, s')$ est le coût de l'action $a$ menant de $s$ à $s'$
+\end{itemize}
+
+Autrement dit, un problème de recherche, c'est un espace de possibilités ($S$), un point de départ ($s_0$), une destination ($G$), des chemins entre les possibilités ($A$), et un prix pour chaque chemin ($c$).
+\end{definitionbox}
+
+Cette formalisation abstraite s'applique à de nombreux problèmes concrets.
+
+\begin{exemplebox}[Application -- Navigation Dakar $\rightarrow$ Saint-Louis]
+Pour notre exemple fil rouge :
+\begin{itemize}
+    \item $S = \{\text{Dakar, Rufisque, Mbour, Thiès, Diourbel, Louga, Saint-Louis}\}$ (7 états)
+    \item $s_0 = \text{Dakar}$
+    \item $G = \{\text{Saint-Louis}\}$
+    \item $A(\text{Dakar}) = \{\text{aller\_Rufisque}, \text{aller\_Mbour}\}$, etc.
+    \item $c(\text{Dakar}, \text{aller\_Rufisque}, \text{Rufisque}) = 30$ km
+\end{itemize}
+\end{exemplebox}
+
+\subsection{La notion de solution}
+
+Une fois le problème formulé, qu'est-ce qu'une solution ?
+
+\begin{definitionbox}[Définition -- Solution et solution optimale]
+Une \textbf{solution} est une séquence d'actions menant de l'état initial à un état but.
+
+Une \textbf{solution optimale} est une solution dont le coût total (somme des coûts des actions) est minimal parmi toutes les solutions.
+\end{definitionbox}
+
+Pour notre exemple, plusieurs chemins mènent de Dakar à Saint-Louis :
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+\textbf{Chemin} & \textbf{Coût total} \\
+\midrule
+Dakar $\rightarrow$ Rufisque $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis & 30 + 50 + 120 + 70 = \textbf{270 km} \\
+Dakar $\rightarrow$ Mbour $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis & 80 + 70 + 120 + 70 = 340 km \\
+Dakar $\rightarrow$ Mbour $\rightarrow$ Diourbel $\rightarrow$ Louga $\rightarrow$ Saint-Louis & 80 + 130 + 100 + 70 = 380 km \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La solution optimale est le premier chemin, avec un coût de 270 km.
+
+\subsection{L'hypothèse des coûts positifs}
+
+Dans cette séance, nous supposons que tous les coûts sont \textbf{strictement positifs} : $c(s, a, s') > 0$ pour toute action. Cette hypothèse est naturelle pour les distances, les temps, ou les consommations d'énergie. Elle garantit que les chemins plus longs (en nombre d'actions) ne sont pas automatiquement moins coûteux.
+
+\begin{attentionbox}[Attention -- Coûts nuls ou négatifs]
+Si des actions peuvent avoir un coût nul ou négatif, certains algorithmes (comme UCS et A*) nécessitent des adaptations. Par exemple, des cycles de coût négatif peuvent rendre le problème d'optimisation indéfini.
+\end{attentionbox}
+
+\subsection{Espace d'états vs arbre de recherche}
+
+Une distinction cruciale est celle entre l'\textbf{espace d'états} (le graphe du problème) et l'\textbf{arbre de recherche} (la structure explorée par l'algorithme).
+
+L'espace d'états de notre exemple est un graphe à 7 nœuds et 8 arêtes. Mais lorsqu'un algorithme explore ce graphe, il construit implicitement un \textit{arbre} : chaque chemin depuis la racine (état initial) jusqu'à un nœud représente une séquence d'actions.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    level distance=1.8cm,
+    sibling distance=3cm,
+    treenode/.style={circle, draw, minimum size=0.9cm, font=\small},
+    edge from parent/.style={draw, ->, thick}
+]
+\node[treenode, fill=green!20] {D}
+    child {node[treenode] {R}
+        child {node[treenode] {T}
+            child {node[treenode] {L}
+                child {node[treenode, fill=red!20] {S}}
+            }
+        }
+    }
+    child {node[treenode] {M}
+        child {node[treenode] {T}
+            child {node[treenode] {...}}
+        }
+        child {node[treenode] {Di}
+            child {node[treenode] {...}}
+        }
+    };
+\end{tikzpicture}
+\caption{L'arbre de recherche est potentiellement infini même si le graphe est fini. Chaque chemin depuis la racine représente une séquence d'actions. D = Dakar, R = Rufisque, M = Mbour, T = Thiès, Di = Diourbel, L = Louga, S = Saint-Louis.}
+\label{fig:arbre}
+\end{figure}
+
+\begin{attentionbox}[Attention -- L'arbre peut être infini]
+Même si l'espace d'états est fini, l'arbre de recherche peut être infini si le graphe contient des cycles. Par exemple, le chemin Dakar $\rightarrow$ Rufisque $\rightarrow$ Dakar $\rightarrow$ Rufisque $\rightarrow$ ... est un chemin valide (mais stupide) de longueur infinie.
+
+Les algorithmes de recherche doivent gérer ce risque, soit en évitant de revisiter des états (\textit{graph search}), soit en garantissant de trouver une solution malgré les cycles.
+\end{attentionbox}
+
+%=============================================================================
+\section{La stratégie générale de recherche}
+%=============================================================================
+
+Tous les algorithmes de recherche que nous étudierons partagent un schéma commun. Comprendre ce schéma permet de saisir rapidement chaque algorithme comme une \textit{variation} sur un thème unique.
+
+\subsection{L'idée centrale : la frontière}
+
+Le concept clé est celui de \textbf{frontière} (ou \textit{fringe}, ou \textit{open list}). La frontière est l'ensemble des nœuds découverts mais pas encore explorés. Elle représente la « limite » entre la partie connue et la partie inconnue de l'espace de recherche.
+
+\begin{definitionbox}[Définition -- Frontière]
+La \textbf{frontière} est une structure de données contenant tous les nœuds qui ont été générés mais pas encore expansés. Chaque nœud de la frontière représente un chemin partiel depuis l'état initial.
+\end{definitionbox}
+
+\subsection{La recette universelle}
+
+Voici la stratégie commune à tous les algorithmes de recherche :
+
+\begin{recipebox}[Recette -- Recherche générique]
+\begin{enumerate}
+    \item \textbf{Initialiser} la frontière avec le nœud initial (Dakar)
+    \item \textbf{Répéter} :
+    \begin{enumerate}
+        \item Si la frontière est vide : \textbf{échec} (pas de solution)
+        \item \textbf{Choisir} un nœud de la frontière (selon la stratégie)
+        \item Si ce nœud est un but : \textbf{succès} (retourner le chemin)
+        \item \textbf{Expanser} ce nœud : ajouter ses successeurs à la frontière
+    \end{enumerate}
+\end{enumerate}
+\end{recipebox}
+
+La seule différence entre BFS, DFS, UCS, Greedy et A* est la \textbf{stratégie de choix} à l'étape 2b. Cette observation est fondamentale : les algorithmes de recherche sont des variations sur le choix de quel nœud explorer en premier.
+
+\subsection{Vocabulaire et reconstruction du chemin}
+
+Avant de détailler chaque algorithme, clarifions le vocabulaire et un point important : comment retrouve-t-on le chemin une fois le but atteint ?
+
+\begin{definitionbox}[Vocabulaire -- États d'un nœud]
+Au cours de la recherche, un nœud peut être dans trois états :
+\begin{itemize}
+    \item \textbf{Inconnu} : l'algorithme ne l'a pas encore rencontré.
+    \item \textbf{Dans la frontière} (ou \textit{ouvert}) : le nœud a été \textbf{découvert} comme successeur d'un nœud exploré, mais n'a pas encore été traité lui-même. Il attend dans la frontière.
+    \item \textbf{Exploré} (ou \textit{fermé}) : le nœud a été \textbf{retiré} de la frontière et ses successeurs ont été générés.
+\end{itemize}
+\end{definitionbox}
+
+\textbf{Reconstruction du chemin.} Lorsqu'on ajoute un nœud $n'$ à la frontière comme successeur de $n$, on enregistre le \textbf{parent} de $n'$ : $\text{parent}(n') = n$. Quand le but est atteint, on remonte la chaîne des parents pour reconstituer le chemin :
+$$\text{But} \xrightarrow{\text{parent}} n_k \xrightarrow{\text{parent}} n_{k-1} \xrightarrow{\text{parent}} \cdots \xrightarrow{\text{parent}} s_0$$
+
+Dans nos traces d'exécution, la colonne \textbf{Parent} indique quel nœud a permis de découvrir chaque nouveau nœud. C'est cette information qui permet de reconstituer le chemin final.
+
+\subsection{Les paramètres de la complexité}
+
+Pour mesurer la difficulté d'un problème de recherche et comparer les algorithmes, trois paramètres sont essentiels. Ces paramètres apparaîtront dans toutes les analyses de complexité de cette séance.
+
+\begin{definitionbox}[Définition -- Paramètres de la complexité]
+\begin{itemize}
+    \item $b$ : le \textbf{facteur de branchement} (\textit{branching factor}) -- le nombre maximal de successeurs d'un nœud
+    \item $d$ : la \textbf{profondeur de la solution} -- le nombre d'actions dans le chemin le plus court vers un état but
+    \item $m$ : la \textbf{profondeur maximale} de l'arbre de recherche -- la longueur du plus long chemin sans cycle
+\end{itemize}
+\end{definitionbox}
+
+Calculons ces paramètres pour notre réseau routier sénégalais :
+
+\begin{exemplebox}[Paramètres $b$ -- $d$ -- $m$ sur notre exemple]
+\textbf{Facteur de branchement $b$.} Comptons les voisins de chaque ville :
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Ville} & \textbf{Voisins} & \textbf{Nombre} \\
+\midrule
+Dakar & Rufisque, Mbour & 2 \\
+Rufisque & Dakar, Thiès & 2 \\
+Mbour & Dakar, Thiès, Diourbel & 3 \\
+Thiès & Rufisque, Mbour, Louga & 3 \\
+Diourbel & Mbour, Louga & 2 \\
+Louga & Thiès, Diourbel, Saint-Louis & 3 \\
+Saint-Louis & Louga & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le facteur de branchement maximal est $b = 3$ (Mbour, Thiès, Louga). Le facteur de branchement moyen est $16/7 \approx 2{,}3$.
+
+\textbf{Profondeur de la solution $d$.} Le chemin le plus court (en nombre d'étapes) de Dakar à Saint-Louis comporte 4 arêtes : Dakar $\rightarrow$ Rufisque $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis. Donc $d = 4$.
+
+\textbf{Profondeur maximale $m$.} Le plus long chemin simple (sans répétition de ville) depuis Dakar comporte au plus 6 arêtes (puisqu'il y a 7 villes). En pratique, $m = 6$. Mais si l'algorithme n'évite pas les cycles, $m = \infty$.
+\end{exemplebox}
+
+\subsection{L'explosion combinatoire}
+
+Ces trois paramètres révèlent le défi fondamental de la recherche : l'\textbf{explosion combinatoire}. Le nombre de nœuds dans l'arbre de recherche croît \textit{exponentiellement} avec la profondeur.
+
+Au niveau 0 (la racine), il y a 1 nœud. Au niveau 1, il y a au plus $b$ nœuds. Au niveau 2, chacun des $b$ nœuds a au plus $b$ successeurs, soit $b^2$ nœuds. Au niveau $d$, le nombre de nœuds est au plus $b^d$. Le total cumulé est :
+$$1 + b + b^2 + \cdots + b^d = \frac{b^{d+1} - 1}{b - 1} = O(b^d)$$
+
+Autrement dit, le nombre total de nœuds double (environ) à chaque niveau, et le dernier niveau contient à lui seul autant de nœuds que tous les précédents réunis.
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$b$ & $d$ & $b^d$ & \textbf{Interprétation} \\
+\midrule
+3 & 4 & 81 & Notre réseau routier : très gérable \\
+3 & 10 & 59\,049 & Un réseau régional : encore faisable \\
+3 & 20 & 3,5 milliards & Déjà problématique \\
+10 & 10 & 10 milliards & Typique d'un jeu comme les échecs \\
+35 & 80 & $\sim 10^{123}$ & Le Go : plus de nœuds que d'atomes dans l'univers \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{retenirbox}[Point clé -- L'explosion combinatoire]
+L'explosion combinatoire est \textbf{la} raison pour laquelle les algorithmes de recherche naïfs ne suffisent pas pour les problèmes réels. C'est aussi la raison pour laquelle les heuristiques (§7--9) sont si importantes : elles permettent de \textit{guider} la recherche pour éviter d'explorer l'arbre entier.
+\end{retenirbox}
+
+\subsection{Propriétés des algorithmes de recherche}
+\label{sec:proprietes}
+
+Pour évaluer et comparer les algorithmes, nous utilisons quatre critères standard :
+
+\begin{definitionbox}[Critères d'évaluation des algorithmes de recherche]
+\begin{itemize}
+    \item \textbf{Complétude} : L'algorithme trouve-t-il toujours une solution si elle existe ?
+    \item \textbf{Optimalité} : L'algorithme trouve-t-il toujours la solution de coût minimal ?
+    \item \textbf{Complexité temporelle} : Combien de nœuds sont générés/explorés au pire cas ?
+    \item \textbf{Complexité spatiale} : Combien de nœuds sont stockés en mémoire au pire cas ?
+\end{itemize}
+\end{definitionbox}
+
+Les deux premiers critères (complétude, optimalité) sont des propriétés de \textit{correction}. Les deux derniers mesurent le \textit{coût} de l'algorithme. La distinction entre complexité temporelle et spatiale mérite une attention particulière, car elle est au c\oe ur de tous les compromis entre algorithmes.
+
+\begin{attentionbox}[Temporelle vs Spatiale -- Le rôle central de la frontière]
+Les deux complexités portent sur le même objet -- la \textbf{frontière} -- mais sous deux angles différents :
+
+\begin{itemize}
+    \item \textbf{Complexité temporelle} = combien de n\oe uds ont \textbf{transité} par la frontière au total (entrés puis sortis). Chaque n\oe ud retiré de la frontière puis expansé consomme du temps de calcul. Même si ce n\oe ud est ensuite oublié, le travail a été fait.
+    \item \textbf{Complexité spatiale} = quelle \textbf{taille maximale} la frontière a atteinte à un instant donné, plus les n\oe uds gardés en mémoire (ensemble \texttt{explored}).
+\end{itemize}
+
+L'analogie est celle d'un restaurant de thiéboudiène à la Médina : il peut \textit{servir} 200 clients dans la journée (complexité temporelle = 200), mais n'a que 20 places assises (complexité spatiale = 20). Les clients mangent et partent, libérant les places pour les suivants.
+
+\textbf{Conséquence fondamentale :} un algorithme peut visiter un grand nombre de n\oe uds (forte temporelle) tout en ne gardant qu'un petit nombre de n\oe uds en mémoire simultanément (faible spatiale). C'est exactement ce que fait DFS par rapport à BFS, comme nous le verrons dans les sections suivantes.
+\end{attentionbox}
+
+Ces critères sont souvent en tension : un algorithme optimal peut être plus lent qu'un algorithme non-optimal. Le choix de l'algorithme dépend du contexte et des priorités. En pratique, c'est souvent la \textbf{complexité spatiale} qui est le facteur limitant : un ordinateur peut tourner longtemps (on est patient), mais s'il manque de RAM, le programme s'arrête. C'est cette contrainte mémoire qui motivera l'approfondissement itératif (IDS) et les variantes de A* à mémoire limitée (IDA*).
+
+%=============================================================================
+\section{Recherche en largeur (BFS)}
+%=============================================================================
+
+Le premier algorithme que nous étudions est la \textbf{recherche en largeur d'abord} (Breadth-First Search, BFS). Son principe est simple : explorer les nœuds par ordre de profondeur croissante.
+
+\subsection{Principe}
+
+BFS utilise une \textbf{file FIFO} (First-In-First-Out) comme frontière. Les nœuds sont explorés dans l'ordre où ils ont été découverts : les nœuds les plus anciens d'abord.
+
+\begin{recipebox}[Recette -- BFS (Recherche en largeur)]
+\begin{itemize}
+    \item \textbf{Structure de la frontière :} File FIFO
+    \item \textbf{Règle de choix :} Toujours prendre le nœud le plus ancien (le premier entré)
+    \item \textbf{Effet :} Explorer niveau par niveau (tous les nœuds à profondeur $d$ avant ceux à profondeur $d+1$)
+\end{itemize}
+\end{recipebox}
+
+\subsection{Exécution sur notre exemple}
+
+Appliquons BFS à notre réseau routier. Nous utilisons la \textit{graph search} : un état déjà exploré n'est pas réinséré dans la frontière. Les successeurs sont ajoutés dans l'ordre alphabétique.
+
+{\small
+\begin{center}
+\begin{tabular}{|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & \textbf{Frontière après expansion} & \textbf{Parents mis à jour} \\
+\hline
+0 & -- & [Dakar] & -- \\
+1 & Dakar & [Rufisque, Mbour] & R$\leftarrow$D, M$\leftarrow$D \\
+2 & Rufisque & [Mbour, Thiès] & T$\leftarrow$R \\
+3 & Mbour & [Thiès, Diourbel] & Di$\leftarrow$M \\
+  & & \multicolumn{2}{l|}{\scriptsize Thiès déjà dans la frontière $\rightarrow$ ignoré} \\
+4 & Thiès & [Diourbel, Louga] & L$\leftarrow$T \\
+5 & Diourbel & [Louga] & \\
+  & & \multicolumn{2}{l|}{\scriptsize Louga déjà dans la frontière $\rightarrow$ ignoré} \\
+6 & Louga & [Saint-Louis] & S$\leftarrow$L \\
+7 & \textbf{Saint-Louis} & \textbf{BUT ATTEINT} & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\textbf{Reconstruction du chemin.} On remonte les parents depuis Saint-Louis :
+$$\text{S} \xleftarrow{\text{parent}} \text{L} \xleftarrow{\text{parent}} \text{T} \xleftarrow{\text{parent}} \text{R} \xleftarrow{\text{parent}} \text{D}$$
+En inversant : Dakar $\rightarrow$ Rufisque $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis (270 km). BFS a exploré les 7 nœuds.
+
+\textbf{Remarque à l'étape 3.} Mbour a trois voisins : Dakar (déjà exploré), Thiès et Diourbel. Thiès est déjà dans la frontière (ajouté via Rufisque à l'étape 2). En graph search, on ne l'ajoute pas une seconde fois. Sans cette vérification, la frontière contiendrait deux copies de Thiès, issues de deux chemins différents.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    city/.style={circle, draw=blue!60, fill=blue!10, thick, minimum size=1.2cm, font=\small\bfseries},
+    start/.style={city, draw=green!60, fill=green!20},
+    goal/.style={city, draw=red!60, fill=red!20},
+    visited/.style={city, draw=blue!80, fill=blue!30},
+    road/.style={thick, gray!70},
+    path/.style={ultra thick, blue!60},
+    cost/.style={font=\footnotesize, fill=white, inner sep=2pt},
+    order/.style={circle, fill=orange, text=white, font=\tiny\bfseries, minimum size=0.5cm}
+]
+
+% Positions des villes
+\node[start] (D) at (0,0) {Dakar};
+\node[visited] (R) at (2.5,0.5) {Rufisque};
+\node[visited] (M) at (2,-2) {Mbour};
+\node[visited] (T) at (5.5,0) {Thiès};
+\node[visited] (Di) at (5,-2.5) {Diourbel};
+\node[visited] (L) at (8.5,0.5) {Louga};
+\node[goal] (S) at (11.5,0) {St-Louis};
+
+% Routes
+\draw[road] (D) -- node[cost, above] {30} (R);
+\draw[road] (D) -- node[cost, left] {80} (M);
+\draw[road] (R) -- node[cost, above] {50} (T);
+\draw[road] (M) -- node[cost, below] {70} (T);
+\draw[road] (M) -- node[cost, below right] {130} (Di);
+\draw[road] (T) -- node[cost, above] {120} (L);
+\draw[road] (Di) -- node[cost, right] {100} (L);
+\draw[road] (L) -- node[cost, above] {70} (S);
+
+% Ordre d'exploration BFS
+\node[order] at ($(D)+(0.6,0.6)$) {1};
+\node[order] at ($(R)+(0.6,0.6)$) {2};
+\node[order] at ($(M)+(0.6,-0.6)$) {3};
+\node[order] at ($(T)+(0.6,0.6)$) {4};
+\node[order] at ($(Di)+(0.6,-0.6)$) {5};
+\node[order] at ($(L)+(0.6,0.6)$) {6};
+\node[order] at ($(S)+(0.6,0.6)$) {7};
+
+% Chemin trouvé
+\draw[path] (D) -- (R);
+\draw[path] (R) -- (T);
+\draw[path] (T) -- (L);
+\draw[path] (L) -- (S);
+
+\end{tikzpicture}
+\caption{Exécution de BFS sur le réseau routier. Les numéros oranges indiquent l'ordre d'exploration. BFS explore tous les nœuds niveau par niveau : d'abord les voisins directs de Dakar (profondeur 1), puis les voisins des voisins (profondeur 2), etc.}
+\label{fig:bfs}
+\end{figure}
+
+\textbf{Chemin trouvé par BFS :} Dakar $\rightarrow$ Rufisque $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis (270 km).
+
+Dans ce cas, BFS trouve le chemin optimal. Mais ce résultat est \textit{chanceux} : BFS garantit de trouver le chemin avec le \textbf{moins d'étapes}, pas celui de \textbf{moindre coût}.
+
+\subsection{Comprendre la complexité de BFS}
+
+\begin{theorembox}[Propriétés de BFS]
+\begin{itemize}
+    \item \textbf{Complet :} Oui, si le facteur de branchement $b$ est fini
+    \item \textbf{Optimal :} \textbf{Non} en général. Oui seulement si tous les coûts sont égaux
+    \item \textbf{Complexité temporelle :} $O(b^d)$
+    \item \textbf{Complexité spatiale :} $O(b^d)$
+\end{itemize}
+\end{theorembox}
+
+\subsubsection*{Complexité temporelle : $O(b^d)$}
+
+BFS doit explorer tous les niveaux avant d'atteindre le but. Combien de nœuds cela représente-t-il ? Comptons niveau par niveau :
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Niveau} & \textbf{Nœuds au pire cas} & \textbf{Explication} \\
+\midrule
+0 & $1$ & Juste la racine \\
+1 & $b$ & Chaque nœud a au plus $b$ fils \\
+2 & $b^2$ & Chacun des $b$ nœuds a au plus $b$ fils \\
+$\vdots$ & $\vdots$ & $\vdots$ \\
+$d$ & $b^d$ & Le niveau où se trouve le but \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le nombre total de nœuds explorés est la somme de tous les niveaux :
+$$\underbrace{1}_{\text{niveau 0}} + \underbrace{b}_{\text{niveau 1}} + \underbrace{b^2}_{\text{niveau 2}} + \cdots + \underbrace{b^d}_{\text{niveau } d} = \frac{b^{d+1} - 1}{b - 1} = O(b^d)$$
+
+\textbf{Sur notre exemple :} $b = 3$, $d = 4$, donc au pire $1 + 3 + 9 + 27 + 81 = 121$ nœuds. Avec seulement 7 villes (et la graph search), BFS en a exploré 7 -- la borne théorique est pessimiste mais prédit le comportement sur des graphes plus grands.
+
+\subsubsection*{Complexité spatiale : $O(b^d)$}
+
+La mémoire de BFS est dominée par la \textbf{frontière}. Puisque BFS explore niveau par niveau, la frontière contient à tout moment l'ensemble du « front d'onde » courant. Le pire cas survient juste avant d'explorer le niveau $d$ :
+
+\begin{center}
+\begin{tikzpicture}[
+    level distance=1.1cm, sibling distance=1.2cm,
+    every node/.style={circle, draw, minimum size=0.4cm, inner sep=0pt, font=\tiny},
+    explored/.style={fill=blue!30},
+    frontier/.style={fill=orange!40, thick},
+    edge from parent/.style={draw, thick}
+]
+\node[explored] {}
+    child {node[explored] {}
+        child {node[frontier] {}}
+        child {node[frontier] {}}
+    }
+    child {node[explored] {}
+        child {node[frontier] {}}
+        child {node[frontier] {}}
+    };
+\end{tikzpicture}
+\hspace{1cm}
+\begin{minipage}{0.5\textwidth}
+{\small
+\textcolor{blue!60}{$\blacksquare$} = explorés (en mémoire dans \texttt{visited})\\
+\textcolor{orange!70}{$\blacksquare$} = frontière (file FIFO)\\[0.2cm]
+La frontière au niveau $d$ contient jusqu'à $b^d$ nœuds.\\
+L'ensemble \texttt{visited} contient $\sim b^d$ nœuds.\\
+\textbf{Total mémoire : $O(b^d)$}
+}
+\end{minipage}
+\end{center}
+
+C'est le \textbf{problème majeur} de BFS. En termes concrets, avec $b = 10$ et $d = 10$ (typique d'un jeu) :
+\begin{itemize}[nosep]
+    \item Frontière $\approx 10^{10} = 10$ milliards de nœuds
+    \item Si chaque nœud occupe 100 octets : $\sim$ 1 téraoctet de RAM
+\end{itemize}
+
+BFS est donc \textbf{impraticable} pour les problèmes de grande profondeur.
+
+\subsection{BFS n'est pas optimal : un contre-exemple}
+
+Pour comprendre pourquoi BFS n'est pas optimal quand les coûts varient, considérons un exemple simple dans les quartiers de Dakar.
+
+\begin{exemplebox}[Contre-exemple -- BFS dans les quartiers de Dakar]
+Fatou habite à Fass et veut aller à Médina. Deux itinéraires :
+
+\begin{center}
+\begin{tikzpicture}[
+    city/.style={circle, draw=blue!60, fill=blue!10, thick, minimum size=1.1cm, font=\small\bfseries},
+    start/.style={city, draw=green!60, fill=green!20},
+    goal/.style={city, draw=red!60, fill=red!20},
+    road/.style={thick, gray!70},
+    cost/.style={font=\footnotesize, fill=white, inner sep=2pt}
+]
+\node[start] (F) at (0,0) {Fass};
+\node[city] (P) at (3,-1.5) {Plateau};
+\node[goal] (M) at (6,0) {Médina};
+
+\draw[road] (F) -- node[cost, above] {30 min} (M);
+\draw[road] (F) -- node[cost, below left] {10 min} (P);
+\draw[road] (P) -- node[cost, below right] {10 min} (M);
+\end{tikzpicture}
+\end{center}
+
+\textbf{BFS} explore par profondeur croissante. Médina est un voisin direct de Fass (profondeur 1). BFS la trouve immédiatement et retourne Fass $\rightarrow$ Médina avec un coût de \textbf{30 min}.
+
+Pourtant, le chemin optimal est Fass $\rightarrow$ Plateau $\rightarrow$ Médina avec un coût de \textbf{20 min} (profondeur 2).
+
+BFS a trouvé le chemin le plus court en \textit{nombre d'étapes} (1 étape au lieu de 2), mais pas le chemin de \textit{moindre coût}. L'algorithme ne regarde pas les distances, seulement la profondeur.
+\end{exemplebox}
+
+Cette observation motive la recherche d'algorithmes qui tiennent compte des coûts (UCS, §6).
+
+%=============================================================================
+\section{Recherche en profondeur (DFS)}
+%=============================================================================
+
+La \textbf{recherche en profondeur d'abord} (Depth-First Search, DFS) adopte la stratégie inverse de BFS : explorer aussi loin que possible avant de revenir en arrière.
+
+\subsection{Principe}
+
+DFS utilise une \textbf{pile LIFO} (Last-In-First-Out) comme frontière. Les nœuds les plus récemment découverts sont explorés en premier.
+
+\begin{recipebox}[Recette -- DFS (Recherche en profondeur)]
+\begin{itemize}
+    \item \textbf{Structure de la frontière :} Pile LIFO
+    \item \textbf{Règle de choix :} Toujours prendre le nœud le plus récent (le dernier entré)
+    \item \textbf{Effet :} Descendre aussi profondément que possible avant de remonter (\textit{backtracking})
+\end{itemize}
+\end{recipebox}
+
+\subsection{Exécution sur notre exemple}
+
+Avec DFS, l'ordre d'exploration dépend de l'ordre d'insertion des successeurs dans la pile. Nous ajoutons les successeurs dans l'ordre alphabétique, ce qui signifie que le \textit{dernier} ajouté (le plus avancé dans l'alphabet) sera au sommet de la pile et exploré en premier.
+
+{\small
+\begin{center}
+\begin{tabular}{|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & \textbf{Pile après expansion} & \textbf{Parent} \\
+\hline
+0 & -- & [Dakar] & -- \\
+1 & Dakar & [Mbour, \textbf{Rufisque}] & R$\leftarrow$D, M$\leftarrow$D \\
+2 & Rufisque & [Mbour, \textbf{Thiès}] & T$\leftarrow$R \\
+3 & Thiès & [Mbour, \textbf{Louga}] & L$\leftarrow$T \\
+4 & Louga & [Mbour, \textbf{St-Louis}] & S$\leftarrow$L \\
+5 & \textbf{St-Louis} & \textbf{BUT ATTEINT} & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\textbf{Reconstruction :} S$\leftarrow$L$\leftarrow$T$\leftarrow$R$\leftarrow$D, soit Dakar $\rightarrow$ Rufisque $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis (270 km, 5 nœuds explorés seulement).
+
+DFS plonge directement dans la branche Rufisque $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis sans jamais explorer Mbour ni Diourbel. L'élément en gras dans la pile indique le sommet (prochain à explorer).
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    city/.style={circle, draw=blue!60, fill=blue!10, thick, minimum size=1.2cm, font=\small\bfseries},
+    start/.style={city, draw=green!60, fill=green!20},
+    goal/.style={city, draw=red!60, fill=red!20},
+    visited/.style={city, draw=blue!80, fill=blue!30},
+    unvisited/.style={city, draw=gray!40, fill=gray!10},
+    road/.style={thick, gray!70},
+    path/.style={ultra thick, purple!60},
+    cost/.style={font=\footnotesize, fill=white, inner sep=2pt},
+    order/.style={circle, fill=purple, text=white, font=\tiny\bfseries, minimum size=0.5cm}
+]
+
+% Positions des villes
+\node[start] (D) at (0,0) {Dakar};
+\node[visited] (R) at (2.5,0.5) {Rufisque};
+\node[unvisited] (M) at (2,-2) {Mbour};
+\node[visited] (T) at (5.5,0) {Thiès};
+\node[unvisited] (Di) at (5,-2.5) {Diourbel};
+\node[visited] (L) at (8.5,0.5) {Louga};
+\node[goal] (S) at (11.5,0) {St-Louis};
+
+% Routes
+\draw[road] (D) -- node[cost, above] {30} (R);
+\draw[road] (D) -- node[cost, left] {80} (M);
+\draw[road] (R) -- node[cost, above] {50} (T);
+\draw[road] (M) -- node[cost, below] {70} (T);
+\draw[road] (M) -- node[cost, below right] {130} (Di);
+\draw[road] (T) -- node[cost, above] {120} (L);
+\draw[road] (Di) -- node[cost, right] {100} (L);
+\draw[road] (L) -- node[cost, above] {70} (S);
+
+% Ordre d'exploration DFS
+\node[order] at ($(D)+(0.6,0.6)$) {1};
+\node[order] at ($(R)+(0.6,0.6)$) {2};
+\node[order] at ($(T)+(0.6,0.6)$) {3};
+\node[order] at ($(L)+(0.6,0.6)$) {4};
+\node[order] at ($(S)+(0.6,0.6)$) {5};
+
+% Chemin trouvé
+\draw[path] (D) -- (R);
+\draw[path] (R) -- (T);
+\draw[path] (T) -- (L);
+\draw[path] (L) -- (S);
+
+\end{tikzpicture}
+\caption{Exécution de DFS. L'algorithme plonge directement dans la première branche sans explorer Mbour ni Diourbel (nœuds grisés). Le chemin trouvé est identique à celui de BFS dans cet exemple, mais ce n'est pas garanti en général.}
+\label{fig:dfs}
+\end{figure}
+
+\textbf{Chemin trouvé par DFS :} Dakar $\rightarrow$ Rufisque $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis (270 km, 5 nœuds explorés).
+
+Dans cet exemple, DFS trouve le même chemin que BFS avec \textit{moins} de travail. Mais ce comportement favorable dépend entièrement de l'ordre des successeurs et de la structure du graphe.
+
+\begin{exemplebox}[Contre-exemple -- DFS n'est pas optimal]
+Inversons l'ordre des successeurs : au lieu de (A, B) pour S, on insère d'abord B puis A (ordre alphabétique inversé). Le sommet de la pile est maintenant B.
+
+{\small
+\begin{center}
+\begin{tabular}{|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & \textbf{Pile (sommet = gras)} & \textbf{Parent} \\
+\hline
+0 & -- & [D] & -- \\
+1 & Dakar & [R, \textbf{M}] & M$\leftarrow$D, R$\leftarrow$D \\
+2 & Mbour & [R, Di, \textbf{T}] & T$\leftarrow$M, Di$\leftarrow$M \\
+3 & Thiès & [R, Di, \textbf{L}] & L$\leftarrow$T \\
+4 & Louga & [R, Di, \textbf{S}] & S$\leftarrow$L \\
+5 & \textbf{St-Louis} & \textbf{BUT ATTEINT} & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+Reconstruction : S $\leftarrow$ L $\leftarrow$ T $\leftarrow$ M $\leftarrow$ D $\Rightarrow$ Dakar $\to$ Mbour $\to$ Thiès $\to$ Louga $\to$ Saint-Louis.
+
+Coût : $80 + 70 + 120 + 70 = \textbf{340 km}$. Le chemin optimal (270 km via Rufisque) existe mais DFS ne l'a jamais exploré.
+
+DFS a pris le \textit{premier} chemin trouvé, pas le meilleur. Cela suffit à montrer que DFS \textbf{n'est pas optimal}.
+\end{exemplebox}
+
+\subsection{Comprendre la complexité de DFS}
+
+\begin{theorembox}[Propriétés de DFS]
+\begin{itemize}
+    \item \textbf{Complet :} \textbf{Non} sur les graphes avec cycles (risque de boucle infinie). Oui sur les arbres finis.
+    \item \textbf{Optimal :} \textbf{Non} -- peut trouver une solution sous-optimale avant l'optimale
+    \item \textbf{Complexité temporelle :} $O(b^m)$ où $m$ est la profondeur maximale
+    \item \textbf{Complexité spatiale :} $O(b \cdot m)$
+\end{itemize}
+\end{theorembox}
+
+\subsubsection*{Complexité temporelle : $O(b^m)$}
+
+Dans le pire cas, DFS peut explorer l'\textbf{arbre entier} avant de trouver la solution. Cela arrive quand la solution est à profondeur $d$ mais que DFS s'engage d'abord dans des branches plus profondes de profondeur $m > d$. Le nombre de nœuds dans un arbre de profondeur $m$ est $O(b^m)$.
+
+\textbf{Pourquoi est-ce pire que BFS ?} Parce que $m \geq d$, parfois $m \gg d$. Si $b = 3$, $d = 4$ et $m = 20$ :
+\begin{itemize}[nosep]
+    \item BFS explore au pire $O(3^4) = 81$ nœuds (s'arrête au bon niveau)
+    \item DFS explore au pire $O(3^{20}) \approx 3{,}5$ milliards de nœuds (explore des branches inutiles)
+\end{itemize}
+
+Sur notre exemple : $d = 4$, $m = 6$. Le pire cas est $3^6 = 729$, mais DFS n'en a exploré que 5 grâce à un choix de branche chanceux.
+
+\subsubsection*{Complexité spatiale : $O(bm)$ -- l'avantage décisif de DFS}
+
+C'est le \textbf{grand atout} de DFS. À tout instant, la pile ne contient que les nœuds du \textbf{chemin courant} (de la racine au nœud en cours d'exploration), plus les \textbf{frères non encore explorés} à chaque niveau :
+
+\begin{center}
+\begin{tikzpicture}[
+    level distance=1.1cm, sibling distance=1.4cm,
+    every node/.style={circle, draw, minimum size=0.4cm, inner sep=0pt, font=\tiny},
+    current/.style={fill=purple!40, thick},
+    path/.style={fill=purple!15},
+    waiting/.style={fill=orange!30},
+    done/.style={fill=gray!20, draw=gray},
+    edge from parent/.style={draw, thick}
+]
+\node[path] {}
+    child {node[path] {}
+        child {node[path] {}
+            child {node[current] {$\star$}}
+            child {node[waiting] {}}
+        }
+        child {node[waiting] {}}
+        child {node[waiting] {}}
+    }
+    child {node[waiting] {}}
+    child {node[waiting] {}}
+;
+\end{tikzpicture}
+\hspace{0.5cm}
+\begin{minipage}{0.55\textwidth}
+{\small
+\textcolor{purple!50}{$\blacksquare$} = chemin courant ($m$ nœuds au plus)\\
+$\star$ = nœud en cours d'exploration\\
+\textcolor{orange!50}{$\blacksquare$} = frères en attente ($b{-}1$ par niveau)\\[0.2cm]
+\textbf{Pile =} chemin courant + frères\\
+$= m + m \times (b-1) = m \cdot b$\\[0.2cm]
+\textbf{Total mémoire : $O(bm)$}
+}
+\end{minipage}
+\end{center}
+
+\textbf{Comparaison concrète} avec $b = 10$ et profondeur 20 :
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{BFS} & \textbf{DFS} \\
+\midrule
+Mémoire & $O(b^d) = O(10^{20})$ & $O(bm) = O(10 \times 20) = 200$ \\
+En octets (100 o/nœud) & $\sim 10^{13}$ To (impossible) & $\sim$ 20 Ko (trivial) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cette frugalité en mémoire rend DFS applicable à des espaces de recherche \textit{immenses}, même si sa complexité temporelle est pire que celle de BFS.
+
+\begin{attentionbox}[Attention -- Risque de boucle infinie]
+Sans mécanisme de détection des états déjà visités, DFS peut tourner indéfiniment dans un cycle :
+
+Dakar $\rightarrow$ Rufisque $\rightarrow$ Dakar $\rightarrow$ Rufisque $\rightarrow$ ...
+
+Pour éviter ce problème, on maintient un ensemble des états visités (comme dans notre trace ci-dessus). Le prix à payer est une consommation mémoire supplémentaire de $O(|S|)$, où $|S|$ est le nombre d'états.
+\end{attentionbox}
+
+\subsection{BFS vs DFS : deux philosophies}
+
+Le contraste entre BFS et DFS résume un compromis fondamental en informatique :
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{BFS} & \textbf{DFS} \\
+\midrule
+Frontière & File FIFO & Pile LIFO \\
+Stratégie & Prudent, exhaustif & Audacieux, profond \\
+Complet & Oui & Non (cycles) \\
+Optimal & Non (coûts variables) & Non \\
+Mémoire & $O(b^d)$ -- \textbf{gourmand} & $O(bm)$ -- \textbf{frugal} \\
+Temps pire cas & $O(b^d)$ & $O(b^m)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+BFS sacrifie la mémoire pour la complétude. DFS sacrifie la complétude pour la mémoire. Aucun des deux ne tient compte des coûts.
+
+%=============================================================================
+\section{Recherche à coût uniforme (UCS)}
+%=============================================================================
+
+Ni BFS ni DFS ne garantissent de trouver le chemin de \textbf{moindre coût}. Pour cela, nous avons besoin d'un algorithme qui tient compte des coûts : la \textbf{recherche à coût uniforme} (Uniform-Cost Search, UCS).
+
+\subsection{Principe}
+
+L'idée de UCS est simple : toujours explorer le nœud dont le \textbf{chemin depuis l'origine a le plus petit coût total}. Au lieu d'utiliser une file ou une pile, UCS utilise une \textbf{file de priorité} ordonnée par le coût cumulé $g(n)$.
+
+\begin{definitionbox}[Définition -- Coût cumulé $g(n)$]
+Pour un nœud $n$ atteint par un chemin depuis l'état initial, $g(n)$ désigne le \textbf{coût total du chemin} depuis la racine jusqu'à $n$.
+
+Autrement dit, $g(n)$ est la distance parcourue depuis le départ pour arriver à $n$.
+\end{definitionbox}
+
+\begin{recipebox}[Recette -- UCS (Recherche à coût uniforme)]
+\begin{itemize}
+    \item \textbf{Structure de la frontière :} File de priorité ordonnée par $g(n)$ croissant
+    \item \textbf{Règle de choix :} Toujours prendre le nœud avec le plus petit $g(n)$
+    \item \textbf{Effet :} Explorer les chemins par ordre de coût croissant
+\end{itemize}
+\end{recipebox}
+
+\subsection{Exécution sur notre exemple}
+
+Voyons comment UCS explore notre réseau routier en tenant compte des distances. Quand un nœud est atteint par un chemin moins coûteux que celui déjà enregistré, on met à jour son coût.
+
+{\small
+\begin{center}
+\begin{tabular}{|c|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & $g$ & \textbf{Frontière (par $g$ croissant)} & \textbf{Parent} \\
+\hline
+0 & -- & -- & [D:0] & -- \\
+1 & Dakar & 0 & [R:30, M:80] & R$\leftarrow$D, M$\leftarrow$D \\
+2 & Rufisque & 30 & [T:80, M:80] & T$\leftarrow$R \\
+3 & Thiès & 80 & [M:80, L:200] & L$\leftarrow$T \\
+4 & Mbour & 80 & [L:200, Di:210] & Di$\leftarrow$M \\
+  & & & \multicolumn{2}{l|}{\scriptsize T via M: $g{=}150 > 80$ $\rightarrow$ ignoré} \\
+5 & Louga & 200 & [Di:210, S:270] & S$\leftarrow$L \\
+6 & Diourbel & 210 & [S:270] & \\
+  & & & \multicolumn{2}{l|}{\scriptsize L via Di: $g{=}310 > 200$ $\rightarrow$ ignoré} \\
+7 & \textbf{St-Louis} & \textbf{270} & \textbf{BUT -- optimal} & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\textbf{Reconstruction :} S$\leftarrow$L$\leftarrow$T$\leftarrow$R$\leftarrow$D $\Rightarrow$ 30+50+120+70 = \textbf{270 km}. UCS explore les 7 nœuds.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    city/.style={circle, draw=blue!60, fill=blue!10, thick, minimum size=1.2cm, font=\small\bfseries},
+    start/.style={city, draw=green!60, fill=green!20},
+    goal/.style={city, draw=red!60, fill=red!20},
+    visited/.style={city, draw=blue!80, fill=blue!30},
+    road/.style={thick, gray!70},
+    path/.style={ultra thick, green!60!black},
+    cost/.style={font=\footnotesize, fill=white, inner sep=2pt},
+    gcost/.style={font=\scriptsize, text=green!50!black, below=0.1cm}
+]
+
+% Positions des villes
+\node[start] (D) at (0,0) {Dakar};
+\node[visited] (R) at (2.5,0.5) {Rufisque};
+\node[visited] (M) at (2,-2) {Mbour};
+\node[visited] (T) at (5.5,0) {Thiès};
+\node[visited] (Di) at (5,-2.5) {Diourbel};
+\node[visited] (L) at (8.5,0.5) {Louga};
+\node[goal] (S) at (11.5,0) {St-Louis};
+
+% Routes
+\draw[road] (D) -- node[cost, above] {30} (R);
+\draw[road] (D) -- node[cost, left] {80} (M);
+\draw[road] (R) -- node[cost, above] {50} (T);
+\draw[road] (M) -- node[cost, below] {70} (T);
+\draw[road] (M) -- node[cost, below right] {130} (Di);
+\draw[road] (T) -- node[cost, above] {120} (L);
+\draw[road] (Di) -- node[cost, right] {100} (L);
+\draw[road] (L) -- node[cost, above] {70} (S);
+
+% Coûts g(n) atteints
+\node[gcost] at (D) {$g$=0};
+\node[gcost] at (R) {$g$=30};
+\node[gcost] at (T) {$g$=80};
+\node[gcost] at (M) {$g$=80};
+\node[gcost] at (L) {$g$=200};
+\node[gcost] at (Di) {$g$=210};
+\node[gcost] at (S) {$g$=270};
+
+% Chemin optimal
+\draw[path] (D) -- (R);
+\draw[path] (R) -- (T);
+\draw[path] (T) -- (L);
+\draw[path] (L) -- (S);
+
+\end{tikzpicture}
+\caption{Exécution de UCS. Les valeurs $g$ indiquent le coût minimal pour atteindre chaque nœud depuis Dakar. UCS explore par coût croissant et garantit de trouver le chemin optimal de 270 km. Les 7 nœuds sont tous explorés car UCS est exhaustif jusqu'au coût de la solution.}
+\label{fig:ucs}
+\end{figure}
+
+\textbf{Observation.} UCS explore les 7 nœuds -- il en explore plus que DFS (5 nœuds) pour trouver le même chemin. C'est le prix de la \textbf{garantie d'optimalité} : UCS doit vérifier qu'aucun chemin alternatif n'est moins coûteux.
+
+\subsection{Pourquoi UCS est optimal}
+
+L'optimalité de UCS repose sur un argument élégant. Quand UCS sélectionne un nœud but avec un coût $g^*$, \textit{tous les autres nœuds} encore dans la frontière ont un coût $g \geq g^*$ (par construction de la file de priorité). Tout chemin alternatif vers le but passerait par l'un de ces nœuds et aurait un coût \textit{encore plus élevé} (car les actions ont un coût strictement positif). Le chemin trouvé est donc nécessairement optimal.
+
+Illustrons sur notre exemple : quand UCS dépile Saint-Louis avec $g = 270$, le seul autre nœud dans la frontière est Louga (via Diourbel) avec $g = 310$. Tout chemin vers Saint-Louis passant par ce Louga-via-Diourbel coûterait au moins $310 + 70 = 380 > 270$. L'optimalité est confirmée.
+
+\begin{theorembox}[Propriétés de UCS]
+\begin{itemize}
+    \item \textbf{Complet :} Oui, si tous les coûts sont $> \epsilon > 0$
+    \item \textbf{Optimal :} \textbf{Oui} (c'est sa raison d'être)
+    \item \textbf{Complexité temporelle :} $O(b^{1 + \lfloor C^*/\epsilon \rfloor})$ où $C^*$ est le coût optimal et $\epsilon$ le coût minimal d'une action
+    \item \textbf{Complexité spatiale :} Identique (tous les nœuds de coût $\leq C^*$ en mémoire)
+\end{itemize}
+\end{theorembox}
+
+\subsubsection*{Comprendre la complexité de UCS}
+
+La complexité de UCS est plus subtile que celle de BFS ou DFS. Pour BFS, on comptait les nœuds par \textit{niveau de profondeur}. Mais UCS ne raisonne pas en profondeur : il raisonne en \textit{coût}. Il explore tous les nœuds dont le coût cumulé est inférieur au coût optimal $C^*$. Pour exprimer cette complexité, on a besoin de \textit{traduire} un budget de coût en une profondeur d'arbre.
+
+\subsubsection*{Décortiquer la formule $O(b^{1+\lfloor C^*/\epsilon \rfloor})$}
+
+La formule comporte trois éléments. Comprenons-les un par un.
+
+\textbf{Étape 1 : Qu'est-ce que $C^*$ ?} C'est le coût du chemin optimal, c'est-à-dire le coût total de la meilleure solution. UCS explore les nœuds par coût croissant et s'arrête quand il atteint le but. Avant de trouver la solution de coût $C^*$, il a exploré \textit{tous} les nœuds de coût strictement inférieur à $C^*$.
+
+\textbf{Étape 2 : Qu'est-ce que $\epsilon$ ?} C'est le coût de l'action la moins chère du problème. C'est un paramètre du problème, pas de l'algorithme. On en a besoin pour répondre à la question suivante.
+
+\textbf{Étape 3 : $\lfloor C^*/\epsilon \rfloor$\footnote{La notation $\lfloor x \rfloor$ désigne la \textit{partie entière inférieure} (\textit{floor}) : le plus grand entier $\leq x$. Par exemple, $\lfloor 6{,}75 \rfloor = 6$. En Python : \texttt{270 // 40 = 6}.} -- convertir un budget de coût en profondeur.} Le raisonnement est le suivant. Un chemin de $k$ étapes coûte \textit{au minimum} $k \times \epsilon$ (si chaque action a le coût minimal). Donc un chemin dont le coût total est $\leq C^*$ a au plus $k$ étapes, avec :
+$$k \times \epsilon \leq C^* \quad \Longrightarrow \quad k \leq \frac{C^*}{\epsilon}$$
+
+Autrement dit, $C^*/\epsilon$ est la profondeur maximale qu'UCS peut atteindre en dépensant son budget $C^*$ via les actions les moins chères. C'est le \textit{pire cas} en termes de profondeur d'exploration. La partie entière $\lfloor \cdot \rfloor$ est là parce que la profondeur est un entier.
+
+\textbf{Étape 4 : $b^{1+\lfloor C^*/\epsilon \rfloor}$ -- compter les nœuds.} Une fois qu'on connaît la profondeur maximale, on retombe sur le comptage habituel. Un arbre de facteur de branchement $b$ et de profondeur $p$ contient $O(b^p)$ nœuds. Ici, $p = 1 + \lfloor C^*/\epsilon \rfloor$ (le $+1$ vient du fait qu'on compte aussi le niveau 0, la racine).
+
+\begin{attentionbox}[En résumé -- Lire la formule]
+$$\underbrace{O\Big(b^{1+\lfloor C^*/\epsilon \rfloor}\Big)}_{\text{nombre de n\oe uds}} = O\Big(b^{\overbrace{\scriptstyle 1+\lfloor C^*/\epsilon \rfloor}^{\text{profondeur max}}}\Big)$$
+
+\begin{enumerate}
+    \item UCS explore tout ce qui coûte moins que la solution optimale $C^*$
+    \item La profondeur maximale atteignable avec ce budget est $C^*/\epsilon$
+    \item Le nombre de n\oe uds dans un arbre de cette profondeur est $b^{C^*/\epsilon}$
+\end{enumerate}
+
+Quand les coûts sont tous égaux ($\epsilon = 1$, $C^* = d$), la formule se simplifie en $O(b^d)$ : on retrouve la complexité de BFS.
+\end{attentionbox}
+
+\begin{exemplebox}[Application à notre réseau routier]
+$C^* = 270$ km (coût du chemin optimal), $\epsilon = 30$ km (arête Dakar--Rufisque, la moins chère), $b = 3$.
+
+\textbf{Profondeur maximale :} $\lfloor 270/30 \rfloor = 9$ étapes. UCS pourrait explorer des chemins allant jusqu'à 9 villes, même si la solution n'est qu'à 4 étapes.
+
+\textbf{Nœuds théoriques :} $O(3^{1+9}) = O(3^{10}) \approx 59\,000$ nœuds. En pratique, la graph search réduit considérablement ce nombre (7 nœuds explorés ici, car il n'y a que 7 villes).
+
+\textbf{Comparaison avec BFS :} BFS raisonne en profondeur $d = 4$ et explore $O(3^4) = 81$ nœuds. UCS peut explorer davantage ($O(3^{10})$) car il suit les chemins \textit{bon marché} même s'ils sont longs en nombre d'étapes. C'est le prix de la garantie d'optimalité en coût.
+
+\textbf{Cas extrême :} Si l'arête la moins chère coûtait 1 km au lieu de 30, alors $\lfloor 270/1 \rfloor = 270$, et UCS pourrait explorer un arbre de profondeur 270 -- beaucoup plus de travail. Plus $\epsilon$ est petit par rapport à $C^*$, plus UCS doit chercher loin.
+\end{exemplebox}
+
+\subsubsection*{Complexité spatiale : identique à la temporelle}
+
+Comme BFS, UCS garde en mémoire \textit{tous les nœuds de la frontière} et l'ensemble des nœuds explorés. La file de priorité peut contenir tous les nœuds de coût $\leq C^*$. L'espace est donc aussi $O(b^{1+\lfloor C^*/\epsilon \rfloor})$. Même logique que pour BFS : la frontière de UCS se comporte comme un ``restaurant buffet'' qui accumule les clients (cf.\ notre analogie de la section~\ref{sec:proprietes}).
+
+\subsection{UCS est Dijkstra}
+
+UCS est essentiellement l'algorithme de Dijkstra (1959) pour les plus courts chemins. La seule différence est que UCS s'arrête dès qu'il atteint le but, tandis que Dijkstra calcule les distances à \textit{tous} les nœuds.
+
+%=============================================================================
+\section{Interlude : L'idée des heuristiques}
+%=============================================================================
+
+UCS garantit l'optimalité, mais il peut être lent : il explore tous les nœuds de coût inférieur au coût optimal, y compris ceux qui vont dans la \textit{mauvaise direction}. 
+
+Intuitivement, un voyageur humain ferait mieux : sachant que Saint-Louis est au nord de Dakar, il privilégierait les routes vers le nord. Cette connaissance de la \textbf{direction du but} peut accélérer considérablement la recherche.
+
+\subsection{Qu'est-ce qu'une heuristique ?}
+
+\begin{definitionbox}[Définition -- Heuristique]
+Une \textbf{heuristique} $h(n)$ est une fonction qui estime le coût du chemin le moins cher depuis le nœud $n$ jusqu'au but.
+
+C'est une \textit{estimation} car le vrai coût n'est généralement pas connu sans faire la recherche complète.
+\end{definitionbox}
+
+Pour notre exemple, une heuristique naturelle est la \textbf{distance à vol d'oiseau} jusqu'à Saint-Louis. Cette distance est toujours inférieure ou égale à la distance routière réelle (on ne peut pas aller plus vite qu'en ligne droite).
+
+\begin{exemplebox}[Heuristique pour notre exemple]
+Distances à vol d'oiseau vers Saint-Louis (estimées) :
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Ville} & $h$ (km à vol d'oiseau) & $h^*$ (vrai coût optimal) \\
+\midrule
+Dakar & 250 & 270 \\
+Rufisque & 240 & 240 \\
+Mbour & 250 & 260 \\
+Thiès & 190 & 190 \\
+Diourbel & 160 & 170 \\
+Louga & 70 & 70 \\
+Saint-Louis & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Vérification :} Pour chaque ville, $h \leq h^*$. L'heuristique ne surestime jamais le vrai coût. C'est la propriété d'\textbf{admissibilité} (définie ci-dessous).
+\end{exemplebox}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    city/.style={circle, draw=blue!60, fill=blue!10, thick, minimum size=1.2cm, font=\small\bfseries},
+    start/.style={city, draw=green!60, fill=green!20},
+    goal/.style={city, draw=red!60, fill=red!20},
+    road/.style={thick, gray!70},
+    cost/.style={font=\footnotesize, fill=white, inner sep=2pt},
+    hcost/.style={font=\scriptsize, text=purple!70!black, above=0.1cm}
+]
+
+% Positions des villes
+\node[start] (D) at (0,0) {Dakar};
+\node[city] (R) at (2.5,0.5) {Rufisque};
+\node[city] (M) at (2,-2) {Mbour};
+\node[city] (T) at (5.5,0) {Thiès};
+\node[city] (Di) at (5,-2.5) {Diourbel};
+\node[city] (L) at (8.5,0.5) {Louga};
+\node[goal] (S) at (11.5,0) {St-Louis};
+
+% Routes
+\draw[road] (D) -- node[cost, above] {30} (R);
+\draw[road] (D) -- node[cost, left] {80} (M);
+\draw[road] (R) -- node[cost, above] {50} (T);
+\draw[road] (M) -- node[cost, below] {70} (T);
+\draw[road] (M) -- node[cost, below right] {130} (Di);
+\draw[road] (T) -- node[cost, above] {120} (L);
+\draw[road] (Di) -- node[cost, right] {100} (L);
+\draw[road] (L) -- node[cost, above] {70} (S);
+
+% Heuristiques h(n)
+\node[hcost] at (D) {$h$=250};
+\node[hcost] at (R) {$h$=240};
+\node[hcost] at (M) {$h$=250};
+\node[hcost] at (T) {$h$=190};
+\node[hcost] at (Di) {$h$=160};
+\node[hcost] at (L) {$h$=70};
+\node[hcost] at (S) {$h$=0};
+
+% Flèches vers le but (direction estimée)
+\draw[->, dashed, purple!50, thick] (D) -- ++(0.8,0.3);
+\draw[->, dashed, purple!50, thick] (R) -- ++(0.8,0.2);
+\draw[->, dashed, purple!50, thick] (M) -- ++(0.8,0.5);
+\draw[->, dashed, purple!50, thick] (T) -- ++(0.8,0.2);
+\draw[->, dashed, purple!50, thick] (Di) -- ++(0.7,0.4);
+\draw[->, dashed, purple!50, thick] (L) -- ++(0.8,0.1);
+
+\end{tikzpicture}
+\caption{Heuristiques $h(n)$ pour chaque ville : la distance à vol d'oiseau vers Saint-Louis. Les flèches pointillées symbolisent la direction estimée vers le but. Ces valeurs guident la recherche sans garantir l'optimalité seules.}
+\label{fig:heuristiques}
+\end{figure}
+
+\subsection{Propriété fondamentale : l'admissibilité}
+
+Pour qu'une heuristique soit utile sans compromettre l'optimalité, elle doit satisfaire une propriété cruciale.
+
+\begin{definitionbox}[Définition -- Heuristique admissible]
+Une heuristique $h$ est \textbf{admissible} si elle ne surestime jamais le vrai coût pour atteindre le but :
+$$\forall n : h(n) \leq h^*(n)$$
+où $h^*(n)$ est le vrai coût optimal de $n$ au but.
+
+Autrement dit, l'heuristique est toujours \textbf{optimiste} -- elle croit que le chemin restant est au moins aussi bon (pas plus cher) qu'il ne l'est en réalité.
+\end{definitionbox}
+
+La distance à vol d'oiseau est admissible car elle est toujours inférieure ou égale à la distance routière (on ne peut pas aller plus vite qu'en ligne droite). C'est un fait géométrique : la droite est le plus court chemin entre deux points.
+
+%=============================================================================
+\section{Recherche gloutonne (Greedy Best-First)}
+%=============================================================================
+
+La \textbf{recherche gloutonne} exploite l'heuristique de manière directe : elle explore toujours le nœud qui \textit{semble} le plus proche du but.
+
+\subsection{Principe}
+
+\begin{recipebox}[Recette -- Greedy (Recherche gloutonne)]
+\begin{itemize}
+    \item \textbf{Structure de la frontière :} File de priorité ordonnée par $h(n)$ croissant
+    \item \textbf{Règle de choix :} Toujours prendre le nœud avec le plus petit $h(n)$
+    \item \textbf{Effet :} Foncer vers le but en ignorant le coût déjà parcouru
+\end{itemize}
+\end{recipebox}
+
+\subsection{Exécution sur notre exemple}
+
+{\small
+\begin{center}
+\begin{tabular}{|c|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & $h$ & \textbf{Frontière (par $h$ croissant)} & \textbf{Parent} \\
+\hline
+0 & -- & -- & [D:250] & -- \\
+1 & Dakar & 250 & [R:240, M:250] & R$\leftarrow$D, M$\leftarrow$D \\
+2 & Rufisque & 240 & [T:190, M:250] & T$\leftarrow$R \\
+3 & Thiès & 190 & [L:70, M:250] & L$\leftarrow$T \\
+4 & Louga & 70 & [S:0, M:250] & S$\leftarrow$L \\
+5 & \textbf{St-Louis} & 0 & \textbf{BUT ATTEINT} & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+Greedy explore seulement 5 nœuds et trouve le chemin optimal. Mais ce résultat favorable est une \textit{coïncidence} due à la structure de ce graphe particulier.
+
+\subsection{Quand Greedy se trompe : un contre-exemple}
+
+Pour comprendre pourquoi Greedy n'est pas fiable, modifions légèrement les valeurs heuristiques. Supposons que la distance à vol d'oiseau de Mbour vers Saint-Louis soit de 220 km (au lieu de 250). Ce serait le cas si Mbour était plus à l'est. La valeur reste admissible car le vrai coût depuis Mbour est $h^*(\text{Mbour}) = 260$ km, et $220 \leq 260$.
+
+\begin{exemplebox}[Contre-exemple -- Greedy avec heuristique modifiée]
+Avec $h(\text{Mbour}) = 220$ :
+
+{\small
+\begin{center}
+\begin{tabular}{|c|c|c|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & $h$ & \textbf{Frontière} \\
+\hline
+0 & -- & -- & [D:250] \\
+1 & Dakar & 250 & [M:220, R:240] \\
+2 & Mbour & 220 & [Di:160, T:190, R:240] \\
+3 & Thiès & 190 & [L:70, Di:160, R:240] \\
+4 & Louga & 70 & [\textbf{S:0}, Di:160, R:240] \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+Greedy choisit d'abord Mbour ($h = 220$) plutôt que Rufisque ($h = 240$). Le chemin trouvé est : Dakar $\rightarrow$ Mbour $\rightarrow$ Thiès $\rightarrow$ Louga $\rightarrow$ Saint-Louis, coût = $80 + 70 + 120 + 70 = \textbf{340 km}$.
+
+Le chemin optimal (270 km via Rufisque) a été manqué parce que Greedy a choisi Mbour, qui \textit{semblait} plus proche du but mais dont le coût réel de départ était plus élevé ($g = 80$ contre $g = 30$).
+\end{exemplebox}
+
+Le problème fondamental de Greedy est qu'il ignore le coût déjà parcouru $g(n)$. Il ne regarde que la distance estimée au but, sans tenir compte du chemin déjà fait.
+
+\subsection{Analyse de Greedy}
+
+\begin{theorembox}[Propriétés de Greedy]
+\begin{itemize}
+    \item \textbf{Complet :} Non en général (peut boucler)
+    \item \textbf{Optimal :} \textbf{Non} -- peut manquer le chemin optimal
+    \item \textbf{Complexité temporelle :} $O(b^m)$ au pire cas
+    \item \textbf{Complexité spatiale :} $O(b^m)$
+\end{itemize}
+\end{theorembox}
+
+\textbf{Pourquoi ces mauvaises propriétés ?} Greedy n'a aucune mémoire du coût parcouru. Il peut s'engager sur un chemin très coûteux simplement parce que chaque nœud intermédiaire \textit{semble} proche du but. Dans le pire cas, il peut explorer l'arbre entier avant de trouver une solution, et la solution trouvée n'est pas garantie optimale.
+
+L'avantage de Greedy est sa \textbf{rapidité quand l'heuristique est bonne} : avec une heuristique qui guide bien, Greedy fonce directement vers le but sans explorer de nœuds inutiles. C'est exactement ce qui se passe sur notre exemple original.
+
+%=============================================================================
+\section{L'algorithme A* : le meilleur des deux mondes}
+%=============================================================================
+
+A* combine les avantages de UCS (optimalité grâce à $g$) et de Greedy (efficacité grâce à $h$). C'est l'un des algorithmes les plus importants de l'IA, publié par Hart, Nilsson et Raphael en 1968.
+
+\subsection{Principe}
+
+L'idée de A* est simple : au lieu de trier par $g(n)$ seul (comme UCS) ou par $h(n)$ seul (comme Greedy), on trie par leur \textbf{somme}.
+
+\begin{definitionbox}[Définition -- Fonction d'évaluation $f(n)$]
+Pour un nœud $n$, la fonction d'évaluation A* est :
+$$f(n) = g(n) + h(n)$$
+où :
+\begin{itemize}
+    \item $g(n)$ = coût réel du chemin depuis l'origine jusqu'à $n$ (ce qu'on a \textit{déjà payé})
+    \item $h(n)$ = estimation du coût de $n$ jusqu'au but (ce qu'il \textit{reste à payer})
+\end{itemize}
+$f(n)$ estime donc le \textbf{coût total du meilleur chemin passant par $n$}.
+\end{definitionbox}
+
+\begin{recipebox}[Recette -- A*]
+\begin{itemize}
+    \item \textbf{Structure de la frontière :} File de priorité ordonnée par $f(n) = g(n) + h(n)$ croissant
+    \item \textbf{Règle de choix :} Toujours prendre le nœud avec le plus petit $f(n)$
+    \item \textbf{Effet :} Explorer les chemins par estimation de coût total croissant
+\end{itemize}
+\end{recipebox}
+
+La force de cette combinaison est qu'elle corrige les défauts de chaque composante : $g(n)$ empêche A* de s'engager sur un chemin cher (erreur de Greedy), et $h(n)$ empêche A* d'explorer inutilement dans la mauvaise direction (lenteur de UCS).
+
+\subsection{Exécution sur notre exemple}
+
+{\small
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & $g$ & $h$ & $f$ & \textbf{Frontière (par $f$)} & \textbf{Parent} \\
+\hline
+0 & -- & & & & [D:250] & -- \\
+1 & Dakar & 0 & 250 & 250 & [R:270, M:330] & R$\leftarrow$D, M$\leftarrow$D \\
+2 & Rufisque & 30 & 240 & 270 & [T:270, M:330] & T$\leftarrow$R \\
+3 & Thiès & 80 & 190 & 270 & [L:270, M:330] & L$\leftarrow$T \\
+4 & Louga & 200 & 70 & 270 & [S:270, M:330] & S$\leftarrow$L \\
+5 & \textbf{St-Louis} & \textbf{270} & 0 & \textbf{270} & \textbf{BUT -- optimal} & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\textbf{Reconstruction :} S$\leftarrow$L$\leftarrow$T$\leftarrow$R$\leftarrow$D $\Rightarrow$ 30+50+120+70 = \textbf{270 km}. A* explore 5 nœuds et \textbf{garantit} l'optimalité.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    city/.style={circle, draw=blue!60, fill=blue!10, thick, minimum size=1.2cm, font=\small\bfseries},
+    start/.style={city, draw=green!60, fill=green!20},
+    goal/.style={city, draw=red!60, fill=red!20},
+    visited/.style={city, draw=blue!80, fill=blue!30},
+    unvisited/.style={city, draw=gray!40, fill=gray!10},
+    road/.style={thick, gray!70},
+    path/.style={ultra thick, red!60},
+    cost/.style={font=\footnotesize, fill=white, inner sep=2pt},
+    fcost/.style={font=\scriptsize, text=red!60!black}
+]
+
+% Positions des villes
+\node[start] (D) at (0,0) {Dakar};
+\node[visited] (R) at (2.5,0.5) {Rufisque};
+\node[unvisited] (M) at (2,-2) {Mbour};
+\node[visited] (T) at (5.5,0) {Thiès};
+\node[unvisited] (Di) at (5,-2.5) {Diourbel};
+\node[visited] (L) at (8.5,0.5) {Louga};
+\node[goal] (S) at (11.5,0) {St-Louis};
+
+% Routes
+\draw[road] (D) -- node[cost, above] {30} (R);
+\draw[road] (D) -- node[cost, left] {80} (M);
+\draw[road] (R) -- node[cost, above] {50} (T);
+\draw[road] (M) -- node[cost, below] {70} (T);
+\draw[road] (M) -- node[cost, below right] {130} (Di);
+\draw[road] (T) -- node[cost, above] {120} (L);
+\draw[road] (Di) -- node[cost, right] {100} (L);
+\draw[road] (L) -- node[cost, above] {70} (S);
+
+% Valeurs f = g + h
+\node[fcost, below=0.15cm of D] {\footnotesize $f$=0+250=250};
+\node[fcost, below=0.15cm of R] {\footnotesize $f$=30+240=270};
+\node[fcost, below=0.15cm of T] {\footnotesize $f$=80+190=270};
+\node[fcost, below=0.15cm of L] {\footnotesize $f$=200+70=270};
+\node[fcost, below=0.15cm of S] {\footnotesize $f$=270+0=\textbf{270}};
+
+% Chemin optimal
+\draw[path] (D) -- (R);
+\draw[path] (R) -- (T);
+\draw[path] (T) -- (L);
+\draw[path] (L) -- (S);
+
+\end{tikzpicture}
+\caption{Exécution de A*. Les valeurs $f = g + h$ guident la recherche. Remarquer que $f$ reste constant à 270 sur tout le chemin optimal. Ce n'est pas un hasard : c'est une propriété fondamentale d'A* avec une heuristique admissible et consistante.}
+\label{fig:astar}
+\end{figure}
+
+\textbf{Observation.} Sur le chemin optimal, la valeur $f$ est constante à 270. C'est parce que le long d'un chemin optimal, chaque pas augmente $g$ du coût de l'action et diminue $h$ d'autant (si $h$ est parfaitement proportionnelle à la distance réelle). La somme reste stable. Cette stabilité de $f$ est le signe visuel que l'heuristique est bien calibrée.
+
+\textbf{Pourquoi Mbour n'est jamais exploré.} Mbour est dans la frontière avec $f = 330$. Tant qu'il existe des nœuds avec $f \leq 270$, A* ne s'en occupe pas. Quand le but est trouvé avec $f = 270 < 330$, il est garanti que passer par Mbour ne peut pas donner un chemin de coût $< 270$. En effet, $f(\text{Mbour}) = 330$ signifie que le meilleur chemin \textit{via} Mbour coûterait \textit{au moins} 330 km (rappel : $h$ ne surestime pas). Donc Mbour est éliminé sans jamais être exploré.
+
+\subsection{Pourquoi A* est optimal}
+
+L'idée est la suivante. Tant qu'il reste dans la frontière un nœud « prometteur » — un nœud dont l'estimation $f$ est inférieure ou égale au coût optimal — A* l'explore avant de retourner une solution plus coûteuse. Or, les nœuds du chemin optimal sont \textit{toujours} prometteurs, car l'heuristique est optimiste ($h \leq h^*$). Donc A* les explore tous, et ne peut pas se contenter d'une solution sous-optimale.
+
+Formalisons cet argument.
+
+\begin{theorembox}[Théorème -- Optimalité de A*]
+Si l'heuristique $h$ est \textbf{admissible} (ne surestime jamais), alors A* est \textbf{optimal} : il trouve toujours le chemin de moindre coût.
+\end{theorembox}
+
+\textbf{Preuve sur notre fil rouge.} Supposons, par l'absurde, qu'A* retourne un chemin sous-optimal de coût $g_{\text{sous}} > C^* = 270$. 
+
+Considérons un nœud $n$ situé sur le chemin optimal mais pas encore exploré au moment où A* termine. Ce nœud est dans la frontière. Par admissibilité :
+$$f(n) = g(n) + h(n) \leq g(n) + h^*(n) = C^* = 270$$
+
+Mais A* a sélectionné le but sous-optimal de coût $f = g_{\text{sous}} > 270$ avant $n$. Or A* sélectionne toujours le nœud de plus petit $f$ : il aurait donc sélectionné $n$ (avec $f \leq 270$) \textit{avant} le but sous-optimal (avec $f > 270$). Contradiction. $\square$
+
+\begin{theorembox}[Propriétés de A*]
+\begin{itemize}
+    \item \textbf{Complet :} Oui (sous conditions similaires à UCS)
+    \item \textbf{Optimal :} \textbf{Oui} si $h$ est admissible
+    \item \textbf{Optimalement efficace :} Parmi tous les algorithmes optimaux utilisant la même heuristique, A* explore le \textit{minimum} de nœuds. Aucun algorithme ne peut faire mieux sans risquer de manquer l'optimal.
+\end{itemize}
+\end{theorembox}
+
+\subsection{La consistance : une propriété plus forte}
+
+Pour les graphes (avec possibilité de revisiter des états), une propriété plus forte que l'admissibilité est utile.
+
+\begin{definitionbox}[Définition -- Heuristique consistante (monotone)]
+Une heuristique $h$ est \textbf{consistante} si pour tout nœud $n$ et tout successeur $n'$ obtenu par l'action $a$ :
+$$h(n) \leq c(n, a, n') + h(n')$$
+Autrement dit, l'estimation depuis $n$ ne peut pas diminuer de plus que le coût réel de l'action pour atteindre $n'$.
+\end{definitionbox}
+
+Vérifions la consistance sur notre exemple. Pour chaque arête du graphe, nous devons vérifier que $h(n) \leq c(n, n') + h(n')$ :
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Arête} & $h(n)$ & $\leq$ & $c(n,n')$ & $+$ $h(n')$ & \textbf{OK ?} \\
+\midrule
+Dakar $\rightarrow$ Rufisque & 250 & $\leq$ & 30 + & 240 = 270 & \cmark \\
+Dakar $\rightarrow$ Mbour & 250 & $\leq$ & 80 + & 250 = 330 & \cmark \\
+Rufisque $\rightarrow$ Thiès & 240 & $\leq$ & 50 + & 190 = 240 & \cmark{} (égalité) \\
+Mbour $\rightarrow$ Thiès & 250 & $\leq$ & 70 + & 190 = 260 & \cmark \\
+Mbour $\rightarrow$ Diourbel & 250 & $\leq$ & 130 + & 160 = 290 & \cmark \\
+Thiès $\rightarrow$ Louga & 190 & $\leq$ & 120 + & 70 = 190 & \cmark{} (égalité) \\
+Diourbel $\rightarrow$ Louga & 160 & $\leq$ & 100 + & 70 = 170 & \cmark \\
+Louga $\rightarrow$ Saint-Louis & 70 & $\leq$ & 70 + & 0 = 70 & \cmark{} (égalité) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Notre heuristique est consistante sur toutes les arêtes. Les cas d'égalité (Rufisque$\rightarrow$Thiès, Thiès$\rightarrow$Louga, Louga$\rightarrow$Saint-Louis) indiquent que l'heuristique est \textit{parfaitement calibrée} le long du chemin optimal : la distance à vol d'oiseau correspond exactement à la distance routière. C'est le signe d'une heuristique de très bonne qualité.
+
+\textbf{En pratique}, la consistance est importante car elle garantit que A* ne réexplore jamais un nœud déjà visité. Quand $h$ est consistante, les valeurs $f$ le long de tout chemin sont croissantes :
+$$f(n') = g(n') + h(n') = g(n) + c(n,a,n') + h(n') \geq g(n) + h(n) = f(n)$$
+
+Cela signifie que le premier chemin trouvé vers un nœud est toujours le meilleur, ce qui simplifie grandement l'implémentation.
+
+La bonne nouvelle : \textbf{toute heuristique consistante est admissible}, et la plupart des heuristiques naturelles (distance euclidienne, distance de Manhattan) sont consistantes.
+
+%=============================================================================
+\section{Conception d'heuristiques}
+%=============================================================================
+
+La qualité de A* dépend directement de la qualité de l'heuristique. Une bonne heuristique doit être à la fois \textbf{admissible} (pour garantir l'optimalité) et \textbf{informative} (pour réduire l'exploration).
+
+\subsection{La technique de relaxation}
+
+La méthode la plus féconde pour concevoir des heuristiques est la \textbf{relaxation} : simplifier le problème original en supprimant certaines contraintes, puis utiliser le coût optimal du problème simplifié comme heuristique.
+
+\begin{definitionbox}[Définition -- Relaxation]
+Une \textbf{relaxation} d'un problème est une version simplifiée obtenue en supprimant ou en assouplissant certaines contraintes. Le coût optimal de la relaxation est une heuristique admissible pour le problème original.
+
+\textbf{Pourquoi c'est admissible :} supprimer des contraintes ne peut que réduire le coût (plus d'options = plus de possibilités = coût au plus égal). Le coût dans le problème simplifié est donc $\leq$ au coût dans le problème original.
+\end{definitionbox}
+
+\begin{exemplebox}[Relaxation -- Distance à vol d'oiseau]
+Dans notre problème de navigation :
+\begin{itemize}
+    \item \textbf{Contrainte originale :} On doit suivre les routes existantes
+    \item \textbf{Relaxation :} On peut aller en ligne droite (on supprime la contrainte de suivre les routes)
+    \item \textbf{Heuristique :} Distance euclidienne (à vol d'oiseau)
+\end{itemize}
+Cette heuristique est admissible car la distance en ligne droite est toujours $\leq$ la distance routière.
+\end{exemplebox}
+
+\subsection{Exemples classiques de relaxation}
+
+\textbf{Le taquin (8-puzzle).} Dans ce puzzle, on doit déplacer des tuiles numérotées sur une grille 3$\times$3 pour atteindre une configuration but.
+
+\begin{itemize}
+    \item \textbf{Contrainte originale :} Une tuile ne peut se déplacer que vers une case vide adjacente
+    \item \textbf{Relaxation 1 -- Tuiles mal placées :} Une tuile peut se téléporter à sa position finale. L'heuristique $h_1$ compte le nombre de tuiles qui ne sont pas à leur place.
+    \item \textbf{Relaxation 2 -- Distance de Manhattan :} Une tuile peut se déplacer vers n'importe quelle case adjacente (même occupée). L'heuristique $h_2$ est la somme des distances horizontales et verticales de chaque tuile à sa position finale.
+\end{itemize}
+
+La distance de Manhattan est plus informative que le nombre de tuiles mal placées : elle tient compte de \textit{à quelle distance} chaque tuile est de sa position cible, pas seulement de si elle y est ou non.
+
+\subsection{Dominance entre heuristiques}
+
+\begin{definitionbox}[Définition -- Dominance]
+Une heuristique $h_1$ \textbf{domine} une heuristique $h_2$ si :
+$$\forall n : h_1(n) \geq h_2(n)$$
+et les deux sont admissibles.
+\end{definitionbox}
+
+Une heuristique dominante est toujours préférable : elle guide plus précisément la recherche sans compromettre l'optimalité. A* avec une heuristique dominante explore \textit{moins} de nœuds.
+
+Pour le 8-puzzle : $h_2(\text{Manhattan}) \geq h_1(\text{tuiles mal placées})$ pour tout état (vérifiable : si une tuile est mal placée, sa distance de Manhattan est $\geq 1$). Donc $h_2$ domine $h_1$, et A* avec $h_2$ est plus efficace.
+
+\subsection{Combiner des heuristiques}
+
+Si l'on dispose de plusieurs heuristiques admissibles $h_1, h_2, \ldots, h_k$, on peut les combiner en prenant le maximum :
+$$h(n) = \max\{h_1(n), h_2(n), \ldots, h_k(n)\}$$
+
+\textbf{Pourquoi le max est-il admissible ?} Si chaque $h_i$ satisfait $h_i(n) \leq h^*(n)$, alors $\max_i h_i(n) \leq h^*(n)$ aussi. Le max ne peut pas dépasser le vrai coût si aucune composante ne le dépasse.
+
+Cette technique est gratuite en qualité : le max domine chaque composante individuellement, donc A* explore au plus autant de nœuds qu'avec la meilleure composante seule. En pratique, il en explore souvent beaucoup moins.
+
+\subsection{Que se passe-t-il si $h$ n'est pas admissible ?}
+
+\begin{exemplebox}[Contre-exemple -- Heuristique non admissible sur notre fil rouge]
+Posons $h(\text{Rufisque}) = 300$ (au lieu de 240). Cette valeur \textbf{surestime} le vrai coût $h^*(\text{Rufisque}) = 240$, donc l'heuristique n'est plus admissible.
+
+A* calcule $f(\text{Rufisque}) = 30 + 300 = 330$. Comme $f(\text{Mbour}) = 80 + 250 = 330$, A* peut choisir Mbour en premier. En continuant la recherche, A* peut retourner le chemin via Mbour (340 km) avant d'explorer Rufisque, manquant le chemin optimal de 270 km.
+
+Le problème est précis : surestimer $h(\text{Rufisque})$ fait croire à A* que passer par Rufisque est trop coûteux, et l'écarte. L'admissibilité est le verrou de sécurité qui empêche ce scénario.
+\end{exemplebox}
+
+\begin{retenirbox}[Point clé -- Compromis dans la conception d'heuristiques]
+Une bonne heuristique doit être :
+\begin{itemize}
+    \item \textbf{Admissible} : ne jamais surestimer (sinon A* n'est plus optimal)
+    \item \textbf{Informative} : proche du vrai coût (sinon A* explore trop de nœuds)
+    \item \textbf{Calculable efficacement} : peu coûteuse à évaluer (sinon le gain de nœuds est perdu en temps de calcul de $h$)
+\end{itemize}
+L'heuristique parfaite serait $h = h^*$ (le vrai coût), mais la calculer revient à résoudre le problème. Le défi est de trouver le meilleur compromis. La technique de relaxation et la combinaison par $\max$ sont les outils principaux pour y parvenir.
+\end{retenirbox}
+
+%=============================================================================
+\section{Comparaison des algorithmes}
+%=============================================================================
+
+Résumons les cinq algorithmes étudiés en les comparant sur notre exemple fil rouge.
+
+\subsection{Tableau comparatif}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Algorithme} & \textbf{Frontière} & \textbf{Priorité} & \textbf{Complet} & \textbf{Optimal} & \textbf{Temps} & \textbf{Espace} \\
+\hline
+BFS & File FIFO & Ancienneté & Oui & Non* & $O(b^d)$ & $O(b^d)$ \\
+DFS & Pile LIFO & Récence & Non & Non & $O(b^m)$ & $O(bm)$ \\
+UCS & Priorité & $g(n)$ & Oui & \textbf{Oui} & $O(b^{C^*/\epsilon})$ & $O(b^{C^*/\epsilon})$ \\
+Greedy & Priorité & $h(n)$ & Non & Non & $O(b^m)$ & $O(b^m)$ \\
+A* & Priorité & $f(n) = g + h$ & Oui & \textbf{Oui}** & $O(b^d)$*** & $O(b^d)$ \\
+\hline
+\end{tabular}
+\end{center}
+
+{\small
+\textit{* BFS est optimal si tous les coûts sont égaux.}\\
+\textit{** A* est optimal si $h$ est admissible.}\\
+\textit{*** Avec une bonne heuristique, A* explore beaucoup moins que $b^d$ nœuds en pratique.}
+}
+
+\subsection{Sur notre exemple}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Algorithme} & \textbf{Nœuds explorés} & \textbf{Chemin trouvé} & \textbf{Coût} \\
+\hline
+BFS & 7 & D $\rightarrow$ R $\rightarrow$ T $\rightarrow$ L $\rightarrow$ S & 270 km \\
+DFS & 5 & D $\rightarrow$ R $\rightarrow$ T $\rightarrow$ L $\rightarrow$ S & 270 km \\
+UCS & 7 & D $\rightarrow$ R $\rightarrow$ T $\rightarrow$ L $\rightarrow$ S & 270 km \\
+Greedy & 5 & D $\rightarrow$ R $\rightarrow$ T $\rightarrow$ L $\rightarrow$ S & 270 km \\
+A* & 5 & D $\rightarrow$ R $\rightarrow$ T $\rightarrow$ L $\rightarrow$ S & 270 km \\
+\hline
+\end{tabular}
+\end{center}
+
+Sur ce petit exemple, tous les algorithmes trouvent le même chemin optimal. C'est parce que le graphe est petit et sa structure favorise le chemin optimal. Les différences deviennent dramatiques sur des graphes plus grands ou avec des structures moins favorables, comme nous l'avons illustré avec les contre-exemples (§4.4 pour BFS, §8.3 pour Greedy).
+
+\subsection{Visualisation comparative}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, rounded corners=3pt, minimum width=3.2cm, minimum height=2.2cm, align=center, font=\small},
+    title/.style={font=\bfseries\small},
+    category/.style={font=\small\itshape, gray}
+]
+
+% Catégories
+\node[category] at (-1.5, 2.8) {Non informée};
+\node[category] at (-1.5, -0.2) {Informée};
+
+% Ligne du haut : BFS, DFS, UCS
+\node[box, fill=blue!15, draw=blue!50] (bfs) at (1.8, 2.5) {
+    \textbf{BFS}\\[2pt]
+    Niveau par niveau\\
+    {\scriptsize Complet}\\
+    {\scriptsize\color{red!70!black} Non optimal}
+};
+
+\node[box, fill=purple!15, draw=purple!50] (dfs) at (5.6, 2.5) {
+    \textbf{DFS}\\[2pt]
+    En profondeur\\
+    {\scriptsize Mémoire $O(bm)$}\\
+    {\scriptsize\color{red!70!black} Non complet}
+};
+
+\node[box, fill=green!15, draw=green!50!black] (ucs) at (9.4, 2.5) {
+    \textbf{UCS}\\[2pt]
+    Coût croissant\\
+    {\scriptsize Complet}\\
+    {\scriptsize\color{green!50!black}\textbf{Optimal}}
+};
+
+% Ligne du bas : Greedy, A*
+\node[box, fill=orange!15, draw=orange!70] (greedy) at (3.7, -0.5) {
+    \textbf{Greedy}\\[2pt]
+    Suit $h(n)$\\
+    {\scriptsize Rapide}\\
+    {\scriptsize\color{red!70!black} Non optimal}
+};
+
+\node[box, fill=red!10, draw=red!60, line width=1.5pt] (astar) at (7.5, -0.5) {
+    \textbf{A*}\\[2pt]
+    $f(n) = g(n) + h(n)$\\
+    {\scriptsize\color{green!50!black}\textbf{Optimal}}\\
+    {\scriptsize\color{green!50!black}\textbf{+ Efficace}}
+};
+
+% Flèches conceptuelles
+\draw[->, thick, gray!60] (ucs.south) -- ++(0,-0.4) -| node[pos=0.25, above, font=\scriptsize, gray] {$+$ heuristique} (astar.north);
+\draw[->, thick, gray!60] (greedy.east) -- node[above, font=\scriptsize, gray] {$+$ coût $g$} (astar.west);
+
+% Légende
+\node[font=\scriptsize, gray, align=left] at (11.5, 1) {
+    \textcolor{green!50!black}{Vert} = Optimal\\
+    \textcolor{red!70!black}{Rouge} = Non optimal\\
+    Cadre épais = Recommandé
+};
+
+\end{tikzpicture}
+\caption{Comparaison des cinq algorithmes de recherche. A* combine l'optimalité de UCS (grâce à $g$) et l'efficacité de Greedy (grâce à $h$). Les flèches montrent comment A* hérite des qualités de ses deux « parents ».}
+\label{fig:comparaison}
+\end{figure}
+
+\subsection{Guide de choix}
+
+\begin{retenirbox}[Quel algorithme choisir ?]
+\begin{itemize}
+    \item \textbf{Tous les coûts égaux, pas besoin d'optimalité :} BFS (simple, complet)
+    \item \textbf{Mémoire très limitée :} DFS ou IDA* (A* avec approfondissement itératif)
+    \item \textbf{Optimalité requise, pas d'heuristique disponible :} UCS
+    \item \textbf{Rapidité prioritaire, optimalité secondaire :} Greedy
+    \item \textbf{Optimalité + efficacité, bonne heuristique disponible :} \textbf{A*}
+\end{itemize}
+\end{retenirbox}
+
+%=============================================================================
+\section{Recherche locale : optimiser sans chemin}
+%=============================================================================
+
+Jusqu'ici, tous les algorithmes construisent un \textbf{chemin} depuis l'état initial jusqu'au but. Mais certains problèmes ne nécessitent pas de chemin : seul l'\textbf{état final} compte. Par exemple, placer 8 reines sur un échiquier sans conflit, ou trouver l'emploi du temps optimal à l'UCAD. Ce qui importe n'est pas \textit{comment} on arrive à la solution, mais \textit{quelle} est la solution.
+
+Pour ces problèmes, la recherche locale offre une approche radicalement différente : au lieu de construire un arbre, on part d'un état quelconque et on l'améliore progressivement en se déplaçant vers des voisins de meilleure qualité. La Figure~\ref{fig:4queens} montre ce processus sur le problème classique des 4 reines.
+
+\subsection{Montée de gradient (Hill Climbing)}
+
+\begin{recipebox}[Recette -- Hill Climbing]
+\begin{enumerate}
+    \item Commencer à un état quelconque
+    \item Évaluer tous les voisins de l'état courant
+    \item Se déplacer vers le voisin qui améliore le plus la fonction objectif
+    \item Répéter jusqu'à ce qu'aucun voisin ne soit meilleur (on est au sommet)
+\end{enumerate}
+\end{recipebox}
+
+L'analogie est celle d'un alpiniste dans le brouillard : il ne voit pas le sommet, mais il peut sentir la pente sous ses pieds et monter. La Figure~\ref{fig:landscape} illustre ce problème : hill climbing monte vers le sommet le plus proche et s'y arrête, même si un sommet plus élevé existe de l'autre côté de la vallée.
+
+\textbf{Avantage :} mémoire constante $O(1)$ — seul l'état courant est en mémoire.
+
+\textbf{Problème fondamental :} les \textbf{maxima locaux}. L'algorithme s'arrête dès qu'il atteint un sommet local, même s'il existe un meilleur sommet ailleurs. Il n'a aucun moyen de savoir s'il est au sommet global ou dans une colline secondaire.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{fig_local_search_landscape.pdf}
+\caption{Paysage d'optimisation illustrant la différence entre hill climbing et recuit simulé. Hill climbing (rouge) monte vers le sommet le plus proche et s'y arrête : c'est un maximum \textit{local}. Le recuit simulé (vert) accepte parfois de descendre dans la vallée, ce qui lui permet d'atteindre le maximum \textit{global}.}
+\label{fig:landscape}
+\end{figure}
+
+\begin{exemplebox}[Exemple tropicalisé -- Emploi du temps à l'UCAD]
+Considérons l'affectation de 20 cours à 5 salles et 10 créneaux horaires. L'état est une affectation complète, la fonction objectif compte le nombre de conflits (deux cours dans la même salle au même créneau). Hill climbing part d'une affectation aléatoire et déplace un cours à la fois pour réduire les conflits.
+
+Avec 100 créneaux-salles possibles, l'espace d'états a $100^{20} \approx 10^{40}$ configurations. BFS ou A* sont inapplicables. Hill climbing, lui, n'a besoin que d'évaluer les voisins de l'état courant (déplacer un cours = 20 cours $\times$ 99 alternatives $\approx$ 2000 voisins). C'est faisable en une fraction de seconde.
+\end{exemplebox}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{fig_4queens_hillclimbing.pdf}
+\caption{Hill climbing sur le problème des 4 reines. À gauche, l'état initial $(1,3,2,4)$ a 2 conflits (diagonales en rouge). Au centre, le meilleur voisin $(1,1,2,4)$ réduit à 1 conflit. À droite, la solution $(2,4,1,3)$ avec 0 conflit. Chaque pas choisit le voisin qui minimise le plus le nombre de conflits.}
+\label{fig:4queens}
+\end{figure}
+
+\subsection{Recuit simulé (Simulated Annealing)}
+
+Pour échapper aux maxima locaux, le \textbf{recuit simulé} accepte parfois de descendre :
+
+\begin{recipebox}[Recette -- Recuit simulé]
+\begin{enumerate}
+    \item Choisir un voisin aléatoire
+    \item Si le voisin est meilleur : l'accepter
+    \item Si le voisin est pire : l'accepter avec probabilité $e^{-\Delta E / T}$, où $\Delta E$ est la dégradation et $T$ la température
+    \item Diminuer $T$ progressivement
+\end{enumerate}
+\end{recipebox}
+
+Au début ($T$ élevé), l'algorithme accepte de nombreux mouvements dégradants, ce qui lui permet d'explorer largement. À la fin ($T \to 0$), il n'accepte plus que des améliorations, convergeant vers un minimum local. Si le refroidissement est suffisamment lent, le recuit simulé converge vers l'optimum global (en théorie). La Figure~\ref{fig:sa_temperature} détaille ce mécanisme : à gauche, la décroissance de la température ; à droite, la probabilité d'acceptation en fonction de $T$ et de l'amplitude de la dégradation.
+
+Le nom vient de la métallurgie : le recuit est un processus où l'on chauffe puis refroidit lentement un métal pour obtenir une structure cristalline optimale.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{fig_simulated_annealing.pdf}
+\caption{Recuit simulé. À gauche : la température $T$ décroît au fil des itérations (refroidissement géométrique). À droite : la probabilité d'accepter un mouvement dégradant ($P = e^{-\Delta E/T}$) en fonction de $T$, pour trois niveaux de dégradation. À haute température, presque tous les mouvements sont acceptés (exploration). À basse température, seules les améliorations passent (exploitation).}
+\label{fig:sa_temperature}
+\end{figure}
+
+\subsection{Recherche locale vs recherche systématique}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Systématique} (BFS, A*) & \textbf{Locale} (HC, SA) \\
+\midrule
+Construit un chemin & Oui & Non \\
+Mémoire & $O(b^d)$ ou plus & $O(1)$ \\
+Garantie d'optimalité & Oui (A*, UCS) & Non (sauf recuit lent) \\
+Espaces très grands & Impossible & Faisable \\
+Typiquement utilisé pour & Pathfinding, jeux & Scheduling, CSP, ML \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La recherche locale est omniprésente en Machine Learning : la descente de gradient, au cœur de l'entraînement des réseaux de neurones, est une forme de recherche locale dans l'espace des paramètres. C'est un premier pont vers la Séance 6.
+
+%=============================================================================
+\section{Au-delà de A* : extensions et limites}
+%=============================================================================
+
+A* est puissant mais a des limites. Cette section évoque les extensions et les situations où d'autres approches sont nécessaires.
+
+\subsection{Limites de A*}
+
+\textbf{Complexité spatiale.} A* stocke tous les nœuds générés en mémoire. Pour les très grands espaces de recherche, cela devient prohibitif.
+
+\textbf{Qualité de l'heuristique.} Sans bonne heuristique, A* se réduit à UCS. Concevoir une heuristique admissible et informative peut être difficile.
+
+\textbf{Problèmes continus ou très grands.} Pour les espaces d'états continus ou astronomiquement grands (comme le Go avec $b \approx 250$ et $d \approx 150$), A* pur est inapplicable.
+
+\subsection{Extensions importantes}
+
+\textbf{IDA* (Iterative Deepening A*).} Combine A* avec l'approfondissement itératif pour réduire drastiquement la consommation mémoire, au prix de calculs redondants. IDA* utilise la mémoire de DFS ($O(bm)$) tout en conservant l'optimalité de A*.
+
+\textbf{RBFS (Recursive Best-First Search).} Alternative à IDA* avec une complexité spatiale linéaire.
+
+\textbf{MCTS (Monte Carlo Tree Search).} Pour les jeux avec grand facteur de branchement comme le Go ($b \approx 250$), MCTS combine exploration stochastique et évaluation. C'est la technique utilisée par AlphaGo.
+
+\subsection{Lien avec le Machine Learning}
+
+Les algorithmes de recherche classiques supposent un modèle parfait de l'environnement : on connaît les états, les actions, et les coûts. Que faire quand ce n'est pas le cas ?
+
+\begin{itemize}
+    \item \textbf{Apprentissage de l'heuristique.} On peut \textit{apprendre} $h(n)$ à partir de données plutôt que de la concevoir manuellement. C'est exactement ce que fait AlphaGo : un réseau de neurones estime la valeur de chaque position du plateau.
+    \item \textbf{Apprentissage par renforcement.} Quand les transitions et les récompenses sont inconnues, l'agent doit apprendre \textit{en interagissant} avec l'environnement. C'est le sujet de la Séance 6.
+\end{itemize}
+
+%=============================================================================
+\section{Synthèse et conclusion}
+%=============================================================================
+
+\subsection{Ce que nous avons appris}
+
+Cette séance a introduit les algorithmes de recherche, outils fondamentaux de l'IA pour résoudre des problèmes par exploration systématique.
+
+\begin{retenirbox}[Points clés à retenir]
+\begin{enumerate}
+    \item \textbf{Formulation.} Un problème de recherche est défini par $(S, s_0, G, A, c)$ : états, état initial, buts, actions, coûts.
+    
+    \item \textbf{Paramètres.} Le facteur de branchement $b$, la profondeur de la solution $d$, et la profondeur maximale $m$ déterminent la difficulté du problème. L'explosion combinatoire ($b^d$) est le défi central.
+    
+    \item \textbf{Stratégie générale.} Tous les algorithmes maintiennent une frontière et diffèrent par la stratégie de choix du prochain nœud à explorer.
+    
+    \item \textbf{BFS/DFS.} Recherches non informées. BFS explore par niveau (complet, mémoire $O(b^d)$). DFS explore en profondeur (mémoire $O(bm)$, non complet). Aucun n'est optimal pour les coûts variables.
+    
+    \item \textbf{UCS.} Recherche par coût croissant. Garantit l'optimalité mais explore sans direction.
+    
+    \item \textbf{Heuristiques.} Une estimation $h(n)$ du coût restant. Admissible si $h(n) \leq h^*(n)$. La technique de relaxation permet de concevoir des heuristiques admissibles.
+    
+    \item \textbf{A*.} Combine $g(n)$ et $h(n)$ via $f(n) = g(n) + h(n)$. Optimal et optimalement efficace avec une bonne heuristique.
+    
+    \item \textbf{Recherche locale.} Pour les problèmes d'optimisation sans chemin (scheduling, configuration), hill climbing et recuit simulé améliorent un état courant avec une mémoire $O(1)$. La descente de gradient en ML en est une variante.
+\end{enumerate}
+\end{retenirbox}
+
+\subsection{Fil conducteur du cours}
+
+Cette séance complète notre exploration des agents dans des environnements déterministes et observables :
+
+\begin{center}
+\begin{tabular}{|c|l|l|c|}
+\hline
+\textbf{Séance} & \textbf{Question} & \textbf{Réponse} & \\
+\hline
+1 & Qu'est-ce que l'IA ? & Agents rationnels & \cmark \\
+2 & Comment raisonner ? & Logique formelle & \cmark \\
+\textbf{3} & \textbf{Comment chercher ?} & \textbf{Algorithmes de recherche} & $\leftarrow$ \\
+5 & Comment gérer l'incertitude ? & Probabilités, Bayes & \\
+6 & Pourquoi apprendre ? & MDPs, introduction ML & \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Vers la Séance 5 : l'incertitude}
+
+Les algorithmes de cette séance supposent un monde parfaitement connu : on sait exactement quels états existent, quelles actions mènent où, et combien elles coûtent. Le monde réel est rarement aussi accommodant.
+
+La Séance 5 introduira les outils pour raisonner sous \textbf{incertitude} : les probabilités et le théorème de Bayes. Ces outils permettront de prendre des décisions rationnelles même quand les informations sont incomplètes ou bruitées.
+
+La question centrale sera : \textbf{comment un agent peut-il raisonner et agir quand il n'est pas sûr de l'état du monde ?}
+
+%=============================================================================
+\section*{Références}
+%=============================================================================
+
+\begin{itemize}
+    \item Russell, S., \& Norvig, P. (2020). \textit{Artificial Intelligence: A Modern Approach} (4th ed.). Pearson. Chapitres 3--4.
+    \item Hart, P. E., Nilsson, N. J., \& Raphael, B. (1968). A formal basis for the heuristic determination of minimum cost paths. \textit{IEEE Transactions on Systems Science and Cybernetics}, 4(2), 100--107.
+    \item Dijkstra, E. W. (1959). A note on two problems in connexion with graphs. \textit{Numerische Mathematik}, 1, 269--271.
+\end{itemize}
+
+\end{document}
