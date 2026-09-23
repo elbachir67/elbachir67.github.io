@@ -87,7 +87,7 @@ d'un tuteur IA encadré.
 | US-61 | EP3 | Flottants et mathématiques hors ligne (ouvre SD et Intro IA) | M | 5 | 7 |
 | US-62 | EP3 | Contrôle des figures par comparaison des références de glyphes | S | 3 | — |
 | US-63 | EP3 | Audit d'accessibilité ciblé sur la PR, audit complet hebdomadaire sur `main` | M | 3 | — |
-| US-64 | EP3 | Cellules de tableau étendues (`\multicolumn`, `\multirow`) et équations à étiquettes multiples | S | 3 | — |
+| US-64 | EP3 | Cellules de tableau étendues (`\multicolumn`) et équations à étiquettes multiples | S | 3 | livrée |
 
 ### Stories décrites par le PO
 
@@ -157,14 +157,23 @@ demande deux régimes — sur une PR, l'audit ne porte que sur les **pages touch
 `main`, l'audit **complet** tourne une fois par semaine, et son échec ouvre une issue. Priorité
 **Must** : le PO l'a demandée comme telle.
 
-**US-64 — Ce qu'US-61 laisse de côté.** Trois restes, mesurés sur les sources réelles et sans
-sprint, le PO l'ayant tranché. **`\multicolumn` et `\multirow`** : quatre occurrences dans
-Introduction à l'IA. Une cellule qui s'étend sur plusieurs colonnes ou lignes n'a pas d'équivalent
-en Markdown ; il faut produire un tableau HTML, et `cellules_de_tableau()` doit rendre la structure
-plutôt qu'une liste de cellules — 2 points. **Plusieurs `\label` dans un même `align`** : trois
-occurrences. LaTeX numérote chaque ligne, Quarto numérote le bloc ; il faudrait découper l'`align`
-en équations séparées — 1 point. S'y ajoute un `\qquad` hors formule, négligeable, à traiter avec
-le prochain lot d'espacements.
+**US-64 — Ce qu'US-61 laissait de côté. Livrée avec la migration d'Introduction à l'IA**, le PO
+ayant préféré la traiter plutôt que de publier cinq tableaux mal rendus.
+
+**`\multicolumn`** : cinq occurrences. La cellule garde son contenu et la ligne se complète de
+cellules vides. Elle ne s'**étend** plus, faute d'équivalent en Markdown : produire un tableau HTML
+aurait demandé que `cellules_de_tableau()` rende la structure plutôt qu'une liste de cellules, pour
+un gain que le rendu ne montre pas. **`\multirow` sort de la story** : il n'est utilisé nulle part
+dans les sources des cinq cours — seul `\usepackage{multirow}` y apparaît.
+
+**Plusieurs `\label` dans un même `align`** : trois occurrences, dans la séance 2 d'Introduction à
+l'IA. LaTeX numérote chaque ligne, Quarto numérote le bloc : seule la première étiquette survivait,
+et le rendu signalait « Unable to resolve crossref @eq-r2 » — le lecteur lisait « (?) ». Chaque
+ligne étiquetée devient une équation numérotée ; l'alignement d'une ligne à l'autre se perd, ce
+qu'une page web ne montrait de toute façon pas.
+
+**`\qquad` hors formule** : une espace. Dans une formule, il n'est pas touché — une substitution
+globale, tentée au Sprint 6, avait cassé les mathématiques de huit chapitres publiés.
 
 **La part du PO, et US-58.** Le bilan du Sprint 6 a mesuré que la machine travaille quatre minutes
 par chapitre : le reste est de la lecture et des **décisions du PO** — 33 textes alternatifs pour les
