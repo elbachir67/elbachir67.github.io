@@ -59,6 +59,15 @@ RESERVES = {
     "correctionbox": "encadré de correction (décision du PO)",
     "solution": "solution d'exercice : c'est une correction (décision du PO)",
 }
+# Motifs qui doivent former un **mot entier**, et non commencer un mot. « corr » abrège « corrigé »
+# dans les sources du cours de Structures de Données — `Lab_S03_Tables_Hachage_corr.pdf` est le
+# corrigé du TP 3, et il a traversé l'import parce que la liste ci-dessus ne connaissait que des
+# mots plus longs. En motif de début de mot, « corr » aurait aussi sorti « correlation.pdf » et
+# « correspondance.svg » : ici la fin du mot compte autant que son début.
+RESERVES_MOTS = {
+    "corr": "corrigé (abrégé « corr » dans les sources du PO)",
+    "sol": "solution (abrégée « sol » dans les sources du PO)",
+}
 # Termes que le PO ne veut pas voir sur le site, quelle que soit la page. La correction se fait
 # **à la source** — le .tex du cours et sa copie dans `_import/` —, puis l'import est rejoué : sans
 # cela, le terme revient au prochain import.
@@ -93,6 +102,9 @@ def reserve(nom: str) -> str | None:
     normalise_ = normalise(nom)
     for motif, raison in RESERVES.items():
         if re.search(rf"(?:^|_){re.escape(motif)}", normalise_):
+            return raison
+    for motif, raison in RESERVES_MOTS.items():
+        if re.search(rf"(?:^|_){re.escape(motif)}(?:_|$)", normalise_):
             return raison
     return None
 
@@ -200,7 +212,8 @@ def main() -> int:
               "est rejoué.")
         return 1
     print(f"OK : rien de non publiable dans le dépôt ni dans {racine}/ "
-          f"({len(RESERVES)} nom(s) de document et {len(TERMES_INTERDITS)} terme(s) surveillés).")
+          f"({len(RESERVES) + len(RESERVES_MOTS)} nom(s) de document "
+          f"et {len(TERMES_INTERDITS)} terme(s) surveillés).")
     return 0
 
 

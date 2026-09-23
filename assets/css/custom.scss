@@ -181,6 +181,12 @@ i.callout-icon {
 
 // Mode sombre : les mêmes couleurs, éclaircies pour rester lisibles sur le fond foncé.
 .quarto-dark .cours-carte {
+  // La valeur par défaut aussi. Un cours dont le domaine n'est pas l'un des trois — parce qu'il
+  // est nouveau, ou parce qu'il attend encore la réponse du PO — retombait sur `$primary`, un bleu
+  // foncé calculé pour le fond blanc : sur le fond sombre, le nom du domaine et la pastille
+  // « en ligne » passaient sous le contraste exigé. La carte de Structures de Données l'a montré.
+  --cours-domaine: #6BAEE8;
+
   &[data-domaine="genie-logiciel-architecture"] { --cours-domaine: #6BAEE8; }
   &[data-domaine="ia-data"] { --cours-domaine: #45A99C; }
   &[data-domaine="programmation-web-mobile"] { --cours-domaine: #D98F45; }
@@ -301,6 +307,15 @@ div.quarto-post .listing-categories .listing-category,
     max-width: 100%;
     height: auto;
   }
+}
+
+// Légende de tableau. Bootstrap la compose dans un gris qui donne **4,39:1** sur blanc, sous les
+// 4,5:1 qu'exige WCAG 1.4.3 pour un texte de cette taille. Personne ne l'avait vu parce que le site
+// n'avait aucun tableau légendé : les premiers sont ceux de Structures de Données, que la
+// conversion des flottants d'US-61 a dotés d'une vraie légende. Le gris du site, plus foncé, tient
+// à 5,5:1. Le mode sombre, lui, est déjà conforme et garde le sien.
+.quarto-light table > caption {
+  color: #5a6b75;
 }
 
 // Un tableau de cours plus large que l'écran défile **dans son cadre**, plutôt que d'élargir la page.

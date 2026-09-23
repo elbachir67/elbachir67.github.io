@@ -45,6 +45,10 @@ def main() -> int:
     analyseur.add_argument("source", type=Path, help="dossier contenant les figures en PDF")
     analyseur.add_argument("--sortie", type=Path, required=True, help="dossier des SVG produits")
     analyseur.add_argument("--motif", default="*.pdf", help="figures à convertir (défaut : *.pdf)")
+    analyseur.add_argument("--prefixe", default="",
+                           help="préfixe des SVG produits. Les figures d'un cours vivent toutes "
+                                "dans le même dossier : sans préfixe, le `fig_01` de la séance 1 "
+                                "et celui de la séance 2 s'écrasent (US-61)")
     args = analyseur.parse_args()
 
     if shutil.which("pdftocairo") is None:
@@ -59,7 +63,7 @@ def main() -> int:
     args.sortie.mkdir(parents=True, exist_ok=True)
     echecs = 0
     for figure in figures:
-        cible = args.sortie / f"{figure.stem}.svg"
+        cible = args.sortie / f"{args.prefixe}{figure.stem}.svg"
         faute = convertir(figure, cible)
         if faute:
             print(f"{figure.stem} : ÉCHEC — {faute}")

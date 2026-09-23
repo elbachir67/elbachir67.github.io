@@ -86,7 +86,8 @@ IGNOREES = {"vskip", "vspace", "smallskip", "medskip", "bigskip", "centering", "
             # Sommaire et sauts de page : un document HTML a sa propre table des matières (US-61).
             "tableofcontents", "listoffigures", "listoftables", "newpage", "clearpage", "cleardoublepage",
             "hfill", "hrule", "linebreak", "nopagebreak", "pagebreak", "allowbreak", "protect",
-            "appendix", "cmidrule", "arraybackslash", "justifying"}
+            "appendix", "cmidrule", "arraybackslash", "justifying", "textwidth", "linewidth",
+            "columnwidth", "textheight", "baselineskip"}
 
 # Couleurs d'encre du jeu de figures : elles suivront la couleur du texte de la page.
 ENCRES = {"#000", "#000000", "black", "#1a3a5c", "#1A3A5C", "#1c2a33", "#1C2A33",
@@ -129,6 +130,7 @@ class Conversion:
         self.tableaux = 0
         self.flottants: Counter[str] = Counter()
         self.omis: Counter[str] = Counter()
+        self.prefixe_images = ""
         self.slide = "(préambule)"
 
     def proteger(self, bloc: str) -> str:
@@ -463,7 +465,7 @@ def figures(texte: str, conversion: Conversion, legende_flottante: str = "") -> 
             return texte
         # Le dossier ne compte pas (les figures sont celles du cours), et l'extension non plus :
         # le .tex cite le PDF que compile LaTeX, la page incorpore le SVG du même nom.
-        nom = Path(trouve["nom"]).stem
+        nom = conversion.prefixe_images + Path(trouve["nom"]).stem
         mesure = re.search(r"width=([\d.]+)\\linewidth", trouve["options"] or "")
         largeur = float(mesure[1]) if mesure else None
 
@@ -722,7 +724,9 @@ def inline(texte: str, conversion: Conversion) -> str:
                            # Espacement fantôme et alternance de couleurs d'un tableau : du style.
                            ("phantom", 1), ("hphantom", 1), ("vphantom", 1), ("rowcolors", 3),
                            # Couleur de cellule et filet partiel : du style de tableau.
-                           ("cellcolor", 1), ("rowcolor", 1), ("columncolor", 1)):
+                           ("cellcolor", 1), ("rowcolor", 1), ("columncolor", 1),
+                           # Filet horizontal et titre de partie : de la mise en page de document.
+                           ("rule", 2), ("part", 1)):
         motif = re.compile(rf"\\{nom}\s*\{{")
         while True:
             trouve = motif.search(texte)
@@ -1463,6 +1467,10 @@ def main() -> int:
                            help="ressource de la séance : lab, td, tp, notebook ou pdf, son fichier "
                                 "dans le dépôt et son titre. Un corrigé, une piste ou une "
                                 "correction est refusé. Répétable (US-49)")
+    analyseur.add_argument("--prefixe-images", default="",
+                           help="préfixe du nom des figures importées. Les figures d'un cours "
+                                "vivent toutes dans le même dossier : sans préfixe, le `fig_01` "
+                                "de la séance 1 et celui de la séance 2 s'écrasent (US-61)")
     analyseur.add_argument("--prefixe-tikz",
                            help="préfixe des schémas TikZ compilés (US-55) ; par défaut, le nom du "
                                 "fichier de sortie")
@@ -1511,6 +1519,7 @@ def main() -> int:
             sys.exit(f"Encadré « {nom} » : genre de callout inconnu « {genre} » "
                      "(note, tip, warning, important, caution ou omis).")
         conversion.encadres[nom] = (genre, f"encadre-{nom}", titre or nom)
+    conversion.prefixe_images = args.prefixe_images
     for couple in args.figure_python:
         nom, _, script = couple.partition("=")
         conversion.scripts[nom] = Path(script)

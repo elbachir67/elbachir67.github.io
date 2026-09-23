@@ -249,6 +249,14 @@ def main() -> int:
     analyseur.add_argument("--ressource", action="append", default=[], metavar="TYPE|FICHIER|TITRE",
                            help="ressource de la séance : lab, td, tp, notebook ou pdf, le fichier "
                                 "dans le dépôt et son titre — type|fichier|titre. Répétable (US-49)")
+    analyseur.add_argument("--prefixe-images", default="",
+                           help="préfixe du nom des figures de cette séance, pour qu'elles ne "
+                                "s'écrasent pas d'une séance à l'autre (US-61)")
+    analyseur.add_argument("--script-figures", type=Path,
+                           help="script qui produit les figures de la séance (matplotlib). Il est "
+                                "exécuté **ici**, à la préparation, et ses PDF sont commités : la "
+                                "CI ne rejoue jamais un générateur, pas plus qu'elle ne compile "
+                                "les TikZ (US-61)")
     analyseur.add_argument("--figures-source", type=Path,
                            help="dossier des figures (par défaut : figs/ à côté du .tex)")
     args = analyseur.parse_args()
@@ -274,6 +282,20 @@ def main() -> int:
         sortie = cours / "chapitres" / f"{numero}-{slug}.qmd"
     figures = cours / "figures"
 
+    # Figures calculées : le script du PO les produit dans son propre dossier, comme il le fait
+    # sur sa machine. Elles sont ensuite copiées et commitées ; la CI ne relance rien.
+    if args.script_figures:
+        if not args.script_figures.is_file():
+            print(f"Script de figures introuvable : {args.script_figures}")
+            return 1
+        produit = subprocess.run([sys.executable, args.script_figures.name],
+                                 cwd=args.script_figures.parent, capture_output=True, text=True)
+        if produit.returncode != 0:
+            print(f"Le script de figures a échoué :\n{produit.stderr.strip()}")
+            return 1
+        nouvelles = sorted(f.name for f in args.script_figures.parent.glob("*.pdf"))
+        print(f"{len(nouvelles)} figure(s) produite(s) par {args.script_figures.name}")
+
     tex = copier_sources(cours, args.tex, args.figures_source)
     textes = dict(morceau.split("=", 1) for morceau in args.alt)
     alt = ecrire_textes_alternatifs(cours, {nom: texte.strip('"') for nom, texte in textes.items()})
@@ -294,6 +316,9 @@ def main() -> int:
     langage = (args.langage_code or (precedente or {}).get("langage")
                or langage_declare(source) or "java")
     commande += ["--langage-code", langage]
+    prefixe_images = args.prefixe_images or (precedente or {}).get("prefixe_images", "")
+    if prefixe_images:
+        commande += ["--prefixe-images", prefixe_images]
 
     # Cible et encadrés : décidés par le PO, donc conservés d'une relance à l'autre.
     cible = args.cible or (precedente or {}).get("cible", "slides")
@@ -363,6 +388,7 @@ def main() -> int:
         **({"alt": str(alt.relative_to(cours))} if alt else {}),
         "description": description,
         "langage": langage,
+        "prefixe_images": prefixe_images,
         **({"cible": cible} if cible != "slides" else {}),
         **({"titre": titre} if titre else {}),
         **({"numero": numero_affiche} if numero_affiche else {}),
