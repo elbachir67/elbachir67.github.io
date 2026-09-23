@@ -148,6 +148,11 @@ jobs:
       - name: Vérifier qu'aucune slide ne déborde
         run: node scripts/verifier_debordement.js _site
 
+      # Les présentations chargent MathJax par un détournement de la variable globale que Quarto
+      # expose : si Quarto change, elles perdraient leurs formules sans un mot (US-61).
+      - name: Vérifier que les formules sont composées
+        run: node scripts/verifier_formules.js _site
+
       # Liens externes : un lien cassé produit un avertissement, sans faire échouer la CI.
       - name: Vérifier les liens externes
         id: externes
