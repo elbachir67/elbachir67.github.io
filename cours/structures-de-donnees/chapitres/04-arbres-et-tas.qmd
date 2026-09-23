@@ -1,0 +1,367 @@
+---
+title: "Arbres et tas"
+cible: "page"
+body-classes: cours-page
+numero: "4"
+description: "Séance 4 de Structures de Données et Algorithmes Avancés : arbres binaires de recherche, rotations AVL, tas binaires et file de priorité."
+author: "Dr. El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Navigation conceptuelle"}
+**Ce que vous savez déjà :** ADTs Map et Set (S01), complexité $\mathcal{O}$/$\Omega$/$\Theta$ (S02), fonctions de hachage et résolution de collisions (S03). Vous savez obtenir $\mathcal{O}(1)$ moyen pour `get`, `put`, `remove` par clé.<br>
+**La limite qu'on dépasse aujourd'hui :** Le hachage *disperse* volontairement les clés --- c'est son objectif. Conséquence : **aucun ordre**. Impossible de demander « plus petite clé », « clés dans un intervalle », « lister les clés triées », ou « toujours extraire le minimum d'une collection dynamique ». Pourtant ces opérations sont omniprésentes.<br>
+**Ce que vous saurez faire à la fin :**
+
+1. Construire, rechercher, supprimer dans un arbre binaire de recherche (BST)
+2. Dérouler un parcours *inorder* et reconnaître qu'il produit les clés triées
+3. Diagnostiquer le déséquilibre d'un BST et le coût $\mathcal{O}(n)$ qu'il induit
+4. Identifier le cas de rotation AVL (LL, RR, LR, RL) face à un déséquilibre
+5. Manipuler un tas binaire stocké en tableau : indices parent/enfant, percolation
+6. Analyser la complexité $\mathcal{O}(\log n)$ d'`insert` et `extractMin`
+
+**Ouvre la voie vers :** S05 (graphes --- Dijkstra utilise un tas pour le plus court chemin).
+:::
+
+## Motivation : quand l'ordre compte
+
+### Le cas que le hachage ne sait pas traiter
+
+Reprenons le carnet de contacts de la S03. `HashMap` donne `get("Awa Diop")` en $\mathcal{O}(1)$ moyen. Mais imaginons maintenant :
+
+- « Affiche-moi tous les contacts par ordre alphabétique. »
+- « Quel est le premier contact après "Fatou Sall" ? »
+- « Liste tous les contacts entre "A" et "D". »
+
+Aucune de ces opérations n'est efficace sur une `HashMap` : il faut *tout* parcourir puis trier, soit $\mathcal{O}(n \log n)$.
+
+::: {.callout-warning .encadre-attentionbox title="Ce qu'on cherche"}
+Une structure qui combine **les trois** propriétés suivantes :
+
+1. `get`, `put`, `remove` en $\mathcal{O}(\log n)$
+2. Les clés sont *intrinsèquement* triées
+3. Les parcours par intervalle sont possibles en temps proportionnel au nombre d'éléments visités
+
+Le hachage échoue sur (2) et (3). Le tableau trié échoue sur (1). L'arbre binaire de recherche réussit les trois --- à condition qu'il reste équilibré.
+:::
+
+## L'arbre binaire de recherche
+
+### Définition
+
+::: {.callout-note .encadre-infobox title="Propriété BST"}
+Un arbre binaire est un **BST** si, pour tout nœud $x$ :
+
+- toute clé du sous-arbre gauche de $x$ est *strictement inférieure* à $x.\text{clé}$
+- toute clé du sous-arbre droit de $x$ est *supérieure ou égale* à $x.\text{clé}$
+
+La propriété doit valoir à *tous les niveaux*.
+:::
+
+### Les trois opérations fondamentales
+
+**Insertion et recherche** suivent le même principe : on part de la racine, on compare, on descend à gauche si la clé cherchée est plus petite, à droite sinon.
+
+::: {.figure-flottante}
+{{< svg ../figures/s04-fig_01_bst_operations.svg alt="(a) BST construit par insertions successives. (b) Recherche de 60 : trois comparaisons suffisent (50, 70, 60). (c) Suppression de 30 qui a deux enfants : on remplace par son successeur inorder (40)." >}}
+
+(a) BST construit par insertions successives. (b) Recherche de 60 : trois comparaisons suffisent (50, 70, 60). (c) Suppression de 30 qui a deux enfants : on remplace par son successeur inorder (40).
+:::
+
+**Suppression** --- trois cas :
+
+1. **Feuille** : on détache.
+2. **1 enfant** : on remplace par l'enfant.
+3. **2 enfants** : on remplace par le *successeur inorder* (le plus petit du sous-arbre droit).
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 1 --- Construire un BST"}
+À partir d'un arbre vide, insérez dans l'ordre : 50, 30, 70, 20, 40, 60, 80. Combien d'arêtes traverse-t-on pour insérer la clé 80 ?
+:::
+
+### Traversals
+
+::: {.callout-note .encadre-infobox title="Les trois traversals"}
+Pour un nœud courant $n$ :
+
+- **inorder** : gauche, $n$, droite
+- **preorder** : $n$, gauche, droite
+- **postorder** : gauche, droite, $n$
+:::
+
+::: {.callout-important .encadre-theorembox title="Propriété clé de l'inorder"}
+Sur un BST, le parcours *inorder* visite les clés **dans l'ordre trié croissant**. C'est une conséquence directe de la propriété BST.
+:::
+
+```java
+void inorder(Node n) {
+    if (n != null) { inorder(n.left); visit(n); inorder(n.right); }
+}
+```
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 2 --- Inorder"}
+Donnez le parcours inorder de l'arbre construit au mini-exercice 1. Que constatez-vous ?
+:::
+
+## La question de la hauteur
+
+### Complexité = hauteur
+
+Chaque opération effectue une descente depuis la racine jusqu'à une feuille. Le coût est donc :
+$$\boxed{T_{\text{BST}}(n) = \Theta(h)}$$
+où $h$ est la hauteur de l'arbre. La question devient : *quelle est la hauteur d'un BST à $n$ nœuds ?* La réponse est *ça dépend de l'ordre d'insertion*.
+
+::: {.figure-flottante}
+{{< svg ../figures/s04-fig_02_bst_degenerate.svg alt="Les mêmes 7 clés, deux ordres d'insertion. À gauche, insertions alternées, hauteur h=2. À droite, insertions triées, hauteur h=6 --- l'arbre a dégénéré en liste chaînée." >}}
+
+Les mêmes 7 clés, deux ordres d'insertion. À gauche, insertions alternées, hauteur $h=2$. À droite, insertions triées, hauteur $h=6$ --- l'arbre a dégénéré en liste chaînée.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Le meilleur et le pire des mondes"}
+Pour $n$ nœuds :
+
+- **Cas favorable** (arbre équilibré) : $h = \Theta(\log n)$ $\Rightarrow$ opérations en $\mathcal{O}(\log n)$.
+- **Cas défavorable** (arbre dégénéré, ex : insertions triées) : $h = n - 1$ $\Rightarrow$ opérations en $\mathcal{O}(n)$.
+
+Le pire cas efface complètement l'avantage par rapport à une liste triée. Et c'est loin d'être théorique : en production, les données arrivent souvent par date, par identifiant croissant, par ordre alphabétique --- autant de scénarios qui ruinent un BST non équilibré.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 3 --- Pire cas"}
+On insère dans un BST initialement vide les clés $1, 2, 3, \ldots, 1000$ dans cet ordre. Quelle sera la hauteur obtenue ? Combien de comparaisons coûtera `get(1000)` ?
+:::
+
+## L'invariant AVL
+
+Pour garantir $h = \mathcal{O}(\log n)$ quel que soit l'ordre d'insertion, il faut modifier la structure après chaque opération. Les arbres **AVL** (Adelson-Velsky et Landis, 1962) le font par des *rotations* locales.
+
+::: {.callout-note .encadre-infobox title="Invariant AVL"}
+On note $h(x)$ la hauteur du sous-arbre enraciné en $x$ (arbre vide = $-1$, feuille = $0$). Le *facteur d'équilibre* de $x$ est :
+$$\text{BF}(x) = h(\text{gauche}(x)) - h(\text{droite}(x))$$
+Un arbre est AVL si $|\text{BF}(x)| \leq 1$ pour tout nœud $x$.
+:::
+
+::: {.callout-important .encadre-theorembox title="Garantie AVL"}
+Pour un arbre AVL à $n$ nœuds, la hauteur est bornée par :
+$$h \leq 1{,}44 \cdot \log_2(n + 2) - 0{,}328 = \mathcal{O}(\log n)$$
+Conséquence : `get`, `put`, `remove` sont toutes en $\mathcal{O}(\log n)$ dans le pire cas.
+:::
+
+## Les rotations
+
+### Principe
+
+Une rotation est une réorganisation *locale* de trois nœuds qui :
+
+- préserve la propriété BST
+- change les hauteurs pour rétablir l'équilibre
+- s'effectue en $\mathcal{O}(1)$
+
+### Les quatre cas
+
+::: {.figure-flottante}
+{{< svg ../figures/s04-fig_03_avl_rotations.svg alt="Les quatre cas de déséquilibre et leurs rééquilibrages. Les cas simples (LL, RR) se résolvent par une rotation. Les cas croisés (LR, RL) en demandent deux." >}}
+
+Les quatre cas de déséquilibre et leurs rééquilibrages. Les cas simples (LL, RR) se résolvent par *une* rotation. Les cas croisés (LR, RL) en demandent *deux*.
+:::
+
+::: {.callout-important .encadre-retenirbox title="Lecture des cas"}
+On arrive sur un nœud $A$ déséquilibré ($|\text{BF}(A)| > 1$). On nomme le cas d'après le chemin descendant qui a causé le déséquilibre :
+
+- **LL** : sous-arbre gauche du fils gauche trop lourd $\to$ rotation droite sur $A$
+- **RR** : sous-arbre droit du fils droit trop lourd $\to$ rotation gauche sur $A$
+- **LR** : sous-arbre droit du fils gauche trop lourd $\to$ rotation gauche sur le fils gauche, puis droite sur $A$
+- **RL** : sous-arbre gauche du fils droit trop lourd $\to$ rotation droite sur le fils droit, puis gauche sur $A$
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 4 --- Identifier le cas"}
+On insère dans un arbre AVL initialement vide les clés 10, puis 20, puis 30. Après l'insertion de 30, quel nœud est déséquilibré, quel est son facteur d'équilibre, et de quel cas s'agit-il ?
+:::
+
+::: {.callout-warning .encadre-attentionbox title="En pratique"}
+Les AVL sont rarement utilisés tels quels dans les bibliothèques modernes --- on leur préfère les *red-black trees* (utilisés par `TreeMap` et `TreeSet` en Java) qui font moins de rotations en moyenne. Mais l'idée est identique et AVL est plus simple pédagogiquement.
+:::
+
+## Un nouveau besoin
+
+Les BST et AVL répondent à « donne-moi une clé précise ». Mais beaucoup d'algorithmes n'ont pas besoin de cette puissance : il leur suffit d'**accéder et retirer le plus petit élément** à chaque étape :
+
+- **Dijkstra** : extrait le sommet non visité de distance minimum (sujet de la S05).
+- **Ordonnancement** : exécute la tâche de plus haute priorité.
+- **Simulation événementielle** : traite le prochain événement dans le temps.
+
+C'est l'ADT **PriorityQueue**, et la structure concrète qui le réalise est le **tas binaire**.
+
+::: {.callout-note .encadre-infobox title="ADT PriorityQueue"}
+- `insert(x)` : ajoute un élément
+- `extractMin()` : retire et renvoie le plus petit (min-heap)
+- `peekMin()` : consulte le plus petit sans le retirer
+- `size()`, `isEmpty()`
+:::
+
+## La propriété du tas
+
+::: {.callout-note .encadre-infobox title="Propriété min-heap"}
+Un tas binaire *min-heap* est un arbre binaire **complet** (tous les niveaux sont pleins sauf peut-être le dernier, rempli de gauche à droite) tel que pour chaque nœud $x$ :
+$$\text{clé}(x) \leq \text{clé}(\text{enfant}_1(x))   \text{et}   \text{clé}(x) \leq \text{clé}(\text{enfant}_2(x))$$
+:::
+
+::: {.figure-flottante}
+{{< svg ../figures/s04-fig_04_heap_property.svg alt="À gauche, un min-heap valide : le minimum (2) est à la racine, accessible en O(1). À droite, l'invariant est violé entre 9 et son enfant 4 --- c'est cette situation qui déclenche une percolation." >}}
+
+À gauche, un min-heap valide : le minimum (2) est à la racine, accessible en $\mathcal{O}(1)$. À droite, l'invariant est violé entre 9 et son enfant 4 --- c'est cette situation qui déclenche une *percolation*.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Ne pas confondre BST et heap"}
+- **BST** : gauche $<$ nœud $<$ droite. L'arbre est *trié*.
+- **Heap** : parent $\leq$ enfants. L'arbre est *partiellement ordonné*.
+
+Un heap ne permet *pas* de chercher efficacement un élément arbitraire. Il permet *seulement* d'accéder efficacement au minimum.
+:::
+
+## Représentation en tableau
+
+Un heap est un arbre *complet*. Conséquence : on peut le stocker dans un simple tableau, sans aucun pointeur.
+
+::: {.figure-flottante}
+{{< svg ../figures/s04-fig_05_heap_array.svg alt="L'arbre complet est linéarisé niveau par niveau, de gauche à droite. Les relations parent/enfant se calculent par arithmétique sur les indices --- zéro pointeur, très cache-friendly." >}}
+
+L'arbre complet est linéarisé niveau par niveau, de gauche à droite. Les relations parent/enfant se calculent par arithmétique sur les indices --- zéro pointeur, très cache-friendly.
+:::
+
+::: {.callout-important .encadre-retenirbox title="Arithmétique des indices (tableau indexé à partir de 0)"}
+Pour un nœud à l'indice $i$ :
+
+$$
+\begin{aligned}
+\text{parent}(i) &= \left\lfloor (i-1)/2 \right\rfloor \\
+\text{gauche}(i) &= 2i + 1 \\
+\text{droite}(i) &= 2i + 2
+\end{aligned}
+$$
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 5 --- Indices"}
+Dans un heap de 7 éléments (indices 0 à 6), à quels indices se trouvent le parent, l'enfant gauche et l'enfant droit du nœud d'indice 6 ? Ce nœud est-il une feuille ?
+:::
+
+## Percolation : maintenir l'invariant
+
+Quand on insère ou qu'on extrait, la propriété du tas peut être violée localement. On la rétablit par une opération dite de **percolation**.
+
+### Insertion (percolation vers le haut)
+
+On place le nouvel élément à la fin du tableau, puis tant qu'il est plus petit que son parent on les échange.
+
+### `extractMin` (percolation vers le bas)
+
+On note la racine, on place le *dernier* élément à la racine, puis tant qu'il est plus grand que le minimum de ses enfants on l'échange avec cet enfant.
+
+::: {.figure-flottante}
+{{< svg ../figures/s04-fig_06_percolation.svg alt="Haut : percolation vers le haut après insert(1). Bas : percolation vers le bas après extractMin()." >}}
+
+Haut : percolation vers le haut après `insert(1)`. Bas : percolation vers le bas après `extractMin()`.
+:::
+
+```java
+public class BinaryMinHeap<K extends Comparable<K>> {
+    private K[] data;
+    private int size;
+
+    public void insert(K key) {
+        if (size == data.length) resize();
+        data[size] = key;
+        percolateUp(size);
+        size++;
+    }
+
+    public K extractMin() {
+        if (size == 0) throw new NoSuchElementException();
+        K min = data[0];
+        size--;
+        data[0] = data[size];
+        data[size] = null;
+        if (size > 0) percolateDown(0);
+        return min;
+    }
+
+    private void percolateUp(int i) {
+        while (i > 0) {
+            int parent = (i - 1) / 2;
+            if (data[i].compareTo(data[parent]) < 0) {
+                swap(i, parent);
+                i = parent;
+            } else return;
+        }
+    }
+
+    private void percolateDown(int i) {
+        while (2*i + 1 < size) {
+            int left = 2*i + 1, right = 2*i + 2;
+            int smallest = (right < size && data[right].compareTo(data[left]) < 0)
+                           ? right : left;
+            if (data[i].compareTo(data[smallest]) > 0) {
+                swap(i, smallest);
+                i = smallest;
+            } else return;
+        }
+    }
+}
+```
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 6 --- Trace de percolation"}
+On part du min-heap valide `[2, 5, 3, 10, 7, 8, 6]` et on appelle `insert(1)`. Donnez la succession des états du tableau après chaque échange.
+:::
+
+### Complexité
+
+| **Opération** | **Complexité** | **Justification** |
+| --- | --- | --- |
+| `peekMin` | $\mathcal{O}(1)$ | Le minimum est toujours à l'indice 0 |
+| `insert` | $\mathcal{O}(\log n)$ | Percolation vers le haut, au plus $h$ échanges |
+| `extractMin` | $\mathcal{O}(\log n)$ | Percolation vers le bas, au plus $h$ échanges |
+| `size` | $\mathcal{O}(1)$ | Variable entière |
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 7 --- Tri par tas"}
+Si on insère un par un les $n$ éléments d'un tableau puis on appelle `extractMin` $n$ fois, quel est le coût total et que donne le résultat ?
+:::
+
+## Récapitulatif : la boîte à outils
+
+| **Structure** | **get / contains** | **insert** | **delete** |
+| --- | --- | --- | --- |
+| `ArrayList` | $\mathcal{O}(1)$ indice / $\mathcal{O}(n)$ valeur | $\mathcal{O}(1)$ amorti en queue | $\mathcal{O}(n)$ |
+| `ChainedHashMap` (S03) | $\mathcal{O}(1)$ moyen | $\mathcal{O}(1)$ moyen | $\mathcal{O}(1)$ moyen |
+| **BST non équilibré** | $\mathcal{O}(h)$ --- pire $\mathcal{O}(n)$ | $\mathcal{O}(h)$ | $\mathcal{O}(h)$ |
+| **AVL** | $\mathcal{O}(\log n)$ | $\mathcal{O}(\log n)$ | $\mathcal{O}(\log n)$ |
+| **Binary Heap** | *min seul* $\mathcal{O}(1)$ | $\mathcal{O}(\log n)$ | *extractMin* $\mathcal{O}(\log n)$ |
+
+::: {.callout-important .encadre-retenirbox title="Quand choisir quoi ?"}
+- Accès par clé sans besoin d'ordre $\to$ **HashMap**.
+- Accès par clé *avec* ordre $\to$ **AVL / TreeMap**.
+- Toujours extraire le meilleur $\to$ **Binary Heap / PriorityQueue**.
+:::
+
+## Points clés à retenir
+
+::: {.callout-important .encadre-retenirbox title="Synthèse S04"}
+1. **BST** : propriété gauche $<$ nœud $<$ droite. Opérations en $\mathcal{O}(h)$.
+2. **Inorder sur BST** = clés triées.
+3. **Le problème du BST** : $h$ peut valoir $n - 1$ dans le pire cas.
+4. **AVL** : invariant $|\text{BF}| \leq 1$, garantit $h = \mathcal{O}(\log n)$.
+5. **Quatre cas de rotation** : LL, RR (1 rotation) et LR, RL (2 rotations).
+6. **Heap** : arbre binaire complet, parent $\leq$ enfants, stocké dans un tableau.
+7. **Indices (base 0)** : parent de $i = \lfloor (i-1)/2 \rfloor$, enfants en $2i+1$ et $2i+2$.
+8. **Percolation** : $\mathcal{O}(\log n)$, restaure l'invariant.
+9. **Heap $\neq$ BST** : l'inorder d'un heap ne trie pas.
+10. **Heapsort** : tri en $\mathcal{O}(n \log n)$.
+:::
+
+## Ce qui vient ensuite : les graphes
+
+::: {.callout-note .encadre-prereqbox title="Vers la séance 5"}
+**Ce qu'on sait faire maintenant :** stocker, chercher par clé, maintenir l'ordre, toujours extraire le meilleur.<br>
+**La limite qu'on va dépasser :** toutes ces structures organisent des données *isolées*. Le monde réel est fait de *connexions* : Dakar est reliée à Thiès par l'autoroute.<br>
+**En S05 :** les **graphes**. Parcours BFS et DFS, algorithme de **Dijkstra** pour le plus court chemin pondéré --- qui utilise un min-heap identique à celui vu aujourd'hui.
+:::
+
+<br>
+Dr. El Hadji Bassirou TOURÉ --- ESP/UCAD --- M1 --- 2025--2026

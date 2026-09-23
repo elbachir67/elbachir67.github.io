@@ -61,6 +61,8 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
         commande += ["--alt", str(cours / chapitre["alt"])]
     if chapitre.get("langage"):
         commande += ["--langage-code", chapitre["langage"]]
+    if chapitre.get("prefixe_images"):
+        commande += ["--prefixe-images", chapitre["prefixe_images"]]
     # Un CM rédigé se rejoue avec sa cible, son titre, son numéro affiché et ses encadrés (US-40).
     if chapitre.get("cible"):
         commande += ["--cible", chapitre["cible"]]

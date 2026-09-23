@@ -1,0 +1,405 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm,top=1.2cm,bottom=1.2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+\setstretch{1.0}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+
+\definecolor{corrcolor}{HTML}{1A4D8F}
+\newcommand{\cor}[1]{{\color{corrcolor}\textbf{#1}}}
+\newcommand{\corm}[1]{{\color{corrcolor}#1}}
+\newcommand{\bigO}{\mathcal{O}}
+
+\lstset{
+  language=Java,
+  basicstyle=\ttfamily\footnotesize\linespread{1.15}\selectfont,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=6pt,
+  xleftmargin=14pt,
+  frame=none,
+  aboveskip=6pt,
+  belowskip=6pt,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  extendedchars=true,
+  inputencoding=utf8,
+  literate=
+    {é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {ë}{{\"e}}1
+    {à}{{\`a}}1 {â}{{\^a}}1 {ä}{{\"a}}1
+    {î}{{\^i}}1 {ï}{{\"i}}1
+    {ô}{{\^o}}1 {ö}{{\"o}}1
+    {ù}{{\`u}}1 {û}{{\^u}}1 {ü}{{\"u}}1
+    {ç}{{\c c}}1 {É}{{\'E}}1 {È}{{\`E}}1
+    {À}{{\`A}}1 {Â}{{\^A}}1 {Ô}{{\^O}}1
+}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+\textbf{\large CORRIGÉ -- Lab S03 -- Tables de hachage}\\[0.05cm]
+{\small Structures de Données et Algorithmes Avancés -- Master 1}\\[0.02cm]
+{\small Dr. El Hadji Bassirou TOURÉ -- ESP/UCAD -- 2025--2026} \quad $\bullet$ \quad
+\textcolor{corrcolor}{\textbf{Document prof -- Réponses en bleu}}
+\end{center}
+
+\vspace{-0.1cm}
+\hrule
+\vspace{0.25cm}
+
+{\small\textit{Ce document ne comporte pas de barème : le lab n'est pas noté. Il contient les réponses attendues et des notes pédagogiques à évoquer lors de la restitution en plénière.}}
+
+\vspace{0.3cm}
+
+%=============================================================================
+% PARTIE PRATIQUE : OBSERVATIONS ATTENDUES
+%=============================================================================
+
+\textbf{\Large Partie I -- Pratique : observations attendues}
+
+\vspace{0.3cm}
+
+\textbf{Vérification 1 (tests JUnit, étape 4)} -- Les 5 tests doivent passer. Le test \texttt{testForcerUneCollision} est conceptuellement central : il prouve que le chaînage fonctionne grâce à \texttt{equals}, même quand le \texttt{hashCode} est identique.
+
+\medskip
+
+\corm{\textit{À souligner en plénière :} c'est la première fois que les étudiants voient que \texttt{hashCode} seul ne suffit pas --- c'est le couple (\texttt{hashCode}, \texttt{equals}) qui distingue les clés. Cela prépare l'exercice théorique 5.}
+
+\vspace{0.25cm}
+
+\textbf{Vérification 2 (test du rehash, étape 5)} -- La capacité doit passer de 8 à 16 au moment de la 7\textsuperscript{e} insertion. Toutes les clés doivent rester accessibles.
+
+\medskip
+
+\corm{\textit{Piège fréquent :} un étudiant qui a oublié le cast \texttt{(double)} verra que la capacité ne change jamais. C'est un bug classique à provoquer et discuter --- la division entière Java est un piège récurrent.}
+
+\vspace{0.3cm}
+
+\textbf{Vérification 3 (programme d'observation, étape 6) -- réponses attendues :}
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=0pt]
+\item \cor{3 rehashs pendant 30 insertions}, aux moments $n = 7$, $n = 13$, $n = 25$.
+\item Juste après chaque rehash, $\alpha \approx \cor{0{,}4}$ (entre 0,39 et 0,44).
+\item \cor{Non, $\alpha$ ne dépasse jamais durablement 0{,}75} : à chaque fois qu'il l'atteint, le rehash le redescend aussitôt.
+\end{enumerate}
+
+\medskip
+
+\corm{\textit{Message clé à faire passer :} c'est exactement le résultat théorique du CM, \emph{visible en direct}. Le facteur de charge se comporte comme une dent de scie oscillant entre $\approx 0{,}4$ (juste après rehash) et 0,875 (juste avant rehash). En moyenne, il reste largement sous 0,75.}
+
+\vspace{0.3cm}
+
+\textbf{Vérification 4 (distribution des seaux, étape 7) -- réponses attendues (valeurs approximatives, dépend de String.hashCode) :}
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=0pt]
+\item Avec 12 noms sur $m = 16$ ou $m = 32$ cases selon où s'est produit le rehash, \cor{typiquement 1 à 3 seaux avec 2 paires}, les autres avec 0 ou 1.
+\item \cor{Plusieurs seaux vides} (attendu : $\alpha < 1$ signifie qu'il y a plus de cases que de paires).
+\item Le seau le plus rempli \cor{dépasse rarement 3} avec \texttt{String.hashCode} bien distribué sur des noms propres.
+\end{enumerate}
+
+\medskip
+
+\corm{\textit{Note :} si un étudiant obtient une distribution très déséquilibrée (seau à 5, autres vides), c'est instructif : ça montre concrètement pourquoi on doit faire confiance à la fonction de hachage mais se préparer aux collisions. Un bon sujet de discussion.}
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.3cm}
+
+%=============================================================================
+% EXERCICE 1
+%=============================================================================
+\textbf{\Large Partie II -- Exercices théoriques : solutions}
+
+\vspace{0.3cm}
+
+\textbf{\large Exercice 1 -- Calcul de positions}
+
+\vspace{0.15cm}
+
+{\small
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|r|l|}
+\hline
+\textbf{Clé} & \textbf{hashCode()} & \textbf{$h(\text{clé}) = |\text{hashCode()}| \bmod 7$} \\
+\hline
+\texttt{"Awa Diop"} & $-2\,045\,123\,461$ & \corm{$2\,045\,123\,461 \bmod 7 = \mathbf{3}$} \\
+\hline
+\texttt{"Moussa Ndiaye"} & $879\,654\,325$ & \corm{$879\,654\,325 \bmod 7 = \mathbf{4}$} \\
+\hline
+\texttt{"Fatou Sall"} & $1\,234\,567\,892$ & \corm{$1\,234\,567\,892 \bmod 7 = \mathbf{5}$} \\
+\hline
+\texttt{"Cheikh Ba"} & $-555\,888\,777$ & \corm{$555\,888\,777 \bmod 7 = \mathbf{3}$} \\
+\hline
+\texttt{"Aminata Fall"} & $42$ & \corm{$42 \bmod 7 = \mathbf{0}$} \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+
+\textbf{Collisions :} \cor{« Awa Diop » et « Cheikh Ba »} partagent $h = 3$.
+
+\medskip
+
+\corm{\textit{Piège :} ne pas oublier la valeur absolue pour les hashCode négatifs. \textit{Piège bis :} $42 \bmod 7 = 0$, pas 5 --- souvent mal calculé.}
+
+\vspace{0.4cm}
+
+%=============================================================================
+% EXERCICE 2
+%=============================================================================
+\textbf{\large Exercice 2 -- Trace de chaînage}
+
+\vspace{0.15cm}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|c|p{11cm}|}
+\hline
+\textbf{Case} & \textbf{Liste chaînée} \\
+\hline
+$[0]$ & \cor{Aminata Fall $\to$ null} \\
+\hline
+$[1]$ & \corm{\textit{(vide)}} \\
+\hline
+$[2]$ & \corm{\textit{(vide)}} \\
+\hline
+$[3]$ & \cor{Awa Diop $\to$ Cheikh Ba $\to$ null} \\
+\hline
+$[4]$ & \cor{Moussa Ndiaye $\to$ null} \\
+\hline
+$[5]$ & \cor{Fatou Sall $\to$ null} \\
+\hline
+$[6]$ & \corm{\textit{(vide)}} \\
+\hline
+\end{tabular}
+\end{center}
+
+\medskip
+
+\textbf{Comparaisons pour \texttt{get("Aminata Fall")} :} \cor{1} (la case [0] ne contient qu'une seule paire).
+
+\medskip
+
+\corm{\textit{Piège :} certains étudiants mettent Cheikh \emph{avant} Awa en case [3]. Rappeler que \texttt{LinkedList.add()} insère en fin de liste, donc l'ordre d'insertion = ordre d'apparition.}
+
+\vspace{0.4cm}
+
+%=============================================================================
+% EXERCICE 3
+%=============================================================================
+\textbf{\large Exercice 3 -- Trace de sondage linéaire}
+
+\vspace{0.15cm}
+
+\textbf{(a) Tableau final :}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Case} & $[0]$ & $[1]$ & $[2]$ & $[3]$ & $[4]$ & $[5]$ & $[6]$ \\
+\hline
+\textbf{Clé} & \cor{Aminata} & \corm{--} & \corm{--} & \cor{Awa} & \cor{Moussa} & \cor{Fatou} & \cor{Cheikh} \\
+\hline
+\textbf{$h$ origine} & \cor{0} & \corm{--} & \corm{--} & \cor{3} & \cor{4} & \cor{5} & \cor{3} \\
+\hline
+\textbf{Étapes probing} & \cor{0} & \corm{--} & \corm{--} & \cor{0} & \cor{0} & \cor{0} & \cor{3} \\
+\hline
+\end{tabular}
+\end{center}
+
+\medskip
+
+\corm{\textbf{Déroulement pas à pas :}
+\begin{itemize}[leftmargin=1.5em,itemsep=-2pt,topsep=-2pt]
+\item Awa ($h = 3$) : [3] libre $\to$ [3].
+\item Moussa ($h = 4$) : [4] libre $\to$ [4].
+\item Fatou ($h = 5$) : [5] libre $\to$ [5].
+\item Cheikh ($h = 3$) : [3] pris $\to$ [4] pris $\to$ [5] pris $\to$ [6] libre $\to$ [6]. \textbf{3 étapes de probing.}
+\item Aminata ($h = 0$) : [0] libre $\to$ [0].
+\end{itemize}
+}
+
+\medskip
+
+\textbf{(b)} \cor{Un seul cluster} de 4 cases contiguës : positions [3], [4], [5], [6].
+
+(Aminata en [0] est isolée, ne forme pas un cluster multi-cases.)
+
+\medskip
+
+\textbf{(c)} \texttt{get("Ibrahima Kane")} avec $h = 3$ :
+
+\medskip
+
+Indices visités : \cor{[3] $\to$ [4] $\to$ [5] $\to$ [6] $\to$ [0] $\to$ [1]} (arrêt sur case vide).
+
+\medskip
+
+\corm{Ibrahima $\neq$ Awa (en [3]), $\neq$ Moussa ([4]), $\neq$ Fatou ([5]), $\neq$ Cheikh ([6]), $\neq$ Aminata ([0]), puis case [1] \emph{vide} : on sait que la clé n'existe pas.}
+
+\medskip
+
+Résultat : \cor{Absent}, après avoir parcouru \cor{5 cases occupées + 1 case vide}.
+
+\medskip
+
+\corm{\textit{Observation importante :} la recherche d'absence coûte cher à cause du cluster. C'est exactement la raison pour laquelle on limite $\alpha < 0{,}75$ avec rehash.}
+
+\vspace{0.4cm}
+
+%=============================================================================
+% EXERCICE 4
+%=============================================================================
+\textbf{\large Exercice 4 -- Facteur de charge et rehash}
+
+\vspace{0.15cm}
+
+\textbf{(a)} Calcul du seuil : $n > 0{,}75 \times 8 = \cor{6}$.
+
+Le rehash se déclenche dès que $n$ dépasse strictement 6, donc à la $k = \cor{7}$\textsuperscript{ème} insertion.
+
+\medskip
+
+\corm{\textit{Précision importante :} le test \texttt{n/m > 0,75} est évalué \emph{après} l'insertion. Après la 6\textsuperscript{e} insertion, $n/m = 6/8 = 0{,}75$, test strict $>$ faux, pas de rehash. Après la 7\textsuperscript{e}, $7/8 = 0{,}875 > 0{,}75$, rehash.}
+
+\medskip
+
+\textbf{(b)} $m' = \cor{16}$ (on double). $\alpha = 7/16 = \cor{0{,}4375}$.
+
+\medskip
+
+\textbf{(c)} Nouveau seuil : $n > 0{,}75 \times 16 = 12$. 2\textsuperscript{e} rehash à $n = 13$, soit \cor{6 insertions supplémentaires} depuis le 1\textsuperscript{er}.
+
+\medskip
+
+\textbf{(d) Taille $m$ après 100 insertions :}
+
+\corm{
+Suite des rehashs :
+\begin{itemize}[leftmargin=1.5em,itemsep=-1pt,topsep=-2pt]
+\item $m = 8$, rehash à $n = 7 \to m = 16$.
+\item $m = 16$, rehash à $n = 13 \to m = 32$.
+\item $m = 32$, rehash à $n = 25 \to m = 64$ (seuil $0{,}75 \times 32 = 24$).
+\item $m = 64$, rehash à $n = 49 \to m = 128$ (seuil $= 48$).
+\item $m = 128$, rehash à $n = 97 \to m = 256$ (seuil $= 96$).
+\item $m = 256$, seuil $= 192 > 100$ : pas encore de rehash.
+\end{itemize}
+Après 100 insertions, $m = \mathbf{256}$, avec $\alpha = 100/256 \approx 0{,}39$.
+}
+
+\medskip
+
+\cor{Réponse : $m = 256$.}
+
+\medskip
+
+\corm{\textit{Commentaire :} environ $\log_2(100/8) \approx 3{,}6$ rehashs (arrondi supérieur à 5), chacun coûtant $\Theta(n)$ --- mais amortis sur les 100 insertions, le coût par insertion reste $\bigO(1)$.}
+
+\vspace{0.4cm}
+
+%=============================================================================
+% EXERCICE 5
+%=============================================================================
+\textbf{\large Exercice 5 -- Contrat equals / hashCode}
+
+\vspace{0.15cm}
+
+\textbf{(a) Contrat Java :} \cor{Si $a.\text{equals}(b)$ retourne \texttt{true}, alors $a.\text{hashCode}() = b.\text{hashCode}()$ obligatoirement.}
+
+\medskip
+
+\corm{La réciproque n'est pas requise : deux objets distincts peuvent avoir le même hashCode (collision autorisée). Mais deux objets considérés égaux \emph{doivent} avoir le même hashCode.}
+
+\vspace{0.2cm}
+
+\textbf{(b)} \texttt{c1.equals(c2)} vaut \cor{true} (l'egalité porte sur le nom seul, identique). Les \texttt{hashCode} sont \cor{différents} (car \texttt{hashCode()} hérité d'\texttt{Object} dépend de l'adresse mémoire de chaque objet).
+
+\medskip
+
+\corm{\textbf{Pourquoi \texttt{map.get(c2)} retourne \texttt{null} :}
+\texttt{put(c1, "A")} calcule $h_1 = |c_1.\text{hashCode}()| \bmod m$ et range la paire dans la case $[h_1]$.
+Quand on fait \texttt{get(c2)}, on calcule $h_2 = |c_2.\text{hashCode}()| \bmod m$. Comme $c_1.\text{hashCode}() \neq c_2.\text{hashCode}()$, on a (très probablement) $h_1 \neq h_2$. On cherche dans la case $[h_2]$, qui est vide. Retour \texttt{null}, \textbf{bien que la clé équivalente existe dans une autre case}.}
+
+\vspace{0.2cm}
+
+\textbf{(c) hashCode() corrigé :}
+
+\begin{center}
+\fbox{\parbox{14cm}{\ttfamily\footnotesize
+\textcolor{corrcolor}{@Override}\\
+\textcolor{corrcolor}{public int hashCode() \{}\\
+\hspace*{0.8cm}\textcolor{corrcolor}{\textbf{return nom.hashCode();}}\\
+\textcolor{corrcolor}{\}}
+}}
+\end{center}
+
+\medskip
+
+\corm{\textbf{Justification :} puisque \texttt{equals} compare \emph{uniquement} le nom, le hashCode doit dépendre uniquement du nom. Deux \texttt{Contact} avec le même nom ont alors nécessairement le même hashCode, contrat respecté.
+
+\medskip
+\textbf{Variante acceptable :} \texttt{return Objects.hash(nom);} (équivalent, style Java moderne).
+
+\medskip
+\textbf{Variante \emph{incorrecte} :} \texttt{return nom.hashCode() + numero.hashCode();} --- le numéro influencerait le hashCode alors qu'il n'influence pas \texttt{equals}. Deux clés « égales » pourraient avoir des hashCode différents : contrat violé, même bug qu'avant.}
+
+\vspace{0.4cm}
+\hrule
+\vspace{0.3cm}
+
+%=============================================================================
+% NOTES PÉDAGOGIQUES GLOBALES
+%=============================================================================
+
+\textbf{\large Notes pédagogiques pour la plénière}
+
+\vspace{0.15cm}
+
+\textbf{Messages principaux à faire ressortir :}
+\begin{itemize}[leftmargin=1.5em,itemsep=0pt]
+\item La partie pratique (étape 6 en particulier) matérialise le comportement \emph{en dent de scie} du facteur de charge. C'est ce qui relie la théorie (l'analyse amortie) à l'observation.
+\item Le test \texttt{testForcerUneCollision} montre que \texttt{equals} et \texttt{hashCode} jouent des rôles complémentaires : \texttt{hashCode} place dans le seau, \texttt{equals} identifie la bonne paire \emph{dans} le seau.
+\item L'exercice 3 (sondage linéaire) matérialise pourquoi le clustering est problématique : la recherche d'absence coûte proportionnel à la taille du cluster, pas à $\alpha$.
+\end{itemize}
+
+\medskip
+
+\textbf{Erreurs fréquentes à anticiper :}
+\begin{itemize}[leftmargin=1.5em,itemsep=0pt]
+\item \textbf{Pratique :} oubli du cast \texttt{(double)} dans le test du facteur de charge $\to$ jamais de rehash.
+\item \textbf{Pratique :} tests qui plantent avec \texttt{ConcurrentModificationException} dans \texttt{remove} si on utilise \texttt{for-each}.
+\item \textbf{Ex.~1 :} oubli de la valeur absolue sur hashCode négatif ; calcul erroné de $42 \bmod 7$.
+\item \textbf{Ex.~2 :} inversion de l'ordre des clés dans la liste [3].
+\item \textbf{Ex.~3 :} confusion entre $h$ d'origine et position finale après probing. Oubli de compter les étapes du probing de Cheikh.
+\item \textbf{Ex.~4 :} confusion « seuil atteint » ($\alpha = 0{,}75$) vs « seuil dépassé » ($\alpha > 0{,}75$ strict).
+\item \textbf{Ex.~5 :} donner un hashCode qui mélange nom + numéro (viole le contrat).
+\end{itemize}
+
+\vspace{0.3cm}
+\hrule
+\vspace{0.1cm}
+
+\begin{center}
+{\small\textit{Fin du corrigé du Lab S03}}
+\end{center}
+
+\end{document}

@@ -1,0 +1,728 @@
+% =====================================================================
+% CM Séance 2 — Analyse algorithmique
+% Structures de Données et Algorithmes Avancés — M1 — ESP/UCAD
+% Dr. El Hadji Bassirou TOURÉ — 2025–2026
+% Compilation : pdflatex (2 passes)
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{pifont}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,
+            citecolor=blue!60!black}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\bigO}{\mathcal{O}}
+\newcommand{\bigOmega}{\Omega}
+\newcommand{\bigTheta}{\Theta}
+
+% ===== Boîtes =====
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{theorembox}[1][]{colback=purple!5,colframe=purple!50,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{appliboxQ}[1][]{colback=gray!8,colframe=gray!60,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{appliboxR}[1][]{colback=green!3,colframe=green!40!black,
+    fonttitle=\bfseries\itshape,title=#1,breakable}
+\newtcolorbox{exercicebox}[1][]{colback=white,colframe=gray!70,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{lienbox}[1][]{colback=blue!3,colframe=blue!70!black,
+    fonttitle=\bfseries\itshape,title=#1,breakable,
+    before upper={\itshape}}
+
+% ===== Théorèmes =====
+\theoremstyle{definition}
+\newtheorem{definition}{Définition}[section]
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{remark}
+\newtheorem{example}{Exemple}[section]
+\newtheorem{remark}{Remarque}[section]
+
+% ===== Code =====
+\lstset{
+  language=Java,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=4,
+  extendedchars=true,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {û}{{\^u}}1 {â}{{\^a}}1
+           {ë}{{\"e}}1 {ï}{{\"i}}1 {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1
+           {Ç}{{\c{C}}}1 {Ê}{{\^E}}1 {œ}{{\oe}}1 {°}{{$^\circ$}}1
+           {«}{{\guillemotleft}}1 {»}{{\guillemotright}}1
+}
+
+% ===== En-têtes =====
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small S02 --- Analyse algorithmique}
+\fancyhead[R]{\small Structures de Données Avancées --- M1}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Structures de Données et}\\
+\textbf{\LARGE Algorithmes Avancés}\\[0.8cm]
+\textbf{\huge Séance 2 --- Analyse algorithmique}\\[0.3cm]
+\textbf{\Large Comment mesurer l'efficacité d'un algorithme ?}\\[0.5cm]
+\large Master 1 --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+École Supérieure Polytechnique\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Navigation conceptuelle]
+\textbf{Ce que vous savez déjà :} séparer un contrat de son implémentation
+(S1), et réaliser List, Stack, Queue et Deque par tableau ou par nœuds
+chaînés.\\[4pt]
+\textbf{La limite qu'on dépasse aujourd'hui :} en S1, nous avons répété que
+\texttt{remove(0)} est « coûteux » et que \texttt{get(i)} est « constant »
+sans rien démontrer. Une intuition n'est pas un argument, et deux ingénieurs
+qui s'appuient sur leurs intuitions ne peuvent pas trancher.\\[4pt]
+\textbf{Ce que vous saurez faire à la fin :}
+\begin{enumerate}[nosep]
+    \item Établir la fonction de coût $f(n)$ d'un fragment de code par
+          comptage granulaire des opérations élémentaires.
+    \item Énoncer les définitions de $\bigO$, $\bigOmega$, $\bigTheta$ et
+          démontrer une borne en exhibant $c$ et $n_0$.
+    \item Distinguer meilleur cas, pire cas et cas moyen, et justifier
+          pourquoi le pire cas est la référence.
+    \item Résoudre une récurrence de diviser-pour-régner par le théorème
+          principal.
+\end{enumerate}
+\textbf{Ouvre la voie vers :} S3, où l'on cherchera une structure permettant
+l'accès par clé sans parcourir les données.
+\end{prereqbox}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{D'où l'on part}
+% =====================================================================
+
+À la fin de la séance précédente, un constat nous est resté sur les bras :
+une file construite sur une \texttt{ArrayList} avec \texttt{remove(0)} est
+parfaitement \emph{correcte} --- elle sert les clients dans le bon ordre ---
+et pourtant nous la déclarons mauvaise. Sur quoi repose ce jugement ? Pas sur
+les tests, qui passent. Pas sur le chronomètre, qui dépend de la machine, du
+système et de l'humeur du processeur.
+
+Il nous faut donc une grandeur qui ne dépende ni du matériel ni du langage,
+et qui dise comment le coût d'un algorithme \emph{évolue} quand la taille des
+données augmente. Cette grandeur s'obtient en deux temps : on compte les
+opérations élémentaires, ce qui donne une fonction $f(n)$ ; puis on classe
+cette fonction dans une famille de croissance. Le premier temps est
+arithmétique, le second est mathématique. Les deux ensemble forment l'outil
+qui nous servira jusqu'à la fin du semestre.
+
+% =====================================================================
+\section{Compter les opérations}
+% =====================================================================
+
+\subsection{La convention du cours}
+
+Compter suppose de dire ce qu'on compte. Nous adoptons une convention
+\emph{granulaire} : chaque opération élémentaire compte pour une unité, y
+compris les affectations et les accès mémoire.
+
+\begin{table}[h!]
+\centering
+\caption{Convention de comptage retenue dans ce cours}
+\begin{tabular}{ll}
+\toprule
+\textbf{Instruction} & \textbf{Opérations comptées} \\
+\midrule
+\texttt{s = s + i}    & 2 : une addition, une affectation \\
+\texttt{i++}          & 2 : une addition, une affectation \\
+\texttt{tab[i]}       & 1 : un accès mémoire \\
+\texttt{i < n}        & 1 : une comparaison \\
+\texttt{s = 0}        & 1 : une affectation \\
+\texttt{return x}     & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{attentionbox}[Une convention explicite plutôt qu'une vérité]
+D'autres cours comptent \texttt{s = s + i} pour une seule opération. Le
+résultat final --- la classe de complexité --- est le même, car les
+constantes disparaissent à l'étape suivante. Mais tant qu'on manipule
+$f(n)$, la convention doit être explicite : un corrigé ne peut pas être
+discuté si la règle du jeu n'est pas écrite. \textbf{Dans ce cours, on
+compte comme dans le tableau ci-dessus, et on l'annonce.}
+\end{attentionbox}
+
+\subsection{Premier exemple : une boucle simple}
+
+\begin{lstlisting}[caption={Somme des $n$ premiers entiers}]
+int s = 0;                      // 1 affectation
+for (int i = 0; i < n; i++) {   // 1 affectation + (n+1) comparaisons + n*(add+aff)
+    s = s + i;                  // n * (1 addition + 1 affectation)
+}
+\end{lstlisting}
+
+Le décompte, ligne par ligne :
+\begin{align*}
+\texttt{s = 0} &: 1 \\
+\texttt{i = 0} &: 1 \\
+\texttt{i < n} &: n+1 \quad \text{($n$ fois vraie, une fois fausse)} \\
+\texttt{s = s + i} &: 2n \\
+\texttt{i++} &: 2n
+\end{align*}
+\[
+f(n) \;=\; 1 + 1 + (n+1) + 2n + 2n \;=\; 5n + 3
+\]
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.88\textwidth]{fig_01.pdf}
+\caption{La courbe bleue provient d'un compteur incrémenté à chaque
+opération lors d'une exécution réelle ; la droite orange est la formule
+$5n+3$. Les deux coïncident pour $n = 0, \dots, 10$.}
+\end{figure}
+
+\begin{infobox}[Pourquoi vérifier une formule de comptage]
+Une formule de comptage se trompe facilement d'une constante : il est très
+courant d'oublier la comparaison finale qui fait sortir de la boucle, ou de
+compter $n$ au lieu de $n+1$. Instrumenter le code --- un compteur
+incrémenté à chaque opération --- coûte quelques lignes et tranche la
+question. C'est ce que vous ferez au Lab.
+\end{infobox}
+
+\begin{appliboxQ}[Mini-exercice 1 --- La comparaison oubliée]
+Un étudiant obtient $f(n) = 5n + 2$. Quelle opération a-t-il omise ?
+\end{appliboxQ}
+
+\begin{appliboxR}[Réponse]
+La dernière évaluation de \texttt{i < n}, celle qui est fausse et qui fait
+sortir de la boucle : il a compté $n$ comparaisons au lieu de $n+1$.
+
+\textbf{Le piège classique :} raisonner « une comparaison par tour de
+boucle ». Il y a toujours une comparaison de plus que de tours.
+\end{appliboxR}
+
+\subsection{Boucles imbriquées}
+
+\begin{lstlisting}[caption={Boucle triangulaire}]
+int c = 0;
+for (int i = 0; i < n; i++) {
+    for (int j = i; j < n; j++) {
+        c = c + 1;
+    }
+}
+\end{lstlisting}
+
+La boucle interne s'exécute $n - i$ fois pour chaque $i$, soit au total
+\[
+\sum_{i=0}^{n-1} (n-i) \;=\; n + (n-1) + \dots + 1 \;=\; \frac{n(n+1)}{2}
+\]
+tours. En appliquant la convention, on obtient
+\[
+f(n) \;=\; 2{,}5\,n^2 + 7{,}5\,n + 3
+\]
+Pour $n = 5$ : $f(5) = 62{,}5 + 37{,}5 + 3 = 103$, ce que confirme
+l'instrumentation du code.
+
+\begin{appliboxQ}[Mini-exercice 2 --- Le terme dominant]
+Dans $f(n) = 2{,}5n^2 + 7{,}5n + 3$, quelle est la part du terme en $n^2$
+pour $n = 10$ ? Pour $n = 1000$ ?
+\end{appliboxQ}
+
+\begin{appliboxR}[Réponse]
+$n = 10$ : $250$ sur $328$, soit environ $76\,\%$.\\
+$n = 1000$ : $2\,500\,000$ sur $2\,507\,503$, soit environ $99{,}7\,\%$.
+
+\textbf{La leçon :} plus $n$ grandit, plus le terme de plus haut degré
+écrase les autres. C'est exactement ce constat que la notation $\bigO$
+formalise --- et c'est aussi pourquoi il est inutile de s'écharper sur les
+constantes.
+\end{appliboxR}
+
+\subsection{Une boucle qui ne progresse pas d'un pas}
+
+\begin{lstlisting}[caption={Progression multiplicative}]
+for (int i = 1; i < n; i = i * 3) {
+    traiter(i);
+}
+\end{lstlisting}
+
+Les valeurs prises par \texttt{i} sont $1, 3, 9, 27, 81, \dots$, c'est-à-dire
+$3^0, 3^1, 3^2, \dots$ La boucle s'arrête dès que $3^k \geq n$, donc après
+environ $\log_3 n$ tours. Pour $n = 100$ : cinq tours ($1, 3, 9, 27, 81$).
+Pour $n = 10\,000$ : neuf tours.
+
+\begin{attentionbox}[L'erreur la plus fréquente de la séance]
+Lire \texttt{i = i * 3} comme une boucle linéaire. Multiplier $n$ par $10$
+n'ajoute ici que deux tours, alors qu'une boucle en \texttt{i++} en
+ajouterait $9n$. Test de reconnaissance : \emph{la variable de boucle
+est-elle additionnée ou multipliée ?}
+\end{attentionbox}
+
+\subsection{Le coût qu'on ne voit pas dans le code}
+
+\begin{lstlisting}[caption={Deux lignes, deux coûts très différents}]
+for (int i = 0; i < n; i++) {
+    liste.add(0, i);   // insertion en tête
+}
+\end{lstlisting}
+
+La ligne ne comporte aucune boucle visible. Pourtant, si \texttt{liste} est
+une \texttt{ArrayList}, l'insertion en position $0$ décale les $i$ éléments
+déjà présents : le $i$-ième tour effectue $i$ déplacements, et le total vaut
+$0 + 1 + \dots + (n-1) = n(n-1)/2$.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.88\textwidth]{fig_05.pdf}
+\caption{Coût cumulé de $n$ insertions en tête, calculé en simulant les
+déplacements. Pour $n = 2000$ : $1\,999\,000$ déplacements contre $2000$
+rebranchements de références.}
+\end{figure}
+
+\begin{appliboxQ}[Mini-exercice 3 --- Le facteur en jeu]
+Pour $n = 2000$, quel est le rapport entre les deux courbes de la figure ?
+Et pour $n = 20\,000$ ?
+\end{appliboxQ}
+
+\begin{appliboxR}[Réponse]
+$n = 2000$ : $1\,999\,000 / 2000 \approx 1000$.\\
+$n = 20\,000$ : $199\,990\,000 / 20\,000 \approx 10\,000$.
+
+\textbf{La leçon :} l'écart n'est pas un facteur fixe, il grandit avec $n$.
+Un programme qui « marche bien en démonstration » sur $100$ éléments peut
+être inutilisable sur $100\,000$. C'est pourquoi on analyse au lieu de
+tester une seule taille.
+\end{appliboxR}
+
+% =====================================================================
+\section{Les notations asymptotiques}
+% =====================================================================
+
+\subsection{Big-O : une borne supérieure}
+
+\begin{definition}[Notation $\bigO$]
+Soient $f, g : \mathbb{N} \to \mathbb{R}^{+}$. On écrit
+$f(n) \in \bigO(g(n))$ s'il existe deux constantes $c > 0$ et
+$n_0 \in \mathbb{N}$ telles que
+\[
+\forall n \geq n_0, \quad f(n) \leq c \cdot g(n).
+\]
+\end{definition}
+
+Trois éléments méritent d'être soulignés. La constante $c$ autorise à
+ignorer les facteurs multiplicatifs. Le seuil $n_0$ autorise à ignorer le
+comportement sur les petites tailles. Et l'appartenance est une
+\emph{majoration} : dire $f \in \bigO(n^2)$ n'interdit pas que $f$ soit en
+réalité linéaire.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.85\textwidth]{fig_02.pdf}
+\caption{Au-delà de $n_0 = 13$, la courbe $5n^2$ reste au-dessus de
+$3n^2 + 20n + 50$. Le seuil est calculé, pas estimé : en $n = 12$ la
+majoration est fausse ($722 > 720$), en $n = 13$ elle devient vraie
+($817 \leq 845$).}
+\end{figure}
+
+\begin{example}[Une preuve rédigée]
+Montrons que $f(n) = 3n^2 + 20n + 50 \in \bigO(n^2)$.
+
+Pour tout $n \geq 1$, on a $n \leq n^2$ et $1 \leq n^2$, donc
+\[
+3n^2 + 20n + 50 \;\leq\; 3n^2 + 20n^2 + 50n^2 \;=\; 73\,n^2.
+\]
+Avec $c = 73$ et $n_0 = 1$, la définition est satisfaite. \hfill $\square$
+\end{example}
+
+\begin{infobox}[Le couple $c$ et $n_0$ n'est pas unique]
+La preuve ci-dessus donne $(c, n_0) = (73, 1)$ ; la figure exhibe
+$(5, 13)$. Les deux sont corrects : il suffit d'exhiber \emph{un} couple.
+Chercher le plus petit $c$ possible est un exercice d'analyse, pas une
+exigence de la définition.
+\end{infobox}
+
+\begin{appliboxQ}[Mini-exercice 4 --- Une preuve à produire]
+Montrez que $f(n) = 7n + 40 \in \bigO(n)$ en exhibant un couple
+$(c, n_0)$.
+\end{appliboxQ}
+
+\begin{appliboxR}[Réponse]
+Pour $n \geq 1$, $40 \leq 40n$, donc $7n + 40 \leq 47n$ : le couple
+$(47, 1)$ convient. On peut faire mieux : pour $n \geq 40$, $40 \leq n$,
+donc $7n + 40 \leq 8n$, et $(8, 40)$ convient aussi.
+
+\textbf{Remarque :} plus on repousse $n_0$, plus on peut serrer $c$. C'est
+tout le sens du mot « asymptotique ».
+\end{appliboxR}
+
+\subsection{$\bigOmega$ et $\bigTheta$}
+
+\begin{definition}[Notations $\bigOmega$ et $\bigTheta$]
+$f(n) \in \bigOmega(g(n))$ s'il existe $c > 0$ et $n_0$ tels que
+$f(n) \geq c\,g(n)$ pour tout $n \geq n_0$.\\
+$f(n) \in \bigTheta(g(n))$ si $f(n) \in \bigO(g(n))$ \emph{et}
+$f(n) \in \bigOmega(g(n))$.
+\end{definition}
+
+$\bigO$ majore, $\bigOmega$ minore, $\bigTheta$ encadre. Quand on connaît le
+coût exact d'un algorithme, c'est $\bigTheta$ qu'il faut écrire ; $\bigO$
+reste correct mais dit moins.
+
+\begin{proposition}[Propriétés utiles]
+Pour $f, g, h$ à valeurs positives :
+\begin{enumerate}[nosep,label=(\roman*)]
+    \item \textbf{Transitivité :} si $f \in \bigO(g)$ et $g \in \bigO(h)$,
+          alors $f \in \bigO(h)$.
+    \item \textbf{Somme :} $\bigO(f) + \bigO(g) = \bigO(\max(f, g))$.
+    \item \textbf{Produit :} si $f_1 \in \bigO(g_1)$ et
+          $f_2 \in \bigO(g_2)$, alors $f_1 f_2 \in \bigO(g_1 g_2)$.
+    \item \textbf{Constantes :} $\bigO(c \cdot f) = \bigO(f)$ pour toute
+          constante $c > 0$.
+\end{enumerate}
+\end{proposition}
+
+La propriété (ii) justifie la pratique courante : dans une suite
+d'instructions, seule la plus coûteuse compte. La propriété (iii) justifie
+l'analyse des boucles imbriquées par multiplication des coûts.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{fig_03.pdf}
+\caption{Les classes usuelles. À $n = 100$ : $\log_2 n \approx 6{,}6$,
+$n\log_2 n \approx 664$, $n^2 = 10\,000$. L'échelle logarithmique, à droite,
+rend les cinq familles lisibles simultanément.}
+\end{figure}
+
+\begin{appliboxQ}[Mini-exercice 5 --- Vrai ou faux]
+\begin{enumerate}[nosep,label=(\alph*)]
+    \item $5n^2 + 3n \in \bigO(n^3)$
+    \item $5n^2 + 3n \in \bigTheta(n^3)$
+    \item $n^2 \in \bigOmega(n \log n)$
+    \item $2^{n+1} \in \bigO(2^n)$
+\end{enumerate}
+\end{appliboxQ}
+
+\begin{appliboxR}[Réponse]
+(a) vrai --- $\bigO$ est une majoration, elle n'a pas à être serrée.\\
+(b) faux --- il manque la minoration : $n^2$ ne croît pas comme $n^3$.\\
+(c) vrai --- $n^2$ domine $n\log n$.\\
+(d) vrai --- $2^{n+1} = 2 \cdot 2^n$, et une constante multiplicative
+disparaît.
+
+\textbf{Le piège classique :} confondre (a) et (b). Une majoration vraie
+mais lâche n'est pas fausse ; elle est simplement peu informative. La
+question d'examen porte souvent sur cette nuance.
+\end{appliboxR}
+
+\subsection{Du comptage à la classe}
+
+La démarche complète tient en trois gestes : compter, garder le terme
+dominant, oublier les constantes.
+\[
+f(n) = 2{,}5n^2 + 7{,}5n + 3
+\;\longrightarrow\;
+\text{terme dominant } 2{,}5n^2
+\;\longrightarrow\;
+f(n) \in \bigTheta(n^2)
+\]
+
+\begin{appliboxQ}[Mini-exercice 6 --- Classer sans calculer]
+Donnez la classe $\bigTheta$ de chaque fragment :
+\begin{enumerate}[nosep,label=(\alph*)]
+    \item une boucle \texttt{for (i = 0; i < n; i++)} contenant une
+          instruction de coût constant ;
+    \item deux boucles successives sur $n$ ;
+    \item une boucle sur $n$ contenant une boucle sur $n$ ;
+    \item une boucle \texttt{for (i = 1; i < n; i = i * 2)}.
+\end{enumerate}
+\end{appliboxQ}
+
+\begin{appliboxR}[Réponse]
+(a) $\bigTheta(n)$ --- (b) $\bigTheta(n)$ : deux boucles successives
+s'additionnent, $n + n = 2n$ --- (c) $\bigTheta(n^2)$ : les boucles
+imbriquées se multiplient --- (d) $\bigTheta(\log n)$.
+
+\textbf{La règle :} successives $\rightarrow$ on additionne (et le maximum
+l'emporte) ; imbriquées $\rightarrow$ on multiplie.
+\end{appliboxR}
+
+% =====================================================================
+\section{Analyse de cas}
+% =====================================================================
+
+Pour une même taille $n$, le coût dépend souvent du contenu des données.
+
+\begin{lstlisting}[caption={Recherche linéaire}]
+public static int chercher(int[] tab, int cible) {
+    for (int i = 0; i < tab.length; i++) {
+        if (tab[i] == cible) return i;
+    }
+    return -1;
+}
+\end{lstlisting}
+
+\begin{table}[h!]
+\centering
+\caption{Les trois cas de la recherche linéaire}
+\begin{tabular}{lll}
+\toprule
+\textbf{Cas} & \textbf{Situation} & \textbf{Coût} \\
+\midrule
+Meilleur & la cible est en case $0$ & $\bigTheta(1)$ \\
+Pire & la cible est en dernière case ou absente & $\bigTheta(n)$ \\
+Moyen & cible présente, position uniforme & $\approx n/2$ comparaisons, soit $\bigTheta(n)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Le pire cas sert de référence pour deux raisons. Il fournit une garantie
+--- « jamais plus que cela » --- sur laquelle on peut dimensionner un
+système. Et il ne suppose rien sur la distribution des données, alors que le
+cas moyen exige une hypothèse probabiliste souvent invérifiable en pratique.
+
+\begin{attentionbox}[Cas et notation sont deux questions distinctes]
+« Pire cas » désigne une famille d'entrées ; $\bigO$ désigne une famille de
+fonctions. On peut donc parler du $\bigTheta$ du meilleur cas comme du
+$\bigO$ du pire cas. Écrire « $\bigO$ signifie pire cas » est une confusion
+fréquente, et fausse.
+\end{attentionbox}
+
+\begin{appliboxQ}[Mini-exercice 7 --- Identifier le pire cas]
+Pour chacun, décrivez l'entrée qui réalise le pire cas :
+\begin{enumerate}[nosep,label=(\alph*)]
+    \item recherche d'un doublon par double boucle ;
+    \item insertion de $n$ clés dans un tableau trié par insertion directe.
+\end{enumerate}
+\end{appliboxQ}
+
+\begin{appliboxR}[Réponse]
+(a) un tableau sans aucun doublon : aucune sortie anticipée, les deux
+boucles vont jusqu'au bout.\\
+(b) des clés fournies en ordre décroissant : chaque nouvelle clé doit être
+insérée en tête, donc décale tout.
+
+\textbf{Remarque :} le pire cas est souvent le cas « ordonné à l'envers »
+ou le cas « absent ». Ce sont les entrées à mettre dans vos tests de
+performance.
+\end{appliboxR}
+
+% =====================================================================
+\section{Analyser le code récursif}
+% =====================================================================
+
+\subsection{Poser la récurrence}
+
+Le coût d'une fonction récursive s'exprime en fonction de lui-même.
+
+\begin{lstlisting}[caption={Recherche dichotomique}]
+static int dicho(int[] tab, int cible, int gauche, int droite) {
+    if (gauche > droite) return -1;
+    int milieu = (gauche + droite) / 2;
+    if (tab[milieu] == cible) return milieu;
+    if (tab[milieu] < cible) return dicho(tab, cible, milieu + 1, droite);
+    else                     return dicho(tab, cible, gauche, milieu - 1);
+}
+\end{lstlisting}
+
+Chaque appel réduit l'intervalle de moitié et effectue un travail constant :
+\[
+T(n) = T(n/2) + \bigTheta(1), \qquad T(1) = \bigTheta(1).
+\]
+En déroulant : après $k$ appels, l'intervalle a pour taille $n/2^k$, et la
+récursion s'arrête quand $n/2^k = 1$, soit $k = \log_2 n$. D'où
+$T(n) = \bigTheta(\log n)$.
+
+\subsection{Le théorème principal}
+
+\begin{theorembox}[Théorème principal (Master Theorem)]
+Soit $T(n) = a\,T(n/b) + f(n)$ avec $a \geq 1$, $b > 1$, et posons
+$\alpha = \log_b a$.
+\begin{enumerate}[nosep,label=\textbf{Cas \arabic*.}]
+    \item Si $f(n) \in \bigO(n^{\alpha - \varepsilon})$ pour un
+          $\varepsilon > 0$, alors $T(n) \in \bigTheta(n^{\alpha})$.
+    \item Si $f(n) \in \bigTheta(n^{\alpha})$, alors
+          $T(n) \in \bigTheta(n^{\alpha} \log n)$.
+    \item Si $f(n) \in \bigOmega(n^{\alpha + \varepsilon})$ pour un
+          $\varepsilon > 0$, et si $a\,f(n/b) \leq c\,f(n)$ pour un
+          $c < 1$ et $n$ assez grand, alors $T(n) \in \bigTheta(f(n))$.
+\end{enumerate}
+\end{theorembox}
+
+L'énoncé se lit comme une comparaison entre deux forces : le travail des
+appels récursifs, mesuré par $n^{\alpha}$, et le travail effectué à chaque
+niveau, mesuré par $f(n)$. Si les feuilles l'emportent, on est au cas 1 ; si
+l'équilibre règne, au cas 2, et un facteur $\log n$ apparaît ; si la racine
+l'emporte, au cas 3.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{fig_04.pdf}
+\caption{Coût par niveau de récursion pour $n = 1024$. À gauche le travail
+se concentre sur les feuilles (total $2047$) ; au centre chaque niveau coûte
+$1024$, pour $11$ niveaux (total $11\,264$) ; à droite la racine absorbe
+presque tout (total $2\,096\,128$).}
+\end{figure}
+
+\begin{example}[Mergesort]
+Trier par fusion coupe le tableau en deux et fusionne en temps linéaire :
+$T(n) = 2T(n/2) + \bigTheta(n)$. Ici $a = 2$, $b = 2$, donc
+$\alpha = \log_2 2 = 1$ et $f(n) = \bigTheta(n) = \bigTheta(n^{\alpha})$ :
+c'est le cas 2, et $T(n) \in \bigTheta(n \log n)$. Nous reviendrons sur cet
+algorithme en S6.
+\end{example}
+
+\begin{appliboxQ}[Mini-exercice 8 --- Appliquer le théorème]
+Donnez la classe de $T(n)$ dans chaque cas :
+\begin{enumerate}[nosep,label=(\alph*)]
+    \item $T(n) = 2T(n/2) + \bigTheta(1)$
+    \item $T(n) = T(n/2) + \bigTheta(1)$
+    \item $T(n) = 4T(n/2) + \bigTheta(n)$
+\end{enumerate}
+\end{appliboxQ}
+
+\begin{appliboxR}[Réponse]
+(a) $\alpha = 1$, $f(n) = \bigTheta(1) = \bigO(n^{1-\varepsilon})$ : cas 1,
+donc $\bigTheta(n)$.\\
+(b) $a = 1$, $\alpha = \log_2 1 = 0$, $f(n) = \bigTheta(n^0)$ : cas 2, donc
+$\bigTheta(\log n)$ --- c'est la dichotomie.\\
+(c) $\alpha = \log_2 4 = 2$, $f(n) = \bigTheta(n) = \bigO(n^{2-\varepsilon})$ :
+cas 1, donc $\bigTheta(n^2)$.
+
+\textbf{Le piège classique :} confondre (a) et (b). Le nombre d'appels
+récursifs $a$ change tout : un seul appel donne $\bigTheta(\log n)$, deux
+appels donnent $\bigTheta(n)$.
+\end{appliboxR}
+
+\begin{appliboxQ}[Mini-exercice 9 --- Revenir à la question de départ]
+Reprenez la file construite sur une \texttt{ArrayList} avec
+\texttt{remove(0)} (S1). Établissez le coût total de $n$ opérations
+\texttt{dequeue}, puis comparez à la file sur tableau circulaire.
+\end{appliboxQ}
+
+\begin{appliboxR}[Réponse]
+Le $k$-ième \texttt{remove(0)} décale les éléments restants : le total est de
+l'ordre de $n^2/2$ déplacements, soit $\bigTheta(n^2)$ pour la séquence
+complète. Avec le tableau circulaire, chaque \texttt{dequeue} déplace un
+indice : total $\bigTheta(n)$.
+
+\textbf{La conclusion de la séance :} l'intuition de S1 est maintenant un
+énoncé démontré, et le gain est quantifié --- d'un facteur proportionnel à
+$n$, donc arbitrairement grand.
+\end{appliboxR}
+
+% =====================================================================
+\begin{retenirbox}[Points clés à retenir]
+\begin{enumerate}[nosep]
+    \item Analyser, c'est d'abord compter. La convention de comptage doit
+          être annoncée : ici \texttt{s = s + i} vaut deux opérations, et il
+          y a toujours une comparaison de plus que de tours de boucle.
+    \item $f(n) \in \bigO(g(n))$ signifie : il existe $c > 0$ et $n_0$ tels
+          que $f(n) \leq c\,g(n)$ pour tout $n \geq n_0$. Prouver, c'est
+          exhiber un couple $(c, n_0)$ --- pas nécessairement le meilleur.
+    \item $\bigO$ majore, $\bigOmega$ minore, $\bigTheta$ encadre. Quand le
+          coût est connu exactement, on écrit $\bigTheta$.
+    \item Boucles successives : on additionne, le maximum l'emporte.
+          Boucles imbriquées : on multiplie. Variable multipliée dans le
+          pas : c'est logarithmique.
+    \item Le pire cas est la référence, parce qu'il donne une garantie et
+          ne suppose rien sur les données. « Pire cas » et « $\bigO$ » sont
+          deux notions distinctes.
+    \item Le code récursif se traduit en récurrence $T(n) = aT(n/b) + f(n)$,
+          que le théorème principal résout en comparant $f(n)$ à
+          $n^{\log_b a}$.
+    \item Un coût peut être invisible dans le code : \texttt{liste.add(0, x)}
+          tient en une ligne et cache un décalage complet.
+\end{enumerate}
+\end{retenirbox}
+
+% =====================================================================
+\section*{Ce qui vient ensuite : Tables de hachage}
+\addcontentsline{toc}{section}{Ce qui vient ensuite : Tables de hachage}
+% =====================================================================
+
+\begin{prereqbox}[Vers la séance suivante]
+\textbf{Ce qu'on sait faire maintenant :} établir $f(n)$, prouver une borne
+asymptotique, distinguer les cas, et résoudre une récurrence de
+diviser-pour-régner.\\[4pt]
+\textbf{La limite qu'on va dépasser :} nos outils confirment une mauvaise
+nouvelle. Dans un tableau, l'accès \emph{par rang} est en $\bigTheta(1)$,
+mais la recherche \emph{par valeur} est en $\bigTheta(n)$ ; les nœuds
+chaînés ne font pas mieux. Or la plupart des applications cherchent par clé
+--- un numéro d'étudiant, une plaque de bus --- et non par position.\\[4pt]
+\textbf{En S3 :} on construit une structure qui calcule l'emplacement d'une
+donnée à partir de sa clé, et qui atteint un coût constant en moyenne. C'est
+le hachage : fonctions de hachage, collisions, facteur de charge.
+\end{prereqbox}
+
+% =====================================================================
+\section*{Références}
+\addcontentsline{toc}{section}{Références}
+% =====================================================================
+
+\begin{itemize}[nosep]
+    \item R. Sedgewick, K. Wayne, \emph{Algorithms}, 4\textsuperscript{e} éd.
+          --- §1.4 (Analysis of Algorithms).
+    \item T. Cormen, C. Leiserson, R. Rivest, C. Stein,
+          \emph{Introduction to Algorithms}, 4\textsuperscript{e} éd.
+          --- Ch.~3 (Characterizing Running Times), Ch.~4
+          (Divide-and-Conquer).
+    \item S. Skiena, \emph{The Algorithm Design Manual},
+          3\textsuperscript{e} éd. --- Ch.~2 (Algorithm Analysis).
+\end{itemize}
+
+\end{document}
