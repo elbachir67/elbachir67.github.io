@@ -88,6 +88,7 @@ d'un tuteur IA encadré.
 | US-62 | EP3 | Contrôle des figures par comparaison des références de glyphes | S | 3 | — |
 | US-63 | EP3 | Audit d'accessibilité ciblé sur la PR, audit complet hebdomadaire sur `main` | M | 3 | — |
 | US-64 | EP3 | Cellules de tableau étendues (`\multicolumn`) et équations à étiquettes multiples | S | 3 | livrée |
+| US-65 | EP3 | Le site sert ce qu'il promet : page de cours, lien interne, ressource du manifeste | M | 2 | livrée |
 
 ### Stories décrites par le PO
 
@@ -174,6 +175,16 @@ qu'une page web ne montrait de toute façon pas.
 
 **`\qquad` hors formule** : une espace. Dans une formule, il n'est pas touché — une substitution
 globale, tentée au Sprint 6, avait cassé les mathématiques de huit chapitres publiés.
+
+**US-65 — Le site sert ce qu'il promet. Livrée** après le 404 de Structures de Données, à la
+demande du PO. Trois promesses : un dossier de `cours/` promet une page d'accueil, un lien interne
+promet une page, une ressource du manifeste promet un fichier servi.
+
+La leçon tient en une phrase : **un dossier existant était tenu pour une cible valide**. Le contrôle
+des liens internes existait et tournait ; `lychee --offline` a dit OK sur le run qui a livré le
+cours en 404, parce que `_site/cours/structures-de-donnees/` existait — il contenait `chapitres/` —
+sans porter d'`index.html`. `scripts/verifier_publication.py` fait la différence : chez lui, un
+dossier vaut son `index.html`.
 
 **La part du PO, et US-58.** Le bilan du Sprint 6 a mesuré que la machine travaille quatre minutes
 par chapitre : le reste est de la lecture et des **décisions du PO** — 33 textes alternatifs pour les
