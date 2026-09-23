@@ -71,14 +71,14 @@ def figure_01():
 
     fig, ax = plt.subplots(figsize=(9, 4.2))
     ax.plot(ns, mesures, 'o-', color=BLEU, linewidth=2, markersize=6,
-            label="operations comptees (instrumentation)")
+            label="opérations comptées (instrumentation)")
     ax.plot(ns, formule, '--', color=ORANGE, linewidth=2,
             label=r"$f(n) = 5n + 3$")
     for n in [2, 5, 8]:
         ax.annotate(str(formule[n]), xy=(n, formule[n]), xytext=(n - 0.4, formule[n] + 5),
                     fontsize=9, color=ORANGE)
     ax.set_xlabel("n")
-    ax.set_ylabel("nombre d'operations elementaires")
+    ax.set_ylabel("nombre d'opérations élémentaires")
     ax.set_title("Comptage granulaire de la somme des n premiers entiers",
                  fontsize=11, color=BLEU)
     ax.grid(alpha=0.3)
@@ -114,8 +114,8 @@ def figure_02():
     ax.fill_between(n[masque], f[masque], (c * g)[masque],
                     color=ORANGE, alpha=0.15)
     ax.set_xlabel("n")
-    ax.set_ylabel("cout")
-    ax.set_title(r"$f(n) \in \mathcal{O}(n^2)$ : au-dela de $n_0$, $c\,g(n)$ domine $f$",
+    ax.set_ylabel("coût")
+    ax.set_title(r"$f(n) \in \mathcal{O}(n^2)$ : au-delà de $n_0$, $c\,g(n)$ domine $f$",
                  fontsize=11, color=BLEU)
     ax.grid(alpha=0.3)
     ax.legend(fontsize=9, loc='upper left')
@@ -142,16 +142,16 @@ def figure_03():
         for y, lab, col in courbes:
             ax.plot(n, y, label=lab, color=col, linewidth=2)
         ax.set_xlabel("n")
-        ax.set_ylabel("cout")
+        ax.set_ylabel("coût")
         ax.grid(alpha=0.3)
         if logscale:
             ax.set_yscale('log')
-            ax.set_title("echelle logarithmique", fontsize=10, color=GRIS)
+            ax.set_title("échelle logarithmique", fontsize=10, color=GRIS)
         else:
             ax.set_ylim(0, 1200)
-            ax.set_title("echelle lineaire", fontsize=10, color=GRIS)
+            ax.set_title("échelle linéaire", fontsize=10, color=GRIS)
     axes[0].legend(fontsize=9, loc='upper left')
-    fig.suptitle("Les classes de complexite usuelles", fontsize=11, color=BLEU)
+    fig.suptitle("Les classes de complexité usuelles", fontsize=11, color=BLEU)
     plt.tight_layout()
     save(fig, 'fig_03')
 
@@ -169,7 +169,7 @@ def figure_04():
     n = 1024
     cas = [
         (2, 2, 0.0, "Cas 1 : $T(n)=2T(n/2)+\\mathcal{O}(1)$\nles feuilles dominent $\\rightarrow \\Theta(n)$", VERT),
-        (2, 2, 1.0, "Cas 2 : $T(n)=2T(n/2)+\\Theta(n)$\ntous les niveaux egaux $\\rightarrow \\Theta(n\\log n)$", BLEU),
+        (2, 2, 1.0, "Cas 2 : $T(n)=2T(n/2)+\\Theta(n)$\ntous les niveaux égaux $\\rightarrow \\Theta(n\\log n)$", BLEU),
         (2, 2, 2.0, "Cas 3 : $T(n)=2T(n/2)+\\Theta(n^2)$\nla racine domine $\\rightarrow \\Theta(n^2)$", ORANGE),
     ]
     fig, axes = plt.subplots(1, 3, figsize=(11.5, 4.0))
@@ -179,11 +179,11 @@ def figure_04():
         print("  ", titre.split(chr(10))[0], "| total =", round(total, 1),
               "| niveaux =", len(couts))
         ax.bar(range(len(couts)), couts, color=col, alpha=0.8)
-        ax.set_xlabel("niveau de recursion")
-        ax.set_ylabel("cout du niveau")
+        ax.set_xlabel("niveau de récursion")
+        ax.set_ylabel("coût du niveau")
         ax.set_title(titre, fontsize=9)
         ax.grid(alpha=0.25, axis='y')
-    fig.suptitle("n = 1024 : ou se depense le travail dans un diviser-pour-regner",
+    fig.suptitle("n = 1024 : où se dépense le travail dans un diviser-pour-régner",
                  fontsize=11, color=BLEU)
     plt.tight_layout()
     save(fig, 'fig_04')
@@ -219,9 +219,9 @@ def figure_05():
             label="ArrayList.add(0, x) : cumul $\\approx n^2/2$")
     ax.plot(range(n), chaine, color=VERT, linewidth=2,
             label="LinkedList.addFirst(x) : cumul $= n$")
-    ax.set_xlabel("nombre d'insertions effectuees")
-    ax.set_ylabel("operations cumulees")
-    ax.set_title("Meme contrat, meme resultat, couts incomparables",
+    ax.set_xlabel("nombre d'insertions effectuées")
+    ax.set_ylabel("opérations cumulées")
+    ax.set_title("Même contrat, même résultat, coûts incomparables",
                  fontsize=11, color=BLEU)
     ax.grid(alpha=0.3)
     ax.legend(fontsize=9)

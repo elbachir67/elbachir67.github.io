@@ -212,7 +212,8 @@ def main() -> int:
               "est rejoué.")
         return 1
     print(f"OK : rien de non publiable dans le dépôt ni dans {racine}/ "
-          f"({len(RESERVES)} nom(s) de document et {len(TERMES_INTERDITS)} terme(s) surveillés).")
+          f"({len(RESERVES) + len(RESERVES_MOTS)} nom(s) de document "
+          f"et {len(TERMES_INTERDITS)} terme(s) surveillés).")
     return 0
 
 

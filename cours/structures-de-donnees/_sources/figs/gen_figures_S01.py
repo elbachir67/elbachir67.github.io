@@ -71,17 +71,17 @@ def figure_01():
 
     impls = [
         (0.35, "ArrayDeque<T>\ntableau circulaire\nredimensionnable"),
-        (3.55, "LinkedDeque<T>\nnoeuds doublement\nchaines"),
-        (6.75, "TestDeque<T>\nimplementation\nnaive de reference"),
+        (3.55, "LinkedDeque<T>\nnœuds doublement\nchaînés"),
+        (6.75, "TestDeque<T>\nimplémentation\nnaïve de référence"),
     ]
     for x, txt in impls:
         boite(ax, x, 1.4, 2.9, 1.25, txt, VERT_CLAIR, VERT, fs=9)
         fleche(ax, (x + 1.45, 2.65), (5.0, 3.9), couleur=VERT)
 
-    ax.text(5.0, 0.95, "LES IMPLEMENTATIONS — comment la promesse est tenue",
+    ax.text(5.0, 0.95, "LES IMPLÉMENTATIONS — comment la promesse est tenue",
             ha='center', va='center', fontsize=10, color=VERT, fontweight='bold')
     ax.text(5.0, 0.35,
-            "Le code client ne depend que du contrat : changer d'implementation "
+            "Le code client ne dépend que du contrat : changer d'implémentation "
             "ne change pas une ligne du client.",
             ha='center', va='center', fontsize=9, style='italic', color='#444444')
     save(fig, 'fig_01')
@@ -98,7 +98,7 @@ def figure_02():
     ax.set_xlim(0, 10)
     ax.set_ylim(0, 2.2)
     ax.axis('off')
-    ax.text(0.1, 1.95, "ArrayList : cases contigues en memoire",
+    ax.text(0.1, 1.95, "ArrayList : cases contiguës en mémoire",
             fontsize=11, fontweight='bold', color=BLEU)
     valeurs = ['Fatou', 'Moussa', 'Awa', 'Cheikh', 'Aminata', '', '']
     for i, v in enumerate(valeurs):
@@ -110,8 +110,8 @@ def figure_02():
         ax.text(x + 0.6, 0.62, str(i), ha='center', va='center',
                 fontsize=8, color=GRIS)
     ax.text(0.4, 0.2,
-            "get(i) : adresse = base + i x taille  ->  1 acces, cout constant\n"
-            "add(0, x) : il faut decaler les 5 elements vers la droite  ->  cout proportionnel a n",
+            "get(i) : adresse = base + i x taille  ->  1 accès, coût constant\n"
+            "add(0, x) : il faut décaler les 5 éléments vers la droite  ->  coût proportionnel à n",
             fontsize=9, va='center', color='#333333')
 
     # --- noeuds chaines
@@ -119,7 +119,7 @@ def figure_02():
     ax.set_xlim(0, 10)
     ax.set_ylim(0, 2.2)
     ax.axis('off')
-    ax.text(0.1, 1.95, "LinkedList : noeuds disperses, relies par des references",
+    ax.text(0.1, 1.95, "LinkedList : nœuds dispersés, reliés par des références",
             fontsize=11, fontweight='bold', color=VERT)
     noms = ['Fatou', 'Moussa', 'Awa', 'Cheikh']
     for i, v in enumerate(noms):
@@ -135,8 +135,8 @@ def figure_02():
             ax.text(x + 1.47, 1.2, "/", ha='center', va='center',
                     fontsize=11, color=VERT)
     ax.text(0.6, 0.25,
-            "get(i) : il faut suivre i references depuis la tete  ->  cout proportionnel a i\n"
-            "addFirst(x) : creer un noeud et rebrancher une reference  ->  cout constant",
+            "get(i) : il faut suivre i références depuis la tête  ->  coût proportionnel à i\n"
+            "addFirst(x) : créer un nœud et rebrancher une référence  ->  coût constant",
             fontsize=9, va='center', color='#333333')
 
     plt.tight_layout()
@@ -186,7 +186,7 @@ def figure_03():
                 fontsize=8, color=GRIS)
 
     ax.text(0.3, 3.15 - 3.0,
-            "Pile vide a la fin  ->  expression equilibree",
+            "Pile vide à la fin  ->  expression équilibrée",
             fontsize=9, style='italic', color=VERT)
     save(fig, 'fig_03')
 
@@ -219,7 +219,7 @@ def figure_04():
     dequeue(); dequeue()
     instantanes.append(("2 clients servis", list(tab), tete, taille))
     enqueue('Aminata'); enqueue('Ibrahima'); enqueue('Ndeye')
-    instantanes.append(("3 arrivees : la fin repasse en case 0",
+    instantanes.append(("3 arrivées : la fin repasse en case 0",
                         list(tab), tete, taille))
 
     for titre, t, h, n in instantanes:
@@ -244,7 +244,7 @@ def figure_04():
             ax.text(x + 0.45, 0.78, str(i), ha='center', va='center',
                     fontsize=8, color=GRIS)
         xt = 0.2 + h * 1.0 + 0.45
-        ax.annotate("tete", xy=(xt, 1.72), xytext=(xt, 2.25),
+        ax.annotate("tête", xy=(xt, 1.72), xytext=(xt, 2.25),
                     ha='center', fontsize=9, color=ORANGE,
                     arrowprops=dict(arrowstyle='-|>', color=ORANGE, lw=1.4))
         xf = 0.2 + ((h + n) % m) * 1.0 + 0.45
@@ -299,8 +299,8 @@ def figure_05():
         ax.plot([x + 0.9, x + 0.9], [0.55, 2.6], color=GRIS, linewidth=1.0)
         ax.plot([x, x + 0.9], [0.55, 0.55], color=GRIS, linewidth=1.4)
     ax.text(0.3, 0.15,
-            "Un seul parcours des jetons : chaque jeton est empile ou "
-            "declenche un depilement de deux operandes.",
+            "Un seul parcours des jetons : chaque jeton est empilé ou "
+            "déclenche un dépilement de deux opérandes.",
             fontsize=9, style='italic', color='#333333')
     save(fig, 'fig_05')
 
