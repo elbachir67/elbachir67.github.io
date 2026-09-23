@@ -116,6 +116,14 @@ jobs:
           fail: true
           output: lychee/liens-internes.md
 
+      # Ce que le site promet, il doit le servir (US-65) : un dossier de cours promet une page
+      # d'accueil, un lien interne promet une page, une ressource du manifeste promet un fichier.
+      # Le contrôle ci-dessus ne suffit pas : lychee tient un **dossier existant** pour une cible
+      # valide, et `cours/structures-de-donnees/` existait — sans `index.html`. Le cours est parti
+      # en ligne en 404, la CI au vert.
+      - name: Vérifier que le site sert ce qu'il promet
+        run: python scripts/verifier_publication.py _site
+
       # Site bilingue (US-36) : équivalents FR/EN et hreflang réciproques.
       - name: Vérifier la cohérence bilingue
         run: python scripts/verifier_bilingue.py _site
