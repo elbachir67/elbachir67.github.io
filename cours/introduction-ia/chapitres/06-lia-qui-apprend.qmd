@@ -1,0 +1,864 @@
+---
+title: "L'IA qui apprend"
+cible: "page"
+body-classes: cours-page
+numero: "6"
+description: "Séance 6 d'Introduction à l'IA : utilité espérée maximale, processus de décision markoviens, équation de Bellman, value iteration, Q-learning et descente de gradient."
+author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Navigation conceptuelle"}
+**Prérequis :**
+
+- **S5 (intégrale) :** probabilités, théorème de Bayes, mise à jour séquentielle des croyances, réseaux bayésiens, d-séparation. Cette séance est la **suite directe de S5** --- on y pose la question que S5 ne résout pas : comment *agir* dans un monde incertain ?
+- **S3 :** algorithmes de recherche (BFS, A*), graphes d'états, coût de chemin. Les MDPs en sont la généralisation probabiliste directe.
+- **S1 :** boucle perception--action, mesure de performance, propriétés d'un environnement (stochastique, partiellement observable).
+
+**Ce que cette séance ouvre :**
+
+- **Machine Learning S2 :** régression, classification, réseaux de neurones, RL avancé. Tout le semestre 2 repose sur les fondations posées ici.
+:::
+
+## Introduction : ce que la Séance 5 a laissé ouvert
+
+### Le bilan de S5 : raisonner, oui --- mais agir ?
+
+En Séance 5, nous avons résolu l'un des problèmes fondamentaux de l'IA : *comment raisonner sous incertitude*. Bayes et les réseaux bayésiens permettent à un agent de mettre à jour ses croyances à mesure qu'il observe le monde. À la fin de S5, Dr. Ndoye savait calculer :
+$$P(\text{paludisme} \mid \text{frissons, fièvre très haute, TDR positif}) \approx 0{,}99$$
+
+C'est une réussite considérable. Mais observons ce que Dr. Ndoye fait *ensuite* avec ce chiffre. Il ne le contemple pas --- il **décide** : hospitaliser ou rentrer chez soi ? Prescrire l'artémisinine maintenant ou attendre un second TDR ? Ces décisions ont des conséquences qui s'étalent dans le temps.
+
+De même, Ousmane dans le Monde de Bouki (S2 et S5) ne s'arrête pas à « je crois à 90% que Bouki est en $(2,2)$ ». Il doit *choisir un chemin* vers l'or, en tenant compte du risque de rencontrer Bouki *et* de la récompense à atteindre *et* du coût de chaque pas.
+
+**La limite précise de S5 :** les outils de S5 répondent à *« Quelle est la meilleure croyance ? »* Ils ne répondent pas à *« Quelle est la meilleure action ? »* quand les conséquences s'enchaînent dans le temps et que le monde est stochastique.
+
+::: {.callout-note .encadre-prereqbox title="Ce qu'on sait faire après S5 --- et ce qui manque"}
+**Après S5, l'agent sait :**
+
+- Exprimer son incertitude par une distribution de probabilité.
+- Mettre à jour ses croyances avec Bayes après chaque observation.
+- Représenter un monde complexe compactement par un réseau bayésien.
+- Inférer la probabilité d'une variable cachée depuis les observations.
+
+**Ce qui manque encore :** comment Dr. Ndoye doit-il combiner $P(\text{paludisme} \mid \ldots)= 0{,}99$ avec les conséquences médicales de chaque traitement pour *prendre la meilleure décision* ? Et quand les décisions s'enchaînent (hospitaliser → surveiller → ajuster le traitement), comment planifier une stratégie optimale sur plusieurs étapes ?
+
+**Le plan de cette séance :** d'abord la décision **ponctuelle** (une seule action à choisir) grâce au principe MEU --- c'est le pont direct depuis S5. Ensuite la décision **séquentielle** (une stratégie sur plusieurs étapes) grâce aux MDPs. Enfin, l'apprentissage **sans modèle** quand on ne connaît pas les probabilités de transition --- c'est le Q-learning.
+:::
+
+### L'exemple fil rouge : Amadou, taxi à Dakar
+
+::: {.callout-tip .encadre-exemplebox title="Fil rouge --- Amadou navigue dans Dakar"}
+Amadou est chauffeur de taxi à Dakar. Il part chaque matin du Plateau et veut rejoindre le marché Sandaga. La ville est imprévisible :
+
+- Certaines routes sont **embouteillées** aux heures de pointe : probabilité 0,2 d'être bloqué.
+- Des **zones inondées** en hivernage bloquent certains quartiers et lui coûtent du temps ($R = -1$).
+- Arriver à Sandaga lui rapporte $R = +1$ : le marché est animé, les courses sont nombreuses.
+
+**La question :** quelle *stratégie générale* Amadou doit-il adopter pour maximiser ses gains en espérance --- pas juste pour ce trajet, mais une règle applicable quel que soit l'état de la circulation au réveil ?
+:::
+
+A* (S3) lui donnerait le chemin le plus court en supposant les rues libres. Ce n'est pas ce qu'il faut. Amadou a besoin d'un outil qui intègre l'incertitude et qui lui donne une règle de comportement adaptative : « si tu es à Parcelles et la VDN est bloquée, va par Guédiawaye ».
+
+## Le MEU : de la croyance bayésienne à la décision rationnelle {#sec-meu}
+
+### Pourquoi Bayes seul ne suffit pas à décider
+
+Russell et Norvig identifient trois piliers pour construire un agent rationnel qui décide sous incertitude :
+
+| **Pilier** | **Outil** | **Question résolue** |
+| --- | --- | --- |
+| 1 | Théorie des probabilités | *Qu'est-ce qui est probable ?* (S5) |
+| 2 | Théorie de l'utilité | *Qu'est-ce qui est désirable ?* (nouveau) |
+| 3 | Théorie de la décision (MEU) | *Quelle action prendre ?* (cette section) |
+
+S5 a construit le pilier 1. Mais même avec $P(\text{palu}) = 0{,}99$, la décision de traiter reste impossible sans le pilier 2 : savoir si traiter est *souhaitable* dans ce contexte précis. Ce qui est probable n'est pas nécessairement ce qui mène à la meilleure conséquence.
+
+::: {.callout-tip .encadre-exemplebox title="Pourquoi la probabilité seule ne décide pas"}
+Dr. Ndoye a calculé $P(\text{palu} \mid \text{obs}) = 0{,}83$. Deux scénarios :
+
+- **Scénario A (traitement bénin) :** l'artémisinine est sans effet secondaire, très bon marché. Même pour un faux positif, prescrire est peu coûteux. $\Rightarrow$ Traiter.
+- **Scénario B (traitement risqué) :** le médicament disponible a 10% de chances de provoquer des complications graves. $\Rightarrow$ La même probabilité $P(\text{palu}) = 0{,}83$ peut conduire à *ne pas traiter* et à demander un second avis.
+
+La probabilité est identique. La décision est opposée. Ce qui change : les **conséquences** de chaque action dans chaque scénario --- c'est l'utilité.
+:::
+
+### L'utilité : quantifier ce qui est désirable
+
+::: {.callout-note .encadre-definitionbox title="Fonction d'utilité"}
+Une **fonction d'utilité** $U : \mathcal{S} \to \mathbb{R}$ associe à chaque résultat possible $s$ un nombre réel qui représente la préférence de l'agent pour ce résultat.
+
+- $U(s) > 0$ : résultat désirable (gain, guérison, récompense).
+- $U(s) < 0$ : résultat indésirable (perte, complication, pénalité).
+- $|U(s)|$ grand : la conséquence est importante (qu'elle soit bonne ou mauvaise).
+
+**Autrement dit :** l'utilité est la traduction numérique des préférences de l'agent. Elle permet de comparer des conséquences de nature différente (temps perdu, argent gagné, vie sauvée) sur une même échelle.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="L'utilité n'est pas la probabilité"}
+Une confusion fréquente : confondre l'utilité d'un résultat avec sa probabilité. Ce sont deux objets distincts.
+
+- $P(s \mid a)$ : mesure la *vraisemblance* que l'action $a$ mène au résultat $s$. Dépend de l'environnement.
+- $U(s)$ : mesure la *valeur* que l'agent attribue à ce résultat. Dépend de l'agent et de son contexte.
+
+Un événement peut être très probable mais très peu désirable (embouteillage sur la VDN), ou très peu probable mais extrêmement désirable (trouver l'or de Bouki). La décision rationnelle tient compte des deux simultanément.
+:::
+
+### Le principe MEU : la formule fondamentale
+
+::: {.callout-important .encadre-theorembox title="Principe de l'Utilité Espérée Maximale --- MEU"}
+L'agent choisit l'action $a^*$ qui maximise l'**utilité espérée** :
+$$\boxed{a^* = \arg\max_{a \in \mathcal{A}} \; \sum_{s} \; P\!\bigl(\mathrm{Résultat}(a) = s \mid \mathbf{e}\bigr) \cdot U(s)}$$
+où $\mathbf{e}$ est l'ensemble des observations de l'agent, $s$ parcourt tous les résultats possibles, et $U(s)$ est l'utilité du résultat $s$.
+:::
+
+Décortiquons chaque fragment :
+
+| **Fragment** | **Signification** |
+| --- | --- |
+| $a^*$ | L'action optimale que l'on cherche. |
+| $\arg\max_a$ | « Donne-moi l'action $a$ qui maximise ce qui suit ». |
+| $\sum_s$ | On somme sur *tous* les résultats possibles. Aucun scénario n'est ignoré. |
+| $P(\mathrm{Résultat}(a)=s \mid \mathbf{e})$ | Probabilité que $a$ mène au résultat $s$, étant donné ce que l'agent a observé. C'est ici qu'intervient le calcul bayésien de S5. |
+| $U(s)$ | Valeur subjective du résultat $s$. Peut être positive ou très négative. |
+| $\sum_s (\ldots) \cdot U(s)$ | Espérance mathématique de l'utilité : moyenne pondérée des conséquences par leurs probabilités. |
+
+**Autrement dit :** on choisit l'action dont la *moyenne pondérée des conséquences* est la meilleure, où « pondérée » signifie : par la probabilité de chaque conséquence. Le MEU est l'assemblage des piliers 1 et 2 en un critère de décision unique.
+
+### Application complète : Dr. Ndoye décide pour Fatou
+
+::: {.callout-tip .encadre-exemplebox title="Situation --- le diagnostic après Bayes"}
+Après application du théorème de Bayes avec les frissons et la fièvre élevée (calcul effectué en S5) :
+$$P(\text{palu} \mid \text{obs}) = 0{,}83 \qquad P(\text{non-palu} \mid \text{obs}) = 0{,}17$$
+Dr. Ndoye doit choisir entre deux actions : **traiter** ($a_1$) ou **ne pas traiter** ($a_2$).
+:::
+
+**Étape 1 --- Définir les utilités.**
+
+Les utilités reflètent les préférences cliniques du médecin face à chaque combinaison (action, réalité) :
+
+| **Résultat réel** | **Traiter** $a_1$ | **Ne pas traiter** $a_2$ |
+| --- | --- | --- |
+| Fatou *a* le palu   $(P = 0{,}83)$ | $+10$ (guérison) | $-100$ (maladie grave) |
+| Fatou *n'a pas* le palu   $(P = 0{,}17)$ | $-5$  (traitement inutile) | $+2$ (évite un traitement) |
+
+Pourquoi ces valeurs ? La pénalité $-100$ (ne pas traiter un vrai paludisme) est vingt fois plus grande que l'inconvénient $-5$ (traiter à tort). Cela modélise l'asymétrie clinique réelle : rater un paludisme en saison des pluies peut être fatal, alors qu'un traitement superflu est seulement coûteux.
+
+**Étape 2 --- Calculer l'utilité espérée de chaque action.**
+
+$$
+\begin{aligned}
+EU(a_1 = \text{traiter})
+  &= P(\text{palu}) \cdot U(\text{guérison})
+   + P(\text{non-palu}) \cdot U(\text{traitement inutile}) \\
+  &= 0{,}83 \times (+10)\; + \;0{,}17 \times (-5) \\
+  &= 8{,}30 - 0{,}85 \\[3pt]
+  &= \mathbf{+7{,}45}
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+EU(a_2 = \text{ne pas traiter})
+  &= P(\text{palu}) \cdot U(\text{maladie grave})
+   + P(\text{non-palu}) \cdot U(\text{évite traitement}) \\
+  &= 0{,}83 \times (-100) \;+\; 0{,}17 \times (+2) \\
+  &= -83{,}00 + 0{,}34 \\[3pt]
+  &= \mathbf{-82{,}66}
+\end{aligned}
+$$
+
+**Étape 3 --- Prendre la décision.**
+$$a^* = \arg\max\{+7{,}45,\; -82{,}66\} = a_1   \Rightarrow   \textbf{Traiter}$$
+
+Dr. Ndoye traite Fatou. L'écart est massif ($+7{,}45$ contre $-82{,}66$) parce que l'asymétrie des utilités domine : rater un paludisme réel coûte $-100$ pondéré par $0{,}83$, soit une espérance de $-83$ rien que sur ce scénario.
+
+::: {.callout-important .encadre-retenirbox title="Trois leçons du MEU"}
+1. **Les probabilités seules ne décident pas.** Même avec $P(\text{palu}) = 83\%$, la décision reste impossible sans les utilités. Si le traitement était extrêmement dangereux ($U(\text{traitement inutile}) = -500$), le calcul pourrait changer.
+2. **L'asymétrie des risques gouverne la décision.** La pénalité de manquer un vrai paludisme est vingt fois plus grande que l'inconvénient d'un traitement inutile. Le MEU formalise ce que l'intuition clinique fait naturellement : le risque de *sous-traitement* domine.
+3. **Même une probabilité modérée suffit si les enjeux sont asymétriques.** Si $P(\text{palu})$ n'était que de $30\%$ mais que $U(\text{maladie grave}) = -1000$, Dr. Ndoye traiterait encore : $EU(a_1) = 0{,}3\times 10 + 0{,}7\times(-5) = -0{,}5$, meilleur que $EU(a_2) = 0{,}3\times(-1000) + 0{,}7\times 2 = -298{,}6$.
+:::
+
+### Du MEU ponctuel aux MDPs : la limite à dépasser
+
+Le MEU résout parfaitement la décision **ponctuelle** : une seule action à choisir, des conséquences immédiates. Mais qu'est-ce que Dr. Ndoye fait *après* avoir traité Fatou ?
+
+- Dans 48h, il réévalue son état (nouvelle observation $\mathbf{e}'$).
+- Il recalcule une distribution sur les maladies possibles.
+- Il prend une *nouvelle décision* : continuer le traitement ? Changer de médicament ? Hospitaliser ?
+- Cette décision affecte l'état de Fatou, qui affectera les décisions suivantes…
+
+C'est une **séquence de décisions** où chaque action change l'état du monde, ce qui change les probabilités futures, ce qui change les décisions futures. Le MEU ne gère qu'un seul pas. Il faut un outil pour la séquence : les **Processus de Décision Markoviens**.
+
+::: {.callout-note .encadre-pontbox title="Fil conducteur S5 $\to$ S6"}
+| **Séance 5** |  | **Séance 6** |
+| --- | --- | --- |
+| Décision ponctuelle | $\longrightarrow$ | Séquence de décisions |
+| $EU(a) = \sum_s P(s \mid \mathbf{e}) \cdot U(s)$ | $\longrightarrow$ | $V^*(s) = \max_a \!\left[R(s,a) + \gamma \sum_{s'} P(s' \mid s,a) V^*(s')\right]$ |
+| Choisir traiter/pas traiter | $\longrightarrow$ | Choisir une politique optimale $\pi^*$ |
+| Un seul état futur | $\longrightarrow$ | Horizon infini de transitions |
+| Récompense immédiate | $\longrightarrow$ | Récompenses cumulées actualisées |
+
+La valeur d'un état dans un MDP, $V^*(s)$, est exactement une utilité espérée calculée *récursivement* sur plusieurs pas. Le MDP généralise le MEU à un horizon temporel.
+:::
+
+## Formalisme des MDPs : le langage de la décision séquentielle
+
+### Les cinq ingrédients
+
+Un MDP est entièrement défini par cinq objets. Voici l'intuition avant la formalisation : un MDP modélise une situation où (1) l'agent est dans une *situation* (état), (2) il choisit une *action*, (3) le monde réagit de façon *probabiliste*, (4) l'agent reçoit une *récompense*, et (5) il veut maximiser ses récompenses sur le *long terme* en tenant compte que les récompenses futures valent légèrement moins que les récompenses immédiates.
+
+::: {.callout-note .encadre-definitionbox title="Processus de Décision Markovien (MDP)"}
+Un MDP est un tuple $\langle \mathcal{S}, \mathcal{A}, P, R, \gamma \rangle$ :
+
+| **Symbole** | **Nom** | **Ce que ça représente** |
+| --- | --- | --- |
+| $\mathcal{S}$ | États | Toutes les situations possibles. Pour Amadou : 16 quartiers. Pour Dr. Ndoye : état de santé de Fatou. |
+| $\mathcal{A}$ | Actions | Ce que l'agent peut faire : $\{\text{Haut}, \text{Bas}, \text{Gauche}, \text{Droite}\}$ pour Amadou ; $\{\text{traiter}, \text{hospitaliser}, \text{attendre}\}$ pour Dr. Ndoye. |
+| $P(s' \mid s, a)$ | Transition | Probabilité d'arriver en $s'$ depuis $s$ en faisant $a$. Encode l'incertitude du monde. On a toujours $\sum_{s'} P(s' \mid s,a) = 1$. |
+| $R(s, a)$ | Récompense | Gain immédiat reçu. Peut être négatif (pénalité). |
+| $\gamma \in [0,1)$ | Discount | Une récompense demain vaut $\gamma$ fois une récompense aujourd'hui. |
+:::
+
+### La propriété de Markov : l'état résume tout le passé utile
+
+Le « M » de MDP porte une hypothèse fondamentale :
+$$P(s_{t+1} \mid s_t, a_t,\; s_{t-1}, a_{t-1}, \ldots, s_0, a_0) = P(s_{t+1} \mid s_t, a_t)$$
+
+**Autrement dit :** pour prédire l'avenir, il suffit de connaître l'état présent. Toute l'histoire passée --- tous les états traversés, toutes les actions prises --- est déjà *résumée* dans l'état courant $s_t$. Le passé, une fois encodé dans l'état, devient inutile.
+
+::: {.callout-tip .encadre-exemplebox title="Propriété de Markov pour Amadou"}
+Amadou est à Médina. Que la propriété de Markov soit vraie signifie ceci : la probabilité d'embouteillage au prochain carrefour est la même que ce soit sa première heure de service ou sa dixième, que ce soit un lundi ou un vendredi, qu'il vienne de Plateau ou de Pikine --- à condition que son *état* (position + heure + conditions météo) soit le même.
+
+**Contre-exemple :** si la fatigue d'Amadou s'accumule pendant la journée et influence ses réflexes, alors « être à Médina » n'est plus un état suffisant. Être à Médina après 2h de conduite $\neq$ être à Médina après 10h. Il faut alors *enrichir* l'état en ajoutant le niveau de fatigue.
+
+**Leçon de conception :** un bon état MDP doit encoder *toute* l'information pertinente pour le futur. Un état trop pauvre viole la propriété de Markov et rend le MDP incorrect. Un état trop riche rend le problème inutilement complexe. Trouver le bon état est un art en soi.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Lien direct avec les réseaux bayésiens de S5"}
+La propriété de Markov est *exactement* l'indépendance conditionnelle de S5, mais appliquée dans le temps. En S5, on avait $\text{Maladie} \perp \text{Antécédents} \mid \text{Symptômes}$ : connaître les symptômes rendait les antécédents non informatifs. Ici : $S_{t+1} \perp (S_{t-1}, S_{t-2}, \ldots) \mid (S_t, A_t)$. Un MDP *est* un réseau bayésien dynamique qui se déroule dans le temps :
+$$S_0 \to A_0 \to S_1 \to A_1 \to S_2 \to \cdots$$
+La table $P(S_{t+1} \mid S_t, A_t)$ joue exactement le rôle d'une CPT de réseau bayésien.
+:::
+
+### La politique : une règle de comportement, pas un chemin
+
+En S3, A* retournait un *chemin* : une séquence fixe $s_0 \to s_1 \to \cdots \to s_g$. Ce chemin était planifiable d'avance parce que le monde était déterministe. Si l'action « aller à droite » menait toujours à droite, il suffisait de calculer le chemin optimal une fois pour toutes.
+
+Dans un MDP, le monde est stochastique. Si Amadou planifie « droite, puis haut, puis droite », son deuxième mouvement peut l'amener ailleurs que prévu (glissement). Planifier un chemin fixe n'a plus de sens.
+
+La solution : planifier une **politique**.
+
+::: {.callout-note .encadre-definitionbox title="Politique"}
+Une **politique** $\pi$ est une fonction qui associe à chaque état une action :
+$$\pi : \mathcal{S} \to \mathcal{A}   \text{(politique déterministe)}$$
+ou une distribution sur les actions :
+$$\pi(a \mid s) = P(\text{action}=a \mid \text{état}=s)   \text{(politique stochastique)}$$
+
+**Autrement dit :** une politique, c'est un GPS parfait. À chaque intersection (état), il dit quelle direction prendre --- peu importe comment on est arrivé à cette intersection, et sans avoir besoin de savoir à l'avance quelles intersections on va traverser. La politique couvre tous les états possibles, même ceux qu'on n'avait pas prévus d'atteindre.
+
+L'objectif d'un MDP : trouver la politique **optimale** $\pi^*$, celle qui maximise la récompense cumulée espérée depuis n'importe quel état de départ.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Différence chemin / politique pour Amadou"}
+**Chemin (A*, S3) :** « Plateau $\to$ Médina $\to$ Fann $\to$ Mermoz $\to$ Keur Massar $\to$ Bargny $\to$ Sandaga ». Ce plan est fragile : si le trafic dévie Amadou vers Guédiawaye, le chemin devient inapplicable.
+
+**Politique (MDP, S6) :** « Depuis Plateau : aller à droite. Depuis Médina : aller à droite. Depuis Fann : aller en bas. Depuis Guédiawaye : aller à droite. Depuis toute zone inondée : aller en haut…» Cette règle s'adapte à tout déviement. Si le trafic envoie Amadou à Guédiawaye, la politique lui dit quoi faire depuis Guédiawaye.
+
+La figure @fig-gridworld(c) montre exactement cette politique optimale : une flèche par case, indépendamment du chemin suivi pour y arriver.
+:::
+
+### Le Gridworld de Dakar : notre laboratoire
+
+::: {#fig-gridworld}
+{{< svg ../figures/s06-s06_fig02_gridworld_dakar.svg alt="Le Gridworld Dakar. (a) Récompenses : Sandaga (vert, R=+1) est le but, deux zones inondées (rouge, R=-1) sont les dangers, toutes les autres cases ont R=0. (b) Valeurs optimales V^*(s) calculées par Value Iteration (gamma=0,9) : les cases proches du but ont une valeur élevée, celles proches du danger une valeur négative. (c) La politique optimale pi^*(s) : chaque case a une flèche indiquant la meilleure action. On voit que certaines cases dévient de la route directe pour éviter les zones inondées." >}}
+
+Le Gridworld Dakar. **(a)** Récompenses : Sandaga (vert, $R=+1$) est le but, deux zones inondées (rouge, $R=-1$) sont les dangers, toutes les autres cases ont $R=0$. **(b)** Valeurs optimales $V^*(s)$ calculées par Value Iteration ($\gamma=0{,}9$) : les cases proches du but ont une valeur élevée, celles proches du danger une valeur négative. **(c)** La politique optimale $\pi^*(s)$ : chaque case a une flèche indiquant la meilleure action. On voit que certaines cases dévient de la route directe pour éviter les zones inondées.
+:::
+
+**Spécification complète des transitions.** Le sol est glissant (circulation imprévisible) : l'action voulue réussit avec probabilité $0{,}8$, et avec probabilité $0{,}1$ l'agent glisse perpendiculairement à gauche de sa direction voulue, et avec $0{,}1$ à droite. Si le mouvement amènerait hors de la grille, l'agent reste sur place.
+
+**Exemple détaillé.** Amadou est à Fann $(3,4)$ et tente d'aller à droite (vers Mermoz $(4,4)$) :
+
+- Avec proba $\mathbf{0{,}8}$ : arrive à Mermoz $(4,4)$ comme voulu.
+- Avec proba $\mathbf{0{,}1}$ : glisse en haut --- mais $(3,5)$ est hors grille, reste en Fann $(3,4)$.
+- Avec proba $\mathbf{0{,}1}$ : glisse en bas vers Guédiawaye $(3,3)$.
+
+Somme des probabilités : $0{,}8 + 0{,}1 + 0{,}1 = 1{,}0$. La propriété de normalisation est respectée pour tout $(s, a)$.
+
+## La fonction de valeur : « Combien vaut d'être dans cet état ? »
+
+### L'idée fondamentale
+
+Nous avons défini le MDP et la politique. L'étape suivante est de *mesurer* la qualité d'une politique. Pour cela, répondons à cette question centrale : si Amadou est en Médina et suit la politique optimale, combien peut-il espérer gagner au total, de maintenant jusqu'à la fin de sa journée ?
+
+Cette grandeur --- la somme actualisée des récompenses futures espérées --- s'appelle la **fonction de valeur**. C'est l'analogue multi-étapes de l'utilité espérée du MEU.
+
+::: {.callout-note .encadre-definitionbox title="Fonction de valeur d'état"}
+La **fonction de valeur** $V^\pi(s)$ de la politique $\pi$ est la récompense cumulée espérée en partant de $s$ et en suivant $\pi$ :
+$$V^\pi(s) = \mathbb{E}_\pi \!\left[\, \sum_{t=0}^{\infty} \gamma^t \, r_t \;\middle|\; s_0 = s \right]$$
+
+- $r_t$ est la récompense reçue au pas de temps $t$.
+- $\gamma^t$ décroît avec $t$ : les récompenses futures sont moins valorisées que les immédiates.
+- $\mathbb{E}_\pi[\cdot]$ : espérance sur tous les scénarios possibles générés par $\pi$ et les transitions probabilistes.
+
+La **valeur optimale** est $V^*(s) = \max_\pi V^\pi(s)$ --- la meilleure valeur atteignable depuis $s$ par n'importe quelle politique.
+
+**Autrement dit :** $V^*(s)$ répond à la question « si je pars de $s$ et que je joue parfaitement, combien vais-je récolter en espérance jusqu'à la fin ? ». C'est l'utilité espérée du MEU, généralisée à un horizon infini.
+:::
+
+### Le facteur de discount $\gamma$ : valoriser le présent sur le futur
+
+::: {#fig-discount}
+{{< svg ../figures/s06-s06_fig05_discount.svg alt="L'impact du facteur de discount gamma. (Gauche) Le poids gamma^t décroît exponentiellement avec le temps : un agent myope (gamma=0,5) ignore presque tout ce qui se passe après 3 étapes ; un agent prévoyant (gamma=0,99) valorise encore le futur lointain. (Droite) La valeur de gamma^5 (récompense à 5 étapes) en fonction de gamma : pour gamma=0,9, une récompense dans 5 étapes vaut encore 59% d'une récompense immédiate." >}}
+
+L'impact du facteur de discount $\gamma$. **(Gauche)** Le poids $\gamma^t$ décroît exponentiellement avec le temps : un agent myope ($\gamma=0{,}5$) ignore presque tout ce qui se passe après 3 étapes ; un agent prévoyant ($\gamma=0{,}99$) valorise encore le futur lointain. **(Droite)** La valeur de $\gamma^5$ (récompense à 5 étapes) en fonction de $\gamma$ : pour $\gamma=0{,}9$, une récompense dans 5 étapes vaut encore 59% d'une récompense immédiate.
+:::
+
+**Pourquoi $\gamma < 1$ ?** Trois justifications complémentaires.
+
+**1. Justification économique.** En finance, un franc CFA aujourd'hui vaut plus qu'un franc demain, car on peut l'investir entre-temps à un taux $i$. Le facteur d'actualisation est $\gamma = 1/(1+i)$. Pour $i = 10\%$, $\gamma \approx 0{,}91$.
+
+**2. Justification par l'incertitude temporelle.** Si à chaque pas il y a une probabilité $1-\gamma$ que l'épisode se termine (Amadou tombe en panne, le marché ferme…), alors l'espérance de recevoir une récompense dans $t$ étapes est naturellement multipliée par $\gamma^t$.
+
+**3. Justification mathématique.** Sans discount, $\sum_{t=0}^\infty r_t$ peut diverger si les récompenses ne tendent pas vers zéro. Avec $\gamma < 1$, la somme est bornée par $R_{\max}/(1-\gamma)$, garantissant l'existence d'une solution optimale.
+
+::: {.callout-tip .encadre-exemplebox title="L'impact concret du choix de $\gamma$ pour Amadou"}
+Amadou doit choisir entre deux routes :
+
+- **Route courte risquée :** espérance de récompense $+0{,}41$ dans *1 étape* (calcul : $0{,}7 \times 0{,}8 + 0{,}3 \times (-0{,}5)$).
+- **Route longue sûre :** récompense certaine $+0{,}70$ dans *3 étapes*.
+
+Valeur actualisée de la route longue selon $\gamma$ :
+$$\gamma = 0{,}5 \; :   0{,}5^3 \times 0{,}70 = 0{,}088   <   0{,}41   \Rightarrow   \textbf{route courte gagne}$$
+$$\gamma = 0{,}9 \; :   0{,}9^3 \times 0{,}70 = 0{,}510   >   0{,}41   \Rightarrow   \textbf{route longue gagne}$$
+
+*La même situation, les mêmes récompenses, mais deux décisions opposées selon $\gamma$.* Le discount est un vrai paramètre de conception de l'agent : il encode son degré de prévoyance.
+:::
+
+### La fonction Q : valeur d'un couple état--action
+
+$V^*(s)$ répond à « quelle est la valeur de cet état en agissant de façon optimale ? ». La **fonction Q** (ou action-valeur) répond à une question plus fine : « si je suis en $s$ et que je fais *spécifiquement* l'action $a$ maintenant --- puis optimal ensuite --- quelle est ma valeur espérée ? »
+
+::: {.callout-note .encadre-definitionbox title="Fonction Q"}
+$$Q^*(s, a) = R(s, a) + \gamma \sum_{s'} P(s' \mid s, a) \cdot V^*(s')$$
+**Autrement dit :** $Q^*(s,a)$ est la récompense immédiate de faire $a$ en $s$, plus la valeur espérée des états suivants en étant optimal à partir de là. C'est le MEU appliqué sur un seul pas avec continuation optimale.
+
+La relation avec $V^*$ est directe :
+$$V^*(s) = \max_{a \in \mathcal{A}} Q^*(s, a)$$
+**Autrement dit :** la valeur optimale d'un état est la valeur de la meilleure action disponible depuis cet état.
+:::
+
+Pourquoi définir $Q^*$ en plus de $V^*$ ? Parce que $Q^*$ permet de choisir la meilleure action *sans avoir besoin de connaître $P(s'|s,a)$* au moment de la décision. On verra que c'est la clé du Q-learning (section @sec-qlearning).
+
+## L'équation de Bellman : la récurrence fondamentale
+
+### Dérivation intuitive : d'où vient la récurrence ?
+
+Richard Bellman (1957) a observé une propriété remarquable : la valeur optimale d'un état peut s'exprimer en fonction des valeurs des états voisins. Cette idée semble circulaire --- mais c'est précisément sa force.
+
+**Raisonnement pas à pas.** Imaginez qu'on connaisse déjà la valeur optimale de tous les états du gridworld *sauf* Bargny $(4,2)$. Comment calculer $V^*(\text{Bargny})$ ?
+
+Amadou est à Bargny. Il peut tenter d'aller vers Sandaga (action « Bas ») :
+
+$$
+\begin{aligned}
+Q^*(\text{Bargny}, \downarrow) &= \underbrace{R(\text{Bargny}, \downarrow)}_{= 0} + \gamma \cdot \Bigl[\underbrace{0{,}8}_{\text{réussit}} \cdot V^*(\text{Sandaga}) + \underbrace{0{,}1}_{\text{glisse gauche}} \cdot V^*(\text{Rufisque}) + \underbrace{0{,}1}_{\text{glisse droite, hors grille}} \cdot V^*(\text{Bargny})\Bigr]
+\end{aligned}
+$$
+
+Ou tenter d'aller vers Keur Massar (action « Haut ») :
+
+$$
+\begin{aligned}
+Q^*(\text{Bargny}, \uparrow) &= 0 + \gamma \cdot \Bigl[0{,}8 \cdot V^*(\text{Keur Massar}) + 0{,}1 \cdot V^*(\text{Rufisque}) + 0{,}1 \cdot V^*(\text{Bargny})\Bigr]
+\end{aligned}
+$$
+
+La meilleure des deux actions détermine $V^*(\text{Bargny}) = \max\{Q^*(\text{Bargny}, \downarrow),\; Q^*(\text{Bargny}, \uparrow),\; \ldots\}$.
+
+C'est exactement l'équation de Bellman. Formalisons.
+
+::: {.callout-important .encadre-theorembox title="Équation de Bellman pour la valeur optimale"}
+$$\boxed{V^*(s) = \max_{a \in \mathcal{A}} \left[ R(s,a) + \gamma \sum_{s' \in \mathcal{S}} P(s' \mid s,a) \cdot V^*(s') \right]}$$
+
+Cette équation admet trois lectures complémentaires :
+
+1. **Lecture MEU récursive :** c'est le MEU de la section @sec-meu, appliqué non pas à des résultats terminaux mais à des états dont la valeur est elle-même une utilité espérée future. La récursion encode le fait que chaque état ouvre sur d'autres états, qui ouvrent sur d'autres états, à l'infini.
+2. **Lecture économique :** valeur de $s$ = récompense courante (gain immédiat) + valeur d'investissement dans le futur (récompenses futures actualisées).
+3. **Lecture système :** c'est un système de $|\mathcal{S}|$ équations et $|\mathcal{S}|$ inconnues. Le $\max$ le rend non linéaire, donc non résolvable directement par algèbre linéaire. Il faut itérer.
+:::
+
+::: {#fig-bellman}
+{{< svg ../figures/s06-s06_fig03_bellman.svg alt="Visualisation de l'équation de Bellman. Depuis s (bleu), l'agent choisit la meilleure action a^* (orange). L'environnement le distribue probabilistiquement vers des états futurs s'_1, s'_2, s'_3 (vert). La valeur de s est la récompense immédiate R(s,a^*) plus la somme pondérée des valeurs futures. Comparez avec le MEU : la structure est identique, mais V^*(s') remplace U(s) --- parce que les états futurs ont eux-mêmes une valeur future." >}}
+
+Visualisation de l'équation de Bellman. Depuis $s$ (bleu), l'agent choisit la meilleure action $a^*$ (orange). L'environnement le distribue probabilistiquement vers des états futurs $s'_1, s'_2, s'_3$ (vert). La valeur de $s$ est la récompense immédiate $R(s,a^*)$ plus la somme pondérée des valeurs futures. Comparez avec le MEU : la structure est identique, mais $V^*(s')$ remplace $U(s)$ --- parce que les états futurs ont eux-mêmes une valeur future.
+:::
+
+### Calcul numérique complet : Bargny dans le Gridworld
+
+Appliquons l'équation de Bellman à Bargny $(4,2)$ avec $\gamma = 0{,}9$.
+
+**Valeurs voisines supposées connues :**
+$$V^*(\text{Sandaga}) = 1{,}00   V^*(\text{Keur Massar}) = 0{,}86   V^*(\text{Rufisque}) = 0{,}63$$
+
+**Calcul de $Q^*(\text{Bargny}, \downarrow)$ --- action « Bas » vers Sandaga :**
+
+$$
+\begin{aligned}
+Q^*(\text{Bargny}, \downarrow) &= 0 + 0{,}9 \times [0{,}8 \times 1{,}00 + 0{,}1 \times 0{,}63 + 0{,}1 \times 0{,}72] \\
+&= 0{,}9 \times [0{,}800 + 0{,}063 + 0{,}072] = 0{,}9 \times 0{,}935 = \mathbf{0{,}842}
+\end{aligned}
+$$
+
+**Calcul de $Q^*(\text{Bargny}, \uparrow)$ --- action « Haut » vers Keur Massar :**
+
+$$
+\begin{aligned}
+Q^*(\text{Bargny}, \uparrow) &= 0 + 0{,}9 \times [0{,}8 \times 0{,}86 + 0{,}1 \times 0{,}63 + 0{,}1 \times 0{,}72] \\
+&= 0{,}9 \times [0{,}688 + 0{,}063 + 0{,}072] = 0{,}9 \times 0{,}823 = \mathbf{0{,}741}
+\end{aligned}
+$$
+
+**Décision :** $Q^*(\text{Bargny}, \downarrow) = 0{,}842 > Q^*(\text{Bargny}, \uparrow) = 0{,}741$. La politique optimale depuis Bargny est « Aller vers Sandaga » --- ce que confirme la figure @fig-gridworld(c) avec la flèche $\downarrow$ en $(4,2)$.
+
+$$V^*(\text{Bargny}) = \max\{0{,}842, 0{,}741, \ldots\} = 0{,}842 \approx \mathbf{0{,}72} \text{ (valeur convergée, figure @fig-gridworldb)}$$
+
+La légère différence tient au fait que $V^*(\text{Bargny})$ apparaissait lui-même dans le calcul : on a utilisé une approximation. Value Iteration résout cela par itération.
+
+## Value Iteration : résoudre par propagation itérative
+
+### L'idée : initialiser à zéro et propager
+
+L'équation de Bellman définit $V^*$ comme la solution d'un système non linéaire. Pour le résoudre, on utilise une idée simple : partir de valeurs nulles (on ne sait rien) et appliquer l'opérateur de Bellman répétitivement, jusqu'à convergence.
+
+::: {.callout-tip .encadre-recipebox title="Value Iteration --- algorithme complet et intuition"}
+**Initialisation :** $V_0(s) = 0$ pour tout $s \in \mathcal{S}$   (on ne sait rien encore).
+
+**Mise à jour à chaque itération $k$ :**
+$$V_{k+1}(s) \leftarrow \max_{a \in \mathcal{A}} \left[ R(s,a) + \gamma \sum_{s'} P(s' \mid s,a) \cdot V_k(s') \right]   \forall s$$
+
+**Arrêt :** quand $\max_s |V_{k+1}(s) - V_k(s)| < \varepsilon$   (convergence numérique).
+
+**Extraction de la politique optimale *après* convergence :**
+$$\pi^*(s) \leftarrow \arg\max_{a} \left[ R(s,a) + \gamma \sum_{s'} P(s' \mid s,a) \cdot V^*(s') \right]$$
+
+**Intuition :** les récompenses « rayonnent » depuis les états terminaux vers les états lointains, comme une onde qui se propage sur un plan d'eau. À l'itération 1, seuls les voisins immédiats des terminaux « savent » quelque chose. À l'itération 2, les états à deux pas. À l'itération $k$, les états à distance $k$. La vitesse de propagation est limitée par $\gamma$ : chaque saut de distance « coûte » $(1-\gamma)$ en valeur.
+:::
+
+### Trace complète sur la grille 2×3
+
+Pour rendre la convergence palpable, déroulons Value Iteration sur une grille réduite à 6 états (A à F). Même mécanisme que le gridworld complet, mais tout est calculable à la main.
+
+| **A** | **B** | **C** |
+| --- | --- | --- |
+| **D** | **E** | **F** |
+
+| **F** (vert) : but, $R(F)=+1$, terminal |
+| --- |
+| **E** (rouge) : danger, $R(E)=-1$, terminal |
+| **A** (bleu) : départ d'Amadou |
+| **B, C, D** : cases neutres, $R=0$ |
+
+*Transitions :* action voulue réussit avec $p=0{,}8$ ; glisse perpendiculairement avec $0{,}1+0{,}1$ (reste si hors grille). $\gamma=0{,}9$.
+
+**Itération $k=0$ : initialisation.**
+
+| $V_0(\text{A})=0$ | $V_0(\text{B})=0$ | $V_0(\text{C})=0$ |
+| --- | --- | --- |
+| $V_0(\text{D})=0$ | $V_0(\text{E})=-1$ | $V_0(\text{F})=+1$ |
+
+Les terminaux E et F gardent leur valeur de récompense. Toutes les autres cases démarrent à 0 : on ne sait encore rien de leur valeur.
+
+**Itération $k=1$ : première propagation --- seule C « voit » F.**
+
+Depuis C, calculons l'utilité espérée de l'action « Droite » (vers F) :
+$$Q_1(\text{C}, \rightarrow) = 0 + 0{,}9 \times [\underbrace{0{,}8 \times V_0(\text{F})}_{0{,}8 \times 1}
++ \underbrace{0{,}1 \times V_0(\text{F})}_{0{,}1 \times 1 \;\text{(glisse haut = F)}}
++ \underbrace{0{,}1 \times V_0(\text{E})}_{0{,}1 \times (-1)\;\text{(glisse bas = E)}}] = 0{,}9\times(0{,}8+0{,}1-0{,}1) = \mathbf{0{,}72}$$
+
+Depuis C, action « Gauche » (vers B, $V_0=0$) :
+$$Q_1(\text{C}, \leftarrow) = 0 + 0{,}9 \times [0{,}8 \times 0 + 0{,}1 \times 1 + 0{,}1 \times(-1)] = 0{,}9 \times 0 = 0$$
+
+$V_1(\text{C}) = \max(0{,}72, 0, \ldots) = \mathbf{0{,}72}$   (action optimale : « Droite »).
+
+Depuis B, toutes les actions vont vers des cases à $V_0=0$ ou s'approchent des terminaux via le glissement, mais l'effet est nul ou négatif avec les valeurs actuelles. $V_1(\text{B})=0$. Idem A et D.
+
+| $V_1(\text{A})=0$ | $V_1(\text{B})=0$ | $V_1(\text{C})=\mathbf{0{,}72}$ |
+| --- | --- | --- |
+| $V_1(\text{D})=0$ | $V_1(\text{E})=-1$ | $V_1(\text{F})=+1$ |
+
+**Itération $k=2$ : la valeur de C se propage vers B.**
+
+Depuis B, action « Droite » (vers C, qui vaut maintenant $V_1(\text{C})=0{,}72$) :
+$$Q_2(\text{B}, \rightarrow) = 0 + 0{,}9 \times [0{,}8 \times 0{,}72 + 0{,}1 \times 1 + 0{,}1 \times(-1)] = 0{,}9 \times [0{,}576 + 0] = \mathbf{0{,}518}$$
+
+(Le glissement haut amène vers F $=+1$ et le glissement bas vers E $=-1$, qui s'annulent.)
+
+$V_2(\text{B}) = \mathbf{0{,}518}$. Depuis A, B vaut maintenant quelque chose, mais l'effet atteint A seulement via la prochaine itération.
+
+| $V_2(\text{A})=0$ | $V_2(\text{B})=\mathbf{0{,}518}$ | $V_2(\text{C})=\mathbf{0{,}74}$ |
+| --- | --- | --- |
+| $V_2(\text{D})=0$ | $V_2(\text{E})=-1$ | $V_2(\text{F})=+1$ |
+
+(C se met légèrement à jour à $0{,}74$ car $V_1(\text{B})=0$ contribue via le glissement latéral à l'itération suivante.)
+
+**Itération $k=3$ : la valeur atteint A et D.**
+
+Depuis A, action « Droite » (vers B, $V_2(\text{B})=0{,}518$) :
+$$Q_3(\text{A}, \rightarrow) = 0 + 0{,}9 \times [0{,}8 \times 0{,}518 + 0{,}1 \times 0 + 0{,}1 \times 0] = 0{,}9 \times 0{,}414 = \mathbf{0{,}373}$$
+
+$V_3(\text{A}) = \mathbf{0{,}373}$. Depuis D, les actions possibles sont « Haut » (vers A) et « Droite » (vers E, danger). L'action « Haut » donne :
+$$Q_3(\text{D}, \uparrow) = 0 + 0{,}9 \times [0{,}8 \times 0 + 0{,}1 \times 0{,}518 + 0{,}1 \times 0] = 0{,}9 \times 0{,}052 = 0{,}047$$
+
+$V_3(\text{D}) = \mathbf{0{,}047}$ (positif mais faible : D est proche d'E).
+
+| $V_3(\text{A})=\mathbf{0{,}37}$ | $V_3(\text{B})=\mathbf{0{,}57}$ | $V_3(\text{C})=\mathbf{0{,}76}$ |
+| --- | --- | --- |
+| $V_3(\text{D})=\mathbf{0{,}05}$ | $V_3(\text{E})=-1$ | $V_3(\text{F})=+1$ |
+
+::: {.callout-important .encadre-retenirbox title="Ce que révèle la trace"}
+- **Propagation par vagues :** la valeur de F « rayonne » case par case --- C d'abord (itération 1), puis B (itération 2), puis A (itération 3). C'est le même principe que la diffusion d'une onde.
+- **Vitesse de propagation = $(1-\gamma)$ par pas :** avec $\gamma=0{,}9$, chaque étape de distance divise la valeur par environ 0,9.
+- **Asymétrie A/D :** A vaut $0{,}37$, D vaut $0{,}05$. Même si A et D sont à la même distance de F, D est coincé entre A (neutre) et E (danger $-1$), ce qui tire sa valeur vers le bas.
+- **La politique optimale émerge naturellement :** depuis chaque case, choisir l'action qui maximise $Q_{k+1}(s, a)$. En A : aller à droite (vers B). En D : aller en haut (vers A, malgré la faible valeur --- c'est mieux qu'aller vers E).
+:::
+
+### Convergence sur le gridworld complet
+
+::: {#fig-vi}
+{{< svg ../figures/s06-s06_fig04_value_iteration.svg alt="Convergence de Value Iteration sur le Gridworld Dakar (gamma=0,9). Chaque courbe est la valeur d'une case représentative au fil des itérations. Les valeurs partent toutes de 0 et convergent : Mermoz (très proche de Sandaga) monte vite vers 0,89 ; Bargny suit ; HLM (plus loin, avec un chemin contraint) converge plus lentement. Convergence observable dès l'itération 6--7." >}}
+
+Convergence de Value Iteration sur le Gridworld Dakar ($\gamma=0{,}9$). Chaque courbe est la valeur d'une case représentative au fil des itérations. Les valeurs partent toutes de 0 et convergent : Mermoz (très proche de Sandaga) monte vite vers $0{,}89$ ; Bargny suit ; HLM (plus loin, avec un chemin contraint) converge plus lentement. Convergence observable dès l'itération 6--7.
+:::
+
+**Pourquoi la convergence est-elle garantie ?** L'opérateur de Bellman $\mathcal{T}$ est une **contraction de facteur $\gamma$** : à chaque application, la distance entre $V_k$ et $V^*$ est multipliée par $\gamma < 1$. Après $k$ itérations :
+$$\|V_k - V^*\|_\infty \leq \gamma^k \cdot \|V_0 - V^*\|_\infty$$
+
+Pour $\gamma=0{,}9$ et une précision $\varepsilon=10^{-3}$, il faut au plus $k = \lceil\log(10^{-3}) / \log(0{,}9)\rceil \approx 66$ itérations dans le pire cas. Dans la pratique, sur notre gridworld, 6--7 itérations suffisent car les états lointains convergent vite.
+
+## Du MDP au Q-Learning : apprendre sans modèle {#sec-qlearning}
+
+### Le problème fondamental : Amadou ne connaît pas $P$
+
+Value Iteration est puissant mais suppose que l'agent connaît $P(s' \mid s,a)$ et $R(s,a)$ exactement avant même d'agir. C'est le **MDP à modèle connu** (model-based). Dans la réalité, Amadou n'a pas de tableau probabiliste de Dakar : il ne sait pas que la probabilité d'embouteillage sur la VDN entre 8h et 9h30 un lundi est exactement 0,73. Il doit *l'apprendre* en conduisant.
+
+On entre dans le domaine du **Reinforcement Learning** (RL) : apprendre une politique optimale depuis l'expérience seule, sans modèle préalable.
+
+|  | **MDP classique (model-based)** | **RL (model-free)** |
+| --- | --- | --- |
+| $P(s'|s,a)$ connu ? | Oui, avant d'agir | Non --- observé après chaque action |
+| $R(s,a)$ connu ? | Oui | Partiellement (reçu après l'action) |
+| Méthode | Value / Policy Iteration | Q-learning, SARSA, etc. |
+| Apprentissage | Planification hors-ligne | Expérience en-ligne |
+| Analogie | Étudier une carte avant le voyage | Apprendre en conduisant |
+
+### L'idée centrale : estimer $Q^*$ directement depuis l'expérience
+
+$Q^*(s,a)$ a une propriété précieuse : si on la connaît, la politique optimale est immédiate --- $\pi^*(s) = \arg\max_a Q^*(s,a)$ --- sans avoir besoin de $P$ ni de $V^*$.
+
+**Idée de Watkins (1989) :** on peut estimer $Q^*(s,a)$ directement depuis les transitions observées, en utilisant la définition récursive de $Q^*$ comme équation de mise à jour.
+
+Si $Q^*(s,a)$ était la vraie valeur optimale, on aurait :
+$$Q^*(s, a) = R(s, a) + \gamma \max_{a'} Q^*(s', a')$$
+
+Mais on ne connaît pas $Q^*$. Après avoir observé une transition $(s, a, r, s')$ en interagissant avec l'environnement, on dispose d'une **nouvelle estimation** (la « cible ») :
+$$\text{Cible}_t = r + \gamma \max_{a'} Q(s', a')$$
+
+Cette cible est plus informative que l'estimation courante car elle intègre une observation réelle de $r$ et de $s'$. On met à jour $Q(s,a)$ dans sa direction, avec un pas $\alpha$ :
+
+::: {.callout-important .encadre-theorembox title="Règle de mise à jour Q-learning --- Watkins 1989"}
+$$\boxed{Q(s, a) \;\leftarrow\; Q(s, a) + \alpha \underbrace{\bigl[ \underbrace{r + \gamma \max_{a'} Q(s', a')}_{\text{Cible : nouvelle estimation}} - \underbrace{Q(s, a)}_{\text{Ancienne estimation}} \bigr]}_{\delta_t \;:\; \text{Erreur de Différence Temporelle (TD)}}}$$
+
+- $\alpha \in (0,1)$ : **taux d'apprentissage**. Grand $\alpha$ = confiance dans la nouvelle observation (apprentissage rapide mais instable). Petit $\alpha$ = changement lent (stable mais long). En pratique : $\alpha$ décroissant.
+- $\delta_t$ : **erreur TD**. Si $\delta_t > 0$ : la cible est meilleure que prévu (bonne surprise, on augmente $Q$). Si $\delta_t < 0$ : déception (on diminue $Q$). Si $\delta_t = 0$ : cohérence parfaite, pas de mise à jour nécessaire.
+- La mise à jour est **hors-politique** (off-policy) : on apprend la valeur de l'action greedy $\max_{a'}Q(s',a')$ même si l'agent n'a pas suivi cette action.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Lien profond avec la mise à jour bayésienne de S5"}
+Réécrivons la mise à jour Q-learning :
+$$Q_{\text{nouveau}} = Q_{\text{ancien}} + \alpha \cdot (\text{Cible} - Q_{\text{ancien}}) = (1-\alpha) \cdot Q_{\text{ancien}} + \alpha \cdot \text{Cible}$$
+C'est une **moyenne exponentielle pondérée** entre l'ancienne croyance et la nouvelle observation. Comparez avec Bayes (S5) :
+$$P_{\text{nouveau}}(H) \propto P(\text{obs} \mid H) \cdot P_{\text{ancien}}(H)$$
+Dans les deux cas, on combine ce qu'on savait avant avec ce que l'observation révèle. La différence : Bayes utilise la vraisemblance comme coefficient de pondération ; Q-learning utilise $\alpha$. Les deux sont des mécanismes de mise à jour incrémentale des croyances.
+:::
+
+### Le dilemme exploration--exploitation
+
+Pour apprendre des estimations $Q$ fiables, l'agent doit visiter tous les états et essayer toutes les actions suffisamment souvent. Mais s'il explore trop, il prend des actions sous-optimales et perd des récompenses. Ce dilemme est fondamental en RL.
+
+::: {.callout-warning .encadre-attentionbox title="Exploration vs Exploitation"}
+- **Exploiter :** faire ce qu'on sait être bon, c'est-à-dire $\arg\max_a Q(s,a)$. Maximise les récompenses *selon la connaissance actuelle* --- mais cette connaissance peut être incomplète ou fausse si certaines routes n'ont jamais été essayées.
+- **Explorer :** essayer des actions qu'on n'a pas beaucoup testées. Coûte des récompenses immédiates --- mais peut révéler de meilleures stratégies inconnues et corriger des estimations $Q$ erronées.
+
+**Autrement dit :** Amadou qui n'exploite que ce qu'il connaît peut rater une route bien meilleure qu'il n'a jamais empruntée. Amadou qui explore en permanence ne profite jamais de sa connaissance accumulée. Il faut les deux, équilibrés.
+:::
+
+::: {.callout-tip .encadre-recipebox title="Stratégie $\varepsilon$-greedy"}
+À chaque pas de temps, tirer $u \sim \text{Uniforme}(0,1)$ :
+
+- Si $u < \varepsilon$ : choisir une action **aléatoire** parmi $\mathcal{A}$ --- exploration pure.
+- Si $u \geq \varepsilon$ : choisir $\arg\max_a Q(s,a)$ --- exploitation.
+
+En pratique, $\varepsilon$ est décroissant : $\varepsilon_k = \varepsilon_0 / k$ ou $\varepsilon_k = \varepsilon_0 \cdot e^{-\lambda k}$. Au début, beaucoup d'exploration (les $Q$ sont tous à 0, toutes les estimations sont mauvaises). Au fil du temps, de moins en moins (les $Q$ convergent, l'exploitation devient fiable).
+
+**Pour Amadou :** les premiers jours de taxi, il prend des routes inconnues (exploration). Après un mois, il connaît Dakar et optimise chaque trajet (exploitation).
+:::
+
+### Trace de Q-learning : 4 épisodes, pas à pas
+
+Grille 2×3, $\alpha = 0{,}5$, $\gamma = 0{,}9$. Initialisation : $Q(s,a) = 0$ pour tout $(s,a)$.
+
+**Épisode 1 --- exploration aléatoire, chemin A $\to$ B $\to$ C $\to$ F :**
+
+| **Pas** | **État** | **Action** | **Arrivée** | **Récompense** |
+| --- | --- | --- | --- | --- |
+| 1 | A | Droite | B | 0 |
+| 2 | B | Droite | C | 0 |
+| 3 | C | Droite | F | $+1$ |
+
+Les mises à jour se font **en remontant** depuis la fin de l'épisode vers le début (l'ordre est important pour la propagation) :
+
+*Pas 3 (C $\to$ F) :* $\delta = 1 + 0{,}9 \times \max_a Q(\text{F},a) - Q(\text{C},\rightarrow) = 1 + 0 - 0 = 1$
+$$Q(\text{C}, \rightarrow) \leftarrow 0 + 0{,}5 \times 1 = \mathbf{0{,}500}$$
+
+*Pas 2 (B $\to$ C) :* $\delta = 0 + 0{,}9 \times \max_a Q(\text{C},a) - Q(\text{B},\rightarrow) = 0{,}9\times 0{,}5 - 0 = 0{,}45$
+$$Q(\text{B}, \rightarrow) \leftarrow 0 + 0{,}5 \times 0{,}45 = \mathbf{0{,}225}$$
+
+*Pas 1 (A $\to$ B) :* $\delta = 0 + 0{,}9 \times \max_a Q(\text{B},a) - Q(\text{A},\rightarrow) = 0{,}9\times 0{,}225 - 0 = 0{,}2025$
+$$Q(\text{A}, \rightarrow) \leftarrow 0 + 0{,}5 \times 0{,}2025 = \mathbf{0{,}101}$$
+
+**Épisode 2 --- Amadou repasse par C $\to$ F :**
+$$Q(\text{C}, \rightarrow) \leftarrow 0{,}500 + 0{,}5 \times (1 + 0 - 0{,}500) = 0{,}500 + 0{,}250 = \mathbf{0{,}750}$$
+
+**Évolution des estimations Q sur 4 épisodes :**
+
+| **Épisode** | $Q(\text{C},\rightarrow)$ | $Q(\text{B},\rightarrow)$ | $Q(\text{A},\rightarrow)$ | $Q(\text{D},\uparrow)$ |
+| --- | --- | --- | --- | --- |
+| 0 (init) | 0{,}000 | 0{,}000 | 0{,}000 | 0{,}000 |
+| 1 | 0{,}500 | 0{,}225 | 0{,}101 | --- |
+| 2 | 0{,}750 | 0{,}338 | 0{,}152 | --- |
+| 3 | 0{,}875 | 0{,}394 | 0{,}177 | 0{,}030 |
+| 4 | 0{,}938 | 0{,}422 | 0{,}190 | 0{,}055 |
+| $Q^*$ (optimal) | 1{,}000 | 0{,}648 | 0{,}512 | 0{,}290 |
+
+Les estimations convergent vers les vraies valeurs $Q^*$, mais lentement : après 4 épisodes, on n'est qu'à 50--90% des valeurs réelles. Avec un $\varepsilon$-greedy décroissant et des centaines d'épisodes, la convergence est garantie (résultat de Watkins & Dayan, 1992).
+
+::: {#fig-qlearning}
+{{< svg ../figures/s06-s06_fig06_qlearning.svg alt="Q-learning sur le Gridworld Dakar complet (alpha=0,3, gamma=0,9, epsilon-greedy décroissant, 200 épisodes). (Gauche) Récompense cumulée par épisode : bruyante au début (exploration), elle remonte et se stabilise autour de la valeur optimale. (Droite) Q(Plateau, Droite) converge vers sa valeur théorique Q^* au fil des épisodes." >}}
+
+Q-learning sur le Gridworld Dakar complet ($\alpha=0{,}3$, $\gamma=0{,}9$, $\varepsilon$-greedy décroissant, 200 épisodes). **(Gauche)** Récompense cumulée par épisode : bruyante au début (exploration), elle remonte et se stabilise autour de la valeur optimale. **(Droite)** $Q(\text{Plateau}, \text{Droite})$ converge vers sa valeur théorique $Q^*$ au fil des épisodes.
+:::
+
+## La descente de gradient : le pont vers le Machine Learning
+
+### Pourquoi les tableaux Q ne suffisent pas
+
+Dans tout ce qui précède, $V(s)$ et $Q(s,a)$ étaient stockés dans des tableaux : une valeur par case, une valeur par couple case-action. Sur notre gridworld 4×4, cela représente 16 valeurs pour $V$ et 64 pour $Q$.
+
+Mais le monde réel est d'une tout autre dimension. Un jeu d'échecs a environ $10^{47}$ états. Un jeu de go en a $10^{170}$. Une image $224\times224$ pixels représente un état de dimension $224^2 = 50\,176$. On ne peut pas stocker de tableau. Il faut *approximer* $V_\theta(s)$ ou $Q_\theta(s,a)$ par une fonction paramétrique --- par exemple un réseau de neurones avec paramètres $\theta$.
+
+Pour trouver les bons paramètres $\theta$, on a besoin d'un algorithme d'optimisation. Cet algorithme, c'est la **descente de gradient** --- le moteur de tout le Machine Learning.
+
+### L'idée géométrique : descendre une surface
+
+Imaginez la surface d'une fonction de coût $J(\theta)$ comme un paysage autour de Dakar : collines, vallées, plaines. Vous êtes posé quelque part sur ce paysage, dans le brouillard. Vous voulez atteindre la vallée la plus profonde (le minimum). Vous ne voyez pas loin, mais vous sentez la pente sous vos pieds.
+
+**Stratégie naturelle :** à chaque pas, regarder dans quelle direction ça descend le plus vite, et faire un petit pas dans cette direction. Répéter jusqu'à atteindre un fond de vallée.
+
+::: {#fig-gradient}
+{{< svg ../figures/s06-s06_fig07_gradient_descent.svg alt="Descente de gradient. (Gauche) En 1D : depuis w_0 = 2,5, le chemin d'optimisation suit la pente vers le minimum w^*. Chaque point w_k est obtenu par w_k+1 = w_k - êta fois J'(w_k). (Droite) En 2D : les courbes de niveau montrent la surface de coût, le chemin en spirale converge vers le minimum global (étoile verte)." >}}
+
+Descente de gradient. **(Gauche)** En 1D : depuis $w_0 = 2{,}5$, le chemin d'optimisation suit la pente vers le minimum $w^*$. Chaque point $w_k$ est obtenu par $w_{k+1} = w_k - \eta \cdot J'(w_k)$. **(Droite)** En 2D : les courbes de niveau montrent la surface de coût, le chemin en spirale converge vers le minimum global (étoile verte).
+:::
+
+::: {.callout-note .encadre-definitionbox title="Descente de gradient"}
+Étant donné une fonction de coût $J(\theta)$ différentiable, la règle de mise à jour est :
+$$\theta_{k+1} \leftarrow \theta_k - \eta \cdot \nabla_\theta J(\theta_k)$$
+
+- $\nabla_\theta J(\theta)$ : le **gradient** --- vecteur des dérivées partielles de $J$ par rapport à chaque paramètre. Il pointe dans la direction de la plus grande *montée*.
+- On *soustrait* le gradient : on va dans la direction de la plus grande *descente*.
+- $\eta > 0$ : le **taux d'apprentissage** --- contrôle la taille du pas.
+
+**Autrement dit :** le gradient nous dit « la pente monte dans cette direction » ; on fait le contraire.
+:::
+
+### Quatre angles pour comprendre le gradient
+
+Ce concept est suffisamment central en ML pour mériter quatre regards différents.
+
+**Angle 1 --- Géométrique.** Le gradient est le vecteur orthogonal aux courbes de niveau de $J$, orienté vers les valeurs croissantes. En soustraire un multiple, c'est se déplacer perpendiculairement aux courbes de niveau vers les valeurs décroissantes. Sur les Mamelles de Dakar : se diriger vers la vallée là où la pente est la plus raide.
+
+**Angle 2 --- Algébrique.** Pour une fonction simple $J(w) = w^2$ (coût quadratique), $\nabla J = 2w$. La mise à jour est $w \leftarrow w - \eta \cdot 2w = w(1 - 2\eta)$. Pour $\eta = 0{,}3$ : $w_1 = 0{,}4 w_0$, $w_2 = 0{,}16 w_0$, …Convergence géométrique vers $w^* = 0$.
+
+**Angle 3 --- Physique.** C'est la trajectoire d'une bille sur une surface inclinée, soumise à une force de friction proportionnelle à la vitesse. La bille glisse vers le bas (gradient négatif), ralentie par la friction (le facteur $\eta$ empêche des oscillations). Elle s'arrête dans la vallée (minimum).
+
+**Angle 4 --- Machine Learning.** On dispose de $n$ exemples $(x_i, y_i)$ et d'un modèle $f_\theta$. On minimise $J(\theta) = \frac{1}{n}\sum_i (y_i - f_\theta(x_i))^2$. Le gradient $\nabla_\theta J$ indique comment modifier $\theta$ pour que les prédictions $f_\theta(x_i)$ se rapprochent des vraies valeurs $y_i$. C'est l'apprentissage automatique en une phrase.
+
+::: {.callout-warning .encadre-attentionbox title="Le taux d'apprentissage $\eta$ : le paramètre le plus critique en pratique"}
+| **Cas** | **Ce qui se passe** | **Analogie pour Amadou** |
+| --- | --- | --- |
+| $\eta$ trop petit | Convergence très lente, stable. Des milliers d'itérations pour atteindre le minimum. | Amadou corrige sa route de 1 mètre à la fois. Il finit par trouver Sandaga, mais après des heures. |
+| $\eta$ trop grand | Oscillations ou divergence. On « saute par-dessus » le minimum à chaque itération. | Amadou fait de grands virages brusques : il passe d'un bord de Dakar à l'autre sans jamais se stabiliser. |
+| $\eta$ bien choisi | Convergence rapide et stable. | Amadou ajuste sa trajectoire avec de petites corrections raisonnables et arrive vite. |
+
+En pratique, on utilise des **schedules** : $\eta$ commence grand (exploration rapide du paysage) et diminue au fil de l'entraînement (affinement précis autour du minimum).
+:::
+
+### La connexion fondamentale : Q-learning = descente de gradient sur un tableau
+
+Regardons la mise à jour Q-learning côte à côte avec la descente de gradient sur une perte quadratique $J(\theta) = \frac{1}{2}(y - \theta)^2$ avec cible $y$ :
+
+|  | **Descente de gradient** | **Q-learning** |
+| --- | --- | --- |
+| **Paramètre** | $\theta$ | $Q(s,a)$ |
+| **Cible** | $y$ | $r + \gamma \max_{a'} Q(s',a')$ |
+| **Erreur** | $y - \theta$ | $\delta_t = r + \gamma \max_{a'} Q(s',a') - Q(s,a)$ |
+| **Mise à jour** | $\theta \leftarrow \theta + \eta(y-\theta)$ | $Q(s,a) \leftarrow Q(s,a) + \alpha \cdot \delta_t$ |
+| **Pas** | $\eta$ | $\alpha$ |
+
+**Les deux formules sont identiques.** Q-learning *est* de la descente de gradient --- sur un tableau, avec $Q(s,a)$ jouant le rôle de $\theta$, et l'erreur TD $\delta_t$ jouant le rôle du gradient négatif de la perte.
+
+Conséquence directe : quand on remplace le tableau par un réseau de neurones $Q_\theta(s,a)$ et qu'on applique la descente de gradient aux poids $\theta$, on obtient **DQN** (Deep Q-Network, Mnih et al. 2015) --- l'algorithme qui a appris à jouer à 49 jeux Atari au niveau humain, directement depuis les pixels, sans aucune connaissance préalable des règles. Vous avez construit les fondations de DQN dans cette séance.
+
+## Le Monde de Bouki revisité : de Bayes au MDP
+
+Nous avons accompagné Ousmane depuis S2. Il est temps de montrer comment les trois approches du cours le traitent différemment --- et pourquoi le MDP est la solution la plus complète.
+
+### Ce que Bayes (S5) avait donné
+
+À la fin de S5, Ousmane avait calculé (après avoir entendu des grognements et observé l'absence de brise) :
+$$P(\text{Bouki en }(2,2)) \approx 0{,}90 \qquad P(\text{Bouki en }(3,1)) \approx 0{,}06 \qquad P(\text{Bouki en }(1,3)) \approx 0{,}04$$
+
+C'est excellent pour raisonner. Mais Ousmane doit maintenant *agir*. Quelle route emprunter vers l'or en $(4,4)$ ?
+
+### Le MEU comme première réponse (décision ponctuelle)
+
+Si Ousmane doit prendre une seule décision (le prochain pas), le MEU de la section @sec-meu s'applique. Exemple : est-il rationnel de passer en $(2,2)$ si c'est le chemin le plus court ?
+
+$$
+\begin{aligned}
+EU(\text{passer par }(2,2)) &= P(\text{Bouki là}) \times U(\text{être dévoré}) + P(\text{Bouki absent}) \times U(\text{traverser}) \\
+&= 0{,}90 \times (-1000) + 0{,}10 \times (-1) = -900 - 0{,}1 = \mathbf{-900{,}1}
+\end{aligned}
+$$
+
+Clairement non rationnel. Même sans calculer les alternatives, éviter $(2,2)$ s'impose. Le MEU permet de valider cette intuition.
+
+### Le MDP comme réponse complète (décision séquentielle)
+
+::: {.callout-tip .encadre-exemplebox title="MDP du Monde de Bouki"}
+**États :** chaque case de la grille 4×4, y compris celles potentiellement occupées par Bouki.
+
+**Récompenses :**
+
+- $R = +1000$ : atteindre l'or en $(4,4)$ et ressortir vivant.
+- $R = -1000$ : être dévoré ou tomber dans un puits.
+- $R = -1$ : chaque déplacement (encourage la rapidité).
+
+**La clé --- intégrer les croyances bayésiennes dans les récompenses :** au lieu d'une case fixe pour Bouki, on utilise $P(\text{Bouki en }(2,2)) = 0{,}90$ pour pondérer le danger de cette case. La « récompense espérée » de la case $(2,2)$ est $-1000 \times 0{,}90 + (-1) \times 0{,}10 \approx -900$. La politique optimale évite $(2,2)$ avec une force proportionnelle à cette probabilité.
+
+Si demain une nouvelle observation montrait $P(\text{Bouki en }(2,2)) = 0{,}30$, la politique changerait --- peut-être $(2,2)$ deviendrait-il acceptable si c'est le seul chemin vers l'or.
+:::
+
+|  | **S2 -- Logique** | **S5 -- Bayes + MEU** | **S6 -- MDP** |
+| --- | --- | --- | --- |
+| **Croyance** | Bouki est en $(2,2)$ ou $(3,1)$ | $P(\text{Bouki}=(2,2))=0{,}90$ | Distribution intégrée dans les transitions |
+| **Décision** | Explorer pour trancher | MEU : éviter $(2,2)$ maintenant | Politique multi-étapes optimale |
+| **Horizon** | Immédiat | Un seul pas | Toute la navigation jusqu'à l'or |
+| **Objectif** | Déduire la vérité | Maximiser l'utilité ponctuelle | Maximiser la récompense cumulée |
+
+## Le paysage du Machine Learning : ce qui vous attend au Semestre 2
+
+### Le bilan des six séances
+
+::: {.callout-important .encadre-retenirbox title="Le fil narratif complet du cours"}
+- **S1 --- L'IA, c'est quoi ?** Un agent rationnel perçoit et agit pour maximiser sa performance. Limite : comment raisonner sur ce qu'il perçoit ?
+- **S2 --- L'IA qui raisonne.** Logique propositionnelle, modus ponens, résolution. Limite : le monde est trop ambigu pour le binaire vrai/faux.
+- **S3 --- L'IA qui cherche.** BFS, A*, heuristiques. Limite : le monde est trop incertain pour planifier un chemin fixe.
+- **S5 --- L'IA qui doute.** Probabilités, Bayes, réseaux bayésiens. Limite : raisonner bien, oui --- mais comment décider dans le temps ?
+- **S6 --- L'IA qui apprend.** MEU (décision ponctuelle), MDPs (décision séquentielle), Q-learning (sans modèle), descente de gradient (pont ML).
+:::
+
+### Le paysage du ML : quatre familles
+
+::: {#fig-ml_landscape}
+{{< svg ../figures/s06-s06_fig08_ml_landscape.svg alt="Le paysage du Machine Learning. Quatre grandes familles (Supervisé, Non supervisé, Deep Learning, RL), toutes reliées aux fondations de ce cours (droite). La flèche rouge indique votre position à l'entrée du Semestre 2 : vous connaissez déjà les fondations, vous vous apprêtez à construire les murs." >}}
+
+Le paysage du Machine Learning. Quatre grandes familles (Supervisé, Non supervisé, Deep Learning, RL), toutes reliées aux fondations de ce cours (droite). La flèche rouge indique votre position à l'entrée du Semestre 2 : vous connaissez déjà les fondations, vous vous apprêtez à construire les murs.
+:::
+
+Le dénominateur commun de tout le Machine Learning tient en une formule :
+
+*Trouver les paramètres $\theta^*$ qui minimisent une fonction de perte $J(\theta)$ sur les données.*
+
+| **Approche** | **Paramètres $\theta$** | **Fonction de perte $J(\theta)$** |
+| --- | --- | --- |
+| Régression linéaire | Coefficients $w, b$ | Erreur quadratique $\sum_i (y_i - w^\top x_i - b)^2$ |
+| Classification logistique | Poids $w, b$ | Log-vraisemblance négative (lien direct avec S5) |
+| Réseau de neurones | Poids de toutes les couches | Entropie croisée ou MSE |
+| Q-learning (DQN) | Poids du réseau Q | Erreur TD au carré $\sum \delta_t^2$ |
+
+Dans tous les cas, l'outil d'optimisation est la descente de gradient (ou SGD, Adam, RMSProp). **Vous connaissez déjà cet outil.**
+
+- **Apprentissage supervisé :** l'agent apprend $f : \mathcal{X} \to \mathcal{Y}$ depuis des paires $(x_i, y_i)$. Lien direct avec S5 : la log-vraisemblance $\log P(y \mid x, \theta)$ (que vous connaissez de Bayes) est exactement la fonction de perte des classifieurs probabilistes.
+- **Apprentissage non supervisé :** sans étiquettes, l'agent découvre une structure cachée. K-Means partition, PCA compresse. Lien avec S5 : on cherche à estimer $P(X_1, \ldots, X_n)$ --- la distribution jointe, notion centrale des réseaux bayésiens.
+- **Deep Learning :** les $f_\theta$ sont des réseaux de neurones profonds. Ce n'est pas un paradigme différent --- c'est une famille de fonctions très expressives, entraînées par descente de gradient. Les LLMs (GPT, Claude…) en sont la forme la plus avancée.
+- **Reinforcement Learning avancé :** Q-learning est la forme la plus simple. DQN, PPO, SAC remplacent le tableau $Q$ par un réseau de neurones. Vous avez construit la fondation de DQN dans cette séance.
+
+## Synthèse : les idées fondamentales
+
+::: {.callout-important .encadre-retenirbox title="Les six idées fondamentales de la séance"}
+1. **Le MEU est le pont direct entre Bayes (S5) et la décision.** L'agent choisit l'action qui maximise $\sum_s P(s \mid \mathbf{e}) \cdot U(s)$ : les probabilités bayésiennes pèsent chaque conséquence par son utilité. La décision ponctuelle rationnelle est toujours un MEU.
+2. **Un MDP formalise la décision séquentielle.** Cinq ingrédients : états $\mathcal{S}$, actions $\mathcal{A}$, transitions $P$, récompenses $R$, discount $\gamma$. Il généralise A* au monde stochastique et le MEU au monde multi-étapes.
+3. **La fonction de valeur $V^*(s)$ encode « combien vaut cet état ».** Elle est définie récursivement par l'équation de Bellman --- le MEU récursif sur un horizon infini.
+4. **Value Iteration résout Bellman par propagation itérative.** Les valeurs rayonnent depuis les terminaux comme une onde. L'opérateur de Bellman est une contraction ($\times\gamma$ par itération), garantissant la convergence vers $V^*$.
+5. **Q-learning apprend sans modèle par essai-erreur.** L'erreur TD $\delta_t$ guide la mise à jour de $Q(s,a)$, comme Bayes guidait la mise à jour de $P(H \mid E)$ en S5. C'est de la descente de gradient sur un tableau.
+6. **La descente de gradient est le moteur universel du ML.** $\theta \leftarrow \theta - \eta \nabla J(\theta)$ s'applique à tout --- des simples coefficients de régression aux milliards de poids d'un LLM.
+:::
+
+::: {.callout-note .encadre-prereqbox title="Vers le Semestre 2 : ce qui change"}
+**Ce qu'on sait maintenant :** modéliser un agent (S1), raisonner formellement (S2), chercher dans un graphe d'états (S3), raisonner sous incertitude avec Bayes (S5), décider de façon optimale --- ponctuelle avec le MEU, séquentielle avec les MDPs --- et apprendre depuis l'expérience avec Q-learning (S6).
+
+**La limite à dépasser :** nos MDPs supposent un espace d'états fini et discret. Nos probabilités portent sur des variables discrètes. Le monde réel est continu, de grande dimension, et les modèles ($P$, $Q$, les CPT de S5) doivent être *appris depuis les données* --- pas posés à la main.
+
+**En Semestre 2 :** comment apprendre $f : \mathcal{X} \to \mathcal{Y}$ depuis des données (régression, classification), comment représenter des fonctions complexes (réseaux de neurones, backpropagation, convolutions, attention), comment passer de Q-learning à DQN. Le moteur : la descente de gradient --- que vous maîtrisez déjà.
+:::
+
+## Preuve de convergence de Value Iteration
+
+::: {.callout-important .encadre-theorembox title="Théorème de contraction de Bellman"}
+Pour $\gamma \in [0,1)$, l'opérateur $(\mathcal{T}V)(s) = \max_a [R(s,a) + \gamma \sum_{s'} P(s'|s,a) V(s')]$ satisfait $\|\mathcal{T}V - \mathcal{T}V'\|_\infty \leq \gamma \|V - V'\|_\infty$.
+:::
+
+**Preuve.** Soient $a_2 = \arg\max_a (\mathcal{T}V')(s)$ pour un état $s$ quelconque.
+
+$$
+\begin{aligned}
+(\mathcal{T}V)(s) - (\mathcal{T}V')(s) &\leq [R(s,a_2) + \gamma \sum_{s'} P V(s')] - [R(s,a_2) + \gamma \sum_{s'} P V'(s')] \\
+&= \gamma \sum_{s'} P(s'|s,a_2)[V(s') - V'(s')] \;\leq\; \gamma \|V-V'\|_\infty
+\end{aligned}
+$$
+
+Par symétrie : $|(\mathcal{T}V)(s) - (\mathcal{T}V')(s)| \leq \gamma \|V-V'\|_\infty$ pour tout $s$. En prenant le max : $\|\mathcal{T}V - \mathcal{T}V'\|_\infty \leq \gamma \|V-V'\|_\infty$. $\square$
+
+Par le théorème du point fixe de Banach, $V_k = \mathcal{T}^k V_0 \to V^*$ (l'unique point fixe de $\mathcal{T}$).
+
+## MEU et MDP : la connexion formelle
+
+Le MEU et l'équation de Bellman sont la même formule à des horizons différents.
+
+**MEU (horizon $t=1$) :**
+$$EU(a) = \sum_{s} P(\text{Résultat}(a)=s \mid \mathbf{e}) \cdot U(s)$$
+
+**Équation de Bellman (horizon infini) :**
+$$V^*(s) = \max_a \left[ R(s,a) + \gamma \sum_{s'} P(s'|s,a) \cdot V^*(s') \right]$$
+
+La différence : dans le MEU, $U(s)$ est une utilité terminale fixée par l'agent. Dans Bellman, $V^*(s')$ est l'utilité espérée optimale depuis $s'$ --- c'est-à-dire un MEU calculé récursivement depuis $s'$. Le MDP est un MEU récursif sur un horizon infini, avec une structure markovienne permettant la récursion.
+
+## Lien MDP -- Réseau bayésien dynamique
+
+Un MDP est un réseau bayésien dont les nœuds se déroulent dans le temps :
+$$S_0 \to A_0 \to S_1 \to A_1 \to S_2 \to \cdots$$
+
+La propriété de Markov $S_{t+1} \perp (S_{t-1},\ldots) \mid (S_t, A_t)$ est l'indépendance conditionnelle de S5. La table $P(S_{t+1} \mid S_t, A_t)$ est une CPT. Cette connexion est exploitée dans les **Modèles de Markov Cachés** (HMM : quand $S_t$ n'est pas observable directement) et les **POMDPs** (Partially Observable MDPs : la généralisation de S5 et S6 en un seul cadre).

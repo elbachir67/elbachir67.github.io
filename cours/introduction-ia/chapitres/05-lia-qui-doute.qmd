@@ -1,0 +1,1087 @@
+---
+title: "L'IA qui doute"
+cible: "page"
+body-classes: cours-page
+numero: "5"
+description: "Séance 5 d'Introduction à l'IA : probabilités et incertitude, distribution jointe, théorème de Bayes, mise à jour séquentielle, réseaux bayésiens et d-séparation."
+author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Navigation conceptuelle"}
+**Prérequis :**
+
+- **S1 :** Agents intelligents, types d'environnements -- en particulier les environnements *partiellement observables* et *stochastiques*, et la distinction IA/ML/DL.
+- **S2 :** Logique propositionnelle / des prédicats -- les limites du raisonnement binaire (vrai/faux) face au monde réel.
+- **S3 :** Algorithmes de recherche (BFS, DFS, A*) -- la résolution de problèmes dans un monde parfaitement connu, et le concept d'explosion combinatoire.
+- Notions élémentaires de probabilités.
+
+**Ouvre la voie vers :**
+
+- **S6 (MDPs) :** la prise de décision séquentielle sous incertitude, qui combine la recherche (S3) avec les transitions probabilistes (cette séance).
+- **Machine Learning (S2, cours dédié) :** classification bayésienne (Naive Bayes), vraisemblance, fonctions de perte, modèles génératifs. **Tout le ML probabiliste repose sur les fondations de cette séance.**
+:::
+
+## Introduction : pourquoi un agent doit-il savoir douter ?
+
+Cette séance marque un tournant fondamental dans le cours.
+
+### Ce que nous avons construit jusqu'ici
+
+En **S1**, nous avons défini l'IA comme la construction d'**agents rationnels** et constaté que les environnements les plus difficiles sont *partiellement observables* et *stochastiques*. En **S2**, notre agent a appris à **raisonner** par la logique -- mais chaque proposition est soit **vraie**, soit **fausse**, sans place pour le « probablement ». En **S3**, il a appris à **chercher** un chemin optimal -- mais dans un monde parfaitement connu et déterministe. Le diagnostic médical, noté dès S1 comme un cas difficile, échappe aux deux approches. Cette séance va enfin nous donner les outils pour y faire face.
+
+### Le problème : le monde réel n'est ni logique ni déterministe
+
+Considérons Dr. Ndoye, médecin au centre de santé de Médina à Dakar. Fatou, 28 ans, se présente avec de la fièvre en plein mois d'août (saison des pluies). Dr. Ndoye doit déterminer la cause : paludisme, grippe, ou autre chose. Examinons pourquoi les outils des séances précédentes ne suffisent pas.
+
+**La logique (S2) se heurte à l'ambiguïté.**
+Le médecin pourrait tenter d'écrire des règles logiques :
+$$\text{fièvre} \land \text{maux de tête} \Rightarrow \text{paludisme}$$
+Mais la fièvre et les maux de tête sont *aussi* des symptômes de la grippe, de la typhoïde, d'une méningite, ou d'une simple insolation. La même prémisse mènerait à des conclusions contradictoires. La logique est trop rigide pour cette situation.
+
+**La recherche (S3) se heurte à l'incertitude.**
+A* suppose un état initial connu, des actions déterministes et des coûts fixes -- trois hypothèses violées ici. Le médecin ne « voit » pas directement la maladie (observabilité partielle), un test médical peut donner un faux positif (stochastique), et le coût d'un mauvais diagnostic dépend de la maladie réelle.
+
+::: {.callout-warning .encadre-attentionbox title="Les trois sources d'incertitude"}
+L'incertitude d'un agent provient de trois causes fondamentales, identifiées implicitement dans le tableau des environnements en S1 :
+
+1. **Observabilité partielle.** L'agent ne peut pas voir tout l'état du monde. Le médecin voit les symptômes, pas la maladie. Le joueur de poker voit ses cartes, pas celles de l'adversaire.
+2. **Non-déterminisme.** Même si on connaissait l'état exact et l'action choisie, le résultat peut varier. Deux patients avec la même maladie ne présentent pas les mêmes symptômes. Un même traitement ne produit pas le même effet chez tout le monde.
+3. **Ignorance.** Certains facteurs pertinents sont tout simplement inconnus ou trop nombreux pour être tous pris en compte -- le patrimoine génétique de Fatou, la densité de moustiques dans son quartier la nuit dernière. C'est l'incertitude la plus fondamentale et la plus irréductible.
+:::
+
+### La solution : remplacer vrai/faux par un degré de croyance
+
+L'idée centrale de cette séance est simple mais profonde : généraliser le système binaire $\{0, 1\}$ de la logique en un système **continu** dans l'intervalle $[0, 1]$ -- le **degré de croyance**.
+
+Quand Dr. Ndoye dit « je pense que c'est le paludisme », il n'affirme pas une certitude logique. Il exprime quelque chose comme : « sur la base de ce que je sais en ce moment, j'estime à environ 70% que c'est le paludisme ». Ce 70% est un **degré de croyance**, pas un fait logique vérifié par modus ponens.
+
+::: {#fig-spectre}
+{{< svg ../figures/s05-fig01_spectre_croyance.svg alt="Le spectre des degrés de croyance. La logique (S2) ne vit qu'aux extrémités 0, 1. Les probabilités couvrent tout l'intervalle [0,1] et generalisent la logique classique." >}}
+
+Le spectre des degrés de croyance. La logique (S2) ne vit qu'aux extrémités $\{0, 1\}$. Les probabilités couvrent tout l'intervalle $[0,1]$ et generalisent la logique classique.
+:::
+
+::: {.callout-important .encadre-retenirbox title="De la logique aux probabilités"}
+|  | **Logique (S2)** | **Probabilités (S5)** |
+| --- | --- | --- |
+| **Valeurs possibles** | $\{$\,vrai, faux\,$\}$ | $[0, \; 1]$ |
+| **Opérateurs** | $\land, \lor, \neg, \Rightarrow$ | $P(\cdot), \; P(\cdot \mid \cdot)$ |
+| **Raisonnement** | Modus ponens, résolution | Théorème de Bayes |
+| **Monde supposé** | Déterministe, complet | Stochastique, incomplet |
+| **Force** | Garantie de correction | Gestion de l'incertitude |
+| **Faiblesse** | Trop rigide pour le réel | Pas de certitude absolue |
+
+Les probabilités ne *remplacent* pas la logique. Elles l'*étendent* aux situations où la logique est trop rigide. Quand le monde est parfaitement certain, les probabilités valent 0 ou 1 et on retrouve la logique classique. La logique est un **cas particulier** des probabilités.
+:::
+
+### Notre exemple fil rouge
+
+Comme en Séance 3 avec le réseau routier Dakar--Saint-Louis, nous utiliserons un **même scénario** tout au long de cette séance pour illustrer chaque concept. Cela permet de voir comment chaque nouvel outil enrichit notre capacité de raisonnement.
+
+::: {.callout-tip .encadre-exemplebox title="Fil rouge -- Le diagnostic de Dr. Ndoye"}
+Dr. Ndoye est médecin au centre de santé de Médina à Dakar. Nous sommes en **août**, en pleine saison des pluies. Fatou, 28 ans, se présente avec de la **fièvre**.
+
+Dr. Ndoye sait par expérience que la fièvre en août à Dakar a trois causes principales :
+
+- **Paludisme** (40% des cas de fièvre en août)
+- **Grippe** (35% des cas)
+- **Autre cause** (25% des cas -- insolation, infection, typhoïde...)
+
+D'où viennent ces chiffres ? Des registres du centre de santé : sur les 500 patients fiévreux vus en août l'année dernière, environ 200 avaient le paludisme, 175 la grippe, et 125 une autre cause.
+
+Dr. Ndoye dispose de trois observations possibles :
+
+- Les **frissons** de Fatou (observables par examen clinique)
+- Sa **température** (mesurable au thermomètre)
+- Le résultat du **TDR** -- Test de Diagnostic Rapide du paludisme (test sanguin rapide)
+
+**La question :** comment Dr. Ndoye peut-il utiliser ces observations pour affiner son diagnostic ? Comment passe-t-il du « 40% de chances que ce soit le paludisme » initial à une certitude suffisante pour prescrire un traitement ?
+:::
+
+### Plan de la séance
+
+La séance suit une progression naturelle, chaque section construisant sur la précédente :
+
+1. **Les probabilités comme langage** (§2) : variables aléatoires, événements, distributions -- les briques fondamentales.
+2. **Distribution jointe et conditionnelle** (§3) : comment deux variables sont liées, l'opération de zoom qu'est la probabilité conditionnelle.
+3. **Le théorème de Bayes** (§4) : le cœur de la séance -- inverser le raisonnement, comprendre chaque terme, et l'importance capitale du prior (Dakar vs Paris).
+4. **Accumuler les preuves** (§5) : mise à jour séquentielle, quand les preuves convergent ou se contredisent.
+5. **Réseaux bayésiens et d-séparation** (§7--8) : représenter un monde complexe compactement en exploitant la structure.
+6. **Inférence** (§9) : comment calculer dans ces réseaux.
+7. **Synthèse et pont vers le ML** (§10) : Naive Bayes, transition vers le semestre 2.
+
+## Les probabilités comme langage de l'incertitude
+
+Vous avez étudié les probabilités en Licence. L'objectif ici n'est *pas* de refaire un cours de probabilités (vous avez les bases), mais de les voir sous un angle nouveau : comme le **langage de l'IA** pour raisonner sous incertitude. Chaque concept sera présenté avec son rôle concret dans le raisonnement d'un agent intelligent.
+
+### Variables aléatoires : donner un nom à ce qu'on ne sait pas
+
+Commençons par une idée simple. Quand Dr. Ndoye examine Fatou, il ne connaît pas encore sa maladie. Il crée mentalement une « case vide » pour cette information manquante. En mathématiques, cette case vide s'appelle une **variable aléatoire** -- ce n'est rien d'autre qu'un nom donné à quelque chose dont on ne connaît pas (encore) la valeur.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Variable aléatoire"}
+Une **variable aléatoire** $X$ est une variable qui peut prendre différentes valeurs dans un ensemble appelé son **domaine**, noté $\text{Dom}(X)$.
+
+- **Variable booléenne :** deux valeurs possibles. Exemple : $\textit{Frissons} \in \{\text{vrai}, \text{faux}\}$ -- Fatou a des frissons ou non.
+- **Variable discrète à plusieurs valeurs :** un ensemble fini de possibilités. Exemple : $\textit{Maladie} \in \{\text{palu}, \text{grippe}, \text{autre}\}$ -- la cause de la fièvre.
+- **Variable continue :** prend ses valeurs dans un intervalle réel. Exemple : $\textit{Température} \in [36, 42]$ -- la température de Fatou en degrés Celsius.
+
+**Convention d'écriture :** les variables s'écrivent avec une majuscule ($X$, $M$, $Fr$). Leurs valeurs possibles s'écrivent en minuscule ($x$, $\text{palu}$, $\text{vrai}$).
+:::
+
+Pour le diagnostic de Fatou, voici les variables en jeu :
+
+| **Variable** | **Domaine** | **Interprétation pour Dr. Ndoye** |
+| --- | --- | --- |
+| $M$ (Maladie) | $\{\text{palu, grippe, autre}\}$ | La cause de la fièvre. **Variable cachée** : le médecin ne peut pas la « voir » directement. |
+| $Fr$ (Frissons) | $\{\text{vrai, faux}\}$ | Fatou a-t-elle des frissons ? **Variable observable** par examen clinique. |
+| $T$ (Température) | $\{\text{haute, très haute}\}$ | Le niveau de fièvre mesuré. **Observable** au thermomètre. |
+| $TDR$ (Test rapide) | $\{\text{positif, négatif}\}$ | Résultat du test sanguin. **Observable** par analyse rapide. |
+
+::: {.callout-warning .encadre-attentionbox title="Variables cachées vs observables -- lien avec S1"}
+Cette distinction est fondamentale en IA. En Séance 1, nous avions dit qu'un environnement est **partiellement observable** quand les capteurs de l'agent ne donnent pas accès à l'état complet du monde. Ici, les « capteurs » de Dr. Ndoye (ses yeux, le thermomètre, le TDR) lui donnent accès aux variables $Fr$, $T$ et $TDR$, mais *pas* à la variable $M$ (la maladie). La maladie est l'état caché du monde que l'agent doit *inférer* à partir d'observations indirectes.
+
+C'est exactement le scénario du poker mentionné en S1 : le joueur voit ses cartes (observable) mais pas celles de l'adversaire (caché). Ou celui du taxi autonome : les capteurs voient la route (observable) mais pas les intentions du piéton (caché).
+:::
+
+### Événements : ce sur quoi on raisonne
+
+Une variable aléatoire nomme quelque chose d'incertain. Mais quand on raisonne, on ne pose pas toujours la question « quelle est la valeur exacte de $X$ ? ». On pose souvent des questions du type : « est-ce que la maladie est le paludisme OU la grippe ? », « est-ce que la température est supérieure à 39°C ? ». Ces questions portent sur des **ensembles de valeurs** possibles, pas sur une valeur unique. C'est ce qu'on appelle un **événement**.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Événement"}
+Un **événement** $A$ est un sous-ensemble de l'espace des résultats possibles $\Omega$. En d'autres termes, c'est toute proposition sur le monde dont on peut dire si elle est vraie ou fausse une fois l'expérience réalisée.
+
+- **Événement élémentaire :** un seul résultat possible. Exemple : $A = \{M = \text{palu}\}$ -- la maladie est exactement le paludisme.
+- **Événement composite :** une union de résultats. Exemple : $B = \{M = \text{palu}\} \cup \{M = \text{grippe}\}$ -- la maladie est soit le paludisme, soit la grippe (pas une autre cause).
+- **Événement certain :** $\Omega$ lui-même -- quelque chose se passe forcément.
+- **Événement impossible :** l'ensemble vide $\emptyset$ -- rien ne se passe.
+:::
+
+**Pourquoi cette notion est-elle importante pour l'approche bayésienne ?** Parce que le théorème de Bayes, dans sa formulation la plus générale, raisonne sur des **événements**, pas sur des valeurs isolées. Quand Dr. Ndoye dit « je pense que c'est le paludisme ou la grippe », il raisonne sur un événement composite. Et lorsqu'on écrira $P(H \mid E)$ plus loin dans ce cours, $H$ (l'hypothèse) et $E$ (l'évidence) sont des événements au sens formel.
+
+::: {.callout-tip .encadre-exemplebox title="Événements dans le diagnostic de Fatou"}
+Voici des événements concrets construits à partir des variables de notre fil rouge :
+
+| **Événement** | **Signification** |
+| --- | --- |
+| $\{M = \text{palu}\}$ | Fatou a le paludisme (événement élémentaire) |
+| $\{M = \text{palu}\} \cup \{M = \text{grippe}\}$ | Fatou a le paludisme ou la grippe |
+| $\{Fr = \text{vrai}\}$ | Fatou a des frissons (l'évidence observée) |
+| $\{TDR = +\}$ | Le test de diagnostic rapide est positif |
+| $\{M = \text{palu}\} \cap \{Fr = \text{vrai}\}$ | Fatou a le paludisme ET des frissons |
+
+**Le lien avec Bayes :** lorsqu'on calculera $P(\text{palu} \mid \text{frissons})$ à la section 4, on calcule en réalité $P(\{M = \text{palu}\} \mid \{Fr = \text{vrai}\})$ -- la probabilité de l'événement « paludisme » sachant que l'événement « frissons » s'est produit. La variable aléatoire nomme, l'événement délimite, la probabilité quantifie.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Événement vs valeur d'une variable aléatoire"}
+Une source fréquente de confusion : la différence entre une *valeur* et un *événement*.
+
+- $M = \text{palu}$ est une **valeur** de la variable $M$.
+- $\{M = \text{palu}\}$ est l'**événement** correspondant -- le sous-ensemble de $\Omega$ dans lequel la maladie est le paludisme.
+
+En pratique, les deux notations sont souvent confondues par abus de langage, et on écrit simplement $P(M = \text{palu})$ ou même $P(\text{palu})$ sans les accolades. C'est acceptable dès lors qu'on a compris que derrière chaque $P(\cdot)$ se cache un événement.
+:::
+
+### Distribution de probabilité : quantifier ce qu'on croit
+
+Maintenant que nous avons nommé les variables et délimité les événements sur lesquels on raisonne, nous devons quantifier notre degré de croyance pour chaque valeur possible. C'est le rôle de la **distribution de probabilité**.
+
+L'idée est intuitive : on dispose d'un « budget de croyance » total de 1 (100%), et on le **répartit** entre les valeurs possibles. Plus on met de budget sur une valeur, plus on la croit probable.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Distribution de probabilité"}
+Une **distribution de probabilité** sur une variable discrète $X$ est une fonction $P : \text{Dom}(X) \to [0,1]$ qui assigne à chaque valeur possible un nombre entre 0 et 1, tel que la somme de tous les nombres vaut exactement 1 :
+$$\sum_{x \in \text{Dom}(X)} P(X = x) = 1$$
+
+Autrement dit  : on répartit notre croyance totale (= 1) entre toutes les possibilités. *Quelque chose* doit se passer, et on a distribué tout notre « budget de croyance » sans en garder.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Distribution de la maladie en août à Dakar"}
+Dr. Ndoye, fort de 15 ans d'expérience et des registres du centre de santé, estime la distribution suivante pour les patients fiévreux en août :
+
+| **Maladie** $m$ | $P(M = m)$ | **Pourcentage** | **Source du chiffre** |
+| --- | --- | --- | --- |
+| Paludisme | 0,40 | 40% | $\sim$ 200 cas sur 500 fiévreux en août |
+| Grippe | 0,35 | 35% | $\sim$ 175 cas sur 500 |
+| Autre | 0,25 | 25% | $\sim$ 125 cas sur 500 |
+| **Total** | **1,00** | **100%** |  |
+
+**Vérification :** $0{,}40 + 0{,}35 + 0{,}25 = 1{,}00$ ✓ -- le budget de croyance est bien entièrement réparti.
+
+Cette distribution représente ce que Dr. Ndoye croit **sans encore avoir examiné Fatou** -- avant toute observation particulière sur ce patient. C'est ce qu'on appelle une **probabilité non conditionnelle** (*unconditional probability*), ou encore **probabilité marginale**. C'est le point de départ du raisonnement bayésien.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Unconditional probability -- prior -- posterior : clarification du vocabulaire"}
+Ces trois termes reviennent constamment en IA et en Machine Learning. Il est essentiel de ne pas les confondre.
+
+**Probabilité non conditionnelle (*unconditional probability*) :** $P(X)$ sans aucune condition explicite. Elle exprime ce qu'on sait sur $X$ indépendamment de toute autre observation. $P(M = \text{palu}) = 0{,}40$ est une probabilité non conditionnelle : elle ne dépend d'aucun symptôme observé.
+
+**Prior (*prior probability*) :** terme employé dans deux sens qu'il faut distinguer.
+
+- **Sens de l'IA classique** (celui de ce cours) : le prior est la probabilité *avant* qu'une évidence particulière soit observée. Dans ce sens, prior $\equiv$ unconditional. $P(\text{palu}) = 0{,}40$ est le prior de Dr. Ndoye *avant* d'examiner Fatou. Une fois les frissons observés, ce prior se transforme en **posterior** (*posterior probability*) : $P(\text{palu} \mid \text{frissons})$. Le posterior d'aujourd'hui devient le prior de demain si une nouvelle observation arrive.
+- **Sens du Machine Learning probabiliste** (cours du S2) : le prior est une distribution sur les *paramètres* d'un modèle, représentant nos croyances sur ces paramètres *avant* de voir les données d'entraînement. Les données jouent alors le rôle d'évidence, et l'apprentissage est une mise à jour bayésienne de ces croyances sur les paramètres.
+
+**En résumé :** unconditional = probabilité sans condition explicite ; prior = probabilité *avant* une observation donnée. Dans ce cours, les deux sont synonymes. En ML probabiliste (S2), le prior prend un sens plus précis lié aux paramètres du modèle.
+:::
+
+### Les axiomes de Kolmogorov : les trois règles fondamentales
+
+Toutes les règles de calcul des probabilités découlent de trois axiomes posés par le mathématicien russe Andrei Kolmogorov en 1933. Ce sont les « règles du jeu » -- les propriétés minimales que doit respecter tout système de croyances cohérent.
+
+::: {.callout-important .encadre-theorembox title="Axiomes de Kolmogorov (1933)"}
+Soit $\Omega$ l'ensemble de tous les résultats possibles (l'« univers »). Pour tout événement $A$ :
+
+1. **Non-négativité :** $P(A) \geq 0$
+       
+       Autrement dit  : une croyance ne peut pas être négative. On ne peut pas croire « moins que pas du tout » à quelque chose.
+2. **Normalisation :** $P(\Omega) = 1$
+       
+       Autrement dit  : quelque chose se passe forcément. La probabilité que *l'un des résultats possibles* se produise vaut 1.
+3. **Additivité :** Si $A$ et $B$ sont incompatibles ($A \cap B = \emptyset$), alors $P(A \cup B) = P(A) + P(B)$
+       
+       Autrement dit  : si deux événements ne peuvent pas se produire en même temps, la probabilité que l'un *ou* l'autre se produise est la somme de leurs probabilités.
+:::
+
+De ces trois axiomes, on déduit toutes les autres règles. Voici les plus utiles :
+
+::: {.callout-tip .encadre-exemplebox title="Conséquences directes des axiomes"}
+**Règle du complémentaire :**
+$$P(\neg A) = 1 - P(A)$$
+Autrement dit  : la probabilité que $A$ *ne se produise pas* est 1 moins la probabilité que $A$ se produise.
+
+**Application :** Quelle est la probabilité que Fatou n'ait *pas* le paludisme ?
+$$P(M \neq \text{palu}) = 1 - P(M = \text{palu}) = 1 - 0{,}40 = 0{,}60$$
+Si 40% des fiévreux ont le paludisme, alors 60% ont autre chose. C'est trivial mais utile.
+
+**Encadrement :**
+$$0 \leq P(A) \leq 1$$
+Autrement dit  : une probabilité est toujours entre 0 (impossible) et 1 (certain). Si vous obtenez un nombre négatif ou supérieur à 1 dans un calcul, il y a une erreur quelque part.
+:::
+
+### Deux interprétations : fréquentiste et bayésienne
+
+Que signifie exactement « $P(\text{palu}) = 0{,}40$ » ? Il existe deux philosophies.
+
+**L'interprétation fréquentiste** dit : si on observait un très grand nombre de patients fiévreux en août à Dakar, environ 40% auraient le paludisme. La probabilité est une propriété objective du monde, mesurable par la fréquence relative.
+
+**L'interprétation bayésienne** dit : 0,40 exprime le degré de croyance de Dr. Ndoye, étant donné ses connaissances actuelles. C'est une propriété de son *état de connaissance*, pas du monde lui-même. Ce degré peut être mis à jour quand de nouvelles informations arrivent.
+
+::: {.callout-warning .encadre-attentionbox title="En IA nous sommes bayésiens"}
+L'interprétation bayésienne est celle que nous adoptons en IA, pour une raison pratique : elle permet de modéliser un agent qui **apprend et met à jour ses croyances**. Quand Dr. Ndoye observe que Fatou a des frissons, son degré de croyance change -- c'est la mise à jour bayésienne, le cœur de cette séance.
+
+**Lien avec le ML (S2) :** En Machine Learning, on parle d'« apprentissage bayésien » quand le modèle met à jour ses paramètres à la lumière des données. L'apprentissage supervisé, dans sa formulation probabiliste, est exactement un processus de mise à jour de croyances : on commence avec un prior sur les paramètres du modèle, et les données d'entraînement jouent le rôle d'observations.
+:::
+
+## Distribution jointe et probabilité conditionnelle
+
+Le monde réel contient des variables qui s'influencent mutuellement. La maladie de Fatou *influence* ses symptômes : si elle a le paludisme, elle est plus susceptible d'avoir des frissons que si elle a une simple insolation. Pour modéliser ces influences, nous avons besoin de deux outils : la distribution jointe et la probabilité conditionnelle.
+
+### Distribution jointe : le grand tableau
+
+Quand on a deux variables, on veut souvent connaître la probabilité de *chaque combinaison* possible. C'est la distribution jointe. Pour deux variables discrètes, elle se représente comme un tableau.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Distribution jointe"}
+La **distribution de probabilité jointe** de deux variables $X$ et $Y$ assigne une probabilité à chaque paire $(x, y)$ possible :
+$$P(X = x, Y = y)   \text{pour tout } x \in \text{Dom}(X), \; y \in \text{Dom}(Y)$$
+
+La somme de *toutes* les cases du tableau vaut 1 :
+$$\sum_{x}\sum_{y} P(X=x, Y=y) = 1$$
+
+Autrement dit  : on répartit notre budget de croyance entre toutes les combinaisons possibles des deux variables. Exactement comme pour une seule variable, mais avec plus de « cases » à remplir.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Distribution jointe Maladie $\times$ Frissons"}
+Voici la distribution jointe $P(M, Fr)$ pour les patients fiévreux en août à Dakar. Chaque case contient la proportion de patients qui ont cette combinaison exacte.
+
+|  | $Fr = \text{vrai}$ | $Fr = \text{faux}$ | **Total ligne** |
+| --- | --- | --- | --- |
+| $M = \text{palu}$ | **0,320** | 0,080 | 0,40 |
+| $M = \text{grippe}$ | 0,105 | 0,245 | 0,35 |
+| $M = \text{autre}$ | 0,025 | 0,225 | 0,25 |
+| **Total colonne** | 0,450 | 0,550 | **1,00** |
+
+**Lecture d'une case :** $P(M = \text{palu}, Fr = \text{vrai}) = 0{,}320$ signifie que 32% des patients fiévreux en août ont *à la fois* le paludisme *et* des frissons.
+
+**D'où vient le 0,320 ?** On combine deux informations : 40% des patients ont le paludisme, et parmi ceux qui ont le paludisme, 80% ont des frissons. Donc $0{,}40 \times 0{,}80 = 0{,}320$. Ce calcul sera formalisé par la **règle du produit** (§3.4).
+
+**Vérification globale :** $0{,}320 + 0{,}080 + 0{,}105 + 0{,}245 + 0{,}025 + 0{,}225 = 1{,}000$ ✓
+:::
+
+Ce tableau contient **toute l'information** sur la relation entre maladie et frissons. Toute question que l'on peut se poser sur ces deux variables -- « quelle est la probabilité du paludisme ? », « quelle est la probabilité des frissons ? », « si on observe des frissons, qu'est-ce que ça change pour la maladie ? » -- peut être répondue à partir de ce seul tableau.
+
+### Marginalisation : faire disparaître une variable
+
+Parfois, on a la distribution jointe de $(X, Y)$ mais on ne s'intéresse qu'à $X$ seul, sans se soucier de $Y$. L'opération de « faire disparaître » une variable s'appelle la **marginalisation**.
+
+Concrètement, c'est l'opération de **sommer les lignes** (pour obtenir la distribution de la variable en ligne) ou **sommer les colonnes** (pour la variable en colonne) du tableau.
+
+::: {.callout-note .encadre-definitionbox title="Règle de marginalisation"}
+$$P(X = x) = \sum_{y \in \text{Dom}(Y)} P(X = x, Y = y)$$
+
+Autrement dit  : pour connaître la probabilité de $X = x$ sans s'occuper de $Y$, on additionne toutes les cases de la ligne correspondant à $X = x$.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Marginalisation pas à pas"}
+**Retrouver $P(M)$ par sommation des lignes :**
+
+$$
+\begin{aligned}
+P(M = \text{palu}) &= \underbrace{P(\text{palu}, Fr = \text{vrai})}_{0{,}320} + \underbrace{P(\text{palu}, Fr = \text{faux})}_{0{,}080} = \textbf{0,40}
+\end{aligned}
+$$
+
+On retrouve le prior $P(\text{palu}) = 0{,}40$. Normal : qu'on regarde les frissons ou non, la proportion de patients avec le paludisme ne change pas.
+
+**Retrouver $P(Fr)$ par sommation des colonnes :**
+
+$$
+\begin{aligned}
+P(Fr = \text{vrai}) &= \underbrace{P(\text{palu}, \text{vrai})}_{0{,}320} + \underbrace{P(\text{grippe}, \text{vrai})}_{0{,}105} + \underbrace{P(\text{autre}, \text{vrai})}_{0{,}025} = \textbf{0,45}
+\end{aligned}
+$$
+
+Autrement dit  : 45% des patients fiévreux en août ont des frissons, toutes maladies confondues.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Pourquoi le nom « marginalisation » ?"}
+Le terme vient du fait que les totaux par ligne et par colonne apparaissent dans les *marges* du tableau (la colonne « Total ligne » et la ligne « Total colonne »). L'opération consiste simplement à lire ces marges -- d'où « marginaliser » une variable revient à sommer pour la faire disparaître.
+:::
+
+### Probabilité conditionnelle : apprendre en observant
+
+Nous arrivons au concept le plus important de cette section, et l'un des plus importants du cours. La probabilité conditionnelle répond à la question que se pose tout agent face à une observation : **« j'ai observé quelque chose. Qu'est-ce que ça change pour moi ? »**
+
+Imaginons que Dr. Ndoye observe que Fatou a des frissons. Avant cette observation, il estimait le paludisme à 40%. Après cette observation, son estimation devrait changer : les frissons sont plus fréquents avec le paludisme qu'avec d'autres causes, donc observer des frissons devrait *augmenter* la probabilité du paludisme.
+
+La probabilité conditionnelle quantifie *exactement* cette mise à jour.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Probabilité conditionnelle"}
+La **probabilité conditionnelle** de $X = x$ sachant que $Y = y$ est observé :
+$$P(X = x \mid Y = y) = \frac{P(X = x, Y = y)}{P(Y = y)}$$
+
+à condition que $P(Y = y) > 0$ (on ne peut pas conditionner sur un événement impossible).
+
+Le symbole « $\mid$ » se lit « sachant » ou « étant donné ». $P(A \mid B)$ se lit « probabilité de $A$ sachant $B$ ».
+:::
+
+**Comment comprendre cette formule ?** L'intuition est celle d'un **zoom**, ou d'un **filtre**. Avant l'observation, on considère l'ensemble de tous les patients fiévreux (100%). Après avoir observé que Fatou a des frissons, on « zoome » sur la sous-population des patients *avec frissons* (45% de la population totale). Parmi cette sous-population réduite, quelle proportion a le paludisme ?
+
+Voici l'image :
+
+::: {#fig-condprob}
+{{< svg ../figures/s05-fig07_zoom_condprob.svg alt="La probabilité conditionnelle comme filtre-zoom. Parmi les 100 patients fiévreux, 45 ont des frissons. Parmi ces 45, 32 ont le paludisme. Donc P(palu sachant frissons) = 32/45 environ 71,1%." >}}
+
+La probabilité conditionnelle comme filtre-zoom. Parmi les 100 patients fiévreux, 45 ont des frissons. Parmi ces 45, 32 ont le paludisme. Donc $P(\text{palu} \mid \text{frissons}) = 32/45 \approx 71{,}1\%$.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Calcul complet -- mise à jour par les frissons"}
+**Sachant que Fatou a des frissons**, quelle est la probabilité de chaque maladie ?
+
+**Pour le paludisme :**
+$$P(\text{palu} \mid Fr = \text{vrai}) = \frac{P(\text{palu}, Fr = \text{vrai})}{P(Fr = \text{vrai})} = \frac{0{,}320}{0{,}450} \approx \textbf{0,711}$$
+
+**Pour la grippe :**
+$$P(\text{grippe} \mid Fr = \text{vrai}) = \frac{P(\text{grippe}, Fr = \text{vrai})}{P(Fr = \text{vrai})} = \frac{0{,}105}{0{,}450} \approx \textbf{0,233}$$
+
+**Pour les autres causes :**
+$$P(\text{autre} \mid Fr = \text{vrai}) = \frac{P(\text{autre}, Fr = \text{vrai})}{P(Fr = \text{vrai})} = \frac{0{,}025}{0{,}450} \approx \textbf{0,056}$$
+
+**Vérification :** $0{,}711 + 0{,}233 + 0{,}056 = 1{,}000$ ✓ -- les probabilités conditionnelles forment bien une distribution valide (leur somme vaut 1).
+
+**Ce qui s'est passé :** Les frissons ont *redistributé* la croyance. Le paludisme passe de 40% à 71% (forte hausse), la grippe de 35% à 23% (baisse), les autres causes de 25% à 6% (forte baisse). L'observation a « poussé » la croyance vers l'hypothèse la plus compatible.
+:::
+
+### Règle du produit : le pont entre jointe et conditionnelle
+
+En réarrangeant la formule de la probabilité conditionnelle, on obtient la **règle du produit** :
+
+::: {.callout-important .encadre-theorembox title="Règle du produit"}
+$$P(X, Y) = P(X \mid Y) \cdot P(Y) = P(Y \mid X) \cdot P(X)$$
+
+Autrement dit  : la probabilité que $X$ et $Y$ se produisent *ensemble* = la probabilité de l'un $\times$ la probabilité de l'autre *sachant le premier*.
+
+Les deux écritures sont équivalentes. Le fait que les deux côtés sont égaux est ce qui permet de dériver le théorème de Bayes (§4).
+:::
+
+C'est exactement ce que nous avons fait pour construire le tableau de la distribution jointe. Par exemple :
+$$P(\text{palu}, Fr = \text{vrai}) = P(Fr = \text{vrai} \mid \text{palu}) \times P(\text{palu}) = 0{,}80 \times 0{,}40 = 0{,}320$$
+
+Autrement dit  : « la probabilité d'avoir le paludisme ET des frissons = la probabilité d'avoir des frissons quand on a le paludisme $\times$ la probabilité d'avoir le paludisme ».
+
+### Indépendance : quand observer ne sert à rien
+
+Deux variables sont **indépendantes** si connaître l'une n'apporte aucune information sur l'autre.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Indépendance"}
+$X$ et $Y$ sont **indépendantes** (noté $X \perp Y$) si et seulement si :
+$$P(X, Y) = P(X) \cdot P(Y) \qquad \Leftrightarrow \qquad P(X \mid Y) = P(X)$$
+
+Autrement dit  : la distribution jointe est simplement le produit des distributions individuelles. Ou de façon équivalente : connaître $Y$ ne change pas la croyance sur $X$.
+:::
+
+Dans notre exemple, $M$ et $Fr$ ne sont clairement *pas* indépendantes : observer les frissons fait passer $P(\text{palu})$ de 40% à 71%. C'est précisément parce que maladie et frissons sont *dépendants* que l'observation des frissons est **informative** pour le diagnostic. Si les symptômes étaient indépendants de la maladie, ils ne serviraient à rien pour diagnostiquer !
+
+## Le théorème de Bayes : inverser le raisonnement
+
+Nous arrivons au **cœur** de cette séance, et à l'un des résultats les plus importants de tout le cours. Le théorème de Bayes sera aussi fondamental pour le cours de Machine Learning au semestre 2.
+
+### Le problème : on connaît cause$\to$effet, on veut effet$\to$cause
+
+Le raisonnement médical illustre un problème universel en IA. Il y a deux directions de raisonnement :
+
+**Direction cause $\to$ effet** (la direction « facile ») :
+$$P(\text{frissons} \mid \text{paludisme}) = 0{,}80$$
+« Si le patient a le paludisme, il y a 80% de chance qu'il ait des frissons. » On connaît bien cette direction parce qu'on peut l'observer directement : suivre 1000 patients diagnostiqués avec le paludisme et compter combien ont des frissons.
+
+**Direction effet $\to$ cause** (la direction « utile ») :
+$$P(\text{paludisme} \mid \text{frissons}) = \;?$$
+« Si le patient a des frissons, quelle est la probabilité que ce soit le paludisme ? » C'est cette direction que le médecin a besoin de connaître, mais elle demande de « remonter » des effets observés vers la cause cachée. C'est un problème d'**inférence**.
+
+Le théorème de Bayes est *exactement* la formule qui permet de passer de la première direction à la seconde.
+
+::: {.callout-warning .encadre-attentionbox title="L'erreur de l'inversion -- NE PAS confondre $P(A \mid B)$ et $P(B \mid A)$"}
+C'est l'une des erreurs de raisonnement les plus dangereuses et les plus répandues :
+
+- « 80% des patients atteints de paludisme ont des frissons » <br>$\neq$ « 80% des patients avec frissons ont le paludisme »
+- « 90% des étudiants de l'UCAD parlent wolof » <br>$\neq$ « 90% des locuteurs du wolof sont étudiants à l'UCAD »
+- « 95% des personnes atteintes de la maladie X testent positif » <br>$\neq$ « 95% des personnes testant positif ont la maladie X »
+
+La deuxième affirmation est fausse dans chaque cas car la population qui a des frissons (ou parle wolof, ou teste positif) est beaucoup *plus large* que celle qui a le paludisme (ou est à l'UCAD, ou a la maladie). Cette confusion, appelée **erreur du procureur** (*prosecutor's fallacy*), a conduit à des erreurs judiciaires graves dans le monde réel.
+:::
+
+### Dérivation : trois lignes d'une élégance remarquable
+
+La preuve du théorème de Bayes est l'une des plus courtes et des plus élégantes des mathématiques. Elle ne nécessite que la règle du produit (§3.4).
+
+**Étape 1.** La règle du produit donne deux façons d'écrire la jointe $P(H, E)$ :
+$$P(H, E) = P(E \mid H) \cdot P(H)$$
+$$P(H, E) = P(H \mid E) \cdot P(E)$$
+
+**Étape 2.** Le côté gauche est identique dans les deux équations, donc :
+$$P(H \mid E) \cdot P(E) = P(E \mid H) \cdot P(H)$$
+
+**Étape 3.** On divise les deux côtés par $P(E)$ :
+
+::: {.callout-important .encadre-theorembox title="Théorème de Bayes -- 1763"}
+$$\boxed{P(H \mid E) = \frac{P(E \mid H) \cdot P(H)}{P(E)}}$$
+
+Chaque terme a un nom et un rôle précis :
+
+| **Terme** | **Nom** | **Rôle** |
+| --- | --- | --- |
+| $P(H)$ | **Prior** (*unconditional*) | Croyance *avant* l'observation |
+| $P(E \mid H)$ | **Vraisemblance** | À quel point $E$ est compatible avec $H$ |
+| $P(H \mid E)$ | **Posterior** | Croyance *après* l'observation |
+| $P(E)$ | **Évidence** | Probabilité totale de $E$ (normalisation) |
+:::
+
+Le théorème se résume en une phrase :
+
+$\text{Posterior} = \frac{\text{Vraisemblance} \times \text{Prior}}{\text{Évidence}}$
+
+::: {#fig-bayes_mechanism}
+{{< svg ../figures/s05-fig02_mecanisme_bayes.svg alt="Le mécanisme bayésien. Le prior (croyance initiale) est pondéré par la vraisemblance (compatibilité de l'observation avec l'hypothèse), puis normalisé par l'évidence, pour produire le posterior (croyance mise à jour)." >}}
+
+Le mécanisme bayésien. Le prior (croyance initiale) est pondéré par la vraisemblance (compatibilité de l'observation avec l'hypothèse), puis normalisé par l'évidence, pour produire le posterior (croyance mise à jour).
+:::
+
+### Le rôle de chaque terme — comment s'y prendre
+
+Calculer mécaniquement les chiffres est une chose. Comprendre ce que fait chaque terme et comment l'interpréter en est une autre, décisive pour développer une intuition bayésienne solide. La figure @fig-trois_termes visualise les trois termes sur notre exemple.
+
+::: {#fig-trois_termes}
+{{< svg ../figures/s05-fig03_trois_termes_bayes.svg alt="Les trois termes de Bayes sur le diagnostic de Fatou. Le prior ((1) contexte épidémiologique) multiplié par la vraisemblance ((2) biologie des symptômes) et divisé par l'évidence produit le posterior ((3) croyance mise à jour, redistributée vers l'hypothèse la plus compatible)." >}}
+
+Les trois termes de Bayes sur le diagnostic de Fatou. Le prior ((1) contexte épidémiologique) multiplié par la vraisemblance ((2) biologie des symptômes) et divisé par l'évidence produit le posterior ((3) croyance mise à jour, redistributée vers l'hypothèse la plus compatible).
+:::
+
+**Le prior $P(H)$ — la probabilité non conditionnelle de départ.**
+Le prior capture ce que l'on sait *avant* toute observation sur ce patient particulier. C'est une **probabilité non conditionnelle** (*unconditional probability*) : elle n'est conditionnée sur aucun symptôme observé. Ce n'est pas une opinion subjective arbitraire : c'est la synthèse d'une population de référence. Pour Dr. Ndoye, c'est la distribution des causes de fièvre dans son registre de Médina en août. Ce chiffre encode trois informations simultanément : le lieu (Dakar, zone endémique pour le paludisme -- pas Paris), la saison (août, pic de transmission), et la population (patients qui se présentent avec de la fièvre, pas la population générale). Changer l'un de ces trois facteurs change le prior. La question pratique est : *quelle est la population de référence ?* C'est le premier geste du raisonnement bayésien -- identifier le contexte avant de regarder la preuve.
+
+**La vraisemblance $P(E \mid H)$ — mesurer la force de la preuve.**
+La vraisemblance répond à la question : *si l'hypothèse $H$ était vraie, à quelle fréquence observerait-on $E$ ?* C'est une propriété du mécanisme causal, pas du patient devant nous. $P(\text{frissons} \mid \text{palu}) = 0{,}80$ est un fait biologique sur le paludisme en général. On l'estime sur des cohortes de patients confirmés paludéens — indépendamment du contexte géographique. La vraisemblance ne dit pas « quelle est la probabilité que ce patient ait le paludisme » : elle dit « quel est l'indice que les frissons apportent sur chaque hypothèse ». Ce qui compte n'est pas la valeur absolue $P(E \mid H_i)$ pour une seule hypothèse, mais le **rapport de vraisemblance** $P(E \mid H_i) / P(E \mid H_j)$ entre deux hypothèses concurrentes. Un rapport de $0{,}80/0{,}30 \approx 2{,}67$ signifie que les frissons sont 2,67 fois plus attendus sous l'hypothèse paludisme que sous la grippe — c'est la *force discriminante* de cette observation.
+
+**Le posterior $P(H \mid E)$ — lire le résultat comme une redistribution.**
+Le posterior n'est pas une valeur qui « sort de nulle part ». C'est le prior *déformé* par la preuve. La façon la plus intuitive de le lire : l'observation prend la masse de probabilité totale (qui vaut 1) et la *redistribue* entre les hypothèses proportionnellement à $P(E \mid H) \times P(H)$. Les hypothèses pour lesquelles l'observation est fréquente ($P(E \mid H)$ élevé) *gagnent* de la masse ; les autres en *perdent*. Le posterior de 71% pour le paludisme n'est pas un chiffre absolu — c'est une part relative dans un budget de probabilité total fixé à 1.
+
+**L'évidence $P(E)$ — le rôle discret mais essentiel du dénominateur.**
+L'évidence est souvent décrite comme un simple facteur de normalisation, ce qui masque son rôle conceptuel. Elle répond à la question : *à quelle fréquence observe-t-on $E$ dans la population de référence, toutes hypothèses confondues ?* C'est la probabilité de l'observation elle-même, moyennée sur tous les scénarios possibles. Elle est calculée par la **loi des probabilités totales** :
+$$P(E) = \sum_{h} P(E \mid H = h) \cdot P(H = h)$$
+Concrètement : $P(\text{frissons}) = 0{,}80 \times 0{,}40 + 0{,}30 \times 0{,}35 + 0{,}10 \times 0{,}25 = 0{,}450$. Cela signifie que 45% des patients fiévreux en août à Médina ont des frissons. Si $P(E)$ est élevé, l'observation est banale — peu informative. Si $P(E)$ est faible, l'observation est rare — très informative. Le dénominateur divise tout le numérateur par la même constante, ce qui garantit que les posteriors somment à 1 sans modifier leur ordre relatif.
+
+::: {.callout-warning .encadre-attentionbox title="Comment s'y prendre en pratique — les quatre gestes"}
+1. **Identifier la population de référence** $\to$ définit le prior
+2. **Évaluer la force discriminante** de chaque observation via les rapports de vraisemblance (comparer les $P(E \mid H_i)$ entre eux, pas en absolu)
+3. **Multiplier** chaque prior par la vraisemblance correspondante (numérateur)
+4. **Normaliser** en divisant par la somme des numérateurs ($= P(E)$)
+
+Le résultat est une **redistribution**, pas une invention : la somme de toutes les hypothèses reste 1. Bayes ne crée pas de certitude — il déplace la masse de probabilité vers les hypothèses compatibles avec la preuve.
+:::
+
+### Application complète pas à pas
+
+Appliquons Bayes au diagnostic de Fatou. Suivons chaque étape en détail.
+
+**Données :**
+
+- Priors : $P(\text{palu}) = 0{,}40$, \; $P(\text{grippe}) = 0{,}35$, \; $P(\text{autre}) = 0{,}25$
+- Vraisemblances : $P(Fr \mid \text{palu}) = 0{,}80$, \; $P(Fr \mid \text{grippe}) = 0{,}30$, \; $P(Fr \mid \text{autre}) = 0{,}10$
+- Observation : Fatou a des frissons ($Fr = \text{vrai}$)
+
+**Étape 1 : Calculer le numérateur pour chaque hypothèse.**
+
+Le numérateur de Bayes est $P(E \mid H) \times P(H)$ -- le produit vraisemblance $\times$ prior :
+
+$$
+\begin{aligned}
+\text{Paludisme :}   & P(Fr \mid \text{palu}) \times P(\text{palu}) = 0{,}80 \times 0{,}40 = \textbf{0,320} \\
+\text{Grippe :}   & P(Fr \mid \text{grippe}) \times P(\text{grippe}) = 0{,}30 \times 0{,}35 = \textbf{0,105} \\
+\text{Autre :}   & P(Fr \mid \text{autre}) \times P(\text{autre}) = 0{,}10 \times 0{,}25 = \textbf{0,025}
+\end{aligned}
+$$
+
+**Étape 2 : Calculer l'évidence $P(E)$ -- le dénominateur.**
+
+C'est la somme des numérateurs (formule des probabilités totales) :
+$$P(Fr = \text{vrai}) = 0{,}320 + 0{,}105 + 0{,}025 = \textbf{0,450}$$
+
+Autrement dit  : 45% des patients fiévreux en août ont des frissons, toutes causes confondues.
+
+**Étape 3 : Diviser chaque numérateur par le dénominateur.**
+
+$$
+\begin{aligned}
+P(\text{palu} \mid Fr) &= \frac{0{,}320}{0{,}450} \approx \textbf{0,711}   \text{(71,1\%)} \\[3pt]
+P(\text{grippe} \mid Fr) &= \frac{0{,}105}{0{,}450} \approx \textbf{0,233}   \text{(23,3\%)} \\[3pt]
+P(\text{autre} \mid Fr) &= \frac{0{,}025}{0{,}450} \approx \textbf{0,056}   \text{(5,6\%)}
+\end{aligned}
+$$
+
+**Étape 4 : Vérification.**
+$$0{,}711 + 0{,}233 + 0{,}056 = 1{,}000   \ding{51}$$
+
+::: {.callout-important .encadre-retenirbox title="Résultat -- première observation"}
+| **Hypothèse** | **Prior** | $\xrightarrow{\;\text{frissons}\;}$ | **Posterior** |
+| --- | --- | --- | --- |
+| Paludisme | 40,0% | $\longrightarrow$ | **71,1%** $\uparrow\uparrow$ |
+| Grippe | 35,0% | $\longrightarrow$ | 23,3% $\downarrow$ |
+| Autre | 25,0% | $\longrightarrow$ | 5,6% $\downarrow\downarrow$ |
+
+L'observation a **redistribué** la croyance vers l'hypothèse la plus compatible avec les frissons.
+:::
+
+Le paludisme « gagne » parce que deux facteurs se multiplient en sa faveur : un prior déjà dominant (40%) et un rapport de vraisemblance de $0{,}80/0{,}30 \approx 2{,}67$ en sa faveur (§4.3). Mais que se passe-t-il si le prior est radicalement différent ?
+
+### L'importance capitale du prior : même preuve, contexte différent
+
+::: {.callout-tip .encadre-exemplebox title="Contre-exemple -- même symptômes à Paris en janvier"}
+Dr. Dupont exerce à Paris en hiver. Un patient se présente avec de la fièvre et des frissons. Le paludisme est extrêmement rare à Paris :
+
+- Priors : $P(\text{palu}) = 0{,}001$ (1 sur 1000), \; $P(\text{grippe}) = 0{,}700$, \; $P(\text{autre}) = 0{,}299$
+- Les vraisemblances sont *identiques* à celles de Dakar (la biologie du paludisme ne change pas avec la géographie)
+
+Calcul :
+
+$$
+\begin{aligned}
+P(Fr) &= 0{,}80 \times 0{,}001 + 0{,}30 \times 0{,}700 + 0{,}10 \times 0{,}299 \\
+&= 0{,}0008 + 0{,}210 + 0{,}0299 = 0{,}2407 \\[5pt]
+P(\text{palu} \mid Fr) &= \frac{0{,}80 \times 0{,}001}{0{,}2407} = \frac{0{,}0008}{0{,}2407} \approx \textbf{0,003}   \text{(0,3\%)}
+\end{aligned}
+$$
+
+|  | **À Dakar en août** | **À Paris en janvier** |
+| --- | --- | --- |
+| Même observation | Frissons | Frissons |
+| Même vraisemblance | $P(Fr \mid \text{palu}) = 0{,}80$ | $P(Fr \mid \text{palu}) = 0{,}80$ |
+| Prior différent | $P(\text{palu}) = 0{,}40$ | $P(\text{palu}) = 0{,}001$ |
+| **Posterior** | **71,1%** | **0,3%** |
+
+La *même observation*, les *mêmes vraisemblances*, mais un prior radicalement différent $\to$ une conclusion radicalement différente.
+:::
+
+::: {.callout-important .encadre-retenirbox title="Le prior est le contexte"}
+Le théorème de Bayes formalise une idée intuitive : le même symptôme n'a pas la même signification selon le contexte. Un médecin expérimenté le sait instinctivement -- Bayes quantifie cette intuition.
+
+**Lien avec S1 :** Le prior encode les caractéristiques de l'**environnement** de l'agent. En Séance 1, nous avions défini l'agent rationnel comme celui qui maximise sa performance *étant donné sa connaissance de l'environnement*. Le prior *est* cette connaissance de l'environnement.
+
+**Lien avec le ML (S2) :** En apprentissage supervisé, le prior sera remplacé par un modèle appris à partir de données d'entraînement. Les données jouent le rôle du contexte.
+:::
+
+## Mise à jour séquentielle : accumuler les preuves
+
+En pratique, un agent reçoit rarement une seule observation. Dr. Ndoye ne s'arrête pas aux frissons. Il mesure la température, observe d'autres symptômes, peut-être demande un TDR. Chaque nouvelle observation apporte de l'information.
+
+### Le principe : le posterior d'hier est le prior d'aujourd'hui
+
+L'élégance du cadre bayésien est que l'on peut appliquer Bayes **itérativement**. Après la première observation, on obtient un posterior. Ce posterior devient le *nouveau prior* pour la deuxième observation.
+
+::: {.callout-tip .encadre-recipebox title="Recette -- Mise à jour séquentielle"}
+1. Commencer avec le prior initial $P(H)$
+2. Observer $E_1$ $\to$ appliquer Bayes $\to$ obtenir $P(H \mid E_1)$
+3. Utiliser $P(H \mid E_1)$ comme nouveau prior
+4. Observer $E_2$ $\to$ appliquer Bayes $\to$ obtenir $P(H \mid E_1, E_2)$
+5. Répéter pour chaque nouvelle observation
+
+C'est comme un **GPS qui recalcule l'itinéraire à chaque intersection** (rappel de la Séance 3, §8), sauf qu'ici on recalcule les *croyances* à chaque nouvelle observation.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Condition : indépendance conditionnelle des preuves"}
+La mise à jour séquentielle simplifiée suppose que les preuves sont **conditionnellement indépendantes** sachant la maladie :
+$$P(E_1, E_2 \mid H) = P(E_1 \mid H) \cdot P(E_2 \mid H)$$
+
+Autrement dit  : une fois qu'on connaît la maladie, savoir que le patient a des frissons ne change pas la probabilité d'avoir de la fièvre élevée. Les symptômes sont des indices *indépendants* une fois la cause connue.
+
+Cette hypothèse est forte et souvent approximative dans la réalité. Mais elle simplifie énormément les calculs et fonctionne remarquablement bien en pratique. C'est le fondement du classificateur **Naive Bayes**, l'un des modèles les plus simples et les plus efficaces en Machine Learning (S2).
+:::
+
+### Deuxième observation : la température
+
+Dr. Ndoye mesure la température de Fatou : elle est très élevée ($> 39{,}5$°C).
+
+**Vraisemblances pour la fièvre élevée :**
+
+| **Hypothèse** | $P(T = \text{très haute} \mid H)$ | **Pourquoi ?** |
+| --- | --- | --- |
+| Paludisme | 0,70 | Le paludisme donne souvent de fortes fièvres |
+| Grippe | 0,20 | La grippe dépasse rarement 39,5°C |
+| Autre | 0,05 | Rare pour les causes bénignes |
+
+**Nouveau prior** = posterior de l'étape précédente :
+$$P(\text{palu}) = 0{,}711,   P(\text{grippe}) = 0{,}233,   P(\text{autre}) = 0{,}056$$
+
+**Évidence :**
+
+$$
+\begin{aligned}
+P(T = \text{très haute}) &= 0{,}70 \times 0{,}711 + 0{,}20 \times 0{,}233 + 0{,}05 \times 0{,}056 \\
+&= 0{,}4977 + 0{,}0466 + 0{,}0028 = \textbf{0,5471}
+\end{aligned}
+$$
+
+**Posteriors :**
+
+$$
+\begin{aligned}
+P(\text{palu} \mid Fr, T) &= \frac{0{,}70 \times 0{,}711}{0{,}5471} = \frac{0{,}4977}{0{,}5471} \approx \textbf{0,910} \\[3pt]
+P(\text{grippe} \mid Fr, T) &= \frac{0{,}20 \times 0{,}233}{0{,}5471} = \frac{0{,}0466}{0{,}5471} \approx \textbf{0,085} \\[3pt]
+P(\text{autre} \mid Fr, T) &= \frac{0{,}05 \times 0{,}056}{0{,}5471} = \frac{0{,}0028}{0{,}5471} \approx \textbf{0,005}
+\end{aligned}
+$$
+
+**Vérification :** $0{,}910 + 0{,}085 + 0{,}005 = 1{,}000$ ✓
+
+### Troisième observation : le TDR
+
+Dr. Ndoye demande un TDR (Test de Diagnostic Rapide) pour le paludisme. Le résultat est **positif**. Mais aucun test n'est parfait :
+
+- **Sensibilité :** $P(TDR^+ \mid \text{palu}) = 0{,}95$ -- le test détecte 95% des vrais cas
+- **Taux de faux positifs :** $P(TDR^+ \mid \neg\text{palu}) = 0{,}10$ -- il donne un faux positif dans 10% des cas où il n'y a pas de paludisme
+
+**Prior :** $P(\text{palu}) = 0{,}910$, \; $P(\neg\text{palu}) = 0{,}090$.
+
+$$
+\begin{aligned}
+P(TDR^+) &= 0{,}95 \times 0{,}910 + 0{,}10 \times 0{,}090 = 0{,}8645 + 0{,}009 = 0{,}8735 \\[5pt]
+P(\text{palu} \mid TDR^+) &= \frac{0{,}95 \times 0{,}910}{0{,}8735} = \frac{0{,}8645}{0{,}8735} \approx \textbf{0,990}
+\end{aligned}
+$$
+
+::: {.callout-tip .encadre-exemplebox title="Tableau récapitulatif -- évolution des croyances"}
+| **Hypothèse** | **Prior** | **+Frissons** | **+Fièvre haute** | **+TDR positif** |
+| --- | --- | --- | --- | --- |
+| Paludisme | 40% | 71,1% | 91,0% | **99,0%** |
+| Grippe | 35% | 23,3% | 8,5% | $<$ 1% |
+| Autre | 25% | 5,6% | 0,5% | $<$ 1% |
+
+Chaque observation convergente a renforcé le paludisme et affaibli les alternatives. Trois preuves concordantes ont fait passer la probabilité de 40% à 99%.
+:::
+
+::: {#fig-sequential}
+{{< svg ../figures/s05-fig04_convergence_sequentielle.svg alt="Convergence des croyances de Dr. Ndoye. Chaque observation convergente renforce le paludisme aux dépens des alternatives. C'est le raisonnement bayésien séquentiel en action." >}}
+
+Convergence des croyances de Dr. Ndoye. Chaque observation convergente renforce le paludisme aux dépens des alternatives. C'est le raisonnement bayésien séquentiel en action.
+:::
+
+### Quand la preuve contredit : le TDR négatif
+
+Le raisonnement bayésien est **symétrique** : une preuve peut renforcer ou affaiblir une hypothèse. C'est un avantage majeur sur un raisonnement par « conviction » qui ne prendrait en compte que les preuves favorables.
+
+::: {.callout-tip .encadre-exemplebox title="Et si le TDR revenait négatif ?"}
+Reprenons au point où $P(\text{palu}) = 0{,}910$ (après frissons + fièvre élevée). Supposons que le TDR revient **négatif**.
+
+$$
+\begin{aligned}
+P(TDR^- \mid \text{palu}) &= 1 - 0{,}95 = 0{,}05   \text{(taux de faux négatifs)} \\
+P(TDR^- \mid \neg\text{palu}) &= 1 - 0{,}10 = 0{,}90 \\[5pt]
+P(TDR^-) &= 0{,}05 \times 0{,}910 + 0{,}90 \times 0{,}090 = 0{,}0455 + 0{,}0810 = 0{,}1265 \\[5pt]
+P(\text{palu} \mid TDR^-) &= \frac{0{,}05 \times 0{,}910}{0{,}1265} = \frac{0{,}0455}{0{,}1265} \approx \textbf{0,360}
+\end{aligned}
+$$
+
+Le TDR négatif fait **chuter** la probabilité de 91% à 36% -- une preuve contradictoire a un effet puissant.
+
+Mais elle ne descend pas à 0% : le test a un taux de faux négatifs de 5%, donc un résultat négatif n'exclut pas totalement la maladie. Deux preuves convergentes (frissons + fièvre) « résistent » partiellement à une preuve contradictoire.
+:::
+
+## Retour au Monde de Bouki : de la logique aux probabilités
+
+En Séance 2, Ousmane explorait la grotte de Kédougou avec la **logique propositionnelle**. Il déduisait avec certitude : « Bouki est en $(2,2)$ ou en $(3,1)$ », mais il ne pouvait pas trancher entre les deux sans explorer physiquement une case supplémentaire. C'est exactement la limite identifiée en conclusion de S2 : la logique est tout-ou-rien. Nous allons maintenant résoudre ce problème avec les probabilités.
+
+### Le problème que la logique ne peut pas résoudre
+
+Rappel du raisonnement de S2 après trois étapes d'exploration :
+
+- Ousmane visite $(1,1)$ : pas d'odeur $\to$ $\neg B_{1,2}$, $\neg B_{2,1}$ (cases sûres)
+- Ousmane visite $(2,1)$ : odeur $\to$ $B_{2,2} \lor B_{3,1}$
+- Ousmane visite $(1,2)$ : odeur $\to$ $B_{1,3} \lor B_{2,2}$
+
+L'intersection logique donne $B_{2,2}$ comme seul terme commun, mais la logique ne peut pas conclure que $B_{2,2}$ est vrai sans exploration supplémentaire. Avec les probabilités, on peut *quantifier* la confiance dans cette hypothèse.
+
+### Modélisation probabiliste
+
+**Prior.** Dans la grotte, la case de départ $(1,1)$ ne contient pas Bouki (règle du jeu). Bouki se trouve dans l'une des 15 cases restantes, tirée uniformément. Donc :
+$$P(\text{Bouki en }(i,j)) = \frac{1}{15} \approx 0{,}067   \text{pour toute case }(i,j) \neq (1,1)$$
+
+**Vraisemblance -- capteurs bruités.** Contrairement à la version logique de S2, nous modélisons ici des capteurs *imparfaits*. L'odeur de Bouki est forte mais pas infaillible :
+$$P(\text{odeur} \mid \text{Bouki adjacent}) = 0{,}90 \qquad P(\text{odeur} \mid \text{Bouki non adjacent}) = 0{,}05$$
+Le capteur détecte l'odeur 90% du temps quand Bouki est adjacent, mais produit aussi de fausses alertes 5% du temps. C'est précisément cette imperfection qui rend les probabilités indispensables : la logique ne sait pas gérer un capteur qui ment parfois.
+
+::: {#fig-bouki_proba}
+{{< svg ../figures/s05-fig05_bouki_probabiliste.svg alt="Le Monde de Bouki traité comme un problème probabiliste avec capteurs bruités. P(Bouki) par case, mis à jour à chaque observation. La logique (S2) disait « B_2,2 ou B_3,1 ». Les probabilités disent « P(B_2,2) = 0,88 » — un raisonnement gradué, exploitable sans exploration risquée supplémentaire." >}}
+
+Le Monde de Bouki traité comme un problème probabiliste avec capteurs bruités. $P(\text{Bouki})$ par case, mis à jour à chaque observation. La logique (S2) disait « $B_{2,2}$ ou $B_{3,1}$ ». Les probabilités disent « $P(B_{2,2}) = 0{,}88$ » — un raisonnement gradué, exploitable sans exploration risquée supplémentaire.
+:::
+
+### Mise à jour bayésienne des croyances
+
+**État (1) — Prior uniforme.** Ousmane entre en $(1,1)$. Sans aucune information, $P(\text{Bouki}) = 1/15 \approx 0{,}07$ pour chaque case. C'est la croyance de départ symétrique.
+
+**État (2) — Après $(1,1)$ sans odeur.** Pas d'odeur en $(1,1)$. Les cases adjacentes à $(1,1)$ sont $(1,2)$ et $(2,1)$. On applique Bayes exactement comme pour le diagnostic de Fatou, mais cette fois l'hypothèse est « Bouki est en case $c$ » et l'observation est « pas d'odeur en $(1,1)$ ».
+
+::: {.callout-tip .encadre-exemplebox title="Calcul -- mise à jour après $(1,1)$ sans odeur"}
+**Vraisemblances :** si Bouki est adjacent à $(1,1)$, l'absence d'odeur est peu probable (le capteur rate 10% du temps). Sinon, c'est attendu (95% de chance de ne pas sentir quand Bouki est loin).
+$$P(\text{pas d'odeur} \mid \text{adjacent}) = 0{,}10 \qquad P(\text{pas d'odeur} \mid \text{non adjacent}) = 0{,}95$$
+
+**Numérateurs** (vraisemblance $\times$ prior) :
+
+$$
+\begin{aligned}
+\text{Case adjacente } (1,2) \text{ ou } (2,1) &:   0{,}10 \times \tfrac{1}{15} = 0{,}0067 \\
+\text{Toute autre case} &:   0{,}95 \times \tfrac{1}{15} = 0{,}0633
+\end{aligned}
+$$
+
+**Dénominateur :** $2 \times 0{,}0067 + 13 \times 0{,}0633 = 0{,}837$
+
+**Posteriors :**
+$$P(\text{Bouki en }(1,2)) = P(\text{Bouki en }(2,1)) = \frac{0{,}0067}{0{,}837} \approx \textbf{0,008}   (0{,}8\%)$$
+$$P(\text{Bouki en autre case}) = \frac{0{,}0633}{0{,}837} \approx \textbf{0,076}   (7{,}6\%)$$
+
+L'absence d'odeur a fait **chuter** les cases adjacentes de 7% à 0,8% -- elles ne sont pas éliminées (le capteur peut se tromper), mais devenues très improbables.
+:::
+
+**État (3) — Après $(2,1)$ avec odeur.** L'odeur en $(2,1)$ signifie que Bouki est probablement dans une case adjacente à $(2,1)$. Les candidats principaux deviennent $(2,2)$ et $(3,1)$, tous deux à $\approx 38\%$ -- une symétrie parfaite, car les deux sont adjacents à $(2,1)$ et ont le même prior.
+
+**État (4) — Après $(1,2)$ avec odeur : la brisure de symétrie.** Voici le moment clé. $(2,2)$ et $(3,1)$ partent du même prior ($\approx 38\%$), mais leurs positions par rapport à $(1,2)$ diffèrent : $(2,2)$ est adjacent à $(1,2)$, $(3,1)$ ne l'est pas.
+
+::: {.callout-tip .encadre-exemplebox title="Calcul -- brisure de symétrie après $(1,2)$ avec odeur"}
+**Priors** (posteriors de l'étape précédente) :
+$$P(B_{2,2}) \approx 0{,}383,   P(B_{3,1}) \approx 0{,}383,   P(B_{1,3}) \approx 0{,}021$$
+
+**Vraisemblances :** $(2,2)$ et $(1,3)$ sont adjacents à $(1,2)$, mais $(3,1)$ *ne l'est pas*.
+
+| **Case** | $P(\text{odeur} \mid \text{Bouki en case})$ | **Pourquoi ?** |
+| --- | --- | --- |
+| $(2,2)$ | $0{,}90$ | Adjacent à $(1,2)$ ✓ |
+| $(1,3)$ | $0{,}90$ | Adjacent à $(1,2)$ ✓ |
+| $(3,1)$ | $0{,}05$ | **Pas** adjacent à $(1,2)$ ✗ |
+
+**Numérateurs :**
+
+$$
+\begin{aligned}
+(2,2) &:   0{,}90 \times 0{,}383 = \textbf{0,345} \\
+(3,1) &:   0{,}05 \times 0{,}383 = 0{,}019 \\
+(1,3) &:   0{,}90 \times 0{,}021 = 0{,}019
+\end{aligned}
+$$
+
+**Dénominateur :** $0{,}345 + 0{,}019 + 0{,}019 + \text{autres} = 0{,}394$
+
+**Posteriors :**
+$$P(B_{2,2}) = \frac{0{,}345}{0{,}394} \approx \textbf{0,88}   (88\%), \qquad P(B_{3,1}) = P(B_{1,3}) \approx \textbf{0,05}   (5\%)$$
+
+**Ce qui s'est passé :** $(2,2)$ et $(3,1)$ avaient le même prior. Mais l'odeur en $(1,2)$ est 18 fois plus probable si Bouki est en $(2,2)$ (adjacent) que s'il est en $(3,1)$ (non adjacent). Ce rapport de vraisemblance $0{,}90 / 0{,}05 = 18$ brise la symétrie de façon décisive.
+:::
+
+::: {.callout-important .encadre-retenirbox title="Ce que les probabilités apportent par rapport à la logique"}
+|  | **Logique (S2)** | **Probabilités (S5)** |
+| --- | --- | --- |
+| **Conclusion** | « Bouki en $(2,2)$ ou $(3,1)$ » | « Bouki en $(2,2)$ avec 88% » |
+| **Décision** | Explorer physiquement l'une des deux | Aller directement vers le trésor en évitant $(2,2)$ |
+| **Incertitude** | Bloquant — ne peut pas trancher | Graduée — exploitable pour la décision |
+| **Capteurs bruités** | Impossible à gérer | Modélisé par la vraisemblance |
+
+Cette différence est précisément ce qui motive les **MDPs** en Séance 6 : l'agent ne peut plus planifier un chemin optimal dans un espace d'états certains, il doit optimiser ses actions dans un espace d'états *probabilistes*.
+:::
+
+## Réseaux bayésiens : représenter un monde complexe
+
+Jusqu'ici, nous avons raisonné avec 2 ou 3 variables. Le monde réel est bien plus complexe : un diagnostic complet peut impliquer des dizaines de maladies et de symptômes.
+
+### Le problème de l'explosion combinatoire
+
+La distribution jointe complète de $n$ variables booléennes nécessite $2^n - 1$ paramètres. Regardons ce que cela donne concrètement :
+
+| **Variables** $n$ | **Paramètres** | **Comparaison** |
+| --- | --- | --- |
+| 5 | 31 | Gérable à la main |
+| 10 | 1\,023 | Difficile |
+| 20 | $\approx$ 1 million | Impraticable |
+| 30 | $\approx$ 1 milliard | Absurde |
+| 100 | $\approx 10^{30}$ | Plus que les grains de sable sur Terre |
+
+C'est la même **explosion combinatoire** que celle rencontrée en Séance 3 pour les espaces de recherche (un arbre de facteur de branchement $b$ et profondeur $d$ a $b^d$ feuilles). Là-bas, la solution était l'heuristique (A* exploite une estimation intelligente pour éviter d'explorer tout l'arbre). Ici, la solution sera d'exploiter les **indépendances conditionnelles**.
+
+### La clé : la plupart des variables ne sont pas directement liées
+
+Dans le monde réel, la plupart des variables ne s'influencent pas directement. Les frissons de Fatou sont liés à sa maladie. Le résultat du TDR est aussi lié à sa maladie. Mais les frissons ne sont pas *directement* liés au TDR -- ils sont liés *indirectement*, via la maladie. Si on connaissait la maladie avec certitude, savoir que Fatou a des frissons n'apporterait aucune information supplémentaire sur le résultat du TDR.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Indépendance conditionnelle"}
+$X$ et $Y$ sont **conditionnellement indépendants** sachant $Z$ (noté $X \perp Y \mid Z$) si :
+$$P(X, Y \mid Z) = P(X \mid Z) \cdot P(Y \mid Z)$$
+
+Autrement dit  : une fois qu'on connaît $Z$, savoir $X$ n'apporte rien de plus sur $Y$. Toute la dépendance entre $X$ et $Y$ « passe par » $Z$.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Indépendance conditionnelle dans le diagnostic"}
+**Avant** de connaître la maladie : les frissons et le TDR sont *dépendants*. Un TDR positif rend les frissons plus probables, parce que les deux pointent vers le paludisme.
+
+**Après** avoir appris que c'est le paludisme : les frissons et le TDR deviennent *indépendants*. On connaît déjà la cause, donc le TDR ne nous apprend plus rien sur les frissons. Chaque symptôme est une conséquence directe de la maladie, pas des autres symptômes.
+
+C'est la maladie qui « crée » la dépendance apparente entre les symptômes. Une fois la cause connue, les effets sont indépendants.
+:::
+
+### Définition d'un réseau bayésien
+
+Un réseau bayésien exploite systématiquement les indépendances conditionnelles pour représenter la distribution jointe de manière compacte.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Réseau bayésien"}
+Un **réseau bayésien** est un couple $(\mathcal{G}, \Theta)$ :
+
+1. $\mathcal{G}$ est un **graphe orienté acyclique** (DAG, pour *Directed Acyclic Graph*). Chaque nœud est une variable aléatoire. Un arc $X \to Y$ signifie que $X$ **influence directement** $Y$ ($X$ est un *parent* de $Y$).
+2. $\Theta$ est un ensemble de **tables de probabilités conditionnelles** (CPT, pour *Conditional Probability Table*). Chaque nœud $X_i$ a une table $P(X_i \mid \text{Parents}(X_i))$ donnant sa distribution conditionnellement à ses parents.
+
+**Propriété fondamentale :** la distribution jointe complète se reconstruit par le produit :
+$$P(X_1, X_2, \ldots, X_n) = \prod_{i=1}^{n} P(X_i \mid \text{Parents}(X_i))$$
+
+Autrement dit  : chaque variable ne dépend que de ses parents directs dans le graphe. Cette factorisation réduit considérablement le nombre de paramètres.
+:::
+
+::: {#fig-bayesnet}
+{{< svg ../figures/s05-fig08_reseau_bayesien.svg alt="Réseau bayésien pour le diagnostic. Les arcs = influences directes. Sachant la Maladie, Frissons, Température et TDR sont conditionnellement indépendants entre eux." >}}
+
+Réseau bayésien pour le diagnostic. Les arcs = influences directes. Sachant la Maladie, Frissons, Température et TDR sont conditionnellement indépendants entre eux.
+:::
+
+**Comptons les paramètres.** Pour ce réseau à 5 variables (supposées binaires) :
+
+Distribution jointe brute : $2^5 - 1 = \textbf{31}$ paramètres.
+
+Réseau bayésien : $P(\text{Saison})$ : 1 + $P(\text{Moustiques})$ : 1 + $P(\text{Maladie} \mid \text{S, Mo})$ : 4 + $P(\text{Fr} \mid \text{M})$ : 2 + $P(\text{T} \mid \text{M})$ : 2 + $P(\text{TDR} \mid \text{M})$ : 2 = **12** paramètres.
+
+Le gain s'amplifie avec la taille : avec 1 maladie (3 valeurs) et 30 symptômes binaires, la jointe brute nécessiterait $3 \times 2^{30} - 1 \approx 3$ milliards de paramètres. Le réseau bayésien n'en demande que $2 + 30 \times 2 = 62$.
+
+## Structures canoniques et d-séparation
+
+La structure du graphe encode des propriétés profondes sur la façon dont l'information circule dans le réseau. Trois motifs de base suffisent à tout expliquer — la figure @fig-structures les présente côte à côte.
+
+::: {#fig-structures}
+{{< svg ../figures/s05-fig06_structures_canoniques.svg alt="Les trois structures canoniques de la d-séparation. Chaîne et cause commune : observer le nœud central bloque le flux. V-structure : observer l'enfant ouvre un flux (explaining away)." >}}
+
+Les trois structures canoniques de la d-séparation. Chaîne et cause commune : observer le nœud central **bloque** le flux. V-structure : observer l'enfant **ouvre** un flux (explaining away).
+:::
+
+### La chaîne : $A \to B \to C$
+
+**Règle :** $A \perp C \mid B$. Si on connaît $B$, alors $A$ et $C$ sont indépendants.
+
+*Intuition :* Si on *sait* que Fatou a le paludisme, la saison n'apporte plus d'information sur ses frissons. La maladie « absorbe » toute l'information utile. $B$ **bloque** le flux d'information entre $A$ et $C$.
+
+*Sans connaître $B$ :* $A$ et $C$ sont dépendants (saison des pluies $\to$ plus de paludisme $\to$ plus de frissons).
+
+### La cause commune : $A \leftarrow B \to C$
+
+**Règle :** $A \perp C \mid B$ (même règle que la chaîne). Si on connaît la cause commune, les effets deviennent indépendants.
+
+*Intuition :* Si on connaît la maladie de Fatou, le résultat du TDR ne nous dit plus rien sur ses frissons. Chaque effet est une conséquence indépendante de la même cause.
+
+### La v-structure (effet commun) : $A \to B \leftarrow C$
+
+**Règle :** $A \perp C$ (marginalement indépendants) **MAIS** $A \not\perp C \mid B$ (dépendants conditionnellement). C'est **l'inverse** des deux cas précédents.
+
+*Intuition :* La saison et la densité de moustiques n'ont pas de lien direct a priori. Mais si on apprend que Fatou a le paludisme ($B$ observé), alors les deux causes deviennent « en compétition » : si c'est la saison sèche (peu propice au paludisme), il *faut* qu'il y ait beaucoup de moustiques pour expliquer le diagnostic. Connaître l'effet « active » une dépendance entre les causes.
+
+Ce phénomène s'appelle **explaining away** (explication concurrente) et c'est l'une des formes de raisonnement les plus subtiles capturées par les réseaux bayésiens.
+
+::: {.callout-warning .encadre-attentionbox title="Résumé des trois structures"}
+| **Structure** | **Sans observer $B$** | **En observant $B$** |
+| --- | --- | --- |
+| Chaîne $A \to B \to C$ | $A, C$ dépendants | $A \perp C \mid B$ (bloque) |
+| Cause commune $A \leftarrow B \to C$ | $A, C$ dépendants | $A \perp C \mid B$ (bloque) |
+| V-structure $A \to B \leftarrow C$ | $A \perp C$ | $A, C$ dépendants (ouvre) |
+
+Les deux premières structures se comportent de la même façon : observer le nœud central **bloque** le flux d'information. La v-structure est le cas surprenant : observer le nœud central **ouvre** un flux qui n'existait pas.
+:::
+
+## Inférence dans les réseaux bayésiens
+
+Construire un réseau est la première étape. L'exploiter pour répondre à des questions -- « sachant ces observations, que croire sur les variables cachées ? » -- c'est l'**inférence**.
+
+### Inférence par énumération
+
+La méthode la plus directe : écrire la jointe comme produit des CPTs, fixer les observations, sommer sur les variables cachées, normaliser.
+
+::: {.callout-tip .encadre-recipebox title="Recette -- Inférence par énumération"}
+Pour calculer $P(X \mid \mathbf{e})$ où $\mathbf{e}$ sont les observations :
+
+1. Écrire la jointe : $P(X_1, \ldots, X_n) = \prod_i P(X_i \mid \text{Parents}(X_i))$
+2. Fixer les variables observées à leurs valeurs connues
+3. Pour chaque valeur de $X$ : sommer le produit sur toutes les combinaisons des variables cachées
+4. Normaliser pour que la somme fasse 1
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Inférence par énumération -- réseau simplifié"}
+Calculons $P(M \mid Fr = \text{vrai}, TDR = \text{positif})$ dans le réseau $Fr \leftarrow M \to TDR$.
+
+La jointe se factorise : $P(M, Fr, TDR) = P(M) \cdot P(Fr \mid M) \cdot P(TDR \mid M)$
+
+On évalue avec $Fr = \text{vrai}$ et $TDR = \text{positif}$, pour chaque valeur de $M$ :
+
+$$
+\begin{aligned}
+P(\text{palu}, \text{vrai}, +) &= 0{,}40 \times 0{,}80 \times 0{,}95 = \textbf{0,304} \\
+P(\text{grippe}, \text{vrai}, +) &= 0{,}35 \times 0{,}30 \times 0{,}10 = \textbf{0,0105} \\
+P(\text{autre}, \text{vrai}, +) &= 0{,}25 \times 0{,}10 \times 0{,}10 = \textbf{0,0025}
+\end{aligned}
+$$
+
+Normalisation : $\alpha = 1/(0{,}304 + 0{,}0105 + 0{,}0025) = 1/0{,}317$
+
+$P(\text{palu} \mid Fr, TDR^+) = 0{,}304/0{,}317 \approx \textbf{0,959}$   (95,9%)
+:::
+
+### Élimination de variables : exploiter la structure
+
+L'énumération est exacte mais coûteuse : avec $n$ variables cachées binaires, elle calcule $2^n$ termes. L'**élimination de variables** factorise la sommation en éliminant les variables une par une, dans un ordre intelligent. Le coût dépend alors de la **largeur d'arbre** du réseau (une mesure de sa « complexité structurelle »), pas du nombre total de variables.
+
+C'est le même type d'optimisation que celle de A* par rapport à BFS en Séance 3 : exploiter la **structure** du problème pour éviter le calcul brut.
+
+### Inférence approchée : l'échantillonnage
+
+Pour les très grands réseaux (centaines de variables), même l'élimination de variables peut être coûteuse. L'alternative est l'**échantillonnage** (sampling) : simuler le réseau un grand nombre de fois et estimer les probabilités par les fréquences observées.
+
+::: {.callout-tip .encadre-exemplebox title="Principe de l'échantillonnage"}
+Au lieu de calculer $P(\text{palu} \mid Fr, TDR^+)$ exactement, on simule 10\,000 patients virtuels :
+
+1. Tirer une maladie aléatoirement selon $P(M)$
+2. Tirer des frissons selon $P(Fr \mid M)$
+3. Tirer un résultat de TDR selon $P(TDR \mid M)$
+4. Ne garder que les patients simulés avec $Fr = \text{vrai}$ ET $TDR = +$
+5. Compter la proportion de ces patients qui ont $M = \text{palu}$
+
+Avec suffisamment d'échantillons, cette proportion converge vers la vraie probabilité par la loi des grands nombres. Des variantes plus efficaces (likelihood weighting, MCMC) sont utilisées en pratique et seront évoquées au S2.
+:::
+
+## Synthèse : le grand tableau du cours
+
+### Ce que cette séance apporte au parcours
+
+| **Séance** | **Type de monde** | **Outil principal** | **Ce que ça prépare pour le ML** |
+| --- | --- | --- | --- |
+| S2 (Logique) | Certain, complet | Inférence logique | Représentation des connaissances |
+| S3 (Recherche) | Déterministe, observable | BFS, DFS, A* | Optimisation, exploration |
+| **S5 (Probas)** | **Stochastique, partiel** | **Bayes, réseaux** | **Fondement du ML probabiliste** |
+| S6 (MDPs) | Stochastique, séquentiel | Bellman, Q-learning | Apprentissage par renforcement |
+
+### Le classificateur Naive Bayes -- votre premier modèle de ML
+
+Le classificateur Naive Bayes est l'application la plus directe du théorème de Bayes en Machine Learning. Son principe est *exactement* celui de notre diagnostic médical :
+
+$$P(\text{classe} \mid \text{observations}) \propto P(\text{classe}) \times \prod_{i} P(\text{observation}_i \mid \text{classe})$$
+
+::: {.callout-tip .encadre-exemplebox title="Naive Bayes pour le filtrage de spam"}
+Un email contient les mots « gratuit », « offre », « cliquez ». Est-il du spam ?
+
+| **Mot** | $P(\text{mot} \mid \text{spam})$ | $P(\text{mot} \mid \text{légitime})$ |
+| --- | --- | --- |
+| gratuit | 0,80 | 0,05 |
+| offre | 0,60 | 0,10 |
+| cliquez | 0,70 | 0,08 |
+
+Avec $P(\text{spam}) = 0{,}30$ :
+
+$$
+\begin{aligned}
+P(\text{spam} \mid \text{mots}) &\propto 0{,}30 \times 0{,}80 \times 0{,}60 \times 0{,}70 = 0{,}1008 \\
+P(\text{légitime} \mid \text{mots}) &\propto 0{,}70 \times 0{,}05 \times 0{,}10 \times 0{,}08 = 0{,}000028
+\end{aligned}
+$$
+
+Après normalisation : $P(\text{spam}) \approx 99{,}97\%$. L'email est très probablement du spam.
+
+**Lien avec le ML (S2) :** La seule différence avec notre diagnostic est la *source* des vraisemblances. Ici, nous les avons données. En ML, elles seront **estimées automatiquement** à partir d'un corpus d'emails étiquetés « spam » ou « légitime ».
+:::
+
+### Le pont vers le Machine Learning
+
+Cette séance a supposé que le modèle est donné par un expert : Dr. Ndoye connaît les priors et les vraisemblances. Mais d'où viennent-ils en général ? **Le Machine Learning répond à cette question** : apprendre les paramètres du modèle automatiquement à partir de données.
+
+|  | **Cette séance (S5)** | **Machine Learning (S2, semestre 2)** |
+| --- | --- | --- |
+| **Modèle** | Donné par l'expert humain | **Appris** à partir de données |
+| **Prior** | Fixé (ex: 40% paludisme) | Estimé sur les données d'entraînement |
+| **Vraisemblances** | Connues (ex: 80% frissons) | Estimées par comptage ou optimisation |
+| **Inférence** | Calculer $P(H \mid E)$ | Prédire la classe d'un nouvel exemple |
+
+Quand vous étudierez la régression logistique, les réseaux de neurones, ou les modèles génératifs au S2, vous utiliserez les concepts de cette séance -- vraisemblance, posterior, mise à jour bayésienne -- mais appliqués à des modèles appris automatiquement à partir de données massives.
+
+### Points clés à retenir
+
+::: {.callout-important .encadre-retenirbox title="Les 10 points essentiels de la séance"}
+1. **L'incertitude est inévitable.** Le monde réel est partiellement observable et stochastique (S1). La logique (S2) et la recherche (S3) ne suffisent pas. Les probabilités sont le langage adapté.
+2. **Distribution jointe = toute l'information.** $P(X_1, \ldots, X_n)$ contient tout. La marginalisation permet d'en extraire ce dont on a besoin en « sommant » les variables non pertinentes.
+3. **Probabilité conditionnelle = zoom.** $P(A \mid B) = P(A,B)/P(B)$ -- on filtre et on renormalise.
+4. **$P(A \mid B) \neq P(B \mid A)$.** Ne jamais confondre ces deux quantités. L'erreur du procureur est omniprésente.
+5. **Bayes = Posterior $\propto$ Vraisemblance $\times$ Prior.** La formule pour inverser le raisonnement : passer des effets aux causes.
+6. **Prior = probabilité non conditionnelle.** $P(H)$ est la croyance *avant* l'observation -- une *unconditional probability*. Le prior n'est pas une opinion arbitraire : c'est la synthèse d'une population de référence. Même preuve + contexte différent $=$ prior différent $=$ conclusion différente (Dakar vs Paris).
+7. **Mise à jour séquentielle.** Le posterior d'hier est le prior d'aujourd'hui. Les preuves convergentes renforcent, les preuves contradictoires affaiblissent.
+8. **Réseaux bayésiens = compacité via les indépendances.** DAG + CPTs réduisent exponentiellement le nombre de paramètres.
+9. **Trois structures canoniques.** Chaîne et cause commune : observer bloque. V-structure : observer ouvre (explaining away).
+10. **Vers le ML.** Bayes avec modèle expert $=$ cette séance. Bayes avec modèle appris $=$ Machine Learning. C'est le pont fondamental.
+:::
+
+### Fil conducteur du cours
+
+| **Séance** | **Question** | **Réponse** |  |
+| --- | --- | --- | --- |
+| 1 | Qu'est-ce que l'IA ? | Agents rationnels, PEAS, environnements | ✓ |
+| 2 | Comment raisonner ? | Logique propositionnelle et du 1er ordre | ✓ |
+| 3 | Comment chercher ? | BFS, DFS, UCS, A*, recherche locale | ✓ |
+| **5** | **Comment gérer l'incertitude ?** | **Probabilités, Bayes, réseaux bayésiens** | $\leftarrow$ |
+| 6 | Pourquoi apprendre ? | MDPs, intro ML |  |
+
+### Vers la Séance 6 : l'IA qui apprend
+
+Deux grandes questions restent ouvertes.
+
+**Question 1 : comment *agir* sous incertitude ?** Le théorème de Bayes donne des croyances, pas des décisions. Il nous dit que Fatou a 99% de probabilité d'avoir le paludisme. Mais faut-il prescrire un traitement immédiatement ou attendre un test sanguin complet ? Et si le traitement a des effets secondaires ? Et si l'attente est risquée ? Les **Processus de Décision Markoviens** (MDPs) formalisent la prise de décision séquentielle sous incertitude. Ils combinent la recherche de S3 (planifier une séquence d'actions) avec les transitions probabilistes de S5 (le résultat de chaque action est incertain).
+
+**Question 2 : d'où vient le modèle ?** Nous avons supposé que Dr. Ndoye connaissait les priors et les vraisemblances. Et si on pouvait les **apprendre automatiquement** à partir de milliers de dossiers médicaux ? C'est exactement le **Machine Learning**, sujet principal du cours du semestre 2 et aboutissement de toute la progression de ce cours d'introduction.
+
+## Références
+
+- Russell, S., & Norvig, P. (2020). *Artificial Intelligence: A Modern Approach* (4^e^ éd.). Pearson. -- Chapitres 12 à 14.
+- Murphy, K. P. (2022). *Probabilistic Machine Learning: An Introduction*. MIT Press. -- Chapitres 2 à 4. Disponible librement à `probml.github.io`.
+- Pearl, J. (1988). *Probabilistic Reasoning in Intelligent Systems*. Morgan Kaufmann.
+- Klein, D., & Abbeel, P. *CS188: Introduction to Artificial Intelligence* (UC Berkeley). -- Séances 12--14.
