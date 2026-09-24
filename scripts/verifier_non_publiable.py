@@ -34,6 +34,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import tomllib
 import sys
 import unicodedata
 from pathlib import Path
@@ -74,6 +75,12 @@ RESERVES_MOTS = {
 TERMES_INTERDITS = {
     "GLSI": "sigle de filière, retiré à la demande du PO : « L3 GLSI » devient « L3 »",
 }
+
+# Au-delà de cette taille, un fichier suivi par Git doit être une ressource déclarée au manifeste.
+# Un manuel sous copyright de 5,2 Mo dormait dans `_import/` : il n'a jamais été commité, mais rien
+# ne l'en empêchait, et un dépôt public garde ce qu'on y met. Le plus gros fichier légitime du
+# dépôt — une figure matplotlib du cours de ML — pèse 1,71 Mo (US-66).
+TAILLE_MAXIMALE = 2 * 1024 * 1024
 
 # Où un document publié peut apparaître : le fichier lui-même, ou un lien qui y mène.
 EXTENSIONS_TEXTE = {".html", ".xml", ".json", ".txt"}
@@ -118,6 +125,47 @@ def fichiers_publies(racine: Path) -> list[tuple[Path, str]]:
         raison = reserve(fichier.name)
         if raison:
             trouves.append((fichier, raison))
+    return trouves
+
+
+def ressources_declarees() -> set[str]:
+    """Noms des fichiers déclarés comme ressources, par le manifeste ou la fiche d'un cours."""
+    racine = Path(__file__).resolve().parent.parent
+    declares: set[str] = set()
+    for manifeste in sorted((racine / "cours").glob("*/_sources/import.toml")):
+        charge = tomllib.loads(manifeste.read_text(encoding="utf-8"))
+        declares |= {Path(r["fichier"]).name for c in charge.get("chapitres", [])
+                     for r in c.get("ressources", []) if "fichier" in r}
+    for fiche in sorted((racine / "cours").glob("*/cours.yml")):
+        declares |= {Path(n).name
+                     for n in re.findall(r'fichier:\s*"([^"]+)"', fiche.read_text(encoding="utf-8"))}
+    return declares
+
+
+def fichiers_trop_lourds() -> list[tuple[Path, str]]:
+    """Un gros fichier suivi par Git doit être une ressource déclarée, et rien d'autre.
+
+    Le poids seul ne dit pas si un fichier a sa place ici ; la déclaration, si. Une ressource de
+    cours est annoncée au manifeste, relue et servie. Tout le reste — un manuel scanné, une archive,
+    une vidéo déposée par mégarde — n'a aucune raison de peser deux mégaoctets dans un dépôt public.
+    """
+    racine = Path(__file__).resolve().parent.parent
+    try:
+        liste = subprocess.run(["git", "-C", str(racine), "ls-files", "-z"],
+                               capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    declares = ressources_declarees()
+    trouves = []
+    for nom in sorted(filter(None, liste.split("\0"))):
+        fichier = racine / nom
+        if not fichier.is_file() or fichier.name in declares:
+            continue
+        taille = fichier.stat().st_size
+        if taille > TAILLE_MAXIMALE:
+            trouves.append((Path(nom), f"{round(taille / 1048576, 1)} Mo, et déclaré nulle part : "
+                                       "au-delà de 2 Mo, seul un fichier annoncé au manifeste "
+                                       "d'un cours a sa place dans le dépôt"))
     return trouves
 
 
@@ -195,6 +243,9 @@ def main() -> int:
     for fichier, raison in fichiers_du_depot():
         signaler(fichier, f"document réservé versionné : {raison}")
         fautes += 1
+    for fichier, raison in fichiers_trop_lourds():
+        signaler(fichier, f"fichier volumineux non déclaré : {raison}")
+        fautes += 1
     for fichier, raison in fichiers_publies(racine):
         signaler(fichier, f"document réservé publié : {raison}")
         fautes += 1
@@ -212,8 +263,9 @@ def main() -> int:
               "est rejoué.")
         return 1
     print(f"OK : rien de non publiable dans le dépôt ni dans {racine}/ "
-          f"({len(RESERVES) + len(RESERVES_MOTS)} nom(s) de document "
-          f"et {len(TERMES_INTERDITS)} terme(s) surveillés).")
+          f"({len(RESERVES) + len(RESERVES_MOTS)} nom(s) de document, "
+          f"{len(TERMES_INTERDITS)} terme(s) surveillés, "
+          f"et aucun fichier non déclaré au-delà de 2 Mo).")
     return 0
 
 
