@@ -39,6 +39,22 @@ function presentations(dossier) {
   return trouvees.sort();
 }
 
+// Reveal ne charge une image qu'au moment où sa slide paraît : jusque-là, l'adresse est rangée
+// dans `data-src` et l'image mesure zéro. La mesure ci-dessous affiche les slides sans les
+// parcourir, donc sans déclencher ce chargement — une slide dont l'image pèse deux cents unités
+// passait pour vide. C'est le défaut qui a rendu invisibles les deux figures matricielles de la
+// séance 6 du cours de ML, et que ce contrôle avait déclarée bonne. On charge donc tout avant de
+// mesurer, et on attend que le navigateur ait vraiment les pixels.
+async function chargerLesImages() {
+  const images = [...document.querySelectorAll("img[data-src]")];
+  images.forEach((image) => {
+    image.src = image.getAttribute("data-src");
+    image.removeAttribute("data-src");
+  });
+  await Promise.all([...document.images].map((image) =>
+    image.complete ? Promise.resolve() : image.decode().catch(() => {})));
+}
+
 // Mesure exécutée dans la page : chaque slide est affichée le temps d'être mesurée, puis remise
 // comme elle était. Invisible pour qui regarde, et sans effet sur le fichier rendu.
 function mesurer(battement) {
@@ -48,14 +64,27 @@ function mesurer(battement) {
   [...cadre.querySelectorAll(":scope > section")].forEach((section, index) => {
     const empilees = section.querySelectorAll(":scope > section");
     const cibles = empilees.length ? [...empilees] : [section];
+    // Une slide empilée vit dans une section que reveal cache : lui rendre `display: block` ne
+    // suffit pas, un ancêtre en `display: none` met toute la descendance à zéro. C'est ce qui
+    // faisait mesurer **63 slides sur 67** à zéro dans la séance 6 du cours de ML : le contrôle
+    // ne voyait vraiment que les quatre slides affichées, et déclarait le reste conforme.
+    const affichageParent = section.style.display;
+    const visibiliteParent = section.style.visibility;
+    if (empilees.length) {
+      section.style.display = "block";
+      section.style.visibility = "hidden";
+    }
     cibles.forEach((slide) => {
       const affichage = slide.style.display;
       const visibilite = slide.style.visibility;
       slide.style.display = "block";
       slide.style.visibility = "hidden";
       // Le contenu peut dépasser sans que la section grandisse : on regarde aussi ses enfants.
+      // La **position** de l'enfant compte autant que sa hauteur : une figure de deux cents
+      // unités placée à cinq cents dépasse, alors que ni l'une ni l'autre mesure ne le dit.
       const mesure = Math.max(slide.scrollHeight,
-        ...[...slide.children].map((enfant) => enfant.scrollHeight || 0));
+        ...[...slide.children].map((enfant) => enfant.scrollHeight || 0),
+        ...[...slide.children].map((enfant) => enfant.offsetTop + enfant.offsetHeight || 0));
       slide.style.display = affichage;
       slide.style.visibility = visibilite;
       if (mesure > hauteur + battement) {
@@ -67,6 +96,8 @@ function mesurer(battement) {
         });
       }
     });
+    section.style.display = affichageParent;
+    section.style.visibility = visibiliteParent;
   });
   return { trop, hauteur, slides: cadre.querySelectorAll("section").length };
 }
@@ -93,6 +124,7 @@ async function main() {
     const adresse = "/" + path.relative(path.resolve(dossier), fichier).split(path.sep).join("/");
     await page.goto(`${site.adresse}${adresse}`, { waitUntil: "networkidle" });
     await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(chargerLesImages);
     await page.waitForTimeout(700);
     const resultat = await page.evaluate(mesurer, BATTEMENT);
     slides += resultat.slides;

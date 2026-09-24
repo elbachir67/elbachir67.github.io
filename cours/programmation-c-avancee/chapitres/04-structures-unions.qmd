@@ -1,0 +1,471 @@
+---
+title: "Structures et unions"
+cible: "page"
+body-classes: cours-page
+numero: "3"
+ressources:
+  - type: "pdf"
+    titre: "Le chapitre en PDF"
+    fichier: "ressources/cm-structures-unions.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/cm-structures-unions.pdf"
+  - type: "td"
+    titre: "TD — Structures et unions"
+    fichier: "ressources/td-structures-unions.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/td-structures-unions.pdf"
+  - type: "tp"
+    titre: "TP — Structures et unions"
+    fichier: "ressources/tp-structures-unions.pdf"
+    chemin: "/cours/programmation-c-avancee/ressources/tp-structures-unions.pdf"
+description: "Chapitre 3 de Programmation C avancée : structures, alignement et padding, unions, champs de bits et membres de tableau flexibles."
+author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+## Structures
+
+### Déclaration et Définition
+
+Une structure est un type composé regroupant des variables de types différents sous un même nom. La déclaration définit le layout mémoire.
+
+```c
+// Déclaration de structure
+struct Point {
+    int x;
+    int y;
+};
+
+// Définition de variable
+struct Point p1;
+
+// Déclaration + définition simultanée
+struct Point p2 = {10, 20};
+```
+
+::: {.callout-note .encadre-definitionbox title="Syntaxe de déclaration"}
+```c
+struct nom_structure {
+    type1 membre1;
+    type2 membre2;
+    // ...
+};
+```
+
+La structure crée un nouveau type. Chaque membre a un offset fixe par rapport au début de la structure.
+:::
+
+### Initialisation
+
+```c
+// Initialisation positionnelle
+struct Point p1 = {10, 20};
+
+// Initialisation désignée (C99)
+struct Point p2 = {.y = 20, .x = 10};
+
+// Initialisation partielle (membres restants à 0)
+struct Point p3 = {.x = 5};  // y = 0
+
+// Initialisation composée (compound literal, C99)
+struct Point p4 = (struct Point){100, 200};
+```
+
+::: {.callout-important .encadre-techbox title="Initialisation désignée (C99)"}
+Les designated initializers permettent d'initialiser les membres dans n'importe quel ordre et de n'initialiser qu'un sous-ensemble. Les membres non spécifiés sont initialisés à zéro.
+:::
+
+### Accès aux Membres
+
+```c
+struct Point p = {10, 20};
+struct Point *ptr = &p;
+
+// Accès direct (opérateur .)
+int a = p.x;       // a = 10
+
+// Accès via pointeur (opérateur ->)
+int b = ptr->y;    // b = 20
+
+// Équivalence: ptr->membre == (*ptr).membre
+int c = (*ptr).x;  // c = 10
+```
+
+{{< svg ../figures/04-structures-unions-01.svg alt="0x1000 (ptr) mène à x: 10 (0x1000, struct Point p, p.x) ; s'y ajoutent, y: 20 (0x1004, p.y ou ptr->y)." >}}
+
+### typedef
+
+```c
+// Sans typedef
+struct Point {
+    int x, y;
+};
+struct Point p1;  // mot-clé struct requis
+
+// Avec typedef
+typedef struct {
+    int x, y;
+} Point;
+Point p2;  // plus besoin de struct
+
+// typedef avec nom de structure (pour auto-référence)
+typedef struct Node {
+    int data;
+    struct Node *next;  // auto-référence
+} Node;
+```
+
+## Alignement et Padding
+
+### Règles d'Alignement
+
+Les processeurs modernes imposent des contraintes d'alignement pour des raisons de performance. Un type de taille $n$ octets doit généralement être aligné sur une adresse multiple de $n$.
+
+::: {.callout-note .encadre-definitionbox title="Contraintes d'alignement (x86-64)"}
+| **Type** | **Taille (octets)** | **Alignement** |
+| --- | --- | --- |
+| `char` | 1 | 1 |
+| `short` | 2 | 2 |
+| `int` | 4 | 4 |
+| `long` | 8 | 8 |
+| `float` | 4 | 4 |
+| `double` | 8 | 8 |
+| `pointeur` | 8 | 8 |
+
+L'alignement d'une structure est celui de son membre le plus contraignant.
+:::
+
+### Calcul du Padding
+
+Le compilateur insère des octets de padding pour respecter l'alignement de chaque membre.
+
+```c
+struct S1 {
+    char a;     // offset 0, size 1
+    int b;      // offset 4 (padding: 3), size 4
+    char c;     // offset 8, size 1
+};              // taille totale: 12 (padding final: 3)
+```
+
+{{< svg ../figures/04-structures-unions-02.svg alt="Disposition en mémoire de struct S1, 12 octets : a, puis 3 octets de padding, b sur 4 octets, c, puis 3 octets de padding." >}}
+
+### Optimisation par Réorganisation
+
+Réorganiser les membres par taille décroissante minimise le padding.
+
+```c
+// Structure non optimisée: 24 octets
+struct Bad {
+    char a;     // 1 + 7 padding
+    double b;   // 8
+    char c;     // 1 + 7 padding
+};
+
+// Structure optimisée: 16 octets
+struct Good {
+    double b;   // 8
+    char a;     // 1
+    char c;     // 1 + 6 padding
+};
+```
+
+{{< svg ../figures/04-structures-unions-03.svg alt="Le schéma porte struct Bad (24 octets), a, c, struct Good (16 octets), a et c ; une suite de 21 cases s'y répète." >}}
+
+### Représentation Hexadécimale
+
+::: {.callout-tip .encadre-examplebox title="Analyse forensique d'une structure"}
+```c
+struct Data {
+    char tag;       // offset 0
+    int value;      // offset 4
+    short flags;    // offset 8
+};
+struct Data d = {'A', 0x12345678, 0xABCD};
+```
+
+Dump mémoire (little-endian, adresse 0x1000):
+
+```
+0x1000: 41 00 00 00 78 56 34 12 CD AB 00 00
+        ^  ^--padding  ^--value     ^--flags ^--padding
+        tag
+```
+:::
+
+{{< svg ../figures/04-structures-unions-04.svg alt="Les 12 octets de struct Data en mémoire : 41 00 00 00, puis 78 56 34 12, puis CD AB 00 00." >}}
+
+## Structures Imbriquées
+
+```c
+struct Point {
+    int x, y;
+};
+
+struct Rectangle {
+    struct Point top_left;
+    struct Point bottom_right;
+    char color;
+};
+
+struct Rectangle r = {{0, 0}, {100, 50}, 'R'};
+
+// Accès
+int x1 = r.top_left.x;
+int y2 = r.bottom_right.y;
+```
+
+{{< svg ../figures/04-structures-unions-05.svg alt="Le schéma porte struct Rectangle (20 octets), top_left.x (+0, 4 octets), top_left.y (+4, 4 octets), bottom_right.x (+8, 4 octets), bottom_right.y (+12, 4 octets) et color + padding (+16, 1+3 octets)." >}}
+
+### Tableaux de Structures
+
+```c
+struct Point points[3] = {{0,0}, {10,20}, {30,40}};
+
+// Accès
+int x1 = points[1].x;     // 10
+int y2 = points[2].y;     // 40
+
+// Via pointeur
+struct Point *p = points;
+int x0 = p->x;            // 0
+int x1 = (p+1)->x;        // 10
+```
+
+{{< svg ../figures/04-structures-unions-06.svg alt="Le tableau points[3] en mémoire : points[0] vaut (0, 0), points[1] (10, 20) et points[2] (30, 40), rangés à la suite." >}}
+
+## Unions
+
+### Définition et Caractéristiques
+
+Une union est un type composé où tous les membres partagent la même zone mémoire. La taille de l'union est celle de son plus grand membre.
+
+```c
+union Data {
+    int i;
+    float f;
+    char c[4];
+};
+
+union Data d;
+d.i = 0x41424344;
+printf("%c%c%c%c\n", d.c[0], d.c[1], d.c[2], d.c[3]);
+// Affiche: DCBA (little-endian)
+```
+
+{{< svg ../figures/04-structures-unions-07.svg alt="Le schéma porte union Data (4 octets), 44 (c[0]='D'), 43 (c[1]='C'), 42 (c[2]='B') et 41 (c[3]='A')." >}}
+
+::: {.callout-warning .encadre-warningbox title="Type Punning"}
+Accéder à un membre différent de celui qui a été écrit en dernier constitue du type punning. Le comportement est défini en C (contrairement à C++) mais peut produire des résultats dépendants de l'architecture (endianness).
+:::
+
+### Tagged Union (Union Discriminée)
+
+Pattern pour utiliser les unions de manière sûre: associer un tag indiquant le type actif.
+
+```c
+typedef enum { INT_TYPE, FLOAT_TYPE, STRING_TYPE } DataType;
+
+typedef struct {
+    DataType type;  // discriminant
+    union {
+        int i;
+        float f;
+        char *s;
+    } value;
+} Variant;
+
+void print_variant(Variant *v) {
+    switch (v->type) {
+        case INT_TYPE:   printf("%d\n", v->value.i); break;
+        case FLOAT_TYPE: printf("%f\n", v->value.f); break;
+        case STRING_TYPE: printf("%s\n", v->value.s); break;
+    }
+}
+```
+
+{{< svg ../figures/04-structures-unions-08.svg alt="Variant (16 octets), type (4) (enum: 0, 1, ou 2), padding (4) et value (8) (int / float / char*)." >}}
+
+### Cas d'Usage des Unions
+
+::: {.callout-important .encadre-techbox title="Applications typiques"}
+- **Type punning**: conversion entre représentations (int $\leftrightarrow$ float)
+- **Économie mémoire**: stocker des données alternatives
+- **Protocoles réseau**: interpréter des paquets selon le type
+- **Registres hardware**: accéder à des champs de bits
+- **Variants**: implémenter des types polymorphes
+:::
+
+## Champs de Bits (Bit Fields)
+
+Les bit fields permettent de définir des membres de structure occupant un nombre spécifique de bits.
+
+```c
+struct Flags {
+    unsigned int active : 1;    // 1 bit
+    unsigned int mode : 3;      // 3 bits (0-7)
+    unsigned int priority : 4;  // 4 bits (0-15)
+};
+
+struct Flags f = {1, 5, 12};
+// Layout possible: [priority:4][mode:3][active:1] = 0xC5
+```
+
+{{< svg ../figures/04-structures-unions-09.svg alt="Représentation en bits : 1 1 0 0 1 0 1 1." >}}
+
+::: {.callout-warning .encadre-warningbox title="Portabilité des Bit Fields"}
+L'ordre des bits, l'alignement, et le packing des bit fields sont définis par l'implémentation. Le code utilisant des bit fields pour des protocoles réseau ou des formats de fichiers n'est pas portable. Préférer les masques et décalages explicites pour le code portable.
+:::
+
+## Structures et Allocation Dynamique
+
+### Allocation de Structures
+
+```c
+#include <stdlib.h>
+
+struct Point {
+    int x, y;
+};
+
+// Allocation d'une structure
+struct Point *p = malloc(sizeof(struct Point));
+if (p == NULL) { /* erreur */ }
+p->x = 10;
+p->y = 20;
+free(p);
+
+// Allocation d'un tableau de structures
+struct Point *points = malloc(5 * sizeof(struct Point));
+for (int i = 0; i < 5; i++) {
+    points[i].x = i;
+    points[i].y = i * 2;
+}
+free(points);
+```
+
+{{< svg ../figures/04-structures-unions-10.svg alt="p: 0x2000 mène à x: 10 ; s'y ajoutent, Stack, Heap (0x2000) et y: 20." >}}
+
+### Structures avec Membres Dynamiques
+
+```c
+typedef struct {
+    char *name;
+    int *data;
+    size_t size;
+} Container;
+
+Container *create_container(const char *name, size_t n) {
+    Container *c = malloc(sizeof(Container));
+    if (!c) return NULL;
+    
+    c->name = strdup(name);  // allocation pour name
+    c->data = malloc(n * sizeof(int));
+    c->size = n;
+    
+    if (!c->name || !c->data) {
+        free(c->name);
+        free(c->data);
+        free(c);
+        return NULL;
+    }
+    return c;
+}
+
+void destroy_container(Container *c) {
+    if (c) {
+        free(c->name);  // libérer les membres d'abord
+        free(c->data);
+        free(c);        // puis la structure
+    }
+}
+```
+
+{{< svg ../figures/04-structures-unions-11.svg alt="Une structure Container sur le tas : size vaut 4, name pointe vers la chaîne "test", et data vers un tableau de quatre cases, de [0] à [3]." >}}
+
+### Flexible Array Member (C99)
+
+```c
+// Membre tableau flexible (doit être le dernier)
+typedef struct {
+    size_t length;
+    int data[];  // flexible array member
+} FlexArray;
+
+// Allocation
+FlexArray *create(size_t n) {
+    FlexArray *arr = malloc(sizeof(FlexArray) + n * sizeof(int));
+    arr->length = n;
+    return arr;
+}
+
+FlexArray *a = create(10);
+a->data[0] = 42;  // accès direct
+```
+
+{{< svg ../figures/04-structures-unions-12.svg alt="FlexArray avec n=4, length: 4, [0], [1], [2] et [3]." >}}
+
+## Structures Opaques et Encapsulation
+
+### Forward Declaration
+
+La déclaration anticipée permet de déclarer un type sans révéler sa structure.
+
+```c
+// Dans header.h
+typedef struct Stack Stack;  // forward declaration
+
+Stack *stack_create(void);
+void stack_push(Stack *s, int value);
+int stack_pop(Stack *s);
+void stack_destroy(Stack *s);
+
+// Dans implementation.c
+#include "header.h"
+
+struct Stack {
+    int *data;
+    size_t capacity;
+    size_t top;
+};
+
+Stack *stack_create(void) {
+    Stack *s = malloc(sizeof(Stack));
+    s->data = malloc(16 * sizeof(int));
+    s->capacity = 16;
+    s->top = 0;
+    return s;
+}
+```
+
+::: {.callout-important .encadre-techbox title="Avantages de l'encapsulation"}
+- **Abstraction**: l'utilisateur manipule un pointeur opaque
+- **Évolution**: la structure interne peut changer sans modifier l'API
+- **Compilation**: modifier l'implémentation ne recompile pas les clients
+- **Sécurité**: impossible d'accéder directement aux membres
+:::
+
+## Résumé des Tailles et Alignements
+
+| **Concept** | **Taille** | **Alignement** | **Notes** |
+| --- | --- | --- | --- |
+| `struct` | $\geq$ somme membres | max(membres) | + padding |
+| `union` | max(membres) | max(membres) | membres superposés |
+| bit field | selon déclaration | selon type | non portable |
+| flexible array | 0 dans sizeof | type élément | C99 |
+
+::: {.callout-note .encadre-infobox title="Outils d'inspection"}
+```c
+// offsetof: offset d'un membre (stddef.h)
+#include <stddef.h>
+size_t off = offsetof(struct S, membre);
+
+// sizeof: taille totale
+size_t sz = sizeof(struct S);
+
+// GDB: examiner une structure
+(gdb) ptype struct S
+(gdb) p sizeof(struct S)
+(gdb) x/12xb &variable
+```
+:::
+
+::: {#ressources-seance}
+:::

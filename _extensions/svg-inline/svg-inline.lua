@@ -51,7 +51,13 @@ return {
     -- Déclaration XML et commentaires de tête : inutiles dans une page HTML.
     svg = svg:gsub("^%s*<%?xml.-%?>%s*", ""):gsub("^%s*<!%-%-.-%-%->%s*", "")
     -- Le nom accessible et le rôle remplacent l'attribut alt d'une image.
-    svg = svg:gsub("<svg", string.format('<svg role="img" aria-label="%s"', echapper(alt)), 1)
+    --
+    -- Le remplacement passe par une **fonction** : dans une chaîne de remplacement, Lua donne un
+    -- sens particulier au « % », et un texte alternatif qui en contient — « part de zéros
+    -- impossibles (%) », au cours d'Introduction au ML — faisait échouer le rendu de la page
+    -- entière sur « invalid use of "%" in replacement string ».
+    local entete = string.format('<svg role="img" aria-label="%s"', echapper(alt))
+    svg = svg:gsub("<svg", function() return entete end, 1)
 
     local style = largeur ~= "" and string.format(' style="width: %s"', echapper(largeur)) or ""
     return pandoc.RawInline("html",

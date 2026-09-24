@@ -61,6 +61,8 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
         commande += ["--alt", str(cours / chapitre["alt"])]
     if chapitre.get("langage"):
         commande += ["--langage-code", chapitre["langage"]]
+    if chapitre.get("prefixe_images"):
+        commande += ["--prefixe-images", chapitre["prefixe_images"]]
     # Un CM rédigé se rejoue avec sa cible, son titre, son numéro affiché et ses encadrés (US-40).
     if chapitre.get("cible"):
         commande += ["--cible", chapitre["cible"]]
@@ -101,59 +103,50 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
     return ecarts
 
 
-# Ressources d'une séance (US-49) : les énoncés sont publiés depuis ressources/, les corrigés vivent
-# dans _corriges/, que Quarto ne publie pas — le préfixe « _ » est la garantie, pas la vigilance.
-DOSSIER_PUBLIE, DOSSIER_CORRIGES = "ressources", "_corriges"
-ISO = re.compile(r"\d{4}-\d{2}-\d{2}")
+# Ressources d'une séance (US-49) : elles vivent toutes dans ressources/, et elles sont toutes
+# publiées. Le dossier `_corriges/` et la publication datée n'existent plus : aucun corrigé, aucune
+# piste, aucune indication de correction ne vit dans le dépôt (décision du PO).
+DOSSIER_PUBLIE = "ressources"
+
+
+def ressources_non_declarees(cours: Path, manifeste: dict) -> list[tuple[Path, str]]:
+    """Un dossier de ressources ne publie que ce que le manifeste déclare (décision du PO).
+
+    La liste des noms interdits attrape ce qu'elle connaît ; une liste blanche attrape le reste.
+    Un corrigé déposé par mégarde dans `ressources/` part en ligne quel que soit son nom : seule
+    une déclaration explicite l'autorise. Les fichiers préfixés d'un `_` sont ceux de Quarto —
+    `_metadata.yml` règle le rendu des notebooks et n'est pas une ressource.
+    """
+    dossier = cours / DOSSIER_PUBLIE
+    if not dossier.is_dir():
+        return []
+    declares = {Path(ressource["fichier"]).name
+                for chapitre in manifeste.get("chapitres", [])
+                for ressource in chapitre.get("ressources", [])}
+    fiche = cours / "cours.yml"
+    if fiche.is_file():
+        declares |= {Path(nom).name
+                     for nom in re.findall(r'fichier:\s*"([^"]+)"', fiche.read_text(encoding="utf-8"))}
+    return [(fichier, "fichier présent dans ressources/ mais déclaré nulle part : "
+                      "seul un fichier du manifeste est publié")
+            for fichier in sorted(dossier.iterdir())
+            if fichier.is_file() and not fichier.name.startswith("_")
+            and fichier.name not in declares]
 
 
 def ressources_mal_rangees(cours: Path, chapitre: dict) -> list[tuple[Path, str]]:
-    """Une ressource doit exister, être bien rangée, et un corrigé doit porter sa date."""
+    """Une ressource doit exister, être bien rangée, et ne pas porter de date."""
     ecarts = []
     for ressource in chapitre.get("ressources", []):
         fichier = cours / ressource["fichier"]
         dossier = Path(ressource["fichier"]).parts[0]
-        corrige = ressource["type"] == "corrige"
-        date = ressource.get("date", "")
         if not fichier.is_file():
             ecarts.append((fichier, "ressource déclarée dans import.toml mais absente du dépôt"))
-        if corrige and dossier != DOSSIER_CORRIGES:
-            ecarts.append((fichier, f"corrigé publiable : il doit vivre dans {DOSSIER_CORRIGES}/, que "
-                                    "Quarto ne rend pas, et n'être publié qu'à sa date"))
-        if not corrige and dossier != DOSSIER_PUBLIE:
+        if dossier != DOSSIER_PUBLIE:
             ecarts.append((fichier, f"une ressource publiée doit vivre dans {DOSSIER_PUBLIE}/"))
-        if corrige and not ISO.fullmatch(date):
-            ecarts.append((fichier, "corrigé sans date de publication valide (AAAA-MM-JJ) : sans date, "
-                                    "il ne peut pas être publié"))
-        if not corrige and date:
-            ecarts.append((fichier, "seul un corrigé porte une date de publication"))
-    return ecarts
-
-
-def corriges_publies(site: Path) -> list[tuple[Path, str]]:
-    """Dernier filet : dans le site rendu, un corrigé n'est là que si sa date est atteinte.
-
-    Le contrôle regarde le site et non les sources : il attrape aussi bien une copie faite à la main
-    qu'une erreur de la publication par date (scripts/rendre.py).
-    """
-    if not site.is_dir():
-        return []
-    aujourdhui = dt.date.today().isoformat()
-    dates: dict[str, str] = {}
-    for manifeste in sorted(RACINE.glob("cours/*/_sources/import.toml")):
-        for chapitre in tomllib.loads(manifeste.read_text(encoding="utf-8")).get("chapitres", []):
-            for ressource in chapitre.get("ressources", []):
-                if ressource["type"] == "corrige":
-                    dates[Path(ressource["fichier"]).name] = ressource.get("date", "")
-    noms = {fichier.name for corriges in RACINE.glob(f"cours/*/{DOSSIER_CORRIGES}")
-            for fichier in corriges.iterdir() if fichier.is_file()}
-    ecarts = []
-    for publie in site.rglob("*"):
-        if publie.is_file() and publie.name in noms:
-            date = dates.get(publie.name, "")
-            if not date or date > aujourdhui:
-                ecarts.append((publie, "corrigé publié avant sa date" if date
-                               else "corrigé publié sans date : il doit rester hors du site"))
+        if ressource.get("date"):
+            ecarts.append((fichier, "une ressource ne porte pas de date : la publication datée "
+                                    "des corrigés est supprimée"))
     return ecarts
 
 
@@ -237,13 +230,14 @@ def main() -> int:
     chapitres = 0
     for manifeste in manifestes:
         cours = manifeste.parent.parent
-        for chapitre in tomllib.loads(manifeste.read_text(encoding="utf-8"))["chapitres"]:
+        donnees = tomllib.loads(manifeste.read_text(encoding="utf-8"))
+        ecarts += ressources_non_declarees(cours, donnees)
+        for chapitre in donnees["chapitres"]:
             chapitres += 1
             ecarts += ressources_mal_rangees(cours, chapitre)
             with tempfile.TemporaryDirectory() as dossier:
                 ecarts += rejouer(cours, chapitre, Path(dossier))
 
-    ecarts += corriges_publies(RACINE / "_site")
     ecarts += ressources_sans_telechargement(RACINE / "_site")
     ecarts += notebooks_illisibles()
     pages = sorted(RACINE.glob("cours/*/chapitres/*.qmd"))

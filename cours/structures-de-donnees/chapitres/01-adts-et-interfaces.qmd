@@ -1,0 +1,524 @@
+---
+title: "ADTs et interfaces Java"
+cible: "page"
+body-classes: cours-page
+numero: "1"
+ressources:
+  - type: "tp"
+    titre: "Lab 1 — ADTs et interfaces Java"
+    fichier: "ressources/lab-1-adts-et-interfaces.pdf"
+    chemin: "/cours/structures-de-donnees/ressources/lab-1-adts-et-interfaces.pdf"
+description: "Séance 1 de Structures de Données et Algorithmes Avancés : types abstraits de données, interfaces Java, et la séparation du contrat et de l'implémentation."
+author: "Dr. El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Navigation conceptuelle"}
+**Ce que vous savez déjà :** Java orienté objet (classes, héritage,
+interfaces), et l'environnement de travail installé au TP-1 (Docker, Gradle,
+JUnit).<br>
+**La limite qu'on dépasse aujourd'hui :** vous savez écrire une classe
+qui stocke des données. Mais dès qu'un programme grossit, le code client se
+retrouve soudé à une décision technique --- « on utilise un tableau » ---
+qu'on ne peut plus changer sans tout réécrire.<br>
+**Ce que vous saurez faire à la fin :**
+
+1. Énoncer un type abstrait de données (ADT) sous forme d'interface
+             Java générique, indépendamment de toute implémentation.
+2. Implémenter List, Stack, Queue et Deque par tableau et par nœuds
+             chaînés, et énoncer les compromis de chaque choix.
+3. Utiliser une pile pour vérifier un parenthésage et évaluer une
+             expression postfixe.
+4. Choisir, pour un problème donné, l'ADT adapté avant de choisir la
+             structure concrète.
+
+**Ouvre la voie vers :** S2, où l'on se donnera les outils mathématiques
+pour *prouver* qu'une implémentation est meilleure qu'une autre.
+:::
+
+## D'où l'on part
+
+En licence, vous avez appris à écrire des classes : un tableau ici, une liste
+chaînée là, quelques méthodes pour ajouter et retirer des éléments. Cela
+suffit tant que le programme tient dans un fichier. Dès qu'il grandit, une
+difficulté apparaît : le code qui *utilise* la structure connaît la
+manière dont elle est construite, et il en dépend. Remplacer le tableau par
+une liste chaînée oblige alors à corriger des dizaines d'endroits.
+
+Ce cours commence donc par le geste fondateur du génie logiciel appliqué aux
+structures de données : **séparer ce qu'une structure promet de la
+manière dont elle tient sa promesse**. Cette séparation porte un nom --- le
+type abstrait de données --- et Java lui donne un support direct : l'interface.
+Tout le reste du semestre repose sur ce geste. Quand nous étudierons les
+tables de hachage, les arbres ou les graphes, la question sera toujours la
+même : quel contrat, et quelle implémentation pour le tenir.
+
+## Le contrat : type abstrait de données
+
+### Une promesse, pas une construction
+
+Quand vous entrez dans une agence de la Poste à Dakar, vous savez comment la
+file fonctionne : le premier arrivé est le premier servi, un nouveau client se
+met à la fin, et personne ne double. Vous n'avez besoin de savoir ni si les
+clients sont debout dans un couloir, ni assis sur des chaises numérotées, ni
+inscrits sur un cahier. La règle vous suffit pour vous en servir.
+
+Un type abstrait de données, c'est exactement cela : la règle, sans la mise en
+œuvre.
+
+::: {.callout-note .encadre-definition title="Type abstrait de données"}
+Un *type abstrait de données* (ADT) est la donnée d'un ensemble de
+valeurs et d'un ensemble d'opérations sur ces valeurs, spécifiés par leur
+*comportement* --- ce qu'elles produisent --- et non par la manière dont
+elles sont programmées.
+:::
+
+::: {.callout-note .encadre-definition title="Structure de données"}
+Une *structure de données* est une réalisation concrète d'un ADT : un
+agencement particulier en mémoire, accompagné des algorithmes qui réalisent
+chaque opération du contrat.
+:::
+
+Un même ADT admet plusieurs structures de données. Le contrat ne change pas ;
+le coût des opérations, lui, change beaucoup. C'est toute la matière de ce
+cours.
+
+::: {.figure-flottante}
+{{< svg ../figures/s01-fig_01.svg alt="Un contrat, trois réalisations. Le code client ne mentionne que l'interface Deque<T> ; il continue de fonctionner quelle que soit l'implémentation qu'on lui fournit." >}}
+
+Un contrat, trois réalisations. Le code client ne mentionne que
+l'interface `Deque<T>` ; il continue de fonctionner quelle que soit
+l'implémentation qu'on lui fournit.
+:::
+
+### En Java : l'interface générique
+
+Java exprime le contrat par une `interface`, et le rend indépendant du
+type des éléments par les *génériques*.
+
+```java
+public interface Liste<T> {
+    void ajouter(T element);        // ajoute en fin
+    void ajouter(int i, T element); // insère à la position i
+    T get(int i);                   // lit l'élément de rang i
+    T supprimer(int i);             // retire et renvoie l'élément de rang i
+    int taille();
+    boolean estVide();
+}
+```
+
+Le paramètre `<T>` est un type à fournir à l'usage :
+`Liste<String>` pour des noms, `Liste<Etudiant>` pour des
+objets métier. L'intérêt n'est pas l'élégance : c'est que le compilateur
+vérifie le contrat à votre place.
+
+```java
+Liste<String> noms = new ListeTableau<>();
+noms.ajouter("Fatou");
+String x = noms.get(0);   // aucun cast : le type est connu
+noms.ajouter(42);         // ERREUR À LA COMPILATION, pas à l'exécution
+```
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 1 --- Contrat ou implémentation ?"}
+Classez chacune de ces affirmations : relève-t-elle du contrat (ADT) ou de
+l'implémentation ?
+
+1. `pop()` renvoie le dernier élément empilé.
+2. Les éléments sont stockés dans un tableau de capacité 16.
+3. `get(i)` lève une exception si $i \geq$ `taille()`.
+4. Quand le tableau est plein, sa capacité est doublée.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Une confusion fréquente"}
+En Java, `ArrayList` et `LinkedList` ne sont pas deux ADTs :
+ce sont deux *implémentations* du même ADT, décrit par l'interface
+`java.util.List`. Dire « j'utilise une ArrayList » annonce un choix
+technique ; dire « j'ai besoin d'une liste » annonce un besoin. On déclare
+toujours le besoin, on n'instancie qu'au dernier moment le choix technique.
+:::
+
+## List : deux façons de tenir la même promesse
+
+### Tableau contigu
+
+Les éléments occupent des cases consécutives. L'adresse de l'élément de rang
+$i$ se calcule : `base` $+\ i \times$ taille d'une case. D'où un accès
+direct, en un nombre d'opérations qui ne dépend pas de $i$.
+
+En contrepartie, insérer en position $0$ suppose de décaler tout ce qui suit,
+et le tableau a une capacité finie : quand il est plein, il faut en allouer un
+plus grand et recopier.
+
+```java
+public void ajouter(int i, T element) {
+    if (taille == donnees.length) agrandir();     // recopie complète
+    for (int k = taille; k > i; k--) {
+        donnees[k] = donnees[k - 1];              // décalage vers la droite
+    }
+    donnees[i] = element;
+    taille++;
+}
+```
+
+### Nœuds chaînés
+
+Chaque élément est logé dans un nœud qui contient, en plus de la valeur, une
+référence vers le nœud suivant. Les nœuds sont dispersés en mémoire.
+Insérer en tête revient à créer un nœud et à rebrancher une référence : le
+travail ne dépend pas du nombre d'éléments déjà présents. Mais atteindre
+l'élément de rang $i$ oblige à suivre $i$ références depuis la tête.
+
+::: {.figure-flottante}
+{{< svg ../figures/s01-fig_02.svg alt="Les deux réalisations de l'ADT List. Ce que l'une donne gratuitement, l'autre le fait payer." >}}
+
+Les deux réalisations de l'ADT List. Ce que l'une donne
+gratuitement, l'autre le fait payer.
+:::
+
+| **Opération** | **Tableau contigu** | **Nœuds chaînés** |
+| --- | --- | --- |
+| `get(i)` | constant | proportionnel à $i$ |
+| `ajouter(x)` en fin | constant (amorti) | constant |
+| `ajouter(0, x)` en tête | proportionnel à $n$ | constant |
+| `supprimer(0)` | proportionnel à $n$ | constant |
+| Mémoire par élément | la valeur seule | valeur + référence(s) |
+
+: Coût des opérations de List selon la réalisation
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 2 --- Choisir sans se tromper"}
+Un service de la DDD enregistre les passages de bus d'une ligne. Deux usages
+distincts :
+
+1. On ajoute chaque passage à la fin, puis on consulte souvent le
+             $k$-ième passage de la journée.
+2. Chaque nouveau passage doit apparaître en tête de liste (le plus
+             récent d'abord) et on ne consulte que les premiers.
+
+Quelle réalisation pour chacun ?
+:::
+
+## Stack : le dernier arrivé sort le premier
+
+### Le contrat
+
+```java
+public interface Pile<T> {
+    void push(T element);   // empile
+    T pop();                // dépile et renvoie le sommet
+    T peek();               // consulte le sommet sans le retirer
+    boolean estVide();
+    int taille();
+}
+```
+
+Une seule règle gouverne le tout : *le dernier élément empilé est le
+premier dépilé*. Aucune opération ne permet d'atteindre le milieu. Cette
+pauvreté délibérée est une force : elle rend l'implémentation efficace et le
+raisonnement simple.
+
+```java
+public class PileTableau<T> implements Pile<T> {
+    private Object[] donnees = new Object[16];
+    private int taille = 0;
+
+    public void push(T element) {
+        if (taille == donnees.length) agrandir();
+        donnees[taille] = element;   // on écrit au sommet
+        taille++;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T pop() {
+        if (estVide()) throw new IllegalStateException("pile vide");
+        taille--;
+        T sommet = (T) donnees[taille];
+        donnees[taille] = null;      // on libère la référence
+        return sommet;
+    }
+}
+```
+
+::: {.callout-note .encadre-infobox title="Pourquoi le sommet est en fin de tableau"}
+Placer le sommet à l'indice `taille - 1` rend `push` et
+`pop` sans décalage. Placer le sommet en case $0$ donnerait le même
+contrat, mais chaque opération déplacerait tous les éléments. Même contrat,
+même résultat, coût incomparable : c'est le thème de la séance prochaine.
+:::
+
+### Application : vérifier un parenthésage
+
+Un éditeur de code doit signaler `( a + [ b )` comme incorrect. Le
+raisonnement est celui d'une pile : chaque symbole ouvrant est mis en attente,
+chaque symbole fermant doit correspondre au dernier ouvrant en attente.
+
+::: {.figure-flottante}
+{{< svg ../figures/s01-fig_03.svg alt="Trace de la pile sur l'expression ( a + [ b ] ). La pile revient vide : l'expression est équilibrée." >}}
+
+Trace de la pile sur l'expression `( a + [ b ] )`. La pile
+revient vide : l'expression est équilibrée.
+:::
+
+```java
+public static boolean estEquilibree(String expression) {
+    Pile<Character> pile = new PileTableau<>();
+    for (char c : expression.toCharArray()) {
+        if (c == '(' || c == '[' || c == '{') {
+            pile.push(c);
+        } else if (c == ')' || c == ']' || c == '}') {
+            if (pile.estVide()) return false;       // fermante orpheline
+            char ouvrante = pile.pop();
+            if (!correspond(ouvrante, c)) return false;
+        }
+    }
+    return pile.estVide();   // une ouvrante restée en attente = déséquilibre
+}
+```
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 3 --- Deux façons d'échouer"}
+Donnez une expression rejetée par le test `pile.estVide()` de la
+ligne 9, et une autre rejetée par le `return pile.estVide()` final.
+:::
+
+### Application : évaluer une expression postfixe
+
+En notation postfixe, l'opérateur suit ses opérandes : `3 4 +` vaut
+$7$. Aucune parenthèse n'est nécessaire, et l'évaluation se fait en un seul
+parcours, à l'aide d'une pile d'opérandes.
+
+::: {.figure-flottante}
+{{< svg ../figures/s01-fig_05.svg alt="Évaluation de 3 4 + 2 * 7 -. Un nombre est empilé ; un opérateur dépile deux valeurs et empile le résultat. Le résultat final est le seul élément restant." >}}
+
+Évaluation de `3 4 + 2 * 7 -`. Un nombre est empilé ; un
+opérateur dépile deux valeurs et empile le résultat. Le résultat final est
+le seul élément restant.
+:::
+
+```java
+public static int evaluer(String expression) {
+    Pile<Integer> pile = new PileTableau<>();
+    for (String jeton : expression.trim().split("\\s+")) {
+        switch (jeton) {
+            case "+": case "-": case "*": case "/":
+                int b = pile.pop();          // ATTENTION à l'ordre
+                int a = pile.pop();
+                pile.push(appliquer(jeton, a, b));
+                break;
+            default:
+                pile.push(Integer.parseInt(jeton));
+        }
+    }
+    int resultat = pile.pop();
+    if (!pile.estVide()) throw new IllegalArgumentException("expression mal formée");
+    return resultat;
+}
+```
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 4 --- L'ordre des opérandes"}
+Que renvoie l'évaluateur sur `10 3 -` si l'on inverse les deux
+dépilements (`int a = pile.pop(); int b = pile.pop();`) ? Et sur
+`10 3 +` ?
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 5 --- Trace à la main"}
+Déroulez l'évaluation de `5 1 2 + 4 * + 3 -` en notant l'état de la
+pile après chaque jeton.
+:::
+
+## Queue : le premier arrivé sort le premier
+
+### Le contrat
+
+```java
+public interface File<T> {
+    void enqueue(T element);  // ajoute en fin
+    T dequeue();              // retire et renvoie la tête
+    T peek();                 // consulte la tête
+    boolean estVide();
+    int taille();
+}
+```
+
+### Le tableau circulaire
+
+L'implémentation naïve --- tête en case $0$, décalage à chaque
+`dequeue` --- tient le contrat mais paie un décalage complet à chaque
+retrait. On évite ce coût en ne déplaçant plus les éléments, mais l'indice de
+la tête.
+
+Deux variables suffisent : `tete` (indice du prochain élément à
+servir) et `taille`. La fin de la file se calcule :
+$$\texttt{fin} \;=\; (\texttt{tete} + \texttt{taille}) \bmod m$$
+où $m$ est la capacité du tableau. Le modulo fait « repasser » la fin au
+début du tableau quand elle atteint le bord : le tableau se comporte comme un
+anneau.
+
+::: {.figure-flottante}
+{{< svg ../figures/s01-fig_04.svg alt="Un guichet, six cases. À droite, la file occupe les cases 2 à 5 puis reprend en case 0 : les éléments n'ont jamais été déplacés." >}}
+
+Un guichet, six cases. À droite, la file occupe les cases $2$ à $5$
+puis reprend en case $0$ : les éléments n'ont jamais été déplacés.
+:::
+
+```java
+public class FileCirculaire<T> implements File<T> {
+    private Object[] donnees = new Object[8];
+    private int tete = 0;
+    private int taille = 0;
+
+    public void enqueue(T element) {
+        if (taille == donnees.length) agrandir();
+        int fin = (tete + taille) % donnees.length;
+        donnees[fin] = element;
+        taille++;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T dequeue() {
+        if (estVide()) throw new IllegalStateException("file vide");
+        T premier = (T) donnees[tete];
+        donnees[tete] = null;
+        tete = (tete + 1) % donnees.length;   // la tête avance, rien ne bouge
+        taille--;
+        return premier;
+    }
+}
+```
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 6 --- Arithmétique de l'anneau"}
+Capacité $m = 6$, `tete` $= 4$, `taille` $= 3$.
+
+1. Quelles cases sont occupées ?
+2. Dans quelle case écrit le prochain `enqueue` ?
+3. Après deux `dequeue`, que vaut `tete` ?
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Pourquoi on garde `taille` et pas seulement deux indices"}
+Avec les seuls indices `tete` et `fin`, la file vide et la file
+pleine donnent la même configuration `tete == fin` : impossible de les
+distinguer. Deux remèdes existent : maintenir un compteur `taille`
+(retenu ici, le plus lisible), ou sacrifier une case du tableau.
+:::
+
+## Deque : les deux extrémités
+
+Un *deque* (*double-ended queue*) accepte ajouts et retraits aux
+deux bouts. Il subsume la pile et la file : un deque restreint à
+`addLast`/`removeLast` se comporte comme une pile, restreint à
+`addLast`/`removeFirst` comme une file.
+
+```java
+public interface Deque<T> {
+    void addFirst(T element);
+    void addLast(T element);
+    T removeFirst();
+    T removeLast();
+    T peekFirst();
+    T peekLast();
+    int size();
+    boolean isEmpty();
+}
+```
+
+L'implémentation par tableau circulaire redimensionnable rend les huit
+opérations peu coûteuses, car aucune ne déplace les éléments : `addFirst`
+recule l'indice de tête modulo $m$, `addLast` avance l'indice de fin.
+
+```java
+// FAUX si tete vaut 0 : (0 - 1) % m donne -1 en Java
+int nouvelleTete = (tete - 1) % donnees.length;
+
+// CORRECT : on ajoute m avant de prendre le modulo
+int nouvelleTete = (tete - 1 + donnees.length) % donnees.length;
+```
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 7 --- Le modulo négatif"}
+En Java, que vaut `(0 - 1) % 8` ? Et `(0 - 1 + 8) % 8` ?
+:::
+
+## Choisir
+
+La démarche d'ingénieur s'énonce en trois temps, dans cet ordre.
+
+1. **Quelles opérations le problème demande-t-il ?** On identifie
+             l'ADT. Un annuleur d'actions (`Ctrl+Z`) demande le dernier
+             geste effectué : c'est une pile. Un guichet sert dans l'ordre
+             d'arrivée : c'est une file.
+2. **Quelles opérations sont fréquentes ?** On choisit la
+             structure concrète selon le profil d'usage.
+3. **Qu'observe-t-on en exécution ?** On mesure, et l'on révise
+             si la mesure contredit la prédiction. C'est l'objet de S2.
+
+| **Besoin exprimé** | **ADT** | **Réalisation courante** |
+| --- | --- | --- |
+| Accès par rang, parcours ordonné | List | tableau contigu |
+| Insertions/retraits en tête fréquents | List | nœuds chaînés |
+| Annulation, retour en arrière | Stack | tableau (sommet en fin) |
+| Service dans l'ordre d'arrivée | Queue | tableau circulaire |
+| Ajout/retrait aux deux bouts | Deque | tableau circulaire |
+
+: Repères pour le choix de l'ADT
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 8 --- Du besoin à l'ADT"}
+Nommez l'ADT adapté à chacun de ces besoins :
+
+1. Le navigateur revient à la page précédente.
+2. Une imprimante partagée traite les travaux dans l'ordre reçu.
+3. Un historique où l'on consulte le plus récent, mais où l'on purge
+             le plus ancien quand la capacité est atteinte.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 9 --- Le coût caché"}
+Un étudiant écrit une file à l'aide d'une `ArrayList` :
+`enqueue` fait `liste.add(x)` et `dequeue` fait
+`liste.remove(0)`. Le contrat est-il respecté ? Le choix est-il bon ?
+:::
+
+::: {.callout-important .encadre-retenirbox title="Points clés à retenir"}
+1. Un ADT est un contrat : un ensemble d'opérations spécifiées par
+             leur comportement. Une structure de données est une manière de
+             tenir ce contrat.
+2. En Java, le contrat s'écrit `interface`, et les génériques
+             le rendent indépendant du type des éléments. On déclare avec le
+             type de l'interface, on n'instancie qu'au dernier moment.
+3. Tableau contigu et nœuds chaînés tiennent le même contrat List avec
+             des coûts opposés : accès direct contre insertion en tête.
+4. La pile obéit au dernier-arrivé-premier-sorti ; elle résout la
+             vérification de parenthésage et l'évaluation postfixe en un seul
+             parcours.
+5. La file obéit au premier-arrivé-premier-sorti ; le tableau
+             circulaire lui évite tout décalage, au prix d'une arithmétique
+             modulo.
+6. En Java, `%` est un reste et peut être négatif : pour
+             reculer un indice, écrire `(i - 1 + m) % m`.
+7. Le deque généralise pile et file ; c'est la structure que vous
+             implémenterez au Lab et dans le Projet P1.
+:::
+
+## Ce qui vient ensuite : Analyse algorithmique
+
+::: {.callout-note .encadre-prereqbox title="Vers la séance suivante"}
+**Ce qu'on sait faire maintenant :** énoncer un contrat sous forme
+d'interface générique, et le réaliser de plusieurs manières --- tableau
+contigu, nœuds chaînés, tableau circulaire.<br>
+**La limite qu'on va dépasser :** tout au long de cette séance, nous
+avons dit « coûteux », « constant », « proportionnel à $n$ » sans jamais rien
+démontrer. Sur quoi repose l'affirmation que `remove(0)` est mauvais ?
+Comment comparer deux implémentations autrement qu'à l'intuition ?<br>
+**En S2 :** on compte les opérations élémentaires, on définit
+formellement $\mathcal{O}$, $\Omega$ et $\Theta$, on prouve des bornes, et on
+apprend à analyser le code récursif. Les affirmations de cette séance
+deviendront des énoncés démontrés.
+:::
+
+## Références
+
+- R. Sedgewick, K. Wayne, *Algorithms*, 4^e^ éd.
+            --- §1.2 (Data Abstraction), §1.3 (Bags, Queues, and Stacks).
+- T. Cormen, C. Leiserson, R. Rivest, C. Stein,
+            *Introduction to Algorithms*, 4^e^ éd.
+            --- Ch. 10 (Elementary Data Structures).
+- S. Skiena, *The Algorithm Design Manual*,
+            3^e^ éd. --- Ch. 3 (Data Structures).
+
+::: {#ressources-seance}
+:::

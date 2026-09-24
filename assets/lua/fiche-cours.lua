@@ -7,7 +7,7 @@
 
 local INSECABLE = "\u{A0}"
 
--- Ressources des séances (US-49) : le poids des fichiers et la date des corrigés sont lus au rendu.
+-- Ressources des séances (US-49) : le poids des fichiers est lu au rendu.
 package.path = package.path .. ";" .. pandoc.path.directory(PANDOC_SCRIPT_FILE) .. "/?.lua"
 local R = require("ressources-communes")
 
@@ -68,6 +68,31 @@ local function fiche(cours)
   blocs:extend(liste("Prérequis", cours.prerequis))
   return blocs
 end
+
+-- Ressources du cours entier, et non d'un chapitre (US-59) : un sujet d'examen, par exemple, ne
+-- relève d'aucun chapitre mais de tout le cours. Elles se déclarent dans `cours.yml`, sous la même
+-- forme que celles d'une séance, et suivent les mêmes règles.
+local function ressources_du_cours(cours, dossier)
+  local publiables = R.publiables(cours.ressources)
+  if #publiables == 0 then
+    return pandoc.Blocks({})
+  end
+  -- Une ressource de séance porte son adresse publique, calculée à l'import ; celle-ci est déclarée
+  -- à la main dans cours.yml, et n'a que son chemin relatif au cours. On la complète ici, de la même
+  -- façon, pour que le lien et l'attribut de téléchargement se décident comme ailleurs.
+  -- `publiables` renvoie une chaîne vide, et non nil, quand le champ manque : en Lua, « or » ne
+  -- l'aurait pas vue, puisque seule nil est fausse.
+  local slug = pandoc.path.filename(dossier)
+  local puces = {}
+  for _, ressource in ipairs(publiables) do
+    if ressource.chemin == "" then
+      ressource.chemin = "/cours/" .. slug .. "/" .. ressource.fichier
+    end
+    table.insert(puces, pandoc.Blocks({ pandoc.Plain(R.lien(ressource, "fr", dossier, false)) }))
+  end
+  return pandoc.Blocks({ pandoc.Header(2, "Ressources du cours"), pandoc.BulletList(puces) })
+end
+
 
 -- En-tête YAML d'un chapitre : son titre et sa description, pour la table des séances.
 local function entete_chapitre(chemin)
@@ -150,6 +175,9 @@ function Pandoc(doc)
       -- sous le mot qui convient au cours.
       if div.identifier == "seances" or div.identifier == "chapitres" then
         return seances(doc)
+      end
+      if div.identifier == "ressources-cours" then
+        return ressources_du_cours(cours, pandoc.path.directory(quarto.doc.input_file))
       end
     end,
   })

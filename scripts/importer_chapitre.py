@@ -26,6 +26,7 @@ import argparse
 import os
 import re
 import sys
+import unicodedata
 import tomllib
 import xml.etree.ElementTree as ET
 from collections import Counter
@@ -33,8 +34,7 @@ from pathlib import Path
 
 SVG = "http://www.w3.org/2000/svg"
 
-# Ressources d'une séance (US-49) : libellé par type, dans les deux langues. Un corrigé n'a pas de
-# libellé ici : c'est `assets/lua/ressources.lua` qui l'affiche, et seulement à partir de sa date.
+# Ressources d'une séance (US-49) : libellé par type, dans les deux langues.
 RESSOURCES = {
     "lab": {"fr": "Lab", "en": "Lab"},
     "td": {"fr": "TD", "en": "Tutorial"},
@@ -44,17 +44,32 @@ RESSOURCES = {
     # depuis le site, c'est ce PDF-là qui fait foi (US-40).
     "pdf": {"fr": "PDF du cours", "en": "Course PDF"},
 }
-CORRIGE = "corrige"
+# Aucun corrigé, aucune piste, aucune indication de correction ne paraît sur le site ni ne vit
+# dans le dépôt : décision du PO, qui remplace la publication datée d'US-49. Le type `corrige` et
+# tout fichier dont le nom l'annonce sont refusés ici, à l'import, et de nouveau par
+# `scripts/verifier_non_publiable.py` sur le dépôt et sur le site rendu.
+TYPE_REFUSE = "corrige"
+# Le motif doit **commencer un mot** : « fig_05_resolution_preuve » est une figure, et non une
+# solution. Les accents sont pliés, la fin du mot reste libre (« corriges », « solutions »).
+MOTS_DE_CORRECTION = re.compile(r"(?:^|[^a-z0-9])(corrige|correction|pistes|solution)")
 
 # Commandes qui ne produisent qu'un caractère. `\textbackslash` apparaît dans ces cours à l'intérieur
 # d'un `\texttt{}`, donc dans un code en ligne, où la barre oblique inverse ne s'échappe pas.
 CARACTERES = {"oe": "œ", "ldots": "\u2026", "dots": "\u2026", "textbackslash": "\\",
-              "textasciitilde": "~", "textasciicircum": "^"}
+              "textasciitilde": "~", "textasciicircum": "^",
+              # Symboles employés **hors** mathématiques dans les CM rédigés : une flèche de prose,
+              # une coche de validation. Les laisser passer les faisait signaler comme non convertis.
+              "checkmark": "✓", "cmark": "✓", "xmark": "✗", "rightarrow": "→", "leftarrow": "←", "leftrightarrow": "↔",
+              "Rightarrow": "⇒", "times": "×", "pm": "±", "bullet": "•", "degree": "°",
+              # Espaces larges **hors** formules : en HTML, une espace suffit. Dans une formule,
+              # elles ne passent jamais ici — `inline()` met les mathématiques de côté d'abord, et
+              # c'est MathJax qui les compose. Une tentative de remplacement global, au Sprint 6,
+              # avait cassé les formules de huit chapitres publiés (US-62).
+              "quad": " ", "qquad": " "}
 
 # Styles de `lstlisting` définis par beamerucad.sty : « out » et « err » sont des sorties de
 # programme, « sh » une commande shell. Sans style, c'est du code dans le langage du cours.
 STYLES_CODE = {"out": "", "err": "", "sh": "bash"}
-ISO = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # Encadrés de beamerucad.sty : type de callout Quarto, classe de couleur, titre par défaut.
 ENCADRES = {
@@ -69,8 +84,15 @@ ENCADRES = {
 
 # Commandes de mise en page sans équivalent en HTML : le style s'en charge.
 IGNOREES = {"vskip", "vspace", "smallskip", "medskip", "bigskip", "centering", "par", "vfill",
+            # Apparitions progressives d'une slide Beamer : une page HTML montre tout d'un coup.
+            "pause",
             "toprule", "midrule", "bottomrule", "hline", "addlinespace", "small", "scriptsize", "footnotesize",
-            "normalsize", "large", "Large", "raggedright", "noindent", "titlepage", "maketitle"}
+            "normalsize", "large", "Large", "raggedright", "noindent", "titlepage", "maketitle",
+            # Sommaire et sauts de page : un document HTML a sa propre table des matières (US-61).
+            "tableofcontents", "listoffigures", "listoftables", "newpage", "clearpage", "cleardoublepage",
+            "hfill", "hrule", "linebreak", "nopagebreak", "pagebreak", "allowbreak", "protect",
+            "appendix", "cmidrule", "arraybackslash", "justifying", "textwidth", "linewidth",
+            "columnwidth", "textheight", "baselineskip"}
 
 # Couleurs d'encre du jeu de figures : elles suivront la couleur du texte de la page.
 ENCRES = {"#000", "#000000", "black", "#1a3a5c", "#1A3A5C", "#1c2a33", "#1C2A33",
@@ -87,6 +109,11 @@ FORMES = {"rect", "circle", "ellipse", "polygon", "polyline", "path", "line"}
 EXPORT = re.compile(r"^\s*(matplotlib\.use\(|fig\.savefig\(|plt\.savefig\(|plt\.show\(|print\()")
 
 
+# Un bloc protégé peut en contenir un autre (une figure dans une colonne, une colonne dans une
+# slide). Trois niveaux suffisent ; la borne évite qu'un marqueur mal formé boucle sans fin.
+PROFONDEUR_INSERTIONS = 5
+
+
 class Conversion:
     """Contexte de la conversion, et compte rendu de ce qu'elle a fait ou laissé à faire."""
 
@@ -100,11 +127,15 @@ class Conversion:
         self.tikz = 0                           # numéro du schéma en cours
         self.insertions: list[str] = []         # blocs déjà finalisés, à l'abri de la conversion
         self.scripts: dict[str, Path] = {}      # figures calculées : script Python, par nom de figure
+        self.matricielles: set[str] = set()     # figures dont la source n'existe qu'en PNG
         self.non_convertis: list[tuple[str, str]] = []
         self.ignorees: Counter[str] = Counter()
         self.figures: list[str] = []
         self.codes: list[str] = []
         self.tableaux = 0
+        self.flottants: Counter[str] = Counter()
+        self.omis: Counter[str] = Counter()
+        self.prefixe_images = ""
         self.slide = "(préambule)"
 
     def proteger(self, bloc: str) -> str:
@@ -113,7 +144,19 @@ class Conversion:
         return f"\x01{len(self.insertions) - 1}\x01"
 
     def restaurer(self, texte: str) -> str:
-        return re.sub(r"\x01(\d+)\x01", lambda t: self.insertions[int(t[1])], texte)
+        """Rend leurs blocs aux marqueurs, y compris à ceux cachés dans un bloc déjà rendu.
+
+        Une insertion en contient parfois une autre : une figure est protégée, puis le bloc de
+        colonnes qui l'entoure l'est à son tour. Une passe unique remplaçait le marqueur extérieur
+        et laissait l'intérieur en place — la figure disparaissait de la slide, et il ne restait
+        que son numéro. Treize figures du cours de ML étaient dans ce cas.
+        """
+        for _ in range(PROFONDEUR_INSERTIONS):
+            rendu = re.sub(r"\x01(\d+)\x01", lambda t: self.insertions[int(t[1])], texte)
+            if rendu == texte:
+                break
+            texte = rendu
+        return texte
 
     def non_converti(self, quoi: str) -> str:
         self.non_convertis.append((self.slide, quoi))
@@ -193,12 +236,17 @@ def preambule(source: str) -> dict[str, str]:
 # Conversion du texte
 # --------------------------------------------------------------------------------------------------
 
-def macros_du_theme(texte: str) -> str:
+def macros_du_theme(texte: str, preambule: str = "") -> str:
     """Développe les macros de beamerucad.sty que la conversion ne peut pas deviner.
 
     `\\figslide{largeur}{fichier}{légende}` place une figure et sa légende : on le récrit sous la
     forme que le reste du script connaît déjà, pour que la légende serve de texte alternatif.
     `\\resultat` annonce la sortie du programme qui suit.
+
+    `\\ucadformula{…}` est l'encadré de formule du cours d'Introduction au ML. Sa définition dit ce
+    qu'il est : `\\begin{center}$\\displaystyle #1$\\end{center}`, soit une **formule hors ligne**.
+    Sans cette règle, la macro n'était pas reconnue et son contenu s'échappait : chaque `\\frac`,
+    `\\sum` ou `\\text` qu'elle contient était alors signalé un à un, 57 fois sur neuf séances.
     """
     motif = re.compile(r"\\figslideb?\{([^}]*)\}\{([^}]*)\}\{", re.S)
     while True:
@@ -215,8 +263,109 @@ def macros_du_theme(texte: str) -> str:
                  + f"\\begin{{center}}\\includegraphics[width={largeur}\\linewidth]{{{fichier}}}\n"
                    f"{{\\scriptsize {legende}}}\\end{{center}}"
                  + texte[fin + 1:])
+    # Macros du préambule sans argument — `\newcommand{\vw}{\mathbf{w}}`. Elles vivent surtout dans
+    # les formules, et **MathJax ne les connaît pas** : il les affiche en rouge, telles quelles. Trois
+    # slides du cours d'Introduction au ML montraient « \vw », « \vx », « \vz » en rouge, et seul
+    # l'audit d'accessibilité l'a vu — par le contraste du rouge d'erreur de MathJax.
+    #
+    # Elles sont développées à la source plutôt que déclarées à MathJax : une substitution de texte
+    # ne dépend ni de la version de MathJax ni de sa configuration, et les définitions les plus
+    # longues passent d'abord, pour que `\vw` ne soit pas coupé par `\v`.
+    definitions = {}
+    for trouve in re.finditer(r"\\(?:new|renew|provide)command\s*\{\\([A-Za-z]+)\}\s*\{", preambule):
+        nom = trouve[1]
+        fin = accolade(preambule, trouve.end() - 1)
+        corps_macro = preambule[trouve.end():fin]
+        # Une définition qui contient elle-même une formule ou un environnement n'est pas une
+        # abréviation mathématique : l'injecter dans un `$…$` imbriquerait les dollars, et la
+        # structure du document se décalait — un `lstlisting` du cours de Python s'en trouvait
+        # coupé. `\resultat`, qui vaut « Résultat $\rightarrow$ », est traité à part plus bas.
+        if "$" not in corps_macro and "\\begin" not in corps_macro:
+            definitions[nom] = corps_macro
+    # Deux écritures des colonnes Beamer coexistent dans le même cours : `\column{0.5\linewidth}`
+    # et `\begin{column}{0.5\textwidth}…\end{column}`. On ramène la seconde à la première, pour que
+    # `colonnes()` n'ait qu'une forme à connaître.
+    texte = re.sub(r"\\begin\{column\}\s*\{([^}]*)\}", r"\\column{\1}", texte)
+    texte = texte.replace("\\end{column}", "")
+
+    # `\figduo{l1}{f1}{l2}{f2}{légende}` : deux figures côte à côte sous une même légende. Elles
+    # deviennent deux colonnes, et la légende suit — c'est elle qui fera le texte alternatif.
+    motif_duo = re.compile(r"\\figduo\{([^}]*)\}\{([^}]*)\}\{([^}]*)\}\{([^}]*)\}\{", re.S)
+    while True:
+        trouve = motif_duo.search(texte)
+        if not trouve:
+            break
+        fin = accolade(texte, trouve.end() - 1)
+        l1, f1, l2, f2 = trouve[1], trouve[2], trouve[3], trouve[4]
+        legende = texte[trouve.end():fin]
+        texte = (texte[:trouve.start()]
+                 + f"\\begin{{center}}\\includegraphics[width={l1}\\linewidth]{{{f1}}}\n"
+                   f"\\includegraphics[width={l2}\\linewidth]{{{f2}}}\n"
+                   f"{{\\scriptsize {legende}}}\\end{{center}}"
+                 + texte[fin + 1:])
+
+    # Réglages de mise en page à deux arguments : ils n'ont pas de contenu, et laissés en place ils
+    # se signalent comme non convertis. `\renewcommand{\arraystretch}{1.2}` espace les lignes d'un
+    # tableau ; en HTML c'est la feuille de style qui s'en charge.
+    for commande in ("renewcommand", "setlength", "addtolength"):
+        motif_reglage = re.compile(rf"\\{commande}\s*\{{")
+        while True:
+            trouve = motif_reglage.search(texte)
+            if not trouve:
+                break
+            fin = accolade(texte, trouve.end() - 1)
+            suivant = re.match(r"\s*\{", texte[fin + 1:])
+            fin = accolade(texte, fin + 1 + suivant.end() - 1) if suivant else fin
+            texte = texte[:trouve.start()] + texte[fin + 1:]
+
+    # `\texorpdfstring{beau}{brut}` : la première forme est celle qu'on lit. Résolue **ici**, avant
+    # tout découpage : elle apparaît dans l'argument optionnel d'un `\section[…]{…}`, que le
+    # découpage des sections coupe en deux — l'accolade restait alors ouverte et l'import s'arrêtait
+    # (séance 5 du cours d'Introduction au ML).
+    motif_tex = re.compile(r"\\texorpdfstring\s*\{")
+    while True:
+        trouve = motif_tex.search(texte)
+        if not trouve:
+            break
+        fin_un = accolade(texte, trouve.end() - 1)
+        suivant = re.match(r"\s*\{", texte[fin_un + 1:])
+        lisible = texte[trouve.end():fin_un]
+        fin = accolade(texte, fin_un + 1 + suivant.end() - 1) if suivant else fin_un
+        texte = texte[:trouve.start()] + lisible + texte[fin + 1:]
+
     texte = texte.replace("\\resultat", "\n\n**Résultat →**\n\n")
-    return texte.replace("\\quad", " ")
+
+    # `\ucadformula{…}` -> formule hors ligne. Le contenu se lit en comptant les accolades : une
+    # formule en contient (`\frac{1}{n}`), et une expression régulière s'arrêterait à la première.
+    motif = re.compile(r"\\ucadformula\s*\{")
+    while True:
+        trouve = motif.search(texte)
+        if not trouve:
+            break
+        fin = accolade(texte, trouve.end() - 1)
+        formule = texte[trouve.end():fin].strip()
+        texte = texte[:trouve.start()] + f"\n\n$$ {formule} $$\n\n" + texte[fin + 1:]
+
+    # La substitution ne touche **que les formules**, et vient **après** `\ucadformula` : appliquée
+    # partout, elle entrait dans les blocs de code — le cours de Python définit des macros dont le
+    # nom apparaît dans ses exemples, et un `lstlisting` s'en trouvait coupé en deux. Les
+    # environnements `align`, `equation` et `gather` sont des formules sans dollars : les oublier
+    # laissait `\vd` et `\vz` tels quels dans les quatre équations de la rétropropagation, que
+    # MathJax affichait alors en rouge.
+    if definitions:
+        def developper(trouve: re.Match[str]) -> str:
+            formule = trouve[0]
+            for nom in sorted(definitions, key=len, reverse=True):
+                formule = re.sub(rf"\\{nom}(?![A-Za-z])",
+                                 lambda _, c=definitions[nom]: c, formule)
+            return formule
+
+        texte = MOTIF_ENVIRONNEMENTS_MATHS.sub(developper, texte)
+        texte = MOTIF_MATHS.sub(developper, texte)
+
+    # Les renvois sont résolus ici, sur le document entier : ils traversent le texte courant comme
+    # les légendes, et `\\ref` n'a pas de sens plus loin dans la chaîne (US-61).
+    return renvois(petites_matrices(texte.replace("\\quad", " ")))
 
 
 def sans_commentaires(texte: str) -> str:
@@ -238,12 +387,71 @@ def retirer_tailles(texte: str) -> str:
 
 MOTIF_IMAGE = re.compile(r"\\includegraphics(?:\[(?P<options>[^\]]*)\])?\{(?P<nom>[^}]+)\}")
 MOTIF_LEGENDE = re.compile(r"\s*\{\\(?:scriptsize|footnotesize|small)\s")
+# La légende d'un flottant, éventuellement précédée d'un `\\label` (US-61).
+MOTIF_CAPTION = re.compile(r"\s*(?:\\label\s*\{[^}]*\}\s*)?\\caption\s*\{")
+# La même étiquette, quand elle suit la légende plutôt qu'elle ne la précède.
+MOTIF_LABEL_SUIVANT = re.compile(r"\s*\\label\s*\{([^}]*)\}")
+
+
+# Commandes non alphabétiques qu'une légende contient : LaTeX les échappe, un texte alternatif les
+# veut nues. `\,` et ses variantes sont des espaces fines, sans équivalent dans du texte lu.
+PONCTUATION_LATEX = {r"\%": "%", r"\&": "&", r"\_": "_", r"\#": "#", r"\$": "$",
+                     r"\,": " ", r"\;": " ", r"\!": "", r"\ ": " "}
+
+
+# Ce que devient une commande mathématique dans un texte alternatif : le mot qu'on prononce.
+# Une légende d'Introduction à l'IA écrit « Value Iteration ($\\gamma=0{,}9$) » ; sans cette table,
+# la commande était simplement effacée et le lecteur d'écran disait « Value Iteration parenthèse
+# égale zéro virgule neuf ». Le PO l'a posé en règle au Sprint 7, pour les neuf textes du cours de
+# ML : on écrit les formules en toutes lettres, comme on les lit à voix haute.
+MATHS_A_VOIX_HAUTE = {
+    "alpha": "alpha", "beta": "bêta", "gamma": "gamma", "delta": "delta",
+    "epsilon": "epsilon", "varepsilon": "epsilon", "zeta": "zêta", "eta": "êta",
+    "theta": "thêta", "vartheta": "thêta", "iota": "iota", "kappa": "kappa",
+    "lambda": "lambda", "mu": "mu", "nu": "nu", "xi": "xi", "rho": "rhô", "varrho": "rhô",
+    "sigma": "sigma", "tau": "tau", "upsilon": "upsilon", "phi": "phi", "varphi": "phi",
+    "chi": "chi", "psi": "psi", "omega": "oméga", "pi": "pi", "varpi": "pi",
+    "Gamma": "Gamma", "Delta": "delta", "Theta": "thêta", "Lambda": "lambda", "Xi": "xi",
+    "Pi": "pi", "Sigma": "sigma", "Phi": "phi", "Psi": "psi", "Omega": "oméga",
+    # Opérateurs et relations : le mot, et non le signe, qu'un lecteur d'écran n'annonce pas tous.
+    "approx": "environ", "simeq": "environ", "leq": "inférieur ou égal à",
+    "geq": "supérieur ou égal à", "neq": "différent de", "times": "fois", "cdot": "fois",
+    "pm": "plus ou moins", "in": "appartient à", "neg": "non", "lnot": "non",
+    # Les flèches gardent leur signe : le site les écrit déjà ainsi dans le texte courant, et un
+    # lecteur d'écran les annonce. Les traduire par un mot donnait « pris par Awa vers va en [4] ».
+    "rightarrow": "→", "to": "→", "leftarrow": "←", "Rightarrow": "⇒", "Leftarrow": "⇐",
+    # `\\mid` sépare l'événement de sa condition : « P(A sachant B) ».
+    "mid": "sachant", "infty": "l'infini", "sum": "somme", "prod": "produit",
+    "dots": "…", "ldots": "…", "cdots": "…",
+    # Noms de fonctions : ce sont déjà des mots, et les effacer laissait « _2 n 664 » là où la
+    # légende disait « \\log_2 n ≈ 664 ».
+    "log": "log", "ln": "ln", "exp": "exp", "max": "max", "min": "min", "lim": "lim",
+    "sin": "sin", "cos": "cos", "tan": "tan", "det": "det", "arg": "arg", "deg": "deg",
+}
 
 
 def sans_balises(texte: str) -> str:
-    """Texte nu d'une légende, pour servir de texte alternatif."""
+    """Texte nu d'une légende, pour servir de texte alternatif.
+
+    Un texte alternatif est **lu à voix haute** : aucune formule n'y sera rendue, et les dollars,
+    les accolades et les commandes échappées s'y entendraient tels quels. Une légende du cours
+    d'Introduction au ML écrivait « pour atteindre $80\\,\\%$ de variance » : le lecteur d'écran
+    aurait dit « dollar 80 antislash virgule antislash pourcent dollar ».
+    """
+    for commande, caractere in PONCTUATION_LATEX.items():
+        texte = texte.replace(commande, caractere)
+    # Guillemets de LaTeX : une légende d'Introduction à l'IA cite la logique de la séance 2 entre
+    # « ``…'' ». Lus à voix haute, ces signes s'entendraient tels quels.
+    texte = re.sub(r"``\s*(.+?)\s*''", "« \\1 »", texte, flags=re.S)
+    # Accolades échappées : `$\\{0, 1\\}$` laissait « \\0, 1\\ » dans le texte alternatif, la barre
+    # oblique survivant au retrait des accolades.
+    texte = texte.replace("\\{", "").replace("\\}", "")
+    # Les commandes qui **se prononcent** deviennent leur mot, avant que les autres soient effacées.
+    texte = re.sub(r"\\([A-Za-z]+)",
+                   lambda trouve: MATHS_A_VOIX_HAUTE.get(trouve[1], trouve[0]), texte)
     texte = re.sub(r"\\[A-Za-z]+\s*\{([^{}]*)\}", r"\1", texte)
-    texte = re.sub(r"\\[A-Za-z]+\s*", "", texte).replace("{", "").replace("}", "")
+    texte = re.sub(r"\\[A-Za-z]+\s*", "", texte)
+    texte = texte.replace("{", "").replace("}", "").replace("$", "")
     return re.sub(r"\s+", " ", texte).replace('"', "«").strip()
 
 
@@ -289,7 +497,7 @@ def bloc_python(nom: str, conversion: Conversion, legende: str | None) -> tuple[
     return chunk, repli
 
 
-def figures(texte: str, conversion: Conversion) -> str:
+def figures(texte: str, conversion: Conversion, legende_flottante: str = "") -> str:
     """Remplace chaque image, et la légende qui la suit, par le shortcode et sa légende.
 
     Le texte alternatif vient de la légende du `.tex`. Quand il n'y en a pas, il vient du fichier
@@ -302,16 +510,33 @@ def figures(texte: str, conversion: Conversion) -> str:
             return texte
         # Le dossier ne compte pas (les figures sont celles du cours), et l'extension non plus :
         # le .tex cite le PDF que compile LaTeX, la page incorpore le SVG du même nom.
-        nom = Path(trouve["nom"]).stem
+        nom = conversion.prefixe_images + Path(trouve["nom"]).stem
         mesure = re.search(r"width=([\d.]+)\\linewidth", trouve["options"] or "")
         largeur = float(mesure[1]) if mesure else None
 
         legende, fin = None, trouve.end()
+        flottant, etiquette = False, ""
         suivante = MOTIF_LEGENDE.match(texte, trouve.end())
         if suivante:
             ouverture = texte.index("{", trouve.end())
             fermeture = accolade(texte, ouverture)
             legende, fin = texte[suivante.end():fermeture], fermeture + 1
+        else:
+            # Dans un flottant `figure`, la légende s'écrit `\caption{…}` juste après l'image
+            # (US-61). `figures()` passe sur le texte avant que `convertir()` ne voie le flottant :
+            # c'est donc ici qu'il faut la reconnaître, sans quoi la figure partait avec un
+            # TODO(PO) alors que sa légende était à deux lignes. L'étiquette `\label{fig:x}`
+            # l'entoure indifféremment avant ou après — les deux usages coexistent dans les cours.
+            apres = MOTIF_CAPTION.match(texte, trouve.end())
+            if apres:
+                fermeture = accolade(texte, apres.end() - 1)
+                legende, fin = texte[apres.end():fermeture], fermeture + 1
+                flottant = True
+                marque = (MOTIF_LABEL.search(texte, trouve.end(), apres.end())
+                          or MOTIF_LABEL_SUIVANT.match(texte, fin))
+                if marque:
+                    etiquette = identifiant_quarto(marque[1])
+                    fin = max(fin, marque.end())
 
         repli = None
         if nom in conversion.scripts:
@@ -321,24 +546,128 @@ def figures(texte: str, conversion: Conversion) -> str:
             insertion = ("<!-- FIGURE CALCULÉE (US-18) : " + nom
                          + ", à produire par le bloc Python de _sources/figs/figA.py -->")
         else:
-            alt = conversion.alternatifs.get(nom) or (sans_balises(legende) if legende else "")
+            legende_utile = legende or legende_flottante
+            alt = conversion.alternatifs.get(nom) or (sans_balises(legende_utile)
+                                                      if legende_utile else "")
             origine = ("texte fourni par le PO" if nom in conversion.alternatifs
-                       else "légende du .tex" if legende else "TODO(PO)")
-            conversion.figures.append(f"{nom} : insérée, texte alternatif — {origine}")
+                       else "légende du .tex" if legende_utile else "TODO(PO)")
             taille = f' largeur="{round(largeur * 100)}%"' if largeur else ""
-            insertion = (f'{{{{< svg {conversion.prefixe_figures}/{nom}.svg '
-                         f'alt="{alt or "TODO(PO): description de la figure"}"{taille} >}}}}')
+            if nom in conversion.matricielles:
+                # Figure livrée en image matricielle seulement : aucun SVG à incorporer. Elle est
+                # posée comme une image ordinaire, avec son texte alternatif. Elle ne suivra pas le
+                # mode sombre et se pixellisera au zoom — c'est le prix d'une source sans vectoriel.
+                conversion.figures.append(f"{nom} : insérée en PNG (aucune source vectorielle), "
+                                          f"texte alternatif — {origine}")
+                # Le texte alternatif passe par `fig-alt`, et non par le crochet de l'image : écrit
+                # dans le crochet, Pandoc en fait une figure implicite, et le filtre revealjs de
+                # Quarto remplace `src` par `data-src` **en perdant l'attribut alt** — l'audit
+                # d'accessibilité signalait alors une image sans nom accessible.
+                # `.nostretch` : sans elle, Quarto pose `r-stretch` sur l'image, et reveal lui
+                # donne la hauteur qui reste dans la slide. Quand le texte occupe déjà la slide,
+                # cette hauteur vaut **zéro** : l'image est chargée, présente dans la page, et
+                # invisible. Les deux figures matricielles de la séance 6 du cours de ML étaient
+                # dans ce cas. `.figure-matricielle` donne à l'image un fond clair, pour qu'un
+                # PNG à fond transparent reste lisible quel que soit le fond de la page.
+                attributs = [".nostretch", ".figure-matricielle",
+                             f'fig-alt="{(alt or "TODO(PO): description de la figure").replace(chr(34), "&quot;")}"']
+                if largeur:
+                    attributs.append(f'width="{round(largeur * 100)}%"')
+                insertion = (f'![]({conversion.prefixe_figures}/{nom}.png)'
+                             f'{{{" ".join(attributs)}}}')
+            else:
+                conversion.figures.append(f"{nom} : insérée, texte alternatif — {origine}")
+                insertion = (f'{{{{< svg {conversion.prefixe_figures}/{nom}.svg '
+                             f'alt="{alt or "TODO(PO): description de la figure"}"{taille} >}}}}')
 
         # Seule l'insertion est mise à l'abri ; la légende, elle, suit le chemin normal du texte.
         bloc = conversion.proteger(insertion)
-        if legende:
+        if flottant and legende:
+            # Figure Quarto : numérotée, et référençable par `@fig-…` quand la source l'étiquette.
+            conversion.flottants["figure"] += 1
+            ouverture = f"::: {{#{etiquette}}}" if etiquette else "::: {.figure-flottante}"
+            bloc = f"{ouverture}\n{bloc}\n\n{legende.strip()}\n:::"
+        elif legende:
             bloc += "\n\n::: {.legende}\n" + legende.strip() + "\n:::"
         if repli:
             bloc += "\n\n" + conversion.proteger(repli)
         texte = texte[:trouve.start()] + bloc + texte[fin:]
 
 
-MOTIF_MATHS = re.compile(r"\$\$.+?\$\$|\$[^$]+?\$|\\\[.+?\\\]", re.S)
+# Le crochet ouvrant ne compte que s'il n'est pas lui-même précédé d'une barre oblique : « \\[2pt] »
+# est un saut de ligne avec espacement, et non le début d'une formule.
+MOTIF_MATHS = re.compile(r"\$\$.+?\$\$|\$[^$]+?\$|(?<!\\)\\\[.+?(?<!\\)\\\]", re.S)
+# Les environnements qui sont des mathématiques sans porter de dollars.
+MOTIF_ENVIRONNEMENTS_MATHS = re.compile(
+    r"\\begin\{(align|equation|gather|multline|eqnarray)(\*?)\}.*?\\end\{\1\2\}", re.S)
+
+
+# Références croisées (US-61). LaTeX étiquette avec `\label{fig:x}` et renvoie avec `\ref{fig:x}` ;
+# Quarto identifie avec `{#fig-x}` et renvoie avec `@fig-x`. Les préfixes se correspondent un à un,
+# et ce sont les trois seuls que les cours emploient : `fig:` (101 fois), `sec:` (13), `eq:` (4).
+PREFIXES_RENVOI = {"fig": "fig", "tbl": "tbl", "tab": "tbl", "sec": "sec", "eq": "eq"}
+MOTIF_LABEL = re.compile(r"\\label\s*\{([^}]*)\}")
+MOTIF_RENVOI = re.compile(r"\\(?:auto)?ref\s*\{([^}]*)\}|\\eqref\s*\{([^}]*)\}")
+
+
+def identifiant_quarto(etiquette: str) -> str:
+    """« fig:bouki_grille » -> « fig-bouki_grille ».
+
+    Un identifiant sans préfixe connu reçoit `sec-` : Quarto numérote par préfixe, et une
+    étiquette qu'il ne reconnaît pas ne se référencerait pas du tout.
+    """
+    prefixe, _, reste = etiquette.partition(":")
+    if not reste:
+        return "sec-" + re.sub(r"[^A-Za-z0-9_-]+", "-", etiquette.strip()).strip("-").lower()
+    court = PREFIXES_RENVOI.get(prefixe.strip().lower(), "sec")
+    return f"{court}-" + re.sub(r"[^A-Za-z0-9_-]+", "-", reste.strip()).strip("-").lower()
+
+
+def renvois(texte: str) -> str:
+    r"""`\ref{fig:x}` et `\eqref{eq:x}` -> `@fig-x`, que Quarto numérote et relie."""
+    def un(trouve: re.Match[str]) -> str:
+        return "@" + identifiant_quarto(trouve[1] or trouve[2])
+    return MOTIF_RENVOI.sub(un, texte)
+
+
+# Matrices de `mathtools` que MathJax ne connaît pas. MathJax 2.7.9, que Quarto charge pour les
+# présentations avec la configuration `TeX-AMS_HTML-full`, embarque amsmath mais **pas**
+# mathtools : `\begin{psmallmatrix}` est pour lui un environnement inconnu, et il affiche alors le
+# TeX **brut dans un cadre**, au milieu de la phrase. C'est ce que montrait la séance 10 du cours
+# d'Introduction au ML. La forme équivalente — un `smallmatrix` d'amsmath entre délimiteurs — dit
+# la même chose et se rend correctement.
+PETITES_MATRICES = {"psmallmatrix": ("(", ")"), "bsmallmatrix": ("[", "]"),
+                    "Bsmallmatrix": ("\\{", "\\}"), "vsmallmatrix": ("|", "|"),
+                    "Vsmallmatrix": ("\\|", "\\|")}
+
+
+def petites_matrices(texte: str) -> str:
+    """« \\begin{psmallmatrix} … \\end{psmallmatrix} » -> « \\left( \\begin{smallmatrix} … » (US-60)."""
+    # Remplacement littéral : dans une expression régulière, les antislashs de la chaîne de
+    # remplacement seraient lus comme des échappements.
+    for nom, (gauche, droite) in PETITES_MATRICES.items():
+        texte = texte.replace(f"\\begin{{{nom}}}", f"\\left{gauche}\\begin{{smallmatrix}}")
+        texte = texte.replace(f"\\end{{{nom}}}", f"\\end{{smallmatrix}}\\right{droite}")
+    return texte
+
+
+def maths_en_dollars(formule: str) -> str:
+    """Écrit la formule sous la forme que Quarto sait lire.
+
+    Deux façons d'écrire des mathématiques que LaTeX accepte et que Quarto refuse :
+
+    - « \\[ … \\] » : Quarto n'active pas `tex_math_single_backslash` et voit dans `\\[` un crochet
+      échappé, non une ouverture de formule. Seuls les `\\begin{pmatrix}` intérieurs passaient en
+      mathématiques, et le lecteur lisait « [ X= », la matrice, puis « ^{10000} y= » en toutes
+      lettres — c'est ce que montrait la séance 3 du cours de ML ;
+    - « $4 = $ » : une espace collée au dollar fermant (ou au dollar ouvrant) empêche Quarto d'y
+      voir une formule, et la page affichait les dollars — séance 5 du même cours.
+    """
+    if formule.startswith("\\["):
+        return "$$" + formule[2:-2].strip() + "$$"
+    if formule.startswith("$$") or not formule.startswith("$"):
+        return formule
+    contenu = formule[1:-1].strip()
+    return f"${contenu}$" if contenu else formule
 
 
 # Caractères que LaTeX écrit échappés. Ceux de MARKDOWN_SPECIAUX doivent le rester dans le texte
@@ -382,16 +711,75 @@ def inline(texte: str, conversion: Conversion) -> str:
     texte = retirer_tailles(sans_commentaires(texte))
 
     def garder(trouve: re.Match[str]) -> str:
-        formules.append(trouve[0])
+        formules.append(maths_en_dollars(trouve[0]))
         return f"\x00{len(formules) - 1}\x00"
 
     texte = MOTIF_MATHS.sub(garder, texte)
+
+    # `\textcolor{couleur}{texte}` : la couleur est de la mise en forme, le texte reste. Le
+    # traitement vient **après** la mise de côté des mathématiques : dans une formule, `\textcolor`
+    # est rendu par MathJax, et le retirer effacerait ce que le PO a mis en couleur — le point
+    # binaire rouge du chapitre 1 du cours de C, par exemple.
+    # `\multicolumn{3}{l}{Succès}` : une cellule qui s'étend sur trois colonnes. Markdown ne sait
+    # pas les fusionner ; le contenu, lui, est du texte du cours et doit rester. La cellule garde
+    # donc son texte et la ligne reste plus courte, `tableau()` la complétant par des cellules
+    # vides. Sans cela, cinq tableaux d'Introduction à l'IA affichaient « {3}{l}{Succès} » en
+    # clair, accolades comprises (US-64).
+    motif_multicolumn = re.compile(r"\\multicolumn\s*\{")
+    while True:
+        trouve = motif_multicolumn.search(texte)
+        if not trouve:
+            break
+        fin_portee = accolade(texte, trouve.end() - 1)
+        suivant = re.match(r"\s*\{", texte[fin_portee + 1:])
+        if not suivant:
+            texte = texte[:trouve.start()] + texte[fin_portee + 1:]
+            continue
+        debut_alignement = fin_portee + 1 + suivant.end() - 1
+        fin_alignement = accolade(texte, debut_alignement)
+        apres_alignement = re.match(r"\s*\{", texte[fin_alignement + 1:])
+        if not apres_alignement:
+            texte = texte[:trouve.start()] + texte[fin_alignement + 1:]
+            continue
+        debut_contenu = fin_alignement + 1 + apres_alignement.end() - 1
+        fin_contenu = accolade(texte, debut_contenu)
+        texte = texte[:trouve.start()] + texte[debut_contenu + 1:fin_contenu] + texte[fin_contenu + 1:]
+
+    for commande, garde in (("textcolor", 2),):
+        motif_deux = re.compile(rf"\\{commande}\s*\{{")
+        while True:
+            trouve = motif_deux.search(texte)
+            if not trouve:
+                break
+            fin_un = accolade(texte, trouve.end() - 1)
+            suivant = re.match(r"\s*\{", texte[fin_un + 1:])
+            if not suivant:
+                texte = texte[:trouve.start()] + texte[trouve.end():fin_un] + texte[fin_un + 1:]
+                continue
+            debut_deux = fin_un + 1 + suivant.end() - 1
+            fin_deux = accolade(texte, debut_deux)
+            garde_texte = (texte[debut_deux + 1:fin_deux] if garde == 2
+                           else texte[trouve.end():fin_un])
+            texte = texte[:trouve.start()] + garde_texte + texte[fin_deux + 1:]
+
+    # Guillemets de LaTeX : « ``mot'' ». En Markdown, un double accent grave **ouvre un code en
+    # ligne** et avale tout ce qui suit, barres d'un tableau comprises : la ligne cessait d'être une
+    # ligne de tableau, et Pandoc rendait le tout en bloc de lignes, barres verticales apparentes.
+    # Constaté sur le chapitre 2 du cours de C ; 189 occurrences dans les quatre chapitres.
+    texte = re.sub(r"``\s*(.+?)\s*''", "« \\1 »", texte, flags=re.S)
 
     # Mise en forme.
     remplacements = [
         (r"\\textbf\{", "**", "**"), (r"\\alert\{", "**", "**"),
         (r"\\emph\{", "*", "*"), (r"\\textit\{", "*", "*"),
         (r"\\texttt\{", "`", "`"), (r"\\textsuperscript\{", "^", "^"),
+        # Petites capitales : Pandoc les rend par un attribut, et non par une commande (US-61).
+        (r"\\textsc\{", "[", "]{.smallcaps}"),
+        # Une adresse littérale devient un lien automatique.
+        (r"\\url\{", "<", ">"),
+        # Note de bas de page : Pandoc a une forme en ligne, qui n'oblige pas à inventer une
+        # étiquette ni à la placer en fin de document (US-62).
+        (r"\\footnote\{", "^[", "]"),
     ]
     for motif, avant, apres in remplacements:
         while True:
@@ -400,6 +788,34 @@ def inline(texte: str, conversion: Conversion) -> str:
                 break
             contenu, suite = argument(texte, trouve.end() - 1)
             texte = texte[:trouve.start()] + avant + contenu + apres + texte[suite:]
+
+    # Mise en page qui emporte ses arguments : `\thispagestyle{empty}` ou
+    # `\addcontentsline{toc}{section}{Références}` n'ont pas d'équivalent en HTML, et leur nom
+    # seul retiré laisserait « empty » et « tocsectionRéférences » dans la page (US-61).
+    for nom, arguments in (("thispagestyle", 1), ("pagestyle", 1), ("addcontentsline", 3),
+                           ("setcounter", 2), ("refstepcounter", 1), ("addtocounter", 2),
+                           # Espacement fantôme et alternance de couleurs d'un tableau : du style.
+                           ("phantom", 1), ("hphantom", 1), ("vphantom", 1), ("rowcolors", 3),
+                           # Couleur de cellule et filet partiel : du style de tableau.
+                           ("cellcolor", 1), ("rowcolor", 1), ("columncolor", 1),
+                           # Filet horizontal et titre de partie : de la mise en page de document.
+                           ("rule", 2), ("part", 1),
+                           # Espace horizontale : elle sépare deux blocs côte à côte, que
+                           # `colonnes_minipage()` traite en colonnes ; ici elle n'a plus d'objet.
+                           ("hspace", 1)):
+        motif = re.compile(rf"\\{nom}\s*\{{")
+        while True:
+            trouve = motif.search(texte)
+            if not trouve:
+                break
+            fin = trouve.start()
+            position = trouve.end() - 1
+            for _ in range(arguments):
+                if position >= len(texte) or texte[position] != "{":
+                    break
+                position = accolade(texte, position) + 1
+            conversion.ignorees[nom] += 1
+            texte = texte[:fin] + texte[position:]
 
     # Commandes de mise en page et caractères.
     def commande(trouve: re.Match[str]) -> str:
@@ -419,7 +835,21 @@ def inline(texte: str, conversion: Conversion) -> str:
     texte = re.sub(r"\\(?:vskip|vspace)\*?\s*(?:\{[^}]*\}|-?[\d.]+\s*[a-z]+)", "", texte)
     texte = re.sub(r"\\([A-Za-z]+)\s*(?:\{\})?", commande, texte)
     texte = caracteres_echappes(texte)
-    texte = re.sub(r"\x00(\d+)\x00", lambda t: formules[int(t[1])], texte)
+    # Pandoc refuse une formule en ligne **immédiatement suivie d'un chiffre** : c'est sa façon de
+    # ne pas prendre le « 5$ » et le « 3$ » d'un prix pour une formule. La page affichait donc
+    # « 3$$3 » là où la source écrit « grille 3$\\times$3 », et « $$200 cas » pour « $\\sim$200 cas ».
+    # Une espace fine insécable lève l'ambiguïté sans rien changer à la lecture. La correction se
+    # pose **ici**, où le marqueur dit exactement où commence et finit la formule : appliquée au
+    # texte restitué, une expression régulière prenait la fin d'une formule et le début de la
+    # suivante pour une seule, et cassait les deux.
+    def restituer(trouve: re.Match[str]) -> str:
+        formule = formules[int(trouve[1])]
+        chiffre = trouve[2]
+        if chiffre and formule.startswith("$") and not formule.startswith("$$"):
+            return formule + "\u202f" + chiffre
+        return formule + chiffre
+
+    texte = re.sub(r"\x00(\d+)\x00(\d?)", restituer, texte)
     return re.sub(r"\n{3,}", "\n\n", texte).strip()
 
 
@@ -435,15 +865,57 @@ def titre_de_callout(titre: str | None, conversion: Conversion) -> str:
     return inline(titre, conversion).replace("\n", " ").replace('"', '\\"').strip()
 
 
+def cellules_de_tableau(contenu: str) -> list[list[str]]:
+    """Découpe un `tabular` en lignes et en cellules, comme LaTeX les lit.
+
+    Découper naïvement sur « & » coupait `\\texttt{\\&x}` en deux : une **esperluette échappée** n'est
+    pas un séparateur de colonne, et la moitié de cellule qui en sortait laissait une accolade
+    ouverte. L'import du chapitre 2 du cours de C s'arrêtait là, sur « accolade non fermée ».
+
+    Trois règles suffisent : une barre oblique inverse protège le caractère suivant, un séparateur ne
+    compte qu'en dehors des accolades, et « \\\\ » termine la ligne — l'espacement optionnel compris.
+    """
+    lignes: list[list[str]] = []
+    ligne: list[str] = []
+    tampon: list[str] = []
+    profondeur = position = 0
+    while position < len(contenu):
+        caractere = contenu[position]
+        if caractere == "\\" and position + 1 < len(contenu):
+            if contenu[position + 1] == "\\" and profondeur == 0:
+                ligne.append("".join(tampon))
+                lignes.append(ligne)
+                ligne, tampon = [], []
+                position += 2
+                # Une ligne peut finir par « \\[2pt] » : l'espacement n'appartient à aucune cellule.
+                espacement = re.match(r"\s*\[[^\]]*\]", contenu[position:])
+                position += espacement.end() if espacement else 0
+                continue
+            tampon.append(contenu[position:position + 2])
+            position += 2
+            continue
+        if caractere == "{":
+            profondeur += 1
+        elif caractere == "}":
+            profondeur -= 1
+        elif caractere == "&" and profondeur == 0:
+            ligne.append("".join(tampon))
+            tampon = []
+            position += 1
+            continue
+        tampon.append(caractere)
+        position += 1
+    ligne.append("".join(tampon))
+    lignes.append(ligne)
+    return lignes
+
+
 def tableau(contenu: str, conversion: Conversion) -> str:
     """tabular -> tableau Markdown ; les filets de booktabs disparaissent."""
     conversion.tableaux += 1
     lignes = []
-    for brute in contenu.split("\\\\"):
-        # Une ligne peut finir par « \\[2pt] » : l'espacement reste collé au début de la suivante.
-        brute = re.sub(r"^\s*\[[^\]]*\]", "", brute)
-        cellules = [inline(c, conversion).replace("\n", " ").strip()
-                    for c in brute.split("&")]
+    for brute in cellules_de_tableau(contenu):
+        cellules = [inline(c, conversion).replace("\n", " ").strip() for c in brute]
         if any(cellules):
             lignes.append(cellules)
     if not lignes:
@@ -456,9 +928,34 @@ def tableau(contenu: str, conversion: Conversion) -> str:
     return "\n".join([entete, separateur] + corps)
 
 
+# Découpe d'une liste : `\item`, `\begin{…}` et `\end{…}`, pour ne couper qu'au premier niveau.
+MOTIF_ELEMENTS = re.compile(r"\\item\b|\\begin\{|\\end\{")
+
+
+def elements_de_liste(contenu: str) -> list[str]:
+    """Les éléments d'une liste, sans toucher aux `\\item` des listes imbriquées.
+
+    La recette de recherche générique de la séance 3 d'Introduction à l'IA numérote ses étapes, et
+    l'une d'elles ouvre sa propre énumération. Découper sur **tous** les `\\item` coupait
+    l'énumération intérieure en deux : le fragment qui portait son `\\begin{enumerate}` n'avait
+    plus de `\\end{enumerate}`, et la conversion s'arrêtait sur « environnement non fermé ».
+    """
+    coupes, profondeur = [], 0
+    for trouve in MOTIF_ELEMENTS.finditer(contenu):
+        jeton = trouve.group()
+        if jeton == "\\begin{":
+            profondeur += 1
+        elif jeton == "\\end{":
+            profondeur -= 1
+        elif profondeur == 0:
+            coupes.append((trouve.end(), trouve.start()))
+    fins = [debut for _, debut in coupes[1:]] + [len(contenu)]
+    return [contenu[apres_item:fin] for (apres_item, _), fin in zip(coupes, fins)]
+
+
 def liste(contenu: str, ordonnee: bool, conversion: Conversion) -> str:
     puces = []
-    for element in re.split(r"\\item\b", contenu)[1:]:
+    for element in elements_de_liste(contenu):
         corps = convertir(element, conversion).strip()
         if not corps:
             continue
@@ -511,28 +1008,217 @@ def code(contenu: str, conversion: Conversion, options: str | None = None) -> st
     return f"```{langage}\n{corps}\n```"
 
 
+def colonnes(contenu: str, conversion: Conversion) -> str:
+    """`columns` de Beamer -> colonnes Quarto, largeurs comprises (US-60).
+
+    Le cours d'Introduction au ML pose une figure à côté de son commentaire. Jusqu'ici les deux
+    colonnes étaient converties l'une après l'autre : le texte passait sous la figure, et la slide
+    perdait sa mise en page. Les largeurs sont écrites dans la source (`0.54\\linewidth`), en
+    fractions ; Quarto les veut en pourcentages.
+    """
+    morceaux = re.split(r"\\column\s*\{([^}]*)\}", contenu)
+    if len(morceaux) < 3:
+        return convertir(contenu, conversion)
+    blocs = ["::: {.columns}"]
+    for largeur, corps in zip(morceaux[1::2], morceaux[2::2]):
+        fraction = re.match(r"\s*([0-9.]+)\s*\\(?:linewidth|textwidth)", largeur)
+        pourcent = f'{round(float(fraction[1]) * 100)}%' if fraction else "50%"
+        blocs.append(f'::: {{.column width="{pourcent}"}}')
+        blocs.append(convertir(corps, conversion))
+        blocs.append(":::")
+    blocs.append(":::")
+    return "\n".join(blocs)
+
+
+def lignes_de_formule(corps: str) -> list[str]:
+    """Les lignes d'un `align`, coupées sur « \\\\ » hors accolades."""
+    lignes, profondeur, debut, i = [], 0, 0, 0
+    while i < len(corps):
+        if corps[i] == "{":
+            profondeur += 1
+        elif corps[i] == "}":
+            profondeur -= 1
+        elif corps.startswith("\\\\", i) and profondeur == 0:
+            lignes.append(corps[debut:i])
+            i += 2
+            debut = i
+            continue
+        i += 1
+    lignes.append(corps[debut:])
+    return [ligne for ligne in (l.strip() for l in lignes) if ligne]
+
+
+def equations_etiquetees(corps: str, interne: str) -> str:
+    """Un `align` qui porte **plusieurs** étiquettes devient une équation numérotée par ligne.
+
+    Quarto numérote et référence une formule hors ligne quand son bloc porte `{#eq-…}` : un bloc,
+    une étiquette. Les trois règles du Monde de Bouki, à la séance 2 d'Introduction à l'IA,
+    tiennent dans un seul `align` et portent trois `\\label` : seule la première était reprise, et
+    la page renvoyait à deux équations qui n'existaient pas — « Unable to resolve crossref
+    @eq-r2 », disait le rendu, et le lecteur voyait « (?) ».
+
+    Chaque ligne garde son environnement d'alignement, et donc ses `&` ; l'alignement d'une ligne
+    à l'autre se perd, ce qu'une page web ne montrait de toute façon pas.
+    """
+    blocs = []
+    for ligne in lignes_de_formule(corps):
+        etiquette = ""
+        marque = MOTIF_LABEL.search(ligne)
+        if marque:
+            etiquette = identifiant_quarto(marque[1])
+            ligne = (ligne[:marque.start()] + ligne[marque.end():]).strip()
+        if not ligne:
+            continue
+        suffixe = f" {{#{etiquette}}}" if etiquette else ""
+        blocs.append(f"$$\n\\begin{{{interne}}}\n{ligne}\n\\end{{{interne}}}\n$${suffixe}")
+    return "\n\n".join(blocs)
+
+
+def colonnes_minipage(contenu: str, conversion: Conversion) -> str:
+    """`minipage` -> colonne Quarto, ce qui précède formant la première colonne (US-62).
+
+    La séance 3 d'Introduction à l'IA pose son arbre de recherche à côté du décompte de la mémoire
+    qu'il occupe : un `tikzpicture`, une espace horizontale, puis un `minipage` large de la moitié
+    de la page. Converti bloc après bloc, le décompte passait sous la figure — et le `minipage`
+    n'était pas converti du tout, faute d'équivalent connu.
+
+    Les largeurs sont écrites en fractions de `\\textwidth`, comme les colonnes Beamer les écrivent
+    en fractions de `\\linewidth` ; ce qui précède prend ce qui reste.
+    """
+    morceaux: list[tuple[str, str]] = []
+    reste = contenu
+    while True:
+        trouve = re.search(r"\\begin\{minipage\}", reste)
+        if not trouve:
+            morceaux.append(("", reste))
+            break
+        morceaux.append(("", reste[:trouve.start()]))
+        position = trouve.end()
+        _, position = option(reste, position)          # alignement facultatif : [t], [b]
+        largeur, position = argument(reste, position)  # largeur : {0.5\textwidth}
+        corps, suite = environnement(reste, "minipage", position)
+        morceaux.append((largeur, corps))
+        reste = reste[suite:]
+
+    def pourcentage(largeur: str) -> int:
+        fraction = re.match(r"\s*([0-9.]+)\s*\\(?:linewidth|textwidth|columnwidth)", largeur)
+        return round(float(fraction[1]) * 100) if fraction else 50
+
+    colonnes_reelles = [(l, c) for l, c in morceaux if c.strip()]
+    if not any(l for l, _ in colonnes_reelles):
+        return convertir(contenu, conversion)
+    declarees = sum(pourcentage(l) for l, _ in colonnes_reelles if l)
+    libres = [i for i, (l, _) in enumerate(colonnes_reelles) if not l]
+    # Ce qui n'a pas de largeur déclarée — la figure, le plus souvent — se partage le reste.
+    reste_pourcent = max(100 - declarees, 20 * len(libres)) // max(len(libres), 1)
+
+    blocs = ["::: {.columns}"]
+    for largeur, corps in colonnes_reelles:
+        part = pourcentage(largeur) if largeur else reste_pourcent
+        blocs.append(f'::: {{.column width="{part}%"}}')
+        blocs.append(convertir(corps, conversion))
+        blocs.append(":::")
+    blocs.append(":::")
+    return "\n".join(blocs)
+
+
+def legende_et_etiquette(contenu: str, conversion: Conversion) -> tuple[str, str, str]:
+    """Sépare d'un flottant sa légende, son étiquette et ce qu'il reste (US-61)."""
+    legende = ""
+    trouve = re.search(r"\\caption\s*\{", contenu)
+    if trouve:
+        fin = accolade(contenu, trouve.end() - 1)
+        legende = contenu[trouve.end():fin]
+        contenu = contenu[:trouve.start()] + contenu[fin + 1:]
+    etiquette = ""
+    marque = MOTIF_LABEL.search(contenu)
+    if marque:
+        etiquette = identifiant_quarto(marque[1])
+        contenu = contenu[:marque.start()] + contenu[marque.end():]
+    return contenu, legende, etiquette
+
+
+def flottant_figure(contenu: str, conversion: Conversion) -> str:
+    """`figure` de LaTeX -> figure Quarto numérotée et référençable (US-61).
+
+    Quarto numérote et relie une figure quand elle porte un identifiant `#fig-…`. L'image, elle,
+    passe par le chemin habituel — un SVG est incorporé pour suivre les encres du thème —, d'où la
+    forme en division plutôt que le crochet d'image : `::: {#fig-x}` … légende … `:::`.
+    """
+    contenu, legende, etiquette = legende_et_etiquette(contenu, conversion)
+    conversion.flottants["figure"] += 1
+    corps = convertir(figures(contenu, conversion, legende), conversion)
+    if not legende:
+        # Sans légende, rien à numéroter : Quarto exige une légende pour référencer une figure.
+        return corps
+    ligne = f"::: {{#{etiquette}}}" if etiquette else "::: {.figure-flottante}"
+    return "\n".join([ligne, corps, "", inline(legende, conversion), ":::"])
+
+
+def flottant_tableau(contenu: str, conversion: Conversion) -> str:
+    """`table` de LaTeX -> tableau Quarto avec sa légende (US-61).
+
+    La légende d'un tableau s'écrit sous lui, précédée de deux points ; l'identifiant la suit entre
+    accolades. C'est la forme que Quarto numérote et relie par `@tbl-…`.
+    """
+    contenu, legende, etiquette = legende_et_etiquette(contenu, conversion)
+    conversion.flottants["table"] += 1
+    corps = convertir(contenu, conversion)
+    if not legende:
+        return corps
+    suffixe = f" {{#{etiquette}}}" if etiquette else ""
+    return f"{corps}\n\n: {inline(legende, conversion)}{suffixe}"
+
+
 def convertir(texte: str, conversion: Conversion) -> str:
     """Convertit un fragment : environnements connus, puis texte courant."""
     # Les commandes de taille sont retirées ici aussi : « {\small\begin{tabular}… } » entoure parfois
     # un environnement, et ses accolades traverseraient sinon la conversion.
     morceaux, reste = [], retirer_tailles(sans_commentaires(texte))
+
+    # Les mathématiques sont mises de côté **avant** de chercher les environnements : `\begin{cases}`
+    # vit à l'intérieur d'un `$…$`, et le prendre pour un environnement du document coupait la
+    # formule en deux — c'est ce qui laissait deux `cases` et un `\rightarrow` non convertis au
+    # chapitre 1 du cours de C. `inline` les protégera de nouveau, à sa façon.
+    formules: list[str] = []
+
+    # La formule est rangée **telle quelle** : cette mise de côté balaie aussi le contenu des
+    # `verbatim` et des `lstlisting`, où un `$` est une invite shell et non une formule. La
+    # normaliser ici collait l'invite à la commande (« $ pwd » devenait « $pwd ») et soudait deux
+    # lignes de terminal du chapitre 0 du cours de Python. C'est `inline`, qui ne voit que du texte
+    # courant, qui la normalise.
+    def mettre_de_cote(trouve: re.Match[str]) -> str:
+        formules.append(trouve[0])
+        return f"\x02{len(formules) - 1}\x02"
+
+    def rendre(fragment: str) -> str:
+        return re.sub(r"\x02(\d+)\x02", lambda t: formules[int(t[1])], fragment)
+
+    reste = MOTIF_MATHS.sub(mettre_de_cote, reste)
     while True:
         trouve = re.search(r"\\begin\{([A-Za-z*]+)\}", reste)
         if not trouve:
-            morceaux.append(inline(reste, conversion))
+            morceaux.append(inline(rendre(reste), conversion))
             break
-        morceaux.append(inline(reste[:trouve.start()], conversion))
+        morceaux.append(inline(rendre(reste[:trouve.start()]), conversion))
         nom = trouve[1]
         position = trouve.end()
         titre, position = option(reste, position)
         if nom == "tabular":  # la spécification des colonnes ne sert qu'à LaTeX
+            _, position = argument(reste, position)
+        elif nom == "minipage":  # la largeur est traitée par `colonnes_minipage()`
             _, position = argument(reste, position)
         elif nom in conversion.encadres and position < len(reste) and reste[position] == "{":
             # Un encadré `tcolorbox` porte son titre entre accolades, là où un encadré Beamer le met
             # entre crochets : `\begin{definitionbox}{Le langage C}`.
             titre, position = argument(reste, position)
         contenu, suite = environnement(reste, nom, position)
+        contenu, titre = rendre(contenu), (rendre(titre) if titre else titre)
 
+        if nom in conversion.encadres and conversion.encadres[nom][0] == "omis":
+            conversion.omis[nom] += 1
+            reste = reste[suite:]
+            continue
         if nom in conversion.encadres:
             genre, classe, defaut = conversion.encadres[nom]
             corps = convertir(contenu, conversion)
@@ -549,11 +1235,50 @@ def convertir(texte: str, conversion: Conversion) -> str:
             morceaux.append(liste(contenu, nom == "enumerate", conversion))
         elif nom == "lstlisting":
             morceaux.append(code(contenu, conversion, titre))
+        elif nom == "verbatim":
+            # `verbatim` n'a ni langage ni style : c'est du texte tel quel — une trace d'exécution, un
+            # schéma en caractères. Le colorer comme du C inventerait une syntaxe qu'il n'a pas.
+            conversion.codes.append("sortie")
+            morceaux.append(conversion.proteger("```\n" + contenu.strip("\n") + "\n```"))
         elif nom == "tabular":
             morceaux.append(tableau(contenu, conversion))
         elif nom == "tikzpicture":
             morceaux.append(conversion.proteger(schema_tikz(conversion)))
-        elif nom in ("center", "block", "columns", "column"):
+        elif nom in ("align", "align*", "equation", "equation*", "gather", "gather*"):
+            # Mathématiques hors ligne : MathJax les rend telles quelles dans un bloc « $$ ».
+            # `align` se compose en `aligned`, qui est sa forme utilisable à l'intérieur de « $$ ».
+            interne = {"align": "aligned", "align*": "aligned", "gather": "gathered",
+                       "gather*": "gathered"}.get(nom)
+            # Une équation étiquetée se numérote et se référence : Quarto le fait quand le bloc
+            # porte `{#eq-…}` (US-61). L'étiquette est retirée du corps, où LaTeX seul la lisait.
+            corps = contenu.strip()
+            if interne and len(MOTIF_LABEL.findall(corps)) > 1:
+                morceaux.append(conversion.proteger(equations_etiquetees(corps, interne)))
+                reste = reste[suite:]
+                continue
+            etiquette = ""
+            marque = MOTIF_LABEL.search(corps)
+            if marque:
+                etiquette = identifiant_quarto(marque[1])
+                corps = (corps[:marque.start()] + corps[marque.end():]).strip()
+            if interne:
+                corps = f"\\begin{{{interne}}}\n{corps}\n\\end{{{interne}}}"
+            suffixe = f" {{#{etiquette}}}" if etiquette else ""
+            morceaux.append(conversion.proteger(f"$$\n{corps}\n$${suffixe}"))
+        elif nom in ("figure", "figure*"):
+            morceaux.append(flottant_figure(contenu, conversion))
+        elif nom in ("table", "table*"):
+            morceaux.append(flottant_tableau(contenu, conversion))
+        elif nom == "columns":
+            morceaux.append(conversion.proteger(colonnes(contenu, conversion)))
+        elif nom in ("center", "block", "column"):
+            if "\\begin{minipage}" in contenu:
+                morceaux.append(conversion.proteger(colonnes_minipage(contenu, conversion)))
+            else:
+                morceaux.append(convertir(contenu, conversion))
+        elif nom == "minipage":
+            # Un `minipage` seul, hors d'un bloc centré : il n'y a rien à mettre à côté, son
+            # contenu suit le fil de la page.
             morceaux.append(convertir(contenu, conversion))
         else:
             morceaux.append(conversion.non_converti(f"\\begin{{{nom}}} … \\end{{{nom}}}"))
@@ -569,7 +1294,8 @@ def page(corps: str, conversion: Conversion) -> list[str]:
     page —, `\\subsection` un niveau 3, et le texte entre deux titres est converti tel quel.
     """
     niveaux = {"section": "##", "subsection": "###", "subsubsection": "####"}
-    motif = re.compile(r"\\(section|subsection|subsubsection)\*?\{")
+    # Le titre peut être précédé d'un argument facultatif : `\section[court]{affiché}`.
+    motif = re.compile(r"\\(section|subsection|subsubsection)\*?(?=[\[{])")
     sorties = []
 
     def morceau(texte: str, titre: str) -> None:
@@ -585,9 +1311,17 @@ def page(corps: str, conversion: Conversion) -> list[str]:
         morceau(corps[:trouve.start()], "")
 
     while trouve:
-        titre, position = argument(corps, trouve.end() - 1)
+        _, apres_option = option(corps, trouve.end())
+        titre, position = argument(corps, apres_option)
+        # `\\label{sec:x}` qui suit le titre devient l'identifiant de la section : c'est lui que
+        # `@sec-x` ira chercher (US-61).
+        marque = re.match(r"\s*\\label\s*\{([^}]*)\}", corps[position:])
+        etiquette = ""
+        if marque:
+            etiquette = f" {{#{identifiant_quarto(marque[1])}}}"
+            position += marque.end()
         suivant = motif.search(corps, position)
-        sorties.append(f"{niveaux[trouve[1]]} {inline(titre, conversion)}")
+        sorties.append(f"{niveaux[trouve[1]]} {inline(titre, conversion)}{etiquette}")
         morceau(corps[position:suivant.start() if suivant else len(corps)], titre)
         trouve = suivant
     return sorties
@@ -602,7 +1336,11 @@ def slides(corps: str, conversion: Conversion) -> list[str]:
         if not trouve:
             break
         if trouve[1] == "section":
-            titre, position = argument(corps, trouve.end())
+            # `\section[titre court]{titre affiché}` : l'argument facultatif ne sert qu'à la table
+            # des matières de Beamer. Ne pas le sauter faisait lire « court]{affiché » comme un seul
+            # titre — six slides de section de la séance 5 du cours de ML s'affichaient ainsi.
+            _, apres_option = option(corps, trouve.end())
+            titre, position = argument(corps, apres_option)
             conversion.slide = titre
             sorties.append(f"# {inline(titre, conversion)}")
             continue
@@ -685,8 +1423,39 @@ def nettoyer_svg(source: Path, cible: Path) -> dict[str, int]:
         element.set("style", "; ".join(d for d in declarations if d))
     cible.parent.mkdir(parents=True, exist_ok=True)
     arbre.write(cible, encoding="unicode", xml_declaration=False)
-    cible.write_text(cible.read_text(encoding="utf-8").rstrip() + "\n", encoding="utf-8")
+    cible.write_text(identifiants_uniques(cible.read_text(encoding="utf-8"), cible.stem).rstrip()
+                     + "\n", encoding="utf-8")
     return compte
+
+
+def identifiants_uniques(svg: str, prefixe: str) -> str:
+    """Préfixe les identifiants internes d'une figure par son nom.
+
+    Une figure incorporée dans la page partage l'espace des identifiants avec **toutes les autres**
+    de cette page. `pdftocairo` nomme ses glyphes `glyph-0-0`, `glyph-0-1`… et recommence à zéro pour
+    chaque figure : sur une page qui en porte vingt, `glyph-0-0` est défini vingt fois, et chaque
+    `<use href="#glyph-0-0">` désigne celui de la **première**. Tous les textes des figures suivantes
+    s'écrivaient donc avec les lettres de la première — c'est ce que le PO a vu sur les chapitres 1
+    et 2 du cours de C.
+
+    Le défaut ne se voit ni dans le SVG isolé, ni dans un contrôle de structure : chaque figure, prise
+    seule, est parfaitement valide. Il n'apparaît qu'une fois plusieurs figures posées dans la même
+    page.
+    """
+    # Les deux écritures existent dans les figures de ce site : pdftocairo met des guillemets,
+    # dvisvgm des apostrophes. Le navigateur les lit pareil, une expression régulière non.
+    identifiants = set(re.findall(r"""\bid=["']([^"']+)["']""", svg))
+    if not identifiants:
+        return svg
+    for identifiant in sorted(identifiants, key=len, reverse=True):
+        nouveau = f"{prefixe}-{identifiant}"
+        for guillemet in ('"', "'"):
+            svg = svg.replace(f"id={guillemet}{identifiant}{guillemet}",
+                              f"id={guillemet}{nouveau}{guillemet}")
+            svg = svg.replace(f"href={guillemet}#{identifiant}{guillemet}",
+                              f"href={guillemet}#{nouveau}{guillemet}")
+        svg = svg.replace(f"url(#{identifiant})", f"url(#{nouveau})")
+    return svg
 
 
 # --------------------------------------------------------------------------------------------------
@@ -694,25 +1463,27 @@ def nettoyer_svg(source: Path, cible: Path) -> dict[str, int]:
 # --------------------------------------------------------------------------------------------------
 
 def ressource(brute: str) -> dict:
-    """« lab|cours/x/ressources/lab1.pdf|Lab 1 » -> l'entrée écrite dans l'en-tête de la séance.
-
-    Un corrigé a un quatrième champ, sa **date de publication** : il est obligatoire, et c'est lui qui
-    décide du jour où le corrigé rejoint le site. Son fichier vit dans `_corriges/`, que Quarto ne rend
-    pas ; il est copié à l'assemblage, sous `corriges/`, le jour venu seulement.
-    """
+    """« lab|cours/x/ressources/lab1.pdf|Lab 1 » -> l'entrée écrite dans l'en-tête de la séance."""
     champs = brute.split("|")
     if len(champs) < 3:
-        sys.exit(f"Ressource mal formée : « {brute} » (attendu : type|fichier|titre[|date]).")
+        sys.exit(f"Ressource mal formée : « {brute} » (attendu : type|fichier|titre).")
     type_, fichier, titre = champs[0], champs[1], champs[2]
-    date = champs[3] if len(champs) > 3 else ""
-    if type_ not in RESSOURCES and type_ != CORRIGE:
+    if type_ == TYPE_REFUSE:
+        sys.exit("Un corrigé ne se publie pas et ne vit pas dans le dépôt : le type "
+                 f"« {TYPE_REFUSE} » est refusé (décision du PO, qui remplace la règle d'US-49).")
+    if type_ not in RESSOURCES:
         sys.exit(f"Type de ressource inconnu : « {type_} » "
-                 f"(attendu : {', '.join(sorted(RESSOURCES))} ou {CORRIGE}).")
-    if type_ == CORRIGE and not ISO.fullmatch(date):
-        sys.exit(f"Le corrigé « {titre} » n'a pas de date de publication (type|fichier|titre|AAAA-MM-JJ). "
-                 "Sans date, un corrigé ne peut pas être publié : c'est la règle d'US-49.")
-    if type_ != CORRIGE and date:
-        sys.exit(f"Seul un corrigé porte une date de publication (ici : « {type_} »).")
+                 f"(attendu : {', '.join(sorted(RESSOURCES))}).")
+    # Un corrigé passé sous un autre type — « tp|…/tp-pistes-ch1.pdf » — dit ce qu'il est par son
+    # nom de fichier. C'est ainsi que trois pistes du cours de C étaient parties en ligne.
+    minuscule = "".join(c for c in unicodedata.normalize("NFD", Path(fichier).name.lower())
+                        if not unicodedata.combining(c))
+    if MOTS_DE_CORRECTION.search(minuscule):
+        sys.exit(f"« {Path(fichier).name} » annonce une correction par son nom : aucun corrigé, "
+                 "aucune piste, aucune indication de correction ne se publie (décision du PO).")
+    if len(champs) > 3 and champs[3]:
+        sys.exit("Une ressource ne porte pas de date : la publication datée des corrigés "
+                 "(US-49) est supprimée.")
 
     # Chemins : `fichier` est relatif au dossier du cours (le filtre y lit le poids), `chemin` est
     # l'adresse publique. Ils se déduisent du chemin donné, et non de `--sortie` : le contrôle de
@@ -721,18 +1492,15 @@ def ressource(brute: str) -> dict:
     if len(parties) < 3 or parties[0] != "cours":
         sys.exit(f"Ressource hors d'un cours : {fichier} (attendu : cours/<slug>/…).")
     slug, relatif = parties[1], str(Path(*parties[2:]))
-    publie = f"corriges/{Path(relatif).name}" if type_ == CORRIGE else relatif
     return {"type": type_, "titre": titre or Path(relatif).name, "fichier": relatif,
-            "chemin": f"/cours/{slug}/{publie}", "date": date}
+            "chemin": f"/cours/{slug}/{relatif}"}
 
 
 def slide_ressources(ressources: list[dict]) -> str:
     """Dernière slide : les ressources de la séance (US-49).
 
     La slide n'est qu'un emplacement : c'est `assets/lua/ressources.lua` qui la remplit **au rendu**,
-    parce que deux de ses données ne sont connues qu'à ce moment-là — le poids de chaque fichier, et le
-    fait qu'un corrigé ait atteint ou non sa date de publication. Un corrigé avant sa date n'apparaît
-    donc nulle part, pas même en commentaire dans la page.
+    parce que le poids de chaque fichier n'est connu qu'à ce moment-là.
     """
     return "::: {#ressources-seance}\n:::" if ressources else ""
 
@@ -765,6 +1533,10 @@ def entete_page(entete: dict[str, str], description: str, numero: str,
     # Une page rédigée n'est pas imprimée en PDF depuis le site : c'est le PDF de LaTeX qui fait
     # foi, attaché en ressource. La table des séances a besoin de le savoir.
     lignes.append('cible: "page"')
+    # Marque la page pour la feuille de style et le script de défilement (US-59) : un chapitre rédigé
+    # porte des tableaux et des figures plus larges qu'un téléphone, qui doivent défiler dans leur
+    # cadre plutôt qu'élargir la page.
+    lignes.append("body-classes: cours-page")
     if numero:
         lignes.append(f"numero: {guillemets(numero)}")
     lignes += ressources_yaml(ressources)
@@ -784,8 +1556,7 @@ def ressources_yaml(ressources: list[dict] | None) -> list[str]:
     """Bloc `ressources:` de l'en-tête, le même pour une page et pour un deck (US-49).
 
     `fichier` est relatif au dossier du cours — c'est ce qui permet au filtre d'en lire le poids ;
-    `chemin` est l'adresse publique. Un corrigé porte en plus sa date de publication : avant elle,
-    ni le filtre ni le rendu ne le laissent apparaître.
+    `chemin` est l'adresse publique.
     """
     lignes = []
     for ressource in ressources or []:
@@ -793,8 +1564,6 @@ def ressources_yaml(ressources: list[dict] | None) -> list[str]:
         lignes.append(f"    titre: {guillemets(ressource['titre'])}")
         lignes.append(f"    fichier: {guillemets(ressource['fichier'])}")
         lignes.append(f"    chemin: {guillemets(ressource['chemin'])}")
-        if ressource.get("date"):
-            lignes.append(f"    date: {guillemets(ressource['date'])}")
     return ["ressources:"] + lignes if lignes else []
 
 
@@ -831,10 +1600,13 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: s
         "    scrollable: true",
         "    history: false",
         # Le menu de revealjs est construit à l'exécution : ce script lui donne un nom accessible et
-        # rend son panneau atteignable au clavier (US-42).
+        # rend son panneau atteignable au clavier (US-42). Le troisième charge les images tout de
+        # suite et fait recentrer les slides : reveal les positionne avant que les pixels arrivent,
+        # et ne recommence jamais.
         "    include-after-body:",
         '      text: \'<script src="/assets/js/slides-accessibilite.js"></script>'
-        '<script src="/assets/js/slides-pdf.js"></script>\'',
+        '<script src="/assets/js/slides-pdf.js"></script>'
+        '<script src="/assets/js/slides-images.js"></script>\'',
         "---",
         "",
     ]
@@ -865,6 +1637,16 @@ def ecrire_rapport(chemin: Path, source: Path, sortie: Path, conversion: Convers
         lignes += [f"- **{slide}** : `{quoi}`" for slide, quoi in conversion.non_convertis]
     else:
         lignes.append("Rien : tout le contenu a été converti.")
+    if conversion.flottants:
+        lignes += ["", "## Flottants", "",
+                   *(f"- `{nom}` : {nombre} converti(s) en {'figure' if nom == 'figure' else 'tableau'}"
+                     f" Quarto, avec légende" for nom, nombre in sorted(conversion.flottants.items()))]
+    if conversion.omis:
+        # Ce qui a été écarté se lit ici, et nulle part ailleurs : un encadré `omis` ne laisse
+        # aucune trace dans la page (US-61).
+        lignes += ["", "## Encadrés écartés", "",
+                   "Déclarés `omis` à l'import : leur contenu n'est pas publié.", "",
+                   *(f"- `{nom}` : {nombre} fois" for nom, nombre in sorted(conversion.omis.items()))]
     lignes += ["", "## Figures", ""]
     lignes += [f"- {ligne}" for ligne in conversion.figures]
     if figures:
@@ -901,10 +1683,14 @@ def main() -> int:
     analyseur.add_argument("--video", default="",
                            help="identifiant YouTube de la capsule de la séance (slide finale, US-19)")
     analyseur.add_argument("--ressource", action="append", default=[],
-                           metavar="TYPE|FICHIER|TITRE[|DATE]",
-                           help="ressource de la séance : lab, td, notebook ou corrige, son fichier dans "
-                                "le dépôt et son titre ; un corrigé exige en plus sa date de publication "
-                                "(AAAA-MM-JJ). Répétable (US-49)")
+                           metavar="TYPE|FICHIER|TITRE",
+                           help="ressource de la séance : lab, td, tp, notebook ou pdf, son fichier "
+                                "dans le dépôt et son titre. Un corrigé, une piste ou une "
+                                "correction est refusé. Répétable (US-49)")
+    analyseur.add_argument("--prefixe-images", default="",
+                           help="préfixe du nom des figures importées. Les figures d'un cours "
+                                "vivent toutes dans le même dossier : sans préfixe, le `fig_01` "
+                                "de la séance 1 et celui de la séance 2 s'écrasent (US-61)")
     analyseur.add_argument("--prefixe-tikz",
                            help="préfixe des schémas TikZ compilés (US-55) ; par défaut, le nom du "
                                 "fichier de sortie")
@@ -930,24 +1716,40 @@ def main() -> int:
     alternatifs = tomllib.loads(args.alt.read_text(encoding="utf-8")) if args.alt else {}
     # Les figures sont citées dans le .qmd par un chemin relatif à lui, comme un lien Markdown.
     prefixe = args.prefixe_figures or os.path.relpath(args.figures, args.sortie.parent)
+    # Les figures qui n'existent qu'en PNG sont repérées d'avance : l'insertion diffère, et la
+    # conversion a besoin de le savoir au moment où elle écrit la page.
+    figs = args.source.parent / "figs"
+    matricielles = {f.stem for f in figs.glob("*.png")
+                    if not (figs / f"{f.stem}.svg").is_file()} if figs.is_dir() else set()
+
     conversion = Conversion(alternatifs, prefixe,
                             args.langage_code or langage_declare(source) or "java")
     conversion.prefixe_tikz = args.prefixe_tikz or args.sortie.stem
+    conversion.matricielles = matricielles
     # Encadrés propres au document : leur sens est une décision du PO, jamais une déduction. Ils sont
     # déclarés à l'import et enregistrés dans le manifeste, que la CI rejoue.
     for brute in args.encadre:
         nom, _, reste = brute.partition("=")
         genre, _, titre = reste.partition("|")
-        if genre not in ("note", "tip", "warning", "important", "caution"):
+        # `omis` : l'encadré ne passe pas du tout. C'est ce qu'il faut pour les boîtes de réponse —
+        # `appliboxR` de Structures de Données, `correctionbox`, `corrbox` et `solbox`
+        # d'Introduction à l'IA —, qu'aucun corrigé ne doit publier (décision du PO, US-61). Le
+        # rapport de conversion en tient le compte : rien ne disparaît en silence.
+        if genre not in ("note", "tip", "warning", "important", "caution", "omis"):
             sys.exit(f"Encadré « {nom} » : genre de callout inconnu « {genre} » "
-                     "(note, tip, warning, important ou caution).")
+                     "(note, tip, warning, important, caution ou omis).")
         conversion.encadres[nom] = (genre, f"encadre-{nom}", titre or nom)
+    conversion.prefixe_images = args.prefixe_images
     for couple in args.figure_python:
         nom, _, script = couple.partition("=")
         conversion.scripts[nom] = Path(script)
 
     debut = source.index("\\begin{document}") + len("\\begin{document}")
-    corps = macros_du_theme(source[debut:source.index("\\end{document}")])
+    # Le préambule est passé **à part** : on y lit les `\newcommand` du document, et on les
+    # développe dans le corps. Faire traverser le préambule par le reste des substitutions cassait
+    # le cours de Python, dont les définitions contiennent les motifs que ces substitutions visent.
+    corps = macros_du_theme(source[debut:source.index("\\end{document}")],
+                            source.split("\\begin{document}", 1)[0])
 
     entete = preambule(source)
     if args.titre:
@@ -981,6 +1783,11 @@ def main() -> int:
         origine = dossier_figures / f"{nom}.svg"
         if origine.is_file():
             nettoyees[nom] = nettoyer_svg(origine, args.figures / f"{nom}.svg")
+        elif (dossier_figures / f"{nom}.png").is_file():
+            # Figure sans source vectorielle : elle est copiée telle quelle, et la page la pose
+            # comme une image ordinaire (voir `figures`).
+            args.figures.mkdir(parents=True, exist_ok=True)
+            (args.figures / f"{nom}.png").write_bytes((dossier_figures / f"{nom}.png").read_bytes())
 
     if args.rapport:
         ecrire_rapport(args.rapport, args.source, args.sortie, conversion, nettoyees)

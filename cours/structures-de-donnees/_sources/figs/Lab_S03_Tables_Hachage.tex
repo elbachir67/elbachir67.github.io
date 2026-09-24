@@ -1,0 +1,999 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+
+\usepackage[margin=2.2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{listings}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\bigO}{\mathcal{O}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{exercicebox}[1][]{colback=purple!5,colframe=purple!50,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{lienbox}[1][]{colback=blue!3,colframe=blue!70!black,
+    fonttitle=\bfseries\itshape,title=#1,breakable,
+    before upper={\itshape}}
+
+\lstdefinestyle{java}{
+  language=Java,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single, framerule=0.5pt, rulecolor=\color{gray!40},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+  numbers=left, numberstyle=\tiny\color{gray},
+  breaklines=true, showstringspaces=false, tabsize=4,
+  xleftmargin=4pt, xrightmargin=4pt, aboveskip=8pt, belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1 {α}{{$\alpha$}}1 {≤}{{$\leq$}}1 {≥}{{$\geq$}}1,
+}
+
+\lstdefinestyle{bash}{
+  language=bash,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{black!5},
+  frame=single, framerule=0.5pt, rulecolor=\color{gray!40},
+  numbers=none, breaklines=true, showstringspaces=false,
+  xleftmargin=4pt, xrightmargin=4pt, aboveskip=8pt, belowskip=8pt,
+}
+
+\lstdefinestyle{output}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{yellow!10},
+  frame=single, framerule=0.5pt, rulecolor=\color{yellow!50!black},
+  numbers=none, breaklines=true, showstringspaces=false,
+  xleftmargin=4pt, xrightmargin=4pt, aboveskip=8pt, belowskip=8pt,
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Lab S03 : Tables de hachage}
+\fancyhead[R]{\small ESP/UCAD --- M1}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Structures de Données et}\\
+\textbf{\LARGE Algorithmes Avancés}\\[0.8cm]
+\textbf{\huge Lab S03 --- Tables de hachage}\\[0.3cm]
+\textbf{\Large Implémenter et observer une ChainedHashMap}\\[0.5cm]
+\large Master 1 --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+École Supérieure Polytechnique\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Prérequis et contexte]
+\textbf{Prérequis :} CM S03 (fonction de hachage, chaînage séparé, facteur de charge, rehash). Lab S01 complété (Docker, Gradle, tests JUnit).\\[4pt]
+\textbf{Objectif :} Implémenter une \texttt{ChainedHashMap<K,V>} complète et \emph{observer concrètement} ce qu'on a vu en CM : collisions, rehash, évolution du facteur de charge. Puis faire quelques exercices théoriques pour consolider.\\[4pt]
+\textbf{Organisation :} Ce lab est en \textbf{deux parties}. Partie~I (pratique) : on code et on observe, pas à pas. Partie~II (théorique) : des traces papier à dérouler en lien avec ce qu'on a codé.\\[4pt]
+\textbf{Livrable :} un dépôt Git avec le code + un rapport individuel (1--2 pages) décrivant ce que vous avez fait et appris.
+\end{prereqbox}
+
+\begin{objectifbox}[À la fin de ce lab, vous saurez]
+\begin{enumerate}[nosep]
+    \item Implémenter \texttt{ChainedHashMap<K,V>} avec chaînage séparé
+    \item Écrire des tests JUnit qui \emph{forcent} des collisions
+    \item Ajouter un rehash automatique au seuil $\alpha > 0{,}75$
+    \item Visualiser la distribution des seaux et le déclenchement des rehashs
+    \item Dérouler manuellement une trace de chaînage et de sondage linéaire
+    \item Calculer $h(k) = |k.\text{hashCode}()| \bmod m$ et anticiper les collisions
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\part{Pratique : implémentation et observation}
+% =====================================================================
+
+% =====================================================================
+\section{Environnement de travail}
+% =====================================================================
+
+\begin{infobox}[Rappel Docker]
+Ce lab se fait dans l'environnement Docker du cours.
+
+\textbf{Lancement :}
+\begin{verbatim}
+# Linux/macOS
+docker run -it -v "$(pwd):/workspace" elbachirtoure/dsa-java-m1:v1.1
+
+# Windows (Git Bash)
+MSYS_NO_PATHCONV=1 docker run -it -v "$(pwd):/workspace" \
+    elbachirtoure/dsa-java-m1:v1.1
+
+cd /workspace
+\end{verbatim}
+
+Si vous n'avez jamais utilisé cet environnement, revoyez le TP-1.
+\end{infobox}
+
+\subsection{Créer le projet}
+
+\begin{lstlisting}[style=bash]
+cd /workspace
+new-project lab-s03
+cd lab-s03
+\end{lstlisting}
+
+La commande \texttt{new-project} crée un squelette Gradle avec JUnit 5 configuré, un \texttt{Main.java}, un \texttt{MainTest.java} et un dossier \texttt{src/main/java/}.
+
+% =====================================================================
+\section{Étape 1 --- L'interface \texttt{Map<K,V>}}
+% =====================================================================
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+En S03 on a défini l'\textbf{ADT Map} comme un contrat (put, get, remove, containsKey, size). Ici on écrit ce contrat en Java, comme on l'a fait pour \texttt{Deque} en S01.
+\end{lienbox}
+
+Créez le fichier \texttt{src/main/java/Map.java}.
+
+\begin{lstlisting}[style=java]
+/**
+ * ADT Map (dictionnaire associatif cle -> valeur).
+ * Chaque cle apparait au plus une fois.
+ */
+public interface Map<K, V> {
+
+    /** Associe la valeur a la cle. Remplace si la cle existe deja.
+     *  Retourne l'ancienne valeur, ou null si la cle etait absente. */
+    V put(K cle, V valeur);
+
+    /** Retourne la valeur associee, ou null si absente. */
+    V get(K cle);
+
+    /** Supprime la paire. Retourne la valeur, ou null si absente. */
+    V remove(K cle);
+
+    /** Teste l'appartenance de la cle. */
+    boolean containsKey(K cle);
+
+    /** Nombre de paires stockees. */
+    int size();
+
+    /** True si la map est vide. */
+    default boolean isEmpty() {
+        return size() == 0;
+    }
+}
+\end{lstlisting}
+
+\begin{infobox}[Pourquoi \texttt{put} retourne la valeur précédente ?]
+Cela permet de faire \emph{en une seule opération} une mise à jour \emph{et} de savoir si la clé existait. Sinon il faudrait appeler \texttt{containsKey}, puis \texttt{get}, puis \texttt{put} --- trois fois plus coûteux.
+\end{infobox}
+
+% =====================================================================
+\section{Étape 2 --- La classe \texttt{Paire<K,V>}}
+% =====================================================================
+
+Créez \texttt{src/main/java/Paire.java} :
+
+\begin{lstlisting}[style=java]
+public class Paire<K, V> {
+    public final K cle;       // la cle ne doit JAMAIS changer
+    public V valeur;           // la valeur, elle, peut etre mise a jour
+
+    public Paire(K cle, V valeur) {
+        this.cle = cle;
+        this.valeur = valeur;
+    }
+
+    @Override
+    public String toString() {
+        return cle + "=" + valeur;
+    }
+}
+\end{lstlisting}
+
+\begin{attentionbox}[Pourquoi \texttt{cle} est \texttt{final} ?]
+Si on modifiait la clé \emph{après} avoir inséré la paire, son hachage changerait et on ne pourrait plus la retrouver. La clé d'une paire, une fois insérée, ne doit jamais changer. C'est une règle générale des tables de hachage : \textbf{ne jamais mettre comme clé un objet dont l'état peut changer}.
+\end{attentionbox}
+
+% =====================================================================
+\section{Étape 3 --- Squelette de \texttt{ChainedHashMap}}
+% =====================================================================
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+\textbf{Chaînage séparé :} chaque case du tableau interne = une liste chaînée des paires qui collisionnent. La fonction de hachage $h(k) = |k.\text{hashCode}()| \bmod m$ envoie la clé dans une case.
+\end{lienbox}
+
+Créez \texttt{src/main/java/ChainedHashMap.java}. On commence sans le rehash --- on l'ajoutera à l'étape 5.
+
+\begin{lstlisting}[style=java]
+import java.util.LinkedList;
+
+public class ChainedHashMap<K, V> implements Map<K, V> {
+
+    private LinkedList<Paire<K, V>>[] table;
+    private int m;      // taille du tableau (nombre de seaux)
+    private int n;      // nombre de paires stockees
+
+    private static final int CAPACITE_INITIALE = 8;
+
+    @SuppressWarnings("unchecked")
+    public ChainedHashMap() {
+        m = CAPACITE_INITIALE;
+        n = 0;
+        table = new LinkedList[m];
+        for (int i = 0; i < m; i++) {
+            table[i] = new LinkedList<>();
+        }
+    }
+
+    private int hash(K cle) {
+        return Math.abs(cle.hashCode()) % m;
+    }
+
+    public int size() { return n; }
+
+    public int capacity() { return m; }   // utile pour observer
+
+    public double loadFactor() {          // utile pour observer
+        return (double) n / m;
+    }
+}
+\end{lstlisting}
+
+\subsection{\texttt{get} et \texttt{containsKey}}
+
+\begin{lstlisting}[style=java]
+    public V get(K cle) {
+        int i = hash(cle);
+        for (Paire<K, V> p : table[i]) {
+            if (p.cle.equals(cle)) return p.valeur;
+        }
+        return null;
+    }
+
+    public boolean containsKey(K cle) {
+        int i = hash(cle);
+        for (Paire<K, V> p : table[i]) {
+            if (p.cle.equals(cle)) return true;
+        }
+        return false;
+    }
+\end{lstlisting}
+
+\begin{attentionbox}[Pourquoi \texttt{containsKey} ne réutilise pas \texttt{get} ?]
+Si on faisait \texttt{return get(cle) != null;}, ça marcherait \emph{sauf} si la clé est associée à la valeur \texttt{null} --- la fonction retournerait alors \texttt{false} alors que la clé existe. On refait donc la boucle à la main.
+\end{attentionbox}
+
+\subsection{\texttt{put} (version sans rehash)}
+
+\begin{lstlisting}[style=java]
+    public V put(K cle, V valeur) {
+        int i = hash(cle);
+        // Si la cle existe deja : mise a jour
+        for (Paire<K, V> p : table[i]) {
+            if (p.cle.equals(cle)) {
+                V ancienne = p.valeur;
+                p.valeur = valeur;
+                return ancienne;
+            }
+        }
+        // Sinon : nouvelle paire ajoutee en fin de liste
+        table[i].add(new Paire<>(cle, valeur));
+        n++;
+        return null;
+    }
+\end{lstlisting}
+
+\subsection{\texttt{remove}}
+
+\begin{lstlisting}[style=java]
+    public V remove(K cle) {
+        int i = hash(cle);
+        var it = table[i].iterator();
+        while (it.hasNext()) {
+            Paire<K, V> p = it.next();
+            if (p.cle.equals(cle)) {
+                it.remove();
+                n--;
+                return p.valeur;
+            }
+        }
+        return null;
+    }
+\end{lstlisting}
+
+\begin{infobox}[Pourquoi un itérateur explicite ?]
+On ne peut pas utiliser \texttt{for-each} pour supprimer un élément pendant le parcours (\texttt{ConcurrentModificationException}). L'itérateur explicite fournit \texttt{it.remove()} qui gère cela proprement.
+\end{infobox}
+
+\subsection{Compiler}
+
+\begin{lstlisting}[style=bash]
+gradle --no-daemon build
+\end{lstlisting}
+
+À cette étape, la compilation doit passer sans erreur. Si vous avez un problème, vérifiez que vos trois fichiers (\texttt{Map.java}, \texttt{Paire.java}, \texttt{ChainedHashMap.java}) sont bien dans \texttt{src/main/java/}.
+
+% =====================================================================
+\section{Étape 4 --- Tests JUnit : observer les collisions}
+% =====================================================================
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+\textbf{Collisions inévitables :} en CM on a démontré par le principe des tiroirs que deux clés différentes peuvent avoir le même hachage. Ici on va le \emph{provoquer} et vérifier que notre chaînage fonctionne.
+\end{lienbox}
+
+Créez \texttt{src/test/java/ChainedHashMapTest.java} :
+
+\begin{lstlisting}[style=java]
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ChainedHashMapTest {
+
+    @Test
+    void testPutGet() {
+        Map<String, String> carnet = new ChainedHashMap<>();
+        carnet.put("Awa Diop", "+221 77 555 01 23");
+        assertEquals("+221 77 555 01 23", carnet.get("Awa Diop"));
+    }
+
+    @Test
+    void testUpdate() {
+        Map<String, String> carnet = new ChainedHashMap<>();
+        carnet.put("Awa Diop", "+221 77 555 01 23");
+        String ancien = carnet.put("Awa Diop", "+221 77 999 00 00");
+        assertEquals("+221 77 555 01 23", ancien);
+        assertEquals("+221 77 999 00 00", carnet.get("Awa Diop"));
+        assertEquals(1, carnet.size());  // pas d'augmentation de taille
+    }
+
+    @Test
+    void testMissingKey() {
+        Map<String, String> carnet = new ChainedHashMap<>();
+        assertNull(carnet.get("Fatou Sall"));
+        assertFalse(carnet.containsKey("Fatou Sall"));
+    }
+
+    @Test
+    void testRemove() {
+        Map<String, String> carnet = new ChainedHashMap<>();
+        carnet.put("Awa Diop", "+221 77 555 01 23");
+        String supprimee = carnet.remove("Awa Diop");
+        assertEquals("+221 77 555 01 23", supprimee);
+        assertFalse(carnet.containsKey("Awa Diop"));
+        assertEquals(0, carnet.size());
+    }
+
+    /** Test qui FORCE une collision avec un hashCode custom. */
+    @Test
+    void testForcerUneCollision() {
+        Map<ClePerso, String> map = new ChainedHashMap<>();
+        // Deux cles distinctes mais avec le MEME hashCode
+        ClePerso k1 = new ClePerso("Awa", 42);
+        ClePerso k2 = new ClePerso("Moussa", 42);
+        map.put(k1, "contact A");
+        map.put(k2, "contact B");
+        // Les deux doivent etre retrouvables malgre la collision
+        assertEquals("contact A", map.get(k1));
+        assertEquals("contact B", map.get(k2));
+        assertEquals(2, map.size());
+    }
+
+    /** Classe auxiliaire : hashCode = second argument. Permet de
+     *  forcer des collisions pour les tests. */
+    static class ClePerso {
+        final String nom;
+        final int h;
+        ClePerso(String nom, int h) { this.nom = nom; this.h = h; }
+        @Override public int hashCode() { return h; }
+        @Override public boolean equals(Object o) {
+            if (!(o instanceof ClePerso)) return false;
+            ClePerso other = (ClePerso) o;
+            return this.nom.equals(other.nom) && this.h == other.h;
+        }
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[style=bash]
+gradle --no-daemon test
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 1 --- tous les tests passent]
+\begin{enumerate}[nosep]
+    \item Les 5 tests doivent passer (\texttt{BUILD SUCCESSFUL}).
+    \item Le test \texttt{testForcerUneCollision} est le plus intéressant : il prouve que votre chaînage fonctionne. \emph{Comment} ? Les deux clés \texttt{k1} et \texttt{k2} ont le même \texttt{hashCode} (42), donc le même $h$, donc elles sont dans la même case. Votre \texttt{get} doit quand même les distinguer grâce à \texttt{equals}.
+\end{enumerate}
+\end{exercicebox}
+
+% =====================================================================
+\section{Étape 5 --- Ajouter le redimensionnement (rehash)}
+% =====================================================================
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+\textbf{Facteur de charge} $\alpha = n/m$ et \textbf{rehash à $\alpha > 0{,}75$ :} quand la table devient trop pleine, on double $m$ et on recalcule toutes les positions. Coût amorti $\bigO(1)$.
+\end{lienbox}
+
+Modifiez \texttt{ChainedHashMap.java} pour ajouter la constante de seuil et la méthode \texttt{rehash} :
+
+\begin{lstlisting}[style=java]
+    private static final double SEUIL_REHASH = 0.75;
+
+    @SuppressWarnings("unchecked")
+    private void rehash() {
+        LinkedList<Paire<K, V>>[] ancienneTable = table;
+        m = 2 * m;                         // double la taille
+        table = new LinkedList[m];
+        for (int i = 0; i < m; i++) {
+            table[i] = new LinkedList<>();
+        }
+        n = 0;
+        // Reinserer chaque paire (h(cle) sera recalcule)
+        for (LinkedList<Paire<K, V>> seau : ancienneTable) {
+            for (Paire<K, V> p : seau) {
+                put(p.cle, p.valeur);
+            }
+        }
+    }
+\end{lstlisting}
+
+Puis modifiez \texttt{put} pour déclencher le rehash \emph{après} insertion :
+
+\begin{lstlisting}[style=java]
+    public V put(K cle, V valeur) {
+        int i = hash(cle);
+        for (Paire<K, V> p : table[i]) {
+            if (p.cle.equals(cle)) {
+                V ancienne = p.valeur;
+                p.valeur = valeur;
+                return ancienne;
+            }
+        }
+        table[i].add(new Paire<>(cle, valeur));
+        n++;
+
+        // Verifier le facteur de charge
+        if ((double) n / m > SEUIL_REHASH) {
+            rehash();
+        }
+        return null;
+    }
+\end{lstlisting}
+
+\begin{attentionbox}[Piège fréquent]
+\texttt{n / m > 0.75} avec deux entiers fait une division \emph{entière} qui donne toujours 0 (ou 1 une fois la table pleine). Il faut impérativement caster : \texttt{(double) n / m > 0.75}.
+\end{attentionbox}
+
+\subsection{Test du rehash}
+
+Ajoutez ce test dans \texttt{ChainedHashMapTest.java} :
+
+\begin{lstlisting}[style=java]
+    @Test
+    void testRehashAutomatique() {
+        ChainedHashMap<Integer, String> map = new ChainedHashMap<>();
+        // Capacite initiale = 8
+        assertEquals(8, map.capacity());
+
+        // Inserer 7 paires (α = 7/8 = 0.875 > 0.75 -> declenchement)
+        for (int i = 0; i < 7; i++) {
+            map.put(i, "v" + i);
+        }
+        // Apres le 7eme put, un rehash doit avoir eu lieu
+        assertEquals(16, map.capacity(), "m doit avoir double");
+        assertEquals(7, map.size(), "n doit rester a 7");
+
+        // Toutes les cles doivent encore etre accessibles apres rehash
+        for (int i = 0; i < 7; i++) {
+            assertEquals("v" + i, map.get(i));
+        }
+    }
+\end{lstlisting}
+
+\begin{lstlisting}[style=bash]
+gradle --no-daemon test
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 2 --- le rehash fonctionne]
+Le test \texttt{testRehashAutomatique} doit passer. Avant d'avancer, assurez-vous bien que : (a) la capacité double exactement au bon moment, (b) toutes les paires restent accessibles après le rehash.
+\end{exercicebox}
+
+% =====================================================================
+\section{Étape 6 --- Observer : programme d'observation}
+% =====================================================================
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+\textbf{Évolution du facteur de charge et des rehashs.} En CM on a annoncé qu'avec un rehash à 0,75 le facteur de charge reste borné. Ici on va \emph{visualiser} cette évolution avec un programme qui affiche la capacité, la taille et $\alpha$ après chaque insertion.
+\end{lienbox}
+
+Modifiez \texttt{src/main/java/Main.java} :
+
+\begin{lstlisting}[style=java]
+public class Main {
+    public static void main(String[] args) {
+        ChainedHashMap<Integer, String> map = new ChainedHashMap<>();
+
+        System.out.println("n\tm\talpha\tevenement");
+        int m_precedent = map.capacity();
+
+        for (int i = 1; i <= 30; i++) {
+            map.put(i, "valeur" + i);
+            int m_actuel = map.capacity();
+            String evenement = (m_actuel != m_precedent) ? "REHASH" : "";
+            System.out.printf("%d\t%d\t%.3f\t%s%n",
+                              map.size(),
+                              m_actuel,
+                              map.loadFactor(),
+                              evenement);
+            m_precedent = m_actuel;
+        }
+    }
+}
+\end{lstlisting}
+
+Exécution :
+\begin{lstlisting}[style=bash]
+gradle --no-daemon run
+\end{lstlisting}
+
+Vous devriez obtenir un affichage ressemblant à ceci :
+
+\begin{lstlisting}[style=output]
+n  m   alpha   evenement
+1  8   0.125
+2  8   0.250
+3  8   0.375
+4  8   0.500
+5  8   0.625
+6  8   0.750
+7  16  0.438   REHASH
+8  16  0.500
+...
+12 16  0.750
+13 32  0.406   REHASH
+...
+24 32  0.750
+25 64  0.391   REHASH
+...
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 3 --- observations à faire]
+\begin{enumerate}[nosep]
+    \item Combien de rehashs se produisent pendant ces 30 insertions ? Notez les valeurs de $n$ où ils se déclenchent : \rule{6cm}{0.4pt}
+    \item Juste après chaque rehash, quelle est la valeur approximative de $\alpha$ ? \rule{4cm}{0.4pt}
+    \item Le facteur de charge dépasse-t-il jamais 0,75 à long terme ? \rule{4cm}{0.4pt}
+\end{enumerate}
+\end{exercicebox}
+
+\begin{infobox}[Ce que vous venez de voir en direct]
+Vous venez de visualiser \textbf{empiriquement} le résultat théorique du CM : le rehash maintient $\alpha$ sous 0,75 \emph{en moyenne}. Les pics dépassent brièvement 0,75 (juste avant chaque rehash) mais sont immédiatement corrigés. C'est ce qui permet de garantir $\bigO(1)$ amorti.
+\end{infobox}
+
+% =====================================================================
+\section{Étape 7 --- Observer : distribution des seaux}
+% =====================================================================
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+\textbf{Uniformité du hachage :} en CM on a supposé que les clés se répartissent uniformément. Ici on va vérifier que c'est bien le cas avec des chaînes de caractères typiques (via \texttt{String.hashCode()}).
+\end{lienbox}
+
+Ajoutez une méthode d'inspection à \texttt{ChainedHashMap} :
+
+\begin{lstlisting}[style=java]
+    /** Retourne un tableau indiquant la longueur de chaque seau.
+     *  Utile pour verifier la distribution. */
+    public int[] bucketSizes() {
+        int[] tailles = new int[m];
+        for (int i = 0; i < m; i++) {
+            tailles[i] = table[i].size();
+        }
+        return tailles;
+    }
+\end{lstlisting}
+
+Ajoutez un second scénario dans \texttt{Main.java} (après le premier) :
+
+\begin{lstlisting}[style=java]
+        System.out.println("\n--- Distribution des seaux ---");
+        ChainedHashMap<String, Integer> contacts = new ChainedHashMap<>();
+        String[] noms = {
+            "Awa Diop", "Moussa Ndiaye", "Fatou Sall", "Cheikh Ba",
+            "Aminata Fall", "Ibrahima Kane", "Mariama Sow", "Ousmane Ba",
+            "Khadija Diallo", "Mamadou Cisse", "Aicha Gueye", "Babacar Seck"
+        };
+        for (int i = 0; i < noms.length; i++) {
+            contacts.put(noms[i], i);
+        }
+
+        int[] tailles = contacts.bucketSizes();
+        System.out.println("Capacite : " + contacts.capacity()
+                         + ", nb contacts : " + contacts.size()
+                         + ", alpha : " + contacts.loadFactor());
+        for (int i = 0; i < tailles.length; i++) {
+            System.out.printf("Seau [%d] : %d paire(s)%n", i, tailles[i]);
+        }
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 4 --- observation de la distribution]
+Relancez le programme. Observez la sortie.
+\begin{enumerate}[nosep]
+    \item Combien de seaux ont plus d'une paire (collision visible) ? \rule{3cm}{0.4pt}
+    \item Combien de seaux sont vides ? \rule{3cm}{0.4pt}
+    \item La longueur du seau le plus rempli dépasse-t-elle 3 ? \rule{3cm}{0.4pt}
+\end{enumerate}
+
+Si la distribution vous paraît \emph{très} inégale (par exemple un seau avec 5 paires et les autres vides), c'est que \texttt{String.hashCode()} de Java a produit des valeurs mal réparties \emph{pour ces noms particuliers}. Cela peut arriver avec peu de clés. Ajoutez d'autres noms et relancez : la distribution s'égalise généralement.
+\end{exercicebox}
+
+% =====================================================================
+\section{Git}
+% =====================================================================
+
+\begin{lstlisting}[style=bash]
+cd /workspace/lab-s03
+git init
+git add .
+git commit -m "Lab S03 : ChainedHashMap avec rehash et observation"
+git log --oneline
+\end{lstlisting}
+
+\newpage
+% =====================================================================
+\part{Théorie : exercices d'application}
+% =====================================================================
+
+\begin{infobox}[Comment remplir cette partie]
+Les exercices suivants sont à faire \emph{sur papier} (ou directement dans les cases de ce document). Ils ne sont pas des \emph{tests} : ils servent à vérifier que vous avez bien compris les mécanismes qu'on vient d'implémenter. Si vous bloquez, revenez à votre code --- souvent, il contient la réponse.
+\end{infobox}
+
+% =====================================================================
+\section{Exercice 1 --- Calcul de positions de hachage}
+% =====================================================================
+
+Soit une \texttt{ChainedHashMap<String, String>} de taille $m = 7$. On vous donne les \texttt{hashCode} de 5 clés :
+
+\medskip
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|r|c|}
+\hline
+\textbf{Clé} & \textbf{hashCode()} & \textbf{$h(\text{clé}) = |\text{hashCode()}| \bmod 7$} \\
+\hline
+\texttt{"Awa Diop"} & $-2\,045\,123\,461$ & \rule{0pt}{0.7cm}\hspace{3cm} \\
+\hline
+\texttt{"Moussa Ndiaye"} & $879\,654\,325$ & \rule{0pt}{0.7cm} \\
+\hline
+\texttt{"Fatou Sall"} & $1\,234\,567\,892$ & \rule{0pt}{0.7cm} \\
+\hline
+\texttt{"Cheikh Ba"} & $-555\,888\,777$ & \rule{0pt}{0.7cm} \\
+\hline
+\texttt{"Aminata Fall"} & $42$ & \rule{0pt}{0.7cm} \\
+\hline
+\end{tabular}
+\end{center}
+
+\medskip
+
+{\footnotesize\textit{Aide :} $2\,045\,123\,461 \bmod 7 = 3$\ ;\ \ $879\,654\,325 \bmod 7 = 4$\ ;\ \ $1\,234\,567\,892 \bmod 7 = 5$\ ;\ \ $555\,888\,777 \bmod 7 = 3$\ ;\ \ $42 \bmod 7 = 0$.}
+
+\medskip
+
+\textbf{Question :} quelles clés collisionnent ? \rule{8cm}{0.4pt}
+
+% =====================================================================
+\section{Exercice 2 --- Trace de chaînage séparé}
+% =====================================================================
+
+Reprenez les hachages calculés à l'exercice 1. Les paires sont insérées dans l'ordre :
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=0pt,topsep=0pt]
+\item \texttt{put("Awa Diop", "77 555 01 23")}
+\item \texttt{put("Moussa Ndiaye", "76 123 45 67")}
+\item \texttt{put("Fatou Sall", "77 888 12 34")}
+\item \texttt{put("Cheikh Ba", "70 111 22 33")}
+\item \texttt{put("Aminata Fall", "77 666 77 88")}
+\end{enumerate}
+
+\medskip
+
+\textbf{Question :} dessinez l'état final. L'insertion dans une \texttt{LinkedList} se fait \textbf{en fin de liste} (l'ordre d'apparition dans la liste = ordre d'insertion).
+
+\medskip
+
+\begin{center}
+\renewcommand{\arraystretch}{1.9}
+\begin{tabular}{|c|p{11cm}|}
+\hline
+\textbf{Case} & \textbf{Liste chaînée (du début vers la fin)} \\
+\hline
+$[0]$ & \\
+\hline
+$[1]$ & \\
+\hline
+$[2]$ & \\
+\hline
+$[3]$ & \\
+\hline
+$[4]$ & \\
+\hline
+$[5]$ & \\
+\hline
+$[6]$ & \\
+\hline
+\end{tabular}
+\end{center}
+
+\medskip
+
+\textbf{Question subsidiaire :} combien de comparaisons pour \texttt{get("Aminata Fall")} ? \rule{3cm}{0.4pt}
+
+\newpage
+% =====================================================================
+\section{Exercice 3 --- Trace de sondage linéaire}
+% =====================================================================
+
+Mêmes clés et hachages qu'à l'exercice 2, mais cette fois avec une \texttt{LinearProbingMap} de taille $m = 7$ (un seul tableau simple, sans listes chaînées).
+
+\medskip
+
+\textbf{Règle du probing :} quand la case $h(\text{clé})$ est occupée, on essaie $h+1$, puis $h+2$, etc. (modulo 7), jusqu'à une case libre.
+
+\medskip
+
+\textbf{(a)} Remplissez le tableau après toutes les insertions :
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\small
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Case} & $[0]$ & $[1]$ & $[2]$ & $[3]$ & $[4]$ & $[5]$ & $[6]$ \\
+\hline
+\textbf{Clé (ou --)} & & & & & & & \\
+\hline
+\textbf{Indice $h$ d'origine} & & & & & & & \\
+\hline
+\textbf{Nombre d'étapes de probing} & & & & & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\medskip
+
+\textbf{(b)} Combien de cluster(s) (amas contigu de cases occupées) observez-vous ? \rule{8cm}{0.4pt}
+
+\medskip
+
+\textbf{(c)} On cherche \texttt{get("Ibrahima Kane")} avec $h = 3$. Décrire la séquence d'indices visités :
+
+\medskip
+
+Indices visités : \rule{12cm}{0.4pt}
+
+\medskip
+
+Résultat (trouvé / absent) : \rule{6cm}{0.4pt}
+
+% =====================================================================
+\section{Exercice 4 --- Facteur de charge et rehash}
+% =====================================================================
+
+\begin{infobox}[Lien avec votre implémentation]
+Cet exercice demande de prédire \emph{sur le papier} exactement ce que votre programme de l'étape 6 a affiché. Vérifiez vos réponses avec la sortie console.
+\end{infobox}
+
+Une \texttt{ChainedHashMap} démarre à $m = 8$. Seuil de rehash : $\alpha > 0{,}75$. On insère des clés \textbf{toutes distinctes}.
+
+\medskip
+
+\textbf{(a)} Combien de clés peut-on insérer \emph{avant} que le 1\textsuperscript{er} rehash ne se déclenche ? (Autrement dit : à quelle insertion $k$ le rehash se produit-il ?)
+
+\medskip
+
+Calcul du seuil : $n > 0{,}75 \times 8 = $ \rule{2cm}{0.4pt}
+
+\medskip
+
+Donc le rehash se déclenche à la $k = $ \rule{2cm}{0.4pt} \textsuperscript{ème} insertion.
+
+\medskip
+
+\textbf{(b)} Après ce rehash, taille $m'$ : \rule{2cm}{0.4pt}. Nouveau facteur de charge $\alpha = n/m' = $ \rule{3cm}{0.4pt}.
+
+\medskip
+
+\textbf{(c)} Combien d'insertions supplémentaires avant le 2\textsuperscript{e} rehash ? \rule{2cm}{0.4pt}
+
+\medskip
+
+\textbf{(d)} Après 100 insertions successives, quelle est la taille $m$ finale du tableau ? Donnez la suite des rehashs (à quelles valeurs de $n$) :
+
+\medskip
+\rule{17cm}{0.4pt}
+
+\vspace{0.3cm}
+\rule{17cm}{0.4pt}
+
+\vspace{0.3cm}
+\rule{17cm}{0.4pt}
+
+% =====================================================================
+\section{Exercice 5 --- Contrat \texttt{equals} $\leftrightarrow$ \texttt{hashCode}}
+% =====================================================================
+
+Voici une classe \texttt{Contact} utilisée comme clé :
+
+\begin{lstlisting}[style=java]
+public class Contact {
+    private final String nom;
+    private final String numero;
+
+    public Contact(String nom, String numero) {
+        this.nom = nom;
+        this.numero = numero;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Contact)) return false;
+        Contact c = (Contact) o;
+        return this.nom.equals(c.nom);  // egalite sur le nom seul
+    }
+
+    // hashCode() NON redefini -> herite d'Object !
+}
+\end{lstlisting}
+
+\textbf{(a)} Rappeler le contrat Java entre \texttt{equals} et \texttt{hashCode} : \rule{8cm}{0.4pt}
+
+\medskip
+\rule{17cm}{0.4pt}
+
+\medskip
+
+\textbf{(b)} On crée deux contacts avec le même nom mais différents numéros :
+\texttt{c1 = new Contact("Awa Diop", "77 111 22 33")}
+et \texttt{c2 = new Contact("Awa Diop", "77 999 88 77")}.
+
+\medskip
+
+\texttt{c1.equals(c2)} vaut \rule{2cm}{0.4pt}. \quad \texttt{c1.hashCode() == c2.hashCode()} est \rule{4cm}{0.4pt}.
+
+\medskip
+
+Pourquoi \texttt{map.put(c1, "A"); map.get(c2);} retourne-t-il \texttt{null} ? (2-3 lignes)
+
+\medskip
+\rule{17cm}{0.4pt}
+
+\vspace{0.3cm}
+\rule{17cm}{0.4pt}
+
+\vspace{0.3cm}
+\rule{17cm}{0.4pt}
+
+\medskip
+
+\textbf{(c)} Écrire la méthode \texttt{hashCode()} manquante qui respecte le contrat :
+
+\medskip
+
+\begin{center}
+\fbox{\parbox{15.5cm}{\ttfamily\small
+\rule{0pt}{0.5cm}
+@Override\\[0.15cm]
+public int hashCode() \{\\[0.25cm]
+\hspace*{1cm}\rule{10cm}{0.4pt}\\[0.3cm]
+\}
+}}
+\end{center}
+
+% =====================================================================
+\section{Pour aller plus loin (optionnel)}
+% =====================================================================
+
+Si vous avez fini et que vous voulez creuser :
+
+\begin{itemize}[itemsep=2pt]
+    \item Modifiez le seuil de rehash dans votre code (ex : 0,5 ou 0,9). Relancez \texttt{Main} et observez : les rehashs sont-ils plus fréquents ou moins fréquents ? La distribution des seaux change-t-elle ?
+    \item Implémentez \texttt{LinearProbingMap} (sondage linéaire) en reprenant le squelette mais sans listes chaînées. Comparez les performances avec \texttt{ChainedHashMap} en ajoutant dans \texttt{Main} une boucle de 100\,000 insertions chronométrée.
+    \item Ajoutez une méthode \texttt{longestChain()} qui retourne la longueur du seau le plus rempli. Observez son évolution au fil des insertions.
+\end{itemize}
+
+% =====================================================================
+\section{Aide-mémoire}
+% =====================================================================
+
+\begin{retenirbox}[Aide-mémoire S03]
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}l l@{}}
+\toprule
+\textbf{Concept} & \textbf{Résumé} \\
+\midrule
+Fonction de hachage & $h(k) = |k.\text{hashCode}()| \bmod m$ \\
+Chaînage séparé     & Chaque case = \texttt{LinkedList<Paire>} \\
+Sondage linéaire    & Si la case est prise, essayer $(i+1) \bmod m$ \\
+Facteur de charge   & $\alpha = n/m$ \\
+Seuil de rehash     & $\alpha > 0{,}75 \Rightarrow$ doubler $m$, recalculer $h$ \\
+Coût amorti put     & $\bigO(1)$ malgré les rehashs occasionnels \\
+Contrat Java        & $a.\text{equals}(b) \Rightarrow a.\text{hashCode}() = b.\text{hashCode}()$ \\
+\bottomrule
+\end{tabular}
+\end{retenirbox}
+
+\begin{retenirbox}[Commandes utiles]
+\renewcommand{\arraystretch}{1.3}
+\small
+\begin{tabular}{@{}l l@{}}
+\toprule
+\textbf{Commande} & \textbf{Usage} \\
+\midrule
+\texttt{gradle --no-daemon build} & Compiler le projet \\
+\texttt{gradle --no-daemon test}  & Exécuter les tests JUnit \\
+\texttt{gradle --no-daemon run}   & Exécuter la classe Main \\
+\texttt{git add . \&\& git commit -m "msg"} & Committer les changements \\
+\bottomrule
+\end{tabular}
+\end{retenirbox}
+
+% =====================================================================
+\section*{Rapport individuel}
+% =====================================================================
+
+\begin{attentionbox}[Rapport individuel --- obligatoire]
+Chaque étudiant rédige un rapport de \textbf{1 à 2 pages} :
+\begin{enumerate}[nosep]
+    \item \textbf{Ce que j'ai fait :} classes implémentées, tests écrits, ce que Main affiche.
+    \item \textbf{Les observations clés :} qu'est-ce que le programme d'observation m'a montré que je n'avais pas bien compris du CM ?
+    \item \textbf{Les difficultés :} erreurs de compilation, bugs, blocages sur les exercices théoriques.
+    \item \textbf{Ce que j'ai appris :} le concept le plus important retenu de cette séance.
+\end{enumerate}
+\textbf{Format :} PDF. \textbf{Nom :} \texttt{rapport-lab-S03-PRENOM-NOM.pdf}
+\end{attentionbox}
+
+\vfill
+\begin{center}
+\rule{0.6\textwidth}{0.4pt}\\[6pt]
+{\small Dr. El Hadji Bassirou TOURÉ --- ESP/UCAD --- M1 --- 2025--2026}
+\end{center}
+
+\end{document}

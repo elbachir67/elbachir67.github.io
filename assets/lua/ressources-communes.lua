@@ -1,19 +1,18 @@
 -- Ressources d'une séance (US-49), partagées par deux filtres : celui de la séance
 -- (`ressources.lua`) et celui de la page du cours (`fiche-cours.lua`).
 --
--- Deux données ne peuvent être connues qu'au rendu, et non à l'import :
---   * le **poids** du fichier, qui change dès que le PO remplace son énoncé ;
---   * le fait qu'un **corrigé** ait atteint sa date de publication.
--- C'est pourquoi la liste est construite ici, et non écrite dans la page.
+-- Une donnée ne peut être connue qu'au rendu, et non à l'import : le **poids** du fichier, qui
+-- change dès que le PO remplace son énoncé. C'est pourquoi la liste est construite ici, et non
+-- écrite dans la page.
 
 local M = {}
 
--- Libellé par type et par langue. `corrige` n'apparaît qu'à partir de sa date.
+-- Libellé par type et par langue. `corrige` n'y figure pas : aucun corrigé, aucune piste, aucune
+-- indication de correction ne paraît sur le site (décision du PO). Un type inconnu est ignoré, ce
+-- qui fait de cette table le dernier filet du rendu.
 local LIBELLES = {
-  fr = { lab = "Lab", tp = "TP", td = "TD", notebook = "Notebook", pdf = "PDF du cours",
-         corrige = "Corrigé" },
-  en = { lab = "Lab", tp = "Lab", td = "Tutorial", notebook = "Notebook", pdf = "Course PDF",
-         corrige = "Solution" },
+  fr = { lab = "Lab", tp = "TP", td = "TD", notebook = "Notebook", pdf = "PDF du cours" },
+  en = { lab = "Lab", tp = "Lab", td = "Tutorial", notebook = "Notebook", pdf = "Course PDF" },
 }
 
 local UNITES = {
@@ -46,21 +45,13 @@ function M.poids(chemin, langue)
   return mega:gsub("%.", unites.separateur) .. " " .. unites[3]
 end
 
---- Aujourd'hui, en AAAA-MM-JJ : les dates ISO se comparent comme des chaînes.
-function M.aujourdhui()
-  return os.date("%Y-%m-%d")
-end
-
---- Ressources visibles aujourd'hui : un corrigé sans date, ou dont la date n'est pas atteinte, est
---- absent — pas de lien, pas de mention, rien. C'est la règle impérative d'US-49.
+--- Ressources publiables : celles dont le type porte un libellé. Un corrigé, une piste ou une
+--- correction n'en a pas, et n'apparaît donc nulle part — pas de lien, pas de mention, rien.
 function M.publiables(ressources)
   local visibles = {}
-  local maintenant = M.aujourdhui()
   for _, ressource in ipairs(ressources or {}) do
     local type_ = pandoc.utils.stringify(ressource.type or "")
-    local date = ressource.date and pandoc.utils.stringify(ressource.date) or ""
-    local attendue = type_ == "corrige" and (date == "" or date > maintenant)
-    if LIBELLES.fr[type_] and not attendue then
+    if LIBELLES.fr[type_] then
       table.insert(visibles, {
         type = type_,
         titre = pandoc.utils.stringify(ressource.titre or ""),

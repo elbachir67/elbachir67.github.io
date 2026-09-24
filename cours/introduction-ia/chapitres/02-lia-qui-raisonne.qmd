@@ -1,0 +1,1487 @@
+---
+title: "L'IA qui raisonne"
+cible: "page"
+body-classes: cours-page
+numero: "2"
+ressources:
+  - type: "td"
+    titre: "Fiche de TD 2"
+    fichier: "ressources/td-2-lia-qui-raisonne.pdf"
+    chemin: "/cours/introduction-ia/ressources/td-2-lia-qui-raisonne.pdf"
+description: "Séance 2 d'Introduction à l'IA : logique propositionnelle, syntaxe et sémantique, formes normales, inférence, résolution et preuve par réfutation, puis logique du premier ordre et unification."
+author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Navigation conceptuelle"}
+**Prérequis :**
+
+- **S1 :** Agents intelligents, cadre PEAS, types d'environnements -- en particulier les environnements *déterministes* et *totalement observables*, et la distinction IA symbolique/connexionniste.
+- **S1 :** Types d'agents -- agent réflexe, agent basé sur modèle, agent basé sur buts. La notion de *base de connaissances* interne à l'agent.
+- Notions de base en logique mathématique (Licence).
+
+**Ouvre la voie vers :**
+
+- **S3 (Recherche) :** la formulation de problèmes comme espaces d'états, où l'agent *cherche* une séquence d'actions menant au but. La logique fournit le langage pour *décrire* ces états et ces buts ; la recherche fournit les algorithmes pour *trouver* le chemin.
+- **S5 (Probabilités) :** le passage de la certitude (vrai/faux) à l'incertitude (degrés de croyance). Les limites de la logique face au monde réel motivent directement le raisonnement probabiliste.
+- **Machine Learning (S2, cours dédié) :** les approches neuro-symboliques qui combinent apprentissage et raisonnement formel.
+:::
+
+## Introduction : pourquoi un agent doit-il savoir raisonner ?
+
+Reprenons le fil de notre cours depuis le début. En **Séance 1**, nous avons défini l'IA comme la construction d'**agents rationnels** : des systèmes qui perçoivent leur environnement via des capteurs et agissent via des actuateurs pour maximiser une mesure de performance. Nous avons classé les agents par sophistication croissante -- réflexe, basé sur modèle, basé sur buts, basé sur utilité, apprenant -- et nous avons vu que les agents les plus avancés maintiennent une **représentation interne du monde** qu'ils utilisent pour prendre des décisions.
+
+La question centrale de cette séance est : **comment un agent représente-t-il ses connaissances, et comment en déduit-il de nouvelles ?**
+
+### Les limites de l'agent réflexe
+
+Considérons Ousmane, un explorateur qui pénètre dans une grotte à Kédougou. La grotte est une grille $4 \times 4$. Certaines cases contiennent des dangers : Bouki (la hyène des contes wolof) et des puits. Ousmane ne peut percevoir que des indices dans les cases adjacentes : une *odeur* signale la proximité de Bouki, une *brise* signale un puits.
+
+Un agent **réflexe simple** (le type le plus basique vu en S1) réagirait directement à ses perceptions : « si odeur, alors fuir ». Mais cette stratégie est trop grossière. Ousmane sent une odeur en case $(2,1)$. Doit-il reculer ? Pas nécessairement : Bouki pourrait être en $(3,1)$ ou en $(2,2)$. Pour prendre la bonne décision, Ousmane doit **combiner** ses observations actuelles avec celles qu'il a faites précédemment, et en **déduire** où Bouki se trouve probablement.
+
+Un agent réflexe ne sait pas faire cela. Il lui faut une **base de connaissances** -- un ensemble de faits et de règles -- et un mécanisme pour en déduire de nouveaux faits. C'est exactement ce que fournit la **logique**.
+
+### L'agent basé sur les connaissances
+
+En Séance 1, nous avons brièvement mentionné les agents basés sur modèle et basés sur buts. L'**agent basé sur les connaissances** (knowledge-based agent) est une réalisation concrète de ces idées. Il repose sur trois composants :
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Agent basé sur les connaissances"}
+Un **agent basé sur les connaissances** possède :
+
+1. Une **base de connaissances** (KB, *Knowledge Base*) : un ensemble de formules logiques représentant ce que l'agent sait sur le monde.
+2. Un mécanisme de **mise à jour** ([Tell]{.smallcaps}) : quand l'agent perçoit quelque chose, il ajoute cette information à sa KB.
+3. Un mécanisme d'**inférence** ([Ask]{.smallcaps}) : l'agent interroge sa KB pour déduire de nouvelles connaissances et décider de son action.
+
+Le cycle de fonctionnement est :
+
+1. L'agent perçoit l'environnement
+2. Il informe sa KB ([Tell]{.smallcaps})
+3. Il interroge sa KB pour décider ([Ask]{.smallcaps})
+4. Il agit
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- L'agent Ousmane dans la grotte"}
+L'agent Ousmane fonctionne ainsi :
+
+**Étape 1 :** Il entre en case $(1,1)$. Pas d'odeur, pas de brise.
+$$\textsc{Tell}(\text{KB}, \neg O_{1,1} \land \neg Br_{1,1})$$
+
+**Étape 2 :** Il interroge sa KB pour savoir si les cases adjacentes sont sûres.
+$$\textsc{Ask}(\text{KB}, \text{``La case (2,1) est-elle sûre ?''}) \to \text{Oui}$$
+
+**Étape 3 :** Il se déplace en $(2,1)$.
+
+Ce cycle [Tell]{.smallcaps}/[Ask]{.smallcaps}/agir se répète à chaque pas. La logique est le **langage** de la KB, et les règles d'inférence sont le **moteur** de [Ask]{.smallcaps}.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="L'agent basé sur les connaissances -- lien avec la hiérarchie des agents (S1)"}
+L'agent basé sur les connaissances est un cas particulier de l'**agent basé sur modèle** vu en S1 :
+
+- Le *modèle du monde* est la base de connaissances (KB).
+- La *mise à jour de l'état interne* est l'opération [Tell]{.smallcaps}.
+- La *sélection d'action* repose sur l'opération [Ask]{.smallcaps}.
+
+L'avantage de la logique est que le raisonnement est **garanti correct** : si les prémisses sont vraies, les conclusions le sont aussi. Ce n'est pas le cas d'un agent réflexe qui se trompe dès que la perception est ambiguë.
+:::
+
+### L'IA symbolique dans le paysage de l'IA
+
+En Séance 1, nous avons distingué deux grandes familles d'approches en IA :
+
+- L'**IA symbolique** : manipuler des symboles selon des règles logiques pour déduire de nouvelles connaissances. C'est l'objet de cette séance.
+- L'**IA connexionniste** : apprendre des patterns à partir de données. C'est le Machine Learning, objet du cours de S2.
+
+L'IA symbolique a dominé le champ de 1956 aux années 1990. Les systèmes experts, la démonstration automatique de théorèmes, le calcul formel (Wolfram Alpha, Maple) en sont les réalisations majeures. Ces systèmes restent irremplaçables pour les tâches nécessitant un raisonnement *garanti correct* : vérification de logiciels, diagnostic médical par règles, preuves mathématiques, systèmes juridiques.
+
+::: {#fig-paysage}
+{{< svg ../figures/s02-fig_01_ia_symbolique_paysage.svg alt="L'IA symbolique (logique, systèmes experts, calcul formel) dans le paysage global de l'Intelligence Artificielle. Cette séance se concentre sur la partie encadrée en pointillés. En Séance 5, les limites de la logique face à l'incertitude motiveront le passage aux probabilités." >}}
+
+L'IA symbolique (logique, systèmes experts, calcul formel) dans le paysage global de l'Intelligence Artificielle. Cette séance se concentre sur la partie encadrée en pointillés. En Séance 5, les *limites* de la logique face à l'incertitude motiveront le passage aux probabilités.
+:::
+
+### Notre exemple fil rouge : le Monde de Bouki
+
+Tout au long de cette séance, nous utiliserons un même exemple pour illustrer chaque concept. Cet exemple unique permettra de voir comment chaque outil logique enrichit la capacité de raisonnement de notre agent.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple fil rouge -- Le Monde de Bouki"}
+Ousmane, un explorateur, pénètre dans une grotte de Kédougou à la recherche d'un trésor (or). La grotte est représentée par une grille $4 \times 4$. Certaines cases contiennent des dangers :
+
+- **Bouki** (la hyène) : si Ousmane entre dans sa case, il est dévoré
+- **Puits** : si Ousmane tombe dedans, il meurt
+- **Or** : le but est de trouver l'or et ressortir vivant
+
+**Perceptions** (indices dans les cases adjacentes) :
+
+- **Odeur** : Bouki est dans une case adjacente (N, S, E, O)
+- **Brise** : un puits est dans une case adjacente
+- **Éclat** : l'or est dans la case actuelle
+
+**L'agent Ousmane** doit utiliser la logique pour déduire où sont les dangers et planifier un chemin sûr vers l'or. À chaque étape, nous verrons comment un nouvel outil logique lui permet de raisonner plus finement.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Analyse PEAS du Monde de Bouki (rappel S1)"}
+Appliquons le cadre PEAS défini en Séance 1 à notre agent Ousmane :
+
+| **Composant PEAS** | **Monde de Bouki** |
+| --- | --- |
+| **P**erformance | $+1000$ pour l'or, $-1000$ pour la mort, $-1$ par déplacement |
+| **E**nvironnement | Grille $4 \times 4$, Bouki, puits, or |
+| **A**ctuateurs | Déplacements (Nord, Sud, Est, Ouest), ramasser l'or |
+| **S**enseurs | Odeur, brise, éclat (perceptions locales uniquement) |
+
+**Propriétés de l'environnement (S1) :**
+
+- **Partiellement observable** -- Ousmane ne voit que les perceptions de sa case, pas la grille entière
+- **Déterministe** -- les actions ont des résultats certains (pas de glissement aléatoire)
+- **Séquentiel** -- les décisions passées affectent les possibilités futures
+- **Statique** -- Bouki et les puits ne bougent pas pendant l'exploration
+- **Discret** -- nombre fini de cases et d'actions
+- **Mono-agent** -- Ousmane est le seul à agir
+
+C'est l'observabilité partielle qui rend la logique indispensable : l'agent doit *raisonner* pour combler le fossé entre ce qu'il perçoit et ce qu'il a besoin de savoir.
+:::
+
+::: {#fig-bouki_grille}
+{{< svg ../figures/s02-fig_06_monde_bouki_grille.svg alt="Le Monde de Bouki -- configuration complète de la grotte (invisible pour l'agent). L'agent Ousmane commence en (1,1) et ne perçoit que les indices locaux (odeur, brise). La logique lui permet de déduire progressivement la position des dangers." >}}
+
+Le Monde de Bouki -- configuration complète de la grotte (invisible pour l'agent). L'agent Ousmane commence en $(1,1)$ et ne perçoit que les indices locaux (odeur, brise). La logique lui permet de déduire progressivement la position des dangers.
+:::
+
+### Structure de la séance
+
+Cette séance suit une progression naturelle des outils de raisonnement, du plus simple au plus expressif :
+
+1. **Logique propositionnelle** (§2--4) : le langage le plus simple pour exprimer des faits et raisonner. Suffisant pour le Monde de Bouki.
+2. **Inférence** (§5--6) : les mécanismes qui permettent à l'agent de déduire de nouvelles connaissances à partir de sa base.
+3. **Le Monde de Bouki en action** (§7) : application complète du raisonnement logique.
+4. **Logique du premier ordre** (§8--11) : quand la logique propositionnelle ne suffit plus, comment l'étendre avec prédicats, quantificateurs et formes normales.
+5. **Calcul symbolique** (§12) : la manipulation d'expressions mathématiques comme application de l'IA symbolique.
+6. **Synthèse** (§13) : forces, limites, et transition vers la recherche (S3) et l'incertitude (S5).
+
+## Logique propositionnelle : syntaxe
+
+La logique propositionnelle est le fondement de tout raisonnement formel. C'est le langage le plus simple pour exprimer des faits et en déduire de nouveaux. Elle est le « langage machine » de la base de connaissances de notre agent Ousmane.
+
+### Propositions atomiques
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Proposition atomique"}
+Une **proposition atomique** (ou **variable propositionnelle**) est un énoncé déclaratif qui peut être soit **vrai**, soit **faux**, mais pas les deux simultanément. C'est l'unité de base du langage logique.
+:::
+
+Le choix des propositions atomiques est un acte de **modélisation** : on décide quels aspects du monde l'agent va représenter. C'est l'analogue logique de la *formulation du problème* que nous verrons en Séance 3 pour les algorithmes de recherche.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Propositions atomiques pour le Monde de Bouki"}
+Pour modéliser la grotte $4 \times 4$, Ousmane utilise les propositions suivantes :
+
+- $B_{i,j}$ : « Bouki est en case $(i,j)$ »   (16 propositions pour les 16 cases)
+- $P_{i,j}$ : « Un puits est en case $(i,j)$ »
+- $O_{i,j}$ : « On perçoit une odeur en case $(i,j)$ »
+- $Br_{i,j}$ : « On perçoit une brise en case $(i,j)$ »
+- $V_{i,j}$ : « La case $(i,j)$ a été visitée »
+- $S_{i,j}$ : « La case $(i,j)$ est sûre (ni Bouki ni puits) »
+
+Chacune de ces propositions est soit vraie, soit fausse, selon l'état réel de la grotte.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Propositions dans le contexte universitaire"}
+Considérons le contexte d'un étudiant à l'UCAD :
+
+- $P$ : « Fatou est inscrite en M1 IABD »
+- $Q$ : « Fatou a réussi l'examen d'IA »
+- $R$ : « Fatou peut s'inscrire en M2 »
+
+Chacune de ces propositions est soit vraie, soit fausse, selon la situation réelle de Fatou.
+:::
+
+### Connecteurs logiques
+
+Les propositions atomiques seules ne permettent pas de raisonner. Il faut les **combiner** pour exprimer des relations entre faits. Les connecteurs logiques jouent ce rôle.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Connecteurs logiques"}
+Les **connecteurs logiques** permettent de combiner des propositions pour en former de nouvelles :
+
+- **Négation** ($\neg$) : « non $P$ »
+- **Conjonction** ($\land$) : « $P$ et $Q$ »
+- **Disjonction** ($\lor$) : « $P$ ou $Q$ » (ou inclusif)
+- **Implication** ($\rightarrow$) : « si $P$ alors $Q$ »
+- **Équivalence** ($\leftrightarrow$) : « $P$ si et seulement si $Q$ »
+:::
+
+L'implication mérite une attention particulière car elle est souvent source de confusion.
+
+::: {.callout-warning .encadre-attentionbox title="Attention -- L'implication $P \rightarrow Q$"}
+L'implication $P \rightarrow Q$ est **fausse uniquement** quand $P$ est vrai et $Q$ est faux. Dans tous les autres cas, elle est vraie. En particulier, si $P$ est faux, l'implication est automatiquement vraie quel que soit $Q$. C'est l'**implication vacuement vraie**.
+
+« Si Dakar est en Europe, alors la Lune est en fromage » est *vrai* en logique classique, car la prémisse est fausse. Cela peut sembler contre-intuitif, mais c'est la convention qui rend le raisonnement cohérent.
+
+**Moyen mnémotechnique :** une implication est une *promesse*. « Si tu réussis l'examen, tu auras un stage. » La promesse n'est violée que si l'étudiant réussit mais n'obtient pas de stage. Si l'étudiant échoue, la promesse n'a pas été violée, même s'il obtient un stage par un autre moyen.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Formules composées dans le Monde de Bouki"}
+Voici des formules qui encodent les règles du monde :
+
+- $O_{1,1} \leftrightarrow (B_{1,2} \lor B_{2,1})$ :<br>« Il y a une odeur en $(1,1)$ ssi Bouki est en $(1,2)$ ou en $(2,1)$ »
+- $\neg O_{1,1} \rightarrow (\neg B_{1,2} \land \neg B_{2,1})$ :<br>« Pas d'odeur en $(1,1)$ implique pas de Bouki dans les cases adjacentes »
+- $V_{1,1} \land \neg B_{1,1}$ :<br>« La case $(1,1)$ a été visitée et ne contient pas Bouki »
+:::
+
+### Formules bien formées
+
+Pas toute suite de symboles n'est une formule valide. La grammaire des formules est définie récursivement.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Formule bien formée (fbf)"}
+Une **formule bien formée** est construite récursivement :
+
+1. Toute proposition atomique est une fbf
+2. Si $\phi$ est une fbf, alors $\neg\phi$ est une fbf
+3. Si $\phi$ et $\psi$ sont des fbf, alors $(\phi \land \psi)$, $(\phi \lor \psi)$, $(\phi \rightarrow \psi)$, et $(\phi \leftrightarrow \psi)$ sont des fbf
+4. Rien d'autre n'est une fbf
+:::
+
+**Priorité des connecteurs** (du plus prioritaire au moins prioritaire) : $\neg$, $\land$, $\lor$, $\rightarrow$, $\leftrightarrow$. Ainsi, $\neg P \land Q \rightarrow R$ se lit $((\neg P) \land Q) \rightarrow R$.
+
+### Tables de vérité
+
+Les connecteurs logiques sont définis par leurs **tables de vérité**, qui spécifient la valeur de vérité de la formule composée pour chaque combinaison de valeurs des propositions atomiques.
+
+| $P$ | $Q$ | $\neg P$ | $P \land Q$ | $P \lor Q$ | $P \rightarrow Q$ | $P \leftrightarrow Q$ |
+| --- | --- | --- | --- | --- | --- | --- |
+| V | V | F | V | V | V | V |
+| V | F | F | F | V | **F** | F |
+| F | V | V | F | V | V | F |
+| F | F | V | F | F | V | V |
+
+La ligne en gras ($P=V, Q=F, P \rightarrow Q = F$) est le seul cas où l'implication est fausse.
+
+::: {#fig-tables}
+{{< svg ../figures/s02-fig_02_tables_verite.svg alt="Tables de vérité des connecteurs logiques. V = Vrai, F = Faux. L'implication est fausse uniquement quand la prémisse est vraie et la conclusion est fausse." >}}
+
+Tables de vérité des connecteurs logiques. V = Vrai, F = Faux. L'implication est fausse uniquement quand la prémisse est vraie et la conclusion est fausse.
+:::
+
+## Logique propositionnelle : sémantique
+
+La syntaxe définit les formules *correctement écrites*. La sémantique leur donne un *sens* : quand une formule est-elle vraie ?
+
+### Interprétation
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Interprétation (Valuation)"}
+Une **interprétation** $I$ est une fonction qui assigne une valeur de vérité (Vrai ou Faux) à **chaque** proposition atomique du langage.
+
+Si l'on a $n$ propositions atomiques, il existe $2^n$ interprétations possibles.
+:::
+
+Chaque interprétation représente un « monde possible » -- une configuration hypothétique de la réalité. Pour le Monde de Bouki avec $k$ propositions atomiques, il y a $2^k$ mondes possibles. L'agent ne sait pas dans lequel il se trouve, mais il peut éliminer des mondes impossibles grâce à ses observations.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Interprétations"}
+Avec trois propositions $P$, $Q$, $R$ (inscrite, réussite, inscription M2), il y a $2^3 = 8$ interprétations :
+
+- $I_1 : P=V, Q=V, R=V$   (Fatou est inscrite, a réussi, peut passer en M2)
+- $I_2 : P=V, Q=F, R=F$   (inscrite mais n'a pas réussi, ne peut pas passer)
+- $I_3 : P=F, Q=V, R=F$   (pas inscrite mais a réussi l'examen ?!)
+
+Certaines interprétations correspondent à des situations plausibles, d'autres non. La logique ne juge pas de la plausibilité -- elle vérifie la cohérence.
+:::
+
+### Modèle
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Modèle"}
+Une interprétation $I$ est un **modèle** d'une formule $\phi$ si $I$ rend $\phi$ vraie. On note $I \models \phi$ (se lit « $I$ satisfait $\phi$ »).
+
+L'ensemble de tous les modèles de $\phi$ est noté $\text{Mod}(\phi)$.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Modèle vs non-modèle"}
+Considérons la formule $\phi = (P \land Q) \rightarrow R$ (« si Fatou est inscrite et a réussi, alors elle peut s'inscrire en M2 »).
+
+**$I_1$ est-il un modèle de $\phi$ ?**
+
+- Avec $I_1 : P=V, Q=V, R=V$
+- $(P \land Q) = V \land V = V$
+- $\phi = V \rightarrow V = V$   ✓$I_1 \models \phi$
+
+**$I_4$ avec $P=V, Q=V, R=F$ est-il un modèle ?**
+
+- $(P \land Q) = V$
+- $\phi = V \rightarrow F = F$   ✗$I_4 \not\models \phi$
+
+$I_4$ n'est pas un modèle : Fatou est inscrite et a réussi, mais ne peut pas s'inscrire en M2. Cela contredit la règle.
+:::
+
+::: {#fig-modele}
+{{< svg ../figures/s02-fig_03_interpretation_modele.svg alt="Interprétation et modèle. À gauche : exemples d'interprétations pour une formule. À droite : l'espace de toutes les interprétations avec la zone des modèles en vert." >}}
+
+Interprétation et modèle. À gauche : exemples d'interprétations pour une formule. À droite : l'espace de toutes les interprétations avec la zone des modèles en vert.
+:::
+
+### Satisfiabilité, validité, insatisfiabilité
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Satisfiabilité, Validité, Insatisfiabilité"}
+Une formule $\phi$ est :
+
+- **Satisfiable** : s'il existe au moins un modèle ($\text{Mod}(\phi) \neq \emptyset$)
+- **Valide** (tautologie) : si **toutes** les interprétations sont des modèles ($\text{Mod}(\phi) =$ toutes les interprétations)
+- **Insatisfiable** (contradiction) : si elle n'a **aucun** modèle ($\text{Mod}(\phi) = \emptyset$)
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Les trois cas"}
+- **Satisfiable mais pas valide** : $P \land Q$ (vraie si $P=V$ et $Q=V$, fausse sinon)
+- **Valide (tautologie)** : $P \lor \neg P$ (toujours vraie, c'est le *tiers exclu*)
+- **Insatisfiable** : $P \land \neg P$ (jamais vraie -- *contradiction*)
+:::
+
+::: {.callout-important .encadre-retenirbox title="Relation fondamentale"}
+Il existe un lien profond entre ces trois notions :
+
+- $\phi$ est **valide** $\iff$ $\neg\phi$ est **insatisfiable**
+- $\phi$ est **insatisfiable** $\iff$ $\neg\phi$ est **valide**
+
+Ce lien est à la base de la **preuve par réfutation** : pour prouver que $\phi$ est une conséquence logique d'un ensemble de prémisses, on montre que les prémisses $\land \neg\phi$ mènent à une contradiction.
+:::
+
+### Conséquence logique
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Conséquence logique (implication sémantique)"}
+Une formule $\psi$ est une **conséquence logique** d'un ensemble de formules $\Gamma$ (noté $\Gamma \models \psi$) si tout modèle de $\Gamma$ est aussi un modèle de $\psi$.
+
+En français : si toutes les prémisses de $\Gamma$ sont vraies, alors $\psi$ est *nécessairement* vraie.
+:::
+
+C'est cette notion qui fonde le raisonnement de l'agent. Quand Ousmane ajoute une observation à sa KB et en déduit un fait, il utilise la conséquence logique : $\text{KB} \models \text{fait déduit}$.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Conséquence logique"}
+Soit $\Gamma = \{P, \; P \rightarrow Q\}$ (Fatou est inscrite, et si inscrite alors elle a un numéro étudiant).
+
+Tout modèle de $\Gamma$ rend $P$ vrai *et* $P \rightarrow Q$ vrai. Si $P$ est vrai et $P \rightarrow Q$ est vrai, alors $Q$ doit être vrai (sinon l'implication serait fausse). Donc $\Gamma \models Q$.
+
+C'est le **modus ponens** -- la règle d'inférence la plus fondamentale.
+:::
+
+## Équivalences et formes normales
+
+Pour manipuler efficacement les formules -- les simplifier, les comparer, les utiliser dans des algorithmes -- on a besoin d'**équivalences logiques** et de **formes canoniques**.
+
+### Équivalence logique
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Équivalence logique"}
+Deux formules $\phi$ et $\psi$ sont **logiquement équivalentes** (noté $\phi \equiv \psi$) si elles ont exactement les mêmes modèles : pour toute interprétation $I$, $I \models \phi \iff I \models \psi$.
+:::
+
+::: {.callout-important .encadre-theorembox title="Propriété -- Équivalences fondamentales"}
+Les équivalences suivantes permettent de transformer toute formule :
+
+- **Élimination de l'implication** : $P \rightarrow Q \equiv \neg P \lor Q$
+- **Élimination de l'équivalence** : $P \leftrightarrow Q \equiv (P \rightarrow Q) \land (Q \rightarrow P)$
+- **Lois de De Morgan** : 
+      $\neg(P \land Q) \equiv \neg P \lor \neg Q$   et   $\neg(P \lor Q) \equiv \neg P \land \neg Q$
+- **Double négation** : $\neg\neg P \equiv P$
+- **Contraposition** : $(P \rightarrow Q) \equiv (\neg Q \rightarrow \neg P)$
+- **Distributivité** : $P \land (Q \lor R) \equiv (P \land Q) \lor (P \land R)$
+- **Distributivité** : $P \lor (Q \land R) \equiv (P \lor Q) \land (P \lor R)$
+- **Idempotence** : $P \land P \equiv P$   et   $P \lor P \equiv P$
+- **Absorption** : $P \land (P \lor Q) \equiv P$   et   $P \lor (P \land Q) \equiv P$
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Application des équivalences"}
+Simplifions $\neg(P \rightarrow Q)$ :
+
+$$
+\begin{aligned}
+\neg(P \rightarrow Q) &\equiv \neg(\neg P \lor Q) && \text{(élimination de } \rightarrow \text{)} \\
+&\equiv \neg\neg P \land \neg Q && \text{(De Morgan)} \\
+&\equiv P \land \neg Q && \text{(double négation)}
+\end{aligned}
+$$
+
+Interprétation : « $P \rightarrow Q$ est faux » équivaut à « $P$ est vrai et $Q$ est faux ». L'implication n'échoue que si la prémisse est vraie mais la conclusion est fausse. C'est cohérent avec notre analyse de la table de vérité.
+:::
+
+### Forme Normale Conjonctive (CNF)
+
+Les algorithmes d'inférence automatique travaillent souvent sur des formules dans un format standardisé. Le format le plus utilisé est la **Forme Normale Conjonctive**.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Littéral, Clause, CNF"}
+- Un **littéral** est une variable propositionnelle ($P$) ou sa négation ($\neg P$).
+- Une **clause** est une disjonction de littéraux : $l_1 \lor l_2 \lor \ldots \lor l_k$.
+- Une formule est en **Forme Normale Conjonctive (CNF)** si elle est une conjonction de clauses :
+      $$\text{CNF} = C_1 \land C_2 \land \ldots \land C_m = \bigwedge_{i=1}^{m} \left(\bigvee_{j=1}^{k_i} l_{ij}\right)$$
+:::
+
+::: {.callout-tip .encadre-recipebox title="Recette -- Conversion en CNF"}
+Pour convertir toute formule en CNF :
+
+1. **Éliminer** $\leftrightarrow$ : remplacer $\phi \leftrightarrow \psi$ par $(\phi \rightarrow \psi) \land (\psi \rightarrow \phi)$
+2. **Éliminer** $\rightarrow$ : remplacer $\phi \rightarrow \psi$ par $\neg \phi \lor \psi$
+3. **Pousser** les négations vers l'intérieur (De Morgan, double négation)
+4. **Distribuer** $\lor$ sur $\land$ : remplacer $A \lor (B \land C)$ par $(A \lor B) \land (A \lor C)$
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Conversion en CNF pas à pas"}
+Convertissons $(P \rightarrow Q) \land (Q \rightarrow R)$ en CNF :
+
+**Étape 2** (éliminer $\rightarrow$) :
+$$(\neg P \lor Q) \land (\neg Q \lor R)$$
+
+C'est déjà en CNF avec deux clauses : $C_1 = (\neg P \lor Q)$ et $C_2 = (\neg Q \lor R)$.
+
+Convertissons maintenant $\neg(P \lor Q) \rightarrow R$ en CNF :
+
+**Étape 2** : $\neg(\neg(P \lor Q)) \lor R = (P \lor Q) \lor R$
+
+**Simplification** : $P \lor Q \lor R$   (une seule clause)
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Conversion plus complexe"}
+Convertissons $(P \lor Q) \rightarrow (R \land S)$ en CNF :
+
+$$
+\begin{aligned}
+(P \lor Q) \rightarrow (R \land S) &\equiv \neg(P \lor Q) \lor (R \land S) && \text{(éliminer } \rightarrow \text{)} \\
+&\equiv (\neg P \land \neg Q) \lor (R \land S) && \text{(De Morgan)} \\
+&\equiv ((\neg P \land \neg Q) \lor R) \land ((\neg P \land \neg Q) \lor S) && \text{(distribuer } \lor \text{ sur } \land \text{)} \\
+&\equiv (\neg P \lor R) \land (\neg Q \lor R) \land (\neg P \lor S) \land (\neg Q \lor S) && \text{(distribuer encore)}
+\end{aligned}
+$$
+
+Résultat : 4 clauses. Chaque clause est une disjonction de littéraux. ✓
+:::
+
+### Forme Normale Disjonctive (DNF)
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Forme Normale Disjonctive (DNF)"}
+Une formule est en **DNF** si elle est une disjonction de **conjonctions** de littéraux :
+$$\text{DNF} = (l_{11} \land l_{12} \land \ldots) \lor (l_{21} \land l_{22} \land \ldots) \lor \ldots$$
+:::
+
+La DNF est le « dual » de la CNF : on échange $\land$ et $\lor$. La CNF est privilégiée pour la résolution (§6), mais la DNF est utile pour tester la satisfiabilité : une formule en DNF est satisfiable ssi au moins une de ses conjonctions ne contient pas un littéral et sa négation.
+
+## Inférence en logique propositionnelle
+
+L'inférence est le cœur du raisonnement de l'agent. C'est le mécanisme qui implémente l'opération [Ask]{.smallcaps} : « étant donné ma base de connaissances, que puis-je en déduire ? »
+
+### Règles d'inférence
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Règle d'inférence"}
+Une **règle d'inférence** est une règle qui permet de déduire une **conclusion** à partir de **prémisses**, de façon **garantie valide**. Si les prémisses sont vraies, la conclusion l'est nécessairement.
+
+Une règle d'inférence est **correcte** (*sound*) si elle préserve la vérité. Elle est **complète** si elle permet de déduire *toutes* les conséquences logiques.
+:::
+
+::: {.callout-important .encadre-theorembox title="Propriété -- Modus Ponens (MP)"}
+Si l'on sait que $P \rightarrow Q$ est vrai et que $P$ est vrai, alors $Q$ est nécessairement vrai :
+$$\frac{P \rightarrow Q    P}{Q}$$
+:::
+
+::: {#fig-inference}
+{{< svg ../figures/s02-fig_04_regles_inference.svg alt="Les deux règles d'inférence fondamentales : Modus Ponens et Modus Tollens, avec des exemples concrets dans le contexte sénégalais." >}}
+
+Les deux règles d'inférence fondamentales : Modus Ponens et Modus Tollens, avec des exemples concrets dans le contexte sénégalais.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Modus Ponens tropicalisé"}
+**Contexte : Transport à Dakar**
+
+- Prémisse 1 : « Si Amadou rate le bus DDD, il arrivera en retard au travail »
+- Prémisse 2 : « Amadou a raté le bus DDD ce matin »
+- **Conclusion** : « Amadou arrivera en retard au travail »
+:::
+
+::: {.callout-important .encadre-theorembox title="Propriété -- Modus Tollens (MT)"}
+Si l'on sait que $P \rightarrow Q$ est vrai et que $Q$ est faux, alors $P$ est nécessairement faux :
+$$\frac{P \rightarrow Q    \neg Q}{\neg P}$$
+:::
+
+Le modus tollens est la **contraposée** du modus ponens. Il raisonne « à rebours » : si la conséquence est fausse, la prémisse devait être fausse.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Modus Tollens tropicalisé"}
+**Contexte : Cuisine sénégalaise**
+
+- Prémisse 1 : « Si le thiéboudienne est bien préparé, il sent délicieux »
+- Prémisse 2 : « Le thiéboudienne ne sent pas délicieux »
+- **Conclusion** : « Le thiéboudienne n'est pas bien préparé »
+:::
+
+::: {.callout-important .encadre-theorembox title="Propriété -- Autres règles d'inférence utiles"}
+**Syllogisme hypothétique :**
+$$\frac{P \rightarrow Q    Q \rightarrow R}{P \rightarrow R}$$
+En français : si $P$ implique $Q$ et $Q$ implique $R$, alors $P$ implique $R$ (transitivité).
+
+**Élimination de la disjonction (preuve par cas) :**
+$$\frac{P \lor Q    P \rightarrow R    Q \rightarrow R}{R}$$
+En français : si l'un des deux est vrai, et que chacun implique $R$, alors $R$ est vrai.
+:::
+
+### Chaînage avant et chaînage arrière
+
+L'agent dispose de deux stratégies pour raisonner à partir de sa base de connaissances.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Chaînage avant (*Forward chaining*)"}
+Le **chaînage avant** part des **faits connus** et applique les règles d'inférence pour déduire de **nouveaux faits**, jusqu'à atteindre le but ou épuiser les règles.
+
+C'est une stratégie *dirigée par les données*.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Chaînage avant"}
+Base de connaissances :
+
+- Fait : $A$ (Aminata est étudiante en informatique)
+- Règle 1 : $A \rightarrow B$ (si étudiante en info, alors sait programmer)
+- Règle 2 : $B \rightarrow C$ (si sait programmer, alors peut postuler en stage)
+
+**Chaînage avant** (on part des faits) :
+
+1. On sait $A$
+2. $A$ et règle 1 $\Rightarrow$ on déduit $B$ (modus ponens)
+3. $B$ et règle 2 $\Rightarrow$ on déduit $C$ (modus ponens)
+
+Conclusion : Aminata peut postuler en stage.
+:::
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Chaînage arrière (*Backward chaining*)"}
+Le **chaînage arrière** part du **but à prouver** et cherche les prémisses nécessaires pour l'établir, récursivement.
+
+C'est une stratégie *dirigée par le but*. C'est la stratégie utilisée par Prolog.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Chaînage arrière"}
+But : Prouver $C$ (Aminata peut postuler en stage)
+
+**Chaînage arrière** :
+
+1. Pour prouver $C$, on cherche une règle qui conclut $C$ $\to$ Règle 2 : $B \rightarrow C$
+2. Il suffit de prouver $B$. On cherche une règle qui conclut $B$ $\to$ Règle 1 : $A \rightarrow B$
+3. Il suffit de prouver $A$. $A$ est un fait connu. ✓
+
+On remonte la chaîne : $A$ établi $\Rightarrow$ $B$ établi $\Rightarrow$ $C$ prouvé.
+:::
+
+|  | **Chaînage avant** | **Chaînage arrière** |
+| --- | --- | --- |
+| Direction | Faits $\to$ Conclusions | But $\to$ Prémisses |
+| Stratégie | Dirigé par les données | Dirigé par le but |
+| Avantage | Trouve tout ce qui est déductible | Focalisé, efficace pour un but précis |
+| Inconvénient | Peut déduire des faits inutiles | Peut boucler sur les mêmes sous-buts |
+| Utilisé dans | Systèmes de monitoring | Prolog, systèmes de diagnostic |
+
+## Résolution et preuve par réfutation
+
+Le modus ponens et le modus tollens sont des règles d'inférence *correctes* mais pas *complètes* : il existe des conséquences logiques qu'on ne peut pas dériver avec ces seules règles. La **résolution** est une règle d'inférence qui est à la fois correcte *et* complète (pour la réfutation). C'est l'algorithme que notre agent utilise réellement.
+
+### La règle de résolution
+
+::: {.callout-important .encadre-theorembox title="Propriété -- Règle de résolution"}
+Si deux clauses contiennent des littéraux complémentaires ($P$ et $\neg P$), on peut les **résoudre** pour obtenir une nouvelle clause appelée **résolvante** :
+$$\frac{P \lor A    \neg P \lor B}{A \lor B}$$
+où $A$ et $B$ sont des disjonctions de littéraux (éventuellement vides).
+:::
+
+La résolution « annule » le littéral $P$ entre les deux clauses, comme une simplification algébrique.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Résolution"}
+Clauses : $(\neg P \lor Q)$ et $(P)$
+
+Résolution sur $P$ :
+$$\frac{\neg P \lor Q    P}{Q}$$
+On obtient la clause $(Q)$. C'est le modus ponens, retrouvé comme cas particulier de la résolution !
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- La clause vide"}
+Clauses : $(P)$ et $(\neg P)$
+
+Résolution sur $P$ :
+$$\frac{P    \neg P}{\square}$$
+On obtient la **clause vide** $\square$, qui est toujours **fausse**. Cela signifie que les deux clauses sont contradictoires : $P$ et $\neg P$ ne peuvent pas être vrais simultanément. La dérivation de $\square$ signale une **contradiction**.
+:::
+
+### Preuve par réfutation
+
+La résolution est utilisée pour prouver des théorèmes par **réfutation** (preuve par l'absurde) :
+
+::: {.callout-tip .encadre-recipebox title="Recette -- Preuve par résolution"}
+Pour prouver que $\text{KB} \models \alpha$ (la formule $\alpha$ est une conséquence de la base de connaissances) :
+
+1. Convertir KB $\land \neg\alpha$ en CNF (ensemble de clauses)
+2. Appliquer la résolution de manière répétée entre paires de clauses
+3. Si on dérive la clause vide $\square$ : **preuve réussie** ($\alpha$ est bien une conséquence de KB)
+4. Si on ne peut plus dériver de nouvelles clauses sans obtenir $\square$ : **$\alpha$ n'est pas une conséquence de KB**
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple complet -- Preuve par résolution"}
+**KB** : $\{P, \; P \rightarrow Q, \; Q \rightarrow R\}$. Prouver que $\text{KB} \models R$.
+
+**Étape 1 -- Conversion en CNF :**
+
+- $P$ $\to$ clause $(P)$
+- $P \rightarrow Q$ $\to$ clause $(\neg P \lor Q)$
+- $Q \rightarrow R$ $\to$ clause $(\neg Q \lor R)$
+- $\neg R$ $\to$ clause $(\neg R)$   (on ajoute la négation du but)
+
+**Étape 2 -- Résolution :**
+
+| **\#** | **Clause** | **Origine** | **Littéral résolu** |
+| --- | --- | --- | --- |
+| 1 | $(P)$ | KB | --- |
+| 2 | $(\neg P \lor Q)$ | KB | --- |
+| 3 | $(\neg Q \lor R)$ | KB | --- |
+| 4 | $(\neg R)$ | Négation du but | --- |
+| 5 | $(Q)$ | Résolution 1+2 | $P$ |
+| 6 | $(R)$ | Résolution 5+3 | $Q$ |
+| 7 | $\square$ | Résolution 6+4 | $R$ |
+
+La clause vide $\square$ est dérivée en 3 pas : **contradiction**. Donc $\neg R$ est incompatible avec KB, ce qui prouve que $\text{KB} \models R$.
+:::
+
+::: {#fig-resolution}
+{{< svg ../figures/s02-fig_05_resolution_preuve.svg alt="Preuve par résolution : pour prouver R à partir de la base de connaissances, on ajoute non R et on dérive la clause vide (contradiction). L'arbre montre les résolutions successives." >}}
+
+Preuve par résolution : pour prouver $R$ à partir de la base de connaissances, on ajoute $\neg R$ et on dérive la clause vide (contradiction). L'arbre montre les résolutions successives.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Preuve plus complexe"}
+**KB** : « Si Aminata est étudiante en IABD, elle sait programmer. Si elle sait programmer et connaît les maths, elle comprend le ML. Aminata est étudiante en IABD. Aminata connaît les maths. »
+
+**Prouver :** Aminata comprend le ML.
+
+Formalisation : $A$ = étudiante IABD, $B$ = sait programmer, $C$ = connaît les maths, $D$ = comprend le ML.
+
+KB en CNF : $\{(\neg A \lor B), \; (\neg B \lor \neg C \lor D), \; (A), \; (C)\}$. But : $D$.
+
+| **\#** | **Clause** | **Origine** | **Résolution sur** |
+| --- | --- | --- | --- |
+| 1 | $(\neg A \lor B)$ | KB | --- |
+| 2 | $(\neg B \lor \neg C \lor D)$ | KB | --- |
+| 3 | $(A)$ | KB | --- |
+| 4 | $(C)$ | KB | --- |
+| 5 | $(\neg D)$ | Négation du but | --- |
+| 6 | $(B)$ | 1 + 3 | $A$ |
+| 7 | $(\neg C \lor D)$ | 2 + 6 | $B$ |
+| 8 | $(D)$ | 7 + 4 | $C$ |
+| 9 | $\square$ | 8 + 5 | $D$   ✓ |
+
+Prouvé en 4 pas de résolution. Aminata comprend bien le ML.
+:::
+
+::: {.callout-important .encadre-theorembox title="Propriété -- Correction et complétude de la résolution"}
+La résolution est :
+
+- **Correcte** (*sound*) : si la clause vide est dérivée, alors la base est bien insatisfiable.
+- **Complète pour la réfutation** : si la base est insatisfiable, la résolution finira par dériver la clause vide.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Complexité de l'inférence en logique propositionnelle"}
+L'inférence en logique propositionnelle est un problème **difficile** :
+
+- Vérifier si une formule est **satisfiable** (problème SAT) est **NP-complet**. C'est le premier problème prouvé NP-complet (théorème de Cook-Levin, 1971).
+- Vérifier si une formule est **valide** est **co-NP-complet**.
+
+Avec $n$ propositions, la table de vérité complète a $2^n$ lignes. Pour $n = 30$ (un petit système expert), cela fait plus d'un milliard de lignes. C'est pourquoi les algorithmes comme la résolution, DPLL et les solveurs SAT modernes sont essentiels : ils exploitent la structure de la formule pour éviter l'exploration exhaustive.
+
+Malgré cette complexité théorique, les solveurs SAT modernes résolvent routinièrement des instances avec des millions de variables. Ils sont au cœur de la vérification de circuits intégrés, de la planification et de la cryptanalyse.
+:::
+
+## Application : le Monde de Bouki en action
+
+Mettons en pratique tout ce que nous avons appris sur un raisonnement complet dans le Monde de Bouki. L'agent Ousmane va utiliser la logique propositionnelle pour déduire la position de Bouki à partir de ses seules perceptions.
+
+### Base de connaissances de l'agent
+
+La KB d'Ousmane contient deux types de formules : les **règles du monde** (connues à l'avance) et les **percepts** (ajoutés au fur et à mesure).
+
+**Règles du monde** (extraits pour la zone explorée) :
+
+$$
+\begin{aligned}
+O_{1,1} &\leftrightarrow (B_{1,2} \lor B_{2,1})
+\end{aligned}
+$$ {#eq-r1}
+
+$$
+\begin{aligned}
+O_{2,1} &\leftrightarrow (B_{1,1} \lor B_{2,2} \lor B_{3,1})
+\end{aligned}
+$$ {#eq-r2}
+
+$$
+\begin{aligned}
+O_{1,2} &\leftrightarrow (B_{1,1} \lor B_{1,3} \lor B_{2,2})
+\end{aligned}
+$$ {#eq-r3}
+
+En français : « il y a une odeur en $(i,j)$ si et seulement si Bouki est dans une case adjacente ».
+
+### Raisonnement étape par étape
+
+::: {#fig-bouki_raisonnement}
+{{< svg ../figures/s02-fig_07_bouki_raisonnement_etapes.svg alt="Raisonnement logique étape par étape dans le Monde de Bouki. L'agent Ousmane déduit progressivement la position de Bouki par intersection des possibilités, en combinant ses perceptions successives avec les règles du monde." >}}
+
+Raisonnement logique étape par étape dans le Monde de Bouki. L'agent Ousmane déduit progressivement la position de Bouki par intersection des possibilités, en combinant ses perceptions successives avec les règles du monde.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Étape 1 -- Case $(1,1)$ : pas d'odeur"}
+Ousmane entre en $(1,1)$. Il ne perçoit **aucune odeur**.
+
+$\textsc{Tell}(\text{KB}, \neg O_{1,1})$
+
+Par (@eq-r1) et modus tollens : $\neg O_{1,1} \Rightarrow \neg(B_{1,2} \lor B_{2,1}) \Rightarrow \neg B_{1,2} \land \neg B_{2,1}$.
+
+**Déduction :** Bouki n'est ni en $(1,2)$ ni en $(2,1)$. Ces cases sont sûres.
+
+$\textsc{Tell}(\text{KB}, S_{1,2} \land S_{2,1})$
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Étape 2 -- Case $(2,1)$ : odeur !"}
+Ousmane se déplace en $(2,1)$ (sûre). Il perçoit une **odeur**.
+
+$\textsc{Tell}(\text{KB}, O_{2,1})$
+
+Par (@eq-r2) : $O_{2,1} \Rightarrow B_{1,1} \lor B_{2,2} \lor B_{3,1}$.
+
+Mais $(1,1)$ a été visité sans danger : $\neg B_{1,1}$.
+
+**Déduction :** $B_{2,2} \lor B_{3,1}$. Bouki est en $(2,2)$ ou en $(3,1)$.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Étape 3 -- Case $(1,2)$ : odeur !"}
+Ousmane se déplace en $(1,2)$ (sûre d'après l'étape 1). Il perçoit une **odeur**.
+
+$\textsc{Tell}(\text{KB}, O_{1,2})$
+
+Par (@eq-r3) : $O_{1,2} \Rightarrow B_{1,1} \lor B_{1,3} \lor B_{2,2}$.
+
+$\neg B_{1,1}$ (visité), donc : $B_{1,3} \lor B_{2,2}$.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Étape 4 -- Intersection et déduction finale"}
+L'agent a maintenant deux disjonctions dans sa KB :
+
+$$
+\begin{aligned}
+&B_{2,2} \lor B_{3,1} && \text{(de l'étape 2)} \\
+    &B_{1,3} \lor B_{2,2} && \text{(de l'étape 3)}
+\end{aligned}
+$$
+
+$B_{2,2}$ est le seul terme commun. Peut-on conclure que $B_{2,2}$ est vrai ? Pas encore formellement avec la seule résolution propositionnelle. Mais si Ousmane explore $(3,1)$ sans trouver Bouki, alors $\neg B_{3,1}$, et par résolution avec $B_{2,2} \lor B_{3,1}$, il déduit $B_{2,2}$.
+
+Alternativement, s'il explore $(1,3)$ sans danger : $\neg B_{1,3}$, et par résolution avec $B_{1,3} \lor B_{2,2}$, il déduit aussi $B_{2,2}$.
+
+**Dans les deux cas :** Bouki est en $(2,2)$ !
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Limites du raisonnement logique dans le Monde de Bouki"}
+Le raisonnement ci-dessus suppose que les règles du monde sont **parfaites** et que les perceptions sont **fiables**. Dans le monde réel :
+
+- Les capteurs peuvent être bruités (fausse odeur, faux négatif)
+- Le monde peut être partiellement modélisé (règles incomplètes)
+- Parfois, les observations ne suffisent pas pour une déduction certaine
+
+Dans ces situations, l'agent doit prendre des *risques calculés*. C'est exactement ce que permettront les **probabilités** de la Séance 5 : au lieu de « Bouki est en $(2,2)$ ou en $(3,1)$ », l'agent dira « Bouki est en $(2,2)$ avec probabilité 0,7 et en $(3,1)$ avec probabilité 0,3 ».
+:::
+
+## Logique du premier ordre : au-delà des propositions
+
+La logique propositionnelle est puissante pour raisonner sur des faits spécifiques dans un monde fini (comme la grille du Monde de Bouki). Mais elle a une **limitation fondamentale** : elle ne peut pas exprimer des généralités.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- L'insuffisance de la logique propositionnelle"}
+Supposons que l'UCAD ait 500 étudiants. Pour exprimer « tout étudiant inscrit doit payer ses frais », il faudrait écrire 500 implications, une par étudiant :
+
+$$
+\begin{aligned}
+\text{InscritFatou} &\rightarrow \text{PayeFatou} \\
+\text{InscritAmadou} &\rightarrow \text{PayeAmadou} \\
+&\vdots \\
+\text{InscritOusmane} &\rightarrow \text{PayeOusmane}
+\end{aligned}
+$$
+
+C'est intenable. La **logique du premier ordre** (LPO) résout ce problème avec une seule formule :
+$$\forall x \, (\text{Inscrit}(x) \rightarrow \text{Paye}(x))$$
+:::
+
+### Les briques de la LPO
+
+La LPO enrichit la logique propositionnelle avec trois nouveaux éléments : les **prédicats**, les **fonctions**, et les **quantificateurs**.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Vocabulaire de la LPO"}
+Le vocabulaire d'un langage de LPO comprend :
+
+- **Constantes** : des objets nommés du domaine. Ex : $\text{Fatou}$, $\text{Dakar}$, $\text{IABD}$.
+- **Variables** : des « cases vides » pouvant désigner n'importe quel objet. Ex : $x$, $y$, $z$.
+- **Prédicats** : des propriétés ou relations. Ex : $\text{Étudiant}(x)$, $\text{Enseigne}(x, y)$.
+- **Fonctions** : des transformations qui retournent un objet. Ex : $\text{père}(x)$, $\text{âge}(x)$.
+- **Quantificateurs** : $\forall$ (« pour tout ») et $\exists$ (« il existe »).
+- **Connecteurs logiques** : les mêmes qu'en logique propositionnelle ($\neg, \land, \lor, \rightarrow, \leftrightarrow$).
+:::
+
+### Termes et formules atomiques
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Terme"}
+Un **terme** désigne un objet du domaine. Il est défini récursivement :
+
+- Toute constante est un terme (ex : $\text{Fatou}$, $\text{Dakar}$)
+- Toute variable est un terme (ex : $x$, $y$)
+- Si $f$ est une fonction $n$-aire et $t_1, \ldots, t_n$ sont des termes, alors $f(t_1, \ldots, t_n)$ est un terme (ex : $\text{père}(\text{Fatou})$, $\text{distance}(\text{Dakar}, x)$)
+:::
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Formule atomique"}
+Une **formule atomique** (ou **atome**) est l'application d'un prédicat à des termes. Si $P$ est un prédicat $n$-aire et $t_1, \ldots, t_n$ sont des termes :
+$$P(t_1, \ldots, t_n)$$
+L'égalité $t_1 = t_2$ est aussi une formule atomique.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Prédicats et fonctions"}
+- $\text{Étudiant}(x)$ : « $x$ est un étudiant » (prédicat unaire)
+- $\text{Enseigne}(x, y)$ : « $x$ enseigne la matière $y$ » (prédicat binaire)
+- $\text{père}(x)$ : « le père de $x$ » (fonction unaire, retourne une personne)
+- $\text{âge}(x)$ : « l'âge de $x$ » (fonction, retourne un nombre)
+
+**Combinaisons :**
+
+- $\text{Étudiant}(\text{père}(\text{Fatou}))$ : « Le père de Fatou est étudiant » (probablement Faux !)
+- $\text{Enseigne}(\text{Dr\_Touré}, \text{IA})$ : « Dr Touré enseigne l'IA » (Vrai)
+- $\text{âge}(\text{Fatou}) > 18$ : « L'âge de Fatou est supérieur à 18 »
+:::
+
+### Quantificateurs
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Quantificateur universel ($\forall$)"}
+Le quantificateur $\forall$ (« pour tout ») affirme qu'une propriété est vraie pour **tous** les éléments du domaine :
+$$\forall x \, P(x) \text{ signifie ``Pour tout } x \text{ du domaine, } P(x) \text{ est vrai''}$$
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Quantificateur universel"}
+$$\forall x \, (\text{Étudiant}(x) \rightarrow \text{Travailleur}(x))$$
+« Tous les étudiants sont travailleurs. »
+
+Cette formule est **fausse** s'il existe **un seul** étudiant qui ne travaille pas. Un contre-exemple suffit pour invalider un $\forall$.
+:::
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Quantificateur existentiel ($\exists$)"}
+Le quantificateur $\exists$ (« il existe ») affirme qu'une propriété est vraie pour **au moins un** élément du domaine :
+$$\exists x \, P(x) \text{ signifie ``Il existe un } x \text{ tel que } P(x) \text{ est vrai''}$$
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Quantificateur existentiel"}
+$$\exists x \, (\text{Étudiant}(x) \land \text{Sénégalais}(x))$$
+« Il existe au moins un étudiant sénégalais. »
+
+Cette formule est **vraie** dès qu'on trouve **un seul** exemple.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Attention -- $\forall$ avec $\rightarrow$ et $\exists$ avec $\land$"}
+Un piège classique : quel connecteur utiliser avec quel quantificateur ?
+
+**Correct :** $\forall x \, (\text{Étudiant}(x) \rightarrow \text{Paye}(x))$   « Tout étudiant paye. »
+
+**Incorrect :** $\forall x \, (\text{Étudiant}(x) \land \text{Paye}(x))$   Cela affirme que *tout objet du domaine* est à la fois un étudiant et paye -- les chaises, les bâtiments, tout !
+
+**Correct :** $\exists x \, (\text{Étudiant}(x) \land \text{Sénégalais}(x))$   « Il existe un étudiant sénégalais. »
+
+**Incorrect :** $\exists x \, (\text{Étudiant}(x) \rightarrow \text{Sénégalais}(x))$   Cette formule est vraie dès qu'il existe un non-étudiant (car l'implication est vacuement vraie) -- ce n'est pas le sens voulu.
+
+**Règle mnémotechnique :** $\forall$ va avec $\rightarrow$,   $\exists$ va avec $\land$.
+:::
+
+### Ordre des quantificateurs
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- L'ordre des quantificateurs compte !"}
+$$\forall x \, \exists y \, \text{Aime}(x, y)$$
+« Pour toute personne, il existe quelqu'un qu'elle aime. » (Chacun a un amour, pas forcément le même.)
+
+$$\exists y \, \forall x \, \text{Aime}(x, y)$$
+« Il existe quelqu'un que tout le monde aime. » (Une personne universellement aimée.)
+
+Ces deux formules ont des significations **très différentes**. La seconde est beaucoup plus forte que la première. La seconde implique la première, mais pas l'inverse.
+:::
+
+::: {.callout-important .encadre-theorembox title="Propriété -- Dualité des quantificateurs"}
+Les quantificateurs sont liés par les équivalences suivantes (analogues des lois de De Morgan pour $\land$ et $\lor$) :
+
+- $\neg \forall x \, P(x) \equiv \exists x \, \neg P(x)$   « Pas tous » = « il en existe un qui ne... »
+- $\neg \exists x \, P(x) \equiv \forall x \, \neg P(x)$   « Aucun » = « tous ne... pas »
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Dualité"}
+« Ce n'est pas vrai que tous les étudiants réussissent » équivaut à « Il existe un étudiant qui ne réussit pas » :
+$$\neg \forall x \, (\text{Étudiant}(x) \rightarrow \text{Réussit}(x)) \equiv \exists x \, (\text{Étudiant}(x) \land \neg\text{Réussit}(x))$$
+Notez comment le $\rightarrow$ s'est transformé en $\land$ quand la négation a traversé le $\forall$. C'est cohérent avec les règles de De Morgan et l'élimination de l'implication.
+:::
+
+::: {#fig-lpo}
+{{< svg ../figures/s02-fig_08_lpo_predicats_quantificateurs.svg alt="Prédicats, fonctions et quantificateurs en Logique du Premier Ordre, avec exemples dans le contexte universitaire de l'UCAD. Les prédicats retournent Vrai/Faux, les fonctions retournent un objet du domaine." >}}
+
+Prédicats, fonctions et quantificateurs en Logique du Premier Ordre, avec exemples dans le contexte universitaire de l'UCAD. Les prédicats retournent Vrai/Faux, les fonctions retournent un objet du domaine.
+:::
+
+### Exemples de formalisation en LPO
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Règles universitaires à l'UCAD"}
+**« Tout étudiant inscrit en IABD doit passer l'examen d'IA » :**
+$$\forall x \, ((\text{Étudiant}(x) \land \text{Inscrit}(x, \text{IABD})) \rightarrow \text{PasseExamen}(x, \text{IA}))$$
+
+**« Il existe un professeur du département Maths-Info qui enseigne Python » :**
+$$\exists x \, (\text{Prof}(x) \land \text{Département}(x, \text{MathsInfo}) \land \text{Enseigne}(x, \text{Python}))$$
+
+**« Tout étudiant a un professeur qui l'encadre » :**
+$$\forall x \, (\text{Étudiant}(x) \rightarrow \exists y \, (\text{Prof}(y) \land \text{Encadre}(y, x)))$$
+
+**« Aucun étudiant ne peut s'auto-encadrer » :**
+$$\forall x \, (\text{Étudiant}(x) \rightarrow \neg \text{Encadre}(x, x))$$
+:::
+
+## Variables libres, liées et interprétation en LPO
+
+### Variables libres et liées
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Variable libre et variable liée"}
+Dans une formule de LPO :
+
+- Une variable est **liée** si elle est sous la portée d'un quantificateur ($\forall$ ou $\exists$).
+- Une variable est **libre** si elle n'est sous la portée d'aucun quantificateur.
+
+Une formule sans variable libre est dite **close** (ou **énoncé**).
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Variables libres et liées"}
+Dans la formule :
+$$\forall x \, (\text{Étudiant}(x) \rightarrow \text{Aime}(x, y))$$
+
+- $x$ est **liée** (sous la portée de $\forall x$)
+- $y$ est **libre** (pas quantifiée)
+
+Cette formule dit « tout étudiant aime $y$ » sans préciser qui est $y$. Elle n'a pas de valeur de vérité tant que $y$ n'est pas fixé.
+
+La formule $\forall x \, \exists y \, (\text{Étudiant}(x) \rightarrow \text{Aime}(x, y))$ est **close** : les deux variables sont liées. Elle dit « tout étudiant aime quelqu'un ».
+:::
+
+### Interprétation en LPO
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Interprétation (structure) en LPO"}
+Une **interprétation** (ou **structure**) $\mathcal{I}$ pour un langage de LPO comprend :
+
+1. Un **domaine** $D$ non vide (l'ensemble des objets du monde)
+2. Pour chaque constante $c$ : un élément $c^{\mathcal{I}} \in D$
+3. Pour chaque prédicat $n$-aire $P$ : une relation $P^{\mathcal{I}} \subseteq D^n$
+4. Pour chaque fonction $n$-aire $f$ : une fonction $f^{\mathcal{I}} : D^n \to D$
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Interprétation « UCAD »"}
+**Domaine :** $D = \{\text{Fatou, Amadou, Dr\_Touré, IA, ML, Python, IABD, MathsInfo}\}$
+
+**Interprétation des prédicats :**
+
+- $\text{Étudiant}^{\mathcal{I}} = \{\text{Fatou, Amadou}\}$
+- $\text{Prof}^{\mathcal{I}} = \{\text{Dr\_Touré}\}$
+- $\text{Enseigne}^{\mathcal{I}} = \{(\text{Dr\_Touré, IA}), (\text{Dr\_Touré, Python})\}$
+- $\text{Inscrit}^{\mathcal{I}} = \{(\text{Fatou, IABD}), (\text{Amadou, IABD})\}$
+
+Sous cette interprétation, $\text{Enseigne}(\text{Dr\_Touré}, \text{IA})$ est **vrai** (le couple est dans la relation) et $\text{Enseigne}(\text{Fatou}, \text{ML})$ est **faux**.
+:::
+
+## Formes normales en LPO
+
+Comme en logique propositionnelle, les algorithmes d'inférence en LPO travaillent sur des formules dans un format standardisé. La mise en forme normale en LPO est plus complexe car il faut gérer les quantificateurs.
+
+### Forme prénexe
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Forme prénexe"}
+Une formule est en **forme prénexe** si tous les quantificateurs sont regroupés au début (le **préfixe**), suivis d'une formule sans quantificateur (la **matrice**) :
+$$Q_1 x_1 \, Q_2 x_2 \, \ldots \, Q_n x_n \; \underbrace{\phi(x_1, \ldots, x_n)}_{\text{matrice (sans quantificateurs)}}$$
+où chaque $Q_i$ est $\forall$ ou $\exists$.
+:::
+
+::: {.callout-tip .encadre-recipebox title="Recette -- Mise en forme prénexe"}
+1. **Éliminer** $\leftrightarrow$ et $\rightarrow$ (comme en logique propositionnelle)
+2. **Renommer** les variables liées si nécessaire pour éviter les conflits de noms (chaque quantificateur utilise un nom de variable unique)
+3. **Pousser** les négations vers l'intérieur (De Morgan + dualité des quantificateurs)
+4. **Extraire** les quantificateurs vers l'extérieur, en les déplaçant vers le début de la formule
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Mise en forme prénexe"}
+Mettons en forme prénexe :
+$$(\forall x \, P(x)) \rightarrow (\exists y \, Q(y))$$
+
+**Étape 1** -- Éliminer $\rightarrow$ :
+$$\neg(\forall x \, P(x)) \lor (\exists y \, Q(y))$$
+
+**Étape 3** -- Pousser la négation :
+$$(\exists x \, \neg P(x)) \lor (\exists y \, Q(y))$$
+
+**Étape 4** -- Extraire les quantificateurs :
+$$\exists x \, \exists y \, (\neg P(x) \lor Q(y))$$
+
+Résultat en forme prénexe : préfixe $\exists x \, \exists y$, matrice $\neg P(x) \lor Q(y)$.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Forme prénexe avec renommage"}
+$$(\forall x \, P(x)) \land (\exists x \, Q(x))$$
+
+Les deux $x$ sont liés par des quantificateurs différents. Il faut **renommer** pour éviter la confusion :
+
+**Étape 2** -- Renommage : remplacer le $x$ du second quantificateur par $y$ :
+$$(\forall x \, P(x)) \land (\exists y \, Q(y))$$
+
+**Étape 4** -- Extraction :
+$$\forall x \, \exists y \, (P(x) \land Q(y))$$
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Forme prénexe d'une implication entre formules quantifiées"}
+Mettons en forme prénexe la formule suivante (typique d'un raisonnement sur les étudiants) :
+$$(\forall x \, \text{Inscrit}(x)) \rightarrow (\exists y \, \text{Boursier}(y))$$
+
+**Étape 1** -- Éliminer $\rightarrow$ :
+$$\neg(\forall x \, \text{Inscrit}(x)) \lor (\exists y \, \text{Boursier}(y))$$
+
+**Étape 3** -- Pousser la négation (dualité des quantificateurs) :
+$$(\exists x \, \neg\text{Inscrit}(x)) \lor (\exists y \, \text{Boursier}(y))$$
+
+**Étape 2** -- Renommer (les deux $\exists$ utilisent des variables différentes, OK) :
+
+**Étape 4** -- Extraire les quantificateurs :
+$$\exists x \, \exists y \, (\neg\text{Inscrit}(x) \lor \text{Boursier}(y))$$
+
+En français : « il existe un non-inscrit ou il existe un boursier », ce qui est bien équivalent à « si tout le monde est inscrit, alors il y a un boursier ».
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple avancé -- Forme prénexe avec négation et quantificateurs imbriqués"}
+$$\neg(\forall x \, \exists y \, (\text{Prof}(x) \rightarrow \text{Enseigne}(x, y)))$$
+
+**Étape 1** -- Éliminer $\rightarrow$ :
+$$\neg(\forall x \, \exists y \, (\neg\text{Prof}(x) \lor \text{Enseigne}(x, y)))$$
+
+**Étape 3** -- Pousser la négation vers l'intérieur :
+$$\exists x \, \neg(\exists y \, (\neg\text{Prof}(x) \lor \text{Enseigne}(x, y)))$$
+$$\exists x \, \forall y \, \neg(\neg\text{Prof}(x) \lor \text{Enseigne}(x, y))$$
+$$\exists x \, \forall y \, (\text{Prof}(x) \land \neg\text{Enseigne}(x, y))$$
+
+Résultat en forme prénexe : $\exists x \, \forall y \, (\text{Prof}(x) \land \neg\text{Enseigne}(x, y))$
+
+En français : « il existe un professeur qui n'enseigne aucune matière ». C'est la négation de « tout professeur enseigne au moins une matière ».
+:::
+
+### Skolemisation
+
+La **skolemisation** est une technique pour éliminer les quantificateurs existentiels, en les remplaçant par des fonctions.
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Skolemisation"}
+Soit une formule en forme prénexe. On élimine chaque $\exists y$ en le remplaçant par une **fonction de Skolem** qui dépend de toutes les variables universellement quantifiées qui précèdent $y$ dans le préfixe :
+
+- Si $\exists y$ n'est précédé d'aucun $\forall$ : remplacer $y$ par une **constante de Skolem** $c$.
+- Si $\exists y$ est précédé de $\forall x_1, \ldots, \forall x_k$ : remplacer $y$ par $f(x_1, \ldots, x_k)$ où $f$ est une nouvelle fonction.
+:::
+
+L'idée est la suivante : « il existe un $y$ » signifie qu'on peut *choisir* un $y$. Si ce choix dépend de variables universelles précédentes, alors $y$ est une *fonction* de ces variables.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Skolemisation"}
+**Formule :** $\forall x \, \exists y \, \text{Aime}(x, y)$   (« tout le monde aime quelqu'un »)
+
+$y$ dépend de $x$ (pour chaque personne, il y a *quelqu'un* qu'elle aime -- pas forcément le même).
+
+**Skolemisation :** remplacer $y$ par $f(x)$ :
+$$\forall x \, \text{Aime}(x, f(x))$$
+
+$f$ est la « fonction d'amour » : $f(\text{Fatou})$ est la personne que Fatou aime, $f(\text{Amadou})$ est la personne qu'Amadou aime, etc.
+
+**Formule :** $\exists y \, \forall x \, \text{Aime}(x, y)$   (« il y a quelqu'un que tout le monde aime »)
+
+$y$ ne dépend d'aucune variable universelle (il est avant le $\forall$).
+
+**Skolemisation :** remplacer $y$ par une constante $c$ :
+$$\forall x \, \text{Aime}(x, c)$$
+
+$c$ est la « personne universellement aimée ».
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Attention -- La skolemisation préserve-t-elle le sens ?"}
+La skolemisation ne préserve pas l'équivalence logique au sens strict. Elle préserve la **satisfiabilité** : la formule originale est satisfiable ssi la formule skolemisée l'est. C'est suffisant pour la preuve par réfutation (§6), qui repose précisément sur la (in)satisfiabilité.
+:::
+
+### Forme clausale en LPO
+
+La forme clausale en LPO combine toutes les transformations précédentes.
+
+::: {.callout-tip .encadre-recipebox title="Recette -- Mise en forme clausale (LPO)"}
+Pour convertir une formule de LPO en un ensemble de clauses :
+
+1. **Éliminer** $\leftrightarrow$ et $\rightarrow$
+2. **Pousser** les négations vers l'intérieur (De Morgan + dualité des quantificateurs)
+3. **Standardiser** les variables (renommer pour qu'aucune variable ne soit quantifiée deux fois)
+4. **Mettre en forme prénexe** (extraire les quantificateurs)
+5. **Skolemiser** (éliminer les $\exists$)
+6. **Supprimer** les $\forall$ (ils sont désormais implicites -- toutes les variables restantes sont universelles)
+7. **Distribuer** $\lor$ sur $\land$ pour obtenir une conjonction de clauses
+8. **Séparer** les clauses
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple complet -- Mise en forme clausale"}
+**Formule :** « Tout étudiant a un encadrant qui est professeur. »
+$$\forall x \, (\text{Étudiant}(x) \rightarrow \exists y \, (\text{Prof}(y) \land \text{Encadre}(y, x)))$$
+
+**Étape 1** -- Éliminer $\rightarrow$ :
+$$\forall x \, (\neg\text{Étudiant}(x) \lor \exists y \, (\text{Prof}(y) \land \text{Encadre}(y, x)))$$
+
+**Étape 4** -- Forme prénexe :
+$$\forall x \, \exists y \, (\neg\text{Étudiant}(x) \lor (\text{Prof}(y) \land \text{Encadre}(y, x)))$$
+
+**Étape 5** -- Skolemisation ($y$ dépend de $x$, donc $y \mapsto f(x)$) :
+$$\forall x \, (\neg\text{Étudiant}(x) \lor (\text{Prof}(f(x)) \land \text{Encadre}(f(x), x)))$$
+
+**Étape 6** -- Supprimer $\forall$ :
+$$\neg\text{Étudiant}(x) \lor (\text{Prof}(f(x)) \land \text{Encadre}(f(x), x))$$
+
+**Étape 7** -- Distribuer $\lor$ sur $\land$ :
+$$(\neg\text{Étudiant}(x) \lor \text{Prof}(f(x))) \land (\neg\text{Étudiant}(x) \lor \text{Encadre}(f(x), x))$$
+
+**Étape 8** -- Deux clauses :
+
+$$
+\begin{aligned}
+C_1 &: \neg\text{Étudiant}(x) \lor \text{Prof}(f(x)) \\
+C_2 &: \neg\text{Étudiant}(x) \lor \text{Encadre}(f(x), x)
+\end{aligned}
+$$
+
+$f$ est la fonction de Skolem : « l'encadrant de $x$ ». $C_1$ dit « si $x$ est étudiant, alors $f(x)$ est professeur ». $C_2$ dit « si $x$ est étudiant, alors $f(x)$ encadre $x$ ».
+:::
+
+## Unification et résolution en LPO
+
+Pour appliquer la résolution en LPO (comme nous l'avons fait en logique propositionnelle, §6), il faut pouvoir reconnaître quand deux littéraux sont « complémentaires ». En logique propositionnelle, $P$ et $\neg P$ sont complémentaires. En LPO, $\text{Aime}(x, \text{Fatou})$ et $\neg\text{Aime}(\text{Amadou}, y)$ sont-ils complémentaires ? Oui, si on peut trouver des valeurs pour $x$ et $y$ qui les rendent identiques. C'est le rôle de l'**unification**.
+
+### Substitution
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Substitution"}
+Une **substitution** $\theta = \{x_1/t_1, x_2/t_2, \ldots, x_n/t_n\}$ est un ensemble de remplacements de variables par des termes. L'application de $\theta$ à une formule $\phi$, notée $\phi\theta$, remplace simultanément chaque $x_i$ par $t_i$.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Substitution"}
+$\theta = \{x/\text{Amadou}, \, y/\text{IA}\}$
+
+$\text{Enseigne}(x, y)\theta = \text{Enseigne}(\text{Amadou}, \text{IA})$
+:::
+
+### Unification
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Unificateur"}
+Un **unificateur** de deux expressions $E_1$ et $E_2$ est une substitution $\theta$ telle que $E_1\theta = E_2\theta$.
+
+L'**unificateur le plus général** (UPG, ou *most general unifier*, MGU) est l'unificateur qui fait le minimum de substitutions nécessaire.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Unification"}
+Peut-on unifier $\text{Enseigne}(x, \text{IA})$ et $\text{Enseigne}(\text{Dr\_Touré}, y)$ ?
+
+**Solution** : $\theta = \{x/\text{Dr\_Touré}, \; y/\text{IA}\}$
+
+Vérification : les deux expressions deviennent $\text{Enseigne}(\text{Dr\_Touré}, \text{IA})$. ✓Peut-on unifier $\text{Enseigne}(x, x)$ et $\text{Enseigne}(\text{IA}, \text{ML})$ ?
+
+**Non.** Il faudrait $x = \text{IA}$ et $x = \text{ML}$ simultanément, ce qui est impossible. L'**unification échoue** (occur check).
+:::
+
+::: {.callout-tip .encadre-recipebox title="Recette -- Algorithme d'unification"}
+Pour unifier deux expressions $E_1$ et $E_2$ :
+
+1. Si $E_1 = E_2$ (identiques) : succès, $\theta = \{\}$
+2. Si $E_1$ est une variable $x$ et $x$ n'apparaît pas dans $E_2$ : $\theta = \{x/E_2\}$
+3. Si $E_2$ est une variable : idem, symétriquement
+4. Si $E_1 = f(a_1, \ldots, a_n)$ et $E_2 = f(b_1, \ldots, b_n)$ (même symbole, même arité) : unifier les arguments un par un, en propageant les substitutions
+5. Sinon : **échec**
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Trace détaillée de l'algorithme d'unification"}
+Unifions $\text{Aime}(\text{père}(x), y)$ et $\text{Aime}(z, \text{Fatou})$.
+
+| **Pas** | **Comparaison** | **Action** | **$\theta$ courant** |
+| --- | --- | --- | --- |
+| 1 | $\text{Aime}$ vs $\text{Aime}$ | Même symbole, arité 2 | $\{\}$ |
+| 2 | $\text{père}(x)$ vs $z$ | $z$ est variable, $z \notin \text{père}(x)$ | $\{z/\text{père}(x)\}$ |
+| 3 | $y$ vs $\text{Fatou}$ | $y$ est variable | $\{z/\text{père}(x), \; y/\text{Fatou}\}$ |
+|  | **Succès.** UPG : $\theta = \{z/\text{père}(x), \; y/\text{Fatou}\}$ |  |  |
+
+Vérification : $\text{Aime}(\text{père}(x), y)\theta = \text{Aime}(\text{père}(x), \text{Fatou})$ et $\text{Aime}(z, \text{Fatou})\theta = \text{Aime}(\text{père}(x), \text{Fatou})$. ✓
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Échec de l'unification (*occur check*)"}
+Peut-on unifier $\text{Parent}(x, f(x))$ et $\text{Parent}(y, y)$ ?
+
+| **Pas** | **Comparaison** | **Action** | **$\theta$ courant** |
+| --- | --- | --- | --- |
+| 1 | $\text{Parent}$ vs $\text{Parent}$ | Même symbole | $\{\}$ |
+| 2 | $x$ vs $y$ | $x$ est variable | $\{x/y\}$ |
+| 3 | $f(x)\{x/y\} = f(y)$ vs $y$ | $y$ est variable, mais $y \in f(y)$ ! | **ÉCHEC** |
+
+L'unification échoue au pas 3 : il faudrait $y = f(y) = f(f(y)) = f(f(f(y))) = \ldots$ (boucle infinie). Le **test d'occurrence** (*occur check*) détecte ce cas.
+:::
+
+### Résolution en LPO
+
+La résolution en LPO combine la résolution propositionnelle et l'unification :
+
+::: {.callout-important .encadre-theorembox title="Propriété -- Résolution en LPO"}
+Soient deux clauses $C_1$ et $C_2$ contenant des littéraux $L_1 \in C_1$ et $\neg L_2 \in C_2$ (ou $\neg L_1 \in C_1$ et $L_2 \in C_2$). Si $L_1$ et $L_2$ ont un unificateur $\theta$, alors la **résolvante** est :
+$$(C_1\theta \setminus \{L_1\theta\}) \cup (C_2\theta \setminus \{\neg L_2\theta\})$$
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Résolution en LPO"}
+$C_1 : \neg\text{Étudiant}(x) \lor \text{Travailleur}(x)$   (« tout étudiant est travailleur »)
+
+$C_2 : \text{Étudiant}(\text{Fatou})$   (« Fatou est étudiante »)
+
+**Unification** de $\text{Étudiant}(x)$ et $\text{Étudiant}(\text{Fatou})$ : $\theta = \{x/\text{Fatou}\}$
+
+**Résolvante** : $\text{Travailleur}(\text{Fatou})$   (« Fatou est travailleuse »)
+
+C'est le modus ponens en LPO : « tout étudiant travaille » + « Fatou est étudiante » $\Rightarrow$ « Fatou travaille ».
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple complet -- Preuve par résolution en LPO"}
+**KB :**
+
+- Tout étudiant IABD sait programmer : $\forall x \, (\text{IABD}(x) \rightarrow \text{Prog}(x))$
+- Tout programmeur peut postuler en stage : $\forall x \, (\text{Prog}(x) \rightarrow \text{Stage}(x))$
+- Fatou est en IABD : $\text{IABD}(\text{Fatou})$
+
+**But :** $\text{Stage}(\text{Fatou})$ (Fatou peut postuler en stage)
+
+**Clauses :**
+
+| **\#** | **Clause** | **Origine** | **Unificateur** |
+| --- | --- | --- | --- |
+| 1 | $\neg\text{IABD}(x) \lor \text{Prog}(x)$ | KB | --- |
+| 2 | $\neg\text{Prog}(y) \lor \text{Stage}(y)$ | KB | --- |
+| 3 | $\text{IABD}(\text{Fatou})$ | KB | --- |
+| 4 | $\neg\text{Stage}(\text{Fatou})$ | $\neg$ But | --- |
+| 5 | $\text{Prog}(\text{Fatou})$ | 1 + 3 | $\{x/\text{Fatou}\}$ |
+| 6 | $\text{Stage}(\text{Fatou})$ | 2 + 5 | $\{y/\text{Fatou}\}$ |
+| 7 | $\square$ | 6 + 4 | ---   ✓ |
+
+Prouvé. Fatou peut bien postuler en stage.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Décidabilité et complexité : LP vs LPO"}
+La logique du premier ordre est **beaucoup plus puissante** que la logique propositionnelle, mais cette puissance a un prix :
+
+|  | **Logique propositionnelle** | **Logique du premier ordre** |
+| --- | --- | --- |
+| Satisfiabilité | Décidable (NP-complet) | **Indécidable** |
+| Validité | Décidable (co-NP) | **Semi-décidable** |
+| Réfutation | Terminaison garantie | Terminaison si insatisfiable |
+| Expressivité | Faible (faits spécifiques) | Forte (généralités) |
+
+**Semi-décidable** signifie : si une formule est valide, la résolution finira par le prouver. Mais si elle n'est pas valide, la résolution peut tourner *indéfiniment* sans jamais s'arrêter. C'est une conséquence du théorème d'indécidabilité de Church-Turing (1936).
+
+En pratique, les démonstrateurs automatiques de théorèmes en LPO (comme *Prover9*, *Vampire*, *E*) utilisent des stratégies de recherche sophistiquées pour guider la résolution et converger rapidement dans la plupart des cas utiles.
+:::
+
+## Application : les systèmes experts
+
+Les **systèmes experts** sont l'application la plus célèbre de l'IA symbolique. Ils incarnent exactement le modèle d'agent basé sur les connaissances que nous avons décrit en §1 : une base de connaissances (les règles de l'expert humain), un moteur d'inférence (chaînage avant ou arrière), et une interface pour recueillir les observations et communiquer les conclusions.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Un mini-système expert de diagnostic médical"}
+Imaginons un système expert simplifié pour le centre de santé de Médina à Dakar.
+
+**Base de règles (KB) :**
+
+- $R_1$ : $\text{Fièvre}(x) \land \text{Frissons}(x) \land \text{SaisonPluies} \rightarrow \text{SuspectPaludisme}(x)$
+- $R_2$ : $\text{Fièvre}(x) \land \text{Toux}(x) \land \text{Rhinite}(x) \rightarrow \text{SuspectGrippe}(x)$
+- $R_3$ : $\text{SuspectPaludisme}(x) \rightarrow \text{Prescrire}(x, \text{TDR})$
+- $R_4$ : $\text{SuspectGrippe}(x) \rightarrow \text{Prescrire}(x, \text{Repos})$
+
+**Faits (observations) :** $\text{Fièvre}(\text{Fatou})$, $\text{Frissons}(\text{Fatou})$, $\text{SaisonPluies}$.
+
+**Chaînage avant :**
+
+1. Faits connus : Fièvre(Fatou), Frissons(Fatou), SaisonPluies
+2. $R_1$ applicable avec $x = \text{Fatou}$ $\Rightarrow$ nouveau fait : SuspectPaludisme(Fatou)
+3. $R_3$ applicable $\Rightarrow$ nouveau fait : Prescrire(Fatou, TDR)
+
+Le système recommande un **Test de Diagnostic Rapide** (TDR) pour Fatou.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Limites des systèmes experts -- motivation pour la Séance 5"}
+Les systèmes experts à base de règles souffrent de deux limitations majeures :
+
+**1. Fragilité face à l'incertitude.** Si Fatou a de la fièvre et des frissons mais *aussi* de la toux, $R_1$ et $R_2$ s'appliquent toutes les deux. Le système conclut « suspect paludisme » *et* « suspect grippe ». Comment trancher ? La logique classique ne sait pas exprimer « plus probable » ou « moins probable ». La Séance 5 résoudra ce problème avec le théorème de Bayes.
+
+**2. Acquisition des connaissances.** Les règles doivent être extraites d'experts humains, une par une. C'est un processus long, coûteux, et incomplet. C'est le *goulot d'étranglement des connaissances* (*knowledge engineering bottleneck*). Le Machine Learning (S2 du programme) contourne ce problème en apprenant les règles directement à partir des données.
+:::
+
+## Calcul symbolique
+
+Le **calcul symbolique** (ou calcul formel) est une application majeure de l'IA symbolique. Il consiste à manipuler des expressions mathématiques sous forme symbolique, par opposition au calcul numérique qui travaille avec des approximations décimales.
+
+C'est un exemple parfait d'agent basé sur les connaissances : le système « connaît » les règles de la dérivation, de l'intégration et de l'algèbre, et les applique pour transformer des expressions. La base de connaissances contient les identités mathématiques, et le moteur d'inférence applique les règles de réécriture.
+
+### Symbolique vs Numérique
+
+::: {#fig-symbolic}
+{{< svg ../figures/s02-fig_09_symbolique_vs_numerique.svg alt="Calcul symbolique (résultats exacts) vs calcul numérique (approximations). Le calcul symbolique préserve la structure mathématique et donne des résultats valables pour tout x." >}}
+
+Calcul symbolique (résultats exacts) vs calcul numérique (approximations). Le calcul symbolique préserve la structure mathématique et donne des résultats valables pour tout $x$.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- La différence fondamentale"}
+**Question :** Quelle est la dérivée de $x^2 + \sin(x)$ ?
+
+**Calcul symbolique :** 
+$$\frac{d}{dx}(x^2 + \sin(x)) = 2x + \cos(x)$$
+Résultat exact, valable pour tout $x$.
+
+**Calcul numérique** (en $x = 0.5$, avec $h = 0.001$) :
+$$\frac{(0.501)^2 + \sin(0.501) - (0.5^2 + \sin(0.5))}{0.001} \approx 1.8776\ldots$$
+Approximation pour une seule valeur de $x$, avec une erreur dépendant de $h$.
+:::
+
+|  | **Calcul symbolique** | **Calcul numérique** |
+| --- | --- | --- |
+| Résultat | Exact | Approché |
+| Validité | Pour tout $x$ | Pour un $x$ donné |
+| Erreur | Aucune (si règles correctes) | Dépend de la méthode |
+| Interprétabilité | Haute (formule lisible) | Faible (un nombre) |
+| Limites | Pas toujours possible | Toujours possible |
+
+### Lien avec la logique
+
+Le calcul symbolique repose sur des **règles de réécriture**, qui sont des instances de règles d'inférence logiques. Par exemple, la règle de dérivation du produit :
+$$\frac{d}{dx}[f(x) \cdot g(x)] = f'(x) \cdot g(x) + f(x) \cdot g'(x)$$
+est une règle qui transforme une expression en une autre, garantissant l'équivalence mathématique. Le système applique ces règles de manière systématique -- c'est du **chaînage avant** (§5.2) : à partir de l'expression initiale, on applique les règles jusqu'à obtenir une forme simplifiée.
+
+### SymPy : calcul symbolique en Python
+
+Le principal outil de calcul symbolique en Python est **SymPy**, une bibliothèque open-source.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Introduction à SymPy"}
+```bash
+from sympy import symbols, sin, cos, diff, integrate, simplify
+
+# Définir des symboles
+x = symbols('x')
+
+# Expression symbolique
+expr = x**2 + sin(x)
+
+# Dérivation
+derivee = diff(expr, x)
+print(derivee)  # 2*x + cos(x)
+
+# Intégration
+integrale = integrate(expr, x)
+print(integrale)  # x**3/3 - cos(x)
+
+# Simplification
+expr2 = (x + 1)**2 - x**2 - 1
+simplifie = simplify(expr2)
+print(simplifie)  # 2*x
+```
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Résolution d'équations avec SymPy"}
+```bash
+from sympy import symbols, solve, Eq
+
+x, y = symbols('x y')
+
+# Résoudre une équation
+solutions = solve(x**2 - 5*x + 6, x)
+print(solutions)  # [2, 3]
+
+# Système d'équations (contexte : budget étudiant)
+# x = budget transport, y = budget repas
+# x + y = 50000 (CFA), 2*x + y = 80000
+sol = solve([Eq(x + y, 50000), Eq(2*x + y, 80000)], [x, y])
+print(sol)  # {x: 30000, y: 20000}
+```
+
+Interprétation : un étudiant qui dépense 50\,000 CFA entre transport et repas, avec le transport deux fois plus cher, dépense 30\,000 en transport et 20\,000 en repas.
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Logique symbolique avec SymPy"}
+SymPy contient aussi un module de **logique symbolique** qui implémente exactement les concepts de cette séance :
+
+```bash
+from sympy.logic.boolalg import And, Or, Not, Implies
+from sympy.logic.boolalg import to_cnf, satisfiable
+from sympy import symbols
+
+P, Q, R = symbols('P Q R')
+
+# Conversion en CNF
+expr = Implies(P, And(Q, R))
+cnf = to_cnf(expr)
+print(cnf)  # (Q | ~P) & (R | ~P)
+
+# Test de satisfiabilité
+result = satisfiable(And(P, Not(P)))
+print(result)  # False (contradiction !)
+
+result = satisfiable(And(P, Implies(P, Q)))
+print(result)  # {P: True, Q: True}
+```
+
+Le module `sympy.logic` implémente la conversion en CNF, le test de satisfiabilité et la résolution -- exactement les algorithmes que nous avons étudiés dans cette séance.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Note -- Approfondissement en TP"}
+Le TP de cette séance est entièrement consacré au calcul symbolique avec SymPy. Vous y découvrirez progressivement comment manipuler des expressions, résoudre des équations, et appliquer le calcul symbolique à des problèmes concrets. Le lien entre les règles logiques (cette séance) et les règles de dérivation/intégration sera exploré en pratique.
+:::
+
+## Synthèse et conclusion
+
+### Ce que nous avons appris
+
+Cette séance a introduit les outils fondamentaux du raisonnement formel en IA : le langage de la base de connaissances de l'agent.
+
+::: {.callout-important .encadre-retenirbox title="Points clés à retenir"}
+1. **Agent basé sur les connaissances.** Un agent qui maintient une base de connaissances (KB), la met à jour avec ses observations ([Tell]{.smallcaps}), et en déduit des faits pour agir ([Ask]{.smallcaps}). La logique est le langage de la KB, l'inférence est son moteur.
+2. **Logique propositionnelle.** Langage de base : propositions atomiques, connecteurs ($\neg, \land, \lor, \rightarrow, \leftrightarrow$), tables de vérité. Une formule est satisfiable, valide (tautologie), ou insatisfiable (contradiction). La conséquence logique ($\Gamma \models \psi$) fonde le raisonnement.
+3. **Inférence.** Modus ponens, modus tollens, chaînage avant/arrière. La **résolution** est une règle complète pour la réfutation : convertir en CNF, ajouter $\neg\alpha$, résoudre jusqu'à la clause vide.
+4. **Logique du premier ordre.** Étend la LP avec des prédicats, des fonctions et des quantificateurs ($\forall$, $\exists$). Permet d'exprimer des généralités. Les formes normales (prénexe, skolemisation, clausale) préparent les formules pour la résolution automatique.
+5. **Calcul symbolique.** Application de l'IA symbolique : manipulation d'expressions mathématiques par règles de réécriture, garantissant des résultats exacts.
+:::
+
+### Forces et limites de la logique pour l'IA
+
+| **Forces** | **Limites** |
+| --- | --- |
+| Raisonnement **garanti correct** : si les prémisses sont vraies, les conclusions le sont | Le monde réel est rarement totalement **observable** ni parfaitement **déterministe** |
+| Résultat **explicable** : on peut retracer la chaîne de raisonnement | Chaque proposition est **vraie ou fausse** -- pas de « peut-être » |
+| **Vérifiable** : on peut prouver qu'un système respecte ses spécifications | Les règles doivent être écrites **manuellement** par un expert humain |
+| **Composable** : les connaissances s'ajoutent de manière modulaire | La complexité de l'inférence est souvent **exponentielle** |
+
+### Fil conducteur du cours
+
+Cette séance complète notre exploration du raisonnement formel dans des mondes parfaitement définis :
+
+| **Séance** | **Question** | **Réponse** |  |
+| --- | --- | --- | --- |
+| 1 | Qu'est-ce que l'IA ? | Agents rationnels | ✓ |
+| **2** | **Comment raisonner ?** | **Logique formelle** | $\leftarrow$ |
+| 3 | Comment chercher ? | Algorithmes de recherche |  |
+| 5 | Comment gérer l'incertitude ? | Probabilités, Bayes |  |
+| 6 | Pourquoi apprendre ? | MDPs, introduction ML |  |
+
+### Vers la Séance 3 : L'IA qui cherche
+
+La logique permet à l'agent de *déduire* de nouveaux faits, mais elle ne lui dit pas comment *agir* -- quelle séquence d'actions effectuer pour atteindre un but. Pour cela, l'agent doit **explorer l'espace des possibilités** et trouver un chemin.
+
+Imaginons l'agent Ousmane dans le Monde de Bouki. Il sait maintenant (grâce à la logique) que Bouki est en $(2,2)$. Mais comment trouver le chemin le plus sûr vers l'or ? Il doit explorer les différentes routes possibles dans la grille, en évitant les cases dangereuses. C'est un **problème de recherche**.
+
+La Séance 3 introduira les algorithmes qui résolvent ce type de problème : BFS, DFS, et surtout A*, qui utilise une **heuristique** pour guider la recherche intelligemment.
+
+La question centrale sera : **comment un agent trouve-t-il la séquence d'actions qui mène à son but ?**
+
+### Et vers la Séance 5 : les limites de la logique
+
+La logique fonctionne quand le monde est **certain et complet**. Mais que faire quand les perceptions de l'agent sont bruitées ? Si Ousmane perçoit une odeur dans 95% des cas quand Bouki est à côté (mais parfois il ne la sent pas), et s'il perçoit parfois une odeur fantôme (faux positif dans 5% des cas) ? La logique binaire (vrai/faux) ne peut pas représenter ces nuances.
+
+La Séance 5 résoudra ce problème en passant de $\{0, 1\}$ à $[0, 1]$ : au lieu de « Bouki est en $(2,2)$ » (vrai ou faux), l'agent dira « Bouki est en $(2,2)$ avec probabilité 0,85 ». C'est le **raisonnement probabiliste**, extension naturelle de la logique.
+
+## Références
+
+- Russell, S., & Norvig, P. (2020). *Artificial Intelligence: A Modern Approach* (4th ed.). Pearson. Chapitres 7--9.
+- Enderton, H. B. (2001). *A Mathematical Introduction to Logic* (2nd ed.). Academic Press.
+- Ben-Ari, M. (2012). *Mathematical Logic for Computer Science* (3rd ed.). Springer.
+- Documentation SymPy : <https://docs.sympy.org/>
+
+::: {#ressources-seance}
+:::

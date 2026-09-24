@@ -181,6 +181,12 @@ i.callout-icon {
 
 // Mode sombre : les mêmes couleurs, éclaircies pour rester lisibles sur le fond foncé.
 .quarto-dark .cours-carte {
+  // La valeur par défaut aussi. Un cours dont le domaine n'est pas l'un des trois — parce qu'il
+  // est nouveau, ou parce qu'il attend encore la réponse du PO — retombait sur `$primary`, un bleu
+  // foncé calculé pour le fond blanc : sur le fond sombre, le nom du domaine et la pastille
+  // « en ligne » passaient sous le contraste exigé. La carte de Structures de Données l'a montré.
+  --cours-domaine: #6BAEE8;
+
   &[data-domaine="genie-logiciel-architecture"] { --cours-domaine: #6BAEE8; }
   &[data-domaine="ia-data"] { --cours-domaine: #45A99C; }
   &[data-domaine="programmation-web-mobile"] { --cours-domaine: #D98F45; }
@@ -289,6 +295,59 @@ div.quarto-post .listing-categories .listing-category,
   padding: 0.75rem;
 }
 
+// Figures incorporées dans une **page** de cours (US-59). Les slides avaient déjà leur règle, et les
+// schémas TikZ la leur ; une figure matplotlib incorporée dans une page rédigée n'avait ni l'une ni
+// l'autre. Le chapitre 2 du cours de C, et ses vingt figures, élargissait la page de 1352 px à 375 px
+// de large : le lecteur devait faire défiler la page entière pour lire une phrase.
+.figure-cours {
+  display: block;
+  max-width: 100%;
+
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+// Légendes. Bootstrap les compose dans un gris qui donne **4,39:1** sur blanc, sous les 4,5:1
+// qu'exige WCAG 1.4.3 pour un texte de cette taille. Personne ne l'avait vu parce que le site
+// n'avait aucune légende : les premières sont celles de Structures de Données et d'Introduction à
+// l'IA, que la conversion des flottants d'US-61 a dotées d'une vraie légende — de tableau pour le
+// premier cours, de figure pour le second. Le gris du site, plus foncé, tient à 5,5:1. Le mode
+// sombre, lui, est déjà conforme et garde le sien.
+.quarto-light {
+  table > caption,
+  figcaption,
+  .figure-caption,
+  .quarto-figure figcaption {
+    color: #5a6b75;
+  }
+}
+
+// Un tableau de cours plus large que l'écran défile **dans son cadre**, plutôt que d'élargir la page.
+// Les dumps mémoire en hexadécimal du chapitre 2 comptent jusqu'à cinq colonnes à chasse fixe.
+// `assets/js/defilement-cours.js` les rend atteignables au clavier : une zone qui défile sans être
+// focalisable enferme le lecteur qui n'emploie pas la souris (WCAG 2.1.1).
+.cours-page {
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  // Une formule en ligne ne se coupe pas : celle qui donne les deux cas de la conversion
+  // signed/unsigned mesure 340 px et élargissait la page de 3 px à 375 px de large. Elle défile
+  // dans son cadre, comme un tableau.
+  .math.inline mjx-container {
+    // `overflow` n'a aucun effet sur une boîte **en ligne**, et MathJax compose les formules en
+    // ligne ainsi : sans `inline-block`, la règle ci-dessous ne faisait rien du tout.
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
 // Notebooks de TP rendus en page (US-50). Une sortie de notebook — un tableau pandas, une trace
 // d'erreur — est souvent plus large que l'écran d'un téléphone : elle défile dans son cadre plutôt
 // que d'élargir la page entière.
@@ -318,13 +377,20 @@ div.quarto-post .listing-categories .listing-category,
   white-space: nowrap;
 }
 
-// Code en ligne dans un titre de notebook (US-50). Quarto donne au titre la couleur du texte et au
-// code un fond clair fixe : en mode sombre, le code devenait blanc sur gris très clair (1,05:1).
-// Dans un titre, le code reprend donc la couleur et le fond du titre.
+// Code en ligne là où Quarto impose la couleur du texte (US-50, puis US-59). Quarto donne au code un
+// fond clair **fixe** ; partout où le texte environnant devient blanc en mode sombre, le code se
+// retrouve blanc sur gris très clair — 1,05:1, très loin des 4,5:1 de WCAG AA.
+//
+// Le cas s'est présenté trois fois : dans un titre de notebook, dans un **en-tête de tableau** où le
+// cours de C écrit ses opérateurs (`&x`, `*p`), et dans un **titre d'encadré**. La règle vaut donc
+// partout où Quarto colore le texte lui-même : le code y reprend la couleur et le fond de ce qui
+// l'entoure, plutôt que de garder les siens.
 .quarto-dark h1 > code,
 .quarto-dark h2 > code,
 .quarto-dark h3 > code,
-.quarto-dark h4 > code {
+.quarto-dark h4 > code,
+.quarto-dark th > code,
+.quarto-dark .callout-title-container code {
   background: transparent;
   color: inherit;
 }

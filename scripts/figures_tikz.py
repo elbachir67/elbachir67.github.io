@@ -37,11 +37,46 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from importer_chapitre import identifiants_uniques  # noqa: E402  (même dossier)
+
 # Paquets du préambule utiles au dessin. La mise en page de l'article, elle, n'a rien à faire dans
 # un schéma autonome — et `inputenc`/`fontenc` sont incompatibles avec fontspec.
 GARDES = re.compile(r"\s*\\(usepackage|usetikzlibrary|definecolor|tcbuselibrary|pgfplotsset)")
 ECARTES = ("geometry", "hyperref", "inputenc", "fontenc", "babel", "fancyhdr", "titlesec")
 POLICE = "Source Sans 3"
+
+
+# Mots-clés de TikZ : ils s'écrivent sans barre oblique et ne s'affichent jamais.
+MOTS_TIKZ = {"node", "child", "children", "edge", "from", "parent", "draw", "fill", "at", "to",
+             "and", "cycle", "foreach", "in", "let", "coordinate", "rectangle", "circle",
+             "ellipse", "arc", "grid", "plot", "controls", "pic", "scope", "sin", "cos", "of"}
+
+
+def porte_du_texte(dessin: str) -> bool:
+    """Le schéma affiche-t-il du texte ?
+
+    Le contrôle qui suit — « le texte est sorti en tracés » — cherchait une lettre **n'importe où**
+    dans la source. Or un schéma TikZ en contient toujours : ses options (`fill=blue!30`) et ses
+    mots-clés (`node`, `child`) en sont faits. Le quatrième schéma de la séance 3 d'Introduction à
+    l'IA dessine un arbre de recherche dont **tous les nœuds sont vides** : il n'affiche aucun
+    texte, son SVG n'en portait donc aucun, et le contrôle le refusait à tort.
+
+    Restent ici les mots qui s'afficheront : ni commentaire, ni option entre crochets, ni commande,
+    ni mot-clé de TikZ.
+    """
+    texte = re.sub(r"(?<!\\)%.*", "", dessin)
+    texte = re.sub(r"\\(?:begin|end)\s*\{[A-Za-z*]+\}", " ", texte)
+    # Les options s'imbriquent (`every node/.style={...}` dans le bloc du dessin) : on les retire
+    # du plus intérieur au plus extérieur, jusqu'à ce qu'il n'en reste plus.
+    while True:
+        reduit = re.sub(r"\[[^\[\]]*\]", " ", texte)
+        if reduit == texte:
+            break
+        texte = reduit
+    sans_commandes = re.sub(r"\\[A-Za-z]+", " ", texte)
+    return any(mot.lower() not in MOTS_TIKZ
+               for mot in re.findall(r"[A-Za-zÀ-ÿ]{2,}", sans_commandes))
 
 
 def preambule_du_dessin(source: str) -> list[str]:
@@ -100,7 +135,7 @@ def compiler(dessin: str, preambule: list[str], cible: Path) -> str | None:
             return (svg.stderr or svg.stdout).strip().splitlines()[-1:][0]
 
         contenu = (travail / "f.svg").read_text(encoding="utf-8")
-        if "<text" not in contenu and re.search(r"[A-Za-z]", dessin):
+        if "<text" not in contenu and porte_du_texte(dessin):
             return ("le texte du schéma est sorti en tracés, et non en texte : la figure serait "
                     "illisible aux lecteurs d'écran et non sélectionnable")
         # Le nettoyage des autres figures ne s'applique pas ici, et c'est un choix mesuré :
@@ -115,13 +150,19 @@ def compiler(dessin: str, preambule: list[str], cible: Path) -> str | None:
         # Le schéma garde donc les couleurs que le PO a dessinées, et porte une classe qui permet à
         # la page de le poser sur un fond clair quand elle passe en mode sombre.
         cible.parent.mkdir(parents=True, exist_ok=True)
-        cible.write_text(marquer(contenu), encoding="utf-8")
+        cible.write_text(marquer(contenu, cible.stem), encoding="utf-8")
     return None
 
 
-def marquer(svg: str) -> str:
-    """Ajoute la classe `schema-tikz` à la racine : la page sait alors comment le présenter."""
-    return re.sub(r"<svg\b", '<svg class="schema-tikz"', svg, count=1)
+def marquer(svg: str, nom: str) -> str:
+    """Classe `schema-tikz` à la racine, et identifiants internes préfixés par le nom du schéma.
+
+    Une page de chapitre porte jusqu'à seize schémas. dvisvgm nomme le sien `page1` — le même pour
+    tous —, et un identifiant en double dans une page est un défaut : le navigateur en choisit un, et
+    toute référence désigne alors le mauvais. C'est ce qui avait brouillé les figures matplotlib.
+    """
+    svg = re.sub(r"<svg\b", '<svg class="schema-tikz"', svg, count=1)
+    return identifiants_uniques(svg, nom)
 
 
 def main() -> int:

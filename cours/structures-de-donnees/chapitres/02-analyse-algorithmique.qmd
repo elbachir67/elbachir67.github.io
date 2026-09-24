@@ -1,0 +1,469 @@
+---
+title: "Analyse algorithmique"
+cible: "page"
+body-classes: cours-page
+numero: "2"
+ressources:
+  - type: "tp"
+    titre: "Lab 2 — Analyse algorithmique"
+    fichier: "ressources/lab-2-analyse-algorithmique.pdf"
+    chemin: "/cours/structures-de-donnees/ressources/lab-2-analyse-algorithmique.pdf"
+description: "Séance 2 de Structures de Données et Algorithmes Avancés : compter les opérations, notations O, Oméga et Thêta, analyse de cas et théorème principal."
+author: "Dr. El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Navigation conceptuelle"}
+**Ce que vous savez déjà :** séparer un contrat de son implémentation
+(S1), et réaliser List, Stack, Queue et Deque par tableau ou par nœuds
+chaînés.<br>
+**La limite qu'on dépasse aujourd'hui :** en S1, nous avons répété que
+`remove(0)` est « coûteux » et que `get(i)` est « constant »
+sans rien démontrer. Une intuition n'est pas un argument, et deux ingénieurs
+qui s'appuient sur leurs intuitions ne peuvent pas trancher.<br>
+**Ce que vous saurez faire à la fin :**
+
+1. Établir la fonction de coût $f(n)$ d'un fragment de code par
+             comptage granulaire des opérations élémentaires.
+2. Énoncer les définitions de $\mathcal{O}$, $\Omega$, $\Theta$ et
+             démontrer une borne en exhibant $c$ et $n_0$.
+3. Distinguer meilleur cas, pire cas et cas moyen, et justifier
+             pourquoi le pire cas est la référence.
+4. Résoudre une récurrence de diviser-pour-régner par le théorème
+             principal.
+
+**Ouvre la voie vers :** S3, où l'on cherchera une structure permettant
+l'accès par clé sans parcourir les données.
+:::
+
+## D'où l'on part
+
+À la fin de la séance précédente, un constat nous est resté sur les bras :
+une file construite sur une `ArrayList` avec `remove(0)` est
+parfaitement *correcte* --- elle sert les clients dans le bon ordre ---
+et pourtant nous la déclarons mauvaise. Sur quoi repose ce jugement ? Pas sur
+les tests, qui passent. Pas sur le chronomètre, qui dépend de la machine, du
+système et de l'humeur du processeur.
+
+Il nous faut donc une grandeur qui ne dépende ni du matériel ni du langage,
+et qui dise comment le coût d'un algorithme *évolue* quand la taille des
+données augmente. Cette grandeur s'obtient en deux temps : on compte les
+opérations élémentaires, ce qui donne une fonction $f(n)$ ; puis on classe
+cette fonction dans une famille de croissance. Le premier temps est
+arithmétique, le second est mathématique. Les deux ensemble forment l'outil
+qui nous servira jusqu'à la fin du semestre.
+
+## Compter les opérations
+
+### La convention du cours
+
+Compter suppose de dire ce qu'on compte. Nous adoptons une convention
+*granulaire* : chaque opération élémentaire compte pour une unité, y
+compris les affectations et les accès mémoire.
+
+| **Instruction** | **Opérations comptées** |
+| --- | --- |
+| `s = s + i` | 2 : une addition, une affectation |
+| `i++` | 2 : une addition, une affectation |
+| `tab[i]` | 1 : un accès mémoire |
+| `i < n` | 1 : une comparaison |
+| `s = 0` | 1 : une affectation |
+| `return x` | 1 |
+
+: Convention de comptage retenue dans ce cours
+
+::: {.callout-warning .encadre-attentionbox title="Une convention explicite plutôt qu'une vérité"}
+D'autres cours comptent `s = s + i` pour une seule opération. Le
+résultat final --- la classe de complexité --- est le même, car les
+constantes disparaissent à l'étape suivante. Mais tant qu'on manipule
+$f(n)$, la convention doit être explicite : un corrigé ne peut pas être
+discuté si la règle du jeu n'est pas écrite. **Dans ce cours, on
+compte comme dans le tableau ci-dessus, et on l'annonce.**
+:::
+
+### Premier exemple : une boucle simple
+
+```java
+int s = 0;                      // 1 affectation
+for (int i = 0; i < n; i++) {   // 1 affectation + (n+1) comparaisons + n*(add+aff)
+    s = s + i;                  // n * (1 addition + 1 affectation)
+}
+```
+
+Le décompte, ligne par ligne :
+
+$$
+\begin{aligned}
+\texttt{s = 0} &: 1 \\
+\texttt{i = 0} &: 1 \\
+\texttt{i < n} &: n+1   \text{($n$ fois vraie, une fois fausse)} \\
+\texttt{s = s + i} &: 2n \\
+\texttt{i++} &: 2n
+\end{aligned}
+$$
+
+$$f(n) \;=\; 1 + 1 + (n+1) + 2n + 2n \;=\; 5n + 3$$
+
+::: {.figure-flottante}
+{{< svg ../figures/s02-fig_01.svg alt="La courbe bleue provient d'un compteur incrémenté à chaque opération lors d'une exécution réelle ; la droite orange est la formule 5n+3. Les deux coïncident pour n = 0, …, 10." >}}
+
+La courbe bleue provient d'un compteur incrémenté à chaque
+opération lors d'une exécution réelle ; la droite orange est la formule
+$5n+3$. Les deux coïncident pour $n = 0, \dots, 10$.
+:::
+
+::: {.callout-note .encadre-infobox title="Pourquoi vérifier une formule de comptage"}
+Une formule de comptage se trompe facilement d'une constante : il est très
+courant d'oublier la comparaison finale qui fait sortir de la boucle, ou de
+compter $n$ au lieu de $n+1$. Instrumenter le code --- un compteur
+incrémenté à chaque opération --- coûte quelques lignes et tranche la
+question. C'est ce que vous ferez au Lab.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 1 --- La comparaison oubliée"}
+Un étudiant obtient $f(n) = 5n + 2$. Quelle opération a-t-il omise ?
+:::
+
+### Boucles imbriquées
+
+```java
+int c = 0;
+for (int i = 0; i < n; i++) {
+    for (int j = i; j < n; j++) {
+        c = c + 1;
+    }
+}
+```
+
+La boucle interne s'exécute $n - i$ fois pour chaque $i$, soit au total
+$$\sum_{i=0}^{n-1} (n-i) \;=\; n + (n-1) + \dots + 1 \;=\; \frac{n(n+1)}{2}$$
+tours. En appliquant la convention, on obtient
+$$f(n) \;=\; 2{,}5\,n^2 + 7{,}5\,n + 3$$
+Pour $n = 5$ : $f(5) = 62{,}5 + 37{,}5 + 3 = 103$, ce que confirme
+l'instrumentation du code.
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 2 --- Le terme dominant"}
+Dans $f(n) = 2{,}5n^2 + 7{,}5n + 3$, quelle est la part du terme en $n^2$
+pour $n = 10$ ? Pour $n = 1000$ ?
+:::
+
+### Une boucle qui ne progresse pas d'un pas
+
+```java
+for (int i = 1; i < n; i = i * 3) {
+    traiter(i);
+}
+```
+
+Les valeurs prises par `i` sont $1, 3, 9, 27, 81, \dots$, c'est-à-dire
+$3^0, 3^1, 3^2, \dots$ La boucle s'arrête dès que $3^k \geq n$, donc après
+environ $\log_3 n$ tours. Pour $n = 100$ : cinq tours ($1, 3, 9, 27, 81$).
+Pour $n = 10\,000$ : neuf tours.
+
+::: {.callout-warning .encadre-attentionbox title="L'erreur la plus fréquente de la séance"}
+Lire `i = i * 3` comme une boucle linéaire. Multiplier $n$ par $10$
+n'ajoute ici que deux tours, alors qu'une boucle en `i++` en
+ajouterait $9n$. Test de reconnaissance : *la variable de boucle
+est-elle additionnée ou multipliée ?*
+:::
+
+### Le coût qu'on ne voit pas dans le code
+
+```java
+for (int i = 0; i < n; i++) {
+    liste.add(0, i);   // insertion en tête
+}
+```
+
+La ligne ne comporte aucune boucle visible. Pourtant, si `liste` est
+une `ArrayList`, l'insertion en position $0$ décale les $i$ éléments
+déjà présents : le $i$-ième tour effectue $i$ déplacements, et le total vaut
+$0 + 1 + \dots + (n-1) = n(n-1)/2$.
+
+::: {.figure-flottante}
+{{< svg ../figures/s02-fig_05.svg alt="Coût cumulé de n insertions en tête, calculé en simulant les déplacements. Pour n = 2000 : 1 999 000 déplacements contre 2000 rebranchements de références." >}}
+
+Coût cumulé de $n$ insertions en tête, calculé en simulant les
+déplacements. Pour $n = 2000$ : $1\,999\,000$ déplacements contre $2000$
+rebranchements de références.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 3 --- Le facteur en jeu"}
+Pour $n = 2000$, quel est le rapport entre les deux courbes de la figure ?
+Et pour $n = 20\,000$ ?
+:::
+
+## Les notations asymptotiques
+
+### Big-O : une borne supérieure
+
+::: {.callout-note .encadre-definition title="Notation $\mathcal{O}$"}
+Soient $f, g : \mathbb{N} \to \mathbb{R}^{+}$. On écrit
+$f(n) \in \mathcal{O}(g(n))$ s'il existe deux constantes $c > 0$ et
+$n_0 \in \mathbb{N}$ telles que
+$$\forall n \geq n_0,   f(n) \leq c \cdot g(n).$$
+:::
+
+Trois éléments méritent d'être soulignés. La constante $c$ autorise à
+ignorer les facteurs multiplicatifs. Le seuil $n_0$ autorise à ignorer le
+comportement sur les petites tailles. Et l'appartenance est une
+*majoration* : dire $f \in \mathcal{O}(n^2)$ n'interdit pas que $f$ soit en
+réalité linéaire.
+
+::: {.figure-flottante}
+{{< svg ../figures/s02-fig_02.svg alt="Au-delà de n_0 = 13, la courbe 5n^2 reste au-dessus de 3n^2 + 20n + 50. Le seuil est calculé, pas estimé : en n = 12 la majoration est fausse (722 > 720), en n = 13 elle devient vraie (817 inférieur ou égal à 845)." >}}
+
+Au-delà de $n_0 = 13$, la courbe $5n^2$ reste au-dessus de
+$3n^2 + 20n + 50$. Le seuil est calculé, pas estimé : en $n = 12$ la
+majoration est fausse ($722 > 720$), en $n = 13$ elle devient vraie
+($817 \leq 845$).
+:::
+
+::: {.callout-tip .encadre-example title="Une preuve rédigée"}
+Montrons que $f(n) = 3n^2 + 20n + 50 \in \mathcal{O}(n^2)$.
+
+Pour tout $n \geq 1$, on a $n \leq n^2$ et $1 \leq n^2$, donc
+$$3n^2 + 20n + 50 \;\leq\; 3n^2 + 20n^2 + 50n^2 \;=\; 73\,n^2.$$
+Avec $c = 73$ et $n_0 = 1$, la définition est satisfaite. $\square$
+:::
+
+::: {.callout-note .encadre-infobox title="Le couple $c$ et $n_0$ n'est pas unique"}
+La preuve ci-dessus donne $(c, n_0) = (73, 1)$ ; la figure exhibe
+$(5, 13)$. Les deux sont corrects : il suffit d'exhiber *un* couple.
+Chercher le plus petit $c$ possible est un exercice d'analyse, pas une
+exigence de la définition.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 4 --- Une preuve à produire"}
+Montrez que $f(n) = 7n + 40 \in \mathcal{O}(n)$ en exhibant un couple
+$(c, n_0)$.
+:::
+
+### $\Omega$ et $\Theta$
+
+::: {.callout-note .encadre-definition title="Notations $\Omega$ et $\Theta$"}
+$f(n) \in \Omega(g(n))$ s'il existe $c > 0$ et $n_0$ tels que
+$f(n) \geq c\,g(n)$ pour tout $n \geq n_0$.<br>$f(n) \in \Theta(g(n))$ si $f(n) \in \mathcal{O}(g(n))$ *et*
+$f(n) \in \Omega(g(n))$.
+:::
+
+$\mathcal{O}$ majore, $\Omega$ minore, $\Theta$ encadre. Quand on connaît le
+coût exact d'un algorithme, c'est $\Theta$ qu'il faut écrire ; $\mathcal{O}$
+reste correct mais dit moins.
+
+::: {.callout-note .encadre-proposition title="Propriétés utiles"}
+Pour $f, g, h$ à valeurs positives :
+
+1. **Transitivité :** si $f \in \mathcal{O}(g)$ et $g \in \mathcal{O}(h)$,
+             alors $f \in \mathcal{O}(h)$.
+2. **Somme :** $\mathcal{O}(f) + \mathcal{O}(g) = \mathcal{O}(\max(f, g))$.
+3. **Produit :** si $f_1 \in \mathcal{O}(g_1)$ et
+             $f_2 \in \mathcal{O}(g_2)$, alors $f_1 f_2 \in \mathcal{O}(g_1 g_2)$.
+4. **Constantes :** $\mathcal{O}(c \cdot f) = \mathcal{O}(f)$ pour toute
+             constante $c > 0$.
+:::
+
+La propriété (ii) justifie la pratique courante : dans une suite
+d'instructions, seule la plus coûteuse compte. La propriété (iii) justifie
+l'analyse des boucles imbriquées par multiplication des coûts.
+
+::: {.figure-flottante}
+{{< svg ../figures/s02-fig_03.svg alt="Les classes usuelles. À n = 100 : log_2 n environ 6,6, nlog_2 n environ 664, n^2 = 10 000. L'échelle logarithmique, à droite, rend les cinq familles lisibles simultanément." >}}
+
+Les classes usuelles. À $n = 100$ : $\log_2 n \approx 6{,}6$,
+$n\log_2 n \approx 664$, $n^2 = 10\,000$. L'échelle logarithmique, à droite,
+rend les cinq familles lisibles simultanément.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 5 --- Vrai ou faux"}
+1. $5n^2 + 3n \in \mathcal{O}(n^3)$
+2. $5n^2 + 3n \in \Theta(n^3)$
+3. $n^2 \in \Omega(n \log n)$
+4. $2^{n+1} \in \mathcal{O}(2^n)$
+:::
+
+### Du comptage à la classe
+
+La démarche complète tient en trois gestes : compter, garder le terme
+dominant, oublier les constantes.
+$$f(n) = 2{,}5n^2 + 7{,}5n + 3
+\;\longrightarrow\;
+\text{terme dominant } 2{,}5n^2
+\;\longrightarrow\;
+f(n) \in \Theta(n^2)$$
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 6 --- Classer sans calculer"}
+Donnez la classe $\Theta$ de chaque fragment :
+
+1. une boucle `for (i = 0; i < n; i++)` contenant une
+             instruction de coût constant ;
+2. deux boucles successives sur $n$ ;
+3. une boucle sur $n$ contenant une boucle sur $n$ ;
+4. une boucle `for (i = 1; i < n; i = i * 2)`.
+:::
+
+## Analyse de cas
+
+Pour une même taille $n$, le coût dépend souvent du contenu des données.
+
+```java
+public static int chercher(int[] tab, int cible) {
+    for (int i = 0; i < tab.length; i++) {
+        if (tab[i] == cible) return i;
+    }
+    return -1;
+}
+```
+
+| **Cas** | **Situation** | **Coût** |
+| --- | --- | --- |
+| Meilleur | la cible est en case $0$ | $\Theta(1)$ |
+| Pire | la cible est en dernière case ou absente | $\Theta(n)$ |
+| Moyen | cible présente, position uniforme | $\approx n/2$ comparaisons, soit $\Theta(n)$ |
+
+: Les trois cas de la recherche linéaire
+
+Le pire cas sert de référence pour deux raisons. Il fournit une garantie
+--- « jamais plus que cela » --- sur laquelle on peut dimensionner un
+système. Et il ne suppose rien sur la distribution des données, alors que le
+cas moyen exige une hypothèse probabiliste souvent invérifiable en pratique.
+
+::: {.callout-warning .encadre-attentionbox title="Cas et notation sont deux questions distinctes"}
+« Pire cas » désigne une famille d'entrées ; $\mathcal{O}$ désigne une famille de
+fonctions. On peut donc parler du $\Theta$ du meilleur cas comme du
+$\mathcal{O}$ du pire cas. Écrire « $\mathcal{O}$ signifie pire cas » est une confusion
+fréquente, et fausse.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 7 --- Identifier le pire cas"}
+Pour chacun, décrivez l'entrée qui réalise le pire cas :
+
+1. recherche d'un doublon par double boucle ;
+2. insertion de $n$ clés dans un tableau trié par insertion directe.
+:::
+
+## Analyser le code récursif
+
+### Poser la récurrence
+
+Le coût d'une fonction récursive s'exprime en fonction de lui-même.
+
+```java
+static int dicho(int[] tab, int cible, int gauche, int droite) {
+    if (gauche > droite) return -1;
+    int milieu = (gauche + droite) / 2;
+    if (tab[milieu] == cible) return milieu;
+    if (tab[milieu] < cible) return dicho(tab, cible, milieu + 1, droite);
+    else                     return dicho(tab, cible, gauche, milieu - 1);
+}
+```
+
+Chaque appel réduit l'intervalle de moitié et effectue un travail constant :
+$$T(n) = T(n/2) + \Theta(1), \qquad T(1) = \Theta(1).$$
+En déroulant : après $k$ appels, l'intervalle a pour taille $n/2^k$, et la
+récursion s'arrête quand $n/2^k = 1$, soit $k = \log_2 n$. D'où
+$T(n) = \Theta(\log n)$.
+
+### Le théorème principal
+
+::: {.callout-important .encadre-theorembox title="Théorème principal (Master Theorem)"}
+Soit $T(n) = a\,T(n/b) + f(n)$ avec $a \geq 1$, $b > 1$, et posons
+$\alpha = \log_b a$.
+
+1. Si $f(n) \in \mathcal{O}(n^{\alpha - \varepsilon})$ pour un
+             $\varepsilon > 0$, alors $T(n) \in \Theta(n^{\alpha})$.
+2. Si $f(n) \in \Theta(n^{\alpha})$, alors
+             $T(n) \in \Theta(n^{\alpha} \log n)$.
+3. Si $f(n) \in \Omega(n^{\alpha + \varepsilon})$ pour un
+             $\varepsilon > 0$, et si $a\,f(n/b) \leq c\,f(n)$ pour un
+             $c < 1$ et $n$ assez grand, alors $T(n) \in \Theta(f(n))$.
+:::
+
+L'énoncé se lit comme une comparaison entre deux forces : le travail des
+appels récursifs, mesuré par $n^{\alpha}$, et le travail effectué à chaque
+niveau, mesuré par $f(n)$. Si les feuilles l'emportent, on est au cas 1 ; si
+l'équilibre règne, au cas 2, et un facteur $\log n$ apparaît ; si la racine
+l'emporte, au cas 3.
+
+::: {.figure-flottante}
+{{< svg ../figures/s02-fig_04.svg alt="Coût par niveau de récursion pour n = 1024. À gauche le travail se concentre sur les feuilles (total 2047) ; au centre chaque niveau coûte 1024, pour 11 niveaux (total 11 264) ; à droite la racine absorbe presque tout (total 2 096 128)." >}}
+
+Coût par niveau de récursion pour $n = 1024$. À gauche le travail
+se concentre sur les feuilles (total $2047$) ; au centre chaque niveau coûte
+$1024$, pour $11$ niveaux (total $11\,264$) ; à droite la racine absorbe
+presque tout (total $2\,096\,128$).
+:::
+
+::: {.callout-tip .encadre-example title="Mergesort"}
+Trier par fusion coupe le tableau en deux et fusionne en temps linéaire :
+$T(n) = 2T(n/2) + \Theta(n)$. Ici $a = 2$, $b = 2$, donc
+$\alpha = \log_2 2 = 1$ et $f(n) = \Theta(n) = \Theta(n^{\alpha})$ :
+c'est le cas 2, et $T(n) \in \Theta(n \log n)$. Nous reviendrons sur cet
+algorithme en S6.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 8 --- Appliquer le théorème"}
+Donnez la classe de $T(n)$ dans chaque cas :
+
+1. $T(n) = 2T(n/2) + \Theta(1)$
+2. $T(n) = T(n/2) + \Theta(1)$
+3. $T(n) = 4T(n/2) + \Theta(n)$
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 9 --- Revenir à la question de départ"}
+Reprenez la file construite sur une `ArrayList` avec
+`remove(0)` (S1). Établissez le coût total de $n$ opérations
+`dequeue`, puis comparez à la file sur tableau circulaire.
+:::
+
+::: {.callout-important .encadre-retenirbox title="Points clés à retenir"}
+1. Analyser, c'est d'abord compter. La convention de comptage doit
+             être annoncée : ici `s = s + i` vaut deux opérations, et il
+             y a toujours une comparaison de plus que de tours de boucle.
+2. $f(n) \in \mathcal{O}(g(n))$ signifie : il existe $c > 0$ et $n_0$ tels
+             que $f(n) \leq c\,g(n)$ pour tout $n \geq n_0$. Prouver, c'est
+             exhiber un couple $(c, n_0)$ --- pas nécessairement le meilleur.
+3. $\mathcal{O}$ majore, $\Omega$ minore, $\Theta$ encadre. Quand le
+             coût est connu exactement, on écrit $\Theta$.
+4. Boucles successives : on additionne, le maximum l'emporte.
+             Boucles imbriquées : on multiplie. Variable multipliée dans le
+             pas : c'est logarithmique.
+5. Le pire cas est la référence, parce qu'il donne une garantie et
+             ne suppose rien sur les données. « Pire cas » et « $\mathcal{O}$ » sont
+             deux notions distinctes.
+6. Le code récursif se traduit en récurrence $T(n) = aT(n/b) + f(n)$,
+             que le théorème principal résout en comparant $f(n)$ à
+             $n^{\log_b a}$.
+7. Un coût peut être invisible dans le code : `liste.add(0, x)`
+             tient en une ligne et cache un décalage complet.
+:::
+
+## Ce qui vient ensuite : Tables de hachage
+
+::: {.callout-note .encadre-prereqbox title="Vers la séance suivante"}
+**Ce qu'on sait faire maintenant :** établir $f(n)$, prouver une borne
+asymptotique, distinguer les cas, et résoudre une récurrence de
+diviser-pour-régner.<br>
+**La limite qu'on va dépasser :** nos outils confirment une mauvaise
+nouvelle. Dans un tableau, l'accès *par rang* est en $\Theta(1)$,
+mais la recherche *par valeur* est en $\Theta(n)$ ; les nœuds
+chaînés ne font pas mieux. Or la plupart des applications cherchent par clé
+--- un numéro d'étudiant, une plaque de bus --- et non par position.<br>
+**En S3 :** on construit une structure qui calcule l'emplacement d'une
+donnée à partir de sa clé, et qui atteint un coût constant en moyenne. C'est
+le hachage : fonctions de hachage, collisions, facteur de charge.
+:::
+
+## Références
+
+- R. Sedgewick, K. Wayne, *Algorithms*, 4^e^ éd.
+            --- §1.4 (Analysis of Algorithms).
+- T. Cormen, C. Leiserson, R. Rivest, C. Stein,
+            *Introduction to Algorithms*, 4^e^ éd.
+            --- Ch. 3 (Characterizing Running Times), Ch. 4
+            (Divide-and-Conquer).
+- S. Skiena, *The Algorithm Design Manual*,
+            3^e^ éd. --- Ch. 2 (Algorithm Analysis).
+
+::: {#ressources-seance}
+:::

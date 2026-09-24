@@ -1,0 +1,435 @@
+---
+title: "Tables de hachage"
+cible: "page"
+body-classes: cours-page
+numero: "3"
+ressources:
+  - type: "tp"
+    titre: "Lab 3 — Tables de hachage"
+    fichier: "ressources/lab-3-tables-de-hachage.pdf"
+    chemin: "/cours/structures-de-donnees/ressources/lab-3-tables-de-hachage.pdf"
+description: "Séance 3 de Structures de Données et Algorithmes Avancés : fonction de hachage, collisions, chaînage, sondage linéaire et redimensionnement."
+author: "Dr. El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Navigation conceptuelle"}
+**Ce que vous savez déjà :** ADTs Map et Set (S1), complexité $\mathcal{O}$/$\Omega$/$\Theta$ (S2). Recherche linéaire $\mathcal{O}(n)$, recherche dichotomique $\mathcal{O}(\log n)$.<br>
+**La limite qu'on dépasse aujourd'hui :** `ArrayList.get(i)` est $\mathcal{O}(1)$ *par indice* mais la recherche *par clé* reste $\mathcal{O}(n)$. Les listes chaînées ne font pas mieux, les tableaux triés plafonnent à $\mathcal{O}(\log n)$ pour `get` et paient $\mathcal{O}(n)$ pour `put`. Peut-on accéder à une donnée en $\mathcal{O}(1)$ *par sa clé* ? Oui --- grâce au hachage.<br>
+**Ce que vous saurez faire à la fin :**
+
+1. Expliquer pourquoi aucune structure linéaire ne permet $\mathcal{O}(1)$ par clé
+2. Calculer $h(k) = |k.\text{hashCode}()| \bmod m$ pour une clé Java donnée
+3. Dérouler une trace de chaînage séparé et de sondage linéaire
+4. Calculer le facteur de charge $\alpha$ et prévoir les rehashs
+5. Analyser la complexité amortie $\mathcal{O}(1)$ moyenne vs $\mathcal{O}(n)$ pire cas
+
+**Ouvre la voie vers :** S4 (arbres de recherche quand l'ordre sur les clés compte).<br>
+**Mapping CSE 373 :** LEC 7 (Intro to Hashing), LEC 8 (Collision Resolution).<br>
+**Méthode pédagogique :** Chaque concept majeur est suivi d'un **mini-exercice d'application**. Cherchez-le avant la séance : il est repris et corrigé en présentiel. Ces exercices sont essentiels --- ne les sautez pas.
+:::
+
+## Motivation : au-delà du $\mathcal{O}(n)$
+
+### Le problème concret : un carnet de contacts
+
+Prenons un cas concret : un **carnet de contacts téléphoniques**. On y stocke des paires *(nom, numéro)* :
+
+```java
+Map<String, String> carnet = new HashMap<>();
+carnet.put("Awa Diop", "+221 77 555 01 23");
+carnet.put("Moussa Ndiaye", "+221 76 123 45 67");
+carnet.put("Fatou Sall", "+221 77 888 12 34");
+
+String numero = carnet.get("Awa Diop");     // "+221 77 555 01 23"
+```
+
+Les opérations essentielles sont `put`, `get`, `remove`, `containsKey`. La question : **combien coûtent-elles avec les structures déjà vues en S1** ?
+
+::: {.figure-flottante}
+{{< svg ../figures/s03-fig_01_map_complexities.svg alt="Complexités des implémentations naïves d'un Map. Aucune structure linéaire ne permet d'atteindre O(1) pour les trois opérations." >}}
+
+Complexités des implémentations naïves d'un Map. Aucune structure linéaire ne permet d'atteindre $\mathcal{O}(1)$ pour les trois opérations.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Le constat qui motive la séance"}
+Avec un tableau, une liste chaînée, ou même un tableau trié, la recherche d'un contact dans un carnet de taille $n$ coûte $\mathcal{O}(\log n)$ au mieux, $\mathcal{O}(n)$ au pire. Pour un service téléphonique d'un million de contacts consulté 10 000 fois par seconde, ce n'est pas acceptable.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 1 --- Calcul d'impact"}
+Une application traite 10\,000 requêtes/seconde sur un carnet de $n = 1\,000\,000$ contacts. Combien d'opérations élémentaires par seconde avec :
+
+1. Une liste chaînée ($\mathcal{O}(n)$) ?
+2. Une table de hachage ($\mathcal{O}(1)$) ?
+:::
+
+## Les ADTs associatifs : Set et Map
+
+::: {.callout-note .encadre-infobox title="ADT Map"}
+Collection de paires $(\text{clé}, \text{valeur})$, chaque clé unique. Opérations : `put`, `get`, `remove`, `containsKey`, `size`.
+:::
+
+::: {.callout-note .encadre-infobox title="ADT Set"}
+Collection d'éléments distincts. Opérations : `add`, `contains`, `remove`, `size`.
+:::
+
+::: {.callout-important .encadre-retenirbox title="Map et Set sont proches"}
+Un Set peut être vu comme un Map dont on ignore les valeurs. En Java, `HashSet` est implémenté en interne comme un `HashMap` sans valeurs. Tout ce qu'on va dire sur le hachage pour Map s'applique à Set.
+:::
+
+## L'idée-clé : la fonction de hachage
+
+### Le point de départ : l'accès direct par indice
+
+En Java, `arr[i]` coûte $\mathcal{O}(1)$ : l'adresse mémoire se calcule par une simple addition.
+
+**Idée.** Et si on pouvait transformer la clé en un **indice** valide ? On accéderait directement à la case contenant la valeur, *sans recherche*.
+
+### Définition
+
+::: {.callout-note .encadre-infobox title="Fonction de hachage"}
+Fonction $h : K \to \{0, 1, \ldots, m-1\}$ qui associe à toute clé un indice dans $[0, m-1]$.
+
+Deux propriétés fondamentales :
+
+1. **Déterminisme** : la même clé produit toujours le même indice.
+2. **Distribution uniforme** : les clés réparties aussi uniformément que possible.
+:::
+
+::: {.figure-flottante}
+{{< svg ../figures/s03-fig_02_hash_concept.svg alt="Chaque clé (nom) est transformée en indice. L'accès à la valeur est direct." >}}
+
+Chaque clé (nom) est transformée en indice. L'accès à la valeur est direct.
+:::
+
+### En Java : `hashCode()` et compression
+
+Tout objet Java a une méthode `hashCode()` qui retourne un `int`. Pour obtenir un indice dans $[0, m-1]$ :
+$$\boxed{h(\text{clé}) = \bigl|\text{clé.hashCode()}\bigr| \bmod m}$$
+
+La valeur absolue évite les indices négatifs, le modulo ramène dans $[0, m-1]$.
+
+::: {.callout-important .encadre-theorembox title="Contrat $\texttt{equals} \leftrightarrow \texttt{hashCode}$"}
+Pour tous objets $a$ et $b$ :
+$$a.\texttt{equals}(b) \;\implies\; a.\texttt{hashCode}() = b.\texttt{hashCode}()$$
+La réciproque n'est **pas** requise : deux objets différents peuvent avoir le même hashCode (c'est une collision).
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 2 --- Calcul de position"}
+Soit $m = 11$. Pour chaque clé, calculez $h(\text{clé}) = |\texttt{hashCode()}| \bmod m$.
+
+| `"Awa Diop"` | `hashCode() = 1234567890` |
+| --- | --- |
+| `"Moussa Ndiaye"` | `hashCode() = -879654321` |
+| `"Fatou Sall"` | `hashCode() = 42` |
+:::
+
+## Le cas idéal : DirectMap sans collisions
+
+Pour comprendre, commençons simplifié : les clés sont déjà des **entiers bornés** (ex : numéros d'arrêts DDD de 0 à 99). Fonction de hachage = identité : $h(k) = k$.
+
+::: {.figure-flottante}
+{{< svg ../figures/s03-fig_04_directmap.svg alt="DirectMap : la clé est directement l'indice, pas de collision possible." >}}
+
+DirectMap : la clé est directement l'indice, pas de collision possible.
+:::
+
+### Implémentation
+
+```java
+public class DirectMap<V> {
+    private V[] data;
+    private int taille;
+
+    @SuppressWarnings("unchecked")
+    public DirectMap(int capacite) {
+        data = (V[]) new Object[capacite];
+        taille = 0;
+    }
+
+    public void put(int cle, V valeur) {
+        if (data[cle] == null) taille++;
+        data[cle] = valeur;      // (@\textbf{$\mathcal{O}(1)$ garanti}@)
+    }
+
+    public V get(int cle) {
+        return data[cle];         // (@\textbf{$\mathcal{O}(1)$ garanti}@)
+    }
+}
+```
+
+::: {.callout-important .encadre-retenirbox title="DirectMap : le saint graal, mais…"}
+Toutes les opérations sont en $\mathcal{O}(1)$ **pire cas**. Problème : ne marche que si le domaine des clés est petit et borné. Pour des noms, c'est inapplicable.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Le dilemme fondamental"}
+- Si $m$ est *grand* (comme le domaine entier des clés) : gaspillage mémoire.
+- Si $m$ est *petit* : on compresse beaucoup de clés dans peu de cases $\Rightarrow$ collisions.
+:::
+
+## Les collisions sont inévitables
+
+::: {.callout-important .encadre-theorembox title="Principe des tiroirs"}
+Si l'on range $n$ objets dans $m$ tiroirs avec $n > m$, au moins un tiroir contient deux objets ou plus.
+:::
+
+Appliqué au hachage : dès que $n > m$, deux clés distinctes doivent nécessairement partager un indice.
+
+::: {.figure-flottante}
+{{< svg ../figures/s03-fig_03_pigeonhole.svg alt="6 clés, 4 cases : au moins deux clés partagent une case --- c'est une collision." >}}
+
+6 clés, 4 cases : au moins deux clés partagent une case --- c'est une collision.
+:::
+
+::: {.callout-note .encadre-infobox title="Collision"}
+Deux clés distinctes $k_1 \neq k_2$ telles que $h(k_1) = h(k_2)$.
+:::
+
+::: {.callout-warning .encadre-attentionbox title="Paradoxe des anniversaires"}
+Avec $m = 365$ cases, il suffit de **23 clés** pour avoir 50% de chances de collision. Pour $m = 10\,000$, c'est 119 clés.
+
+**Conclusion.** Il n'est pas question d'*éviter* les collisions. Il faut **les gérer**.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 3 --- Première collision"}
+Pour $m = 7$, quelles clés parmi ces 5 entrent en collision (ont le même $h$) ?
+
+| $k_1$ | `hashCode = 100` |
+| --- | --- |
+| $k_2$ | `hashCode = 107` |
+| $k_3$ | `hashCode = 50` |
+| $k_4$ | `hashCode = 14` |
+| $k_5$ | `hashCode = 36` |
+:::
+
+## Chaînage séparé (Separate Chaining)
+
+### Principe
+
+L'idée la plus simple : si plusieurs clés atterrissent à la même case, on les stocke **toutes** dans cette case via une **liste chaînée**. Chaque case = un *seau* (*bucket*) contenant la liste des paires.
+
+::: {.figure-flottante}
+{{< svg ../figures/s03-s3b_fig_01_chaining.svg alt="Chaînage séparé. Awa Diop, Fatou Sall et Aminata Fall ont toutes h = 2 : chaînées en case [2]." >}}
+
+Chaînage séparé. Awa Diop, Fatou Sall et Aminata Fall ont toutes $h = 2$ : chaînées en case [2].
+:::
+
+### Implémentation
+
+```java
+public class ChainedHashMap<K, V> {
+    private LinkedList<Paire<K, V>>[] table;
+    private int m, n;
+
+    private int hash(K cle) {
+        return Math.abs(cle.hashCode()) % m;
+    }
+
+    public V get(K cle) {
+        int i = hash(cle);
+        for (Paire<K, V> p : table[i]) {
+            if (p.cle.equals(cle)) return p.valeur;
+        }
+        return null;
+    }
+
+    public void put(K cle, V valeur) {
+        int i = hash(cle);
+        for (Paire<K, V> p : table[i]) {
+            if (p.cle.equals(cle)) { p.valeur = valeur; return; }
+        }
+        table[i].add(new Paire<>(cle, valeur));
+        n++;
+    }
+}
+```
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 4 --- Trace de chaînage"}
+Soit une `ChainedHashMap` avec $m = 5$. On insère les clés (dans cet ordre) :
+
+| `"Awa"` | $h = 2$ |
+| --- | --- |
+| `"Moussa"` | $h = 0$ |
+| `"Fatou"` | $h = 2$ (collision) |
+| `"Cheikh"` | $h = 4$ |
+| `"Aminata"` | $h = 2$ (collision) |
+
+Dessinez l'état final. Combien de comparaisons pour retrouver `"Aminata"` avec `get` ?
+:::
+
+### Analyse du coût moyen
+
+::: {.callout-important .encadre-theorembox title="Complexité du chaînage"}
+Facteur de charge $\alpha = n/m$ = nombre moyen de paires par case. Sous hypothèse d'uniformité, une recherche coûte en moyenne :
+$$\boxed{\Theta(1 + \alpha)}$$
+:::
+
+**Justification.** Calculer $h$ coûte $\mathcal{O}(1)$. Parcourir la liste de la case coûte en moyenne $\alpha$. Total : $\Theta(1 + \alpha)$.
+
+::: {.callout-important .encadre-retenirbox title="Conséquence pratique"}
+Si on maintient $\alpha \leq 0{,}75$ (rehash automatique), le coût moyen est $\Theta(1{,}75) = \Theta(1)$.
+:::
+
+## Sondage linéaire (Linear Probing)
+
+### Principe
+
+Au lieu de listes chaînées, on range tout **directement dans le tableau**. Si $h(\text{clé})$ est occupée, on essaie $h+1$, puis $h+2$, etc. (modulo $m$), jusqu'à une case libre.
+
+::: {.figure-flottante}
+{{< svg ../figures/s03-s3b_fig_02_probing.svg alt="Sondage linéaire. Fatou Sall (h=3) trouve [3] pris par Awa → va en [4]. Les déplacements forment un cluster." >}}
+
+Sondage linéaire. Fatou Sall ($h=3$) trouve [3] pris par Awa $\to$ va en [4]. Les déplacements forment un *cluster*.
+:::
+
+### Implémentation
+
+```java
+public V get(K cle) {
+    int i = hash(cle);
+    while (table[i] != null) {               // (@\textbf{probing}@)
+        if (table[i].cle.equals(cle)) return table[i].valeur;
+        i = (i + 1) % m;                     // (@\textbf{case suivante}@)
+    }
+    return null;
+}
+
+public void put(K cle, V valeur) {
+    int i = hash(cle);
+    while (table[i] != null) {
+        if (table[i].cle.equals(cle)) { table[i].valeur = valeur; return; }
+        i = (i + 1) % m;
+    }
+    table[i] = new Paire<>(cle, valeur);
+    n++;
+}
+```
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 5 --- Trace de sondage"}
+`LinearProbingMap` avec $m = 7$. Insertions :
+
+| `"A"` | $h = 3$ |
+| --- | --- |
+| `"B"` | $h = 5$ |
+| `"C"` | $h = 3$ (collision avec A) |
+| `"D"` | $h = 4$ (collision avec C) |
+
+Donnez l'état du tableau et les indices finaux. Combien de clés y a-t-il dans le cluster ?
+:::
+
+### Clustering
+
+::: {.callout-warning .encadre-attentionbox title="Clustering primaire"}
+Les clés déplacées forment des **amas** de cases contiguës. Un gros cluster attire encore plus de collisions : toute nouvelle clé tombant *dedans* doit parcourir tout le reste. Les amas tendent à grandir et à fusionner.
+:::
+
+## Facteur de charge et redimensionnement
+
+### Le facteur de charge
+
+::: {.callout-note .encadre-infobox title="Facteur de charge"}
+$$\alpha = \frac{n}{m}$$
+Pour le chaînage, $\alpha$ peut dépasser 1. Pour le sondage, $\alpha < 1$ strictement (sinon plus aucune case libre).
+:::
+
+### La règle du rehash
+
+::: {.callout-important .encadre-theorembox title="Règle de redimensionnement"}
+Quand $\alpha > 0{,}75$ (seuil Java typique) :
+
+1. Créer un nouveau tableau de taille $m' = 2m$.
+2. **Recalculer** $h(\text{clé})$ pour chaque paire (car $h$ dépend de $m$).
+3. Réinsérer toutes les paires dans le nouveau tableau.
+:::
+
+::: {.figure-flottante}
+{{< svg ../figures/s03-s3b_fig_03_rehash.svg alt="Redimensionnement : m = 4 → 8. Les positions changent car h dépend de m." >}}
+
+Redimensionnement : $m = 4 \to 8$. Les positions changent car $h$ dépend de $m$.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 6 --- Calculs de facteur de charge"}
+`ChainedHashMap` initialisée à $m = 8$, seuil de rehash $\alpha = 0{,}75$.
+
+1. Combien de clés distinctes avant le 1^er^ rehash ?
+2. Nouvelle taille $m'$ après ce rehash ? Nouveau $\alpha$ juste après ?
+3. Combien d'insertions supplémentaires avant le 2^e^ rehash ?
+:::
+
+### Coût amorti
+
+::: {.callout-warning .encadre-attentionbox title="Un rehash coûte cher, mais il est rare"}
+Un rehash recalcule $n$ hachages : coût $\Theta(n)$. **Mais** : entre deux rehashs, on a fait au moins $m/2$ insertions. Le coût du rehash est amorti sur ces insertions : chaque insertion paie $\Theta(1)$ pour sa quote-part.
+
+**Conclusion.** Coût amorti d'une insertion : $\mathcal{O}(1)$, malgré les rehashs.
+:::
+
+## Analyse comparative
+
+### Formules sous uniformité
+
+::: {.callout-important .encadre-theorembox title="Coût moyen des recherches (sous uniformité)"}
+| **Technique** | **Succès** | **Échec** |
+| --- | --- | --- |
+| Chaînage séparé | $1 + \alpha/2$ | $1 + \alpha$ |
+| Sondage linéaire | $\frac{1}{2}(1 + \frac{1}{1-\alpha})$ | $\frac{1}{2}(1 + \frac{1}{(1-\alpha)^2})$ |
+:::
+
+::: {.figure-flottante}
+{{< svg ../figures/s03-s3b_fig_04_cost_alpha.svg alt="Le chaînage reste linéaire en alpha, le sondage explose dès alpha → 1." >}}
+
+Le chaînage reste linéaire en $\alpha$, le sondage explose dès $\alpha \to 1$.
+:::
+
+::: {.callout-tip .encadre-appliboxQ title="Mini-exercice 7 --- Comparaison numérique"}
+Quel est le coût moyen d'un `get` réussi pour :
+
+1. Chaînage à $\alpha = 0{,}5$ ?
+2. Chaînage à $\alpha = 2$ (pas de rehash) ?
+3. Sondage à $\alpha = 0{,}5$ ?
+4. Sondage à $\alpha = 0{,}9$ ?
+:::
+
+### Tableau récapitulatif
+
+|  | **Chaînage** | **Sondage** | **Liste/Tableau** |
+| --- | --- | --- | --- |
+| get / put / remove (moyen) | $\mathcal{O}(1)$ | $\mathcal{O}(1)$ | $\mathcal{O}(n)$ |
+| get / put (pire cas) | $\mathcal{O}(n)$ | $\mathcal{O}(n)$ | $\mathcal{O}(n)$ |
+| Mémoire | $m$ + chaînons | $m$ | $n$ |
+| Cache-friendly | Non | Oui | --- |
+| Robustesse $\alpha$ élevé | Bonne | Mauvaise | --- |
+
+::: {.callout-important .encadre-retenirbox title="En pratique"}
+**Chaînage** : plus simple, plus robuste. Java utilise le chaînage dans `HashMap` (avec optimisation rouge-noir si une liste devient trop longue depuis Java 8).
+
+**Sondage** : meilleure utilisation du cache CPU, idéal pour petits objets et $\alpha < 0{,}7$.
+:::
+
+## Points clés à retenir
+
+::: {.callout-important .encadre-retenirbox title="Synthèse S03"}
+1. **Fonction de hachage** $h(k) = |k.\text{hashCode}()| \bmod m$. Déterministe, uniforme.
+2. **DirectMap** ($h(k) = k$) : $\mathcal{O}(1)$ garanti, mais domaine de clés borné.
+3. **Collisions inévitables** quand $n > m$ (principe des tiroirs).
+4. **Chaînage séparé** : chaque case = liste chaînée. Coût moyen $\Theta(1 + \alpha)$.
+5. **Sondage linéaire** : case suivante si occupé. Coût moyen $\Theta(1/(1-\alpha))$, explosif.
+6. **Facteur de charge** $\alpha = n/m$. Rehash à $\alpha > 0{,}75$ : double $m$, recalcule les positions. Coût amorti $\mathcal{O}(1)$.
+7. **Pire cas** : $\mathcal{O}(n)$ partout (adversaire, hachage dégénéré).
+8. **Contrat Java** : $a.\text{equals}(b) \Rightarrow a.\text{hashCode}() = b.\text{hashCode}()$.
+9. **Limitation** : pas d'ordre sur les clés $\to$ S4 (arbres).
+:::
+
+## Ce qui vient ensuite : arbres et tas
+
+::: {.callout-note .encadre-prereqbox title="Vers la séance 4"}
+**Ce qu'on sait faire maintenant :** Implémenter une table de hachage complète, gérer le redimensionnement, analyser la complexité amortie. Le hachage donne $\mathcal{O}(1)$ moyen.<br>
+**La limite qu'on va dépasser :** Les tables de hachage n'ont **aucun ordre**. Impossible de demander « plus petite clé ? », « clés dans $[k_1, k_2]$ », « clés triées ». Ces opérations sont pourtant essentielles (tri alphabétique, plages de dates, intervalles, successeurs…).<br>
+**En S4 :** Arbres binaires de recherche (BST), arbres AVL avec rotations, tas binaires (priority queues). $\mathcal{O}(\log n)$ pour les opérations, *et* ordre maintenu.
+:::
+
+<br>
+Dr. El Hadji Bassirou TOURÉ --- ESP/UCAD --- M1 --- 2025--2026
+
+::: {#ressources-seance}
+:::

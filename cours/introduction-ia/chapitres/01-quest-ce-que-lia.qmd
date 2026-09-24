@@ -1,0 +1,678 @@
+---
+title: "Qu'est-ce que l'intelligence artificielle ?"
+cible: "page"
+body-classes: cours-page
+numero: "1"
+ressources:
+  - type: "td"
+    titre: "Fiche de TD 1"
+    fichier: "ressources/td-1-quest-ce-que-lia.pdf"
+    chemin: "/cours/introduction-ia/ressources/td-1-quest-ce-que-lia.pdf"
+  - type: "notebook"
+    titre: "TP 1 — Premiers pas"
+    fichier: "ressources/TP_S01_premiers_pas.ipynb"
+    chemin: "/cours/introduction-ia/ressources/TP_S01_premiers_pas.ipynb"
+description: "Séance 1 d'Introduction à l'IA : définir l'intelligence artificielle, les trois vagues de son histoire, la distinction IA, machine learning et deep learning, les agents intelligents et leurs environnements."
+author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Navigation conceptuelle"}
+**Prérequis :** Aucun prérequis spécifique en IA. Notions de programmation Python.<br>**Ouvre la voie vers :** Toutes les séances suivantes. Cette séance fournit le cadre conceptuel pour comprendre le raisonnement (S2), la recherche (S3), l'incertitude (S5) et l'apprentissage (S6).
+:::
+
+## Introduction : La question fondamentale
+
+L'Intelligence Artificielle est un domaine scientifique dont l'objet d'étude est la création de systèmes capables de réaliser des tâches qui, accomplies par un humain, seraient qualifiées d'intelligentes. Cette définition, volontairement large, cache une diversité considérable d'approches, de techniques et d'objectifs.
+
+Ce cours commence par une question simple en apparence : **qu'est-ce que l'IA ?** La réponse à cette question détermine la structure de tout le cours. Selon la façon dont on définit l'IA, on obtient des programmes de recherche radicalement différents.
+
+### Ce que ce cours couvre
+
+Ce cours d'introduction à l'IA n'est pas un catalogue exhaustif de toutes les techniques existantes. L'objectif est de construire une **compréhension profonde des fondements** : pourquoi l'IA existe, quels problèmes elle cherche à résoudre, et quelles sont les grandes familles d'approches pour y parvenir.
+
+À l'issue de ce semestre, vous comprendrez :
+
+- La distinction entre IA, Machine Learning et Deep Learning
+- Comment un système peut raisonner formellement (logique)
+- Comment résoudre des problèmes par exploration (search)
+- Comment gérer l'incertitude (probabilités, Bayes)
+- Pourquoi et comment un système peut apprendre
+
+Ce cours prépare directement au cours de Machine Learning du semestre 2.
+
+## Définir l'Intelligence Artificielle
+
+### Une définition opérationnelle
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Intelligence Artificielle"}
+L'Intelligence Artificielle est le domaine de l'informatique qui étudie la conception d'agents capables de percevoir leur environnement et d'agir de manière à maximiser leurs chances d'atteindre leurs objectifs.
+:::
+
+Cette définition, issue de Russell et Norvig, met l'accent sur l'**action rationnelle** plutôt que sur l'imitation de l'intelligence humaine. Un système d'IA n'a pas besoin de penser comme un humain, ni même de produire des résultats indistinguables de ceux d'un humain. Il doit simplement agir efficacement.
+
+### Le test de Turing et ses limites
+
+En 1950, Alan Turing propose un critère opérationnel pour l'intelligence artificielle : un système est intelligent si un humain, en communiquant avec lui par texte, ne peut pas distinguer ses réponses de celles d'un autre humain.
+
+Ce test a eu une influence considérable sur le champ, mais présente des limitations importantes :
+
+- Il ne teste qu'une forme d'intelligence (conversationnelle)
+- Il encourage l'imitation plutôt que la résolution de problèmes
+- Un système peut réussir le test sans aucune compréhension réelle
+- Un système peut être très utile sans réussir le test
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Systèmes utiles qui échoueraient au test de Turing"}
+Un algorithme de navigation GPS ne peut pas tenir une conversation, mais il résout efficacement des problèmes de planification de trajet. Un système de recommandation ne prétend pas être humain, mais il identifie des patterns dans des millions de comportements d'achat.
+:::
+
+La recherche contemporaine en IA s'est largement éloignée du test de Turing pour se concentrer sur la **résolution efficace de problèmes spécifiques**.
+
+### Quatre approches historiques
+
+Historiquement, quatre approches ont structuré le champ de l'IA :
+
+|  | **Comme un humain** | **Rationnellement** |
+| --- | --- | --- |
+| **Penser** | Cognitive Science | Logique formelle |
+| **Agir** | Test de Turing | Agents rationnels |
+
+L'approche dominante dans la recherche contemporaine est celle des **agents rationnels** : construire des systèmes qui agissent de manière optimale étant donné leur information disponible, sans nécessairement imiter les mécanismes cognitifs humains.
+
+## Histoire de l'IA : Les trois vagues
+
+L'histoire de l'IA est marquée par des cycles d'enthousiasme et de désillusion, communément appelés « hivers de l'IA ». Trois grandes périodes se distinguent, chacune caractérisée par une approche dominante. La Figure @fig-timeline présente une vue chronologique de ces différentes périodes, avec les jalons majeurs et les hivers qui ont ponctué l'évolution du domaine.
+
+### Première vague : L'IA symbolique (1956--1980)
+
+La naissance officielle de l'IA date de la conférence de Dartmouth en 1956, où John McCarthy, Marvin Minsky, Claude Shannon et d'autres proposent que « chaque aspect de l'apprentissage ou de toute autre caractéristique de l'intelligence peut en principe être décrit de manière si précise qu'une machine peut être construite pour le simuler ».
+
+L'approche dominante de cette période repose sur la **manipulation de symboles** :
+
+- Représentation explicite des connaissances sous forme de règles logiques
+- Raisonnement par inférence formelle
+- Systèmes experts codant l'expertise humaine
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Systèmes de cette période"}
+**ELIZA** (1966) : programme de conversation simulant un psychothérapeute par pattern matching. **MYCIN** (1976) : système expert pour le diagnostic d'infections bactériennes, utilisant environ 600 règles. **GPS** (General Problem Solver, 1959) : tentative de résoudre des problèmes généraux par analyse moyens-fins.
+:::
+
+Cette période se termine par le premier « hiver de l'IA » : les systèmes symboliques s'avèrent fragiles face à la variabilité du monde réel et incapables de passer à l'échelle.
+
+### Deuxième vague : L'IA connexionniste (1980--2010)
+
+Après la redécouverte de la rétropropagation par Rumelhart, Hinton et Williams en 1986, les réseaux de neurones artificiels connaissent un regain d'intérêt. L'idée fondamentale est différente : plutôt que de programmer explicitement des règles, on entraîne un système à partir d'exemples.
+
+Cette période voit également l'émergence du Machine Learning comme discipline à part entière :
+
+- Arbres de décision et méthodes d'ensemble
+- Support Vector Machines (SVM)
+- Apprentissage par renforcement (TD-learning, Q-learning)
+- Modèles graphiques probabilistes
+
+Un second hiver frappe les réseaux de neurones dans les années 1990, mais le Machine Learning « classique » continue de progresser.
+
+### Troisième vague : L'ère du Deep Learning (2010--présent)
+
+Trois facteurs convergent pour permettre la révolution du Deep Learning :
+
+1. **Données massives** : Internet génère des quantités de données sans précédent
+2. **Puissance de calcul** : Les GPU permettent d'entraîner des réseaux profonds
+3. **Algorithmes** : Nouvelles architectures (CNN, LSTM, Transformers) et techniques d'entraînement
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Jalons du Deep Learning"}
+**2012** : AlexNet remporte ImageNet avec un écart massif sur les méthodes traditionnelles. **2016** : AlphaGo bat le champion du monde de Go. **2017** : L'architecture Transformer révolutionne le traitement du langage. **2022** : Les grands modèles de langage (GPT, Claude) démontrent des capacités génératives impressionnantes.
+:::
+
+::: {#fig-timeline}
+{{< svg ../figures/s01-fig_01_ai_timeline.svg alt="Les trois vagues de l'Intelligence Artificielle. Les zones grisées représentent les « hivers de l'IA », périodes de désillusion et de réduction des financements. Les jalons majeurs sont positionnés sur la frise chronologique, permettant de visualiser l'évolution du domaine depuis la conférence de Dartmouth (1956) jusqu'aux grands modèles de langage actuels." >}}
+
+Les trois vagues de l'Intelligence Artificielle. Les zones grisées représentent les « hivers de l'IA », périodes de désillusion et de réduction des financements. Les jalons majeurs sont positionnés sur la frise chronologique, permettant de visualiser l'évolution du domaine depuis la conférence de Dartmouth (1956) jusqu'aux grands modèles de langage actuels.
+:::
+
+## IA, Machine Learning, Deep Learning : La distinction fondamentale
+
+Cette section clarifie une confusion fréquente entre trois termes souvent utilisés de manière interchangeable. La compréhension de cette hiérarchie est essentielle pour situer correctement les différentes techniques que nous étudierons dans ce cours.
+
+### La hiérarchie conceptuelle
+
+::: {.callout-important .encadre-retenirbox title="Point clé -- La distinction IA / ML / DL"}
+- Le **Machine Learning** est une **approche** pour faire de l'IA
+- Le **Deep Learning** est une **technique** de Machine Learning
+
+Ces trois termes ne sont pas synonymes. Ils désignent des ensembles emboîtés.
+:::
+
+#### L'Intelligence Artificielle : le champ global
+
+L'IA englobe **toutes** les méthodes permettant à une machine de réaliser des tâches « intelligentes ». Cela inclut :
+
+- Les systèmes à base de règles explicites
+- Les algorithmes de recherche et d'optimisation
+- Le raisonnement logique et le calcul formel
+- Le Machine Learning
+- Et bien d'autres approches
+
+#### Le Machine Learning : une approche de l'IA
+
+Le Machine Learning est une **approche particulière** pour construire des systèmes d'IA. Son principe fondamental :
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Machine Learning"}
+Le Machine Learning est l'approche qui consiste à construire des systèmes capables d'apprendre à partir de données, plutôt que d'être explicitement programmés pour chaque tâche.
+:::
+
+En français : au lieu de programmer les règles, on fournit des exemples et le système **découvre** les patterns.
+
+::: {.callout-warning .encadre-attentionbox title="Attention -- ML n'est pas la seule approche"}
+Un système de navigation GPS utilisant l'algorithme A* est de l'IA (il résout un problème complexe de planification), mais ce n'est **pas** du Machine Learning : les règles de recherche sont programmées explicitement.
+
+De même, Wolfram Alpha effectue du calcul formel (intégration symbolique, résolution d'équations) : c'est de l'IA symbolique, pas du ML.
+:::
+
+#### Le Deep Learning : une technique de ML
+
+Le Deep Learning est une **technique spécifique** au sein du Machine Learning, caractérisée par l'utilisation de réseaux de neurones artificiels avec de nombreuses couches (d'où « deep », profond).
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Deep Learning"}
+Le Deep Learning utilise des réseaux de neurones profonds (typiquement plus de 3 couches) pour apprendre des représentations hiérarchiques des données.
+:::
+
+Le Deep Learning n'est pas la seule technique de ML. D'autres existent :
+
+- Arbres de décision et forêts aléatoires
+- Support Vector Machines
+- k plus proches voisins (k-NN)
+- Régression logistique
+- Naive Bayes
+
+### Visualisation : les ensembles emboîtés
+
+La Figure @fig-venn illustre graphiquement cette relation d'inclusion entre les trois concepts. Chaque exemple de système est positionné dans l'ensemble correspondant à sa nature : les systèmes à base de règles sont dans l'anneau externe (IA mais pas ML), les algorithmes classiques de ML sont dans l'anneau intermédiaire, et les réseaux profonds sont au centre (Deep Learning).
+
+::: {#fig-venn}
+{{< svg ../figures/s01-fig_02_ai_ml_dl_venn.svg alt="Relation entre Intelligence Artificielle, Machine Learning et Deep Learning. Les exemples sont positionnés selon leur appartenance aux différents ensembles : GPS et systèmes experts sont de l'IA sans ML ; Naive Bayes et SVM sont du ML sans DL ; les Transformers et CNN sont du Deep Learning." >}}
+
+Relation entre Intelligence Artificielle, Machine Learning et Deep Learning. Les exemples sont positionnés selon leur appartenance aux différents ensembles : GPS et systèmes experts sont de l'IA sans ML ; Naive Bayes et SVM sont du ML sans DL ; les Transformers et CNN sont du Deep Learning.
+:::
+
+### Exemples concrets pour chaque catégorie
+
+| **Catégorie** | **Exemple** | **Caractéristique** |
+| --- | --- | --- |
+| IA non-ML | GPS (A*) | Algorithme de recherche programmé |
+| IA non-ML | Wolfram Alpha | Calcul symbolique, règles explicites |
+| IA non-ML | Systèmes experts | Base de règles if-then |
+| ML non-DL | Filtres anti-spam (Naive Bayes) | Apprend des exemples, modèle simple |
+| ML non-DL | Recommandation (forêts aléatoires) | Ensemble d'arbres de décision |
+| ML non-DL | Détection de fraude (SVM) | Séparateur linéaire/non-linéaire |
+| Deep Learning | ChatGPT, Claude | Transformers, milliards de paramètres |
+| Deep Learning | Reconnaissance faciale | CNN profonds |
+| Deep Learning | AlphaGo | Réseaux + Reinforcement Learning |
+
+### Pourquoi cette distinction est importante
+
+Comprendre cette hiérarchie permet de :
+
+1. **Choisir la bonne approche** : Le ML n'est pas toujours la solution. Pour certains problèmes, un algorithme de recherche ou des règles explicites sont plus appropriés.
+2. **Comprendre les limitations** : Le ML nécessite des données. L'IA symbolique nécessite une expertise pour coder les règles.
+3. **Situer les cours du Master** : Ce cours couvre les fondements de l'IA (y compris l'IA non-ML). Le cours du S2 se concentre sur le Machine Learning.
+
+## Agents intelligents
+
+La notion d'agent est centrale en IA. Elle fournit un cadre unifié pour analyser et concevoir des systèmes d'IA, quelle que soit l'approche technique utilisée.
+
+### Définition d'un agent
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Agent"}
+Un **agent** est une entité qui perçoit son environnement à travers des **capteurs** et agit sur cet environnement à travers des **actuateurs**.
+:::
+
+Cette définition est volontairement générale. Elle s'applique aussi bien à un robot physique qu'à un programme logiciel :
+
+| **Agent** | **Capteurs** | **Actuateurs** |
+| --- | --- | --- |
+| Humain | Yeux, oreilles, peau | Mains, jambes, voix |
+| Robot | Caméras, LIDAR, microphones | Moteurs, haut-parleurs |
+| Programme de jeu | État du jeu via API | Commandes de jeu |
+| Assistant virtuel | Texte/audio de l'utilisateur | Texte/audio généré |
+| Thermostat | Capteur de température | Système de chauffage |
+
+### Le cycle perception-action
+
+Un agent fonctionne selon un cycle continu, illustré dans la Figure @fig-agent. Ce cycle fondamental structure toute interaction entre un agent et son environnement :
+
+1. L'agent **perçoit** l'état de l'environnement via ses capteurs
+2. L'agent **choisit** une action selon sa fonction de décision
+3. L'agent **exécute** l'action via ses actuateurs
+4. L'environnement **change** (potentiellement)
+5. Retour à l'étape 1
+
+::: {#fig-agent}
+{{< svg ../figures/s01-fig_03_agent_environment.svg alt="Le cycle agent-environnement. L'agent perçoit son environnement via ses capteurs, traite l'information selon sa fonction de décision interne, puis agit sur l'environnement via ses actuateurs. L'environnement réagit, produisant de nouvelles perceptions qui alimentent le cycle suivant." >}}
+
+Le cycle agent-environnement. L'agent perçoit son environnement via ses capteurs, traite l'information selon sa fonction de décision interne, puis agit sur l'environnement via ses actuateurs. L'environnement réagit, produisant de nouvelles perceptions qui alimentent le cycle suivant.
+:::
+
+### Fonction d'agent et programme d'agent
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Fonction d'agent"}
+La **fonction d'agent** $f: \mathcal{P}^* \rightarrow \mathcal{A}$ associe à chaque séquence de perceptions une action à effectuer.
+
+$\mathcal{P}^*$ est l'ensemble de toutes les séquences de perceptions possibles (l'historique complet de ce que l'agent a perçu). $\mathcal{A}$ est l'ensemble des actions possibles.
+:::
+
+La fonction d'agent est une abstraction mathématique. Le **programme d'agent** est son implémentation concrète.
+
+::: {.callout-warning .encadre-attentionbox title="Attention -- Fonction vs Programme"}
+Une même fonction d'agent peut être implémentée de multiples façons. La fonction spécifie le *comportement souhaité*. Le programme spécifie *comment* le réaliser.
+:::
+
+### Agent rationnel
+
+::: {.callout-note .encadre-definitionbox title="Définition -- Agent rationnel"}
+Un agent est **rationnel** s'il choisit, pour chaque séquence de perceptions possible, l'action qui maximise sa mesure de performance, étant donné :
+
+- Sa connaissance préalable de l'environnement
+- La séquence de perceptions observée jusqu'à présent
+:::
+
+Rationalité $\neq$ omniscience. Un agent rationnel fait de son mieux avec l'information disponible. Il peut se tromper si son information est incomplète ou incorrecte.
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Rationalité limitée"}
+Un agent de trading rationnel peut perdre de l'argent si le marché se comporte de façon imprévisible. Sa décision était rationnelle *au moment où il l'a prise*, même si le résultat s'avère mauvais.
+:::
+
+### Le cadre PEAS
+
+Pour spécifier complètement un problème d'agent, on utilise le cadre PEAS :
+
+::: {.callout-note .encadre-definitionbox title="Définition -- PEAS"}
+- **P**erformance : comment évalue-t-on le succès de l'agent ?
+- **E**nvironnement : dans quel contexte l'agent opère-t-il ?
+- **A**ctuateurs : quelles actions l'agent peut-il effectuer ?
+- **S**enseurs (Capteurs) : que peut percevoir l'agent ?
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- PEAS pour un taxi autonome"}
+- **Performance** : Sécurité, temps de trajet, confort, respect du code de la route, consommation
+- **Environnement** : Routes, autres véhicules, piétons, conditions météo, panneaux
+- **Actuateurs** : Volant, accélérateur, frein, clignotants, klaxon
+- **Sensors** : Caméras, LIDAR, radar, GPS, odomètre, microphones
+:::
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- PEAS pour un chatbot de service client"}
+- **Performance** : Satisfaction client, temps de résolution, taux de résolution sans escalade
+- **Environnement** : Interface de chat, base de connaissances, historique client
+- **Actuateurs** : Messages texte, liens, transfert à un humain
+- **Sensors** : Messages du client, métadonnées (heure, canal, historique)
+:::
+
+## Types d'environnements
+
+Les caractéristiques de l'environnement déterminent en grande partie la difficulté du problème d'IA et les techniques appropriées pour le résoudre.
+
+### Propriétés des environnements
+
+#### Observable vs Partiellement observable
+
+::: {.callout-note .encadre-definitionbox title="Observable vs Partiellement observable"}
+- **Totalement observable** : Les capteurs donnent accès à l'état complet de l'environnement à tout instant.
+- **Partiellement observable** : L'agent n'a qu'une vue partielle ou bruitée de l'état.
+:::
+
+**Exemples** :
+
+- Échecs = totalement observable (tout le plateau est visible)
+- Poker = partiellement observable (cartes adverses cachées)
+- Conduite automobile = partiellement observable (angles morts, intentions des autres conducteurs)
+
+#### Déterministe vs Stochastique
+
+::: {.callout-note .encadre-definitionbox title="Déterministe vs Stochastique"}
+- **Déterministe** : L'état suivant est entièrement déterminé par l'état actuel et l'action de l'agent.
+- **Stochastique** : Il y a une part d'aléatoire dans les transitions.
+:::
+
+**Exemples** :
+
+- Échecs = déterministe (une action mène toujours au même résultat)
+- Backgammon = stochastique (les dés introduisent de l'aléatoire)
+- Monde réel = généralement stochastique
+
+#### Épisodique vs Séquentiel
+
+::: {.callout-note .encadre-definitionbox title="Épisodique vs Séquentiel"}
+- **Épisodique** : Chaque épisode est indépendant. L'action actuelle n'affecte pas les épisodes futurs.
+- **Séquentiel** : Les décisions actuelles affectent toutes les décisions futures.
+:::
+
+**Exemples** :
+
+- Classification d'images = épisodique (chaque image est indépendante)
+- Échecs = séquentiel (chaque coup affecte la suite de la partie)
+
+#### Statique vs Dynamique
+
+::: {.callout-note .encadre-definitionbox title="Statique vs Dynamique"}
+- **Statique** : L'environnement ne change que lorsque l'agent agit.
+- **Dynamique** : L'environnement peut changer pendant que l'agent réfléchit.
+:::
+
+**Exemples** :
+
+- Échecs avec horloge = semi-dynamique (le temps passe)
+- Conduite = dynamique (les autres véhicules bougent)
+- Mots croisés = statique
+
+#### Discret vs Continu
+
+::: {.callout-note .encadre-definitionbox title="Discret vs Continu"}
+- **Discret** : Nombre fini d'états, perceptions et actions.
+- **Continu** : États, perceptions ou actions décrits par des valeurs continues.
+:::
+
+**Exemples** :
+
+- Échecs = discret (nombre fini de positions)
+- Conduite = continu (angle du volant, vitesse)
+
+#### Agent unique vs Multi-agents
+
+::: {.callout-note .encadre-definitionbox title="Agent unique vs Multi-agents"}
+- **Agent unique** : L'agent est seul dans l'environnement.
+- **Multi-agents** : Plusieurs agents interagissent (coopération ou compétition).
+:::
+
+### Tableau récapitulatif
+
+| **Environnement** | **Obs.** | **Dét.** | **Épis.** | **Stat.** | **Disc.** | **Agents** |
+| --- | --- | --- | --- | --- | --- | --- |
+| Échecs | Total | Oui | Non | Oui | Oui | 2 |
+| Poker | Partiel | Non | Non | Oui | Oui | Multi |
+| Taxi autonome | Partiel | Non | Non | Non | Non | Multi |
+| Diagnostic médical | Partiel | Non | Oui | Oui | Oui | 1 |
+| Classification images | Total | Oui | Oui | Oui | Oui | 1 |
+
+### Implications pour la conception d'agents
+
+La difficulté d'un problème d'IA est largement déterminée par ces propriétés :
+
+- **Totalement observable + Déterministe + Discret** : Problèmes les plus simples. On peut souvent trouver des solutions exactes.
+- **Partiellement observable** : L'agent doit maintenir des croyances sur l'état (probabilités).
+- **Stochastique** : L'agent doit raisonner sur les distributions de résultats possibles.
+- **Dynamique** : L'agent doit agir rapidement, parfois avec des informations incomplètes.
+- **Multi-agents** : L'agent doit modéliser le comportement des autres (théorie des jeux).
+
+## Types d'agents
+
+Les agents peuvent être classés selon leur sophistication, depuis les plus simples (réflexes) jusqu'aux plus complexes (basés sur l'utilité). Cette classification représente une progression vers des agents plus capables. La Figure @fig-agent_types présente cette progression, du plus simple au plus sophistiqué.
+
+### Agent réflexe simple
+
+::: {.callout-note .encadre-definitionbox title="Agent réflexe simple"}
+Un agent réflexe simple sélectionne des actions uniquement sur la base de la perception actuelle, ignorant l'historique des perceptions.
+:::
+
+Formellement : $action = f(perception\_actuelle)$
+
+Ces agents utilisent des règles **condition-action** (ou règles « si-alors ») :
+
+```python
+if obstacle_devant:
+    action = tourner
+elif ligne_a_droite:
+    action = suivre_ligne
+else:
+    action = avancer
+```
+
+**Limitations** :
+
+- Ne fonctionne que si l'environnement est totalement observable
+- Pas de mémoire, pas d'apprentissage
+- Échoue si la même perception peut nécessiter différentes actions selon le contexte
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Thermostat simple"}
+Un thermostat simple est un agent réflexe : si température $<$ seuil, allumer le chauffage ; sinon, éteindre.
+:::
+
+### Agent réflexe avec état (basé sur modèle)
+
+::: {.callout-note .encadre-definitionbox title="Agent basé sur modèle"}
+Un agent basé sur modèle maintient un **état interne** qui dépend de l'historique des perceptions. Il utilise un **modèle** de l'environnement pour mettre à jour cet état.
+:::
+
+L'état interne permet de gérer l'observabilité partielle :
+
+```python
+état = mettre_à_jour(état, action, perception, modèle)
+action = règles(état)
+```
+
+**Modèle de l'environnement** :
+
+- **Modèle de transition** : Comment le monde évolue (indépendamment de l'agent et en réponse aux actions)
+- **Modèle de capteurs** : Comment l'état du monde se traduit en perceptions
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Voiture autonome"}
+Une voiture autonome maintient une carte interne des positions des autres véhicules, même quand ils sont temporairement hors du champ de vision (angle mort).
+:::
+
+### Agent basé sur des buts
+
+::: {.callout-note .encadre-definitionbox title="Agent basé sur des buts"}
+Un agent basé sur des buts possède une représentation explicite de ses **objectifs**. Il évalue les actions selon leur capacité à atteindre ces objectifs.
+:::
+
+Ces agents nécessitent des capacités de **recherche** et de **planification** pour trouver des séquences d'actions menant au but.
+
+La simple connaissance de l'état actuel ne suffit plus. L'agent doit :
+
+1. Considérer les actions possibles
+2. Prédire leurs conséquences
+3. Évaluer si le résultat correspond au but
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- GPS navigateur"}
+Un GPS ne réagit pas simplement à la position actuelle. Il a un but (destination) et planifie une route pour l'atteindre.
+:::
+
+### Agent basé sur l'utilité
+
+::: {.callout-note .encadre-definitionbox title="Agent basé sur l'utilité"}
+Un agent basé sur l'utilité utilise une **fonction d'utilité** qui mesure le « bonheur » de l'agent dans un état donné. L'agent cherche à maximiser son utilité espérée.
+:::
+
+Les buts sont binaires (atteint ou non). L'utilité est graduée et permet de :
+
+- Comparer des objectifs conflictuels (rapidité vs sécurité)
+- Pondérer les probabilités de succès
+- Gérer l'incertitude de manière rationnelle
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Trading algorithmique"}
+Un agent de trading ne vise pas simplement « gagner de l'argent ». Il maximise une fonction d'utilité qui prend en compte le rendement espéré, le risque, les contraintes de liquidité, etc.
+:::
+
+### Agent apprenant
+
+::: {.callout-note .encadre-definitionbox title="Agent apprenant"}
+Un agent apprenant peut améliorer ses performances à partir de l'expérience. Il comprend quatre composants :
+
+- **Élément de performance** : sélectionne les actions
+- **Critique** : évalue les performances par rapport à un standard
+- **Élément d'apprentissage** : modifie l'élément de performance pour s'améliorer
+- **Générateur de problèmes** : suggère des actions exploratoires
+:::
+
+L'apprentissage permet à l'agent de fonctionner dans des environnements initialement inconnus et de s'améliorer continuellement.
+
+::: {#fig-agent_types}
+{{< svg ../figures/s01-fig_04_agent_types.svg alt="Les différents types d'agents, du plus simple (réflexe) au plus sophistiqué (apprenant). Chaque type ajoute des capacités au précédent : l'agent basé sur modèle ajoute la mémoire, l'agent basé sur buts ajoute la planification, l'agent basé sur utilité ajoute la gestion des compromis, et l'agent apprenant ajoute l'amélioration continue." >}}
+
+Les différents types d'agents, du plus simple (réflexe) au plus sophistiqué (apprenant). Chaque type ajoute des capacités au précédent : l'agent basé sur modèle ajoute la mémoire, l'agent basé sur buts ajoute la planification, l'agent basé sur utilité ajoute la gestion des compromis, et l'agent apprenant ajoute l'amélioration continue.
+:::
+
+## Les branches de l'Intelligence Artificielle
+
+L'IA est un champ vaste qui se subdivise en plusieurs domaines spécialisés. Cette section présente les principales branches et leur interconnexion.
+
+### Carte des sous-domaines
+
+L'Intelligence Artificielle s'est progressivement structurée en plusieurs sous-domaines spécialisés, chacun apportant des outils et méthodes spécifiques pour résoudre certaines classes de problèmes. Ces domaines ne sont pas isolés : ils partagent des fondements théoriques communs et s'enrichissent mutuellement. Un système d'IA moderne combine souvent plusieurs de ces branches pour accomplir des tâches complexes. La Figure @fig-branches présente une cartographie de ces domaines et leurs relations, en indiquant également quelles séances de ce cours abordent chaque branche.
+
+::: {#fig-branches}
+{{< svg ../figures/s01-fig_05_ai_branches.svg alt="Les principales branches de l'Intelligence Artificielle et leurs relations. Les flèches indiquent des dépendances conceptuelles : par exemple, le Machine Learning s'appuie sur le raisonnement probabiliste, et la robotique intègre plusieurs branches (vision, planification, contrôle). Les séances du cours couvrant chaque branche sont indiquées." >}}
+
+Les principales branches de l'Intelligence Artificielle et leurs relations. Les flèches indiquent des dépendances conceptuelles : par exemple, le Machine Learning s'appuie sur le raisonnement probabiliste, et la robotique intègre plusieurs branches (vision, planification, contrôle). Les séances du cours couvrant chaque branche sont indiquées.
+:::
+
+### Recherche et planification (Search & Planning)
+
+**Question centrale** : Comment trouver une séquence d'actions pour atteindre un objectif ?
+
+Ce domaine traite des problèmes où l'on connaît les règles du jeu et où l'on cherche une solution optimale ou satisfaisante :
+
+- Algorithmes de recherche : BFS, DFS, A*, etc.
+- Planification automatique
+- Résolution de contraintes
+- Jeux à deux joueurs (minimax, alpha-beta)
+
+**Applications** : GPS, puzzles, scheduling, jeux (échecs, Go).
+
+**Ce cours** : Séance 3.
+
+### Représentation des connaissances et raisonnement
+
+**Question centrale** : Comment représenter et manipuler des connaissances ?
+
+Ce domaine étudie comment encoder des faits et des règles de manière à permettre le raisonnement automatique :
+
+- Logique propositionnelle et du premier ordre
+- Ontologies et graphes de connaissances
+- Raisonnement par inférence
+- Systèmes experts
+
+**Applications** : Diagnostic médical, systèmes juridiques, bases de connaissances (Wikidata).
+
+**Ce cours** : Séance 2.
+
+### Apprentissage automatique (Machine Learning)
+
+**Question centrale** : Comment apprendre à partir de données ?
+
+Le ML est aujourd'hui la branche la plus active de l'IA. Elle se subdivise en :
+
+- **Apprentissage supervisé** : Apprendre à partir d'exemples étiquetés
+- **Apprentissage non supervisé** : Découvrir des structures dans des données non étiquetées
+- **Apprentissage par renforcement** : Apprendre par essai-erreur avec des récompenses
+
+**Applications** : Classification, régression, clustering, recommandation, jeux.
+
+**Ce cours** : Introduction en Séance 6. Cours dédié au S2.
+
+### Raisonnement probabiliste
+
+**Question centrale** : Comment raisonner sous incertitude ?
+
+Le monde réel est incertain. Cette branche étudie comment prendre des décisions rationnelles malgré l'incertitude :
+
+- Théorème de Bayes
+- Réseaux bayésiens
+- Modèles de Markov cachés
+- Filtrage et prédiction
+
+**Applications** : Diagnostic, filtrage de spam, reconnaissance vocale.
+
+**Ce cours** : Séance 5.
+
+### Traitement du langage naturel (NLP)
+
+**Question centrale** : Comment permettre aux machines de comprendre et générer du langage humain ?
+
+- Analyse syntaxique et sémantique
+- Traduction automatique
+- Extraction d'information
+- Génération de texte
+- Grands modèles de langage (LLM)
+
+**Applications** : Chatbots, traduction, résumé automatique, assistants vocaux.
+
+### Vision par ordinateur
+
+**Question centrale** : Comment permettre aux machines de « voir » ?
+
+- Reconnaissance d'objets et de visages
+- Segmentation d'images
+- Détection de mouvement
+- Reconstruction 3D
+
+**Applications** : Voitures autonomes, contrôle qualité, imagerie médicale.
+
+### Robotique
+
+**Question centrale** : Comment créer des agents physiques intelligents ?
+
+La robotique intègre plusieurs sous-domaines de l'IA :
+
+- Perception (vision, capteurs)
+- Planification de mouvement
+- Contrôle moteur
+- Interaction homme-robot
+
+**Applications** : Robots industriels, exploration spatiale, chirurgie robotique.
+
+### Interconnexions
+
+Ces domaines ne sont pas isolés. Un système d'IA moderne combine souvent plusieurs branches :
+
+::: {.callout-tip .encadre-exemplebox title="Exemple -- Voiture autonome"}
+Une voiture autonome utilise :
+
+- Vision par ordinateur (comprendre la scène)
+- Raisonnement probabiliste (estimer les positions des obstacles)
+- Planification (choisir une trajectoire)
+- Apprentissage (améliorer les modèles de perception)
+- Contrôle robotique (exécuter les mouvements)
+:::
+
+## Synthèse et perspectives
+
+### Ce que nous avons appris
+
+Cette séance a établi les fondations conceptuelles pour tout le cours :
+
+::: {.callout-important .encadre-retenirbox title="Points clés à retenir"}
+1. L'IA vise à créer des agents rationnels qui agissent de manière optimale étant donné leur information.
+2. Le **Machine Learning est une approche** de l'IA, pas un synonyme. Le **Deep Learning est une technique** de ML.
+3. Un agent perçoit son environnement et agit sur lui. Le cadre PEAS (Performance, Environment, Actuators, Sensors) permet de spécifier complètement un problème d'agent.
+4. Les caractéristiques de l'environnement (observable, déterministe, épisodique, statique, discret, mono/multi-agents) déterminent la difficulté du problème et les techniques appropriées.
+5. Les agents varient en sophistication : réflexe $\rightarrow$ basé sur modèle $\rightarrow$ basé sur buts $\rightarrow$ basé sur utilité $\rightarrow$ apprenant.
+:::
+
+### Fil conducteur du cours
+
+Ce cours suit une progression logique qui répond à des questions successives :
+
+| **Séance** | **Question** | **Ce qu'on apprend** |
+| --- | --- | --- |
+| 1 | Qu'est-ce que l'IA ? | Cadre conceptuel, agents |
+| 2 | Comment raisonner ? | Logique, calcul formel |
+| 3 | Comment chercher ? | Algorithmes de recherche |
+| 5 | Comment gérer l'incertitude ? | Probabilités, Bayes |
+| 6 | Pourquoi apprendre ? | MDPs, intro au ML |
+
+### Vers la séance 2 : L'IA qui raisonne
+
+La prochaine séance aborde la première grande approche de l'IA : le raisonnement formel. 
+
+Un agent rationnel doit pouvoir représenter des connaissances sur le monde et en déduire de nouvelles informations. La logique fournit un cadre rigoureux pour cela. Les systèmes experts des années 1970-80 et les outils de calcul formel comme Wolfram Alpha illustrent cette approche.
+
+La question centrale sera : comment un système peut-il raisonner de manière garantie correcte ?
+
+## Références
+
+- Russell, S., & Norvig, P. (2020). *Artificial Intelligence: A Modern Approach* (4th ed.). Pearson. Chapitres 1-2.
+- Murphy, K. P. (2022). *Probabilistic Machine Learning: An Introduction*. MIT Press. Chapitre 1.
+- Prince, S. J. D. (2023). *Understanding Deep Learning*. MIT Press. Chapitre 1.
+
+::: {#ressources-seance}
+:::
