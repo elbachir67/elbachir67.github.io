@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Échoue si le site rendu contient une violation d'accessibilité WCAG A ou AA (US-42).
 //
-//     node scripts/verifier_accessibilite.js            # analyse _site/
-//     node scripts/verifier_accessibilite.js chemin/    # analyse un autre dossier
+//     node scripts/verifier_accessibilite.js                    # tout le site rendu
+//     node scripts/verifier_accessibilite.js chemin/            # un autre dossier rendu
+//     node scripts/verifier_accessibilite.js _site --pr origin/main   # les pages de la PR
 //
 // Chaque page du site est auditée par axe-core dans les deux langues (toutes les pages rendues sont
 // visitées), en mode clair et sombre, en largeur mobile (375 px) et desktop (1440 px).
@@ -20,6 +21,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { chromium } = require("playwright-core");
 const { servir } = require("./serveur_local.js");
+const { pagesTouchees } = require("./pages_touchees.js");
 
 const AXE = fs.readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
 const REGLES = { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } };
@@ -83,6 +85,36 @@ async function regler_mode(page, mode) {
   }
 }
 
+// Deux régimes (US-63). Sur une PR, l'audit ne porte que sur les pages que la PR touche : à cinq
+// cours, l'audit complet dure vingt-quatre minutes et a fait annuler un job au plafond de quarante.
+// Sur `main`, l'audit complet tourne une fois par semaine — c'est lui qui garantit que rien n'a
+// dérivé ailleurs, et c'est lui qui ouvre une issue s'il trouve quelque chose.
+//
+// Le doute mène toujours au tout : `pages_touchees.js` renvoie « toutes » dès qu'un fichier peut
+// changer le rendu du site entier, ou dès qu'il ne sait pas ce qu'un fichier change.
+function restreindre(toutes, dossier) {
+  // `--pages` nomme les adresses à auditer, sans passer par Git : c'est ce qui permet d'éprouver
+  // le régime restreint, et de relancer l'audit d'une page qui vient d'échouer.
+  const choisies = process.argv.indexOf("--pages");
+  if (choisies !== -1) {
+    const retenues = new Set((process.argv[choisies + 1] || "").split(",").filter(Boolean));
+    return { pages: toutes.filter((p) => retenues.has(p.adresse)),
+             regime: `pages nommées : ${retenues.size}` };
+  }
+  const drapeau = process.argv.indexOf("--pr");
+  if (drapeau === -1) return { pages: toutes, regime: "complet" };
+  const base = process.argv[drapeau + 1] || "origin/main";
+  const touchees = pagesTouchees(base, dossier);
+  if (touchees === null) {
+    return { pages: toutes, regime: `complet (la PR touche au rendu de tout le site)` };
+  }
+  const retenues = new Set(touchees);
+  return {
+    pages: toutes.filter((p) => retenues.has(p.adresse)),
+    regime: `PR : ${touchees.length} page(s) touchée(s) depuis ${base}`,
+  };
+}
+
 async function main() {
   const dossier = process.argv[2] || "_site";
   if (!fs.existsSync(dossier)) {
@@ -90,8 +122,13 @@ async function main() {
     return 1;
   }
   const depart = Date.now();
+  const { pages: toutes, regime } = restreindre(pages(dossier), dossier);
+  console.log(`Régime : ${regime}.`);
+  if (toutes.length === 0) {
+    console.log("Aucune page touchée : rien à auditer.");
+    return 0;
+  }
   const site = await servir(dossier);
-  const toutes = pages(dossier);
   const ordinaires = toutes.filter((p) => !p.slides);
   const presentations = toutes.filter((p) => p.slides);
   const navigateur = await chromium.launch({ channel: "chrome" });
