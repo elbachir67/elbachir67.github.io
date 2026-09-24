@@ -86,7 +86,7 @@ d'un tuteur IA encadré.
 | US-60 | EP3 | Migration d'Introduction au ML (onze séances en decks) | M | 5 | 7 |
 | US-61 | EP3 | Flottants et mathématiques hors ligne (ouvre SD et Intro IA) | M | 5 | 7 |
 | US-62 | EP3 | Contrôle des figures par comparaison des références de glyphes | S | 3 | — |
-| US-63 | EP3 | Audit d'accessibilité ciblé sur la PR, audit complet hebdomadaire sur `main` | M | 3 | — |
+| US-63 | EP3 | Audit d'accessibilité ciblé sur la PR, audit complet hebdomadaire sur `main` | M | 3 | livrée |
 | US-64 | EP3 | Cellules de tableau étendues (`\multicolumn`) et équations à étiquettes multiples | S | 3 | livrée |
 | US-65 | EP3 | Le site sert ce qu'il promet : page de cours, lien interne, ressource du manifeste | M | 2 | livrée |
 
@@ -149,14 +149,25 @@ ressource, type `corrige`), et trois barrières la remplacent : l'import refuse,
 refuse, et `verifier_non_publiable.py` refuse — dans le dépôt autant que dans le site. La règle est
 écrite dans CLAUDE.md §7.
 
-**US-63 — L'accessibilité ne peut plus être vérifiée en entier à chaque PR.** Le contrôle examine
-chaque page et chaque slide en deux langues, deux thèmes et deux largeurs : l'arrivée du cours de ML
-l'a porté à 2102 combinaisons et douze minutes, et le job de CI, coupé à quinze, a été rapporté comme
-un échec alors que ses seize étapes précédentes passaient. Le délai est monté à quarante minutes, ce
-qui est un sursis et non une réponse : chaque séance ajoutée allonge encore le contrôle. La story
-demande deux régimes — sur une PR, l'audit ne porte que sur les **pages touchées** par la PR ; sur
-`main`, l'audit **complet** tourne une fois par semaine, et son échec ouvre une issue. Priorité
-**Must** : le PO l'a demandée comme telle.
+**US-63 — L'accessibilité ne peut plus être vérifiée en entier à chaque PR. Livrée** (#154), en
+urgence : la CI du bilan du Sprint 7 a été **annulée au plafond de quarante minutes**, l'audit
+occupant à lui seul 1 461 s des 2 148 s du job.
+
+Deux régimes. **Sur une PR, l'audit ne porte que sur les pages touchées** :
+`scripts/pages_touchees.js` traduit les fichiers modifiés en adresses du site. Une séance donne sa
+page et celle du cours ; une figure, une ressource ou `cours.yml` donnent les pages du cours et les
+deux catalogues ; une feuille de style, un filtre Lua, un profil Quarto ou un script d'import
+donnent **tout le site** — et **tout fichier de portée inconnue aussi**. Le doute mène toujours au
+tout : un audit complet de trop coûte vingt minutes, un audit manquant laisse passer un défaut.
+
+**Sur `main`, l'audit complet tourne une fois par semaine** — `accessibilite.yml`, lundi 5 h UTC,
+lançable à la main. Un défaut peut apparaître sans qu'aucune page ne change. Son échec **ouvre une
+issue**, parce que personne ne lit les journaux d'un job programmé.
+
+**Mesuré en production**, sur les deux PR qui ont suivi : #153 ajoute un script dont la portée
+n'est pas décidable et retombe sur le régime complet — **1 606 s** ; #155 ne touche qu'un cours et
+audite **8 pages en 77 s**. Vingt et une fois moins. Le plafond du job de CI est monté de 40 à
+60 minutes : c'est désormais la PR rare, celle qui touche au rendu entier, qui le borne.
 
 **US-64 — Ce qu'US-61 laissait de côté. Livrée avec la migration d'Introduction à l'IA**, le PO
 ayant préféré la traiter plutôt que de publier cinq tableaux mal rendus.

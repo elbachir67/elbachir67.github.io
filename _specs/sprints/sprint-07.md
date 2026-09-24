@@ -13,10 +13,10 @@ propose, le PO valide.
 
 ## Entrées PO
 
-- [ ] Validation, en bloc, des brouillons de textes alternatifs (US-58).
-- [ ] Validation de la table des encadrés de Structures de Données et d'Introduction à l'IA (US-61).
-- [ ] Métadonnées du cours d'Introduction au ML (US-60).
-- [ ] Vérifier `_import/` : les séances S03 (Hachage) et S04 (Arbres et tas) de Structures de Données n'y contiennent qu'un fichier `A_DEPOSER_ICI.txt`.
+- [x] Validation, en bloc, des brouillons de textes alternatifs (US-58) — 57 pour le cours de C, 61 pour le ML, 11 pour Introduction à l'IA.
+- [x] Validation de la table des encadrés de Structures de Données et d'Introduction à l'IA (US-61) — 13 et 37 types, six corrections du PO.
+- [x] Métadonnées du cours d'Introduction au ML (US-60).
+- [x] Vérifier `_import/` : les sources de S03 et S04 de Structures de Données ont été déposées en cours de sprint ; S04 la veille de sa migration.
 
 ## Ordre d'exécution
 
