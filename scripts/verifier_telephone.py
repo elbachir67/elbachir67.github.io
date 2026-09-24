@@ -28,6 +28,24 @@ traité de la même façon : regarder ce que la figure montre, et non ce que le 
 La tolérance des blocs de code **ne s'applique pas aux figures** : un numéro dessiné dans une figure est
 affiché au lecteur, il n'est pas un exemple d'API.
 
+**Exception, décidée par le PO : un numéro manifestement factice.** Un carnet d'adresses sert
+d'exemple à trois cours : il est dans le code d'une séance, dans une figure, dans un lab. Ses
+numéros ne sont ceux de personne, et le contrat — « aucun numéro de téléphone sur le site » —
+protège une vie privée, pas une suite de chiffres inventée.
+
+Encore faut-il que « factice » se décide sans jugement. La règle porte sur la **forme** des sept
+chiffres qui suivent l'indicatif d'opérateur, lus en groupes de 3, 2 et 2. Un numéro est toléré
+lorsqu'il vérifie **l'une** de ces trois formes, et elles seules :
+
+1. **chaque groupe est fait d'un seul chiffre répété** — `111 22 33`, `999 00 00`, `666 77 88` ;
+2. **les sept chiffres se suivent**, chacun valant le précédent plus un — `123 45 67` ;
+3. **le premier groupe est un chiffre répété, et les quatre derniers se suivent** — `555 01 23`,
+   `888 12 34`.
+
+Ces formes admettent **1 110 numéros sur les dix millions** d'un indicatif, soit 0,011 % : un vrai
+numéro n'y tombe pas par accident. `77 482 56 19` échoue, `77 654 32 10` échoue — une suite
+descendante n'est pas une suite —, `77 000 00 01` échoue.
+
 **Exception, décidée par le PO au Sprint 3 : les blocs de code des cours.** Un exemple d'API peut contenir
 un numéro fictif (« "771112233" » dans une requête de commande). Un numéro qui n'apparaît **que** dans des
 blocs de code est donc toléré — partout ailleurs, y compris dans la même page hors du code, dans le PDF de
@@ -58,6 +76,25 @@ MOTIFS = {
 # neuf chiffres d'affilée. Aucun numéro sénégalais ne commence par 0 ou 1, et aucun ne s'écrit avec
 # les seuls chiffres 0 et 1 : le chapitre 1 du cours de C en produisait neuf faux positifs.
 BINAIRE = re.compile(r"^[01]{8}2?$")
+
+
+def manifestement_factice(numero: str) -> bool:
+    """Le numéro a-t-il la forme d'un numéro inventé ? Voir la règle en tête de fichier."""
+    chiffres = re.sub(r"\D", "", numero)
+    if len(chiffres) != 9:
+        return False
+    corps = chiffres[2:]
+    groupes = (corps[:3], corps[3:5], corps[5:])
+
+    def repete(groupe: str) -> bool:
+        return len(set(groupe)) == 1
+
+    def se_suivent(suite: str) -> bool:
+        return all(int(suite[i + 1]) == int(suite[i]) + 1 for i in range(len(suite) - 1))
+
+    return (all(repete(groupe) for groupe in groupes)
+            or se_suivent(corps)
+            or (repete(groupes[0]) and se_suivent(corps[3:])))
 EXTENSIONS_TEXTE = {".html", ".xml", ".json", ".txt"}
 MOTIF_TEXTE_SVG = re.compile(r"<text\b[^>]*>(.*?)</text>", re.S)
 EXCLUS = {"site_libs"}
@@ -134,7 +171,7 @@ def main() -> int:
     if not racine.is_dir():
         sys.exit(f"Dossier introuvable : {racine} (lancer quarto render d'abord).")
     tolerés = numeros_du_code(racine)
-    trouves, analyses = 0, 0
+    trouves, analyses, factices = 0, 0, 0
     for fichier, texte in fichiers_a_analyser(racine):
         analyses += 1
         if fichier.suffix == ".html":
@@ -153,6 +190,13 @@ def main() -> int:
             for m in motif.finditer(texte):
                 if m.group(0) in tolerance or BINAIRE.match(m.group(0)):
                     continue
+                if manifestement_factice(m.group(0)):
+                    factices += 1
+                    continue
+                # « +221 » n'emporte pas ses chiffres : on regarde ce qui le suit.
+                if nom.startswith("indicatif") and manifestement_factice(texte[m.end():m.end() + 16]):
+                    factices += 1
+                    continue
                 trouves += 1
                 ligne = texte.count("\n", 0, m.start()) + 1
                 extrait = " ".join(texte[max(0, m.start() - 40):m.end() + 20].split())
@@ -164,8 +208,9 @@ def main() -> int:
         print(f"ÉCHEC : {trouves} numéro(s) de téléphone possible(s) dans {racine}/.")
         return 1
     exception = f", {len(tolerés)} toléré(s) dans des blocs de code" if tolerés else ""
+    inventes = f", {factices} de forme manifestement factice" if factices else ""
     print(f"OK : aucun numéro de téléphone dans {analyses} fichier(s) de {racine}/ "
-          f"(hors site_libs/{exception}).")
+          f"(hors site_libs/{exception}{inventes}).")
     return 0
 
 
