@@ -22,6 +22,7 @@ Sources : historique Git, `gh pr list --state all`, `gh run list`. Chaque fait c
 | US-61 | Flottants, mathématiques numérotées et renvois | #143 | 22/09 21:43 |
 | US-64 | `\multicolumn` et équations à étiquettes multiples | #150 | 23/09 22:30 |
 | US-65 | Le site sert ce qu'il promet | #151 | 23/09 22:47 |
+| US-63 | Audit d'accessibilité ciblé sur la PR | #154 | 24/09 |
 
 **Hors story, sur décision du PO en cours de sprint :**
 
@@ -42,8 +43,8 @@ formules composées).
 | Capacité annoncée | 20 |
 | Engagés (US-58, 59, 60, 61) | 20 |
 | Livrés | 20 |
-| Livrés en plus (US-64, US-65) | 5 |
-| **Écart** | **+5** |
+| Livrés en plus (US-64, US-65, US-63) | 8 |
+| **Écart** | **+8** |
 
 Les deux migrations hors story — Structures de Données et Introduction à l'IA — ne sont pas
 chiffrées : le PO les a demandées en cours de sprint sans les estimer. **Proposition** : leur donner
@@ -81,9 +82,24 @@ Ce qui coûte est autour :
 | Contrôle de débordement | 37 s | CI, même run |
 | **Audit d'accessibilité** | **1 461 s** | CI, même run |
 
-**L'audit d'accessibilité consomme 76 % de la CI** — vingt-quatre minutes sur trente-deux. C'est le
-prix d'un site qui grandit : il visite chaque page dans deux langues, deux modes et deux largeurs,
-soit 2 148 combinaisons. US-63, déjà au backlog, le réduira à la seule PR.
+**L'audit d'accessibilité consommait 76 % de la CI** — vingt-quatre minutes sur trente-deux. C'est
+le prix d'un site qui grandit : il visite chaque page dans deux langues, deux modes et deux
+largeurs, soit 2 148 combinaisons.
+
+**Cette mesure a eu une suite immédiate, et ce bilan est écrit avant elle.** La CI de ce bilan a été
+**annulée au plafond de quarante minutes**, et le PO a fait passer US-63 en priorité sur tout le
+reste. Elle a été livrée le lendemain (#154), après la rédaction de ce qui précède.
+
+Les deux PR suivantes l'ont mesurée **en production**, une de chaque côté de sa règle :
+
+| PR | Régime | Durée de l'audit |
+|---|---|---:|
+| #153 — ajoute un script dont la portée n'est pas décidable | **complet**, par sécurité | 1 606 s |
+| #155 — ne touche qu'un cours | **restreint**, 8 pages | **77 s** |
+
+**Vingt et une fois moins** sur une PR ordinaire, et la règle de sécurité joue exactement là où il
+faut. Le plafond du job est monté de 40 à 60 minutes, au lieu de descendre : c'est désormais la PR
+rare — celle qui touche au rendu de tout le site — qui borne la CI.
 
 **Ce que Git mesure, et ce qu'il ne mesure pas.** D'un premier commit au merge :
 
@@ -177,7 +193,7 @@ un fichier servi.
   des sources en cours de sprint ; S04 est arrivée la veille de sa migration.
 - **La CI dure trente-deux minutes**, dont vingt-quatre d'audit d'accessibilité. Chaque correctif
   d'un défaut d'accessibilité coûte donc une demi-heure avant d'être confirmé — et ce sprint en a
-  eu trois (#148, #150). US-63 traite exactement cela.
+  eu trois (#148, #150). US-63, livrée depuis (#154), traite exactement cela.
 - **Un délai de CI a dû être porté à quarante minutes** pour laisser l'audit finir (commit du
   22/09 08:47).
 - **Un corrigé de TP est entré dans le dépôt** avec les figures de la séance 3 de Structures de
@@ -235,8 +251,8 @@ Reprises des sections « Propositions » des PR du sprint.
   et de compter sur un contrôle en aval (#148).
 - **Le contrôle des figures par comparaison des références de glyphes** — US-62, déjà au backlog :
   il aurait vu le défaut #4 sans qu'on ait à regarder la page.
-- **L'audit d'accessibilité ciblé sur la PR** — US-63, déjà au backlog : vingt-quatre minutes sur
-  trente-deux.
+- ~~L'audit d'accessibilité ciblé sur la PR — US-63~~ : **livrée après la rédaction de ce bilan**
+  (#154), le plafond de CI ayant lâché sur ce bilan même. Voir la section 3.
 - **Étendre `verifier_telephone.py` au texte des figures**, comme `verifier_latex.py` l'a été aux
   textes alternatifs.
 - **Refuser tout fichier de plus de 2 Mo non déclaré** dans `_import/` : un manuel sous copyright de

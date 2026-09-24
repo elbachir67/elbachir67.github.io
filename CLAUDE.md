@@ -104,7 +104,30 @@ l'issue soi-même ; sinon, la laisser ouverte et prévenir le PO.
 - Aucun secret, clé ou token dans le dépôt. Secrets uniquement via GitHub Secrets.
 - Aucune nouvelle dépendance sans justification dans la PR.
 - Code exécutable : `execute: freeze: auto` ; le dossier `_freeze/` est commité.
-- Images : texte alternatif obligatoire, poids < 300 Ko.
+- Images : texte alternatif obligatoire, **poids transféré** < 300 Ko. C'est ce qu'un lecteur
+  télécharge qui compte, et non le poids du fichier : GitHub Pages sert les SVG compressés, et un
+  schéma de texte se compresse environ huit fois. Mesurer avec `gzip -9 -c fichier | wc -c`.
+- **Vérification visuelle d'une page de cours.** Mesurer des largeurs, des débordements et des
+  attributs ne suffit pas : cela ne regarde pas les images. Toute vérification visuelle d'une page de
+  cours **inclut une capture de chaque figure, comparée à sa source — en la regardant**, et non en
+  comparant des pixels. La comparaison automatique a été essayée et mesurée : l'écart entre une
+  figure juste et la même figure brouillée était plus petit que l'écart dû au rendu lui-même
+  (anticrénelage, encres du mode sombre, mise à l'échelle). Les figures des chapitres 1 et 2 de
+  Programmation C avancée sont parties en ligne avec tous leurs textes brouillés, et la vérification
+  dans Chrome les avait déclarées bonnes sans jamais les avoir regardées.
+- **Rien de non publiable sur le site.** Un document réservé à l'enseignant — guide pédagogique,
+  grille de correction, barème — n'est jamais attaché en ressource, et aucun lien n'y mène. Le sigle
+  de filière « GLSI » n'apparaît pas : « L3 GLSI » s'écrit « L3 ». Toute correction se fait **à la
+  source** (le `.tex` du cours et sa copie dans `_import/`), puis l'import est rejoué : sans cela, le
+  terme revient au prochain import. `scripts/verifier_non_publiable.py` le vérifie en CI.
+- **Aucun corrigé, aucune piste, aucune indication de correction** n'est publié sur le site **ni
+  versionné dans le dépôt** — sans date, sans délai, sans exception. Cette règle remplace la
+  publication datée d'US-49, dont la machinerie est supprimée : il n'y a plus de dossier
+  `_corriges/`, plus de date sur une ressource, plus de type `corrige`. Un fichier dont le nom
+  contient « corrige », « correction », « pistes » ou « solution » est refusé à l'import et par
+  `scripts/verifier_non_publiable.py`, qui examine les fichiers suivis par Git autant que le site
+  rendu : un corrigé commité mais non lié reste lisible dans l'historique public. Ces documents
+  vivent hors du dépôt, chez le PO, et ne passent pas non plus par `_import/`.
 - Langue : le site est bilingue depuis US-36. Les pages françaises sont à la racine, leurs équivalents
   anglais sous `en/` (adresse `/en/…`, avec un nom de dossier anglais quand le mot diffère :
   `/recherche/` ↔ `/en/research/`, `/enseignement/` ↔ `/en/teaching/`). Les pages sous `en/` sont
