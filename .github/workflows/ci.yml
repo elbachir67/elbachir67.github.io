@@ -22,14 +22,20 @@ jobs:
   # Ce nom de job est le check obligatoire de la protection de main.
   rendu-et-liens:
     runs-on: ubuntu-latest
-    # Le contrôle d'accessibilité examine chaque page et chaque slide dans les deux langues, les deux
-    # thèmes et deux largeurs : avec l'arrivée du cours de ML, cela fait 2102 combinaisons et une
-    # douzaine de minutes à lui seul. Les quinze minutes d'origine le coupaient en plein vol, et le
-    # job était rapporté comme un échec. Le seuil laisse la place à un cours de plus.
-    timeout-minutes: 40
+    # L'audit d'accessibilité ne porte plus que sur les pages touchées par la PR (US-63) : une PR
+    # qui livre une séance passe de vingt-quatre minutes à seize secondes. Le plafond monte
+    # pourtant, au lieu de descendre : une PR qui touche une feuille de style ou un filtre Lua
+    # audite encore tout le site, et c'est ce cas-là — devenu rare — qui borne le job. Quarante
+    # minutes ne lui suffisaient plus à cinq cours ; sur une PR ordinaire, la marge ne coûte rien.
+    # L'audit complet de `main` tourne une fois par semaine, dans accessibilite.yml.
+    timeout-minutes: 60
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v7
+        with:
+          # L'audit d'accessibilité compare la PR à sa base pour ne vérifier que les pages
+          # touchées (US-63) : il lui faut l'historique, et non le seul dernier commit.
+          fetch-depth: 0
 
       # Seuls les scripts de vérification ont besoin de Python, et ils n'utilisent que la bibliothèque
       # standard. Les dépendances de requirements.txt ne sont pas installées : les résultats d'exécution
@@ -148,8 +154,11 @@ jobs:
       - name: Vérifier qu'aucun reste de LaTeX n'a traversé
         run: python scripts/verifier_latex.py
 
-      - name: Vérifier l'accessibilité
-        run: node scripts/verifier_accessibilite.js _site
+      # Accessibilité (US-42, restreinte par US-63) : seules les pages que la PR touche sont
+      # auditées. Dès qu'un fichier peut changer le rendu du site entier — une feuille de style,
+      # un filtre Lua, un profil Quarto —, l'audit redevient complet de lui-même.
+      - name: Vérifier l'accessibilité des pages touchées
+        run: node scripts/verifier_accessibilite.js _site --pr origin/${{ github.base_ref }}
 
       # Cours (US-43) : une slide trop chargée ne se voit pas au rendu — revealjs la laisse défiler,
       # et l'enseignant la découvre en amphi.
