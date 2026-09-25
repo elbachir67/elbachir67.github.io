@@ -89,6 +89,11 @@ d'un tuteur IA encadré.
 | US-63 | EP3 | Audit d'accessibilité ciblé sur la PR, audit complet hebdomadaire sur `main` | M | 3 | livrée |
 | US-64 | EP3 | Cellules de tableau étendues (`\multicolumn`) et équations à étiquettes multiples | S | 3 | livrée |
 | US-65 | EP3 | Le site sert ce qu'il promet : page de cours, lien interne, ressource du manifeste | M | 2 | livrée |
+| US-66 | EP2 | Un catalogue sans doublon ni confusion (fusion des entrées, contrôle en CI) | M | 3 | 8 |
+| US-67 | EP3 | Les cours se lient entre eux (prérequis en liens, relation inverse calculée) | M | 5 | 8 |
+| US-68 | EP3 | Inventaire des sources disponibles dans `_import/` | M | 2 | 8 |
+| US-69 | EP3 | Architectures Logicielles Modernes, séances suivantes | M | 8 | 8 |
+| US-70 | EP3 | Un lot de cours à labs seuls (le lab tient lieu de séance) | M | 3 | 8 |
 
 ### Stories décrites par le PO
 
@@ -212,6 +217,7 @@ rédige un brouillon à partir de la source de la figure, le PO valide, corrige 
 | 4 | Chaîne de publication et blog | 23 |
 | 5 | Du contenu : un deuxième cours en ligne | 14 livrés sur 19 |
 | 6 | Les cours rédigés entrent dans la chaîne | 26 livrés sur 26 |
-| 7 | Achever le C, publier le ML, préparer les cours rédigés | 20 |
+| 7 | Achever le C, publier le ML, préparer les cours rédigés | 28 livrés sur 20 |
+| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 21 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
