@@ -57,6 +57,14 @@ jobs:
         with:
           version: ${{ env.QUARTO_VERSION }}
 
+      # Catalogue des cours (US-66) : une seule carte par cours. Ce contrôle précède le rendu parce
+      # qu'il lit les sources et non _site/ : un doublon échoue en quelques secondes, au lieu de
+      # trois minutes de rendu. enseignement/cours.lua refusait déjà qu'un cours publié figure dans
+      # cours.yml, mais en comparant les titres caractère pour caractère : une esperluette et un
+      # sous-titre ont suffi à lui faire manquer deux doublons.
+      - name: Vérifier le catalogue des cours
+        run: python scripts/verifier_catalogue.py
+
       # quarto render sort avec le code 0 malgré ses avertissements (DoD : aucun avertissement).
       # Ses messages sont colorés même hors terminal : on retire les codes ANSI avant de chercher WARN.
       # Site bilingue (US-36) : un rendu par langue, puis assemblage dans _site/ (ADR-0003).
