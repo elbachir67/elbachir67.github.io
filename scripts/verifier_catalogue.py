@@ -24,6 +24,14 @@ Ce contrôle compare donc des titres **normalisés** — sans accents, sans cass
 fois son sous-titre retiré. Le troisième cas ne se reconnaît pas à un titre : il se voit à la
 lecture, et c'est au PO de le trancher (US-66, dernier critère).
 
+**Et le graphe des cours (US-67).** Un cours déclare ses prérequis par le `slug` d'autres cours du
+site, dans `prerequis-cours`. Deux choses peuvent mal tourner, et aucune ne se voit à la lecture :
+
+* un **slug inexistant** — une faute de frappe, ou un cours renommé —, que la page afficherait en
+  code brut faute de savoir quoi en faire ;
+* un **cycle** — A avant B, B avant A —, qui ne veut rien dire d'un cursus et qui ferait tourner en
+  rond la relation inverse « Ce cours prépare à ».
+
 Bibliothèque standard uniquement, comme les autres contrôles du dépôt : le YAML est lu à
 l'expression régulière, faute de dépendance YAML.
 """
@@ -41,6 +49,13 @@ COURS = RACINE / "cours"
 
 MOTIF_TITRE_LISTE = re.compile(r'^\s*-\s+titre:\s*"([^"]+)"', re.M)
 MOTIF_TITRE_SEUL = re.compile(r'^titre:\s*"([^"]+)"', re.M)
+# Les entrées de enseignement/cours.yml sont séparées par « - titre: » : chaque bloc porte le slug
+# et les prérequis de son cours.
+MOTIF_ENTREE = re.compile(r'^\s*-\s+titre:\s*"[^"]+"(.*?)(?=^\s*-\s+titre:|\Z)', re.M | re.S)
+MOTIF_SLUG = re.compile(r'^\s*slug:\s*"([^"]+)"', re.M)
+# « prerequis-cours: ["a", "b"] » ou une liste à puces sur les lignes suivantes.
+MOTIF_PREREQUIS = re.compile(r'^\s*prerequis-cours:\s*(\[[^\]]*\]|(?:\n\s*-\s*"[^"]+")+)', re.M)
+MOTIF_SLUG_CITE = re.compile(r'"([^"]+)"')
 
 
 def normaliser(titre: str) -> str:
@@ -77,6 +92,67 @@ def entrees() -> list[tuple[str, str]]:
     return trouvees
 
 
+def graphe() -> tuple[dict[str, list[str]], dict[str, str]]:
+    """Les prérequis de chaque cours, par slug, et le titre qui va avec.
+
+    Un cours publié a pour slug le nom de son dossier ; un cours à venir porte le sien dans
+    `enseignement/cours.yml`, pour qu'un prérequis puisse le désigner avant qu'il ait une page.
+    """
+    arcs: dict[str, list[str]] = {}
+    titres: dict[str, str] = {}
+
+    for fichier in sorted(COURS.glob("*/cours.yml")):
+        slug = fichier.parent.name
+        contenu = fichier.read_text(encoding="utf-8")
+        noms = MOTIF_TITRE_SEUL.findall(contenu)
+        titres[slug] = noms[0] if noms else slug
+        trouve = MOTIF_PREREQUIS.search(contenu)
+        arcs[slug] = MOTIF_SLUG_CITE.findall(trouve.group(1)) if trouve else []
+
+    if CATALOGUE.exists():
+        texte = CATALOGUE.read_text(encoding="utf-8")
+        for titre, bloc in zip(MOTIF_TITRE_LISTE.findall(texte), MOTIF_ENTREE.findall(texte)):
+            slug_trouve = MOTIF_SLUG.search(bloc)
+            if not slug_trouve:
+                continue
+            slug = slug_trouve.group(1)
+            titres[slug] = titre
+            trouve = MOTIF_PREREQUIS.search(bloc)
+            arcs[slug] = MOTIF_SLUG_CITE.findall(trouve.group(1)) if trouve else []
+
+    return arcs, titres
+
+
+def cycles(arcs: dict[str, list[str]]) -> list[list[str]]:
+    """Les cycles du graphe des prérequis, chacun donné comme le chemin qui s'y referme.
+
+    Parcours en profondeur, avec la pile courante : un arc qui retombe dessus ferme un cycle, et le
+    chemin est celui qu'un lecteur doit suivre pour le voir — « A -> B -> A », et non « il y a un
+    cycle quelque part ».
+    """
+    trouves: list[list[str]] = []
+    etat: dict[str, int] = {}          # 0 en cours, 1 terminé
+    pile: list[str] = []
+
+    def descendre(slug: str) -> None:
+        etat[slug] = 0
+        pile.append(slug)
+        for suivant in arcs.get(slug, []):
+            if etat.get(suivant) == 0:
+                boucle = pile[pile.index(suivant):] + [suivant]
+                if boucle not in trouves:
+                    trouves.append(boucle)
+            elif suivant in arcs and etat.get(suivant) is None:
+                descendre(suivant)
+        pile.pop()
+        etat[slug] = 1
+
+    for slug in sorted(arcs):
+        if etat.get(slug) is None:
+            descendre(slug)
+    return trouves
+
+
 def verifier() -> list[str]:
     fautes: list[str] = []
     toutes = entrees()
@@ -109,6 +185,22 @@ def verifier() -> list[str]:
                 f"« {titre} » ({origine}) et « {autre_titre} » ({autre_origine}) nomment le même "
                 f"cours : le sous-titre est le seul écart.")
 
+    # Le graphe des cours (US-67) : un slug doit désigner un cours, et le graphe ne doit pas tourner.
+    arcs, titres = graphe()
+    for slug in sorted(arcs):
+        for cible in arcs[slug]:
+            if cible not in arcs:
+                connus = ", ".join(sorted(arcs)[:4])
+                fautes.append(
+                    f"« {titres.get(slug, slug)} » ({slug}) déclare le prérequis « {cible} », qui "
+                    f"n'est le slug d'aucun cours du site. Slugs connus, entre autres : {connus}…")
+            elif cible == slug:
+                fautes.append(f"« {titres.get(slug, slug)} » ({slug}) est son propre prérequis.")
+    for boucle in cycles(arcs):
+        chemin = " → ".join(boucle)
+        fautes.append(f"Cycle dans les prérequis : {chemin}. Un cours ne peut pas venir avant "
+                      f"lui-même, et « Ce cours prépare à » tournerait en rond.")
+
     return fautes
 
 
@@ -120,9 +212,13 @@ def main() -> int:
     if fautes:
         for faute in fautes:
             print(f"ERREUR : {faute}", file=sys.stderr)
-        print(f"\n{len(fautes)} doublon(s) dans le catalogue des cours.", file=sys.stderr)
+        print(f"\n{len(fautes)} problème(s) dans le catalogue des cours : doublon, slug de "
+              f"prérequis inconnu ou cycle.", file=sys.stderr)
         return 1
-    print(f"OK : {len(entrees())} cours au catalogue, aucun doublon.")
+    arcs, _ = graphe()
+    liens = sum(len(v) for v in arcs.values())
+    print(f"OK : {len(entrees())} cours au catalogue, aucun doublon, "
+          f"et {liens} prérequis entre cours qui désignent un cours connu, sans cycle.")
     return 0
 
 
