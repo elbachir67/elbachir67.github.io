@@ -214,6 +214,8 @@ local function contenu_seul(description)
   -- « Chapitre d'introduction du cours de Programmation C avancée : pourquoi le C… ».
   local apres_deux_points = texte:match("^Séance[^:]*:%s*(.+)$")
     or texte:match("^Chapitre[^:]*:%s*(.+)$")
+    -- Un cours à labs seuls nomme ses séances « Lab N de <cours> : … » (US-70).
+    or texte:match("^Lab[^:]*:%s*(.+)$")
   if apres_deux_points then
     return pandoc.read(apres_deux_points, "markdown").blocks[1].content
   end
