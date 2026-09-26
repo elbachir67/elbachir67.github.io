@@ -595,7 +595,42 @@ def figures(texte: str, conversion: Conversion, legende_flottante: str = "") -> 
 
 # Le crochet ouvrant ne compte que s'il n'est pas lui-même précédé d'une barre oblique : « \\[2pt] »
 # est un saut de ligne avec espacement, et non le début d'une formule.
-MOTIF_MATHS = re.compile(r"\$\$.+?\$\$|\$[^$]+?\$|(?<!\\)\\\[.+?(?<!\\)\\\]", re.S)
+# Un « $ » échappé — `\\$`, le signe d'invite du shell dans le cours de Python — n'ouvre pas une
+# formule : sans la sentinelle, il en ouvrait une qui courait sur tout le reste du document
+# (US-78).
+MOTIF_MATHS = re.compile(
+    r"(?<!\\)\$\$.+?(?<!\\)\$\$|(?<!\\)\$[^$]+?(?<!\\)\$|(?<!\\)\\\[.+?(?<!\\)\\\]", re.S)
+# Le corps d'un bloc de code, dont le `$` n'est **pas** un délimiteur de formule (US-78). « $ » est
+# un caractère ordinaire en JavaScript, en shell, en Python : `${user.name}` — la façon ordinaire
+# d'écrire un gabarit JavaScript — laisse un `$` non apparié que MOTIF_MATHS prenait pour une
+# formule ouverte. Elle courait alors jusqu'au `$` suivant, **par-dessus le `\end{lstlisting}`**, et
+# l'import s'arrêtait sur « environnement lstlisting non fermé ». Cinq des sept labs de Frontend 2
+# étaient dans ce cas, trois fichiers de Frontend 1 et trois de PRC.
+#
+# Seul le **corps** est masqué : `\begin{lstlisting}` et `\end{lstlisting}` restent visibles, parce
+# que la suite de la chaîne les lit pour produire le bloc de code.
+MOTIF_CORPS_DE_CODE = re.compile(
+    r"(\\begin\{(lstlisting|verbatim)\}(?:\[[^\]]*\])?)(.*?)(\\end\{\2\})", re.S)
+
+
+def masquer_le_code(texte: str) -> tuple[str, list[str]]:
+    """Remplace le corps des blocs de code par des marques, et rend les corps retirés."""
+    corps: list[str] = []
+
+    def mettre(trouve: re.Match[str]) -> str:
+        corps.append(trouve[3])
+        return f"{trouve[1]}\x03{len(corps) - 1}\x03{trouve[4]}"
+
+    return MOTIF_CORPS_DE_CODE.sub(mettre, texte), corps
+
+
+def rendre_le_code(texte: str, corps: list[str]) -> str:
+    """Remet les corps de blocs de code à la place de leurs marques."""
+    if not corps:
+        return texte
+    return re.sub(r"\x03(\d+)\x03", lambda t: corps[int(t[1])], texte)
+
+
 # Les environnements qui sont des mathématiques sans porter de dollars.
 MOTIF_ENVIRONNEMENTS_MATHS = re.compile(
     r"\\begin\{(align|equation|gather|multline|eqnarray)(\*?)\}.*?\\end\{\1\2\}", re.S)
@@ -1194,7 +1229,10 @@ def convertir(texte: str, conversion: Conversion) -> str:
     def rendre(fragment: str) -> str:
         return re.sub(r"\x02(\d+)\x02", lambda t: formules[int(t[1])], fragment)
 
-    reste = MOTIF_MATHS.sub(mettre_de_cote, reste)
+    # Le corps des blocs de code est mis à l'abri le temps que les formules soient repérées : un
+    # « $ » de JavaScript n'est pas une formule (US-78).
+    reste, corps_de_code = masquer_le_code(reste)
+    reste = rendre_le_code(MOTIF_MATHS.sub(mettre_de_cote, reste), corps_de_code)
     while True:
         trouve = re.search(r"\\begin\{([A-Za-z*]+)\}", reste)
         if not trouve:
@@ -1621,6 +1659,38 @@ def depuis_la_racine(chemin: Path) -> Path:
         return chemin
 
 
+def dollars_non_apparies(source: Path) -> list[tuple[int, str]]:
+    """Endroits du `.tex` où un « $ » reste seul, hors formule et hors bloc de code (US-78).
+
+    Un `$` isolé dans le texte courant ouvre une formule qui court jusqu'au suivant, parfois
+    par-dessus un `\\end{...}` : c'est ainsi que cinq labs de Frontend 2 arrêtaient l'import sur
+    « environnement non fermé », sans que rien ne dise pourquoi. Le rapport le dit maintenant.
+
+    Tout est effacé **sur place**, en gardant la longueur et les sauts de ligne — commentaires,
+    corps de blocs de code, puis formules bien formées. Le numéro annoncé est donc celui du
+    fichier, et l'extrait est la ligne telle qu'elle y est écrite.
+    """
+    brut = source.read_text(encoding="utf-8")
+    lignes = brut.splitlines()
+
+    def effacer(texte: str, debut: int, fin: int) -> str:
+        return texte[:debut] + re.sub(r"[^\n]", " ", texte[debut:fin]) + texte[fin:]
+
+    texte = brut
+    for ligne in re.finditer(r"(?m)^\s*%.*$", texte):
+        texte = effacer(texte, ligne.start(), ligne.end())
+    for bloc in list(MOTIF_CORPS_DE_CODE.finditer(texte)):
+        texte = effacer(texte, bloc.start(3), bloc.end(3))
+    for formule in list(MOTIF_MATHS.finditer(texte)):
+        texte = effacer(texte, formule.start(), formule.end())
+
+    signales = []
+    for trouve in re.finditer(r"(?<!\\)\$", texte):
+        numero = texte.count("\n", 0, trouve.start()) + 1
+        signales.append((numero, " ".join(lignes[numero - 1].split())[:90]))
+    return signales
+
+
 def ecrire_rapport(chemin: Path, source: Path, sortie: Path, conversion: Conversion,
                    figures: dict[str, dict[str, int]]) -> None:
     lignes = [
@@ -1637,6 +1707,13 @@ def ecrire_rapport(chemin: Path, source: Path, sortie: Path, conversion: Convers
         lignes += [f"- **{slide}** : `{quoi}`" for slide, quoi in conversion.non_convertis]
     else:
         lignes.append("Rien : tout le contenu a été converti.")
+    seuls = dollars_non_apparies(source)
+    if seuls:
+        lignes += ["", "## Dollars non appariés", "",
+                   "Ces lignes portent un « $ » sans partenaire, hors formule et hors bloc de code. "
+                   "Chacun ouvre une formule qui court jusqu'au « $ » suivant, parfois par-dessus la "
+                   "fin d'un environnement (US-78).", "",
+                   *(f"- ligne {numero} : `{extrait}`" for numero, extrait in seuls)]
     if conversion.flottants:
         lignes += ["", "## Flottants", "",
                    *(f"- `{nom}` : {nombre} converti(s) en {'figure' if nom == 'figure' else 'tableau'}"
