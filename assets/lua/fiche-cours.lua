@@ -109,6 +109,32 @@ local function entete_chapitre(chemin)
   return pandoc.read("---\n" .. yaml .. "\n---\n", "markdown").meta
 end
 
+-- La colonne « Contenu » d'une séance montre sa description. Celle-ci commence par nommer le cours
+-- et le numéro de la séance — « Séance 3 d'Introduction au Machine Learning : … », « Programmation
+-- Python — Séance 3 — … » —, ce que la colonne « Séance » dit déjà, juste à côté. Cette part est
+-- retirée **à l'affichage seulement** : la description de la page, elle, garde son contexte, parce
+-- que c'est elle que lisent un moteur de recherche et un aperçu de lien (US-13).
+local function contenu_seul(description)
+  local texte = pandoc.utils.stringify(description)
+  -- « Programmation Python — Séance 3 — Contrôle du flux » (tiret cadratin, sans deux-points).
+  -- Les motifs Lua travaillent sur des octets : « [ée] » serait une classe des octets de « é »,
+  -- qui en occupe deux en UTF-8, et ne reconnaîtrait donc pas « Séance ». Le mot est écrit en
+  -- toutes lettres, ce qui est aussi bien plus clair.
+  local apres_tiret = texte:match("^.*—%s*Séance%s+%d+%s*—%s*(.+)$")
+    or texte:match("^.*—%s*Chapitre%s+%d+%s*—%s*(.+)$")
+  if apres_tiret then
+    return pandoc.read(apres_tiret, "markdown").blocks[1].content
+  end
+  -- « Séance 1 du cours Architectures Logicielles Modernes : dette architecturale… » et
+  -- « Chapitre d'introduction du cours de Programmation C avancée : pourquoi le C… ».
+  local apres_deux_points = texte:match("^Séance[^:]*:%s*(.+)$")
+    or texte:match("^Chapitre[^:]*:%s*(.+)$")
+  if apres_deux_points then
+    return pandoc.read(apres_deux_points, "markdown").blocks[1].content
+  end
+  return description
+end
+
 -- Table des séances : chacune mène à ses slides et à leur PDF (US-17). Le PDF est produit au rendu par
 -- scripts/generer_pdf.js, à côté de la page : le lien est donc le même chemin, en .pdf.
 local function seances(doc)
@@ -129,6 +155,7 @@ local function seances(doc)
       local pdf = "chapitres/" .. nom:gsub("%.qmd$", ".pdf")
       local titre = meta and meta.title or pandoc.Inlines(nom)
       local description = meta and meta.description or pandoc.Inlines("")
+      description = contenu_seul(description)
       -- Une séance en slides est imprimée en PDF au rendu ; une page rédigée, non : son PDF est
       -- celui que LaTeX a compilé, attaché en ressource (US-40).
       local page_redigee = meta and meta.cible and pandoc.utils.stringify(meta.cible) == "page"

@@ -28,7 +28,7 @@
 \hypersetup{colorlinks=true,linkcolor=blue!60!black,
             urlcolor=blue!60!black,citecolor=blue!60!black}
 
-% ── Boîtes colorées (identiques à S05) ───────────────────────────
+% ── Boîtes colorées (identiques à S04) ───────────────────────────
 \newtcolorbox{definitionbox}[1][]{colback=blue!5,colframe=blue!50,
     fonttitle=\bfseries,title=#1,breakable}
 \newtcolorbox{exemplebox}[1][]{colback=green!5,colframe=green!50!black,
@@ -48,12 +48,12 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small S06 -- L'IA qui Apprend}
+\fancyhead[L]{\small S05 -- L'IA qui Apprend}
 \fancyhead[R]{\small Introduction à l'IA -- M1}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 
-\title{\textbf{Séance 6 : L'IA qui Apprend}\\
+\title{\textbf{Séance 5 : L'IA qui Apprend}\\
 \large De la Décision Rationnelle aux Processus de Décision Markoviens\\
 et au Machine Learning\\[0.5cm]
 \normalsize Introduction à l'Intelligence Artificielle}
@@ -69,7 +69,7 @@ Université Cheikh Anta Diop de Dakar}
 \begin{prereqbox}[Navigation conceptuelle]
 \textbf{Prérequis :}
 \begin{itemize}[nosep]
-    \item \textbf{S5 (intégrale) :} probabilités, théorème de Bayes, mise à jour séquentielle des croyances, réseaux bayésiens, d-séparation. Cette séance est la \textbf{suite directe de S5} --- on y pose la question que S5 ne résout pas : comment \textit{agir} dans un monde incertain ?
+    \item \textbf{S4 (intégrale) :} probabilités, théorème de Bayes, mise à jour séquentielle des croyances, réseaux bayésiens, d-séparation. Cette séance est la \textbf{suite directe de S4} --- on y pose la question que S4 ne résout pas : comment \textit{agir} dans un monde incertain ?
     \item \textbf{S3 :} algorithmes de recherche (BFS, A*), graphes d'états, coût de chemin. Les MDPs en sont la généralisation probabiliste directe.
     \item \textbf{S1 :} boucle perception--action, mesure de performance, propriétés d'un environnement (stochastique, partiellement observable).
 \end{itemize}
@@ -84,22 +84,22 @@ Université Cheikh Anta Diop de Dakar}
 \newpage
 
 %=============================================================================
-\section{Introduction : ce que la Séance 5 a laissé ouvert}
+\section{Introduction : ce que la Séance 4 a laissé ouvert}
 %=============================================================================
 
-\subsection{Le bilan de S5 : raisonner, oui --- mais agir ?}
+\subsection{Le bilan de S4 : raisonner, oui --- mais agir ?}
 
-En Séance 5, nous avons résolu l'un des problèmes fondamentaux de l'IA : \textit{comment raisonner sous incertitude}. Bayes et les réseaux bayésiens permettent à un agent de mettre à jour ses croyances à mesure qu'il observe le monde. À la fin de S5, Dr. Ndoye savait calculer :
+En Séance 4, nous avons résolu l'un des problèmes fondamentaux de l'IA : \textit{comment raisonner sous incertitude}. Bayes et les réseaux bayésiens permettent à un agent de mettre à jour ses croyances à mesure qu'il observe le monde. À la fin de S4, Dr. Ndoye savait calculer :
 $$P(\text{paludisme} \mid \text{frissons, fièvre très haute, TDR positif}) \approx 0{,}99$$
 
 C'est une réussite considérable. Mais observons ce que Dr. Ndoye fait \textit{ensuite} avec ce chiffre. Il ne le contemple pas --- il \textbf{décide} : hospitaliser ou rentrer chez soi ? Prescrire l'artémisinine maintenant ou attendre un second TDR ? Ces décisions ont des conséquences qui s'étalent dans le temps.
 
-De même, Ousmane dans le Monde de Bouki (S2 et S5) ne s'arrête pas à ``je crois à 90\% que Bouki est en $(2,2)$''. Il doit \textit{choisir un chemin} vers l'or, en tenant compte du risque de rencontrer Bouki \textit{et} de la récompense à atteindre \textit{et} du coût de chaque pas.
+De même, Ousmane dans le Monde de Bouki (S2 et S4) ne s'arrête pas à ``je crois à 90\% que Bouki est en $(2,2)$''. Il doit \textit{choisir un chemin} vers l'or, en tenant compte du risque de rencontrer Bouki \textit{et} de la récompense à atteindre \textit{et} du coût de chaque pas.
 
-\textbf{La limite précise de S5 :} les outils de S5 répondent à \textit{``Quelle est la meilleure croyance ?''} Ils ne répondent pas à \textit{``Quelle est la meilleure action ?''} quand les conséquences s'enchaînent dans le temps et que le monde est stochastique.
+\textbf{La limite précise de S4 :} les outils de S4 répondent à \textit{``Quelle est la meilleure croyance ?''} Ils ne répondent pas à \textit{``Quelle est la meilleure action ?''} quand les conséquences s'enchaînent dans le temps et que le monde est stochastique.
 
-\begin{prereqbox}[Ce qu'on sait faire après S5 --- et ce qui manque]
-\textbf{Après S5, l'agent sait :}
+\begin{prereqbox}[Ce qu'on sait faire après S4 --- et ce qui manque]
+\textbf{Après S4, l'agent sait :}
 \begin{itemize}[nosep]
     \item Exprimer son incertitude par une distribution de probabilité.
     \item Mettre à jour ses croyances avec Bayes après chaque observation.
@@ -110,7 +110,7 @@ De même, Ousmane dans le Monde de Bouki (S2 et S5) ne s'arrête pas à ``je cro
 \textbf{Ce qui manque encore :} comment Dr. Ndoye doit-il combiner $P(\text{paludisme} \mid \ldots)= 0{,}99$ avec les conséquences médicales de chaque traitement pour \textit{prendre la meilleure décision} ? Et quand les décisions s'enchaînent (hospitaliser → surveiller → ajuster le traitement), comment planifier une stratégie optimale sur plusieurs étapes ?
 
 \medskip
-\textbf{Le plan de cette séance :} d'abord la décision \textbf{ponctuelle} (une seule action à choisir) grâce au principe MEU --- c'est le pont direct depuis S5. Ensuite la décision \textbf{séquentielle} (une stratégie sur plusieurs étapes) grâce aux MDPs. Enfin, l'apprentissage \textbf{sans modèle} quand on ne connaît pas les probabilités de transition --- c'est le Q-learning.
+\textbf{Le plan de cette séance :} d'abord la décision \textbf{ponctuelle} (une seule action à choisir) grâce au principe MEU --- c'est le pont direct depuis S4. Ensuite la décision \textbf{séquentielle} (une stratégie sur plusieurs étapes) grâce aux MDPs. Enfin, l'apprentissage \textbf{sans modèle} quand on ne connaît pas les probabilités de transition --- c'est le Q-learning.
 \end{prereqbox}
 
 \subsection{L'exemple fil rouge : Amadou, taxi à Dakar}
@@ -143,14 +143,14 @@ Russell et Norvig identifient trois piliers pour construire un agent rationnel q
 \toprule
 \textbf{Pilier} & \textbf{Outil} & \textbf{Question résolue} \\
 \midrule
-1 & Théorie des probabilités & \textit{Qu'est-ce qui est probable ?} (S5) \\
+1 & Théorie des probabilités & \textit{Qu'est-ce qui est probable ?} (S4) \\
 2 & Théorie de l'utilité       & \textit{Qu'est-ce qui est désirable ?} (nouveau) \\
 3 & Théorie de la décision (MEU) & \textit{Quelle action prendre ?} (cette section) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-S5 a construit le pilier~1. Mais même avec $P(\text{palu}) = 0{,}99$, la décision de traiter reste impossible sans le pilier~2 : savoir si traiter est \textit{souhaitable} dans ce contexte précis. Ce qui est probable n'est pas nécessairement ce qui mène à la meilleure conséquence.
+S4 a construit le pilier~1. Mais même avec $P(\text{palu}) = 0{,}99$, la décision de traiter reste impossible sans le pilier~2 : savoir si traiter est \textit{souhaitable} dans ce contexte précis. Ce qui est probable n'est pas nécessairement ce qui mène à la meilleure conséquence.
 
 \begin{exemplebox}[Pourquoi la probabilité seule ne décide pas]
 Dr. Ndoye a calculé $P(\text{palu} \mid \text{obs}) = 0{,}83$. Deux scénarios :
@@ -203,7 +203,7 @@ Décortiquons chaque fragment :
 $a^*$ & L'action optimale que l'on cherche. \\
 $\arg\max_a$ & ``Donne-moi l'action $a$ qui maximise ce qui suit''. \\
 $\sum_s$ & On somme sur \textit{tous} les résultats possibles. Aucun scénario n'est ignoré. \\
-$P(\mathrm{Résultat}(a)=s \mid \mathbf{e})$ & Probabilité que $a$ mène au résultat $s$, étant donné ce que l'agent a observé. C'est ici qu'intervient le calcul bayésien de S5. \\
+$P(\mathrm{Résultat}(a)=s \mid \mathbf{e})$ & Probabilité que $a$ mène au résultat $s$, étant donné ce que l'agent a observé. C'est ici qu'intervient le calcul bayésien de S4. \\
 $U(s)$ & Valeur subjective du résultat $s$. Peut être positive ou très négative. \\
 $\sum_s (\ldots) \cdot U(s)$ & Espérance mathématique de l'utilité : moyenne pondérée des conséquences par leurs probabilités. \\
 \bottomrule
@@ -215,7 +215,7 @@ $\sum_s (\ldots) \cdot U(s)$ & Espérance mathématique de l'utilité : moyenne 
 \subsection{Application complète : Dr. Ndoye décide pour Fatou}
 
 \begin{exemplebox}[Situation --- le diagnostic après Bayes]
-Après application du théorème de Bayes avec les frissons et la fièvre élevée (calcul effectué en S5) :
+Après application du théorème de Bayes avec les frissons et la fièvre élevée (calcul effectué en S4) :
 $$P(\text{palu} \mid \text{obs}) = 0{,}83 \qquad P(\text{non-palu} \mid \text{obs}) = 0{,}17$$
 Dr. Ndoye doit choisir entre deux actions : \textbf{traiter} ($a_1$) ou \textbf{ne pas traiter} ($a_2$).
 \end{exemplebox}
@@ -287,11 +287,11 @@ Le MEU résout parfaitement la décision \textbf{ponctuelle} : une seule action 
 
 C'est une \textbf{séquence de décisions} où chaque action change l'état du monde, ce qui change les probabilités futures, ce qui change les décisions futures. Le MEU ne gère qu'un seul pas. Il faut un outil pour la séquence : les \textbf{Processus de Décision Markoviens}.
 
-\begin{pontbox}[Fil conducteur S5 $\to$ S6]
+\begin{pontbox}[Fil conducteur S4 $\to$ S5]
 \begin{center}
 \renewcommand{\arraystretch}{1.6}
 \begin{tabular}{lcl}
-\textbf{Séance 5} & & \textbf{Séance 6} \\
+\textbf{Séance 4} & & \textbf{Séance 5} \\
 \hline
 Décision ponctuelle & $\longrightarrow$ & Séquence de décisions \\
 $EU(a) = \sum_s P(s \mid \mathbf{e}) \cdot U(s)$ & $\longrightarrow$ & $V^*(s) = \max_a \!\left[R(s,a) + \gamma \sum_{s'} P(s' \mid s,a) V^*(s')\right]$ \\
@@ -344,8 +344,8 @@ Amadou est à Médina. Que la propriété de Markov soit vraie signifie ceci : l
 \textbf{Leçon de conception :} un bon état MDP doit encoder \textit{toute} l'information pertinente pour le futur. Un état trop pauvre viole la propriété de Markov et rend le MDP incorrect. Un état trop riche rend le problème inutilement complexe. Trouver le bon état est un art en soi.
 \end{exemplebox}
 
-\begin{attentionbox}[Lien direct avec les réseaux bayésiens de S5]
-La propriété de Markov est \textit{exactement} l'indépendance conditionnelle de S5, mais appliquée dans le temps. En S5, on avait $\text{Maladie} \perp \text{Antécédents} \mid \text{Symptômes}$ : connaître les symptômes rendait les antécédents non informatifs. Ici : $S_{t+1} \perp (S_{t-1}, S_{t-2}, \ldots) \mid (S_t, A_t)$. Un MDP \textit{est} un réseau bayésien dynamique qui se déroule dans le temps :
+\begin{attentionbox}[Lien direct avec les réseaux bayésiens de S4]
+La propriété de Markov est \textit{exactement} l'indépendance conditionnelle de S4, mais appliquée dans le temps. En S4, on avait $\text{Maladie} \perp \text{Antécédents} \mid \text{Symptômes}$ : connaître les symptômes rendait les antécédents non informatifs. Ici : $S_{t+1} \perp (S_{t-1}, S_{t-2}, \ldots) \mid (S_t, A_t)$. Un MDP \textit{est} un réseau bayésien dynamique qui se déroule dans le temps :
 $$S_0 \to A_0 \to S_1 \to A_1 \to S_2 \to \cdots$$
 La table $P(S_{t+1} \mid S_t, A_t)$ joue exactement le rôle d'une CPT de réseau bayésien.
 \end{attentionbox}
@@ -372,7 +372,7 @@ L'objectif d'un MDP : trouver la politique \textbf{optimale} $\pi^*$, celle qui 
 \begin{exemplebox}[Différence chemin / politique pour Amadou]
 \textbf{Chemin (A*, S3) :} ``Plateau $\to$ Médina $\to$ Fann $\to$ Mermoz $\to$ Keur Massar $\to$ Bargny $\to$ Sandaga''. Ce plan est fragile : si le trafic dévie Amadou vers Guédiawaye, le chemin devient inapplicable.
 
-\textbf{Politique (MDP, S6) :} ``Depuis Plateau : aller à droite. Depuis Médina : aller à droite. Depuis Fann : aller en bas. Depuis Guédiawaye : aller à droite. Depuis toute zone inondée : aller en haut\ldots'' Cette règle s'adapte à tout déviement. Si le trafic envoie Amadou à Guédiawaye, la politique lui dit quoi faire depuis Guédiawaye.
+\textbf{Politique (MDP, S5) :} ``Depuis Plateau : aller à droite. Depuis Médina : aller à droite. Depuis Fann : aller en bas. Depuis Guédiawaye : aller à droite. Depuis toute zone inondée : aller en haut\ldots'' Cette règle s'adapte à tout déviement. Si le trafic envoie Amadou à Guédiawaye, la politique lui dit quoi faire depuis Guédiawaye.
 
 La figure~\ref{fig:gridworld}(c) montre exactement cette politique optimale : une flèche par case, indépendamment du chemin suivi pour y arriver.
 \end{exemplebox}
@@ -739,10 +739,10 @@ $$\boxed{Q(s, a) \;\leftarrow\; Q(s, a) + \alpha \underbrace{\bigl[ \underbrace{
 \end{itemize}
 \end{theorembox}
 
-\begin{exemplebox}[Lien profond avec la mise à jour bayésienne de S5]
+\begin{exemplebox}[Lien profond avec la mise à jour bayésienne de S4]
 Réécrivons la mise à jour Q-learning :
 $$Q_{\text{nouveau}} = Q_{\text{ancien}} + \alpha \cdot (\text{Cible} - Q_{\text{ancien}}) = (1-\alpha) \cdot Q_{\text{ancien}} + \alpha \cdot \text{Cible}$$
-C'est une \textbf{moyenne exponentielle pondérée} entre l'ancienne croyance et la nouvelle observation. Comparez avec Bayes (S5) :
+C'est une \textbf{moyenne exponentielle pondérée} entre l'ancienne croyance et la nouvelle observation. Comparez avec Bayes (S4) :
 $$P_{\text{nouveau}}(H) \propto P(\text{obs} \mid H) \cdot P_{\text{ancien}}(H)$$
 Dans les deux cas, on combine ce qu'on savait avant avec ce que l'observation révèle. La différence : Bayes utilise la vraisemblance comme coefficient de pondération ; Q-learning utilise $\alpha$. Les deux sont des mécanismes de mise à jour incrémentale des croyances.
 \end{exemplebox}
@@ -925,9 +925,9 @@ Conséquence directe : quand on remplace le tableau par un réseau de neurones $
 
 Nous avons accompagné Ousmane depuis S2. Il est temps de montrer comment les trois approches du cours le traitent différemment --- et pourquoi le MDP est la solution la plus complète.
 
-\subsection{Ce que Bayes (S5) avait donné}
+\subsection{Ce que Bayes (S4) avait donné}
 
-À la fin de S5, Ousmane avait calculé (après avoir entendu des grognements et observé l'absence de brise) :
+À la fin de S4, Ousmane avait calculé (après avoir entendu des grognements et observé l'absence de brise) :
 $$P(\text{Bouki en }(2,2)) \approx 0{,}90 \qquad P(\text{Bouki en }(3,1)) \approx 0{,}06 \qquad P(\text{Bouki en }(1,3)) \approx 0{,}04$$
 
 C'est excellent pour raisonner. Mais Ousmane doit maintenant \textit{agir}. Quelle route emprunter vers l'or en $(4,4)$ ?
@@ -962,7 +962,7 @@ Si demain une nouvelle observation montrait $P(\text{Bouki en }(2,2)) = 0{,}30$,
 \renewcommand{\arraystretch}{1.4}
 \begin{tabular}{lp{3.5cm}p{3.5cm}p{3.5cm}}
 \toprule
-& \textbf{S2 -- Logique} & \textbf{S5 -- Bayes + MEU} & \textbf{S6 -- MDP} \\
+& \textbf{S2 -- Logique} & \textbf{S4 -- Bayes + MEU} & \textbf{S5 -- MDP} \\
 \midrule
 \textbf{Croyance} & Bouki est en $(2,2)$ ou $(3,1)$ & $P(\text{Bouki}=(2,2))=0{,}90$ & Distribution intégrée dans les transitions \\
 \textbf{Décision} & Explorer pour trancher & MEU : éviter $(2,2)$ maintenant & Politique multi-étapes optimale \\
@@ -983,8 +983,8 @@ Si demain une nouvelle observation montrait $P(\text{Bouki en }(2,2)) = 0{,}30$,
     \item \textbf{S1 --- L'IA, c'est quoi ?} Un agent rationnel perçoit et agit pour maximiser sa performance. Limite : comment raisonner sur ce qu'il perçoit ?
     \item \textbf{S2 --- L'IA qui raisonne.} Logique propositionnelle, modus ponens, résolution. Limite : le monde est trop ambigu pour le binaire vrai/faux.
     \item \textbf{S3 --- L'IA qui cherche.} BFS, A*, heuristiques. Limite : le monde est trop incertain pour planifier un chemin fixe.
-    \item \textbf{S5 --- L'IA qui doute.} Probabilités, Bayes, réseaux bayésiens. Limite : raisonner bien, oui --- mais comment décider dans le temps ?
-    \item \textbf{S6 --- L'IA qui apprend.} MEU (décision ponctuelle), MDPs (décision séquentielle), Q-learning (sans modèle), descente de gradient (pont ML).
+    \item \textbf{S4 --- L'IA qui doute.} Probabilités, Bayes, réseaux bayésiens. Limite : raisonner bien, oui --- mais comment décider dans le temps ?
+    \item \textbf{S5 --- L'IA qui apprend.} MEU (décision ponctuelle), MDPs (décision séquentielle), Q-learning (sans modèle), descente de gradient (pont ML).
 \end{itemize}
 \end{retenirbox}
 
@@ -1009,7 +1009,7 @@ Le dénominateur commun de tout le Machine Learning tient en une formule :
 \textbf{Approche} & \textbf{Paramètres $\theta$} & \textbf{Fonction de perte $J(\theta)$} \\
 \midrule
 Régression linéaire & Coefficients $w, b$ & Erreur quadratique $\sum_i (y_i - w^\top x_i - b)^2$ \\
-Classification logistique & Poids $w, b$ & Log-vraisemblance négative (lien direct avec S5) \\
+Classification logistique & Poids $w, b$ & Log-vraisemblance négative (lien direct avec S4) \\
 Réseau de neurones & Poids de toutes les couches & Entropie croisée ou MSE \\
 Q-learning (DQN) & Poids du réseau Q & Erreur TD au carré $\sum \delta_t^2$ \\
 \bottomrule
@@ -1019,9 +1019,9 @@ Q-learning (DQN) & Poids du réseau Q & Erreur TD au carré $\sum \delta_t^2$ \\
 Dans tous les cas, l'outil d'optimisation est la descente de gradient (ou SGD, Adam, RMSProp). \textbf{Vous connaissez déjà cet outil.}
 
 \begin{itemize}
-    \item \textbf{Apprentissage supervisé :} l'agent apprend $f : \mathcal{X} \to \mathcal{Y}$ depuis des paires $(x_i, y_i)$. Lien direct avec S5 : la log-vraisemblance $\log P(y \mid x, \theta)$ (que vous connaissez de Bayes) est exactement la fonction de perte des classifieurs probabilistes.
+    \item \textbf{Apprentissage supervisé :} l'agent apprend $f : \mathcal{X} \to \mathcal{Y}$ depuis des paires $(x_i, y_i)$. Lien direct avec S4 : la log-vraisemblance $\log P(y \mid x, \theta)$ (que vous connaissez de Bayes) est exactement la fonction de perte des classifieurs probabilistes.
 
-    \item \textbf{Apprentissage non supervisé :} sans étiquettes, l'agent découvre une structure cachée. K-Means partition, PCA compresse. Lien avec S5 : on cherche à estimer $P(X_1, \ldots, X_n)$ --- la distribution jointe, notion centrale des réseaux bayésiens.
+    \item \textbf{Apprentissage non supervisé :} sans étiquettes, l'agent découvre une structure cachée. K-Means partition, PCA compresse. Lien avec S4 : on cherche à estimer $P(X_1, \ldots, X_n)$ --- la distribution jointe, notion centrale des réseaux bayésiens.
 
     \item \textbf{Deep Learning :} les $f_\theta$ sont des réseaux de neurones profonds. Ce n'est pas un paradigme différent --- c'est une famille de fonctions très expressives, entraînées par descente de gradient. Les LLMs (GPT, Claude\ldots) en sont la forme la plus avancée.
 
@@ -1034,7 +1034,7 @@ Dans tous les cas, l'outil d'optimisation est la descente de gradient (ou SGD, A
 
 \begin{retenirbox}[Les six idées fondamentales de la séance]
 \begin{enumerate}
-    \item \textbf{Le MEU est le pont direct entre Bayes (S5) et la décision.} L'agent choisit l'action qui maximise $\sum_s P(s \mid \mathbf{e}) \cdot U(s)$ : les probabilités bayésiennes pèsent chaque conséquence par son utilité. La décision ponctuelle rationnelle est toujours un MEU.
+    \item \textbf{Le MEU est le pont direct entre Bayes (S4) et la décision.} L'agent choisit l'action qui maximise $\sum_s P(s \mid \mathbf{e}) \cdot U(s)$ : les probabilités bayésiennes pèsent chaque conséquence par son utilité. La décision ponctuelle rationnelle est toujours un MEU.
 
     \item \textbf{Un MDP formalise la décision séquentielle.} Cinq ingrédients : états $\mathcal{S}$, actions $\mathcal{A}$, transitions $P$, récompenses $R$, discount $\gamma$. Il généralise A* au monde stochastique et le MEU au monde multi-étapes.
 
@@ -1042,16 +1042,16 @@ Dans tous les cas, l'outil d'optimisation est la descente de gradient (ou SGD, A
 
     \item \textbf{Value Iteration résout Bellman par propagation itérative.} Les valeurs rayonnent depuis les terminaux comme une onde. L'opérateur de Bellman est une contraction ($\times\gamma$ par itération), garantissant la convergence vers $V^*$.
 
-    \item \textbf{Q-learning apprend sans modèle par essai-erreur.} L'erreur TD $\delta_t$ guide la mise à jour de $Q(s,a)$, comme Bayes guidait la mise à jour de $P(H \mid E)$ en S5. C'est de la descente de gradient sur un tableau.
+    \item \textbf{Q-learning apprend sans modèle par essai-erreur.} L'erreur TD $\delta_t$ guide la mise à jour de $Q(s,a)$, comme Bayes guidait la mise à jour de $P(H \mid E)$ en S4. C'est de la descente de gradient sur un tableau.
 
     \item \textbf{La descente de gradient est le moteur universel du ML.} $\theta \leftarrow \theta - \eta \nabla J(\theta)$ s'applique à tout --- des simples coefficients de régression aux milliards de poids d'un LLM.
 \end{enumerate}
 \end{retenirbox}
 
 \begin{prereqbox}[Vers le Semestre 2 : ce qui change]
-\textbf{Ce qu'on sait maintenant :} modéliser un agent (S1), raisonner formellement (S2), chercher dans un graphe d'états (S3), raisonner sous incertitude avec Bayes (S5), décider de façon optimale --- ponctuelle avec le MEU, séquentielle avec les MDPs --- et apprendre depuis l'expérience avec Q-learning (S6).
+\textbf{Ce qu'on sait maintenant :} modéliser un agent (S1), raisonner formellement (S2), chercher dans un graphe d'états (S3), raisonner sous incertitude avec Bayes (S4), décider de façon optimale --- ponctuelle avec le MEU, séquentielle avec les MDPs --- et apprendre depuis l'expérience avec Q-learning (S5).
 
-\textbf{La limite à dépasser :} nos MDPs supposent un espace d'états fini et discret. Nos probabilités portent sur des variables discrètes. Le monde réel est continu, de grande dimension, et les modèles ($P$, $Q$, les CPT de S5) doivent être \textit{appris depuis les données} --- pas posés à la main.
+\textbf{La limite à dépasser :} nos MDPs supposent un espace d'états fini et discret. Nos probabilités portent sur des variables discrètes. Le monde réel est continu, de grande dimension, et les modèles ($P$, $Q$, les CPT de S4) doivent être \textit{appris depuis les données} --- pas posés à la main.
 
 \textbf{En Semestre 2 :} comment apprendre $f : \mathcal{X} \to \mathcal{Y}$ depuis des données (régression, classification), comment représenter des fonctions complexes (réseaux de neurones, backpropagation, convolutions, attention), comment passer de Q-learning à DQN. Le moteur : la descente de gradient --- que vous maîtrisez déjà.
 \end{prereqbox}
@@ -1096,6 +1096,6 @@ La différence : dans le MEU, $U(s)$ est une utilité terminale fixée par l'age
 Un MDP est un réseau bayésien dont les nœuds se déroulent dans le temps :
 $$S_0 \to A_0 \to S_1 \to A_1 \to S_2 \to \cdots$$
 
-La propriété de Markov $S_{t+1} \perp (S_{t-1},\ldots) \mid (S_t, A_t)$ est l'indépendance conditionnelle de S5. La table $P(S_{t+1} \mid S_t, A_t)$ est une CPT. Cette connexion est exploitée dans les \textbf{Modèles de Markov Cachés} (HMM : quand $S_t$ n'est pas observable directement) et les \textbf{POMDPs} (Partially Observable MDPs : la généralisation de S5 et S6 en un seul cadre).
+La propriété de Markov $S_{t+1} \perp (S_{t-1},\ldots) \mid (S_t, A_t)$ est l'indépendance conditionnelle de S4. La table $P(S_{t+1} \mid S_t, A_t)$ est une CPT. Cette connexion est exploitée dans les \textbf{Modèles de Markov Cachés} (HMM : quand $S_t$ n'est pas observable directement) et les \textbf{POMDPs} (Partially Observable MDPs : la généralisation de S4 et S5 en un seul cadre).
 
 \end{document}
