@@ -1,6 +1,6 @@
 # Rapport de conversion — S05_IA_qui_Doute.tex
 
-Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/introduction-ia/chapitres/05-lia-qui-doute.qmd`.
+Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/introduction-ia/chapitres/04-lia-qui-doute.qmd`.
 
 ## À traiter à la main
 

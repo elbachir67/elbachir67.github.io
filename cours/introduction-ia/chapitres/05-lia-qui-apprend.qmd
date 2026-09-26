@@ -3,7 +3,7 @@ title: "L'IA qui apprend"
 cible: "page"
 body-classes: cours-page
 numero: "6"
-description: "Séance 6 d'Introduction à l'IA : utilité espérée maximale, processus de décision markoviens, équation de Bellman, value iteration, Q-learning et descente de gradient."
+description: "Séance 5 d'Introduction à l'IA : utilité espérée maximale, processus de décision markoviens, équation de Bellman, value iteration, Q-learning et descente de gradient."
 author: "Dr. El Hadji Bassirou TOURÉ, Département de Mathématiques et Informatique, Faculté des Sciences et Techniques, Université Cheikh Anta Diop de Dakar"
 toc: true
 toc-location: left
@@ -11,7 +11,7 @@ toc-location: left
 ::: {.callout-note .encadre-prereqbox title="Navigation conceptuelle"}
 **Prérequis :**
 
-- **S5 (intégrale) :** probabilités, théorème de Bayes, mise à jour séquentielle des croyances, réseaux bayésiens, d-séparation. Cette séance est la **suite directe de S5** --- on y pose la question que S5 ne résout pas : comment *agir* dans un monde incertain ?
+- **S4 (intégrale) :** probabilités, théorème de Bayes, mise à jour séquentielle des croyances, réseaux bayésiens, d-séparation. Cette séance est la **suite directe de S4** --- on y pose la question que S4 ne résout pas : comment *agir* dans un monde incertain ?
 - **S3 :** algorithmes de recherche (BFS, A*), graphes d'états, coût de chemin. Les MDPs en sont la généralisation probabiliste directe.
 - **S1 :** boucle perception--action, mesure de performance, propriétés d'un environnement (stochastique, partiellement observable).
 
@@ -20,21 +20,21 @@ toc-location: left
 - **Machine Learning S2 :** régression, classification, réseaux de neurones, RL avancé. Tout le semestre 2 repose sur les fondations posées ici.
 :::
 
-## Introduction : ce que la Séance 5 a laissé ouvert
+## Introduction : ce que la Séance 4 a laissé ouvert
 
-### Le bilan de S5 : raisonner, oui --- mais agir ?
+### Le bilan de S4 : raisonner, oui --- mais agir ?
 
-En Séance 5, nous avons résolu l'un des problèmes fondamentaux de l'IA : *comment raisonner sous incertitude*. Bayes et les réseaux bayésiens permettent à un agent de mettre à jour ses croyances à mesure qu'il observe le monde. À la fin de S5, Dr. Ndoye savait calculer :
+En Séance 4, nous avons résolu l'un des problèmes fondamentaux de l'IA : *comment raisonner sous incertitude*. Bayes et les réseaux bayésiens permettent à un agent de mettre à jour ses croyances à mesure qu'il observe le monde. À la fin de S4, Dr. Ndoye savait calculer :
 $$P(\text{paludisme} \mid \text{frissons, fièvre très haute, TDR positif}) \approx 0{,}99$$
 
 C'est une réussite considérable. Mais observons ce que Dr. Ndoye fait *ensuite* avec ce chiffre. Il ne le contemple pas --- il **décide** : hospitaliser ou rentrer chez soi ? Prescrire l'artémisinine maintenant ou attendre un second TDR ? Ces décisions ont des conséquences qui s'étalent dans le temps.
 
-De même, Ousmane dans le Monde de Bouki (S2 et S5) ne s'arrête pas à « je crois à 90% que Bouki est en $(2,2)$ ». Il doit *choisir un chemin* vers l'or, en tenant compte du risque de rencontrer Bouki *et* de la récompense à atteindre *et* du coût de chaque pas.
+De même, Ousmane dans le Monde de Bouki (S2 et S4) ne s'arrête pas à « je crois à 90% que Bouki est en $(2,2)$ ». Il doit *choisir un chemin* vers l'or, en tenant compte du risque de rencontrer Bouki *et* de la récompense à atteindre *et* du coût de chaque pas.
 
-**La limite précise de S5 :** les outils de S5 répondent à *« Quelle est la meilleure croyance ? »* Ils ne répondent pas à *« Quelle est la meilleure action ? »* quand les conséquences s'enchaînent dans le temps et que le monde est stochastique.
+**La limite précise de S4 :** les outils de S4 répondent à *« Quelle est la meilleure croyance ? »* Ils ne répondent pas à *« Quelle est la meilleure action ? »* quand les conséquences s'enchaînent dans le temps et que le monde est stochastique.
 
-::: {.callout-note .encadre-prereqbox title="Ce qu'on sait faire après S5 --- et ce qui manque"}
-**Après S5, l'agent sait :**
+::: {.callout-note .encadre-prereqbox title="Ce qu'on sait faire après S4 --- et ce qui manque"}
+**Après S4, l'agent sait :**
 
 - Exprimer son incertitude par une distribution de probabilité.
 - Mettre à jour ses croyances avec Bayes après chaque observation.
@@ -43,7 +43,7 @@ De même, Ousmane dans le Monde de Bouki (S2 et S5) ne s'arrête pas à « je cr
 
 **Ce qui manque encore :** comment Dr. Ndoye doit-il combiner $P(\text{paludisme} \mid \ldots)= 0{,}99$ avec les conséquences médicales de chaque traitement pour *prendre la meilleure décision* ? Et quand les décisions s'enchaînent (hospitaliser → surveiller → ajuster le traitement), comment planifier une stratégie optimale sur plusieurs étapes ?
 
-**Le plan de cette séance :** d'abord la décision **ponctuelle** (une seule action à choisir) grâce au principe MEU --- c'est le pont direct depuis S5. Ensuite la décision **séquentielle** (une stratégie sur plusieurs étapes) grâce aux MDPs. Enfin, l'apprentissage **sans modèle** quand on ne connaît pas les probabilités de transition --- c'est le Q-learning.
+**Le plan de cette séance :** d'abord la décision **ponctuelle** (une seule action à choisir) grâce au principe MEU --- c'est le pont direct depuis S4. Ensuite la décision **séquentielle** (une stratégie sur plusieurs étapes) grâce aux MDPs. Enfin, l'apprentissage **sans modèle** quand on ne connaît pas les probabilités de transition --- c'est le Q-learning.
 :::
 
 ### L'exemple fil rouge : Amadou, taxi à Dakar
@@ -68,11 +68,11 @@ Russell et Norvig identifient trois piliers pour construire un agent rationnel q
 
 | **Pilier** | **Outil** | **Question résolue** |
 | --- | --- | --- |
-| 1 | Théorie des probabilités | *Qu'est-ce qui est probable ?* (S5) |
+| 1 | Théorie des probabilités | *Qu'est-ce qui est probable ?* (S4) |
 | 2 | Théorie de l'utilité | *Qu'est-ce qui est désirable ?* (nouveau) |
 | 3 | Théorie de la décision (MEU) | *Quelle action prendre ?* (cette section) |
 
-S5 a construit le pilier 1. Mais même avec $P(\text{palu}) = 0{,}99$, la décision de traiter reste impossible sans le pilier 2 : savoir si traiter est *souhaitable* dans ce contexte précis. Ce qui est probable n'est pas nécessairement ce qui mène à la meilleure conséquence.
+S4 a construit le pilier 1. Mais même avec $P(\text{palu}) = 0{,}99$, la décision de traiter reste impossible sans le pilier 2 : savoir si traiter est *souhaitable* dans ce contexte précis. Ce qui est probable n'est pas nécessairement ce qui mène à la meilleure conséquence.
 
 ::: {.callout-tip .encadre-exemplebox title="Pourquoi la probabilité seule ne décide pas"}
 Dr. Ndoye a calculé $P(\text{palu} \mid \text{obs}) = 0{,}83$. Deux scénarios :
@@ -119,7 +119,7 @@ Décortiquons chaque fragment :
 | $a^*$ | L'action optimale que l'on cherche. |
 | $\arg\max_a$ | « Donne-moi l'action $a$ qui maximise ce qui suit ». |
 | $\sum_s$ | On somme sur *tous* les résultats possibles. Aucun scénario n'est ignoré. |
-| $P(\mathrm{Résultat}(a)=s \mid \mathbf{e})$ | Probabilité que $a$ mène au résultat $s$, étant donné ce que l'agent a observé. C'est ici qu'intervient le calcul bayésien de S5. |
+| $P(\mathrm{Résultat}(a)=s \mid \mathbf{e})$ | Probabilité que $a$ mène au résultat $s$, étant donné ce que l'agent a observé. C'est ici qu'intervient le calcul bayésien de S4. |
 | $U(s)$ | Valeur subjective du résultat $s$. Peut être positive ou très négative. |
 | $\sum_s (\ldots) \cdot U(s)$ | Espérance mathématique de l'utilité : moyenne pondérée des conséquences par leurs probabilités. |
 
@@ -128,7 +128,7 @@ Décortiquons chaque fragment :
 ### Application complète : Dr. Ndoye décide pour Fatou
 
 ::: {.callout-tip .encadre-exemplebox title="Situation --- le diagnostic après Bayes"}
-Après application du théorème de Bayes avec les frissons et la fièvre élevée (calcul effectué en S5) :
+Après application du théorème de Bayes avec les frissons et la fièvre élevée (calcul effectué en S4) :
 $$P(\text{palu} \mid \text{obs}) = 0{,}83 \qquad P(\text{non-palu} \mid \text{obs}) = 0{,}17$$
 Dr. Ndoye doit choisir entre deux actions : **traiter** ($a_1$) ou **ne pas traiter** ($a_2$).
 :::
@@ -190,8 +190,8 @@ Le MEU résout parfaitement la décision **ponctuelle** : une seule action à ch
 
 C'est une **séquence de décisions** où chaque action change l'état du monde, ce qui change les probabilités futures, ce qui change les décisions futures. Le MEU ne gère qu'un seul pas. Il faut un outil pour la séquence : les **Processus de Décision Markoviens**.
 
-::: {.callout-note .encadre-pontbox title="Fil conducteur S5 $\to$ S6"}
-| **Séance 5** |  | **Séance 6** |
+::: {.callout-note .encadre-pontbox title="Fil conducteur S4 $\to$ S5"}
+| **Séance 4** |  | **Séance 5** |
 | --- | --- | --- |
 | Décision ponctuelle | $\longrightarrow$ | Séquence de décisions |
 | $EU(a) = \sum_s P(s \mid \mathbf{e}) \cdot U(s)$ | $\longrightarrow$ | $V^*(s) = \max_a \!\left[R(s,a) + \gamma \sum_{s'} P(s' \mid s,a) V^*(s')\right]$ |
@@ -235,8 +235,8 @@ Amadou est à Médina. Que la propriété de Markov soit vraie signifie ceci : l
 **Leçon de conception :** un bon état MDP doit encoder *toute* l'information pertinente pour le futur. Un état trop pauvre viole la propriété de Markov et rend le MDP incorrect. Un état trop riche rend le problème inutilement complexe. Trouver le bon état est un art en soi.
 :::
 
-::: {.callout-warning .encadre-attentionbox title="Lien direct avec les réseaux bayésiens de S5"}
-La propriété de Markov est *exactement* l'indépendance conditionnelle de S5, mais appliquée dans le temps. En S5, on avait $\text{Maladie} \perp \text{Antécédents} \mid \text{Symptômes}$ : connaître les symptômes rendait les antécédents non informatifs. Ici : $S_{t+1} \perp (S_{t-1}, S_{t-2}, \ldots) \mid (S_t, A_t)$. Un MDP *est* un réseau bayésien dynamique qui se déroule dans le temps :
+::: {.callout-warning .encadre-attentionbox title="Lien direct avec les réseaux bayésiens de S4"}
+La propriété de Markov est *exactement* l'indépendance conditionnelle de S4, mais appliquée dans le temps. En S4, on avait $\text{Maladie} \perp \text{Antécédents} \mid \text{Symptômes}$ : connaître les symptômes rendait les antécédents non informatifs. Ici : $S_{t+1} \perp (S_{t-1}, S_{t-2}, \ldots) \mid (S_t, A_t)$. Un MDP *est* un réseau bayésien dynamique qui se déroule dans le temps :
 $$S_0 \to A_0 \to S_1 \to A_1 \to S_2 \to \cdots$$
 La table $P(S_{t+1} \mid S_t, A_t)$ joue exactement le rôle d'une CPT de réseau bayésien.
 :::
@@ -263,7 +263,7 @@ L'objectif d'un MDP : trouver la politique **optimale** $\pi^*$, celle qui maxim
 ::: {.callout-tip .encadre-exemplebox title="Différence chemin / politique pour Amadou"}
 **Chemin (A*, S3) :** « Plateau $\to$ Médina $\to$ Fann $\to$ Mermoz $\to$ Keur Massar $\to$ Bargny $\to$ Sandaga ». Ce plan est fragile : si le trafic dévie Amadou vers Guédiawaye, le chemin devient inapplicable.
 
-**Politique (MDP, S6) :** « Depuis Plateau : aller à droite. Depuis Médina : aller à droite. Depuis Fann : aller en bas. Depuis Guédiawaye : aller à droite. Depuis toute zone inondée : aller en haut…» Cette règle s'adapte à tout déviement. Si le trafic envoie Amadou à Guédiawaye, la politique lui dit quoi faire depuis Guédiawaye.
+**Politique (MDP, S5) :** « Depuis Plateau : aller à droite. Depuis Médina : aller à droite. Depuis Fann : aller en bas. Depuis Guédiawaye : aller à droite. Depuis toute zone inondée : aller en haut…» Cette règle s'adapte à tout déviement. Si le trafic envoie Amadou à Guédiawaye, la politique lui dit quoi faire depuis Guédiawaye.
 
 La figure @fig-gridworld(c) montre exactement cette politique optimale : une flèche par case, indépendamment du chemin suivi pour y arriver.
 :::
@@ -575,10 +575,10 @@ $$\boxed{Q(s, a) \;\leftarrow\; Q(s, a) + \alpha \underbrace{\bigl[ \underbrace{
 - La mise à jour est **hors-politique** (off-policy) : on apprend la valeur de l'action greedy $\max_{a'}Q(s',a')$ même si l'agent n'a pas suivi cette action.
 :::
 
-::: {.callout-tip .encadre-exemplebox title="Lien profond avec la mise à jour bayésienne de S5"}
+::: {.callout-tip .encadre-exemplebox title="Lien profond avec la mise à jour bayésienne de S4"}
 Réécrivons la mise à jour Q-learning :
 $$Q_{\text{nouveau}} = Q_{\text{ancien}} + \alpha \cdot (\text{Cible} - Q_{\text{ancien}}) = (1-\alpha) \cdot Q_{\text{ancien}} + \alpha \cdot \text{Cible}$$
-C'est une **moyenne exponentielle pondérée** entre l'ancienne croyance et la nouvelle observation. Comparez avec Bayes (S5) :
+C'est une **moyenne exponentielle pondérée** entre l'ancienne croyance et la nouvelle observation. Comparez avec Bayes (S4) :
 $$P_{\text{nouveau}}(H) \propto P(\text{obs} \mid H) \cdot P_{\text{ancien}}(H)$$
 Dans les deux cas, on combine ce qu'on savait avant avec ce que l'observation révèle. La différence : Bayes utilise la vraisemblance comme coefficient de pondération ; Q-learning utilise $\alpha$. Les deux sont des mécanismes de mise à jour incrémentale des croyances.
 :::
@@ -725,9 +725,9 @@ Conséquence directe : quand on remplace le tableau par un réseau de neurones $
 
 Nous avons accompagné Ousmane depuis S2. Il est temps de montrer comment les trois approches du cours le traitent différemment --- et pourquoi le MDP est la solution la plus complète.
 
-### Ce que Bayes (S5) avait donné
+### Ce que Bayes (S4) avait donné
 
-À la fin de S5, Ousmane avait calculé (après avoir entendu des grognements et observé l'absence de brise) :
+À la fin de S4, Ousmane avait calculé (après avoir entendu des grognements et observé l'absence de brise) :
 $$P(\text{Bouki en }(2,2)) \approx 0{,}90 \qquad P(\text{Bouki en }(3,1)) \approx 0{,}06 \qquad P(\text{Bouki en }(1,3)) \approx 0{,}04$$
 
 C'est excellent pour raisonner. Mais Ousmane doit maintenant *agir*. Quelle route emprunter vers l'or en $(4,4)$ ?
@@ -761,7 +761,7 @@ Clairement non rationnel. Même sans calculer les alternatives, éviter $(2,2)$ 
 Si demain une nouvelle observation montrait $P(\text{Bouki en }(2,2)) = 0{,}30$, la politique changerait --- peut-être $(2,2)$ deviendrait-il acceptable si c'est le seul chemin vers l'or.
 :::
 
-|  | **S2 -- Logique** | **S5 -- Bayes + MEU** | **S6 -- MDP** |
+|  | **S2 -- Logique** | **S4 -- Bayes + MEU** | **S5 -- MDP** |
 | --- | --- | --- | --- |
 | **Croyance** | Bouki est en $(2,2)$ ou $(3,1)$ | $P(\text{Bouki}=(2,2))=0{,}90$ | Distribution intégrée dans les transitions |
 | **Décision** | Explorer pour trancher | MEU : éviter $(2,2)$ maintenant | Politique multi-étapes optimale |
@@ -776,8 +776,8 @@ Si demain une nouvelle observation montrait $P(\text{Bouki en }(2,2)) = 0{,}30$,
 - **S1 --- L'IA, c'est quoi ?** Un agent rationnel perçoit et agit pour maximiser sa performance. Limite : comment raisonner sur ce qu'il perçoit ?
 - **S2 --- L'IA qui raisonne.** Logique propositionnelle, modus ponens, résolution. Limite : le monde est trop ambigu pour le binaire vrai/faux.
 - **S3 --- L'IA qui cherche.** BFS, A*, heuristiques. Limite : le monde est trop incertain pour planifier un chemin fixe.
-- **S5 --- L'IA qui doute.** Probabilités, Bayes, réseaux bayésiens. Limite : raisonner bien, oui --- mais comment décider dans le temps ?
-- **S6 --- L'IA qui apprend.** MEU (décision ponctuelle), MDPs (décision séquentielle), Q-learning (sans modèle), descente de gradient (pont ML).
+- **S4 --- L'IA qui doute.** Probabilités, Bayes, réseaux bayésiens. Limite : raisonner bien, oui --- mais comment décider dans le temps ?
+- **S5 --- L'IA qui apprend.** MEU (décision ponctuelle), MDPs (décision séquentielle), Q-learning (sans modèle), descente de gradient (pont ML).
 :::
 
 ### Le paysage du ML : quatre familles
@@ -795,32 +795,32 @@ Le dénominateur commun de tout le Machine Learning tient en une formule :
 | **Approche** | **Paramètres $\theta$** | **Fonction de perte $J(\theta)$** |
 | --- | --- | --- |
 | Régression linéaire | Coefficients $w, b$ | Erreur quadratique $\sum_i (y_i - w^\top x_i - b)^2$ |
-| Classification logistique | Poids $w, b$ | Log-vraisemblance négative (lien direct avec S5) |
+| Classification logistique | Poids $w, b$ | Log-vraisemblance négative (lien direct avec S4) |
 | Réseau de neurones | Poids de toutes les couches | Entropie croisée ou MSE |
 | Q-learning (DQN) | Poids du réseau Q | Erreur TD au carré $\sum \delta_t^2$ |
 
 Dans tous les cas, l'outil d'optimisation est la descente de gradient (ou SGD, Adam, RMSProp). **Vous connaissez déjà cet outil.**
 
-- **Apprentissage supervisé :** l'agent apprend $f : \mathcal{X} \to \mathcal{Y}$ depuis des paires $(x_i, y_i)$. Lien direct avec S5 : la log-vraisemblance $\log P(y \mid x, \theta)$ (que vous connaissez de Bayes) est exactement la fonction de perte des classifieurs probabilistes.
-- **Apprentissage non supervisé :** sans étiquettes, l'agent découvre une structure cachée. K-Means partition, PCA compresse. Lien avec S5 : on cherche à estimer $P(X_1, \ldots, X_n)$ --- la distribution jointe, notion centrale des réseaux bayésiens.
+- **Apprentissage supervisé :** l'agent apprend $f : \mathcal{X} \to \mathcal{Y}$ depuis des paires $(x_i, y_i)$. Lien direct avec S4 : la log-vraisemblance $\log P(y \mid x, \theta)$ (que vous connaissez de Bayes) est exactement la fonction de perte des classifieurs probabilistes.
+- **Apprentissage non supervisé :** sans étiquettes, l'agent découvre une structure cachée. K-Means partition, PCA compresse. Lien avec S4 : on cherche à estimer $P(X_1, \ldots, X_n)$ --- la distribution jointe, notion centrale des réseaux bayésiens.
 - **Deep Learning :** les $f_\theta$ sont des réseaux de neurones profonds. Ce n'est pas un paradigme différent --- c'est une famille de fonctions très expressives, entraînées par descente de gradient. Les LLMs (GPT, Claude…) en sont la forme la plus avancée.
 - **Reinforcement Learning avancé :** Q-learning est la forme la plus simple. DQN, PPO, SAC remplacent le tableau $Q$ par un réseau de neurones. Vous avez construit la fondation de DQN dans cette séance.
 
 ## Synthèse : les idées fondamentales
 
 ::: {.callout-important .encadre-retenirbox title="Les six idées fondamentales de la séance"}
-1. **Le MEU est le pont direct entre Bayes (S5) et la décision.** L'agent choisit l'action qui maximise $\sum_s P(s \mid \mathbf{e}) \cdot U(s)$ : les probabilités bayésiennes pèsent chaque conséquence par son utilité. La décision ponctuelle rationnelle est toujours un MEU.
+1. **Le MEU est le pont direct entre Bayes (S4) et la décision.** L'agent choisit l'action qui maximise $\sum_s P(s \mid \mathbf{e}) \cdot U(s)$ : les probabilités bayésiennes pèsent chaque conséquence par son utilité. La décision ponctuelle rationnelle est toujours un MEU.
 2. **Un MDP formalise la décision séquentielle.** Cinq ingrédients : états $\mathcal{S}$, actions $\mathcal{A}$, transitions $P$, récompenses $R$, discount $\gamma$. Il généralise A* au monde stochastique et le MEU au monde multi-étapes.
 3. **La fonction de valeur $V^*(s)$ encode « combien vaut cet état ».** Elle est définie récursivement par l'équation de Bellman --- le MEU récursif sur un horizon infini.
 4. **Value Iteration résout Bellman par propagation itérative.** Les valeurs rayonnent depuis les terminaux comme une onde. L'opérateur de Bellman est une contraction ($\times\gamma$ par itération), garantissant la convergence vers $V^*$.
-5. **Q-learning apprend sans modèle par essai-erreur.** L'erreur TD $\delta_t$ guide la mise à jour de $Q(s,a)$, comme Bayes guidait la mise à jour de $P(H \mid E)$ en S5. C'est de la descente de gradient sur un tableau.
+5. **Q-learning apprend sans modèle par essai-erreur.** L'erreur TD $\delta_t$ guide la mise à jour de $Q(s,a)$, comme Bayes guidait la mise à jour de $P(H \mid E)$ en S4. C'est de la descente de gradient sur un tableau.
 6. **La descente de gradient est le moteur universel du ML.** $\theta \leftarrow \theta - \eta \nabla J(\theta)$ s'applique à tout --- des simples coefficients de régression aux milliards de poids d'un LLM.
 :::
 
 ::: {.callout-note .encadre-prereqbox title="Vers le Semestre 2 : ce qui change"}
-**Ce qu'on sait maintenant :** modéliser un agent (S1), raisonner formellement (S2), chercher dans un graphe d'états (S3), raisonner sous incertitude avec Bayes (S5), décider de façon optimale --- ponctuelle avec le MEU, séquentielle avec les MDPs --- et apprendre depuis l'expérience avec Q-learning (S6).
+**Ce qu'on sait maintenant :** modéliser un agent (S1), raisonner formellement (S2), chercher dans un graphe d'états (S3), raisonner sous incertitude avec Bayes (S4), décider de façon optimale --- ponctuelle avec le MEU, séquentielle avec les MDPs --- et apprendre depuis l'expérience avec Q-learning (S5).
 
-**La limite à dépasser :** nos MDPs supposent un espace d'états fini et discret. Nos probabilités portent sur des variables discrètes. Le monde réel est continu, de grande dimension, et les modèles ($P$, $Q$, les CPT de S5) doivent être *appris depuis les données* --- pas posés à la main.
+**La limite à dépasser :** nos MDPs supposent un espace d'états fini et discret. Nos probabilités portent sur des variables discrètes. Le monde réel est continu, de grande dimension, et les modèles ($P$, $Q$, les CPT de S4) doivent être *appris depuis les données* --- pas posés à la main.
 
 **En Semestre 2 :** comment apprendre $f : \mathcal{X} \to \mathcal{Y}$ depuis des données (régression, classification), comment représenter des fonctions complexes (réseaux de neurones, backpropagation, convolutions, attention), comment passer de Q-learning à DQN. Le moteur : la descente de gradient --- que vous maîtrisez déjà.
 :::
@@ -861,4 +861,4 @@ La différence : dans le MEU, $U(s)$ est une utilité terminale fixée par l'age
 Un MDP est un réseau bayésien dont les nœuds se déroulent dans le temps :
 $$S_0 \to A_0 \to S_1 \to A_1 \to S_2 \to \cdots$$
 
-La propriété de Markov $S_{t+1} \perp (S_{t-1},\ldots) \mid (S_t, A_t)$ est l'indépendance conditionnelle de S5. La table $P(S_{t+1} \mid S_t, A_t)$ est une CPT. Cette connexion est exploitée dans les **Modèles de Markov Cachés** (HMM : quand $S_t$ n'est pas observable directement) et les **POMDPs** (Partially Observable MDPs : la généralisation de S5 et S6 en un seul cadre).
+La propriété de Markov $S_{t+1} \perp (S_{t-1},\ldots) \mid (S_t, A_t)$ est l'indépendance conditionnelle de S4. La table $P(S_{t+1} \mid S_t, A_t)$ est une CPT. Cette connexion est exploitée dans les **Modèles de Markov Cachés** (HMM : quand $S_t$ n'est pas observable directement) et les **POMDPs** (Partially Observable MDPs : la généralisation de S4 et S5 en un seul cadre).
