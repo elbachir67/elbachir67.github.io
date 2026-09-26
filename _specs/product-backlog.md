@@ -99,7 +99,8 @@ d'un tuteur IA encadré.
 | US-73 | EP3 | Les figures de PRC, régénérées en SVG et à un chemin relatif | M | 2 | 8 |
 | US-74 | EP3 | La numérotation des séances est continue (Introduction à l'IA) | M | 2 | 8 |
 | US-75 | EP3 | Rien de non publiable dans un PDF non plus (le contrôle lit leur texte) | M | 3 | 8 |
-| US-76 | EP1 | Une ressource est ce que sa source produit (recompilation vérifiée en CI) | M | 5 | 8 |
+| US-76 | EP1 | Une ressource est ce que sa source produit (recompilation vérifiée en CI) | M | 5 | 9 |
+| US-78 | EP3 | Les blocs de code ne sont plus lus comme des mathématiques | M | 3 | 8 |
 | US-77 | EP1 | Redirections : les adresses d'hier mènent encore quelque part | C | 2 | — |
 
 ### Stories décrites par le PO
@@ -258,6 +259,14 @@ redirections pour deux adresses que personne n'a encore partagées**. La story r
 sans sprint, pour le jour où le site aura des liens entrants — une renumérotation ou un renommage
 de séance se produira encore.
 
+**US-78 — un `$` de JavaScript n'est pas une formule.** Révélée en commençant US-70 : le
+convertisseur applique le motif des maths **avant** de lire les environnements, et `${user.name}`
+— la façon ordinaire d'écrire un gabarit en JavaScript — y laisse un `$` non apparié qui avale la
+fin du bloc de code. Cinq des sept labs de Frontend 2 ne se convertissent pas, non plus que trois
+fichiers de Frontend 1 et trois de PRC. Le dernier critère d'US-70 demandait de signaler et
+d'estimer un tel manque **sans le contourner** : c'est ce qui a été fait, et le PO a **échangé**
+US-76 contre US-78 plutôt que d'ajouter au sprint clos.
+
 ## Roadmap
 
 | Sprint | Objectif | Pts |
@@ -269,6 +278,6 @@ de séance se produira encore.
 | 5 | Du contenu : un deuxième cours en ligne | 14 livrés sur 19 |
 | 6 | Les cours rédigés entrent dans la chaîne | 26 livrés sur 26 |
 | 7 | Achever le C, publier le ML, préparer les cours rédigés | 41 livrés sur 20 |
-| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 33 |
+| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 31 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.

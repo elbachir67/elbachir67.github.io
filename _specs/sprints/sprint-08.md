@@ -2,7 +2,7 @@
 
 **Objectif :** le catalogue dit la vérité sur l'offre de cours, chaque cours sait de quels autres il
 dépend, et trois cours de plus sont en ligne.
-**Capacité :** 33 points — 21 à la composition, puis les ajouts du PO en cours de sprint : US-73 (2), US-74 (2), US-75 (3) et US-76 (5). **Le sprint est clos aux ajouts** : décision du PO, on s'arrête à 33.
+**Capacité :** 31 points — 21 à la composition, puis les ajouts du PO en cours de sprint : US-73 (2), US-74 (2), US-75 (3) et US-78 (3). **Le sprint est clos aux ajouts** : US-78 n'est pas un ajout mais un **échange** — US-76 (5) passe au Sprint 9 pour lui faire place, décision du PO.
 
 ## Entrées PO
 
@@ -20,9 +20,9 @@ PO. Seul son travail de chaîne (US-73) entre dans ce sprint, parce que la migra
 
 ## Ordre d'exécution
 
-US-68 → US-66 → US-75 → US-74 → US-67 — livrées — puis, dans cet ordre, fixé par le PO :
-**US-69 → US-70 → US-73 → US-76**. Si le temps manque, **US-76 passe au Sprint 9** : c'est la seule
-qui peut glisser.
+US-68 → US-66 → US-75 → US-74 → US-67 → US-69 — livrées — puis, dans cet ordre, fixé par le PO :
+**US-78 → US-70 → US-73**. US-78 précède US-70 parce qu'elle la débloque : sans elle, cinq des sept
+labs de Frontend 2 ne se convertissent pas. **US-76 passe au Sprint 9.**
 
 ---
 
@@ -126,22 +126,24 @@ afin qu'un terme interdit ne parte pas en ligne dans une pièce jointe.
 - [ ] Les cinq PDF du cours de C sont traités selon ce que dit leur source : recompilés si elle est
       saine, signalés sinon.
 
-### US-76 — Une ressource est ce que sa source produit (5 pts)
+### US-78 — Les blocs de code ne sont plus lus comme des mathématiques (3 pts)
 
-En tant qu'équipe de développement, je veux que la CI recompile les ressources d'un cours et les
-compare aux PDF commités, afin qu'un document publié ne dérive plus de sa source sans que personne
-le voie.
+En tant qu'équipe de développement, je veux qu'un `$` d'un bloc de code ne soit pas pris pour une
+formule, afin qu'un lab de JavaScript se convertisse.
 
-- [ ] Chaque ressource PDF déclarée au manifeste d'un cours est **recompilée depuis sa source**
-      et comparée au fichier commité : le contrôle dit lesquelles ont divergé.
-- [ ] Le contrôle échoue sur une source qui **ne compile pas**, et la CI compile avec
-      `-halt-on-error` : un document abîmé ne s'installe plus en ligne en silence.
-- [ ] La comparaison porte sur le **texte extrait**, et non sur les octets : deux compilations d'une
-      même source ne donnent pas le même fichier.
-- [ ] Le contrôle nomme, pour chaque écart, ce qui diffère — et non seulement qu'il diffère.
-- [ ] La chaîne LaTeX entre en CI : la PR dit ce qu'elle coûte en minutes, et ce qu'elle installe.
-- [ ] Les sources hors d'atteinte — celles qu'`_import/` ne contient pas — sont **signalées, et non
-      tues** : une ressource sans source vérifiable est un fait à connaître.
+Révélée par US-70 : `${user.name}` dans un gabarit JavaScript contient un `$`. Le motif des maths
+s'applique **avant** que les environnements soient lus, et un `$` non apparié avale la fin du bloc —
+« environnement `lstlisting` non fermé ». **Cinq des sept labs** de Frontend 2 échouent ainsi, trois
+fichiers de Frontend 1 et trois de PRC également.
+
+- [ ] Le contenu des `lstlisting` et des `verbatim` est **masqué avant** que le motif des maths ne
+      s'applique : un `$` y reste un caractère.
+- [ ] **Les 37 chapitres déjà en ligne sortent identiques**, au caractère près —
+      `scripts/verifier_conversion.py` le dit, et c'est le garde-fou de cette story.
+- [ ] Le **rapport de conversion** signale tout `$` non apparié hors formule : la prochaine source
+      dans ce cas se verra, au lieu d'arrêter l'import sans dire pourquoi.
+- [ ] Les cinq labs de Frontend 2 qui échouaient se convertissent.
+
 
 ---
 
