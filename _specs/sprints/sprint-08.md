@@ -2,7 +2,7 @@
 
 **Objectif :** le catalogue dit la vérité sur l'offre de cours, chaque cours sait de quels autres il
 dépend, et trois cours de plus sont en ligne.
-**Capacité :** 33 points — 21 à la composition, puis les ajouts du PO en cours de sprint : US-73 (2), US-74 (2), US-75 (3) et US-76 (5)
+**Capacité :** 33 points — 21 à la composition, puis les ajouts du PO en cours de sprint : US-73 (2), US-74 (2), US-75 (3) et US-76 (5). **Le sprint est clos aux ajouts** : décision du PO, on s'arrête à 33.
 
 ## Entrées PO
 
@@ -20,7 +20,9 @@ PO. Seul son travail de chaîne (US-73) entre dans ce sprint, parce que la migra
 
 ## Ordre d'exécution
 
-US-68 → US-66 → US-75 → US-74 → US-67 → US-76 → US-69 → US-70 → US-73.
+US-68 → US-66 → US-75 → US-74 → US-67 — livrées — puis, dans cet ordre, fixé par le PO :
+**US-69 → US-70 → US-73 → US-76**. Si le temps manque, **US-76 passe au Sprint 9** : c'est la seule
+qui peut glisser.
 
 ---
 
