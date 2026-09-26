@@ -327,6 +327,8 @@ expliqués, et la liste est ici pour qu'ils ne soient pas rouverts au prochain i
 | **PRC, domaine** | **« Programmation, Web & Mobile »**, et non « Génie Logiciel & Architecture ». | Corrigé au catalogue. |
 | **PDF publiés portant « GLSI »** | Le contrôle doit lire le texte des PDF : **US-75**, 3 pts, dans ce sprint, le contrôle d'abord. | `lab-4` et `projet-3` sont **retirés du site** — sources divergentes, le PO les reprendra (#163). `tp-1` est recompilé après correction de son encodage. |
 | **Skills portant « GLSI »** | **Part du PO**, hors dépôt. | Noté dans #163. |
+| **Numérotation d'Introduction à l'IA** | Continue : **US-74**, livrée. Le cours affiche 1 à 5. | Deux adresses changent ; pas de redirection (US-77 au backlog, sans sprint). |
+| **Les 22 autres `.tex` d'`_import/intro_IA`** | **Laissés tels quels**, décision du PO : examens et TD circulent en PDF avec leur propre numérotation, et les renuméroter décalerait ce que les étudiants ont déjà. | Divergence assumée, notée dans #163. |
 | **Sigle GLSI** | Retiré **à la source**, dès maintenant. | 33 occurrences dans les 14 sources de PRC, 3 dans `Lab_06_API_Django.tex`. `_import/` est ignoré par Git : la correction vit sur le disque du PO, pas dans une PR. |
 
 **Un risque qui reste, et qui n'est pas dans `_import/`.** Le sigle GLSI est aussi dans les skills

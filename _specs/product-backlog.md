@@ -99,6 +99,8 @@ d'un tuteur IA encadré.
 | US-73 | EP3 | Les figures de PRC, régénérées en SVG et à un chemin relatif | M | 2 | 8 |
 | US-74 | EP3 | La numérotation des séances est continue (Introduction à l'IA) | M | 2 | 8 |
 | US-75 | EP3 | Rien de non publiable dans un PDF non plus (le contrôle lit leur texte) | M | 3 | 8 |
+| US-76 | EP1 | Une ressource est ce que sa source produit (recompilation vérifiée en CI) | M | 5 | 8 |
+| US-77 | EP1 | Redirections : les adresses d'hier mènent encore quelque part | C | 2 | — |
 
 ### Stories décrites par le PO
 
@@ -240,6 +242,22 @@ contrôle qui ne regarde pas là où le contenu est. Le PO a tranché le sort de
 Structures de Données : `lab-4` et `projet-3` sont **retirés du site** en attendant qu'il reprenne
 leurs sources — elles ont divergé — et `tp-1` est recompilé après correction de son encodage.
 
+**US-76 — quatre défauts qu'aucun contrôle ne pouvait voir.** US-75 a recompilé huit PDF publiés
+pour en retirer un sigle, et la recompilation a révélé tout autre chose : un style de listing sans
+table d'accents, qui avait fait perdre les siens au TP de mise en place (« # Se d c o n n e c t e
+r ») ; une bibliothèque TikZ jamais chargée ; trois exposants hors mode mathématique, et
+vingt-deux caractères que la police ne compose pas, qui avaient purement disparu du plan du cours
+de C. Les quatre vivaient dans les sources depuis leur écriture. Rien ne pouvait les montrer,
+**parce que les PDF de ressource sont commités, jamais recompilés** : ce que le dépôt sert est un
+artefact, pas un résultat. C'est aussi ce qui a révélé que `lab-4` et `projet-3` avaient divergé de
+leurs sources. Le PO : « quatre défauts invisibles autrement, c'est la démonstration qu'il faut ».
+
+**US-77 — les adresses d'hier.** US-74 a renuméroté deux séances d'Introduction à l'IA, et donc
+changé deux adresses. Aucune page du site n'y menait, et le PO a tranché : **pas de table de
+redirections pour deux adresses que personne n'a encore partagées**. La story reste au backlog,
+sans sprint, pour le jour où le site aura des liens entrants — une renumérotation ou un renommage
+de séance se produira encore.
+
 ## Roadmap
 
 | Sprint | Objectif | Pts |
@@ -251,6 +269,6 @@ leurs sources — elles ont divergé — et `tp-1` est recompilé après correct
 | 5 | Du contenu : un deuxième cours en ligne | 14 livrés sur 19 |
 | 6 | Les cours rédigés entrent dans la chaîne | 26 livrés sur 26 |
 | 7 | Achever le C, publier le ML, préparer les cours rédigés | 41 livrés sur 20 |
-| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 28 |
+| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 33 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
