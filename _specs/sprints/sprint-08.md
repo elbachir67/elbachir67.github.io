@@ -2,21 +2,25 @@
 
 **Objectif :** le catalogue dit la vérité sur l'offre de cours, chaque cours sait de quels autres il
 dépend, et trois cours de plus sont en ligne.
-**Capacité :** 21 points
+**Capacité :** 23 points (21 à la composition, plus les 2 points d'US-73, ajoutée par le PO au vu de l'inventaire)
 
 ## Entrées PO
 
 - [ ] Textes alternatifs des figures sans légende, demandés en une fois par lot de cours.
 - [ ] Métadonnées des cours migrés : niveaux, semestre, objectifs, prérequis.
-- [ ] Arbitrage sur l'inventaire d'US-68 : quels cours migrer, dans quel ordre.
+- [x] Arbitrage sur l'inventaire d'US-68 : quels cours migrer, dans quel ordre. **Rendu** — US-70
+  porte sur **Programmation Frontend 2** ; la migration de PRC attend le Sprint 9 et son travail de
+  chaîne entre dans ce sprint (US-73).
 
 ## Hors périmètre
 
 Nom de domaine (US-05) : reporté, décision du PO. Tuteur IA (EP6) : toujours sans sprint.
+**Migration de Programmation par Réutilisation de Composants** : reportée au Sprint 9, décision du
+PO. Seul son travail de chaîne (US-73) entre dans ce sprint, parce que la migration en dépend.
 
 ## Ordre d'exécution
 
-US-68 → US-66 → US-67 → US-69 → US-70.
+US-68 → US-66 → US-67 → US-69 → US-70 → US-73.
 
 ---
 
@@ -70,9 +74,23 @@ En tant qu'étudiant d'un cours sans CM rédigé, je veux quand même trouver mo
 afin d'accéder aux labs depuis le site.
 
 - [ ] Pour un cours dont les sources ne comportent que des labs, chaque lab devient une séance : son contenu est converti comme un document rédigé, et le PDF compilé est attaché en ressource.
-- [ ] Éprouvé sur un cours réel, choisi par le PO d'après l'inventaire (Programmation par Réutilisation de Composants, Frontend 1 ou 2, ou Introduction au DevOps).
+- [ ] Éprouvé sur un cours réel, choisi par le PO d'après l'inventaire : **Programmation Frontend 2**. Sept labs, aucun CM, aucune figure — donc aucun texte alternatif à valider. Les sept PDF sont déjà compilés.
 - [ ] La page du cours indique la nature de ses séances, sans formule inventée sur ce qu'il contient.
 - [ ] Si la conversion révèle un manque de la chaîne, il est signalé et estimé, jamais contourné.
+
+### US-73 — Les figures de PRC, régénérées en SVG (2 pts)
+
+En tant qu'équipe de développement, je veux que les figures d'un cours se régénèrent au bon format
+et au bon endroit, afin que la migration de PRC ne bute pas dessus au Sprint 9.
+
+- [ ] Les dix-neuf figures des cinq CM de Programmation par Réutilisation de Composants sont
+      produites par les scripts `gen_figures_cm1.py` à `gen_figures_cm5.py`, **corrigés à la
+      source** : sortie en SVG, et non en PNG, dans un chemin relatif au dossier du cours et non
+      dans `/home/claude/cmN/figures/`.
+- [ ] Les dix-neuf noms produits sont exactement ceux que les `.tex` appellent, vérifié fichier par
+      fichier.
+- [ ] Aucune migration : cette story prépare, elle ne publie pas.
+- [ ] Les figures produites sont montrées au PO — **en les regardant**, règle de `CLAUDE.md` §7.
 
 ---
 

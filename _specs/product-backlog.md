@@ -94,6 +94,9 @@ d'un tuteur IA encadré.
 | US-68 | EP3 | Inventaire des sources disponibles dans `_import/` | M | 2 | 8 |
 | US-69 | EP3 | Architectures Logicielles Modernes, séances suivantes | M | 8 | 8 |
 | US-70 | EP3 | Un lot de cours à labs seuls (le lab tient lieu de séance) | M | 3 | 8 |
+| US-71 | EP3 | Migration de Structures de Données et Algorithmes Avancés (4 séances rédigées) | M | 5 | 7 |
+| US-72 | EP3 | Migration d'Introduction à l'IA (5 séances rédigées) | M | 8 | 7 |
+| US-73 | EP3 | Les figures de PRC, régénérées en SVG et à un chemin relatif | M | 2 | 8 |
 
 ### Stories décrites par le PO
 
@@ -207,6 +210,20 @@ par chapitre : le reste est de la lecture et des **décisions du PO** — 33 tex
 seuls chapitres de C, une table d'encadrés par cours rédigé. US-58 déplace cette part : la chaîne
 rédige un brouillon à partir de la source de la figure, le PO valide, corrige ou réécrit.
 
+**US-71 et US-72 — deux migrations du Sprint 7 qui n'avaient pas d'identifiant.** Le PO les avait
+demandées en cours de sprint sans les estimer, et le bilan du Sprint 7 (§2) en faisait la
+proposition : « le plus gros du travail de ce sprint n'apparaît dans aucun compte ». Elles sont
+créées ici, marquées livrées au Sprint 7, sur décision du PO — « le compte doit dire la vérité ».
+Les points sont estimés par comparaison, faute d'avoir été posés à l'époque : Introduction à l'IA
+(5 séances rédigées, 4 TD, un notebook) vaut US-59, les cinq chapitres rédigés du cours de C, soit
+8 ; Structures de Données (4 séances rédigées, 4 labs, un projet, un TP) vaut un cran de moins,
+soit 5. Le Sprint 7 passe donc de 28 à **41 points livrés** pour 20 engagés.
+
+**US-73 — les figures de PRC.** Révélée par l'inventaire d'US-68 : les dix-neuf figures des cinq CM
+sont absentes, et les cinq scripts qui les produisent écrivent en PNG vers `/home/claude/cmN/figures/`,
+un chemin absolu d'une autre machine. Le PO l'a ajoutée au Sprint 8 en portant la capacité à 23,
+et a reporté la migration de PRC elle-même au Sprint 9 : la chaîne d'abord, le cours ensuite.
+
 ## Roadmap
 
 | Sprint | Objectif | Pts |
@@ -217,7 +234,7 @@ rédige un brouillon à partir de la source de la figure, le PO valide, corrige 
 | 4 | Chaîne de publication et blog | 23 |
 | 5 | Du contenu : un deuxième cours en ligne | 14 livrés sur 19 |
 | 6 | Les cours rédigés entrent dans la chaîne | 26 livrés sur 26 |
-| 7 | Achever le C, publier le ML, préparer les cours rédigés | 28 livrés sur 20 |
-| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 21 |
+| 7 | Achever le C, publier le ML, préparer les cours rédigés | 41 livrés sur 20 |
+| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 23 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
