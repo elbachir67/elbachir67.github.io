@@ -93,7 +93,10 @@ textes alternatifs.
 
 ### `frontend2` — Programmation Frontend 2 : frameworks (L2, L3, pas en ligne)
 
-**Cours à labs seuls**, et complet : sept labs, aucun CM. Recommandé pour **US-70**.
+**Cours à labs seuls**, et complet : sept labs, aucun CM. Retenu pour **US-70**.
+
+**Niveau tranché par le PO (26/09) : L2 et L3.** Le `README.txt` du dossier dit « L3 » ; il est
+périmé, et le catalogue dit juste. À reprendre dans `cours.yml` au moment de l'import.
 
 | Lab | Source | Lignes | Blocs de code |
 |---|---|---:|---:|
@@ -175,6 +178,9 @@ les neuf labs se répartissent sur le semestre.
 PO —, **plus 2 points de chaîne** pour la régénération des figures en SVG, qui entrent au Sprint 8
 sous **US-73** : la chaîne d'abord, le cours ensuite. Les 19 textes alternatifs suivront les
 figures, pas avant.
+
+**Domaine tranché par le PO (26/09) : « Programmation, Web & Mobile »**, et non plus « Génie
+Logiciel & Architecture » — les neuf labs sont du React, du Flask, du Leaflet et du Docker.
 
 **Le sigle GLSI a été retiré des quatorze sources le 26/09**, à la source, sur instruction du PO :
 33 occurrences en tout, dans les pieds de page (`ESP/UCAD --- L2 GLSI`), les dates
@@ -317,10 +323,14 @@ expliqués, et la liste est ici pour qu'ils ne soient pas rouverts au prochain i
 | **Structures de Données, séances 5 à 7** | Elles sont **à venir** et seront fournies par le PO. | Le cours affiche quatre séances, et rien n'indique qu'il en manque. C'est l'état voulu. |
 | **US-70, cours à labs seuls** | **Programmation Frontend 2**, sur la recommandation de cet inventaire. | Sept labs, aucune figure ; trois numéros de téléphone d'exemple à remplacer à l'import. |
 | **PRC** | Migration **reportée au Sprint 9**. Seul son travail de chaîne entre au Sprint 8, sous **US-73**. | La capacité du Sprint 8 passe de 21 à 23 points. |
+| **Programmation Frontend 2, niveau** | **L2 et L3.** Le `README.txt` du cours, qui dit « L3 », est périmé. | Le catalogue est juste ; `cours.yml` reprendra L2 et L3 à l'import (US-70). |
+| **PRC, domaine** | **« Programmation, Web & Mobile »**, et non « Génie Logiciel & Architecture ». | Corrigé au catalogue. |
+| **PDF publiés portant « GLSI »** | Le contrôle doit lire le texte des PDF : **US-75**, 3 pts, dans ce sprint, le contrôle d'abord. | `lab-4` et `projet-3` sont **retirés du site** — sources divergentes, le PO les reprendra (#163). `tp-1` est recompilé après correction de son encodage. |
+| **Skills portant « GLSI »** | **Part du PO**, hors dépôt. | Noté dans #163. |
 | **Sigle GLSI** | Retiré **à la source**, dès maintenant. | 33 occurrences dans les 14 sources de PRC, 3 dans `Lab_06_API_Django.tex`. `_import/` est ignoré par Git : la correction vit sur le disque du PO, pas dans une PR. |
 
 **Un risque qui reste, et qui n'est pas dans `_import/`.** Le sigle GLSI est aussi dans les skills
 qui produisent ces cours — `reutilisation-composants/SKILL.md` et `frontend-react-nextjs/SKILL.md`,
 entre autres, sous `~/.claude/skills/synced/`. Tant qu'il y est, **il reviendra** au prochain
 document généré, exactement comme `CLAUDE.md` §7 le prévoit. Ces fichiers sont synchronisés depuis
-le compte du PO : les corriger est sa part, pas celle d'une PR.
+le compte du PO : **il les corrigera lui-même**, et c'est noté dans #163.

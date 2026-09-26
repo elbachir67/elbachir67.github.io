@@ -97,6 +97,8 @@ d'un tuteur IA encadré.
 | US-71 | EP3 | Migration de Structures de Données et Algorithmes Avancés (4 séances rédigées) | M | 5 | 7 |
 | US-72 | EP3 | Migration d'Introduction à l'IA (5 séances rédigées) | M | 8 | 7 |
 | US-73 | EP3 | Les figures de PRC, régénérées en SVG et à un chemin relatif | M | 2 | 8 |
+| US-74 | EP3 | La numérotation des séances est continue (Introduction à l'IA) | M | 2 | 8 |
+| US-75 | EP3 | Rien de non publiable dans un PDF non plus (le contrôle lit leur texte) | M | 3 | 8 |
 
 ### Stories décrites par le PO
 
@@ -224,6 +226,20 @@ sont absentes, et les cinq scripts qui les produisent écrivent en PNG vers `/ho
 un chemin absolu d'une autre machine. Le PO l'a ajoutée au Sprint 8 en portant la capacité à 23,
 et a reporté la migration de PRC elle-même au Sprint 9 : la chaîne d'abord, le cours ensuite.
 
+**US-74 — un cours qui saute de 3 à 5.** Le PO : « un cours qui saute de 3 à 5 donne
+l'impression qu'il manque une séance, ce qui est exactement ce que je voulais éviter ». Introduction
+à l'IA compte cinq séances ; le site en affichait 1, 2, 3, 5, 6, parce que la numérotation des
+dossiers de `_import/` ne suivait pas celle des séances. La correction est à la source, et les
+adresses des deux dernières séances changent.
+
+**US-75 — le contrôle du non publiable ne lisait pas les PDF.** Huit PDF déjà en ligne portent le
+sigle GLSI, 43 fois. `verifier_non_publiable.py` lit les noms de fichiers et le texte des pages
+HTML ; le contrôle des numéros de téléphone, une étape plus haut dans la même CI, extrait bien le
+texte des PDF avec `pdftotext`. C'est le même angle mort que la « leçon du 404 » du Sprint 7 : un
+contrôle qui ne regarde pas là où le contenu est. Le PO a tranché le sort des trois PDF de
+Structures de Données : `lab-4` et `projet-3` sont **retirés du site** en attendant qu'il reprenne
+leurs sources — elles ont divergé — et `tp-1` est recompilé après correction de son encodage.
+
 ## Roadmap
 
 | Sprint | Objectif | Pts |
@@ -235,6 +251,6 @@ et a reporté la migration de PRC elle-même au Sprint 9 : la chaîne d'abord, l
 | 5 | Du contenu : un deuxième cours en ligne | 14 livrés sur 19 |
 | 6 | Les cours rédigés entrent dans la chaîne | 26 livrés sur 26 |
 | 7 | Achever le C, publier le ML, préparer les cours rédigés | 41 livrés sur 20 |
-| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 23 |
+| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 28 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.

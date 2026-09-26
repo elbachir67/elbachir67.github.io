@@ -2,7 +2,7 @@
 
 **Objectif :** le catalogue dit la vérité sur l'offre de cours, chaque cours sait de quels autres il
 dépend, et trois cours de plus sont en ligne.
-**Capacité :** 23 points (21 à la composition, plus les 2 points d'US-73, ajoutée par le PO au vu de l'inventaire)
+**Capacité :** 28 points — 21 à la composition, puis les ajouts du PO en cours de sprint : US-73 (2), US-74 (2) et US-75 (3)
 
 ## Entrées PO
 
@@ -20,7 +20,7 @@ PO. Seul son travail de chaîne (US-73) entre dans ce sprint, parce que la migra
 
 ## Ordre d'exécution
 
-US-68 → US-66 → US-67 → US-69 → US-70 → US-73.
+US-68 → US-66 → US-75 → US-74 → US-67 → US-69 → US-70 → US-73.
 
 ---
 
@@ -91,6 +91,38 @@ et au bon endroit, afin que la migration de PRC ne bute pas dessus au Sprint 9.
       fichier.
 - [ ] Aucune migration : cette story prépare, elle ne publie pas.
 - [ ] Les figures produites sont montrées au PO — **en les regardant**, règle de `CLAUDE.md` §7.
+
+### US-74 — La numérotation des séances est continue (2 pts)
+
+En tant qu'étudiant, je veux que les séances d'un cours se suivent sans trou,
+afin de ne pas croire qu'il en manque une.
+
+- [ ] Introduction à l'IA affiche **1, 2, 3, 4, 5** et non 1, 2, 3, 5, 6. Le cours compte cinq
+      séances : la numérotation des dossiers de `_import/` ne suivait pas celle des séances
+      (§6 de l'inventaire).
+- [ ] La correction se fait **à la source** — les `.tex` de `_sources/` et leurs copies
+      d'`_import/` — puis l'import est rejoué : descriptions de page et renvois d'une séance à
+      l'autre compris.
+- [ ] Les fichiers, le manifeste et les ressources suivent la même numérotation.
+- [ ] Les adresses des deux dernières séances changent : la PR dit lesquelles, et vérifie
+      qu'aucun lien du site n'y menait.
+
+### US-75 — Rien de non publiable dans un PDF non plus (3 pts)
+
+En tant que PO, je veux que le contrôle du non publiable lise aussi les PDF,
+afin qu'un terme interdit ne parte pas en ligne dans une pièce jointe.
+
+- [ ] `scripts/verifier_non_publiable.py` extrait le **texte des PDF** servis par le site et y
+      cherche les mêmes termes que dans les pages. `pdftotext` est déjà installé par la CI, une
+      étape plus haut, pour le contrôle des numéros de téléphone.
+- [ ] Le contrôle est écrit **avant** les corrections : il doit d'abord échouer sur les huit PDF
+      fautifs, et la PR le montre.
+- [ ] `lab-4-arbres-et-tas.pdf` et `projet-3-tas-binaire.pdf` sont **retirés du site** — leurs
+      sources ont divergé, le PO les reprendra (noté dans #163). Rien n'est recompilé pour eux.
+- [ ] `tp-1-mise-en-place.pdf` est recompilé après correction de la séquence UTF-8 invalide de sa
+      source (ligne 189) : c'est un défaut de source, pas de contenu.
+- [ ] Les cinq PDF du cours de C sont traités selon ce que dit leur source : recompilés si elle est
+      saine, signalés sinon.
 
 ---
 
