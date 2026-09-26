@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" font-family="inherit">
+  <defs><marker id="figO_miroir-fo" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 z" fill="#cc1f1f" /></marker>
+  <marker id="figO_miroir-fog" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 z" fill="#2a6b46" /></marker></defs>
+  <rect x="0" y="0" width="900" height="430" fill="none" />
+
+  <text x="225" y="34" text-anchor="middle" font-size="14" font-weight="bold" fill="#cc1f1f">Lab 4 : appel SYNCHRONE en panne</text>
+  <rect x="60" y="60" width="140" height="54" rx="8" fill="#ea7d2b" />
+  <text x="130" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="white">backend</text>
+  <text x="130" y="100" text-anchor="middle" font-size="9" fill="white">confirmer()</text>
+  <rect x="260" y="60" width="150" height="54" rx="8" fill="none" stroke="#cc1f1f" stroke-width="2.5" stroke-dasharray="7,4" />
+  <text x="335" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="#cc1f1f">livraison-service</text>
+  <text x="335" y="100" text-anchor="middle" font-size="9" fill="#cc1f1f">ETEINT</text>
+  <line x1="200" y1="87" x2="256" y2="87" stroke="#cc1f1f" stroke-width="2.5" marker-end="url(#figO_miroir-fo)" />
+  <text x="225" y="150" text-anchor="middle" font-size="11" fill="currentColor">il FAUT une reponse maintenant :</text>
+  <text x="225" y="168" text-anchor="middle" font-size="11" fill="currentColor">timeout apres 2 s, puis</text>
+  <text x="225" y="192" text-anchor="middle" font-size="13" font-weight="bold" fill="#cc1f1f">503 — la confirmation EST MORTE</text>
+  <text x="225" y="222" text-anchor="middle" font-size="10" fill="currentColor">couplage temporel : les deux services</text>
+  <text x="225" y="238" text-anchor="middle" font-size="10" fill="currentColor">doivent etre vivants au meme instant</text>
+
+  <line x1="450" y1="44" x2="450" y2="400" stroke="currentColor" stroke-width="1" stroke-dasharray="6,5" />
+
+  <text x="675" y="34" text-anchor="middle" font-size="14" font-weight="bold" fill="#2a6b46">Lab 5 : evenement ASYNCHRONE en panne</text>
+  <rect x="500" y="60" width="130" height="54" rx="8" fill="#ea7d2b" />
+  <text x="565" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="white">backend</text>
+  <text x="565" y="100" text-anchor="middle" font-size="9" fill="white">publie et continue</text>
+  <rect x="660" y="60" width="90" height="54" rx="8" fill="#a8322d" />
+  <text x="705" y="83" text-anchor="middle" font-size="10" font-weight="bold" fill="white">RabbitMQ</text>
+  <text x="705" y="100" text-anchor="middle" font-size="8" fill="white">3 msgs en attente</text>
+  <rect x="780" y="60" width="110" height="54" rx="8" fill="none" stroke="#7a3a9c" stroke-width="2.5" stroke-dasharray="7,4" />
+  <text x="835" y="83" text-anchor="middle" font-size="10" font-weight="bold" fill="#7a3a9c">paiement-svc</text>
+  <text x="835" y="100" text-anchor="middle" font-size="9" fill="#7a3a9c">ETEINT</text>
+  <line x1="630" y1="87" x2="656" y2="87" stroke="#2a6b46" stroke-width="2.5" marker-end="url(#figO_miroir-fog)" />
+  <text x="675" y="150" text-anchor="middle" font-size="11" fill="currentColor">personne n'attend de reponse :</text>
+  <text x="675" y="168" text-anchor="middle" font-size="11" fill="currentColor">les confirmations REUSSISSENT,</text>
+  <text x="675" y="192" text-anchor="middle" font-size="13" font-weight="bold" fill="#2a6b46">les messages ATTENDENT dans la queue</text>
+  <text x="675" y="222" text-anchor="middle" font-size="10" fill="currentColor">au redemarrage : rattrapage integral,</text>
+  <text x="675" y="238" text-anchor="middle" font-size="10" fill="currentColor">[PAIEMENT] x3 — zero message perdu</text>
+
+  <rect x="90" y="280" width="720" height="100" rx="10" fill="none" stroke="currentColor" stroke-width="2" />
+  <text x="450" y="310" text-anchor="middle" font-size="12" font-weight="bold" fill="currentColor">La regle de decision du semestre</text>
+  <text x="450" y="336" text-anchor="middle" font-size="11" fill="currentColor">Il FAUT une reponse pour continuer (assignation, ETA) : appel synchrone — et on assume le couplage temporel.</text>
+  <text x="450" y="358" text-anchor="middle" font-size="11" fill="currentColor">On INFORME d'un fait (SMS, paiement, stats...) : evenement asynchrone — et les pannes deviennent des retards.</text>
+  <text x="450" y="410" text-anchor="middle" font-size="12" fill="currentColor">La meme panne, deux destins : c'est le choix d'integration qui decide, pas la chance.</text>
+</svg>
