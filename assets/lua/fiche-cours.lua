@@ -44,6 +44,66 @@ local function liste(titre, elements)
   return { pandoc.Header(2, titre), pandoc.BulletList(puces) }
 end
 
+-- Graphe des cours (US-67) : qui vient avant qui. Les deux sources du catalogue sont lues, parce
+-- qu'un prérequis peut désigner un cours qui n'est pas encore en ligne — il s'affiche alors sans
+-- lien, en texte simple.
+--
+-- La relation inverse — « Ce cours prépare à » — n'est **jamais saisie** : elle se calcule en
+-- parcourant les prérequis de tous les autres cours. Saisir les deux sens, c'est accepter qu'ils
+-- divergent.
+local function tous_les_cours()
+  local liste = {}
+
+  -- Cours publiés : un dossier par cours, son slug est le nom du dossier.
+  local dossier = pandoc.path.join({ quarto.project.directory, "cours" })
+  local ok, entrees = pcall(pandoc.system.list_directory, dossier)
+  if ok then
+    table.sort(entrees)
+    for _, slug in ipairs(entrees) do
+      local fichier = io.open(pandoc.path.join({ dossier, slug, "cours.yml" }), "r")
+      if fichier then
+        local contenu = fichier:read("a")
+        fichier:close()
+        local meta = pandoc.read("---\n" .. contenu .. "\n---\n", "markdown").meta
+        table.insert(liste, { slug = slug, titre = meta.titre, en_ligne = true,
+                              prerequis = meta["prerequis-cours"] })
+      end
+    end
+  end
+
+  -- Cours à venir : une entrée de enseignement/cours.yml, avec son champ slug.
+  local catalogue = io.open(pandoc.path.join({ quarto.project.directory, "enseignement", "cours.yml" }), "r")
+  if catalogue then
+    local contenu = catalogue:read("a")
+    catalogue:close()
+    local meta = pandoc.read("---\n" .. contenu .. "\n---\n", "markdown").meta
+    for _, entree in ipairs(meta.cours or {}) do
+      if entree.slug then
+        table.insert(liste, { slug = texte(entree.slug), titre = entree.titre, en_ligne = false,
+                              prerequis = entree["prerequis-cours"] })
+      end
+    end
+  end
+  return liste
+end
+
+-- Un cours désigné par son slug : lien s'il est en ligne, texte simple sinon (US-67).
+local function lien_vers(slug, catalogue)
+  for _, autre in ipairs(catalogue) do
+    if autre.slug == slug then
+      local titre = autre.titre or pandoc.Inlines(slug)
+      if autre.en_ligne then
+        return pandoc.Inlines({ pandoc.Link(titre, "/cours/" .. slug .. "/") })
+      end
+      -- Le cours existe au catalogue mais n'a pas de page : le nommer sans promettre un lien.
+      return pandoc.Inlines(titre) ..
+        pandoc.Inlines({ pandoc.Space(), pandoc.Emph(pandoc.Inlines("(bientôt en ligne)")) })
+    end
+  end
+  -- Slug inconnu : la CI l'interdit (scripts/verifier_catalogue.py), et le rendu ne l'invente pas.
+  return pandoc.Inlines({ pandoc.Code(slug) })
+end
+
 local function fiche(cours)
   local reperes = {}
   local niveaux = {}
@@ -65,7 +125,32 @@ local function fiche(cours)
     blocs:insert(pandoc.Para(pandoc.Inlines(table.concat(reperes, " · "))))
   end
   blocs:extend(liste("Objectifs", cours.objectifs))
-  blocs:extend(liste("Prérequis", cours.prerequis))
+
+  -- Prérequis (US-67) : les cours du site d'abord, en liens, puis les prérequis en texte libre.
+  -- Un étudiant lit une seule liste — ce qu'il doit avoir fait avant —, et la distinction entre
+  -- les deux champs reste dans les données, où elle sert.
+  local catalogue = tous_les_cours()
+  local prerequis = pandoc.List({})
+  for _, slug in ipairs(cours["prerequis-cours"] or {}) do
+    prerequis:insert(lien_vers(texte(slug), catalogue))
+  end
+  for _, libre in ipairs(cours.prerequis or {}) do
+    prerequis:insert(libre)
+  end
+  blocs:extend(liste("Prérequis", #prerequis > 0 and prerequis or nil))
+
+  -- « Ce cours prépare à » : la relation inverse, calculée et jamais saisie.
+  local moi = pandoc.path.filename(pandoc.path.directory(quarto.doc.input_file))
+  local suites = pandoc.List({})
+  for _, autre in ipairs(catalogue) do
+    for _, slug in ipairs(autre.prerequis or {}) do
+      if texte(slug) == moi then
+        suites:insert(lien_vers(autre.slug, catalogue))
+      end
+    end
+  end
+  blocs:extend(liste("Ce cours prépare à", #suites > 0 and suites or nil))
+
   return blocs
 end
 
