@@ -174,10 +174,12 @@ Le cours le plus complet de ceux qui ne sont pas en ligne : cinq CM et neuf labs
 Le découpage en séances est une décision du PO : rien dans `_import/` ne dit comment les cinq CM et
 les neuf labs se répartissent sur le semestre.
 
-**Estimation : 8 points** pour les cinq séances et les neuf labs — **reportés au Sprint 9** par le
-PO —, **plus 2 points de chaîne** pour la régénération des figures en SVG, qui entrent au Sprint 8
-sous **US-73** : la chaîne d'abord, le cours ensuite. Les 19 textes alternatifs suivront les
-figures, pas avant.
+**Estimation : 8 points** pour les cinq séances et les neuf labs, **reportés au Sprint 9** par le
+PO. Les **2 points de chaîne** sont faits : **US-73** a régénéré les dix-neuf figures. Restent les
+19 textes alternatifs, qui suivront les figures.
+
+**Les deux obstacles de ce cours sont levés** : le sigle GLSI est retiré des quatorze sources, et
+les figures existent. La migration de PRC n'attend plus que son tour.
 
 **Domaine tranché par le PO (26/09) : « Programmation, Web & Mobile »**, et non plus « Génie
 Logiciel & Architecture » — les neuf labs sont du React, du Flask, du Leaflet et du Docker.
@@ -300,10 +302,24 @@ lab 1, qui n'existe pas.
 
 ## 5. Manques de chaîne révélés par l'inventaire
 
-Un seul, et il est chiffré. Il est devenu **US-73** au Sprint 8 : **les figures de PRC sont en PNG
-et pointent vers un chemin absolu étranger**. Les cinq scripts qui les produisent sont présents et
-corrects quant aux noms ; il manque de les faire écrire des SVG au bon endroit. Estimé
-**2 points**, à la source. Sans cela, les cinq CM
+Un seul, et il est chiffré. Il est devenu **US-73** au Sprint 8, et il est **levé**. Les figures de
+PRC étaient en PNG et pointaient vers `/home/claude/cmN/figures/`, un chemin absolu d'une autre
+machine où rien ne pouvait les écrire. Les cinq scripts écrivent maintenant dans `figures/`, à côté
+d'eux — le dossier que les `.tex` désignent par `\graphicspath` —, et en **deux formats** : le SVG
+qu'incorpore la page du site, et le PNG que compile `pdflatex`, parce que les `.tex` citent `.png`
+et que s'en priver rendrait les CM incompilables. L'importeur, lui, ignore l'extension citée et
+cherche le SVG du même nom.
+
+**Les dix-neuf figures existent**, aux dix-neuf noms exacts que les cinq CM appellent, vérifié nom
+par nom, et elles ont été regardées une par une. La plus lourde pèse **15 Ko transférés**, très loin
+des 300 Ko de la règle. Une seule portait un défaut de mise en page — l'étiquette « 120h »
+disparaissait sous la légende de `fig01_cout_reutilisation` —, corrigé en relevant le plafond de
+l'axe, sans toucher à une valeur.
+
+Un second manque a été révélé et levé pendant le sprint, **US-78** : le convertisseur prenait le `$`
+d'un gabarit JavaScript pour une formule, et trois fichiers de PRC en dépendaient. L'énoncé
+d'origine de ce paragraphe disait « sans cela, les cinq CM de PRC ne peuvent pas être migrés » :
+c'est vrai deux fois, et les deux obstacles sont tombés. Sans cela, les cinq CM
 de PRC ne peuvent pas être migrés, ou le seraient avec dix-neuf figures manquantes.
 
 Les neuf SVG du Lab 0 de DevOps posent une question voisine mais plus petite : elles existent et
@@ -322,7 +338,7 @@ expliqués, et la liste est ici pour qu'ils ne soient pas rouverts au prochain i
 | **Introduction au ML, séances 1 et 2** | Elles recouvrent le cours de Programmation Python et **ne seront pas migrées**. Le cours commence à la séance 3, et c'est voulu. | La page du cours le dit et renvoie à Python. Reste la question d'un étudiant qui arrive directement sur la séance 3 : décision de contenu du PO. |
 | **Structures de Données, séances 5 à 7** | Elles sont **à venir** et seront fournies par le PO. | Le cours affiche quatre séances, et rien n'indique qu'il en manque. C'est l'état voulu. |
 | **US-70, cours à labs seuls** | **Programmation Frontend 2**, sur la recommandation de cet inventaire. | Sept labs, aucune figure ; trois numéros de téléphone d'exemple à remplacer à l'import. |
-| **PRC** | Migration **reportée au Sprint 9**. Seul son travail de chaîne entre au Sprint 8, sous **US-73**. | La capacité du Sprint 8 passe de 21 à 23 points. |
+| **PRC** | Migration **reportée au Sprint 9**. Seul son travail de chaîne entre au Sprint 8, sous **US-73**. | **Fait** : les dix-neuf figures sont générées, en SVG et en PNG. |
 | **Programmation Frontend 2, niveau** | **L2 et L3.** Le `README.txt` du cours, qui dit « L3 », est périmé. | Le catalogue est juste ; `cours.yml` reprendra L2 et L3 à l'import (US-70). |
 | **PRC, domaine** | **« Programmation, Web & Mobile »**, et non « Génie Logiciel & Architecture ». | Corrigé au catalogue. |
 | **PDF publiés portant « GLSI »** | Le contrôle doit lire le texte des PDF : **US-75**, 3 pts, dans ce sprint, le contrôle d'abord. | `lab-4` et `projet-3` sont **retirés du site** — sources divergentes, le PO les reprendra (#163). `tp-1` est recompilé après correction de son encodage. |
