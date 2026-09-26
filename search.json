@@ -3915,10 +3915,422 @@
     "href": "cours/architectures-logicielles-modernes/index.html#séances",
     "title": "Architectures Logicielles Modernes",
     "section": "Séances",
-    "text": "Séances\n\n\n\nSéance\nContenu\nFormat\n\n\n\n\nArchitectures Logicielles — Séance 1\ndette architecturale, attributs de qualité, couplage, cohésion et refactoring vers une architecture en couches.\n PDF\n\n\nArchitectures Logicielles — Séance 2\nL’hexagone : mettre le domaine au centre, la technique en périphérie\n PDF",
+    "text": "Séances\n\n\n\nSéance\nContenu\nFormat\n\n\n\n\nArchitectures Logicielles — Séance 1\ndette architecturale, attributs de qualité, couplage, cohésion et refactoring vers une architecture en couches.\n PDF\n\n\nArchitectures Logicielles — Séance 2\nL’hexagone : mettre le domaine au centre, la technique en périphérie\n PDF\n\n\nArchitectures Logicielles — Séance 3\nLe monolithe modulaire : des frontières entre les métiers, vérifiées par un test\n PDF · TP (488 Ko)\n\n\nArchitectures Logicielles — Séance 4\nL’extraction : un module quitte le monolithe et devient un microservice\n PDF · TP (544 Ko)\n\n\nArchitectures Logicielles — Séance 5\nL’asynchrone : RabbitMQ, ou l’art de ne plus mourir ensemble\n PDF · TP (455 Ko)",
     "crumbs": [
       "Présentation"
     ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#objectifs-de-la-séance",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#objectifs-de-la-séance",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Objectifs de la séance",
+    "text": "Objectifs de la séance\n\n\n\n\n\n\n\nContenu\n\n\nLe module livraison quitte le monolithe : il devient livraison-service, un microservice FastAPI en Python, extrait selon le pattern Strangler Fig. L’appel qui traversait la JVM traverse désormais le réseau — avec ses promesses (déploiement indépendant, écosystème Python) et ses dangers, que nous éprouverons en provoquant une panne. Au passage : docker compose orchestre nos quatre conteneurs, et une carte Leaflet de Dakar suit le livreur en temps réel.\n\n\n\n\n\nSavoir répondre à la vraie question : quand un microservice mérite-t-il son coût ?\nExtraire sans interrompre : le pattern Strangler Fig, rendu possible par le modulith.\nMesurer ce que change un appel réseau — latence, pannes, et la troisième issue.\nOrchestrer avec docker compose ; visualiser avec Leaflet — zéro clé API.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#la-demande-de-la-direction",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#la-demande-de-la-direction",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "La demande de la direction",
+    "text": "La demande de la direction\n\n\n\n\n\n\n\nLe scénario\n\n\nLa direction veut faire évoluer le calcul d’itinéraires : optimisation, trafic, géospatial — le terrain de l’écosystème Python (geopandas, OR-Tools). Et déployer ces évolutions chaque semaine, sans redéployer SénResto.\n\n\n\n\n\nDeux besoins qu’un monolithe, même modulaire, ne peut pas offrir : une autre technologie pour un module, et un déploiement indépendant — les deux bonnes raisons classiques, avec une troisième : le dimensionnement indépendant.\n\n\n\n\n\n\n\n\nLes mauvaises raisons existent aussi\n\n\n« C’est moderne », « Netflix le fait », « le CV »… Un microservice injustifié, c’est tout le coût du réseau sans aucun bénéfice. La charge de la preuve incombe toujours à l’extraction.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#pourquoi-livraison-et-pas-un-autre",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#pourquoi-livraison-et-pas-un-autre",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Pourquoi livraison — et pas un autre ?",
+    "text": "Pourquoi livraison — et pas un autre ?\nLes critères d’un bon candidat à l’extraction, appliqués à nos modules :\n\n\n\nCritère\nlivraison\ncontre-exemple\n\n\n\n\nFrontière déjà nette\noui (Lab 3)\n—\n\n\nAPI étroite\n3 opérations\ncommandes : au cœur de tout\n\n\nDonnées peu partagées\nles livreurs\ncatalogue : lu par tous\n\n\nRaison technologique\nPython géo\nnotifications : aucune\n\n\nRaison de déploiement\névolutions fréquentes\npartage : jamais\n\n\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nOn n’extrait pas « les modules » : on extrait un module, celui dont l’extraction a une raison d’être. Les autres restent — et c’est très bien ainsi. Votre ADR no4 devra défendre ce choix et les non-choix.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#lidée-simple-déménager-sans-fermer",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#lidée-simple-déménager-sans-fermer",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "L’idée simple : déménager sans fermer",
+    "text": "L’idée simple : déménager sans fermer\n\n\n\n\n\n\n\nLa boutique du coin\n\n\nUn boutiquier veut plus grand. Il ne ferme pas pour tout casser : il construit la nouvelle boutique juste à côté, puis déplace un rayon à la fois. Les clients achètent tous les jours, sans rien remarquer. Un rayon pose problème ? Il le ramène. L’ancienne est vide ? Il la ferme.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#la-boutique-mot-pour-mot-dans-notre-lab",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#la-boutique-mot-pour-mot-dans-notre-lab",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "La boutique, mot pour mot, dans notre lab",
+    "text": "La boutique, mot pour mot, dans notre lab\n\nla nouvelle boutique \\(=\\) livraison-service (Python), construit à côté du monolithe qui continue de tourner ;\ndéplacer le rayon des boissons \\(=\\) basculer un seul module (livraison) vers le nouveau service ;\nles clients ne remarquent rien \\(=\\) l’application fonctionne à chaque instant ;\nramener le rayon si problème \\(=\\) le retour arrière, gratuit (un profil Spring) ;\nfermer l’ancienne boutique vide \\(=\\) supprimer le code que plus personne n’appelle.\n\n(Le nom officiel, Strangler Fig, vient d’un arbre. Retenez la boutique.)",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-figuier-étrangleur",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-figuier-étrangleur",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Le figuier étrangleur",
+    "text": "Le figuier étrangleur\n\n\n\n\n\n\n\nDéfinition (Martin Fowler, 2004)\n\n\nPlutôt que réécrire d’un bloc (le « big bang », qui échoue presque toujours), on fait pousser le nouveau autour de l’ancien, on migre progressivement, et l’ancien meurt quand plus rien ne l’appelle. À chaque instant, l’application fonctionne.\n\n\n\n\n\n  \n    \n      \n    \n  \n  \n\n  \n  1. Avant\n  \n  Monolithe modulaire\n  \n  catalogue\n  \n  commandes\n  \n  livraison\n  \n  paiement\n  \n  notifications, rest, partage\n  frontieres nettes, gardees\n  par verify() : pret a extraire\n\n  \n  2. Cohabitation (ce lab)\n  \n  Monolithe\n  \n  catalogue\n  \n  commandes\n  \n  livraison = FACADE\n  meme API, delegue en HTTP\n  \n  les autres modules\n\n  \n  livraison-service\n  FastAPI (Python)\n  ses donnees, sa vie, son deploiement\n  \n  HTTP\n\n  \n  3. Plus tard, si justifie\n  \n  Monolithe recentre\n  \n  catalogue\n  \n  commandes\n  la facade livraison a disparu\n\n  \n  livraison-service\n  autonome, equipe dediee\n  \n\n  chaque module ne part que\n  si une raison le justifie —\n  la plupart resteront\n\n  Le figuier etrangleur : le nouveau pousse autour de l'ancien, qui continue de fonctionner a chaque instant.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#pourquoi-pas-le-big-bang",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#pourquoi-pas-le-big-bang",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Pourquoi pas le big bang ?",
+    "text": "Pourquoi pas le big bang ?\nL’autre méthode — « on ferme, on reconstruit tout, on rouvre dans six mois » — échoue presque toujours. Trois raisons simples :\n\nSix mois sans rien vendre : pendant la réécriture, rien n’est livré — et les besoins, eux, continuent de changer.\nTout change le même jour : si ça casse à l’ouverture, impossible de revenir en arrière.\nOn apprend trop tard : les vrais problèmes se découvrent après avoir tout construit.\n\n\n\n\n\n\n\n\nLes trois règles du figuier\n\n\n1. Le nouveau se construit à côté, jamais à la place. 2. Chaque bascule peut être annulée — chez nous : un profil Spring. 3. L’ancien code n’est supprimé que quand plus personne ne l’appelle.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-modulith-paie-ses-dividendes",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-modulith-paie-ses-dividendes",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Le modulith paie ses dividendes",
+    "text": "Le modulith paie ses dividendes\n\nExtraire livraison du God controller du Lab 1 aurait exigé des semaines d’archéologie. Aujourd’hui, la frontière est déjà tracée, l’API déjà étroite (assigner, liberer, tous), les données déjà isolées.\nLa clé du lab : AssignationLivreurs reste en place, même API pour commandes — mais devient une façade qui délègue en HTTP. commandes ne saura jamais que livraison a déménagé.\n\n\n\n\n\n\n\n\nÀ retenir — la phrase du semestre\n\n\n« Monolith first, microservices when justified » n’était pas de la prudence : c’était une stratégie. Le monolithe modulaire est le meilleur brouillon d’un système distribué — chaque frontière interne est une extraction en attente, qu’on ne paiera que si elle se justifie.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#ce-que-change-une-flèche-qui-sort-du-processus",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#ce-que-change-une-flèche-qui-sort-du-processus",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Ce que change une flèche qui sort du processus",
+    "text": "Ce que change une flèche qui sort du processus\n\n  \n    \n      \n    \n    \n      \n    \n  \n  \n\n  \n  Hier : dans la meme JVM\n  \n  commandes\n  confirmer()\n  \n  livraison\n  assigner(quartier)\n  \n  un appel de methode :\n  ~100 nanosecondes, ne rate jamais,\n  reussit ou leve une exception claire\n\n  \n\n  \n  Aujourd'hui : a travers le reseau\n  \n  backend\n  confirmer()\n  \n  livraison-service\n  POST /assignations\n  \n  \n  requete\n  reponse... peut-etre\n\n  un appel HTTP : ~des millisecondes (10 000x plus),\n  et TROIS issues possibles :\n  1. reponse OK\n  2. reponse d'erreur (409, 500...)\n  3. PAS de reponse du tout (timeout, panne)\n  — et dans le cas 3, l'assignation a-t-elle eu lieu ?\n  Impossible de le savoir. Bienvenue dans le distribue.\n\n  Le reseau n'est ni fiable, ni instantane, ni gratuit : chaque fleche rouge est une decision d'architecture.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-lexique-du-distribué",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-lexique-du-distribué",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Le lexique du distribué",
+    "text": "Le lexique du distribué\nQuatre mots que ce lab installe pour de bon :\n\n\n\n\n\n\n\nLatence\nle temps aller-retour d’un appel ;  100 ns en JVM, des millisecondes en HTTP — un facteur 10,000\n\n\n\n\nTimeout\nla durée maximale qu’on accepte d’attendre avant de déclarer l’échec ; toujours explicite, jamais infini\n\n\n503\nService Unavailable : « je vais bien, mais quelqu’un dont je dépends ne répond pas — réessayez »\n\n\nCouplage temporel\ndeux services qui doivent être vivants au même instant pour coopérer — la vraie dette du synchrone\n\n\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nUn timeout n’est pas un aveu d’échec : c’est une décision d’architecte — combien de temps la confirmation d’une commande a-t-elle le droit de retenir un client ?",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#les-huit-illusions-du-réseau",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#les-huit-illusions-du-réseau",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Les huit illusions du réseau",
+    "text": "Les huit illusions du réseau\nPeter Deutsch (Sun, 1994) a listé les huit croyances fausses que tout débutant du distribué paie un jour :\n\n\n\nLe réseau est fiable\nLa latence est nulle\nLa bande passante est infinie\nLe réseau est sûr\n\n\n\nLa topologie ne change pas\nIl y a un administrateur\nTransporter ne coûte rien\nLe réseau est homogène\n\n\n\n\n\n\n\n\n\nCelles qui nous mordent aujourd’hui\n\n\nLa no1 justifie nos timeouts et le 503 ; la no2, notre réflexion avant chaque extraction ; la no5, l’usage des noms de services dans compose plutôt que des adresses. Les cinq autres vous attendent en entreprise.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#la-troisième-issue",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#la-troisième-issue",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "La troisième issue",
+    "text": "La troisième issue\n\n\n\n\n\n\n\nLe vrai piège du distribué\n\n\nUn appel de méthode a deux issues : il réussit, ou il lève une exception. Un appel réseau en a trois : réponse OK, réponse d’erreur… ou pas de réponse du tout. Et dans ce troisième cas, impossible de savoir si l’opération a eu lieu côté serveur — le livreur a-t-il été réservé ? Vous ne le savez pas.\n\n\n\n\n\nD’où les outils du distribué que ce cours introduit : timeouts (ne pas attendre éternellement), codes d’erreur traduits (503 quand le service est injoignable), et — au Lab 5 — l’asynchrone et l’idempotence.\nRègle d’hygiène : chaque appel réseau sortant a un timeout explicite et un comportement d’échec décidé. Jamais d’appel « optimiste ».\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nLa latence est 10,000 fois supérieure et l’échec devient un cas normal. Un microservice, c’est un module qui a accepté ce contrat — c’est pour cela qu’on n’extrait pas sans raison.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-contrat-http-du-nouveau-service",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-contrat-http-du-nouveau-service",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Le contrat HTTP du nouveau service",
+    "text": "Le contrat HTTP du nouveau service\nL’API du module devient une API HTTP — traduction presque mot à mot :\nPOST   /assignations   {\"quartier\": \"Medina\", \"restaurant_quartier\": \"Ouakam\"}\n   200 {\"livreur_id\": 1, \"livreur_nom\": \"Ibrahima Ndiaye\", \"eta_minutes\": 43}\n   409 {\"erreur\": \"Aucun livreur disponible pour le moment, ...\"}\nDELETE /assignations/1          # liberer le livreur 1\nGET    /livreurs                # la liste (pour l'onglet Livreurs)\nGET    /livreurs/1/position     # {\"latitude\": ..., \"longitude\": ...}  (carte)\n\nMême vocabulaire, mêmes règles, mêmes messages d’erreur : le contrat métier survit au changement de langage. Seule la syntaxe d’appel change.\nLe trajet est réel : livreur \\(\\to\\) restaurant \\(\\to\\) client. Le service possède ses données (les livreurs) : c’est le principe database per service — plus de table livreur consultée par le monolithe.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#quatre-conteneurs-un-fichier",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#quatre-conteneurs-un-fichier",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Quatre conteneurs, un fichier",
+    "text": "Quatre conteneurs, un fichier\n\n  \n    \n      \n    \n  \n  \n\n  \n  \n  reseau docker compose — les services se parlent par leur NOM\n\n  \n  \n  Navigateur de l'etudiant\n  localhost:5173\n\n  \n  \n  frontend\n  React + Vite + react-leaflet\n  :5173 — onglet Carte de Dakar\n  \n\n  \n  \n  backend\n  Spring Boot (monolithe recentre)\n  :8080 — profil \"distribue\"\n\n  \n  \n  livraison-service\n  FastAPI (Python 3.12)\n  :8001 — assignations + positions\n\n  \n  \n  postgres :5432 (donnees du monolithe)\n  \n\n  \n  \n  /api (commandes)\n\n  \n  positions (carte)\n\n  \n  HTTP : http://livraison-service:8001\n  l'appel qui traversait la JVM traverse le reseau\n\n  Quatre conteneurs, un fichier docker-compose.yml — et une fleche rouge dont la panne fera tout le Lab 5.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#docker-compose-lorchestre-local",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#docker-compose-lorchestre-local",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "docker compose : l’orchestre local",
+    "text": "docker compose : l’orchestre local\nservices:\n  postgres:            # les donnees du monolithe\n    image: postgres:16\n  backend:             # Spring Boot, profil \"distribue\"\n    build: ./backend\n    environment:\n      - SPRING_PROFILES_ACTIVE=distribue\n      - LIVRAISON_URL=http://livraison-service:8001\n  livraison-service:   # FastAPI\n    build: ./livraison-service\n  frontend:            # React + la carte\n    build: ./frontend\n\nSur le réseau compose, le nom du service est son adresse : http://livraison-service:8001 — pas d’IP, pas de configuration réseau manuelle.\nUn seul geste pour tout l’orchestre : docker compose up --build. Et un seul pour la panne de tout à l’heure : docker compose stop livraison-service…",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#la-carte-dakar-en-temps-réel",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#la-carte-dakar-en-temps-réel",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "La carte : Dakar en temps réel",
+    "text": "La carte : Dakar en temps réel\n\nLeaflet + OpenStreetMap : la cartographie libre, zéro clé API, zéro compte — react-leaflet l’intègre à notre frontend en un composant.\nLe nouveau service expose la position simulée du livreur (interpolation restaurant \\(\\to\\) quartier du client au fil de l’ETA) ; le frontend l’interroge toutes les 3 secondes : le marqueur avance sur la carte de Dakar.\nCe n’est pas un gadget : c’est la démonstration du bénéfice — cette fonctionnalité vit entièrement dans le nouveau service, développable et déployable sans toucher au monolithe. La promesse de l’extraction, à l’écran.\n\n\n\n\n\n\n\n\nEn pratique au lab\n\n\nL’onglet « Carte » montre les restaurants (marqueurs fixes) et le livreur de la commande suivie (marqueur mobile). Quartiers, coordonnées : tout vient de QuartiersDakar — désormais propriété du service Python.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-chemin-du-lab-4",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#le-chemin-du-lab-4",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Le chemin du Lab 4",
+    "text": "Le chemin du Lab 4\n\n  \n    \n      \n    \n  \n\n  \n\n  \n\n  \n  \n  \n  lab4-depart\n  \n  = lab3-final\n  7 modules propres,\n  tout vit et meurt\n  dans un seul processus\n  \n\n  \n  \n  \n  lab4-etape1\n  \n  Le service Python\n  livraison-service FastAPI\n  assignations + positions,\n  teste au curl\n  \n\n  \n  \n  \n  lab4-etape2\n  \n  La facade HTTP\n  AssignationLivreurs\n  delegue au reseau ;\n  profil distribue\n  \n\n  \n  \n  \n  lab4-final\n  \n  Compose et carte\n  4 conteneurs, Leaflet,\n  livreur sur la carte —\n  puis LA panne\n  \n\n  Bloques ? git checkout du tag suivant : personne ne reste au bord de la route.\n\n\n\nPoint de départ : votre lab3-final. Et en clôture, une expérience dont le Lab 5 fera son affaire : docker compose stop livraison-service.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#votre-mission-daujourdhui",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#votre-mission-daujourdhui",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "Votre mission d’aujourd’hui",
+    "text": "Votre mission d’aujourd’hui\n\n\n\n\n\n\n\nRôle\nPilotage au Lab 4\n\n\n\n\nLe Doyen\nmerges, tags, ADR — et l’expérience de la panne au vidéoprojecteur\n\n\nL’Huissier\nles profils Spring (monolithe / distribué) et docker compose\n\n\nLe Rédacteur\nl’onglet Carte (react-leaflet, polling des positions)\n\n\nLe Notaire\nla façade HTTP : AdaptateurLivraisonHttp (RestClient, timeouts)\n\n\nL’Appariteur\nle service FastAPI : assignations, positions, données livreurs\n\n\n\n\n\n\n\n\n\n\nLe livrable individuel de la séance\n\n\nL’Architecte du jour signe l’ADR no4 : « Pourquoi extraire Livraison — et pourquoi pas les autres ? » — le premier ADR qui doit défendre des non-décisions.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#lessentiel-de-la-séance",
+    "href": "cours/architectures-logicielles-modernes/chapitres/04-l-extraction.html#lessentiel-de-la-séance",
+    "title": "Architectures Logicielles — Séance 4",
+    "section": "L’essentiel de la séance",
+    "text": "L’essentiel de la séance\n\n\n\n\n\n\n\nÀ retenir\n\n\n\nOn extrait un module pour trois raisons : technologie, déploiement indépendant, dimensionnement — jamais pour la mode. La charge de la preuve incombe à l’extraction.\nLe Strangler Fig : le nouveau pousse autour de l’ancien, l’application fonctionne à chaque instant — et le modulith avait déjà tracé la frontière.\nUn appel réseau a trois issues, coûte 10,000 fois plus cher, et exige timeout + comportement d’échec explicites.\ndocker compose : le nom du service est son adresse ; quatre conteneurs, un fichier, un geste.\n\n\n\n\n\n\n\n\n\n\n\n\nLa question qui ouvre la séance 5\n\n\nEn fin de lab, nous tuerons livraison-service… et la confirmation de commande mourra avec lui. Un service peut-il tomber sans entraîner les autres ? Réponse au Lab 5 : l’asynchrone — RabbitMQ, et des événements qui attendent patiemment le retour des absents.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 4"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#objectifs-de-la-séance",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#objectifs-de-la-séance",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Objectifs de la séance",
+    "text": "Objectifs de la séance\n\n\n\n\n\n\n\nContenu\n\n\nLe Lab 1 a rangé la maison : couches propres, responsabilités séparées. Cette séance s’attaque au problème qui reste : le métier dépend toujours de la technique. Nous allons inverser cette dépendance — ports & adaptateurs, l’architecture dite hexagonale — et en apporter la preuve par le swap : remplacer la base de données par une simple Map, sans toucher une ligne du domaine.\n\n\n\n\n\nComprendre pourquoi des couches propres ne suffisent pas : le sens des dépendances.\nMaîtriser le principe d’inversion de dépendances — et sa question clé : qui possède l’interface ?\nSavoir lire et construire une architecture ports & adaptateurs.\nEn vérifier le bénéfice au chronomètre : des tests du domaine en 2 secondes, sans base de données.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-le-lab-1-a-réglé-et-pas-réglé",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-le-lab-1-a-réglé-et-pas-réglé",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Ce que le Lab 1 a réglé — et pas réglé",
+    "text": "Ce que le Lab 1 a réglé — et pas réglé\n\n\n\n\n\n\n\nL’acquis du Lab 1\n\n\nTrois couches, des dépendances à sens unique, zéro SQL hors des repositories, les quartiers de Dakar à une seule adresse. Le God controller est mort : chaque responsabilité a une maison.\n\n\n\n\n\n\n\n\n\n\n\nL’exigence nouvelle\n\n\nLa direction de SénResto exige que les règles métier — frais, transitions de statut, calcul d’ETA — soient testées à chaque commit. Les tests d’intégration (Spring + BDD + HTTP) prennent plusieurs secondes chacun : trop lents. Il faut des tests unitaires du métier. Essayez d’en écrire un sur CommandeService… vous n’y arriverez pas proprement.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-chaîne-qui-emprisonne-le-métier",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-chaîne-qui-emprisonne-le-métier",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "La chaîne qui emprisonne le métier",
+    "text": "La chaîne qui emprisonne le métier\nSuivez les flèches de dépendance de CommandeService :\nCommandeService \\(\\to\\) CommandeRepository \\(\\to\\) JdbcTemplate \\(\\to\\) BDD\n\nPour instancier le service, il faut un repository ; pour le repository, un JdbcTemplate ; pour le JdbcTemplate, une base qui tourne.\nConclusion : impossible de tester la formule des frais sans démarrer toute la pile. Le métier est propre, mais prisonnier — trois étages au-dessus de la technique.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nLe problème n’est plus le désordre (Lab 1 l’a réglé) : c’est le sens des flèches. Tant que le métier pointe vers la technique, la technique dicte ses conditions au métier.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-principe-dinversion-de-dépendances",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-principe-dinversion-de-dépendances",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Le principe d’inversion de dépendances",
+    "text": "Le principe d’inversion de dépendances\n\n\n\n\n\n\n\nDéfinition\n\n\nPrincipe d’inversion de dépendances (DIP) : le code de haut niveau (le métier) ne doit pas dépendre du code de bas niveau (la technique). Les deux doivent dépendre d’abstractions — des interfaces. Et surtout : ces interfaces sont définies par le métier, selon ses besoins.\n\n\n\n\n\n  \n    \n      \n    \n    \n      \n    \n  \n\n  \n\n  \n  Aujourd'hui (couches)\n\n  \n  CommandeService\n  \n\n  \n  CommandeRepository\n  \n\n  \n  JdbcTemplate\n  \n\n  \n  BDD\n\n  le metier depend de la technique :\n  pas de BDD, pas de test\n\n  \n  \n\n  \n  Demain (inversion)\n\n  \n  Domaine (metier)\n\n  \n  interface CommandesPort\n  definie PAR le domaine\n\n  \n\n  \n  AdaptateurJdbc\n  implements CommandesPort\n\n  \n  la fleche\n  remonte !\n\n  la technique depend du metier :\n  le domaine ne connait plus la BDD",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-question-qui-change-tout",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-question-qui-change-tout",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "La question qui change tout",
+    "text": "La question qui change tout\n\n\n\n\n\n\n\nQui possède l’interface ?\n\n\nUne interface ne suffit pas à inverser quoi que ce soit : si CommandeRepository définit lui-même son interface dans le paquetage repository, le domaine qui l’importe dépend toujours de la persistance. L’inversion se joue sur la propriété : l’interface habite chez le domaine, écrite dans son vocabulaire.\n\n\n\n\n\nLe domaine déclare : « j’ai besoin qu’on me sauvegarde des commandes » — il écrit CommandesPort chez lui.\nLa technique répond : « je sais faire, en JDBC » — l’adaptateur implémente le port, et c’est donc lui qui importe le domaine. La flèche a remonté.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nInverser une dépendance, c’est déplacer la propriété du contrat : le métier ne demande plus la permission à la technique — il publie ses exigences, la technique s’y plie.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#larchitecture-hexagonale",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#larchitecture-hexagonale",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "L’architecture hexagonale",
+    "text": "L’architecture hexagonale\n\n\n\n\n\n\n\nDéfinition (Alistair Cockburn, 2005)\n\n\nL’architecture hexagonale (ports & adaptateurs) place le domaine au centre, entouré de ports — les interfaces qu’il définit. Les adaptateurs traduisent le monde extérieur vers les ports ou les implémentent. Règle unique : toutes les dépendances pointent vers le centre.\n\n\n\n\n\n  \n    \n      \n    \n  \n\n  \n\n  \n  \n  L'application (l'hexagone)\n\n  \n  \n  DOMAINE\n  regles metier, validation,\n  machine a etats, calculs\n  zero Spring, zero SQL, zero HTTP\n\n  \n  \n  PORT\n  entrant\n  (API metier)\n\n  \n  \n  PORT\n  sortant\n  persistance\n\n  \n  PORT\n  sortant\n  notification\n\n  \n  \n  Adaptateur\n  REST\n  controllers Spring\n\n  \n  \n  Adaptateur JDBC\n  H2 / PostgreSQL\n\n  \n  Adaptateur\n  InMemory\n\n  \n  Adaptateur SMS\n  console (System.out)\n\n  \n  \n  \n\n  \n  \n  \n\n  \n  \n  \n\n  \n\n  \n  \n\n  \n  Les ports sont des interfaces definies PAR le domaine ; les adaptateurs les implementent ou les appellent.\n  Toutes les fleches de dependance pointent vers le centre : le domaine ne depend de rien.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ports-entrants-ports-sortants",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ports-entrants-ports-sortants",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Ports entrants, ports sortants",
+    "text": "Ports entrants, ports sortants\n\n\n\n\n\n\n\n\n\nPort entrant\nPort sortant\n\n\n\n\nQui l’appelle ?\nle monde extérieur (REST, plus tard : messages)\nle domaine\n\n\nQui l’implémente ?\nle domaine\nun adaptateur technique (JDBC, SMS…)\n\n\nChez SénResto\n« créer une commande, la confirmer… »\n« sauvegarder, chercher un livreur, notifier »\n\n\n\n\n\n\n\n\n\n\nLe test du vocabulaire\n\n\nLisez un port à voix haute : s’il parle de SELECT, de JSON ou de HTTP, il est mal placé. CommandesPort.sauvegarder(commande) — du métier. executerRequete(sql) — de la technique déguisée.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#à-quoi-ressemble-un-port",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#à-quoi-ressemble-un-port",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "À quoi ressemble un port",
+    "text": "À quoi ressemble un port\nLe domaine écrit son besoin, dans son vocabulaire, chez lui :\npackage sn.ucad.senresto.domaine.port;\n\n/** Ce dont le metier des commandes a besoin — rien de plus. */\npublic interface LivreursPort {\n    Optional&lt;Livreur&gt; premierDisponible();\n    void reserver(long livreurId);\n    void liberer(long livreurId);\n}\n\nAucune annotation Spring, aucun mot technique : ce fichier compilerait en 2005 comme en 2035.\nL’adaptateur JDBC du Lab 1 devient : class AdaptateurLivreursJdbc implements LivreursPort — trois méthodes déjà écrites, seule l’appartenance change.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nAu Lab 2, vous n’écrirez presque pas de code nouveau : vous déplacerez la propriété du code existant. C’est un refactoring de frontières, pas une réécriture.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-moment-magique-changer-la-technique",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-moment-magique-changer-la-technique",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Le moment magique : changer la technique",
+    "text": "Le moment magique : changer la technique\n\n  \n    \n      \n    \n  \n\n  \n\n  \n  En production\n\n  \n  DOMAINE\n  inchange au caractere pres\n\n  \n\n  \n  CommandesPort\n  (interface)\n\n  \n\n  \n  AdaptateurJdbc\n  PostgreSQL / H2\n\n  demarrage complet, vraies donnees\n\n  \n  \n\n  \n  Dans les tests unitaires\n\n  \n  DOMAINE\n  le MEME, au caractere pres\n\n  \n\n  \n  CommandesPort\n  (la meme interface)\n\n  \n\n  \n  AdaptateurInMemory\n  une simple Map en memoire\n\n  zero Spring, zero BDD : verdict en 2 secondes\n\n  \n  On change la technique sans toucher une ligne du metier : c'est la preuve de l'inversion.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-métier-testé-en-deux-secondes",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-métier-testé-en-deux-secondes",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Le métier testé en deux secondes",
+    "text": "Le métier testé en deux secondes\nL’adaptateur in-memory — une Map — implémente les mêmes ports. Le test unitaire devient trivial :\n@Test\nvoid lesFraisDeLivraisonSuiventLeQuartier() {\n    var domaine = new CommandeMetier(new CommandesEnMemoire(),\n            new RestaurantsEnMemoire(), new LivreursEnMemoire(),\n            new NotificationsEnMemoire());\n    var commande = domaine.creer(new CommandeRequete(\n            \"Awa Ba\", \"770000000\", \"Ouakam\", 1L, 2));\n    assertEquals(2500 * 2 + 1500, commande.montantTotal()); // verdict : ~2 s\n}\n\nZéro Spring, zéro BDD, zéro HTTP : on instancie le domaine au constructeur, comme n’importe quel objet Java.\nLes 4 tests d’intégration restent en poste : ils vérifient le branchement complet. Les deux familles de tests sont complémentaires — rapides et nombreux au centre, lents et rares en périphérie.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-lhexagone-achète-et-ce-quil-coûte",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-lhexagone-achète-et-ce-quil-coûte",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Ce que l’hexagone achète — et ce qu’il coûte",
+    "text": "Ce que l’hexagone achète — et ce qu’il coûte\n\nAchète : le métier testable au centre ; la BDD, le framework, le canal de notification remplaçables sans toucher au domaine ; et une frontière prête pour la suite — au Lab 4, extraire un module sera d’autant plus simple que ses dépendances passent déjà par des ports.\nCoûte : des interfaces en plus, une indirection en plus, une discipline de vocabulaire permanente. Pour un script jetable, ce serait du zèle ; pour un système qui doit vivre et évoluer, c’est un investissement.\n\n\n\n\n\n\n\n\nÀ retenir — le réflexe de l’architecte\n\n\nToujours la même question : qu’est-ce que j’achète, avec quoi je le paie ? Votre ADR no2 devra répondre pour SénResto — pas en général.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-chemin-du-lab-2",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-chemin-du-lab-2",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Le chemin du Lab 2",
+    "text": "Le chemin du Lab 2\n\n  \n    \n      \n    \n  \n\n  \n\n  \n\n  \n  \n  \n  lab2-depart\n  \n  = lab1-final\n  couches propres,\n  mais le metier\n  depend du SQL\n  \n\n  \n  \n  \n  lab2-etape1\n  \n  Ports definis\n  les interfaces du\n  domaine, ecrites\n  par le domaine\n  \n\n  \n  \n  \n  lab2-etape2\n  \n  Adaptateurs\n  JDBC et REST\n  branches sur les\n  ports, tests verts\n  \n\n  \n  \n  \n  lab2-final\n  \n  Le swap\n  InMemory branche,\n  tests du domaine\n  en 2 secondes\n  \n\n  Bloques ? git checkout du tag suivant : personne ne reste au bord de la route.\n\n\n\nPoint de départ : votre lab1-final. Le comportement de l’API ne change pas d’un octet — les 4 tests d’intégration restent les juges de paix.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#votre-mission-daujourdhui",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#votre-mission-daujourdhui",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "Votre mission d’aujourd’hui",
+    "text": "Votre mission d’aujourd’hui\n\n\n\n\n\n\n\nRôle\nPilotage au Lab 2\n\n\n\n\nLe Doyen\nbranches, merges, tags — et l’ADR avec l’Architecte du jour\n\n\nL’Huissier\nle domaine des commandes : CommandeMetier + ports sortants\n\n\nLe Rédacteur\nl’adaptateur REST (controllers) branché sur les ports entrants\n\n\nLe Notaire\nles adaptateurs JDBC : implements des ports, SQL inchangé\n\n\nL’Appariteur\nles adaptateurs in-memory + les nouveaux tests unitaires du domaine\n\n\n\n\n\n\n\n\n\n\nLe livrable individuel de la séance\n\n\nL’Architecte du jour signe l’ADR no2 : « Pourquoi inverser les dépendances ? » — une page, deux alternatives sérieuses, deux conséquences négatives assumées.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#lessentiel-de-la-séance",
+    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#lessentiel-de-la-séance",
+    "title": "Architectures Logicielles — Séance 2",
+    "section": "L’essentiel de la séance",
+    "text": "L’essentiel de la séance\n\n\n\n\n\n\n\nÀ retenir\n\n\n\nDes couches propres ne suffisent pas : tant que les flèches descendent vers la technique, le métier reste prisonnier.\nL’inversion se joue sur la propriété de l’interface : le port appartient au domaine, écrit dans son vocabulaire.\nHexagone = domaine au centre, ports à la frontière, adaptateurs autour — toutes les dépendances pointent vers le centre.\nLa preuve par le swap : même domaine, adaptateur JDBC en production, Map en mémoire dans les tests — verdict en 2 secondes.\n\n\n\n\n\n\n\n\n\n\n\n\nLa question qui ouvre la séance 3\n\n\nVotre hexagone protège le métier… mais tout SénResto vit dans un seul hexagone : Catalogue, Commandes, Paiement, Livraison s’y mélangent. Où sont les frontières entre les métiers ? Réponse au Lab 3 : le monolithe modulaire.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 2"
+    ]
+  },
+  {
+    "objectID": "blog/index.html",
+    "href": "blog/index.html",
+    "title": "Blog",
+    "section": "",
+    "text": "Le flux RSS suit les publications.\n\n\n\n\n\nUne analogie, une formule, un exemple chiffré\n\n\n\npédagogie\n\nenseignement\n\n\n\nComment je construis un cours : l’intuition d’abord, le formalisme ensuite, et jamais de résultat inventé.\n\n\n\n\n\n18 septembre 2026\n\n4 min.\n\n\n\n\nAucun article correspondant\n\n\n\n\n\n Retour au sommet"
+  },
+  {
+    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html",
+    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html",
+    "title": "Une analogie, une formule, un exemple chiffré",
+    "section": "",
+    "text": "Richard Feynman raconte qu’il savait compter les secondes dans sa tête tout en lisant, mais qu’il en était incapable dès qu’il parlait. Son collègue John Tukey faisait exactement l’inverse : lui comptait en voyant défiler un ruban de chiffres, et pouvait donc parler en même temps. Même tâche, deux mécaniques mentales incompatibles. Et chacun avait supposé jusque-là que tout le monde faisait comme lui.\nJe pense souvent à cette histoire devant un amphithéâtre. Quand une explication ne passe pas, mon premier réflexe est de la redonner, plus lentement. Sauf que l’étudiant qui décroche n’est pas plus lent que les autres. On lui a proposé une porte qui ne s’ouvre pas pour lui, et on lui repropose la même."
+  },
+  {
+    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#commencer-par-une-image",
+    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#commencer-par-une-image",
+    "title": "Une analogie, une formule, un exemple chiffré",
+    "section": "Commencer par une image",
+    "text": "Commencer par une image\nAlors j’entre par une analogie. Pour le compromis biais-variance, je parle de deux tailleurs : l’un coupe le même costume pour tout le monde, l’autre recommence entièrement dès que son client change de posture. Les étudiants rient, et surtout ils retiennent. L’image devient une rampe à laquelle se tenir quand la formule arrive.\nEnsuite, avant toute notation, je dis la chose en une phrase. L’entropie, c’est le désordre, la surprise moyenne. Gini, c’est la probabilité de se tromper en classant au hasard. Cette étape est aussi un test pour moi : quand je n’y arrive pas, c’est que je n’ai pas encore compris la notion assez bien pour l’enseigner."
+  },
+  {
+    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#ne-pas-sarrêter-là",
+    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#ne-pas-sarrêter-là",
+    "title": "Une analogie, une formule, un exemple chiffré",
+    "section": "Ne pas s’arrêter là",
+    "text": "Ne pas s’arrêter là\nC’est ici que beaucoup de cours « accessibles » s’arrêtent, et c’est exactement ce que je veux éviter. Après l’image vient la vraie formule, entière, sans version édulcorée. L’étudiant à qui on a seulement raconté une métaphore se retrouve démuni devant un article ou un sujet d’examen. L’intuition prépare le formalisme ; elle ne le remplace pas.\nJe décortique donc la formule symbole par symbole, et je glisse les rappels de mathématiques au moment précis où ils servent : le logarithme en base 2 juste sous l’entropie, la dérivée juste avant la descente de gradient. Placés dans un chapitre préliminaire, personne ne les relit.\nPuis j’applique, sur des nombres. Dans mon cours d’apprentissage automatique, l’arbre de décision est construit devant eux sur huit patients : la première coupure, le duel entre les candidates, le calcul du gain, la récursion, les feuilles. À la fin, on lance scikit-learn et on obtient le même arbre. Ce moment-là vaut dix diapositives d’explication : l’objet s’est fabriqué sous leurs yeux, ils ne l’ont pas reçu tout fait.\nSuit un exercice, corrigé dans la foulée, et le piège que je sais qu’ils vont rencontrer : la fuite de données dans une validation croisée, la standardisation calculée avant d’avoir séparé les jeux."
+  },
+  {
+    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#rien-ne-sinvente",
+    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#rien-ne-sinvente",
+    "title": "Une analogie, une formule, un exemple chiffré",
+    "section": "Rien ne s’invente",
+    "text": "Rien ne s’invente\nSur ce point, je ne transige pas : aucune sortie de programme, aucun message d’erreur, aucun résultat chiffré n’est écrit de mémoire sur mes supports. Tout vient d’une exécution réelle. Même les messages d’erreur sont produits exprès, sur du vrai code, avant d’être montrés.\nEn pratique, cela m’oblige à écrire et exécuter le carnet de code d’abord, et les diapositives ensuite, à partir de ce que j’ai réellement obtenu. C’est plus long, mais la raison est simple : un étudiant qui tape le code du cours et n’obtient pas le résultat annoncé ne se dit pas que le support est faux. Il se dit qu’il est mauvais. Une valeur approximative peut lui coûter des semaines de confiance."
+  },
+  {
+    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#raconter-une-histoire-pas-dérouler-un-programme",
+    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#raconter-une-histoire-pas-dérouler-un-programme",
+    "title": "Une analogie, une formule, un exemple chiffré",
+    "section": "Raconter une histoire, pas dérouler un programme",
+    "text": "Raconter une histoire, pas dérouler un programme\nUne séance ne se tient pas toute seule. Chacune commence par rappeler ce qu’on sait déjà faire et où l’on bute, et se termine en annonçant la limite que la prochaine va lever. « On sait trouver le chemin optimal — à condition de disposer de la carte complète. Que fait-on quand on ignore où sont les obstacles ? » Le cours avance alors comme un récit, avec une tension, au lieu d’être une liste de techniques.\nLes mêmes exemples reviennent d’une séance à l’autre. Un jeu de données minuscule croisé au chapitre des arbres réapparaît dans la régression, puis dans les métriques d’évaluation — où l’on découvre qu’un modèle qu’on avait jugé médiocre était simplement mal évalué. Ces retrouvailles font plus pour la compréhension que n’importe quel récapitulatif de fin de chapitre."
+  },
+  {
+    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#ce-que-ça-coûte",
+    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#ce-que-ça-coûte",
+    "title": "Une analogie, une formule, un exemple chiffré",
+    "section": "Ce que ça coûte",
+    "text": "Ce que ça coûte\nBeaucoup de temps, je ne vais pas le cacher. Un concept traité ainsi demande six passages au lieu d’un, les exemples doivent être calculés à la main puis vérifiés par le code, et les bonnes analogies se cherchent longtemps.\nMais un cours construit comme ça résiste. Ceux qui n’entrent pas par l’image entrent par les chiffres. Ceux que la formule rebute la retrouvent après avoir manipulé l’objet. Plusieurs portes valent mieux qu’une seule, répétée plus fort.\nC’est aussi ce que nous essayons de mettre dans la plateforme d’apprentissage adaptatif que nous développons à l’UCAD : adapter non pas la vitesse d’une explication unique, mais la porte par laquelle on entre. Feynman et Tukey l’avaient remarqué en comptant des secondes. Il nous reste à en tirer les conséquences dans nos amphithéâtres."
   },
   {
     "objectID": "cours/architectures-logicielles-modernes/chapitres/01-du-chaos-aux-couches.html#objectifs-de-la-séance",
@@ -4130,206 +4542,355 @@
     ]
   },
   {
-    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html",
-    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html",
-    "title": "Une analogie, une formule, un exemple chiffré",
-    "section": "",
-    "text": "Richard Feynman raconte qu’il savait compter les secondes dans sa tête tout en lisant, mais qu’il en était incapable dès qu’il parlait. Son collègue John Tukey faisait exactement l’inverse : lui comptait en voyant défiler un ruban de chiffres, et pouvait donc parler en même temps. Même tâche, deux mécaniques mentales incompatibles. Et chacun avait supposé jusque-là que tout le monde faisait comme lui.\nJe pense souvent à cette histoire devant un amphithéâtre. Quand une explication ne passe pas, mon premier réflexe est de la redonner, plus lentement. Sauf que l’étudiant qui décroche n’est pas plus lent que les autres. On lui a proposé une porte qui ne s’ouvre pas pour lui, et on lui repropose la même."
-  },
-  {
-    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#commencer-par-une-image",
-    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#commencer-par-une-image",
-    "title": "Une analogie, une formule, un exemple chiffré",
-    "section": "Commencer par une image",
-    "text": "Commencer par une image\nAlors j’entre par une analogie. Pour le compromis biais-variance, je parle de deux tailleurs : l’un coupe le même costume pour tout le monde, l’autre recommence entièrement dès que son client change de posture. Les étudiants rient, et surtout ils retiennent. L’image devient une rampe à laquelle se tenir quand la formule arrive.\nEnsuite, avant toute notation, je dis la chose en une phrase. L’entropie, c’est le désordre, la surprise moyenne. Gini, c’est la probabilité de se tromper en classant au hasard. Cette étape est aussi un test pour moi : quand je n’y arrive pas, c’est que je n’ai pas encore compris la notion assez bien pour l’enseigner."
-  },
-  {
-    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#ne-pas-sarrêter-là",
-    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#ne-pas-sarrêter-là",
-    "title": "Une analogie, une formule, un exemple chiffré",
-    "section": "Ne pas s’arrêter là",
-    "text": "Ne pas s’arrêter là\nC’est ici que beaucoup de cours « accessibles » s’arrêtent, et c’est exactement ce que je veux éviter. Après l’image vient la vraie formule, entière, sans version édulcorée. L’étudiant à qui on a seulement raconté une métaphore se retrouve démuni devant un article ou un sujet d’examen. L’intuition prépare le formalisme ; elle ne le remplace pas.\nJe décortique donc la formule symbole par symbole, et je glisse les rappels de mathématiques au moment précis où ils servent : le logarithme en base 2 juste sous l’entropie, la dérivée juste avant la descente de gradient. Placés dans un chapitre préliminaire, personne ne les relit.\nPuis j’applique, sur des nombres. Dans mon cours d’apprentissage automatique, l’arbre de décision est construit devant eux sur huit patients : la première coupure, le duel entre les candidates, le calcul du gain, la récursion, les feuilles. À la fin, on lance scikit-learn et on obtient le même arbre. Ce moment-là vaut dix diapositives d’explication : l’objet s’est fabriqué sous leurs yeux, ils ne l’ont pas reçu tout fait.\nSuit un exercice, corrigé dans la foulée, et le piège que je sais qu’ils vont rencontrer : la fuite de données dans une validation croisée, la standardisation calculée avant d’avoir séparé les jeux."
-  },
-  {
-    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#rien-ne-sinvente",
-    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#rien-ne-sinvente",
-    "title": "Une analogie, une formule, un exemple chiffré",
-    "section": "Rien ne s’invente",
-    "text": "Rien ne s’invente\nSur ce point, je ne transige pas : aucune sortie de programme, aucun message d’erreur, aucun résultat chiffré n’est écrit de mémoire sur mes supports. Tout vient d’une exécution réelle. Même les messages d’erreur sont produits exprès, sur du vrai code, avant d’être montrés.\nEn pratique, cela m’oblige à écrire et exécuter le carnet de code d’abord, et les diapositives ensuite, à partir de ce que j’ai réellement obtenu. C’est plus long, mais la raison est simple : un étudiant qui tape le code du cours et n’obtient pas le résultat annoncé ne se dit pas que le support est faux. Il se dit qu’il est mauvais. Une valeur approximative peut lui coûter des semaines de confiance."
-  },
-  {
-    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#raconter-une-histoire-pas-dérouler-un-programme",
-    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#raconter-une-histoire-pas-dérouler-un-programme",
-    "title": "Une analogie, une formule, un exemple chiffré",
-    "section": "Raconter une histoire, pas dérouler un programme",
-    "text": "Raconter une histoire, pas dérouler un programme\nUne séance ne se tient pas toute seule. Chacune commence par rappeler ce qu’on sait déjà faire et où l’on bute, et se termine en annonçant la limite que la prochaine va lever. « On sait trouver le chemin optimal — à condition de disposer de la carte complète. Que fait-on quand on ignore où sont les obstacles ? » Le cours avance alors comme un récit, avec une tension, au lieu d’être une liste de techniques.\nLes mêmes exemples reviennent d’une séance à l’autre. Un jeu de données minuscule croisé au chapitre des arbres réapparaît dans la régression, puis dans les métriques d’évaluation — où l’on découvre qu’un modèle qu’on avait jugé médiocre était simplement mal évalué. Ces retrouvailles font plus pour la compréhension que n’importe quel récapitulatif de fin de chapitre."
-  },
-  {
-    "objectID": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#ce-que-ça-coûte",
-    "href": "blog/posts/2026-09-18-analogie-formule-exemple/index.html#ce-que-ça-coûte",
-    "title": "Une analogie, une formule, un exemple chiffré",
-    "section": "Ce que ça coûte",
-    "text": "Ce que ça coûte\nBeaucoup de temps, je ne vais pas le cacher. Un concept traité ainsi demande six passages au lieu d’un, les exemples doivent être calculés à la main puis vérifiés par le code, et les bonnes analogies se cherchent longtemps.\nMais un cours construit comme ça résiste. Ceux qui n’entrent pas par l’image entrent par les chiffres. Ceux que la formule rebute la retrouvent après avoir manipulé l’objet. Plusieurs portes valent mieux qu’une seule, répétée plus fort.\nC’est aussi ce que nous essayons de mettre dans la plateforme d’apprentissage adaptatif que nous développons à l’UCAD : adapter non pas la vitesse d’une explication unique, mais la porte par laquelle on entre. Feynman et Tukey l’avaient remarqué en comptant des secondes. Il nous reste à en tirer les conséquences dans nos amphithéâtres."
-  },
-  {
-    "objectID": "blog/index.html",
-    "href": "blog/index.html",
-    "title": "Blog",
-    "section": "",
-    "text": "Le flux RSS suit les publications.\n\n\n\n\n\nUne analogie, une formule, un exemple chiffré\n\n\n\npédagogie\n\nenseignement\n\n\n\nComment je construis un cours : l’intuition d’abord, le formalisme ensuite, et jamais de résultat inventé.\n\n\n\n\n\n18 septembre 2026\n\n4 min.\n\n\n\n\nAucun article correspondant\n\n\n\n\n\n Retour au sommet"
-  },
-  {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#objectifs-de-la-séance",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#objectifs-de-la-séance",
-    "title": "Architectures Logicielles — Séance 2",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#objectifs-de-la-séance",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#objectifs-de-la-séance",
+    "title": "Architectures Logicielles — Séance 3",
     "section": "Objectifs de la séance",
-    "text": "Objectifs de la séance\n\n\n\n\n\n\n\nContenu\n\n\nLe Lab 1 a rangé la maison : couches propres, responsabilités séparées. Cette séance s’attaque au problème qui reste : le métier dépend toujours de la technique. Nous allons inverser cette dépendance — ports & adaptateurs, l’architecture dite hexagonale — et en apporter la preuve par le swap : remplacer la base de données par une simple Map, sans toucher une ligne du domaine.\n\n\n\n\n\nComprendre pourquoi des couches propres ne suffisent pas : le sens des dépendances.\nMaîtriser le principe d’inversion de dépendances — et sa question clé : qui possède l’interface ?\nSavoir lire et construire une architecture ports & adaptateurs.\nEn vérifier le bénéfice au chronomètre : des tests du domaine en 2 secondes, sans base de données.",
+    "text": "Objectifs de la séance\n\n\n\n\n\n\n\nContenu\n\n\nL’hexagone du Lab 2 protège le métier de la technique — mais tous les métiers de SénResto vivent dans le même hexagone. Cette séance trace les frontières entre les métiers : les bounded contexts, matérialisés en modules dont Spring Modulith garde les frontières par un simple test, et qui collaborent par appels d’API publique ou par événements internes.\n\n\n\n\n\nDécouper un domaine en bounded contexts — et savoir où passe le trait.\nStructurer un module : API publique au paquetage racine, implémentation cachée dans interne/.\nFaire vérifier les frontières par le build : une violation = un test rouge.\nChoisir entre appel direct et événement — et publier vos premiers événements métier.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-le-lab-1-a-réglé-et-pas-réglé",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-le-lab-1-a-réglé-et-pas-réglé",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "Ce que le Lab 1 a réglé — et pas réglé",
-    "text": "Ce que le Lab 1 a réglé — et pas réglé\n\n\n\n\n\n\n\nL’acquis du Lab 1\n\n\nTrois couches, des dépendances à sens unique, zéro SQL hors des repositories, les quartiers de Dakar à une seule adresse. Le God controller est mort : chaque responsabilité a une maison.\n\n\n\n\n\n\n\n\n\n\n\nL’exigence nouvelle\n\n\nLa direction de SénResto exige que les règles métier — frais, transitions de statut, calcul d’ETA — soient testées à chaque commit. Les tests d’intégration (Spring + BDD + HTTP) prennent plusieurs secondes chacun : trop lents. Il faut des tests unitaires du métier. Essayez d’en écrire un sur CommandeService… vous n’y arriverez pas proprement.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#un-hexagone-cinq-métiers",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#un-hexagone-cinq-métiers",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Un hexagone, cinq métiers",
+    "text": "Un hexagone, cinq métiers\n\n\n\n\n\n\n\nLe constat\n\n\nOuvrez domaine/ : commandes, restaurants, livreurs, notifications y cohabitent librement — demain, le catalogue pourra fouiller les données du paiement sans que rien ne l’en empêche. L’hexagone protège le métier de la technique — pas les métiers les uns des autres.\n\n\n\n\n\nÀ 5 classes métier, ce n’est pas grave. À 50, c’est le God controller qui renaît — à l’échelle du domaine entier.\nLa frontière qui manque n’est pas technique : elle est métier. Où finit « commander » et où commence « payer » ?\n\n\n\n\n\n\n\n\nLe consensus industriel\n\n\n« Monolith first » (Fowler) : on structure d’abord le monolithe en modules à frontières explicites — réversible, testable, et meilleur brouillon d’un futur découpage en services… si un jour il se justifie.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-chaîne-qui-emprisonne-le-métier",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-chaîne-qui-emprisonne-le-métier",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "La chaîne qui emprisonne le métier",
-    "text": "La chaîne qui emprisonne le métier\nSuivez les flèches de dépendance de CommandeService :\nCommandeService \\(\\to\\) CommandeRepository \\(\\to\\) JdbcTemplate \\(\\to\\) BDD\n\nPour instancier le service, il faut un repository ; pour le repository, un JdbcTemplate ; pour le JdbcTemplate, une base qui tourne.\nConclusion : impossible de tester la formule des frais sans démarrer toute la pile. Le métier est propre, mais prisonnier — trois étages au-dessus de la technique.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nLe problème n’est plus le désordre (Lab 1 l’a réglé) : c’est le sens des flèches. Tant que le métier pointe vers la technique, la technique dicte ses conditions au métier.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#le-bounded-context",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#le-bounded-context",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Le bounded context",
+    "text": "Le bounded context\n\n\n\n\n\n\n\nDéfinition (DDD, version allégée)\n\n\nUn bounded context est une zone du domaine à l’intérieur de laquelle les mots ont un sens précis et le modèle est cohérent. La frontière passe là où le vocabulaire change de sens — pas là où la technique le suggère.\n\n\n\n\n\n\n\n\n\n\n\nLe test linguistique, sur SénResto\n\n\nQue veut dire « commande » ? Pour Commandes : un panier, un client, un statut. Pour Livraison : une course, une adresse, un ETA. Pour Paiement : un montant à encaisser. Même mot, trois modèles — trois contextes.\n\n\n\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nOn ne découpe pas un domaine avec un couteau technique mais avec une oreille : écouter où le langage change de sens.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-principe-dinversion-de-dépendances",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-principe-dinversion-de-dépendances",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "Le principe d’inversion de dépendances",
-    "text": "Le principe d’inversion de dépendances\n\n\n\n\n\n\n\nDéfinition\n\n\nPrincipe d’inversion de dépendances (DIP) : le code de haut niveau (le métier) ne doit pas dépendre du code de bas niveau (la technique). Les deux doivent dépendre d’abstractions — des interfaces. Et surtout : ces interfaces sont définies par le métier, selon ses besoins.\n\n\n\n\n\n  \n    \n      \n    \n    \n      \n    \n  \n\n  \n\n  \n  Aujourd'hui (couches)\n\n  \n  CommandeService\n  \n\n  \n  CommandeRepository\n  \n\n  \n  JdbcTemplate\n  \n\n  \n  BDD\n\n  le metier depend de la technique :\n  pas de BDD, pas de test\n\n  \n  \n\n  \n  Demain (inversion)\n\n  \n  Domaine (metier)\n\n  \n  interface CommandesPort\n  definie PAR le domaine\n\n  \n\n  \n  AdaptateurJdbc\n  implements CommandesPort\n\n  \n  la fleche\n  remonte !\n\n  la technique depend du metier :\n  le domaine ne connait plus la BDD",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#les-cinq-contextes-de-sénresto",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#les-cinq-contextes-de-sénresto",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Les cinq contextes de SénResto",
+    "text": "Les cinq contextes de SénResto\n\n\n\n\n\n\n\n\nModule\nSa responsabilité\nSon langage\n\n\n\n\ncatalogue\nles restaurants et leurs plats\nplat, prix, spécialité\n\n\ncommandes\nle cycle de vie d’une commande\nstatut, quantité, montant\n\n\nlivraison\nassigner et suivre les livreurs\ncourse, position, ETA\n\n\npaiement\nencaisser (mobile money simulé)\ntransaction, encaissement\n\n\nnotifications\nprévenir les clients\nSMS, destinataire\n\n\n\n\n\n\n\n\n\n\nCe n’est pas un hasard\n\n\nCinq contextes, cinq membres par groupe : au Lab 3, chacun devient propriétaire d’un module — de son API publique, de ses internes, de ses frontières.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-question-qui-change-tout",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#la-question-qui-change-tout",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "La question qui change tout",
-    "text": "La question qui change tout\n\n\n\n\n\n\n\nQui possède l’interface ?\n\n\nUne interface ne suffit pas à inverser quoi que ce soit : si CommandeRepository définit lui-même son interface dans le paquetage repository, le domaine qui l’importe dépend toujours de la persistance. L’inversion se joue sur la propriété : l’interface habite chez le domaine, écrite dans son vocabulaire.\n\n\n\n\n\nLe domaine déclare : « j’ai besoin qu’on me sauvegarde des commandes » — il écrit CommandesPort chez lui.\nLa technique répond : « je sais faire, en JDBC » — l’adaptateur implémente le port, et c’est donc lui qui importe le domaine. La flèche a remonté.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nInverser une dépendance, c’est déplacer la propriété du contrat : le métier ne demande plus la permission à la technique — il publie ses exigences, la technique s’y plie.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#un-module-une-api-publique-des-internes-cachés",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#un-module-une-api-publique-des-internes-cachés",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Un module : une API publique, des internes cachés",
+    "text": "Un module : une API publique, des internes cachés\n\n  \n    \n      \n    \n    \n      \n    \n  \n\n  \n\n  Un module = une API publique (racine) + des internes caches\n\n  \n  \n  commandes/\n  \n  API publique\n  CommandeMetier, evenements\n  \n  interne/\n  adaptateur JDBC, validation,\n  machine a etats\n\n  \n  \n  livraison/\n  \n  API publique\n  AssignationLivreurs\n  \n  interne/\n  adaptateur JDBC livreurs,\n  CalculateurEta\n\n  \n  \n  autorise : via l'API publique\n\n  \n  \n  \n  INTERDIT : acceder a interne/ = build casse\n  \n  \n\n  \n  \n  catalogue/\n  restaurants et plats\n  API : CatalogueMetier\n  interne/ : adaptateur JDBC\n\n  \n  paiement/\n  mobile money simule\n  reagit aux evenements\n  de commandes/\n\n  \n  notifications/\n  les SMS aux clients\n  reagit aux evenements\n  de commandes/\n\n  Cinq contextes, cinq modules, cinq membres de groupe. Un paquetage racine par module = son API publique ;\n  tout ce qui est dans interne/ est invisible des autres modules — et Spring Modulith le verifie par un test.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#larchitecture-hexagonale",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#larchitecture-hexagonale",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "L’architecture hexagonale",
-    "text": "L’architecture hexagonale\n\n\n\n\n\n\n\nDéfinition (Alistair Cockburn, 2005)\n\n\nL’architecture hexagonale (ports & adaptateurs) place le domaine au centre, entouré de ports — les interfaces qu’il définit. Les adaptateurs traduisent le monde extérieur vers les ports ou les implémentent. Règle unique : toutes les dépendances pointent vers le centre.\n\n\n\n\n\n  \n    \n      \n    \n  \n\n  \n\n  \n  \n  L'application (l'hexagone)\n\n  \n  \n  DOMAINE\n  regles metier, validation,\n  machine a etats, calculs\n  zero Spring, zero SQL, zero HTTP\n\n  \n  \n  PORT\n  entrant\n  (API metier)\n\n  \n  \n  PORT\n  sortant\n  persistance\n\n  \n  PORT\n  sortant\n  notification\n\n  \n  \n  Adaptateur\n  REST\n  controllers Spring\n\n  \n  \n  Adaptateur JDBC\n  H2 / PostgreSQL\n\n  \n  Adaptateur\n  InMemory\n\n  \n  Adaptateur SMS\n  console (System.out)\n\n  \n  \n  \n\n  \n  \n  \n\n  \n  \n  \n\n  \n\n  \n  \n\n  \n  Les ports sont des interfaces definies PAR le domaine ; les adaptateurs les implementent ou les appellent.\n  Toutes les fleches de dependance pointent vers le centre : le domaine ne depend de rien.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#la-convention-spring-modulith",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#la-convention-spring-modulith",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "La convention Spring Modulith",
+    "text": "La convention Spring Modulith\nLa règle tient en deux lignes — c’est sa force :\nsn/ucad/senresto/\n|-- commandes/            &lt;- paquetage direct = MODULE \"commandes\"\n|   |-- CommandeMetier.java     &lt;- racine = API PUBLIQUE du module\n|   |-- CommandeConfirmee.java  &lt;- les evenements aussi\n|   \\-- interne/                &lt;- INVISIBLE des autres modules\n|       \\-- AdaptateurCommandesJdbc.java\n\\-- livraison/            &lt;- module \"livraison\", meme structure\n\nChaque paquetage directement sous l’application est un module ; seuls les types de son paquetage racine sont accessibles aux autres.\nPas de nouveau framework à apprendre : c’est une convention de paquetages — et un gardien qui la fait respecter.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ports-entrants-ports-sortants",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ports-entrants-ports-sortants",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "Ports entrants, ports sortants",
-    "text": "Ports entrants, ports sortants\n\n\n\n\n\n\n\n\n\nPort entrant\nPort sortant\n\n\n\n\nQui l’appelle ?\nle monde extérieur (REST, plus tard : messages)\nle domaine\n\n\nQui l’implémente ?\nle domaine\nun adaptateur technique (JDBC, SMS…)\n\n\nChez SénResto\n« créer une commande, la confirmer… »\n« sauvegarder, chercher un livreur, notifier »\n\n\n\n\n\n\n\n\n\n\nLe test du vocabulaire\n\n\nLisez un port à voix haute : s’il parle de SELECT, de JSON ou de HTTP, il est mal placé. CommandesPort.sauvegarder(commande) — du métier. executerRequete(sql) — de la technique déguisée.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#le-gardien-la-frontière-vérifiée-par-un-test",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#le-gardien-la-frontière-vérifiée-par-un-test",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Le gardien : la frontière vérifiée par un test",
+    "text": "Le gardien : la frontière vérifiée par un test\nclass ModulithArchitectureTest {\n\n    @Test\n    void lesFrontieresDesModulesSontRespectees() {\n        ApplicationModules.of(SenRestoApplication.class).verify();\n    }\n}\n\nQu’un développeur importe l’interne/ d’un autre module, et ce test devient rouge — le build casse, la violation est nommée, fichier et ligne à l’appui.\nL’architecture cesse d’être un dessin sur un slide : elle devient une propriété vérifiée en continu, au même titre qu’un comportement.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nLa différence entre une convention et une architecture, c’est un test qui échoue. Vous en ferez l’expérience au lab : violation volontaire, build cassé, message lu, violation retirée.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#à-quoi-ressemble-un-port",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#à-quoi-ressemble-un-port",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "À quoi ressemble un port",
-    "text": "À quoi ressemble un port\nLe domaine écrit son besoin, dans son vocabulaire, chez lui :\npackage sn.ucad.senresto.domaine.port;\n\n/** Ce dont le metier des commandes a besoin — rien de plus. */\npublic interface LivreursPort {\n    Optional&lt;Livreur&gt; premierDisponible();\n    void reserver(long livreurId);\n    void liberer(long livreurId);\n}\n\nAucune annotation Spring, aucun mot technique : ce fichier compilerait en 2005 comme en 2035.\nL’adaptateur JDBC du Lab 1 devient : class AdaptateurLivreursJdbc implements LivreursPort — trois méthodes déjà écrites, seule l’appartenance change.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nAu Lab 2, vous n’écrirez presque pas de code nouveau : vous déplacerez la propriété du code existant. C’est un refactoring de frontières, pas une réécriture.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#deux-façons-de-collaborer-entre-modules",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#deux-façons-de-collaborer-entre-modules",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Deux façons de collaborer entre modules",
+    "text": "Deux façons de collaborer entre modules\n\n  \n    \n      \n    \n    \n      \n    \n  \n\n  \n\n  \n  Appel direct (synchrone)\n  quand la reponse est necessaire tout de suite\n\n  \n  commandes\n  confirmer()\n\n  \n  livraison\n  AssignationLivreurs\n\n  \n  \n  appelle\n  repond\n\n  le client attend le nom du livreur et l'ETA\n  dans la reponse HTTP : il FAUT une reponse\n  couplage assume : commandes connait livraison\n\n  \n  \n\n  \n  Evenement interne (publier / ecouter)\n  quand on informe sans attendre de reponse\n\n  \n  commandes\n  publie et continue\n\n  \n  CommandeConfirmee\n  (record, evenement metier)\n\n  \n\n  \n  paiement\n  @EventListener\n\n  \n  notifications\n  @EventListener\n\n  \n  \n\n  decouplage : commandes ignore qui ecoute\n  ajouter un abonne = zero modification de commandes\n\n  Deux outils, deux usages — et au Lab 5, ces memes evenements traverseront le reseau via RabbitMQ.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-moment-magique-changer-la-technique",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-moment-magique-changer-la-technique",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "Le moment magique : changer la technique",
-    "text": "Le moment magique : changer la technique\n\n  \n    \n      \n    \n  \n\n  \n\n  \n  En production\n\n  \n  DOMAINE\n  inchange au caractere pres\n\n  \n\n  \n  CommandesPort\n  (interface)\n\n  \n\n  \n  AdaptateurJdbc\n  PostgreSQL / H2\n\n  demarrage complet, vraies donnees\n\n  \n  \n\n  \n  Dans les tests unitaires\n\n  \n  DOMAINE\n  le MEME, au caractere pres\n\n  \n\n  \n  CommandesPort\n  (la meme interface)\n\n  \n\n  \n  AdaptateurInMemory\n  une simple Map en memoire\n\n  zero Spring, zero BDD : verdict en 2 secondes\n\n  \n  On change la technique sans toucher une ligne du metier : c'est la preuve de l'inversion.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#publier-un-événement-métier",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#publier-un-événement-métier",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Publier un événement métier",
+    "text": "Publier un événement métier\nUn événement est un simple record — un fait passé, nommé au participe : la commande a été confirmée. Il vit dans l’API publique du module qui le publie :\n// commandes/CommandeConfirmee.java  (racine du module = public)\npublic record CommandeConfirmee(long commandeId, String numero,\n        String clientTelephone, int montantTotal, String livreurNom,\n        int etaMinutes) {}\n// Dans CommandeMetier.confirmer(), a la place de l'appel aux notifications :\nevenements.publier(new CommandeConfirmee(id, numero, telephone,\n        montant, livreurNom, etaMinutes));\n\ncommandes annonce un fait et continue sa route : il ignore qui écoute, et n’attend rien de personne.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-métier-testé-en-deux-secondes",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-métier-testé-en-deux-secondes",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "Le métier testé en deux secondes",
-    "text": "Le métier testé en deux secondes\nL’adaptateur in-memory — une Map — implémente les mêmes ports. Le test unitaire devient trivial :\n@Test\nvoid lesFraisDeLivraisonSuiventLeQuartier() {\n    var domaine = new CommandeMetier(new CommandesEnMemoire(),\n            new RestaurantsEnMemoire(), new LivreursEnMemoire(),\n            new NotificationsEnMemoire());\n    var commande = domaine.creer(new CommandeRequete(\n            \"Awa Ba\", \"770000000\", \"Ouakam\", 1L, 2));\n    assertEquals(2500 * 2 + 1500, commande.montantTotal()); // verdict : ~2 s\n}\n\nZéro Spring, zéro BDD, zéro HTTP : on instancie le domaine au constructeur, comme n’importe quel objet Java.\nLes 4 tests d’intégration restent en poste : ils vérifient le branchement complet. Les deux familles de tests sont complémentaires — rapides et nombreux au centre, lents et rares en périphérie.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#écouter-les-abonnés",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#écouter-les-abonnés",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Écouter : les abonnés",
+    "text": "Écouter : les abonnés\nChaque module intéressé déclare un écouteur — dans ses murs :\n// paiement/interne/EcouteurPaiement.java\n@Component\nclass EcouteurPaiement {\n\n    @EventListener\n    void quandCommandeConfirmee(CommandeConfirmee evt) {\n        System.out.println(\"[PAIEMENT] Encaissement mobile money simule : \"\n                + evt.montantTotal() + \" FCFA pour \" + evt.numero());\n    }\n}\n\npaiement est né sans modifier une ligne de commandes — et par défaut ces événements sont synchrones : le comportement observable ne change pas… pour l’instant.\n\n\n\n\n\n\n\n\nLe pont vers la séance 5\n\n\nRetenez ces records : au Lab 5, les mêmes événements traverseront le réseau via RabbitMQ, vers un service Python. Vous faites déjà de l’event-driven — dans un seul processus.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-lhexagone-achète-et-ce-quil-coûte",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#ce-que-lhexagone-achète-et-ce-quil-coûte",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "Ce que l’hexagone achète — et ce qu’il coûte",
-    "text": "Ce que l’hexagone achète — et ce qu’il coûte\n\nAchète : le métier testable au centre ; la BDD, le framework, le canal de notification remplaçables sans toucher au domaine ; et une frontière prête pour la suite — au Lab 4, extraire un module sera d’autant plus simple que ses dépendances passent déjà par des ports.\nCoûte : des interfaces en plus, une indirection en plus, une discipline de vocabulaire permanente. Pour un script jetable, ce serait du zèle ; pour un système qui doit vivre et évoluer, c’est un investissement.\n\n\n\n\n\n\n\n\nÀ retenir — le réflexe de l’architecte\n\n\nToujours la même question : qu’est-ce que j’achète, avec quoi je le paie ? Votre ADR no2 devra répondre pour SénResto — pas en général.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#ce-que-le-modulith-achète-et-ce-quil-coûte",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#ce-que-le-modulith-achète-et-ce-quil-coûte",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Ce que le modulith achète — et ce qu’il coûte",
+    "text": "Ce que le modulith achète — et ce qu’il coûte\n\nAchète : des frontières métier vérifiées par le build ; un déploiement qui reste simple (un seul processus, une seule BDD, pas de réseau interne) ; des modules extractibles plus tard — le Strangler Fig du Lab 4 cueillera un module déjà découpé ; une documentation d’architecture générable depuis le code.\nCoûte : la discipline des paquetages ; des API publiques à concevoir avec soin ; la tentation permanente du raccourci (« juste cet import… ») — que le gardien transforme, précisément, en build cassé.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nLe monolithe modulaire offre 80,% des bénéfices d’organisation des microservices pour 20,% de leur coût opérationnel. C’est le point d’équilibre moderne — et le meilleur point de départ pour la suite.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-chemin-du-lab-2",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#le-chemin-du-lab-2",
-    "title": "Architectures Logicielles — Séance 2",
-    "section": "Le chemin du Lab 2",
-    "text": "Le chemin du Lab 2\n\n  \n    \n      \n    \n  \n\n  \n\n  \n\n  \n  \n  \n  lab2-depart\n  \n  = lab1-final\n  couches propres,\n  mais le metier\n  depend du SQL\n  \n\n  \n  \n  \n  lab2-etape1\n  \n  Ports definis\n  les interfaces du\n  domaine, ecrites\n  par le domaine\n  \n\n  \n  \n  \n  lab2-etape2\n  \n  Adaptateurs\n  JDBC et REST\n  branches sur les\n  ports, tests verts\n  \n\n  \n  \n  \n  lab2-final\n  \n  Le swap\n  InMemory branche,\n  tests du domaine\n  en 2 secondes\n  \n\n  Bloques ? git checkout du tag suivant : personne ne reste au bord de la route.\n\n\n\nPoint de départ : votre lab1-final. Le comportement de l’API ne change pas d’un octet — les 4 tests d’intégration restent les juges de paix.",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#le-chemin-du-lab-3",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#le-chemin-du-lab-3",
+    "title": "Architectures Logicielles — Séance 3",
+    "section": "Le chemin du Lab 3",
+    "text": "Le chemin du Lab 3\n\n  \n    \n      \n    \n  \n\n  \n\n  \n\n  \n  \n  \n  lab3-depart\n  \n  = lab2-final\n  hexagone propre,\n  mais un seul bloc\n  pour cinq metiers\n  \n\n  \n  \n  \n  lab3-etape1\n  \n  Modules decoupes\n  5 paquetages-modules,\n  API publique vs interne,\n  verify() au vert\n  \n\n  \n  \n  \n  lab3-etape2\n  \n  Evenements\n  CommandeCreee et\n  Confirmee publies ;\n  paiement s abonne\n  \n\n  \n  \n  \n  lab3-final\n  \n  Le gardien\n  violation volontaire\n  = build casse, puis\n  documentation generee\n  \n\n  Bloques ? git checkout du tag suivant : personne ne reste au bord de la route.\n\n\n\nPoint de départ : votre lab2-final. Les 8 tests (intégration + unitaires) restent verts — et un neuvième juge arrive : verify().",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#votre-mission-daujourdhui",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#votre-mission-daujourdhui",
-    "title": "Architectures Logicielles — Séance 2",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#votre-mission-daujourdhui",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#votre-mission-daujourdhui",
+    "title": "Architectures Logicielles — Séance 3",
     "section": "Votre mission d’aujourd’hui",
-    "text": "Votre mission d’aujourd’hui\n\n\n\n\n\n\n\nRôle\nPilotage au Lab 2\n\n\n\n\nLe Doyen\nbranches, merges, tags — et l’ADR avec l’Architecte du jour\n\n\nL’Huissier\nle domaine des commandes : CommandeMetier + ports sortants\n\n\nLe Rédacteur\nl’adaptateur REST (controllers) branché sur les ports entrants\n\n\nLe Notaire\nles adaptateurs JDBC : implements des ports, SQL inchangé\n\n\nL’Appariteur\nles adaptateurs in-memory + les nouveaux tests unitaires du domaine\n\n\n\n\n\n\n\n\n\n\nLe livrable individuel de la séance\n\n\nL’Architecte du jour signe l’ADR no2 : « Pourquoi inverser les dépendances ? » — une page, deux alternatives sérieuses, deux conséquences négatives assumées.",
+    "text": "Votre mission d’aujourd’hui\n\n\n\n\n\n\n\nRôle\nPropriétaire de module au Lab 3\n\n\n\n\nLe Doyen\ncommandes — le module qui publie ; merges, tags, ADR\n\n\nL’Huissier\nlivraison — l’API AssignationLivreurs, appelée en direct\n\n\nLe Rédacteur\ncatalogue — et la documentation générée des modules\n\n\nLe Notaire\nnotifications — les trois écouteurs, mêmes SMS qu’avant\n\n\nL’Appariteur\npaiement — le module né d’un événement, sans toucher aux autres\n\n\n\n\n\n\n\n\n\n\nLe livrable individuel de la séance\n\n\nL’Architecte du jour signe l’ADR no3 : « Comment tracer les frontières des modules ? » — une page, deux alternatives sérieuses, deux conséquences négatives assumées.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
     ]
   },
   {
-    "objectID": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#lessentiel-de-la-séance",
-    "href": "cours/architectures-logicielles-modernes/chapitres/02-l-hexagone.html#lessentiel-de-la-séance",
-    "title": "Architectures Logicielles — Séance 2",
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#lessentiel-de-la-séance",
+    "href": "cours/architectures-logicielles-modernes/chapitres/03-le-monolithe-modulaire.html#lessentiel-de-la-séance",
+    "title": "Architectures Logicielles — Séance 3",
     "section": "L’essentiel de la séance",
-    "text": "L’essentiel de la séance\n\n\n\n\n\n\n\nÀ retenir\n\n\n\nDes couches propres ne suffisent pas : tant que les flèches descendent vers la technique, le métier reste prisonnier.\nL’inversion se joue sur la propriété de l’interface : le port appartient au domaine, écrit dans son vocabulaire.\nHexagone = domaine au centre, ports à la frontière, adaptateurs autour — toutes les dépendances pointent vers le centre.\nLa preuve par le swap : même domaine, adaptateur JDBC en production, Map en mémoire dans les tests — verdict en 2 secondes.\n\n\n\n\n\n\n\n\n\n\n\n\nLa question qui ouvre la séance 3\n\n\nVotre hexagone protège le métier… mais tout SénResto vit dans un seul hexagone : Catalogue, Commandes, Paiement, Livraison s’y mélangent. Où sont les frontières entre les métiers ? Réponse au Lab 3 : le monolithe modulaire.",
+    "text": "L’essentiel de la séance\n\n\n\n\n\n\n\nÀ retenir\n\n\n\nLa frontière qui manquait n’est pas technique : elle est métier — et se trouve en écoutant où le vocabulaire change de sens.\nUn module = une API publique au paquetage racine, des internes invisibles — et Spring Modulith transforme cette convention en test : violation = build cassé.\nDeux modes de collaboration : appel direct quand il faut une réponse (livraison), événement quand on informe (paiement, notifications) — et l’abonné naît sans toucher au publieur.\nLe modulith : 80,% des bénéfices d’organisation des microservices, 20,% de leur coût.\n\n\n\n\n\n\n\n\n\n\n\n\nLa question qui ouvre la séance 4\n\n\nLa direction veut faire évoluer le calcul d’itinéraires avec l’écosystème Python — et le déployer sans redéployer tout SénResto. Un module peut-il quitter le monolithe ? À quel prix ? Réponse au Lab 4 : l’extraction d’un microservice, pattern Strangler Fig.",
     "crumbs": [
       "Séances",
-      "Architectures Logicielles — Séance 2"
+      "Architectures Logicielles — Séance 3"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#objectifs-de-la-séance",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#objectifs-de-la-séance",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Objectifs de la séance",
+    "text": "Objectifs de la séance\n\n\n\n\n\n\n\nContenu\n\n\nDernière séance : les événements du Lab 3 quittent la JVM et traversent le réseau via RabbitMQ. Les notifications consomment depuis une queue durable ; le module paiement déménage en Python (pika) — deuxième extraction du cours, cette fois asynchrone : sans façade, sans timeout, sans 503. Et la démonstration miroir de la panne du Lab 4 : un consommateur éteint, ce sont des messages qui attendent — pas une panne.\n\n\n\n\n\nComprendre le broker : exchange, queue durable, clé de routage, acquittement.\nPublier depuis Spring (Spring AMQP) et consommer depuis Python (pika).\nÉprouver la résilience : arrêt, attente, rattrapage — zéro message perdu.\nSavoir trancher, pour chaque intégration : synchrone ou asynchrone ?",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#trois-douleurs-soigneusement-conservées",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#trois-douleurs-soigneusement-conservées",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Trois douleurs, soigneusement conservées",
+    "text": "Trois douleurs, soigneusement conservées\nNous avons laissé trois blessures ouvertes — volontairement :\n\nLa panne synchrone (Lab 4) : livraison-service éteint \\(\\Rightarrow\\) la confirmation meurt en 503. Compréhensible pour l’assignation (il faut une réponse)… mais les SMS et le paiement, eux, n’exigeaient aucune réponse — pourquoi partager le sort de qui que ce soit ?\nLe statut manuel : la course atteint 100,%, le service sait — et pourtant quelqu’un doit cliquer « Marquer livrée ».\nL’état qui s’évapore : le service redémarre, les courses s’oublient, la base dit le contraire. Deux vérités, aucune réconciliation.\n\n\n\n\n\n\n\n\nLe diagnostic commun\n\n\nCes trois douleurs ont la même racine : nos services ne savent communiquer qu’en direct et à l’instant. Il leur manque un endroit où déposer un fait pour qu’il soit traité quand le destinataire pourra — une boîte aux lettres durable.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lidée-simple-le-téléphone-et-le-message",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lidée-simple-le-téléphone-et-le-message",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "L’idée simple : le téléphone et le message",
+    "text": "L’idée simple : le téléphone et le message\n\n\n\n\n\n\n\nDeux façons de joindre quelqu’un\n\n\nL’appel téléphonique : il faut que l’autre décroche, maintenant. S’il dort, téléphone éteint — échec, rappelez plus tard. Le message WhatsApp : vous l’envoyez et passez à autre chose. Son téléphone est éteint ? Le message attend. À l’allumage, il reçoit tout, dans l’ordre — rien ne s’est perdu.\n\n\n\n\nDans notre lab, mot pour mot :\n\nl’appel téléphonique \\(=\\) l’appel HTTP du Lab 4 : il faut que livraison-service « décroche » — sinon, 503 ;\nle message WhatsApp \\(=\\) l’événement via RabbitMQ : le backend publie et continue sa route ;\nle téléphone éteint \\(=\\) paiement-service arrêté : les messages attendent dans sa queue ;\nl’allumage \\(=\\) le redémarrage : rattrapage intégral, dans l’ordre, zéro perte.\n\n(RabbitMQ est le serveur qui garde les messages — la « boîte » entre l’envoyeur et le destinataire.)",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#rabbitmq-la-boîte-aux-lettres-durable",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#rabbitmq-la-boîte-aux-lettres-durable",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "RabbitMQ : la boîte aux lettres durable",
+    "text": "RabbitMQ : la boîte aux lettres durable\n\n  \n    \n  \n  RabbitMQ : la boite aux lettres durable entre les services\n\n  \n  backend\n  publie les faits en JSON\n  (Spring AMQP)\n\n  \n  RabbitMQ\n  \n  exchange topic\n  senresto.evenements\n  cles de routage : commande.creee,\n  commande.confirmee, commande.statut\n\n  \n\n  \n  queue durable notifications.commandes\n  liee a commande.* — les SMS\n  \n  queue durable paiement.confirmations\n  liee a commande.confirmee\n\n  \n  \n\n  \n  notifications\n  @RabbitListener (dans la JVM)\n  \n\n  \n  paiement-service\n  Python + pika (conteneur a part)\n  \n\n  Le producteur ignore qui consomme ; les queues DURABLES gardent\n  les messages tant que le consommateur n'a pas dit \"ack\".\n  Un consommateur eteint = des messages qui ATTENDENT — pas une panne.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#le-trajet-dun-message-pas-à-pas",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#le-trajet-dun-message-pas-à-pas",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Le trajet d’un message, pas à pas",
+    "text": "Le trajet d’un message, pas à pas\nSuivons CommandeConfirmee de bout en bout :\n\nLe backend le dépose au guichet de tri (l’exchange senresto.evenements) avec une étiquette (la clé de routage) : commande.confirmee.\nLe guichet regarde qui s’est abonné (les bindings) : la boîte des notifications a demandé « tout commande.* » ; celle du paiement, seulement commande.confirmee.\nLe message est copié dans chaque boîte concernée (les queues) — une copie par abonné, chacun la sienne.\nChaque consommateur relève sa boîte, à son rythme — réveillé ou pas au moment de l’envoi, peu importe.\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nLe backend ne connaît que le guichet et l’étiquette. Il ignore qui est abonné, combien ils sont, et s’ils sont réveillés. C’est le découplage du Lab 3 — étendu au réseau et au temps.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#qui-reçoit-quoi-le-routage-en-pratique",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#qui-reçoit-quoi-le-routage-en-pratique",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Qui reçoit quoi ? Le routage en pratique",
+    "text": "Qui reçoit quoi ? Le routage en pratique\nNos trois étiquettes face à nos deux boîtes :\n\n\n\nClé du message\nnotifications\npaiement\n\n\n\n\n\n(abonnée à commande.*)\n(abonnée à commande.confirmee)\n\n\ncommande.creee\nreçoit\n—\n\n\ncommande.confirmee\nreçoit\nreçoit\n\n\ncommande.statut\nreçoit\n—\n\n\n\n\nLe * de l’abonnement remplace un mot : commande.* attrape les trois clés.\nDemain, un module statistiques s’abonne à commande.# : zéro modification chez le backend — comme le module paiement du Lab 3, version réseau.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#le-vocabulaire-qui-suffit",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#le-vocabulaire-qui-suffit",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Le vocabulaire qui suffit",
+    "text": "Le vocabulaire qui suffit\n\n\n\n\n\n\n\nExchange\nle guichet de tri : reçoit chaque message et le route\n\n\n\n\nClé de routage\nl’étiquette du message (commande.confirmee)\n\n\nQueue durable\nla boîte d’un consommateur ; survit aux redémarrages\n\n\nBinding\nl’abonnement d’une queue (commande.* = tout)\n\n\nAck\nl’accusé du consommateur ; sans lui, le message reste\n\n\n\n\n\n\n\n\n\n\nÀ retenir\n\n\nCinq mots, et vous savez lire l’UI de gestion de RabbitMQ — votre poste d’observation de tout le lab. La garantie qu’ils construisent ensemble arrive à la slide suivante.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lack-pourquoi-après-le-traitement",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lack-pourquoi-après-le-traitement",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "L’ack : pourquoi APRÈS le traitement ?",
+    "text": "L’ack : pourquoi APRÈS le traitement ?\nL’ack est l’accusé de réception du consommateur. Tout tient dans le moment où on l’envoie. Deux scénarios de crash :\n\nAck avant de traiter : le consommateur acquitte, la queue efface le message… et le consommateur crashe avant d’avoir traité. Le message est perdu pour toujours — un encaissement envolé.\nAck après avoir traité (notre règle) : le consommateur crashe en plein traitement ? Pas d’ack reçu — la queue redonne le message au redémarrage. Rien ne se perd… mais le message peut être livré deux fois.\n\n\n\n\n\n\n\n\nLa garantie at-least-once\n\n\nQueue durable + message persistant + ack après traitement = chaque message est livré au moins une fois, à travers pannes et redémarrages. « Au moins » — donc parfois deux fois : c’est un choix, pas un défaut. L’alternative (au plus une fois) accepte de perdre des messages — inacceptable pour un paiement.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#publier-le-pont-vers-le-broker",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#publier-le-pont-vers-le-broker",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Publier : le pont vers le broker",
+    "text": "Publier : le pont vers le broker\nNos modules publient déjà des faits (Lab 3). Un pont suffit — il écoute les événements internes et les réexpédie en JSON :\n@Component\nclass PontAmqp {\n    private final RabbitTemplate rabbit;\n    // ...\n    @EventListener\n    void quandCommandeConfirmee(CommandeConfirmee evt) {\n        rabbit.convertAndSend(\"senresto.evenements\",   // exchange\n                \"commande.confirmee\",                  // cle de routage\n                evt);                                  // serialise en JSON\n    }\n}\n\nCommandeMetier n’a pas bougé d’une ligne : il publie ses faits comme au Lab 3, sans savoir qu’un pont les fait désormais voyager. Les frontières du modulith paient une dernière fois.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#consommer-côté-java-notifications",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#consommer-côté-java-notifications",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Consommer côté Java : notifications",
+    "text": "Consommer côté Java : notifications\nCôté monolithe, notifications troque son @EventListener contre une queue durable — le Strangler, encore : l’ancien chemin reste sous @Profile(\"!amqp\"), le nouveau vit sous @Profile(\"amqp\") :\n@RabbitListener(queues = \"notifications.commandes\")\nvoid surEvenement(Map&lt;String, Object&gt; evt,\n        @Header(\"amqp_receivedRoutingKey\") String cle) {\n    // memes textes de SMS qu'avant, aiguilles par la cle\n}\n\nLa queue est déclarée durable : elle survit aux redémarrages — du broker comme du consommateur.\nCe qui change pour l’utilisateur : rien. Mêmes SMS, même ordre. Ce qui change pour l’architecte : les SMS ne peuvent plus se perdre.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#consommer-côté-python-le-paiement-déménage",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#consommer-côté-python-le-paiement-déménage",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Consommer côté Python : le paiement déménage",
+    "text": "Consommer côté Python : le paiement déménage\nLe paiement quitte le monolithe pour son propre conteneur — pika, le dialecte AMQP de Python :\ndef sur_message(canal, methode, proprietes, corps):\n    evt = json.loads(corps)\n    print(f\"[PAIEMENT] Encaissement mobile money simule : \"\n          f\"{evt['montantTotal']} FCFA pour {evt['numero']}\")\n    canal.basic_ack(methode.delivery_tag)   # l'ack APRES le traitement\n\ncanal.basic_consume(queue=\"paiement.confirmations\", on_message_callback=sur_message)\n\n\n\n\n\n\n\nLa deuxième extraction — comparez au Lab 4 !\n\n\nExtraire paiement n’a demandé ni façade, ni timeout, ni 503 : personne n’attend sa réponse. L’extraction asynchrone est radicalement moins chère — quand la nature de l’échange le permet.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#la-démonstration-miroir",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#la-démonstration-miroir",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "La démonstration miroir",
+    "text": "La démonstration miroir\n\n  \n    \n  \n    \n  \n\n  Lab 4 : appel SYNCHRONE en panne\n  \n  backend\n  confirmer()\n  \n  livraison-service\n  ETEINT\n  \n  il FAUT une reponse maintenant :\n  timeout apres 2 s, puis\n  503 — la confirmation EST MORTE\n  couplage temporel : les deux services\n  doivent etre vivants au meme instant\n\n  \n\n  Lab 5 : evenement ASYNCHRONE en panne\n  \n  backend\n  publie et continue\n  \n  RabbitMQ\n  3 msgs en attente\n  \n  paiement-svc\n  ETEINT\n  \n  personne n'attend de reponse :\n  les confirmations REUSSISSENT,\n  les messages ATTENDENT dans la queue\n  au redemarrage : rattrapage integral,\n  [PAIEMENT] x3 — zero message perdu\n\n  \n  La regle de decision du semestre\n  Il FAUT une reponse pour continuer (assignation, ETA) : appel synchrone — et on assume le couplage temporel.\n  On INFORME d'un fait (SMS, paiement, stats...) : evenement asynchrone — et les pannes deviennent des retards.\n  La meme panne, deux destins : c'est le choix d'integration qui decide, pas la chance.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#le-message-qui-revient-un-scénario-concret",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#le-message-qui-revient-un-scénario-concret",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Le message qui revient : un scénario concret",
+    "text": "Le message qui revient : un scénario concret\nRejouons le crash de la slide « ack » avec notre paiement :\n\npaiement-service reçoit CommandeConfirmee pour CMD-2026-0042, affiche [PAIEMENT] Encaissement... 3\\,500 FCFA…\n…et crashe juste avant d’envoyer l’ack (coupure, OOM, redéploiement — la vie).\nLa queue n’a pas reçu d’ack : au redémarrage, elle redonne le même message.\nSans précaution : deuxième encaissement de CMD-2026-0042. Le client paie deux fois son mafé.\n\n\n\n\n\n\n\n\nLe point important\n\n\nCe n’est pas un bug de RabbitMQ : c’est la conséquence logique du choix « ne jamais perdre » (at-least-once). La question n’est donc pas « est-ce que ça arrivera ? » mais « que fait mon code quand ça arrivera ? » — réponse à la slide suivante.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lidempotence-au-moins-une-fois-se-paie",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lidempotence-au-moins-une-fois-se-paie",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "L’idempotence : « au moins une fois » se paie",
+    "text": "L’idempotence : « au moins une fois » se paie\n\n\n\n\n\n\n\nDéfinition\n\n\nUn traitement est idempotent si le rejouer ne change rien : traiter deux fois le même message = le traiter une fois. C’est le prix de l’at-least-once — et la règle d’or de tout webhook de paiement réel (Wave, Orange Money…).\n\n\n\n\n\nRecette du lab : chaque événement porte un identifiant ; le consommateur garde les identifiants déjà traités et ignore les revenants — en loggant [PAIEMENT] deja traite, ignore.\nAu lab (bonus) : un webhook mobile money simulé rejoué deux fois — un seul encaissement. Encaisser deux fois un client, c’est le perdre trois fois.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lidempotence-ce-quil-faut-en-retenir",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lidempotence-ce-quil-faut-en-retenir",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "L’idempotence, ce qu’il faut en retenir",
+    "text": "L’idempotence, ce qu’il faut en retenir\n\n\n\n\n\n\n\nÀ retenir\n\n\nL’idempotence n’est pas une option avancée : c’est le compagnon obligatoire de l’at-least-once. Chez nous : un set des identifiants traités. En production : une table dédiée, ou une contrainte d’unicité en base.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lorchestre-final-six-conteneurs-trois-langages",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lorchestre-final-six-conteneurs-trois-langages",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "L’orchestre final : six conteneurs, trois langages",
+    "text": "L’orchestre final : six conteneurs, trois langages\nL’état du système à la fin du semestre — chaque brique a été ajoutée pour une raison précise :\n\n\n\n\n\n\n\n\nConteneur\nTechno\nPourquoi il existe\n\n\n\n\nbackend\nSpring Boot\nle monolithe modulaire : catalogue, commandes, notifications\n\n\nlivraison-service\nPython FastAPI\nextraction synchrone (Lab 4) : écosystème géo, déploiement à part\n\n\npaiement-service\nPython pika\nextraction asynchrone (Lab 5) : sans façade ni 503\n\n\nrabbitmq\nErlang\nla boîte aux lettres durable entre les trois\n\n\npostgres\n—\nles données du monolithe\n\n\nfrontend\nReact\nl’interface — et la carte qui a tout révélé\n\n\n\nTrois langages qui coopèrent sans se connaître : par contrats HTTP et par messages — jamais par partage de code.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#le-chemin-du-lab-5",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#le-chemin-du-lab-5",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "Le chemin du Lab 5",
+    "text": "Le chemin du Lab 5\n\n  \n    \n      \n    \n  \n\n  \n\n  \n\n  \n  \n  \n  lab5-depart\n  \n  = lab4-final\n  le distribue synchrone\n  marche, mais 503 des\n  que livraison tombe\n  \n\n  \n  \n  \n  lab5-etape1\n  \n  Le broker publie\n  RabbitMQ + pont AMQP :\n  les faits partent en JSON,\n  visibles dans l UI\n  \n\n  \n  \n  \n  lab5-etape2\n  \n  Les consommateurs\n  notifications en queue\n  durable ; paiement part\n  en Python (pika)\n  \n\n  \n  \n  \n  lab5-final\n  \n  La resilience\n  paiement eteint : tout\n  marche, messages en attente,\n  rattrapage au reveil\n  \n\n  Bloques ? git checkout du tag suivant : personne ne reste au bord de la route.\n\n\n\nDépart : votre lab4-final. Rôles : l’Appariteur pilote paiement-service (pika) ; le Notaire les queues et bindings ; l’Huissier compose + RabbitMQ ; le Rédacteur l’UI de gestion et la preuve du rattrapage ; le Doyen la démo finale et l’ADR no5 : « Synchrone ou asynchrone ? » — le tableau de décision de toutes vos intégrations.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
+    ]
+  },
+  {
+    "objectID": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lessentiel-et-larc-du-semestre",
+    "href": "cours/architectures-logicielles-modernes/chapitres/05-l-asynchrone.html#lessentiel-et-larc-du-semestre",
+    "title": "Architectures Logicielles — Séance 5",
+    "section": "L’essentiel — et l’arc du semestre",
+    "text": "L’essentiel — et l’arc du semestre\n\n\n\n\n\n\n\nÀ retenir de la séance\n\n\nUn broker transforme les pannes en retards : queue durable + ack = at-least-once, dont le prix est l’idempotence. La règle de décision : il faut une réponse \\(\\Rightarrow\\) synchrone (et l’on assume le couplage temporel) ; on informe d’un fait \\(\\Rightarrow\\) asynchrone (et les consommateurs vivent leur vie).\n\n\n\n\n\n\n\n\n\n\n\nLe chemin parcouru en cinq séances\n\n\nUn God controller qui souffrait (S1) \\(\\to\\) des couches qui séparent la technique (S1) \\(\\to\\) un hexagone qui protège le métier (S2) \\(\\to\\) des modules aux frontières gardées par un test (S3) \\(\\to\\) un premier microservice, extrait avec précaution et payé au prix du synchrone (S4) \\(\\to\\) des événements qui voyagent, et des services qui ne meurent plus ensemble (S5). Vous n’avez pas appris des architectures : vous avez appris à faire évoluer une architecture — sous tests, par étapes, chaque décision tracée dans un ADR. C’est exactement le métier.",
+    "crumbs": [
+      "Séances",
+      "Architectures Logicielles — Séance 5"
     ]
   },
   {
@@ -8141,14 +8702,14 @@
     "href": "enseignement/index.html",
     "title": "Enseignement",
     "section": "",
-    "text": "Génie Logiciel & Architecture\nBases du Génie Logiciel\nNiveau : L3\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nIngénierie des Processus de Développement Logiciel\nNiveaux : L3, M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nFormalismes de modélisation\nNiveau : M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nIntroduction au DevOps\nNiveau : M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nServices web et APIs\nNiveau : L3\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nArchitectures Logicielles Modernes\nNiveau : M1\nEn ligne  · 2 séances"
+    "text": "Génie Logiciel & Architecture\nBases du Génie Logiciel\nNiveau : L3\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nIngénierie des Processus de Développement Logiciel\nNiveaux : L3, M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nFormalismes de modélisation\nNiveau : M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nIntroduction au DevOps\nNiveau : M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nServices web et APIs\nNiveau : L3\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nArchitectures Logicielles Modernes\nNiveau : M1\nEn ligne  · 5 séances"
   },
   {
     "objectID": "enseignement/index.html#genie-logiciel-architecture",
     "href": "enseignement/index.html#genie-logiciel-architecture",
     "title": "Enseignement",
     "section": "",
-    "text": "Génie Logiciel & Architecture\nBases du Génie Logiciel\nNiveau : L3\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nIngénierie des Processus de Développement Logiciel\nNiveaux : L3, M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nFormalismes de modélisation\nNiveau : M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nIntroduction au DevOps\nNiveau : M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nServices web et APIs\nNiveau : L3\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nArchitectures Logicielles Modernes\nNiveau : M1\nEn ligne  · 2 séances"
+    "text": "Génie Logiciel & Architecture\nBases du Génie Logiciel\nNiveau : L3\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nIngénierie des Processus de Développement Logiciel\nNiveaux : L3, M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nFormalismes de modélisation\nNiveau : M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nIntroduction au DevOps\nNiveau : M1\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nServices web et APIs\nNiveau : L3\nBientôt en ligne\n\n\n\n\n\n\nGénie Logiciel & Architecture\nArchitectures Logicielles Modernes\nNiveau : M1\nEn ligne  · 5 séances"
   },
   {
     "objectID": "enseignement/index.html#ia-data",
