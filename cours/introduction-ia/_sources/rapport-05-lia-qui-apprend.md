@@ -1,6 +1,6 @@
 # Rapport de conversion — CM_S06_IA_qui_Apprend.tex
 
-Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/introduction-ia/chapitres/06-lia-qui-apprend.qmd`.
+Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/introduction-ia/chapitres/05-lia-qui-apprend.qmd`.
 
 ## À traiter à la main
 

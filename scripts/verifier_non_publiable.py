@@ -23,6 +23,13 @@ Le contrôle regarde le **site rendu**, et non les sources : c'est ce qui est pu
 que soit le chemin par lequel il y est arrivé. Il porte sur le nom du fichier et sur le texte des
 pages, parce que c'est ainsi que le PO les désigne.
 
+**Et sur le texte des PDF (US-75).** Il ne le faisait pas, et huit PDF servis par le site portaient
+le sigle GLSI — quarante-trois fois — sans qu'aucun contrôle les voie : les sources avaient bien été
+corrigées, mais les PDF compilés *avant* cette correction étaient partis en ligne. Le contrôle des
+numéros de téléphone, une étape plus haut dans la même CI, extrait pourtant le texte des PDF avec
+`pdftotext`. C'est l'angle mort de la « leçon du 404 » du Sprint 7 : un contrôle qui ne regarde pas
+là où le contenu est. Une pièce jointe est publiée autant qu'une page.
+
 Ce qui devient publiable se retire d'ici ; c'est une décision du PO, et elle se lit dans
 l'historique de ce fichier.
 
@@ -33,6 +40,7 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import subprocess
 import tomllib
 import sys
@@ -228,6 +236,36 @@ def termes_publies(racine: Path) -> list[tuple[Path, int, str, str]]:
     return trouves
 
 
+def termes_dans_les_pdf(racine: Path) -> list[tuple[Path, str, str, str]]:
+    """Termes interdits présents dans le texte d'un PDF servi par le site (US-75).
+
+    Un PDF est publié comme une page l'est : ce qui compte est ce qu'un lecteur y lit. `pdftotext`
+    sépare les pages par un saut de page, ce qui donne le numéro de page sans relire le fichier.
+
+    Sans `pdftotext`, le contrôle le **dit** au lieu de laisser croire qu'il a vérifié.
+    """
+    if not shutil.which("pdftotext"):
+        print("pdftotext introuvable : le texte des PDF n'est pas vérifié "
+              "(poppler-utils ; la CI l'installe à l'étape des numéros de téléphone).")
+        return []
+    trouves = []
+    for fichier in sorted(racine.rglob("*.pdf")):
+        if EXCLUS.intersection(fichier.relative_to(racine).parts):
+            continue
+        try:
+            texte = subprocess.run(["pdftotext", "-q", str(fichier), "-"],
+                                   capture_output=True, text=True, check=True).stdout
+        except (OSError, subprocess.CalledProcessError):
+            trouves.append((fichier, "?", "", "PDF illisible : son texte n'a pas pu être vérifié"))
+            continue
+        for terme, raison in TERMES_INTERDITS.items():
+            for trouve in re.finditer(rf"\b{re.escape(terme)}\b", texte):
+                page = texte.count("\f", 0, trouve.start()) + 1
+                extrait = " ".join(texte[max(0, trouve.start() - 50):trouve.end() + 30].split())
+                trouves.append((fichier, str(page), extrait, raison))
+    return trouves
+
+
 def signaler(chemin: Path, message: str) -> None:
     if os.environ.get("GITHUB_ACTIONS"):
         print(f"::error file={chemin},title=Document réservé::{message}")
@@ -255,6 +293,10 @@ def main() -> int:
     for fichier, ligne, extrait, raison in termes_publies(racine):
         signaler(fichier, f"ligne {ligne} : terme interdit dans « {extrait} » — {raison}")
         fautes += 1
+    for fichier, page, extrait, raison in termes_dans_les_pdf(racine):
+        detail = f"dans « {extrait} » — {raison}" if extrait else raison
+        signaler(fichier, f"page {page} : terme interdit {detail}")
+        fautes += 1
 
     if fautes:
         print(f"ÉCHEC : {fautes} élément(s) non publiable(s) dans le dépôt ou dans {racine}/. "
@@ -262,9 +304,12 @@ def main() -> int:
               "corrige à la source (le .tex du cours et sa copie dans _import/), puis l'import "
               "est rejoué.")
         return 1
+    pdf = sum(1 for f in racine.rglob("*.pdf")
+              if not EXCLUS.intersection(f.relative_to(racine).parts))
     print(f"OK : rien de non publiable dans le dépôt ni dans {racine}/ "
           f"({len(RESERVES) + len(RESERVES_MOTS)} nom(s) de document, "
-          f"{len(TERMES_INTERDITS)} terme(s) surveillés, "
+          f"{len(TERMES_INTERDITS)} terme(s) surveillés dans les pages "
+          f"et dans le texte des {pdf} PDF servis, "
           f"et aucun fichier non déclaré au-delà de 2 Mo).")
     return 0
 
