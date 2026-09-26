@@ -1,6 +1,7 @@
 # Inventaire des sources de `_import/` (US-68)
 
-**Relevé du 25 septembre 2026**, sur l'état de `_import/` au commit `65d6892`. Cette story
+**Relevé du 25 septembre 2026**, sur l'état de `_import/` au commit `65d6892`, **complété le
+26 septembre** des arbitrages du PO (§6) et des deux corrections de source qu'il a demandées. Cette story
 n'observe que : aucun import, aucune page, aucune figure n'a été produite pour l'écrire.
 
 `_import/` est ignoré par Git (`.gitignore:8`) : rien de ce qui suit n'est versionné. Les chemins
@@ -25,15 +26,15 @@ métadonnées, arbitrages — et non des minutes de machine.
 | `prc` | Programmation par Réutilisation de Composants | L2 | — | **5 CM + 9 labs** | documents rédigés | 19 *(à régénérer)* | 8 pts + 2 de chaîne |
 | `Maths_ML` | Mathématiques pour le Machine Learning | M1 | — | **4 modules (+ 2 decks)** | documents rédigés **et** decks | 25, ou 61 avec les decks | 8 pts |
 | `devops` | Introduction au DevOps | M1 | — | **1 lab sur 5** *(labs seuls)* | documents rédigés | 9 *(orphelines)* | 2 pts |
-| `intro_IA` | Introduction à l'IA | M1 | 5 séances | rien : **séance 4 absente** | documents rédigés | — | bloqué PO |
-| `ML` | Introduction au Machine Learning | M1 | 9 séances | rien : **séances 1 et 2 absentes** | decks Beamer + notebooks | — | bloqué PO |
-| `DSA` | Structures de Données et Algorithmes Avancés | M1 | 4 séances | rien : **séances 5 à 7 absentes** | documents rédigés | — | bloqué PO |
+| `intro_IA` | Introduction à l'IA | M1 | 5 séances | rien : **cours complet** | documents rédigés | — | **tranché** |
+| `ML` | Introduction au Machine Learning | M1 | 9 séances | rien : **séances 1 et 2 hors cours** | decks Beamer + notebooks | — | **tranché** |
+| `DSA` | Structures de Données et Algorithmes Avancés | M1 | 4 séances | rien : **séances 5 à 7 à venir** | documents rédigés | — | **tranché** |
 | `c-avance` | Programmation C avancée | L3 | 5 chapitres | rien : **complet** | documents rédigés | — | — |
 | `python` | Programmation Python | L1 | 9 séances | rien : **complet** | decks Beamer + notebooks | — | — |
 
 **Total migrable sans travail de chaîne : 27 séances**, sur cinq cours dont quatre ne sont pas encore
 en ligne. Deux cours (`python`, `c-avance`) sont épuisés : tout ce que `_import/` en contient est
-publié. Trois cours en ligne attendent des sources que le PO n'a pas déposées.
+publié. Trois cours en ligne n'attendent rien : le PO a tranché leur cas (§6), et aucun des trois « trous » relevés au premier jet n'en était un.
 
 **Aucun cours de `_import/` ne manque au catalogue.** Les cinq cours non publiés y figurent déjà,
 au statut `a-venir` : c'est une réponse au dernier critère d'US-66 — l'inventaire ne révèle aucune
@@ -54,7 +55,7 @@ Deux autres cours en comptent beaucoup sans être dans ce cas, parce qu'ils ont 
 **Frontend 1** (8 labs pour 3 CM) et **PRC** (9 labs pour 5 CM). Leurs labs restent des
 ressources de séance, comme ceux de Structures de Données.
 
-**Recommandation pour US-70 : Programmation Frontend 2.** C'est le seul cours à labs seuls qui soit
+**US-70 : Programmation Frontend 2**, retenu par le PO sur cette recommandation. C'est le seul cours à labs seuls qui soit
 complet, ses sept labs couvrent tout le cours, et il ne porte **aucune figure** — donc aucun texte
 alternatif à écrire ni à valider, c'est-à-dire aucune des décisions qui ont coûté quinze heures au
 ML. DevOps éprouverait la même chaîne sur un cours qui n'offrirait qu'une séance sur cinq.
@@ -92,7 +93,10 @@ textes alternatifs.
 
 ### `frontend2` — Programmation Frontend 2 : frameworks (L2, L3, pas en ligne)
 
-**Cours à labs seuls**, et complet : sept labs, aucun CM. Recommandé pour **US-70**.
+**Cours à labs seuls**, et complet : sept labs, aucun CM. Retenu pour **US-70**.
+
+**Niveau tranché par le PO (26/09) : L2 et L3.** Le `README.txt` du dossier dit « L3 » ; il est
+périmé, et le catalogue dit juste. À reprendre dans `cours.yml` au moment de l'import.
 
 | Lab | Source | Lignes | Blocs de code |
 |---|---|---:|---:|
@@ -117,9 +121,14 @@ ressource, sans compilation. **Aucune figure dans les sept labs** — donc aucun
 Ces fichiers ne passent pas par l'import. La banque de QCM et les lots d'examen sont des documents
 réservés à l'enseignant au sens de `CLAUDE.md` §7.
 
-**À corriger à la source avant l'import :** `Lab_06_API_Django.tex` contient le sigle **GLSI**, que
-`scripts/verifier_non_publiable.py` refuse. La correction se fait dans le `.tex` du cours **et** dans
-sa copie de `_import/`, sinon le terme revient au prochain import.
+**Corrigé à la source le 26/09**, sur instruction du PO : `Lab_06_API_Django.tex` portait le sigle
+**GLSI** en trois endroits — non pas en en-tête, mais comme valeur d'exemple du champ `filiere`. Les
+trois sont retirées.
+
+**Repéré pour US-70, à traiter à l'import :** trois numéros de téléphone d'exemple dorment dans les
+labs — `77 123 45 67` dans `Lab_04` et `Lab_05` (un gabarit de formulaire), et `1-770-736-8031` dans
+`Lab_JS_React.tex`, qui recopie les données d'exemple d'une API publique. Aucun numéro ne paraît sur
+le site (`CLAUDE.md` §7) : ils seront remplacés par des numéros fictifs à l'import.
 
 **Estimation : 3 points**, conforme à US-70. Sept séances, sept PDF à attacher, aucune figure, une
 correction de source.
@@ -165,8 +174,17 @@ Le cours le plus complet de ceux qui ne sont pas en ligne : cinq CM et neuf labs
 Le découpage en séances est une décision du PO : rien dans `_import/` ne dit comment les cinq CM et
 les neuf labs se répartissent sur le semestre.
 
-**Estimation : 8 points** pour les cinq séances et les neuf labs, **plus 2 points de chaîne** pour la
-régénération des figures en SVG. Les 19 textes alternatifs suivront les figures, pas avant.
+**Estimation : 8 points** pour les cinq séances et les neuf labs — **reportés au Sprint 9** par le
+PO —, **plus 2 points de chaîne** pour la régénération des figures en SVG, qui entrent au Sprint 8
+sous **US-73** : la chaîne d'abord, le cours ensuite. Les 19 textes alternatifs suivront les
+figures, pas avant.
+
+**Domaine tranché par le PO (26/09) : « Programmation, Web & Mobile »**, et non plus « Génie
+Logiciel & Architecture » — les neuf labs sont du React, du Flask, du Leaflet et du Docker.
+
+**Le sigle GLSI a été retiré des quatorze sources le 26/09**, à la source, sur instruction du PO :
+33 occurrences en tout, dans les pieds de page (`ESP/UCAD --- L2 GLSI`), les dates
+(`L2 GLSI / DUT-INFO2`) et deux mentions en clair de `Lab_PRC08_Docker.tex`.
 
 ### `Maths_ML` — Mathématiques pour le Machine Learning (M1, pas en ligne)
 
@@ -195,15 +213,21 @@ refusés par `scripts/verifier_non_publiable.py`, et leur place n'est pas dans l
 chacun, le plus gros volume rédigé de l'inventaire — avec 25 textes alternatifs. Les decks
 ajouteraient 36 figures et donc 36 décisions de plus.
 
-### `intro_IA` — Introduction à l'IA (M1, en ligne) — **séance 4 absente**
+### `intro_IA` — Introduction à l'IA (M1, en ligne) — **tranché : cours complet**
 
-Cinq séances en ligne : 1, 2, 3, **5**, 6. Les TD des séances 1, 2, 3 et 5 et le notebook de la
-séance 1 sont attachés.
+Cinq séances en ligne. Les TD de quatre d'entre elles et le notebook de la première sont attachés.
 
-**La séance 4 n'a aucune source dans `_import/`.** Le dossier `intro_IA/Ch04/` ne porte pas la
-séance 4 : il contient la séance 5 (`CM_S05_IA_qui_Doute.tex` et ses variantes 5A/5B). Aucun fichier
-de l'arborescence ne nomme une séance 4. C'est un trou du cours, pas un trou de la chaîne, et il
-attend le PO.
+**Tranché par le PO (26/09) : il n'y a pas de séance 4.** La numérotation des dossiers de
+`_import/intro_IA/` ne suit pas celle des séances — `Ch04/` contient `CM_S05_IA_qui_Doute.tex`. Le
+cours compte **cinq séances**, et le site les porte toutes : rien à combler, rien à signaler.
+
+**Une suite, et une seule :** la numérotation affichée doit être **continue**, sans saut visible.
+Le site affiche aujourd'hui 1, 2, 3, **5**, 6 — dans les descriptions de page (« Séance 5
+d'Introduction à l'IA… ») et dans les renvois d'une séance à l'autre. Le catalogue, lui, liste les
+séances par leur titre et ne montre aucun numéro. Portée mesurée : **22 occurrences dans les cinq
+`.tex` de `_sources/`** (la correction se fait là, puis l'import est rejoué), deux lignes
+d'`import.toml`, deux fichiers à renommer, une ressource à renommer, et les adresses des deux
+dernières séances qui changent. Estimé **2 points**, hors périmètre du Sprint 8.
 
 **Disponible et non publié, si le PO le veut :** quatre synthèses de séance (`SYNTH_S01`, `SYNTH_S02`,
 `SYNTH_S03`, `SYNTH_S05`) et une fiche de référence (`REF_S01`), tous en `.tex` et en PDF. Ce sont
@@ -213,19 +237,31 @@ des documents d'étudiant, attachables en ressource comme les TD.
 (`TD_S01_..._CORR.tex`, `CORR_S5A`, `CORR_S5B`) et le PDF de réponses du jeu « 4 à la suite »
 (`Ch01/QPUC1/4_a_la_suite_S01_reponses.pdf`).
 
-### `ML` — Introduction au Machine Learning (M1, en ligne) — **séances 1 et 2 absentes**
+### `ML` — Introduction au Machine Learning (M1, en ligne) — **tranché : séances 1 et 2 hors cours**
 
 Neuf séances en ligne (3 à 11), avec leurs neuf notebooks et neuf fiches d'exercices. `_import/ML/`
-ne contient que `Seance3` à `Seance11` : **les séances 1 et 2 n'ont pas de source**. Le cours est donc
-en ligne dans son intégralité récupérable, et commence à la séance 3.
+ne contient que `Seance3` à `Seance11`.
+
+**Tranché par le PO (26/09) : les séances 1 et 2 recouvrent le cours de Programmation Python et ne
+seront pas migrées.** Le cours commence à la séance 3, et c'est voulu. La page du cours le dit
+déjà : « Le cours commence à la séance 3 : les deux premières recouvrent le cours de Programmation
+Python, qui en est le prérequis », avec le lien vers ce cours.
+
+**Réserve, à la demande du PO :** cette phrase n'est que sur la page du cours. Un étudiant qui
+arrive **directement** sur la séance 3 — par une recherche, un lien partagé — lit « Introduction au
+ML — Séance 3 » sans rien qui explique où sont les deux premières. Une phrase sur la première
+diapositive de la séance 3 le dirait ; c'est du contenu, donc une décision du PO.
 
 **À ne pas importer :** les six `CORR_EXOS_S*` qui restent dans le dossier (séances 3 et 5), déjà connus du contrôle.
 
-### `DSA` — Structures de Données et Algorithmes Avancés (M1, en ligne) — **séances 5 à 7 absentes**
+### `DSA` — Structures de Données et Algorithmes Avancés (M1, en ligne) — **tranché : 5 à 7 à venir**
 
 Quatre séances en ligne, avec leurs quatre labs, le projet P3 et le TP de mise en place. Le `README.md`
-du dossier le dit lui-même : « CM et Labs des **quatre premières** séances ». Le cours en prévoit sept.
-Rien à migrer sans nouvelles sources.
+du dossier le dit lui-même : « CM et Labs des **quatre premières** séances ».
+
+**Tranché par le PO (26/09) : les séances 5 à 7 sont à venir et seront fournies.** Le cours affiche
+quatre séances pour l'instant, et **rien n'indique qu'il en manque** — c'est l'état voulu, pas un
+défaut. Rien à migrer avant les nouvelles sources.
 
 **À ne pas importer :** `Lab_S03_Tables_Hachage_corr.*` et `CORR_Lab_S04_Arbres_et_Tas.pdf`.
 
@@ -260,16 +296,43 @@ JavaScript de Frontend 1. Tout le reste du graphe est une décision du PO : aucu
 **Pour US-69.** Les sources des trois séances sont complètes, figures comprises. Le seul manque est le
 lab 1, qui n'existe pas.
 
-**Pour US-70.** Frontend 2 est recommandé : complet, sept séances, aucune figure.
+**Pour US-70.** Frontend 2, **retenu par le PO** : complet, sept séances, aucune figure.
 
 ## 5. Manques de chaîne révélés par l'inventaire
 
-Un seul, et il est chiffré : **les figures de PRC sont en PNG et pointent vers un chemin absolu
-étranger**. Les cinq scripts qui les produisent sont présents et corrects quant aux noms ; il manque
-de les faire écrire des SVG au bon endroit. Estimé **2 points**, à la source. Sans cela, les cinq CM
+Un seul, et il est chiffré. Il est devenu **US-73** au Sprint 8 : **les figures de PRC sont en PNG
+et pointent vers un chemin absolu étranger**. Les cinq scripts qui les produisent sont présents et
+corrects quant aux noms ; il manque de les faire écrire des SVG au bon endroit. Estimé
+**2 points**, à la source. Sans cela, les cinq CM
 de PRC ne peuvent pas être migrés, ou le seraient avec dix-neuf figures manquantes.
 
 Les neuf SVG du Lab 0 de DevOps posent une question voisine mais plus petite : elles existent et
 `lab0_git.tex` **ne les appelle pas** — zéro `includegraphics` dans le document. Soit elles ont été
 dessinées pour une version ultérieure du lab, soit leurs appels ont été perdus. Le PO seul peut dire
 où chacune va, et dans quel ordre.
+
+## 6. Arbitrages du PO — tranchés le 26 septembre 2026
+
+Ce qui suit est clos. Les trois « trous » du premier relevé n'en étaient pas : le PO les a
+expliqués, et la liste est ici pour qu'ils ne soient pas rouverts au prochain inventaire.
+
+| Point | Décision | Suite |
+|---|---|---|
+| **Introduction à l'IA, « séance 4 »** | Il n'y a pas de séance 4 : la numérotation des dossiers de `_import/` ne suit pas celle des séances. Le cours en compte cinq, toutes en ligne. | Rien à combler, rien à signaler sur le site. La numérotation **affichée** doit être continue : 22 occurrences dans les `.tex`, deux renommages, estimé 2 pts, hors Sprint 8. |
+| **Introduction au ML, séances 1 et 2** | Elles recouvrent le cours de Programmation Python et **ne seront pas migrées**. Le cours commence à la séance 3, et c'est voulu. | La page du cours le dit et renvoie à Python. Reste la question d'un étudiant qui arrive directement sur la séance 3 : décision de contenu du PO. |
+| **Structures de Données, séances 5 à 7** | Elles sont **à venir** et seront fournies par le PO. | Le cours affiche quatre séances, et rien n'indique qu'il en manque. C'est l'état voulu. |
+| **US-70, cours à labs seuls** | **Programmation Frontend 2**, sur la recommandation de cet inventaire. | Sept labs, aucune figure ; trois numéros de téléphone d'exemple à remplacer à l'import. |
+| **PRC** | Migration **reportée au Sprint 9**. Seul son travail de chaîne entre au Sprint 8, sous **US-73**. | La capacité du Sprint 8 passe de 21 à 23 points. |
+| **Programmation Frontend 2, niveau** | **L2 et L3.** Le `README.txt` du cours, qui dit « L3 », est périmé. | Le catalogue est juste ; `cours.yml` reprendra L2 et L3 à l'import (US-70). |
+| **PRC, domaine** | **« Programmation, Web & Mobile »**, et non « Génie Logiciel & Architecture ». | Corrigé au catalogue. |
+| **PDF publiés portant « GLSI »** | Le contrôle doit lire le texte des PDF : **US-75**, 3 pts, dans ce sprint, le contrôle d'abord. | `lab-4` et `projet-3` sont **retirés du site** — sources divergentes, le PO les reprendra (#163). `tp-1` est recompilé après correction de son encodage. |
+| **Skills portant « GLSI »** | **Part du PO**, hors dépôt. | Noté dans #163. |
+| **Numérotation d'Introduction à l'IA** | Continue : **US-74**, livrée. Le cours affiche 1 à 5. | Deux adresses changent ; pas de redirection (US-77 au backlog, sans sprint). |
+| **Les 22 autres `.tex` d'`_import/intro_IA`** | **Laissés tels quels**, décision du PO : examens et TD circulent en PDF avec leur propre numérotation, et les renuméroter décalerait ce que les étudiants ont déjà. | Divergence assumée, notée dans #163. |
+| **Sigle GLSI** | Retiré **à la source**, dès maintenant. | 33 occurrences dans les 14 sources de PRC, 3 dans `Lab_06_API_Django.tex`. `_import/` est ignoré par Git : la correction vit sur le disque du PO, pas dans une PR. |
+
+**Un risque qui reste, et qui n'est pas dans `_import/`.** Le sigle GLSI est aussi dans les skills
+qui produisent ces cours — `reutilisation-composants/SKILL.md` et `frontend-react-nextjs/SKILL.md`,
+entre autres, sous `~/.claude/skills/synced/`. Tant qu'il y est, **il reviendra** au prochain
+document généré, exactement comme `CLAUDE.md` §7 le prévoit. Ces fichiers sont synchronisés depuis
+le compte du PO : **il les corrigera lui-même**, et c'est noté dans #163.

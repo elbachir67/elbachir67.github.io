@@ -89,6 +89,18 @@ d'un tuteur IA encadré.
 | US-63 | EP3 | Audit d'accessibilité ciblé sur la PR, audit complet hebdomadaire sur `main` | M | 3 | livrée |
 | US-64 | EP3 | Cellules de tableau étendues (`\multicolumn`) et équations à étiquettes multiples | S | 3 | livrée |
 | US-65 | EP3 | Le site sert ce qu'il promet : page de cours, lien interne, ressource du manifeste | M | 2 | livrée |
+| US-66 | EP2 | Un catalogue sans doublon ni confusion (fusion des entrées, contrôle en CI) | M | 3 | 8 |
+| US-67 | EP3 | Les cours se lient entre eux (prérequis en liens, relation inverse calculée) | M | 5 | 8 |
+| US-68 | EP3 | Inventaire des sources disponibles dans `_import/` | M | 2 | 8 |
+| US-69 | EP3 | Architectures Logicielles Modernes, séances suivantes | M | 8 | 8 |
+| US-70 | EP3 | Un lot de cours à labs seuls (le lab tient lieu de séance) | M | 3 | 8 |
+| US-71 | EP3 | Migration de Structures de Données et Algorithmes Avancés (4 séances rédigées) | M | 5 | 7 |
+| US-72 | EP3 | Migration d'Introduction à l'IA (5 séances rédigées) | M | 8 | 7 |
+| US-73 | EP3 | Les figures de PRC, régénérées en SVG et à un chemin relatif | M | 2 | 8 |
+| US-74 | EP3 | La numérotation des séances est continue (Introduction à l'IA) | M | 2 | 8 |
+| US-75 | EP3 | Rien de non publiable dans un PDF non plus (le contrôle lit leur texte) | M | 3 | 8 |
+| US-76 | EP1 | Une ressource est ce que sa source produit (recompilation vérifiée en CI) | M | 5 | 8 |
+| US-77 | EP1 | Redirections : les adresses d'hier mènent encore quelque part | C | 2 | — |
 
 ### Stories décrites par le PO
 
@@ -202,6 +214,50 @@ par chapitre : le reste est de la lecture et des **décisions du PO** — 33 tex
 seuls chapitres de C, une table d'encadrés par cours rédigé. US-58 déplace cette part : la chaîne
 rédige un brouillon à partir de la source de la figure, le PO valide, corrige ou réécrit.
 
+**US-71 et US-72 — deux migrations du Sprint 7 qui n'avaient pas d'identifiant.** Le PO les avait
+demandées en cours de sprint sans les estimer, et le bilan du Sprint 7 (§2) en faisait la
+proposition : « le plus gros du travail de ce sprint n'apparaît dans aucun compte ». Elles sont
+créées ici, marquées livrées au Sprint 7, sur décision du PO — « le compte doit dire la vérité ».
+Les points sont estimés par comparaison, faute d'avoir été posés à l'époque : Introduction à l'IA
+(5 séances rédigées, 4 TD, un notebook) vaut US-59, les cinq chapitres rédigés du cours de C, soit
+8 ; Structures de Données (4 séances rédigées, 4 labs, un projet, un TP) vaut un cran de moins,
+soit 5. Le Sprint 7 passe donc de 28 à **41 points livrés** pour 20 engagés.
+
+**US-73 — les figures de PRC.** Révélée par l'inventaire d'US-68 : les dix-neuf figures des cinq CM
+sont absentes, et les cinq scripts qui les produisent écrivent en PNG vers `/home/claude/cmN/figures/`,
+un chemin absolu d'une autre machine. Le PO l'a ajoutée au Sprint 8 en portant la capacité à 23,
+et a reporté la migration de PRC elle-même au Sprint 9 : la chaîne d'abord, le cours ensuite.
+
+**US-74 — un cours qui saute de 3 à 5.** Le PO : « un cours qui saute de 3 à 5 donne
+l'impression qu'il manque une séance, ce qui est exactement ce que je voulais éviter ». Introduction
+à l'IA compte cinq séances ; le site en affichait 1, 2, 3, 5, 6, parce que la numérotation des
+dossiers de `_import/` ne suivait pas celle des séances. La correction est à la source, et les
+adresses des deux dernières séances changent.
+
+**US-75 — le contrôle du non publiable ne lisait pas les PDF.** Huit PDF déjà en ligne portent le
+sigle GLSI, 43 fois. `verifier_non_publiable.py` lit les noms de fichiers et le texte des pages
+HTML ; le contrôle des numéros de téléphone, une étape plus haut dans la même CI, extrait bien le
+texte des PDF avec `pdftotext`. C'est le même angle mort que la « leçon du 404 » du Sprint 7 : un
+contrôle qui ne regarde pas là où le contenu est. Le PO a tranché le sort des trois PDF de
+Structures de Données : `lab-4` et `projet-3` sont **retirés du site** en attendant qu'il reprenne
+leurs sources — elles ont divergé — et `tp-1` est recompilé après correction de son encodage.
+
+**US-76 — quatre défauts qu'aucun contrôle ne pouvait voir.** US-75 a recompilé huit PDF publiés
+pour en retirer un sigle, et la recompilation a révélé tout autre chose : un style de listing sans
+table d'accents, qui avait fait perdre les siens au TP de mise en place (« # Se d c o n n e c t e
+r ») ; une bibliothèque TikZ jamais chargée ; trois exposants hors mode mathématique, et
+vingt-deux caractères que la police ne compose pas, qui avaient purement disparu du plan du cours
+de C. Les quatre vivaient dans les sources depuis leur écriture. Rien ne pouvait les montrer,
+**parce que les PDF de ressource sont commités, jamais recompilés** : ce que le dépôt sert est un
+artefact, pas un résultat. C'est aussi ce qui a révélé que `lab-4` et `projet-3` avaient divergé de
+leurs sources. Le PO : « quatre défauts invisibles autrement, c'est la démonstration qu'il faut ».
+
+**US-77 — les adresses d'hier.** US-74 a renuméroté deux séances d'Introduction à l'IA, et donc
+changé deux adresses. Aucune page du site n'y menait, et le PO a tranché : **pas de table de
+redirections pour deux adresses que personne n'a encore partagées**. La story reste au backlog,
+sans sprint, pour le jour où le site aura des liens entrants — une renumérotation ou un renommage
+de séance se produira encore.
+
 ## Roadmap
 
 | Sprint | Objectif | Pts |
@@ -212,6 +268,7 @@ rédige un brouillon à partir de la source de la figure, le PO valide, corrige 
 | 4 | Chaîne de publication et blog | 23 |
 | 5 | Du contenu : un deuxième cours en ligne | 14 livrés sur 19 |
 | 6 | Les cours rédigés entrent dans la chaîne | 26 livrés sur 26 |
-| 7 | Achever le C, publier le ML, préparer les cours rédigés | 20 |
+| 7 | Achever le C, publier le ML, préparer les cours rédigés | 41 livrés sur 20 |
+| 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 33 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
