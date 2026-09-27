@@ -1,0 +1,960 @@
+% ===========================================================================
+%  Programmation Frontend — Lab : Des fonctions JS à React
+%  ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Code source ---
+\usepackage{listings}
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else,
+    finally, for, function, if, in, instanceof, new, return, switch, this,
+    throw, try, typeof, var, void, while, with, const, let, class, export,
+    extends, import, super, yield, async, await, of, from, true, false, null,
+    undefined},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  morestring=[b]`,
+  sensitive=true,
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  language=JavaScript,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\lstdefinestyle{terminal}{
+  language={},
+  keywordstyle={},
+  commentstyle={},
+  stringstyle={},
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{black!5},
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Prog. Frontend --- Lab : Des fonctions JS à React}
+\fancyhead[R]{\small ESP/UCAD}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Programmation Frontend}\\[0.8cm]
+\textbf{\huge Lab --- Des fonctions JS à React}\\[0.3cm]
+\textbf{\Large Fonctions, asynchrone et votre première application React}\\[0.5cm]
+\large ESP/UCAD --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Durée estimée} & 1h (une séance) \\
+\textbf{Prérequis} & Savoir manipuler le DOM (sélecteurs, événements, modification de styles). \\
+                    & Avoir un éditeur de code (VS Code recommandé) et Node.js installé. \\
+\textbf{Fichiers starter} & \texttt{index.html} + \texttt{index.js} (fournis par l'enseignant) \\
+\textbf{Livrables} & Un dossier \texttt{annuaire-react/} fonctionnel avec une appli React \\
+\textbf{Validation} & L'application React affiche des utilisateurs récupérés depuis une API \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du lab]
+À l'issue de ce lab, chaque étudiant sera capable de :
+\begin{enumerate}[nosep]
+    \item Distinguer les \textbf{trois façons de déclarer une fonction} en JavaScript (déclaration, expression, fléchée)
+    \item Expliquer ce qu'est une opération \textbf{asynchrone} et pourquoi c'est nécessaire
+    \item Utiliser \texttt{fetch} avec \texttt{async/await} pour récupérer des données depuis une API
+    \item Créer une application \textbf{React} avec Vite et comprendre le concept de \textbf{composant}
+    \item Utiliser \texttt{useState} et \texttt{useEffect} pour gérer l'état et les effets de bord
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Le starter --- Point de départ}
+\label{sec:starter}
+% ===========================================================================
+
+Créez un dossier \texttt{lab-react/} et placez-y les deux fichiers suivants.
+
+\subsection{Le fichier \texttt{index.html}}
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+    <title>DOM</title>
+    <script src="index.js"></script>
+  </head>
+  <body>
+    <h2>Manipulation du DOM</h2>
+    <p>Premier exemple</p>
+    <input type="button" value="changer couleur" id="b1" />
+  </body>
+</html>
+\end{lstlisting}
+
+La page contient un titre \texttt{<h2>}, un paragraphe \texttt{<p>} et un bouton \texttt{<input>} avec l'identifiant \texttt{b1}. Le fichier \texttt{index.js} est chargé via la balise \texttt{<script>}.
+
+\subsection{Le fichier \texttt{index.js}}
+
+\begin{lstlisting}
+"use strict";
+(function () {
+  window.addEventListener("load", init);
+
+  function init() {
+    id("b1").addEventListener("click", change);
+  }
+
+  function change() {
+    let p = qs("p");
+    let h2 = qs("h2");
+    p.style.color = "red";
+    h2.style.color = "blue";
+  }
+
+  function id(name) {
+    return document.getElementById(name);
+  }
+  function qs(selector) {
+    return document.querySelector(selector);
+  }
+  function qsa(query) {
+    return document.querySelectorAll(query);
+  }
+})();
+\end{lstlisting}
+
+Le JS est encapsulé dans une IIFE\footnote{IIFE = \emph{Immediately Invoked Function Expression} : une fonction qui s'exécute immédiatement.}. Il contient trois fonctions utilitaires (\texttt{id}, \texttt{qs}, \texttt{qsa}), une fonction \texttt{init} qui attache un écouteur de clic au bouton, et une fonction \texttt{change} qui modifie les couleurs.
+
+\subsection{Testez le starter}
+
+\begin{objectifbox}[Étape 0 --- Vérification]
+Ouvrez \texttt{index.html} dans votre navigateur. Cliquez sur le bouton «~changer couleur~». Le titre doit passer en \textcolor{blue}{\textbf{bleu}} et le paragraphe en \textcolor{red}{\textbf{rouge}}.
+
+Si ça ne fonctionne pas : vérifiez que les deux fichiers sont dans le \textbf{même dossier} et que les noms correspondent (\texttt{index.html} charge \texttt{index.js}).
+\end{objectifbox}
+
+Une fois que ça marche, on va \textbf{enrichir ce code} en trois étapes : d'abord les fonctions, puis l'asynchrone, et enfin React.
+
+% ===========================================================================
+\section{Partie 1 --- Les trois visages des fonctions}
+\label{sec:fonctions}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Comprendre les trois façons d'écrire une fonction en JavaScript et savoir quand utiliser chacune.
+\end{objectifbox}
+
+\subsection{Façon 1 : La déclaration de fonction}
+
+C'est celle que vous connaissez déjà. Regardez le starter :
+
+\begin{lstlisting}
+function change() {
+  let p = qs("p");
+  p.style.color = "red";
+}
+\end{lstlisting}
+
+On déclare une fonction avec le mot-clé \texttt{function}, suivi d'un nom. C'est la forme classique.
+
+\begin{infobox}[Particularité : le \emph{hoisting}]
+Une fonction déclarée peut être appelée \textbf{avant} sa définition dans le code. JavaScript la «~remonte~» automatiquement en haut du fichier. C'est pour cela que dans le starter, \texttt{init()} appelle \texttt{change()} qui est définie plus bas --- et ça marche.
+\end{infobox}
+
+\subsection{Façon 2 : L'expression de fonction}
+
+On peut aussi \textbf{stocker une fonction dans une variable}, comme on stocke un nombre ou un texte :
+
+\begin{lstlisting}
+const change = function() {
+  let p = qs("p");
+  p.style.color = "red";
+};
+\end{lstlisting}
+
+La différence ? Ici, \texttt{change} est une \textbf{variable} qui contient une fonction. On ne peut \textbf{pas} l'appeler avant sa définition (pas de \emph{hoisting}).
+
+\begin{retenirbox}[À retenir]
+\begin{center}
+\begin{tabular}{lp{6cm}}
+\toprule
+\textbf{Déclaration} & \texttt{function maFonction() \{ ... \}} \\
+\textbf{Expression} & \texttt{const maFonction = function() \{ ... \};} \\
+\bottomrule
+\end{tabular}
+\end{center}
+En JavaScript, \textbf{une fonction est une valeur} comme une autre. On peut la stocker dans une variable, la passer en paramètre, la retourner. C'est un concept fondamental.
+\end{retenirbox}
+
+\subsection{Façon 3 : La fonction fléchée (\emph{arrow function})}
+
+Depuis 2015 (ES6), JavaScript offre une syntaxe plus courte :
+
+\begin{lstlisting}
+const change = () => {
+  let p = qs("p");
+  p.style.color = "red";
+};
+\end{lstlisting}
+
+On remplace \texttt{function()} par \texttt{() =>}. C'est la même chose, en plus compact. La flèche se lit «~qui fait~» : \texttt{() => \{ ... \}} = «~une fonction sans paramètre qui fait ...~».
+
+Quand la fonction a \textbf{un seul paramètre}, on peut enlever les parenthèses. Quand elle a \textbf{une seule ligne}, on peut enlever les accolades et le \texttt{return} :
+
+\begin{lstlisting}
+// Avec un paramètre et une seule ligne
+const id = name => document.getElementById(name);
+
+// Équivalent de :
+function id(name) {
+  return document.getElementById(name);
+}
+\end{lstlisting}
+
+\begin{retenirbox}[Les trois formes côte à côte]
+\begin{center}
+\begin{tabular}{lp{7.5cm}}
+\toprule
+\textbf{Forme} & \textbf{Syntaxe} \\
+\midrule
+Déclaration & \texttt{function double(x) \{ return x * 2; \}} \\
+Expression & \texttt{const double = function(x) \{ return x * 2; \};} \\
+Fléchée & \texttt{const double = x => x * 2;} \\
+\bottomrule
+\end{tabular}
+\end{center}
+Les trois font \textbf{la même chose}. La fonction fléchée est la plus utilisée dans le code moderne et dans React.
+\end{retenirbox}
+
+\subsection{Exercice 1 --- Refactoriser le starter}
+
+\begin{objectifbox}[À vous de jouer]
+Réécrivez les fonctions utilitaires du starter en utilisant des \textbf{fonctions fléchées}. Transformez :
+\end{objectifbox}
+
+\begin{lstlisting}
+// AVANT (déclarations classiques)
+function id(name) {
+  return document.getElementById(name);
+}
+function qs(selector) {
+  return document.querySelector(selector);
+}
+function qsa(query) {
+  return document.querySelectorAll(query);
+}
+\end{lstlisting}
+
+En :
+
+\begin{lstlisting}
+// APRÈS (fonctions fléchées)
+const id = name => document.getElementById(name);
+const qs = selector => document.querySelector(selector);
+const qsa = query => document.querySelectorAll(query);
+\end{lstlisting}
+
+Remplacez aussi la fonction \texttt{change} par une fléchée, et \texttt{init} par une fléchée. Votre starter refactorisé doit ressembler à ceci :
+
+\begin{lstlisting}
+"use strict";
+(function () {
+  window.addEventListener("load", init);
+
+  const init = () => {
+    id("b1").addEventListener("click", change);
+  };
+
+  const change = () => {
+    qs("p").style.color = "red";
+    qs("h2").style.color = "blue";
+  };
+
+  const id = name => document.getElementById(name);
+  const qs = selector => document.querySelector(selector);
+  const qsa = query => document.querySelectorAll(query);
+})();
+\end{lstlisting}
+
+\begin{attentionbox}[Attention au \emph{hoisting}]
+Si vous testez ce code, il ne fonctionnera \textbf{pas} directement ! Pourquoi ? Parce que \texttt{init} est maintenant une expression (pas de \emph{hoisting}), mais \texttt{window.addEventListener("load", init)} est appelé avant la définition de \texttt{init}.
+
+La solution : déplacez l'appel \texttt{window.addEventListener} \textbf{après} les définitions :
+
+\begin{lstlisting}
+"use strict";
+(function () {
+  const id = name => document.getElementById(name);
+  const qs = selector => document.querySelector(selector);
+  const qsa = query => document.querySelectorAll(query);
+
+  const change = () => {
+    qs("p").style.color = "red";
+    qs("h2").style.color = "blue";
+  };
+
+  const init = () => {
+    id("b1").addEventListener("click", change);
+  };
+
+  window.addEventListener("load", init);
+})();
+\end{lstlisting}
+
+Avec les fonctions fléchées (expressions), \textbf{l'ordre des définitions compte}. Pas de \emph{hoisting}.
+\end{attentionbox}
+
+Sauvegardez \texttt{index.js} et rechargez \texttt{index.html} dans le navigateur. Le bouton doit fonctionner exactement comme avant.
+
+% ===========================================================================
+\section{Partie 2 --- JavaScript asynchrone}
+\label{sec:async}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 20 minutes]
+Comprendre le concept d'asynchrone et savoir récupérer des données depuis une API avec \texttt{fetch} et \texttt{async/await}.
+\end{objectifbox}
+
+\subsection{Le problème : attendre sans bloquer}
+
+Imaginez que vous commandez un thiéboudienne au restaurant. Deux scénarios :
+
+\begin{center}
+\begin{tabular}{lp{5cm}p{5cm}}
+\toprule
+& \textbf{Synchrone} & \textbf{Asynchrone} \\
+\midrule
+\textbf{Ce qui se passe} & Vous restez debout devant la cuisine, immobile, à attendre que le plat soit prêt. & Vous vous asseyez, consultez votre téléphone. On vous appelle quand c'est prêt. \\
+\textbf{Résultat} & Vous êtes bloqué. Vous ne pouvez rien faire d'autre. & Vous continuez votre vie. Le plat arrive quand il est prêt. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+JavaScript fonctionne en mode \textbf{asynchrone}. Quand on demande des données à un serveur (ce qui prend du temps), JavaScript \textbf{n'attend pas}. Il continue d'exécuter le reste du code, et traite les données \textbf{quand elles arrivent}.
+
+\begin{retenirbox}[À retenir]
+\textbf{Synchrone} = une chose à la fois, dans l'ordre, en attendant chaque résultat.\\
+\textbf{Asynchrone} = on lance une tâche, on continue autre chose, et on traite le résultat quand il arrive.
+
+JavaScript est \textbf{mono-thread} (un seul fil d'exécution). Sans l'asynchrone, la page se figerait à chaque requête réseau. C'est pour cela que l'asynchrone est \textbf{indispensable} en développement web.
+\end{retenirbox}
+
+\subsection{L'API JSONPlaceholder}
+
+Pour pratiquer, on va utiliser une API gratuite de test : \url{https://jsonplaceholder.typicode.com}. Elle fournit de fausses données (utilisateurs, articles, commentaires) au format JSON.
+
+L'adresse \texttt{https://jsonplaceholder.typicode.com/users} retourne 10 utilisateurs fictifs. Ouvrez cette URL dans votre navigateur pour voir les données.
+
+Un utilisateur ressemble à ceci :
+
+\begin{lstlisting}
+{
+  "id": 1,
+  "name": "Leanne Graham",
+  "email": "Sincere@april.biz",
+  "phone": "1-770-736-8031 x56442",
+  "company": {
+    "name": "Romaguera-Crona"
+  }
+}
+\end{lstlisting}
+
+\subsection{Récupérer des données avec \texttt{fetch}}
+
+La fonction \texttt{fetch} envoie une requête HTTP et retourne une \textbf{promesse} (\emph{Promise}) --- c'est-à-dire un objet qui représente un résultat qui \textbf{n'est pas encore disponible}.
+
+\begin{infobox}[Qu'est-ce qu'une promesse ?]
+Quand vous commandez votre thiéboudienne, le serveur vous donne un \textbf{ticket avec un numéro}. Ce ticket est une \emph{promesse} : il ne contient pas le plat, mais il \textbf{garantit} que le plat arrivera (ou qu'on vous préviendra s'il y a un problème). En JavaScript, \texttt{fetch} retourne un tel ticket.
+\end{infobox}
+
+\subsubsection{Méthode 1 : \texttt{.then()} (pour comprendre)}
+
+\begin{lstlisting}
+fetch("https://jsonplaceholder.typicode.com/users")
+  .then(response => response.json())  // Convertir la réponse en JSON
+  .then(users => {
+    console.log(users);               // Afficher les utilisateurs
+  })
+  .catch(error => {
+    console.error("Erreur :", error);  // Gérer les erreurs
+  });
+\end{lstlisting}
+
+Chaque \texttt{.then()} reçoit le résultat de l'étape précédente. C'est une chaîne : requête $\to$ conversion en JSON $\to$ utilisation des données.
+
+\subsubsection{Méthode 2 : \texttt{async/await} (la méthode moderne)}
+
+La syntaxe \texttt{async/await} fait exactement la même chose, mais en \textbf{plus lisible} :
+
+\begin{lstlisting}
+const chargerUtilisateurs = async () => {
+  try {
+    const response = await fetch(
+      "https://jsonplaceholder.typicode.com/users"
+    );
+    const users = await response.json();
+    console.log(users);
+  } catch (error) {
+    console.error("Erreur :", error);
+  }
+};
+\end{lstlisting}
+
+\begin{retenirbox}[Décoder \texttt{async/await}]
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Mot-clé} & \textbf{Signification} \\
+\midrule
+\texttt{async} & Devant une fonction : «~cette fonction contient des opérations asynchrones~» \\
+\texttt{await} & Devant une promesse : «~attends le résultat avant de continuer~» \\
+\texttt{try/catch} & «~Essaie ceci, et si ça échoue, fais cela~» \\
+\bottomrule
+\end{tabular}
+\end{center}
+\texttt{await} ne bloque \textbf{pas} le navigateur. Il met la fonction en pause et laisse JavaScript continuer d'autres tâches. Quand la réponse arrive, la fonction reprend.
+\end{retenirbox}
+
+\subsection{Exercice 2 --- Afficher des utilisateurs dans le DOM}
+
+\begin{objectifbox}[À vous de jouer]
+Créez un fichier HTML + JS qui récupère les utilisateurs depuis JSONPlaceholder et les affiche dans la page. Utilisez le patron du starter.
+\end{objectifbox}
+
+Créez un fichier \texttt{annuaire.html} dans votre dossier \texttt{lab-react/} :
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Annuaire</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
+    .card { border: 1px solid #ccc; padding: 1rem; margin: 0.5rem 0;
+            border-radius: 8px; }
+    .card h3 { margin: 0 0 0.5rem 0; }
+    .card p { margin: 0.2rem 0; color: #555; }
+    #btn-charger { padding: 0.5rem 1.5rem; font-size: 1rem;
+                   cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Annuaire des utilisateurs</h1>
+  <button id="btn-charger">Charger les utilisateurs</button>
+  <div id="liste"></div>
+  <script src="annuaire.js"></script>
+</body>
+</html>
+\end{lstlisting}
+
+Maintenant, créez \texttt{annuaire.js} dans le même dossier, en suivant le patron du starter :
+
+\begin{lstlisting}
+"use strict";
+(function () {
+  const id = name => document.getElementById(name);
+
+  // Fonction asynchrone qui récupère et affiche les utilisateurs
+  const chargerUtilisateurs = async () => {
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      const users = await response.json();
+      afficherUtilisateurs(users);
+    } catch (error) {
+      id("liste").textContent = "Erreur de chargement.";
+      console.error("Erreur :", error);
+    }
+  };
+
+  // Fonction qui construit le HTML pour chaque utilisateur
+  const afficherUtilisateurs = (users) => {
+    const liste = id("liste");
+    liste.innerHTML = "";  // Vider la liste avant de remplir
+
+    users.forEach(user => {
+      const card = document.createElement("div");
+      card.classList.add("card");
+      card.innerHTML = `
+        <h3>${user.name}</h3>
+        <p>Email : ${user.email}</p>
+        <p>Entreprise : ${user.company.name}</p>
+      `;
+      liste.appendChild(card);
+    });
+  };
+
+  const init = () => {
+    id("btn-charger").addEventListener("click", chargerUtilisateurs);
+  };
+
+  window.addEventListener("load", init);
+})();
+\end{lstlisting}
+
+Ouvrez \texttt{annuaire.html} dans votre navigateur. Cliquez sur le bouton. Les 10 utilisateurs apparaissent.
+
+\begin{attentionbox}[Vérification]
+Si rien ne s'affiche, ouvrez la \textbf{console du navigateur} (\texttt{F12} $\to$ onglet Console). Les erreurs y apparaissent en rouge. Causes fréquentes :
+\begin{itemize}[nosep]
+    \item Erreur de syntaxe dans le JS (guillemet manquant, parenthèse oubliée)
+    \item Fichier \texttt{annuaire.js} pas au même endroit que le HTML
+    \item Pas de connexion internet (l'API est en ligne)
+\end{itemize}
+\end{attentionbox}
+
+\begin{retenirbox}[Bilan de la Partie 2]
+Vous savez maintenant :
+\begin{enumerate}[nosep]
+    \item Pourquoi l'asynchrone est nécessaire (ne pas bloquer le navigateur)
+    \item Utiliser \texttt{fetch} + \texttt{async/await} pour récupérer des données
+    \item Construire du HTML dynamiquement à partir de données JSON
+\end{enumerate}
+Mais regardez votre code : pour afficher 10 cartes, il faut \texttt{createElement}, \texttt{innerHTML}, \texttt{appendChild}, \texttt{classList.add}... C'est \textbf{beaucoup de manipulation manuelle du DOM}. Et si on veut ajouter un champ de recherche ? Un tri ? Un filtre ? Le code devient vite ingérable. React résout ce problème.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Partie 3 --- Bienvenue dans React}
+\label{sec:react}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 25 minutes]
+Comprendre pourquoi React existe, créer un projet React avec Vite, et recréer l'annuaire en React.
+\end{objectifbox}
+
+\subsection{Le problème du DOM manuel}
+
+Dans l'exercice précédent, vous avez écrit du code comme :
+
+\begin{lstlisting}
+const card = document.createElement("div");
+card.classList.add("card");
+card.innerHTML = `<h3>${user.name}</h3>`;
+liste.appendChild(card);
+\end{lstlisting}
+
+C'est du code \textbf{impératif} : vous dites au navigateur \textbf{comment} faire, étape par étape. Avec React, on passe en mode \textbf{déclaratif} : on décrit \textbf{ce qu'on veut voir}, et React s'occupe de mettre à jour le DOM.
+
+\begin{retenirbox}[Impératif vs Déclaratif]
+\begin{center}
+\begin{tabular}{lp{5cm}p{5cm}}
+\toprule
+& \textbf{Impératif} (DOM manuel) & \textbf{Déclaratif} (React) \\
+\midrule
+\textbf{Analogie} & Vous expliquez au cuisinier chaque geste : «~coupe l'oignon, fais chauffer l'huile, ajoute le riz...~» & Vous commandez «~un thiéboudienne~» et le cuisinier sait quoi faire. \\
+\textbf{Code} & \texttt{createElement}, \texttt{appendChild}, \texttt{innerHTML} & On décrit le résultat souhaité, React gère le DOM. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+\subsection{Installer Vite + React}
+
+\textbf{Vite} est un outil qui crée et configure un projet React en une seule commande. Il est rapide, moderne et utilisé en production.
+
+Ouvrez un terminal et tapez :
+
+\begin{lstlisting}[style=terminal]
+npm create vite@latest annuaire-react -- --template react
+\end{lstlisting}
+
+\begin{lstlisting}[style=terminal]
+cd annuaire-react
+npm install
+npm run dev
+\end{lstlisting}
+
+Résultat attendu :
+\begin{lstlisting}[style=terminal]
+  VITE v6.x.x  ready in xxx ms
+
+  -> Local:   http://localhost:5173/
+\end{lstlisting}
+
+Ouvrez \texttt{http://localhost:5173} dans votre navigateur. Vous voyez la page d'accueil de Vite + React.
+
+\begin{attentionbox}[Node.js obligatoire]
+Si la commande \texttt{npm} n'est pas reconnue, Node.js n'est pas installé. Téléchargez-le sur \url{https://nodejs.org} (version LTS). Après l'installation, fermez et rouvrez le terminal.
+\end{attentionbox}
+
+\subsection{Comprendre la structure du projet}
+
+Ouvrez le dossier \texttt{annuaire-react} dans VS Code. Voici les fichiers importants :
+
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Fichier} & \textbf{Rôle} \\
+\midrule
+\texttt{src/App.jsx} & Le composant principal --- c'est \textbf{ici} qu'on va travailler \\
+\texttt{src/main.jsx} & Le point d'entrée --- relie React au HTML (ne pas toucher) \\
+\texttt{index.html} & La page HTML (contient juste un \texttt{<div id="root">}) \\
+\texttt{package.json} & La liste des dépendances du projet \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Votre premier composant React}
+
+Ouvrez \texttt{src/App.jsx} et remplacez \textbf{tout le contenu} par :
+
+\begin{lstlisting}
+const App = () => {
+  return (
+    <div>
+      <h1>Annuaire des utilisateurs</h1>
+      <p>Bienvenue dans mon premier composant React !</p>
+    </div>
+  );
+};
+
+export default App;
+\end{lstlisting}
+
+Sauvegardez. La page dans le navigateur se met à jour \textbf{automatiquement} (c'est le \emph{Hot Module Replacement} de Vite --- pas besoin de rafraîchir).
+
+\begin{infobox}[Qu'est-ce qu'un composant ?]
+Un \textbf{composant React} est une fonction qui retourne du \textbf{JSX} --- un mélange de JavaScript et de HTML. C'est la brique de base de toute application React. Chaque élément visible de l'interface (un bouton, une carte, une liste) est un composant.
+
+Remarquez : on utilise une \textbf{fonction fléchée}. Tout ce que vous avez appris en Partie 1 est utilisé ici.
+\end{infobox}
+
+\subsection{Ajouter de l'état avec \texttt{useState}}
+
+On veut que le bouton déclenche le chargement des utilisateurs. Pour cela, on a besoin d'un \textbf{état} : une variable que React \textbf{surveille}. Quand l'état change, React met à jour l'affichage automatiquement.
+
+\begin{lstlisting}
+import { useState } from "react";
+
+const App = () => {
+  const [compteur, setCompteur] = useState(0);
+
+  return (
+    <div>
+      <h1>Annuaire des utilisateurs</h1>
+      <p>Vous avez cliqué {compteur} fois.</p>
+      <button onClick={() => setCompteur(compteur + 1)}>
+        Cliquer
+      </button>
+    </div>
+  );
+};
+
+export default App;
+\end{lstlisting}
+
+Testez : chaque clic incrémente le compteur. La page se met à jour \textbf{sans que vous touchiez au DOM}. Pas de \texttt{innerHTML}, pas de \texttt{createElement}. Vous décrivez le résultat, React s'occupe du reste.
+
+\begin{retenirbox}[Décoder \texttt{useState}]
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Élément} & \textbf{Signification} \\
+\midrule
+\texttt{useState(0)} & Crée un état initialisé à \texttt{0} \\
+\texttt{compteur} & La valeur actuelle de l'état \\
+\texttt{setCompteur} & La fonction pour modifier l'état \\
+\texttt{onClick=\{...\}} & L'événement clic (équivalent de \texttt{addEventListener}) \\
+\texttt{() =>} & Une fonction fléchée (Partie 1 !) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Règle d'or :} ne modifiez \textbf{jamais} l'état directement (\texttt{compteur = 5}). Utilisez \textbf{toujours} la fonction \texttt{set...} fournie par \texttt{useState}.
+\end{retenirbox}
+
+\subsection{Exercice 3 --- L'annuaire en React}
+
+\begin{objectifbox}[À vous de jouer --- Exercice final]
+Recréez l'annuaire de la Partie 2, mais cette fois en React. L'application doit :
+\begin{enumerate}[nosep]
+    \item Afficher un bouton «~Charger les utilisateurs~»
+    \item Au clic, récupérer les données depuis JSONPlaceholder (\texttt{async/await})
+    \item Afficher chaque utilisateur dans une carte
+\end{enumerate}
+\end{objectifbox}
+
+Remplacez le contenu de \texttt{src/App.jsx} par :
+
+\begin{lstlisting}
+import { useState } from "react";
+
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [chargement, setChargement] = useState(false);
+
+  const chargerUtilisateurs = async () => {
+    setChargement(true);
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Erreur :", error);
+    }
+    setChargement(false);
+  };
+
+  return (
+    <div style={{ maxWidth: "600px", margin: "2rem auto",
+                  fontFamily: "sans-serif" }}>
+      <h1>Annuaire des utilisateurs</h1>
+      <button onClick={chargerUtilisateurs}
+              disabled={chargement}>
+        {chargement ? "Chargement..." : "Charger les utilisateurs"}
+      </button>
+
+      {users.map(user => (
+        <UserCard key={user.id} user={user} />
+      ))}
+    </div>
+  );
+};
+
+const UserCard = ({ user }) => {
+  return (
+    <div style={{ border: "1px solid #ccc", padding: "1rem",
+                  margin: "0.5rem 0", borderRadius: "8px" }}>
+      <h3 style={{ margin: "0 0 0.5rem 0" }}>{user.name}</h3>
+      <p style={{ margin: "0.2rem 0", color: "#555" }}>
+        Email : {user.email}
+      </p>
+      <p style={{ margin: "0.2rem 0", color: "#555" }}>
+        Entreprise : {user.company.name}
+      </p>
+    </div>
+  );
+};
+
+export default App;
+\end{lstlisting}
+
+Sauvegardez et vérifiez dans le navigateur.
+
+\begin{infobox}[Ce qui est nouveau ici]
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Concept} & \textbf{Explication} \\
+\midrule
+\texttt{users.map(...)} & Parcourt le tableau et crée un élément JSX pour chaque utilisateur (remplace la boucle \texttt{forEach} + \texttt{appendChild}) \\
+\texttt{key=\{user.id\}} & Identifiant unique que React utilise pour optimiser les mises à jour \\
+\texttt{<UserCard />} & Un \textbf{deuxième composant} ! On découpe l'interface en morceaux réutilisables \\
+\texttt{\{ user \}} dans les props & On passe des données d'un composant parent à un composant enfant \\
+\texttt{disabled=\{chargement\}} & Le bouton se désactive pendant le chargement \\
+\bottomrule
+\end{tabular}
+\end{infobox}
+
+\subsection{Comparer les deux versions}
+
+Prenez un moment pour comparer :
+
+\begin{center}
+\begin{tabular}{lp{5cm}p{5cm}}
+\toprule
+& \textbf{DOM manuel} (Partie 2) & \textbf{React} (Partie 3) \\
+\midrule
+\textbf{Créer une carte} & \texttt{createElement} + \texttt{innerHTML} + \texttt{appendChild} & \texttt{<UserCard user=\{user\} />} \\
+\textbf{Mettre à jour} & Vider le conteneur + recréer tout & Modifier l'état, React met à jour tout seul \\
+\textbf{Événement clic} & \texttt{addEventListener("click", fn)} & \texttt{onClick=\{fn\}} \\
+\textbf{Données} & Variables globales dans une IIFE & \texttt{useState} --- état géré par React \\
+\textbf{État de chargement} & Il faut le gérer manuellement & \texttt{chargement} + texte conditionnel \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+React est plus lisible, plus maintenable, et gère automatiquement les mises à jour du DOM. C'est pour cela qu'il est utilisé par Facebook, Airbnb, Netflix et des milliers d'entreprises.
+
+% ===========================================================================
+\section{Aide-mémoire}
+\label{sec:aide-memoire}
+% ===========================================================================
+
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Concept} & \textbf{Syntaxe / Exemple} \\
+\midrule
+Fonction déclarée & \texttt{function double(x) \{ return x * 2; \}} \\
+Fonction expression & \texttt{const double = function(x) \{ return x * 2; \};} \\
+Fonction fléchée & \texttt{const double = x => x * 2;} \\
+\midrule
+fetch + .then() & \texttt{fetch(url).then(r => r.json()).then(data => ...)} \\
+fetch + async/await & \texttt{const r = await fetch(url); const d = await r.json();} \\
+\midrule
+Créer un projet React & \texttt{npm create vite@latest nom -- --template react} \\
+Lancer le serveur & \texttt{npm run dev} \\
+État React & \texttt{const [val, setVal] = useState(initial);} \\
+Composant React & \texttt{const MonComposant = () => <div>...</div>;} \\
+Passer des données & \texttt{<Enfant nom=\{variable\} />} \\
+Boucle en JSX & \texttt{tableau.map(item => <Elem key=\{item.id\} />)} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ===========================================================================
+\section{Résumé et conclusion}
+% ===========================================================================
+
+Dans ce lab, vous avez :
+
+\begin{enumerate}[nosep]
+    \item Découvert les \textbf{trois façons d'écrire une fonction} en JavaScript et refactorisé le starter avec des fonctions fléchées.
+    \item Compris le concept \textbf{d'asynchrone} et utilisé \texttt{fetch} + \texttt{async/await} pour récupérer des données depuis une API.
+    \item Créé votre \textbf{première application React} avec Vite, utilisé \texttt{useState} pour gérer l'état, et construit un composant réutilisable.
+\end{enumerate}
+
+Voici où vous en êtes dans la progression du cours :
+
+\begin{center}
+\begin{tabular}{lcp{7.5cm}}
+\toprule
+\textbf{Étape} & \textbf{Statut} & \textbf{Ce que vous savez faire} \\
+\midrule
+\textbf{DOM \& événements} & \cmark{} & Sélecteurs, événements, modification du DOM \\
+\textbf{Fonctions JS} & \cmark{} & Déclaration, expression, fléchée, \emph{hoisting} \\
+\textbf{Asynchrone} & \cmark{} & \texttt{fetch}, \texttt{async/await}, gestion d'erreurs \\
+\textbf{React --- les bases} & \cmark{} & Composant, JSX, \texttt{useState}, props, \texttt{.map()} \\
+\textbf{React --- aller plus loin} & $\to$ Prochain lab & \texttt{useEffect}, formulaires, routing \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{projetbox}[Et ensuite ?]
+Vous avez maintenant les bases pour construire de vraies interfaces utilisateur avec React. Dans les prochains labs, vous apprendrez à gérer les \textbf{formulaires}, le \textbf{routing} (navigation entre pages), et les \textbf{effets de bord} (\texttt{useEffect}) pour charger des données automatiquement au démarrage. Chaque concept s'appuie sur ce que vous avez appris aujourd'hui : les fonctions fléchées, l'asynchrone et les composants.
+\end{projetbox}
+
+% ===========================================================================
+\section*{Exercice bonus --- Pour aller plus loin}
+% ===========================================================================
+
+\begin{infobox}[Bonus : ajouter un champ de recherche]
+Si vous avez terminé en avance, ajoutez un champ de recherche qui filtre les utilisateurs par nom. Indice :
+
+\begin{enumerate}[nosep]
+    \item Ajoutez un état \texttt{const [recherche, setRecherche] = useState("");}
+    \item Ajoutez un \texttt{<input>} avec \texttt{onChange=\{e => setRecherche(e.target.value)\}}
+    \item Filtrez les utilisateurs :\\
+    \texttt{users.filter(u => u.name.toLowerCase()}\\
+    \texttt{.includes(recherche.toLowerCase()))}
+    \item Passez le tableau filtré au \texttt{.map()} au lieu de \texttt{users}
+\end{enumerate}
+
+Cet exercice combine l'état, les événements et le rendu conditionnel.
+\end{infobox}
+
+\vspace{1cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab --- Des fonctions JS à React --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous savez écrire des fonctions modernes, récupérer des données\\
+depuis une API et créer une application React.\\[0.2cm]
+Prochaine étape : \texttt{useEffect}, formulaires et routing.\\[0.3cm]
+\textit{Chaque composant commence par une fonction fléchée.}\\[0.5cm]
+\end{minipage}
+}
+\end{center}
+
+\end{document}

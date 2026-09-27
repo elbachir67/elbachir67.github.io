@@ -1,0 +1,1629 @@
+% ===========================================================================
+%  Programmation Frontend — Lab 5 : Next.js App Router
+%  ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+\usepackage{listings}
+\lstdefinelanguage{JavaScript}{keywords={break,case,catch,continue,debugger,default,delete,do,else,finally,for,function,if,in,instanceof,new,return,switch,this,throw,try,typeof,var,void,while,with,const,let,class,export,extends,import,super,yield,async,await,of,from,true,false,null,undefined},morecomment=[l]{//},morecomment=[s]{/*}{*/},morestring=[b]',morestring=[b]",morestring=[b]`,sensitive=true}
+\lstdefinelanguage{CSS}{keywords={color,background,border,padding,margin,font,display,flex,align,justify,width,height,gap,cursor,none,solid,center,column,row,wrap,pointer,radius,size,weight,family,items,content,direction,transform,transition,hover,box,shadow,max,min,text,decoration,opacity,position,sticky,top,letter,spacing,uppercase},morecomment=[s]{/*}{*/},morestring=[b]',morestring=[b]",sensitive=true}
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{gray!8},frame=single,framerule=0.5pt,rulecolor=\color{gray!40},breaklines=true,breakatwhitespace=true,showstringspaces=false,tabsize=2,xleftmargin=4pt,xrightmargin=4pt,aboveskip=8pt,belowskip=8pt,language=JavaScript,keywordstyle=\color{blue!70!black}\bfseries,commentstyle=\color{green!50!black}\itshape,stringstyle=\color{red!60!black},literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1 {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1 {→}{{$\rightarrow$}}1}
+\lstdefinestyle{terminal}{language={},keywordstyle={},commentstyle={},stringstyle={},basicstyle=\ttfamily\small,backgroundcolor=\color{black!5}}
+\lstdefinestyle{css}{language=CSS,keywordstyle=\color{blue!70!black}\bfseries,commentstyle=\color{green!50!black}\itshape,stringstyle=\color{red!60!black}}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small Prog. Frontend --- Lab 5 : Next.js App Router}
+\fancyhead[R]{\small ESP/UCAD}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{\vspace{-1cm}\textbf{\LARGE Programmation Frontend}\\[0.8cm]\textbf{\huge Lab 5 --- Next.js App Router}\\[0.3cm]\textbf{\Large Routing par fichiers --- composants serveur et client}\\[0.5cm]\large ESP/UCAD --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\Département Génie Informatique\\Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\vspace{0.5cm}
+
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Durée estimée} & 2h (une séance) \\
+\textbf{Prérequis} & Connaître React : composants, props, \texttt{useState}, \texttt{useEffect}, CSS Modules, formulaires contrôlés. \\
+\textbf{Projet} & \textbf{Nouveau} projet \texttt{annuaire-next/} \\
+\textbf{Livrables} & Annuaire complet sous Next.js avec 4 pages et composants serveur/client \\
+\textbf{Validation} & L'application fonctionne sur \texttt{http://localhost:3000} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du lab]
+À l'issue de ce lab, chaque étudiant sera capable de :
+\begin{enumerate}[nosep]
+\item Expliquer \textbf{pourquoi} un framework comme Next.js est utile
+\item Créer un projet Next.js et comprendre la structure \texttt{app/}
+\item Créer des routes par \textbf{structure de fichiers} (pas de code de routing)
+\item Utiliser \texttt{layout.js} pour partager une interface commune entre les pages
+\item Distinguer un \textbf{composant serveur} d'un \textbf{composant client} et savoir quand utiliser chacun
+\item Utiliser \texttt{loading.js} pour afficher un loading automatique
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\newpage
+
+% ===========================================================================
+\section{Pourquoi Next.js ?}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Comprendre les limites de React seul et ce que Next.js apporte.
+\end{objectifbox}
+
+\subsection{Les limites de React seul}
+
+Avec React (Vite), quand un utilisateur ouvre votre site, voici ce qui se passe :
+
+\begin{enumerate}[nosep]
+\item Le navigateur télécharge une page HTML \textbf{presque vide} (juste un \texttt{<div id="root">}).
+\item Le navigateur télécharge \textbf{tout le JavaScript} de l'application.
+\item Le JavaScript s'exécute et \textbf{construit} la page dans le navigateur.
+\end{enumerate}
+
+Conséquences :
+\begin{itemize}[nosep]
+\item \textbf{SEO} : les moteurs de recherche (Google) voient une page vide. Le contenu n'existe qu'après l'exécution du JS.
+\item \textbf{Premier chargement lent} : l'utilisateur voit un écran blanc tant que le JS n'a pas fini de s'exécuter.
+\item \textbf{Routing manuel} : il faut installer React Router et configurer chaque route dans le code.
+\end{itemize}
+
+\subsection{Ce que Next.js change}
+
+Avec Next.js, le serveur \textbf{pré-rend} le HTML avant de l'envoyer au navigateur. L'utilisateur voit immédiatement le contenu, sans attendre le JavaScript.
+
+\begin{center}
+\begin{tabular}{lp{4cm}p{4.5cm}}
+\toprule
+\textbf{Aspect} & \textbf{React seul (Vite)} & \textbf{Next.js} \\
+\midrule
+\textbf{HTML envoyé} & Vide (\texttt{<div id="root">}) & Complet (contenu pré-rendu) \\
+\textbf{SEO} & Mauvais (page vide) & Bon (contenu visible) \\
+\textbf{Premier affichage} & Après le chargement du JS & Immédiat \\
+\textbf{Routing} & Manuel (React Router) & Automatique (par fichiers) \\
+\textbf{Loading} & À gérer avec \texttt{useState} & \texttt{loading.js} automatique \\
+\textbf{Layouts} & À gérer manuellement & \texttt{layout.js} intégré \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{infobox}[Analogie : le restaurant]
+\textbf{React seul} : le client reçoit la recette et les ingrédients, puis cuisine lui-même dans sa propre cuisine. Il ne mange qu'après avoir tout préparé.
+
+\textbf{Next.js} : le serveur prépare le plat en cuisine et l'envoie prêt à manger. Le client peut manger immédiatement.
+\end{infobox}
+
+\begin{retenirbox}[Next.js = React + un serveur]
+Next.js n'est \textbf{pas} un remplacement de React. C'est un \textbf{framework} construit \textbf{au-dessus} de React. Il utilise toujours les composants React, le JSX, \texttt{useState}, \texttt{useEffect}... mais il ajoute un serveur qui pré-rend les pages et gère le routing automatiquement.
+\end{retenirbox}
+
+% ===========================================================================
+\section{Partie 1 --- Créer le projet}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Créer un projet Next.js et comprendre sa structure de dossiers.
+\end{objectifbox}
+
+\subsection{La commande}
+
+\begin{lstlisting}[style=terminal]
+npx create-next-app@latest annuaire-next
+\end{lstlisting}
+
+L'outil pose plusieurs questions. Répondez comme suit :
+
+\begin{center}
+\begin{tabular}{lp{6cm}}
+\toprule
+\textbf{Question} & \textbf{Réponse} \\
+\midrule
+TypeScript ? & \textbf{No} \\
+ESLint ? & No \\
+Tailwind CSS ? & \textbf{No} (on utilise CSS Modules) \\
+\texttt{src/} directory ? & \textbf{Yes} \\
+App Router ? & \textbf{Yes} \\
+Turbopack ? & No \\
+Import alias ? & Défaut (\texttt{@/*}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Puis créez les dossiers pour les futures pages :
+
+\begin{lstlisting}[style=terminal]
+cd annuaire-next
+mkdir -p src/app/users/add
+mkdir -p "src/app/users/[id]"
+mkdir -p src/components
+\end{lstlisting}
+
+Lancez le serveur de développement :
+
+\begin{lstlisting}[style=terminal]
+npm run dev
+\end{lstlisting}
+
+Ouvrez \texttt{http://localhost:3000}. La page par défaut de Next.js s'affiche. Le port est \textbf{3000} (Vite utilisait 5173).
+
+\subsection{La structure du projet}
+
+Voici les fichiers importants générés par Next.js :
+
+\begin{lstlisting}[style=terminal]
+annuaire-next/
+  src/
+    app/
+      layout.js     <-- le layout racine
+      page.js       <-- la page d'accueil (/)
+      globals.css   <-- les styles globaux
+  package.json
+\end{lstlisting}
+
+\begin{retenirbox}[Les fichiers spéciaux de Next.js]
+Dans le dossier \texttt{app/}, certains noms de fichiers ont un rôle particulier :
+
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Fichier} & \textbf{Rôle} \\
+\midrule
+\texttt{page.js} & Le contenu de la page pour cette route. C'est ce que l'utilisateur voit. \\
+\texttt{layout.js} & L'interface \textbf{partagée} entre les pages (navbar, footer). Elle enveloppe les pages enfants et reste en place pendant la navigation. \\
+\texttt{loading.js} & L'écran de chargement affiché \textbf{automatiquement} par Next.js pendant que la page se prépare. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+\subsection{Le routing par fichiers}
+
+C'est le changement le plus visible par rapport à React Router. Avec Next.js, la structure des dossiers \textbf{définit} les routes. Pas de code à écrire.
+
+\begin{retenirbox}[La structure des dossiers = les URL]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Fichier créé} & \textbf{URL générée} \\
+\midrule
+\texttt{src/app/page.js} & \texttt{/} \\
+\texttt{src/app/users/page.js} & \texttt{/users} \\
+\texttt{src/app/users/[id]/page.js} & \texttt{/users/3} ou \texttt{/users/7} \\
+\texttt{src/app/users/add/page.js} & \texttt{/users/add} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le dossier \texttt{[id]} (avec les crochets) est un \textbf{segment dynamique}. Il correspond à n'importe quelle valeur dans l'URL. Si l'utilisateur visite \texttt{/users/3}, Next.js charge \texttt{app/users/[id]/page.js} et rend la valeur \texttt{3} accessible.
+\end{retenirbox}
+
+\begin{retenirbox}[React Router vs Next.js]
+\begin{center}
+\begin{tabular}{lp{4.2cm}p{4.2cm}}
+\toprule
+& \textbf{React Router} & \textbf{Next.js} \\
+\midrule
+\textbf{Définir une route} & Dans le code (\texttt{<Route>}) & Par les dossiers/fichiers \\
+\textbf{Paramètre} & \texttt{:id} & \texttt{[id]} (nom du dossier) \\
+\textbf{Lire le paramètre} & \texttt{useParams()} & \texttt{params} (prop) \\
+\textbf{Lien} & \texttt{<Link to="/x">} & \texttt{<Link href="/x">} \\
+\textbf{Redirection} & \texttt{useNavigate()} & \texttt{useRouter().push()} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+% ===========================================================================
+\section{Partie 2 --- Le concept serveur / client}
+\label{sec:server-client}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Comprendre la distinction fondamentale de Next.js avant de coder.
+\end{objectifbox}
+
+C'est \textbf{le} concept clé de ce lab. Il faut le comprendre \textbf{avant} de créer les fichiers.
+
+Dans Next.js, il existe deux types de composants :
+
+\begin{center}
+\begin{tabular}{lp{4.5cm}p{4.5cm}}
+\toprule
+& \textbf{Composant serveur} & \textbf{Composant client} \\
+\midrule
+\textbf{Par défaut ?} & \textbf{Oui} (rien à écrire) & Non (il faut \texttt{"use client"}) \\
+\textbf{Où s'exécute-t-il ?} & Sur le serveur & Dans le navigateur \\
+\textbf{Peut utiliser \texttt{useState} ?} & Non & Oui \\
+\textbf{Peut utiliser \texttt{useEffect} ?} & Non & Oui \\
+\textbf{Peut utiliser \texttt{onClick} ?} & Non & Oui \\
+\textbf{Peut faire \texttt{await fetch()} ?} & Oui (directement) & Non (il faut \texttt{useEffect}) \\
+\textbf{JS envoyé au navigateur ?} & Aucun & Oui \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{infobox}[Analogie : le cuisinier et le serveur]
+Imaginez un restaurant. Le \textbf{cuisinier} (composant serveur) prépare le plat en cuisine --- le client ne le voit pas travailler, il reçoit juste le résultat. Le \textbf{serveur de salle} (composant client) interagit directement avec le client --- il prend la commande, répond aux questions, gère les changements.
+
+Un composant qui affiche des données sans interactivité = cuisinier (serveur). Un composant avec des boutons, des champs de saisie, des clics = serveur de salle (client).
+\end{infobox}
+
+\begin{retenirbox}[La règle de décision]
+Posez-vous cette question pour chaque composant :
+
+\begin{itemize}[nosep]
+\item Ce composant utilise \texttt{useState}, \texttt{useEffect}, \texttt{onClick}, \texttt{onChange} ou un autre hook ? $\to$ \textbf{Composant client} : ajoutez \texttt{"use client"} en première ligne.
+\item Ce composant affiche juste du contenu sans interactivité ? $\to$ \textbf{Composant serveur} : n'écrivez rien de spécial.
+\end{itemize}
+\end{retenirbox}
+
+Dans notre annuaire, voici la répartition :
+
+\begin{center}
+\begin{tabular}{llp{5cm}}
+\toprule
+\textbf{Composant} & \textbf{Type} & \textbf{Pourquoi ?} \\
+\midrule
+\texttt{layout.js} & Serveur & Affiche la Navbar et enveloppe les pages \\
+\texttt{page.js} (accueil) & Serveur & Juste du texte et des liens \\
+\texttt{users/page.js} (liste) & Client & \texttt{useState} (recherche, tri, favoris) + \texttt{useEffect} (fetch) \\
+\texttt{users/[id]/page.js} & Serveur & Fetch avec \texttt{await} directement (pas de hooks) \\
+\texttt{users/add/page.js} & Client & Formulaire (\texttt{useState}, \texttt{onChange}) \\
+\texttt{users/loading.js} & Serveur & Juste du HTML \\
+\texttt{Navbar.jsx} & Client & \texttt{usePathname()} pour le lien actif \\
+\texttt{SearchBar.jsx} & Client & \texttt{onChange} sur l'input \\
+\texttt{UserCard.jsx} & Client & \texttt{onClick} sur le bouton étoile \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ===========================================================================
+\section{Partie 3 --- Styles globaux et Layout}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Mettre en place le reset CSS et le layout avec la Navbar.
+\end{objectifbox}
+
+\subsection{Fichier \texttt{src/app/globals.css}}
+
+Remplacez tout le contenu de ce fichier par un reset CSS propre. Ce fichier est importé une seule fois dans \texttt{layout.js} et s'applique à \textbf{toutes} les pages :
+
+\begin{lstlisting}[style=css]
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  color: #2d3436;
+  background: #f5f6fa;
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+\end{lstlisting}
+
+\subsection{Fichier \texttt{src/app/layout.js} --- Le layout racine}
+
+Le layout est le «~cadre~» de l'application. Il contient ce qui est \textbf{commun à toutes les pages} : la Navbar et la balise \texttt{<main>}. Quand l'utilisateur navigue, seul le contenu à l'intérieur de \texttt{children} change. Le layout reste en place.
+
+Remplacez tout le contenu de \texttt{src/app/layout.js} :
+
+\begin{lstlisting}
+import "./globals.css";
+import Navbar from "@/components/Navbar";
+
+export const metadata = {
+  title: "Annuaire Étudiants",
+  description:
+    "Gestion des utilisateurs - ESP/UCAD",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="fr">
+      <body>
+        <Navbar />
+        <main style={{
+          maxWidth: "700px",
+          margin: "0 auto",
+          padding: "2rem 1rem",
+        }}>
+          {children}
+        </main>
+      </body>
+    </html>
+  );
+}
+\end{lstlisting}
+
+Quelques points à noter :
+
+\begin{itemize}[nosep]
+\item \texttt{metadata} : Next.js utilise cet objet pour générer les balises \texttt{<title>} et \texttt{<meta description>} dans le HTML. C'est pour le SEO.
+\item \texttt{children} : c'est la page courante. Next.js injecte automatiquement le bon \texttt{page.js} selon l'URL.
+\item \texttt{@/components/Navbar} : le \texttt{@/} est un \textbf{alias} qui pointe vers le dossier \texttt{src/}. Au lieu d'écrire \texttt{"../../components/Navbar"} (chemin relatif fragile), on écrit \texttt{"@/components/Navbar"} (chemin absolu depuis \texttt{src/}).
+\end{itemize}
+
+\begin{attentionbox}[\texttt{@/} remplace les chemins relatifs]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Sans alias} & \textbf{Avec alias} \\
+\midrule
+\texttt{"../../components/Navbar"} & \texttt{"@/components/Navbar"} \\
+\texttt{"../../../lib/api"} & \texttt{"@/lib/api"} \\
+\bottomrule
+\end{tabular}
+\end{center}
+L'alias est configuré automatiquement lors de la création du projet Next.js. Il fonctionne partout.
+\end{attentionbox}
+
+\subsection{Fichier \texttt{src/components/Navbar.jsx}}
+
+La Navbar est un \textbf{composant client} car elle utilise \texttt{usePathname()} --- un hook qui lit l'URL courante pour mettre en surbrillance le lien actif.
+
+\begin{lstlisting}
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import styles from "./Navbar.module.css";
+
+const Navbar = () => {
+  const pathname = usePathname();
+
+  const linkClass = (href) => {
+    const isActive = href === "/"
+      ? pathname === "/"
+      : pathname.startsWith(href);
+    return isActive
+      ? `${styles.link} ${styles.active}`
+      : styles.link;
+  };
+
+  return (
+    <nav className={styles.nav}>
+      <div className={styles.container}>
+        <Link href="/" className={styles.logo}>
+          Annuaire
+        </Link>
+        <div className={styles.links}>
+          <Link href="/users"
+                className={linkClass("/users")}>
+            Liste
+          </Link>
+          <Link href="/users/add"
+                className={linkClass("/users/add")}>
+            + Ajouter
+          </Link>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
+\end{lstlisting}
+
+Quelques différences avec React Router :
+
+\begin{itemize}[nosep]
+\item \texttt{Link} vient de \texttt{"next/link"} (pas de \texttt{react-router-dom}).
+\item On utilise \texttt{href} au lieu de \texttt{to}.
+\item Au lieu de \texttt{NavLink} avec \texttt{isActive}, on utilise \texttt{usePathname()} pour savoir quelle page est active et appliquer la classe CSS correspondante.
+\end{itemize}
+
+\subsection{Fichier \texttt{src/components/Navbar.module.css}}
+
+Un \textbf{CSS Module} est un fichier CSS classique dont les noms de classes sont rendus uniques automatiquement. On importe les classes avec \texttt{import styles from "./..."} et on les utilise avec \texttt{className=\{styles.nav\}}.
+
+\begin{lstlisting}[style=css]
+.nav {
+  background: #2d3436;
+  padding: 0 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 56px;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.links { display: flex; gap: 0.25rem; }
+
+.link {
+  color: #b2bec3;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+\end{lstlisting}
+
+% ===========================================================================
+\section{Partie 4 --- La page d'accueil}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 5 minutes]
+Créer la page d'accueil --- un composant serveur simple.
+\end{objectifbox}
+
+\subsection{Fichier \texttt{src/app/page.js}}
+
+Remplacez le contenu. Notez : pas de \texttt{"use client"}. Cette page n'a ni \texttt{useState}, ni \texttt{onClick}. Elle affiche du texte et des liens. C'est un \textbf{composant serveur}.
+
+\begin{lstlisting}
+import Link from "next/link";
+import styles from "./page.module.css";
+
+export default function Home() {
+  return (
+    <div className={styles.home}>
+      <h1 className={styles.titre}>
+        Annuaire des utilisateurs
+      </h1>
+      <p className={styles.description}>
+        Consultez, recherchez et ajoutez des
+        utilisateurs. Cette application est
+        construite avec Next.js.
+      </p>
+      <div className={styles.actions}>
+        <Link href="/users"
+              className={styles.bouton}>
+          Voir la liste
+        </Link>
+        <Link href="/users/add"
+              className={styles.boutonSecondaire}>
+          Ajouter un utilisateur
+        </Link>
+      </div>
+    </div>
+  );
+}
+\end{lstlisting}
+
+\subsection{Fichier \texttt{src/app/page.module.css}}
+
+Supprimez l'ancien \texttt{page.module.css} et remplacez-le :
+
+\begin{lstlisting}[style=css]
+.home {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.titre {
+  font-size: 2rem;
+  color: #2d3436;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.description {
+  color: #636e72;
+  font-size: 1.05rem;
+  max-width: 450px;
+  margin: 0 auto 2rem auto;
+  line-height: 1.7;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.bouton {
+  padding: 0.7rem 1.8rem;
+  background: #0984e3;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.bouton:hover { background: #0770c2; }
+
+.boutonSecondaire {
+  padding: 0.7rem 1.8rem;
+  background: #fff;
+  color: #0984e3;
+  border: 1px solid #0984e3;
+  border-radius: 8px;
+  font-weight: 500;
+}
+.boutonSecondaire:hover { background: #ebf5fb; }
+\end{lstlisting}
+
+\begin{objectifbox}[Vérification]
+Sauvegardez et ouvrez \texttt{http://localhost:3000}. La page d'accueil s'affiche avec le titre, la description et les deux boutons. La Navbar est en haut. Cliquez sur les liens --- les pages n'existent pas encore (on les crée juste après).
+\end{objectifbox}
+
+% ===========================================================================
+\section{Partie 5 --- Les composants réutilisables}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Créer les composants \texttt{SearchBar} et \texttt{UserCard} pour Next.js.
+\end{objectifbox}
+
+Ces composants sont réutilisés dans plusieurs pages. Ils vont dans le dossier \texttt{src/components/}. Les deux sont des \textbf{composants client} car ils utilisent des événements (\texttt{onChange}, \texttt{onClick}).
+
+\subsection{Fichier \texttt{src/components/SearchBar.jsx}}
+
+La barre de recherche reçoit deux \textbf{props} (données venant du parent) : \texttt{recherche} (la valeur actuelle du champ) et \texttt{onRecherche} (la fonction à appeler quand l'utilisateur tape). C'est un \textbf{input contrôlé} : sa valeur est pilotée par React.
+
+\begin{lstlisting}
+"use client";
+
+import styles from "./SearchBar.module.css";
+
+const SearchBar = ({ recherche, onRecherche }) => {
+  return (
+    <div className={styles.container}>
+      <input
+        className={styles.input}
+        type="text"
+        placeholder="Rechercher un utilisateur..."
+        value={recherche}
+        onChange={(e) =>
+          onRecherche(e.target.value)
+        }
+      />
+    </div>
+  );
+};
+
+export default SearchBar;
+\end{lstlisting}
+
+\subsection{Fichier \texttt{src/components/SearchBar.module.css}}
+
+\begin{lstlisting}[style=css]
+.container { margin: 1rem 0; }
+
+.input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid #dfe6e9;
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.15s,
+              box-shadow 0.15s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #0984e3;
+  box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+}
+\end{lstlisting}
+
+\subsection{Fichier \texttt{src/components/UserCard.jsx}}
+
+La carte affiche les informations d'un utilisateur. Elle contient un lien vers la page de détail (\texttt{<Link href=\{...\}>}) et un bouton étoile pour les favoris (\texttt{onClick}). \texttt{"use client"} est nécessaire à cause de l'événement \texttt{onClick}.
+
+\begin{lstlisting}
+"use client";
+
+import Link from "next/link";
+import styles from "./UserCard.module.css";
+
+const UserCard = ({
+  user, estFavori, onToggleFavori
+}) => {
+  return (
+    <div className={styles.card}>
+      <div className={styles.header}>
+        <Link href={`/users/${user.id}`}
+              className={styles.lien}>
+          <h3 className={styles.nom}>
+            {user.name}
+          </h3>
+        </Link>
+        <button className={styles.etoile}
+                onClick={() =>
+                  onToggleFavori(user.id)
+                }>
+          {estFavori ? "\u2605" : "\u2606"}
+        </button>
+      </div>
+      <p className={styles.info}>
+        <span className={styles.labelInfo}>
+          Email
+        </span> {user.email}
+      </p>
+      <p className={styles.info}>
+        <span className={styles.labelInfo}>
+          Entreprise
+        </span> {user.company.name}
+      </p>
+      <Link href={`/users/${user.id}`}
+            className={styles.voir}>
+        Voir le profil →
+      </Link>
+    </div>
+  );
+};
+
+export default UserCard;
+\end{lstlisting}
+
+\subsection{Fichier \texttt{src/components/UserCard.module.css}}
+
+\begin{lstlisting}[style=css]
+.card {
+  background: #fff;
+  border: 1px solid #dfe6e9;
+  padding: 1.25rem;
+  margin: 0.75rem 0;
+  border-radius: 10px;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.lien { text-decoration: none; color: inherit; }
+.nom { margin: 0; font-size: 1.05rem; }
+.nom:hover { color: #0984e3; }
+
+.info {
+  margin: 0.3rem 0;
+  color: #636e72;
+  font-size: 0.9rem;
+}
+.labelInfo {
+  font-weight: 600;
+  color: #2d3436;
+  margin-right: 0.3rem;
+}
+
+.etoile {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #e67e22;
+  padding: 0;
+  line-height: 1;
+  transition: transform 0.15s;
+}
+.etoile:hover { transform: scale(1.2); }
+
+.voir {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: #0984e3;
+  font-weight: 500;
+}
+.voir:hover { text-decoration: underline; }
+\end{lstlisting}
+
+% ===========================================================================
+\section{Partie 6 --- La page de liste (composant client)}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Créer la page qui affiche la liste des utilisateurs avec recherche, tri et favoris.
+\end{objectifbox}
+
+Cette page utilise \texttt{useState} (pour la recherche, le tri, les favoris) et \texttt{useEffect} (pour charger les données au démarrage). C'est donc un \textbf{composant client}.
+
+\texttt{useState} est un hook React qui permet de stocker une donnée dans un composant. Quand cette donnée change (via la fonction \texttt{set...}), React met à jour l'affichage automatiquement.
+
+\texttt{useEffect} est un hook qui exécute du code \textbf{après} le rendu du composant. Avec un tableau vide \texttt{[]}, le code ne s'exécute qu'une seule fois au démarrage.
+
+\subsection{Fichier \texttt{src/app/users/page.js}}
+
+\begin{lstlisting}
+"use client";
+
+import { useState, useEffect } from "react";
+import UserCard from "@/components/UserCard";
+import SearchBar from "@/components/SearchBar";
+import styles from "./page.module.css";
+
+export default function UserList() {
+  // États du composant
+  const [users, setUsers] = useState([]);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState(null);
+  const [recherche, setRecherche] = useState("");
+  const [triAscendant, setTriAscendant] =
+    useState(true);
+  const [favoris, setFavoris] = useState([]);
+
+  // Charger les données au démarrage
+  useEffect(() => {
+    const charger = async () => {
+      try {
+        const res = await fetch(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+        if (!res.ok)
+          throw new Error("Erreur serveur");
+        const data = await res.json();
+        setUsers(data);
+      } catch (error) {
+        setErreur(error.message);
+      }
+      setChargement(false);
+    };
+    charger();
+  }, []);
+
+  // Toggle favori (ajout/retrait)
+  const toggleFavori = (userId) => {
+    if (favoris.includes(userId)) {
+      setFavoris(
+        favoris.filter((id) => id !== userId)
+      );
+    } else {
+      setFavoris([...favoris, userId]);
+    }
+  };
+
+  // Affichage conditionnel
+  if (chargement)
+    return <p className={styles.message}>
+      Chargement en cours...</p>;
+  if (erreur)
+    return <p className={styles.erreur}>
+      Erreur : {erreur}</p>;
+
+  // Filtrage et tri
+  const usersFiltres = users
+    .filter((u) =>
+      u.name.toLowerCase()
+        .includes(recherche.toLowerCase())
+    )
+    .sort((a, b) =>
+      triAscendant
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name)
+    );
+
+  return (
+    <div>
+      <h1 className={styles.titre}>
+        Liste des utilisateurs
+      </h1>
+      <SearchBar recherche={recherche}
+                 onRecherche={setRecherche} />
+      <div className={styles.barre}>
+        <span className={styles.compteur}>
+          {usersFiltres.length} utilisateur(s)
+        </span>
+        {favoris.length > 0 && (
+          <span className={styles.favoris}>
+            {favoris.length} favori(s)
+          </span>
+        )}
+        <button className={styles.boutonTri}
+          onClick={() =>
+            setTriAscendant(!triAscendant)
+          }>
+          {triAscendant ? "A → Z" : "Z → A"}
+        </button>
+      </div>
+      {usersFiltres.map((user) => (
+        <UserCard key={user.id} user={user}
+          estFavori={favoris.includes(user.id)}
+          onToggleFavori={toggleFavori} />
+      ))}
+    </div>
+  );
+}
+\end{lstlisting}
+
+\subsection{Fichier \texttt{src/app/users/page.module.css}}
+
+\begin{lstlisting}[style=css]
+.titre {
+  font-size: 1.5rem;
+  color: #2d3436;
+  margin-bottom: 0.5rem;
+}
+.barre {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+.compteur {
+  color: #636e72;
+  font-size: 0.9rem;
+}
+.favoris {
+  color: #e67e22;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.boutonTri {
+  margin-left: auto;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: 1px solid #dfe6e9;
+  border-radius: 6px;
+  background: #fff;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.boutonTri:hover { background: #f1f2f6; }
+
+.message {
+  color: #636e72;
+  padding: 2rem 0;
+  text-align: center;
+}
+.erreur {
+  color: #d63031;
+  font-weight: 600;
+  padding: 1rem;
+  background: #ffeaa7;
+  border-radius: 8px;
+  text-align: center;
+}
+\end{lstlisting}
+
+% ===========================================================================
+\section{Partie 7 --- Le loading automatique}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 5 minutes]
+Ajouter un loading automatique sans gérer d'état.
+\end{objectifbox}
+
+Créez \texttt{src/app/users/loading.js} :
+
+\begin{lstlisting}
+import styles from "./loading.module.css";
+
+export default function Loading() {
+  return (
+    <div className={styles.container}>
+      <div className={styles.spinner}></div>
+      <p className={styles.texte}>Chargement...</p>
+    </div>
+  );
+}
+\end{lstlisting}
+
+Créez \texttt{src/app/users/loading.module.css} :
+
+\begin{lstlisting}[style=css]
+.container {
+  text-align: center;
+  padding: 3rem 0;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #dfe6e9;
+  border-top-color: #0984e3;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.texte { color: #636e72; }
+\end{lstlisting}
+
+Ce fichier est affiché \textbf{automatiquement} par Next.js pendant que la page \texttt{users/page.js} se prépare. Pas de \texttt{useState("loading")} à gérer, pas de early return à écrire. Next.js s'en charge.
+
+% ===========================================================================
+\section{Partie 8 --- La page de détail (composant serveur)}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Créer une page de détail qui s'exécute \textbf{sur le serveur}. C'est le moment clé du lab.
+\end{objectifbox}
+
+Voici la page qui illustre le mieux la puissance de Next.js. \textbf{Pas de \texttt{"use client"}}, pas de \texttt{useState}, pas de \texttt{useEffect}. La fonction du composant est \texttt{async} et fait directement un \texttt{await fetch()}.
+
+\subsection{Fichier \texttt{src/app/users/[id]/page.js}}
+
+\begin{lstlisting}
+import Link from "next/link";
+import styles from "./page.module.css";
+
+export default async function UserDetail({
+  params
+}) {
+  const { id } = await params;
+
+  const res = await fetch(
+    `https://jsonplaceholder.typicode.com/users/${id}`,
+    { cache: "no-store" }
+  );
+
+  if (!res.ok) {
+    return (
+      <div className={styles.centre}>
+        <p className={styles.erreur}>
+          Utilisateur introuvable
+        </p>
+        <Link href="/users"
+              className={styles.retour}>
+          ← Retour à la liste
+        </Link>
+      </div>
+    );
+  }
+
+  const user = await res.json();
+
+  return (
+    <div>
+      <Link href="/users"
+            className={styles.retour}>
+        ← Retour à la liste
+      </Link>
+      <div className={styles.profil}>
+        <div className={styles.avatar}>
+          {user.name.charAt(0)}
+        </div>
+        <h1 className={styles.nom}>{user.name}</h1>
+        <p className={styles.username}>
+          @{user.username}
+        </p>
+      </div>
+      <div className={styles.carte}>
+        <h2 className={styles.section}>
+          Coordonnées
+        </h2>
+        <div className={styles.champ}>
+          <span className={styles.label}>
+            Email
+          </span>
+          <span>{user.email}</span>
+        </div>
+        <div className={styles.champ}>
+          <span className={styles.label}>
+            Téléphone
+          </span>
+          <span>{user.phone}</span>
+        </div>
+        <div className={styles.champ}>
+          <span className={styles.label}>
+            Site web
+          </span>
+          <span>{user.website}</span>
+        </div>
+      </div>
+      <div className={styles.carte}>
+        <h2 className={styles.section}>Adresse</h2>
+        <div className={styles.champ}>
+          <span className={styles.label}>
+            Ville
+          </span>
+          <span>{user.address.city}</span>
+        </div>
+        <div className={styles.champ}>
+          <span className={styles.label}>Rue</span>
+          <span>
+            {user.address.street},
+            {user.address.suite}
+          </span>
+        </div>
+      </div>
+      <div className={styles.carte}>
+        <h2 className={styles.section}>
+          Entreprise
+        </h2>
+        <div className={styles.champ}>
+          <span className={styles.label}>Nom</span>
+          <span>{user.company.name}</span>
+        </div>
+        <div className={styles.champ}>
+          <span className={styles.label}>
+            Secteur
+          </span>
+          <span>{user.company.bs}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+\end{lstlisting}
+
+\begin{retenirbox}[Pourquoi ce composant est spécial]
+Comparez cette page avec la version React (Labs 3-4) :
+
+\begin{center}
+\begin{tabular}{lp{4.5cm}p{4.5cm}}
+\toprule
+& \textbf{React (useEffect)} & \textbf{Next.js (serveur)} \\
+\midrule
+\textbf{fetch} & Dans un \texttt{useEffect} & Directement avec \texttt{await} \\
+\textbf{Loading} & État \texttt{chargement} + early return & \texttt{loading.js} automatique \\
+\textbf{Erreur} & État \texttt{erreur} + early return & Simple \texttt{if (!res.ok)} \\
+\textbf{Données} & État \texttt{user} (\texttt{useState}) & Variable locale \texttt{user} \\
+\textbf{Ligne \texttt{"use client"}} & Oui & Non (serveur par défaut) \\
+\textbf{JS envoyé au client} & Oui (tout le composant) & Non (juste le HTML) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le composant serveur est plus simple : une fonction \texttt{async} qui fait un \texttt{fetch}, vérifie la réponse, et retourne du JSX. Pas de hooks, pas d'états, pas de cycle de vie.
+\end{retenirbox}
+
+\begin{infobox}[\texttt{cache: "no-store"}]
+Par défaut, Next.js met en cache les réponses \texttt{fetch} côté serveur (pour la performance). L'option \texttt{cache: "no-store"} force un nouveau fetch à chaque requête. Pour une API dont les données changent souvent, c'est nécessaire.
+\end{infobox}
+
+\begin{infobox}[\texttt{params} --- le paramètre d'URL]
+Le composant reçoit un objet \texttt{params} qui contient les segments dynamiques de l'URL. Pour \texttt{/users/3}, \texttt{params.id} vaut \texttt{"3"}. C'est l'équivalent serveur de \texttt{useParams()} côté client.
+\end{infobox}
+
+\subsection{Fichier \texttt{src/app/users/[id]/page.module.css}}
+
+\begin{lstlisting}[style=css]
+.retour {
+  display: inline-block;
+  color: #0984e3;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+.retour:hover { text-decoration: underline; }
+
+.profil {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #0984e3;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem auto;
+}
+.nom {
+  font-size: 1.5rem;
+  color: #2d3436;
+  margin: 0;
+}
+.username {
+  color: #636e72;
+  font-size: 0.95rem;
+  margin-top: 0.2rem;
+}
+
+.carte {
+  background: #fff;
+  border: 1px solid #dfe6e9;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.section {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #636e72;
+  margin: 0 0 0.75rem 0;
+  font-weight: 600;
+}
+.champ {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f2f6;
+  font-size: 0.95rem;
+}
+.champ:last-child { border-bottom: none; }
+.label {
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.erreur {
+  color: #d63031;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.centre {
+  text-align: center;
+  padding: 2rem 0;
+}
+\end{lstlisting}
+
+% ===========================================================================
+\section{Partie 9 --- La page d'ajout (composant client)}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Créer le formulaire d'ajout d'utilisateur.
+\end{objectifbox}
+
+Ce formulaire utilise \texttt{useState} (pour les champs et les erreurs), \texttt{onChange} (événements de saisie) et \texttt{useRouter().push()} (redirection après soumission). C'est un \textbf{composant client}.
+
+Un \textbf{input contrôlé} est un champ dont la valeur est stockée dans l'état React. À chaque frappe, \texttt{onChange} met à jour l'état, et React re-rend le composant avec la nouvelle valeur. L'état React est la «~source de vérité~» pour le contenu du champ.
+
+\subsection{Fichier \texttt{src/app/users/add/page.js}}
+
+\begin{lstlisting}
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import styles from "./page.module.css";
+
+export default function AddUser() {
+  const router = useRouter();
+  const [form, setForm] = useState({
+    name: "", email: "",
+    phone: "", company: "",
+  });
+  const [erreurs, setErreurs] = useState({});
+  const [enCours, setEnCours] = useState(false);
+  const [soumis, setSoumis] = useState(false);
+
+  // Met à jour le champ modifié
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (erreurs[name])
+      setErreurs({ ...erreurs, [name]: null });
+  };
+
+  // Vérifie que les champs requis sont remplis
+  const valider = () => {
+    const err = {};
+    if (!form.name.trim())
+      err.name = "Le nom est obligatoire";
+    if (!form.email.trim())
+      err.email = "L'email est obligatoire";
+    else if (!form.email.includes("@"))
+      err.email = "L'email doit contenir un @";
+    if (!form.phone.trim())
+      err.phone = "Le téléphone est obligatoire";
+    return err;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const err = valider();
+    if (Object.keys(err).length > 0) {
+      setErreurs(err);
+      return;
+    }
+
+    setEnCours(true);
+    try {
+      const res = await fetch(
+        "https://jsonplaceholder.typicode.com/users",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            company: {
+              name: form.company || "Non renseigné",
+            },
+          }),
+        }
+      );
+      if (!res.ok)
+        throw new Error("Erreur serveur");
+
+      setSoumis(true);
+      setTimeout(
+        () => router.push("/users"), 2000
+      );
+    } catch (error) {
+      setErreurs({ submit: error.message });
+    }
+    setEnCours(false);
+  };
+
+  if (soumis) {
+    return (
+      <div className={styles.succes}>
+        <div className={styles.check}>&#10003;</div>
+        <h2>Utilisateur ajouté</h2>
+        <p>Redirection vers la liste...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h1 className={styles.titre}>
+        Ajouter un utilisateur
+      </h1>
+      <div className={styles.carte}>
+        <form onSubmit={handleSubmit}>
+          {[
+            { id: "name",
+              label: "Nom complet *",
+              placeholder: "Fatou Ndiaye" },
+            { id: "email",
+              label: "Email *",
+              placeholder:
+                "fatou.ndiaye@ucad.edu.sn" },
+            { id: "phone",
+              label: "Téléphone *",
+              placeholder: "77 123 45 67" },
+            { id: "company",
+              label: "Entreprise",
+              placeholder: "ESP/UCAD" },
+          ].map((field) => (
+            <div key={field.id}
+                 className={styles.groupe}>
+              <label className={styles.label}
+                     htmlFor={field.id}>
+                {field.label}
+              </label>
+              <input
+                className={`${styles.input} ${
+                  erreurs[field.id]
+                    ? styles.inputErreur : ""
+                }`}
+                type="text"
+                id={field.id}
+                name={field.id}
+                placeholder={field.placeholder}
+                value={form[field.id]}
+                onChange={handleChange}
+              />
+              {erreurs[field.id] && (
+                <p className={styles.erreur}>
+                  {erreurs[field.id]}
+                </p>
+              )}
+            </div>
+          ))}
+          {erreurs.submit && (
+            <p className={styles.erreurGlobale}>
+              {erreurs.submit}
+            </p>
+          )}
+          <button type="submit"
+                  className={styles.bouton}
+                  disabled={enCours}>
+            {enCours ? "Envoi..." : "Ajouter"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+\end{lstlisting}
+
+\begin{attentionbox}[\texttt{useRouter} vient de \texttt{next/navigation}]
+En Next.js, \texttt{useRouter} est importé de \texttt{"next/navigation"} (pas de \texttt{"next/router"} qui est l'ancienne version). La méthode \texttt{router.push("/users")} fonctionne comme \texttt{navigate("/users")} dans React Router.
+\end{attentionbox}
+
+\subsection{Fichier \texttt{src/app/users/add/page.module.css}}
+
+\begin{lstlisting}[style=css]
+.titre {
+  font-size: 1.5rem;
+  color: #2d3436;
+  margin-bottom: 1.5rem;
+}
+.carte {
+  background: #fff;
+  border: 1px solid #dfe6e9;
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+.groupe { margin-bottom: 1.25rem; }
+.label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3436;
+  margin-bottom: 0.4rem;
+}
+.input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+  border: 1px solid #dfe6e9;
+  border-radius: 8px;
+  background: #fff;
+}
+.input:focus {
+  outline: none;
+  border-color: #0984e3;
+  box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+}
+.inputErreur { border-color: #d63031; }
+.erreur {
+  color: #d63031;
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+.erreurGlobale {
+  color: #d63031;
+  font-weight: 600;
+  padding: 0.75rem;
+  background: #ffeaa7;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+.bouton {
+  width: 100%;
+  padding: 0.75rem;
+  background: #0984e3;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bouton:hover { background: #0770c2; }
+.bouton:disabled {
+  background: #b2bec3;
+  cursor: not-allowed;
+}
+.succes {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+.check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #00b894;
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem auto;
+}
+\end{lstlisting}
+
+% ===========================================================================
+\section{Arborescence finale}
+% ===========================================================================
+
+Votre projet contient maintenant \textbf{15 fichiers} :
+
+\begin{lstlisting}[style=terminal]
+annuaire-next/
+  src/
+    app/
+      globals.css             (reset CSS)
+      layout.js               (layout racine)
+      page.js                 (accueil)
+      page.module.css
+      users/
+        page.js               (liste - client)
+        page.module.css
+        loading.js             (loading auto)
+        loading.module.css
+        [id]/
+          page.js              (détail - serveur)
+          page.module.css
+        add/
+          page.js              (ajout - client)
+          page.module.css
+    components/
+      Navbar.jsx               (client)
+      Navbar.module.css
+      UserCard.jsx             (client)
+      UserCard.module.css
+      SearchBar.jsx            (client)
+      SearchBar.module.css
+\end{lstlisting}
+
+Chacun de ces fichiers a été donné intégralement dans ce lab.
+
+% ===========================================================================
+\section{Aide-mémoire}
+% ===========================================================================
+
+\begin{center}
+\begin{tabular}{lp{7.5cm}}
+\toprule
+\textbf{Concept} & \textbf{Syntaxe} \\
+\midrule
+Créer le projet & \texttt{npx create-next-app@latest mon-app} \\
+Lancer le serveur & \texttt{npm run dev} (port 3000) \\
+\midrule
+Page & \texttt{app/chemin/page.js} \\
+Layout & \texttt{app/chemin/layout.js} \\
+Loading & \texttt{app/chemin/loading.js} \\
+Route dynamique & \texttt{app/[param]/page.js} \\
+\midrule
+Composant serveur & Par défaut (rien à écrire) \\
+Composant client & \texttt{"use client"} en première ligne \\
+\midrule
+Link & \texttt{import Link from "next/link"} \\
+& \texttt{<Link href="/users">...</Link>} \\
+Alias import & \texttt{import X from "@/components/X"} \\
+useRouter & \texttt{import \{ useRouter \} from "next/navigation"} \\
+usePathname & \texttt{import \{ usePathname \} from "next/navigation"} \\
+Metadata (SEO) & \texttt{export const metadata = \{ title: "..." \}} \\
+No cache & \texttt{fetch(url, \{ cache: "no-store" \})} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ===========================================================================
+\section{Résumé et conclusion}
+% ===========================================================================
+
+Dans ce lab, vous avez :
+\begin{enumerate}[nosep]
+\item Compris \textbf{pourquoi} Next.js : SEO, performance, routing automatique.
+\item Créé un projet Next.js et appris la structure \texttt{app/}.
+\item Créé des routes par \textbf{structure de fichiers} (un dossier = une URL).
+\item Utilisé \texttt{layout.js} pour la Navbar commune et \texttt{loading.js} pour le chargement automatique.
+\item Distingué \textbf{composants serveur} (par défaut, avec \texttt{await fetch}) et \textbf{composants client} (\texttt{"use client"}, avec hooks et événements).
+\item Créé les 15 fichiers du projet (chaque composant + son CSS Module).
+\end{enumerate}
+
+\begin{center}
+\begin{tabular}{lcp{6.5cm}}
+\toprule
+\textbf{Étape} & \textbf{Statut} & \textbf{Ce que vous savez faire} \\
+\midrule
+\textbf{JS moderne} & \cmark{} & Fonctions fléchées, async/await \\
+\textbf{React --- composants} & \cmark{} & JSX, props, état, useEffect \\
+\textbf{React --- avancé} & \cmark{} & Router, formulaires, CSS Modules \\
+\textbf{Next.js App Router} & \cmark{} & Routing fichier, layout, server/client \\
+\textbf{API Django} & $\to$ Lab 6 & CORS, auth, CRUD \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{projetbox}[Et ensuite ?]
+L'annuaire fonctionne sous Next.js avec du routing par fichiers, des composants serveur et client, et un loading automatique. Mais les données viennent encore de JSONPlaceholder (une API de test).
+
+Dans le \textbf{Lab 6}, vous connecterez l'annuaire à un \textbf{vrai backend Django}. Vous apprendrez CORS, l'authentification par token, et le CRUD complet avec des données persistées en base de données.
+\end{projetbox}
+
+\section*{Exercice bonus}
+
+\begin{infobox}[Bonus : page 404 personnalisée]
+Next.js fournit un fichier spécial pour les pages introuvables. Créez \texttt{src/app/not-found.js} :
+\begin{lstlisting}
+import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <div style={{
+      textAlign: "center",
+      padding: "3rem"
+    }}>
+      <h1>404</h1>
+      <p>Cette page n'existe pas.</p>
+      <Link href="/">Retour à l'accueil</Link>
+    </div>
+  );
+}
+\end{lstlisting}
+Testez en tapant \texttt{/xyz} dans l'URL.
+\end{infobox}
+
+\vspace{1cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab 5 --- Next.js App Router --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous savez créer une application Next.js complète\\
+avec routing par fichiers, layouts et composants serveur/client.\\[0.2cm]
+Prochaine étape : connecter à un backend Django.\\[0.3cm]
+\textit{Un dossier = une route. Un fichier = une page.}\\[0.5cm]
+\end{minipage}
+}
+\end{center}
+
+\end{document}

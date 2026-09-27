@@ -1,0 +1,941 @@
+% ===========================================================================
+%  Programmation Frontend — Lab 2 : Composants, Props et CSS Modules
+%  ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Code source ---
+\usepackage{listings}
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else,
+    finally, for, function, if, in, instanceof, new, return, switch, this,
+    throw, try, typeof, var, void, while, with, const, let, class, export,
+    extends, import, super, yield, async, await, of, from, true, false, null,
+    undefined},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  morestring=[b]`,
+  sensitive=true,
+}
+
+\lstdefinelanguage{CSS}{
+  keywords={color, background, border, padding, margin, font, display, flex,
+    align, justify, width, height, gap, cursor, none, solid, center, column,
+    row, wrap, pointer, radius, size, weight, family, items, content,
+    direction, transform, transition, hover, box, shadow, max, min},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true,
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  language=JavaScript,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\lstdefinestyle{terminal}{
+  language={},
+  keywordstyle={},
+  commentstyle={},
+  stringstyle={},
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{black!5},
+}
+
+\lstdefinestyle{css}{
+  language=CSS,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Prog. Frontend --- Lab 2 : Composants, Props et CSS Modules}
+\fancyhead[R]{\small ESP/UCAD}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Programmation Frontend}\\[0.8cm]
+\textbf{\huge Lab 2 --- Composants, Props et CSS Modules}\\[0.3cm]
+\textbf{\Large Organiser et styliser une application React}\\[0.5cm]
+\large ESP/UCAD --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Durée estimée} & 2h (une séance) \\
+\textbf{Prérequis} & Avoir terminé le Lab 1 (dossier \texttt{annuaire-react/} fonctionnel). \\
+\textbf{Fichier de départ} & Le fichier \texttt{src/App.jsx} du Lab 1 \\
+\textbf{Livrables} & 3 composants (\texttt{App}, \texttt{UserCard}, \texttt{SearchBar}) avec CSS Modules \\
+\textbf{Validation} & Le filtre en temps réel fonctionne, chaque composant a son propre fichier \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du lab]
+À l'issue de ce lab, chaque étudiant sera capable de :
+\begin{enumerate}[nosep]
+    \item \textbf{Découper} une application React en composants réutilisables
+    \item \textbf{Passer des données} d'un composant parent à un composant enfant via les \textbf{props}
+    \item \textbf{Styliser} chaque composant avec un \textbf{CSS Module} (pas de collision de noms)
+    \item \textbf{Remonter l'état} vers le parent commun (\emph{lifting state up})
+    \item Implémenter un \textbf{filtre en temps réel} sur une liste
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Point de départ --- Le code du Lab 1}
+\label{sec:starter}
+% ===========================================================================
+
+Au Lab 1, vous avez créé une application React qui récupère des utilisateurs depuis JSONPlaceholder et les affiche en cartes. Tout fonctionne. Mais regardez le fichier \texttt{src/App.jsx} :
+
+\begin{lstlisting}
+import { useState } from "react";
+
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [chargement, setChargement] = useState(false);
+
+  const chargerUtilisateurs = async () => {
+    setChargement(true);
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Erreur :", error);
+    }
+    setChargement(false);
+  };
+
+  return (
+    <div style={{ maxWidth: "600px", margin: "2rem auto",
+                  fontFamily: "sans-serif" }}>
+      <h1>Annuaire des utilisateurs</h1>
+      <button onClick={chargerUtilisateurs}
+              disabled={chargement}>
+        {chargement ? "Chargement..." : "Charger les utilisateurs"}
+      </button>
+
+      {users.map(user => (
+        <div key={user.id} style={{ border: "1px solid #ccc",
+             padding: "1rem", margin: "0.5rem 0",
+             borderRadius: "8px" }}>
+          <h3 style={{ margin: "0 0 0.5rem 0" }}>{user.name}</h3>
+          <p style={{ margin: "0.2rem 0", color: "#555" }}>
+            Email : {user.email}
+          </p>
+          <p style={{ margin: "0.2rem 0", color: "#555" }}>
+            Entreprise : {user.company.name}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default App;
+\end{lstlisting}
+
+\begin{objectifbox}[Étape 0 --- Vérification]
+Ouvrez le dossier \texttt{annuaire-react/} dans VS Code. Lancez le serveur de développement :
+
+\begin{lstlisting}[style=terminal]
+cd annuaire-react
+npm run dev
+\end{lstlisting}
+
+Ouvrez \texttt{http://localhost:5173}. Cliquez sur le bouton. Les 10 utilisateurs doivent apparaître en cartes.
+
+Si le projet ne démarre pas, vérifiez que les dépendances sont installées (\texttt{npm install}).
+\end{objectifbox}
+
+\subsection{Le problème}
+
+Le code fonctionne, mais tout est dans un seul fichier :
+
+\begin{itemize}[nosep]
+    \item La logique de chargement (fetch, loading)
+    \item L'affichage de chaque carte utilisateur (le bloc \texttt{<div>} dans le \texttt{.map()})
+    \item Les styles (en \texttt{style=\{\{...\}\}} directement dans le JSX)
+\end{itemize}
+
+Imaginez que Fatou doit ajouter un champ de recherche, que Moussa doit modifier l'apparence des cartes, et que Cheikh doit ajouter un compteur. Les trois travaillent dans le \textbf{même fichier}. Ça ne tient pas.
+
+La solution : \textbf{découper en composants}. Chaque morceau d'interface devient un fichier indépendant avec sa propre logique et son propre style.
+
+% ===========================================================================
+\section{Partie 1 --- Extraire un composant}
+\label{sec:composant}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Extraire la carte utilisateur dans un composant \texttt{UserCard} séparé.
+\end{objectifbox}
+
+\subsection{Créer le dossier \texttt{components/}}
+
+Dans \texttt{src/}, créez un dossier \texttt{components/} :
+
+\begin{lstlisting}[style=terminal]
+mkdir src/components
+\end{lstlisting}
+
+Ce dossier contiendra tous les composants réutilisables de l'application.
+
+\subsection{Créer \texttt{UserCard.jsx}}
+
+Créez le fichier \texttt{src/components/UserCard.jsx} :
+
+\begin{lstlisting}
+const UserCard = ({ user }) => {
+  return (
+    <div style={{ border: "1px solid #ccc", padding: "1rem",
+                  margin: "0.5rem 0", borderRadius: "8px" }}>
+      <h3 style={{ margin: "0 0 0.5rem 0" }}>{user.name}</h3>
+      <p style={{ margin: "0.2rem 0", color: "#555" }}>
+        Email : {user.email}
+      </p>
+      <p style={{ margin: "0.2rem 0", color: "#555" }}>
+        Entreprise : {user.company.name}
+      </p>
+    </div>
+  );
+};
+
+export default UserCard;
+\end{lstlisting}
+
+On a simplement \textbf{coupé} le bloc \texttt{<div>} qui était dans le \texttt{.map()} et on l'a mis dans sa propre fonction. Le composant reçoit un objet \texttt{user} et affiche ses informations.
+
+\subsection{Utiliser \texttt{UserCard} dans \texttt{App.jsx}}
+
+Modifiez \texttt{src/App.jsx} pour importer et utiliser le nouveau composant :
+
+\begin{lstlisting}
+import { useState } from "react";
+import UserCard from "./components/UserCard";
+
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [chargement, setChargement] = useState(false);
+
+  const chargerUtilisateurs = async () => {
+    setChargement(true);
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Erreur :", error);
+    }
+    setChargement(false);
+  };
+
+  return (
+    <div style={{ maxWidth: "600px", margin: "2rem auto",
+                  fontFamily: "sans-serif" }}>
+      <h1>Annuaire des utilisateurs</h1>
+      <button onClick={chargerUtilisateurs}
+              disabled={chargement}>
+        {chargement ? "Chargement..." : "Charger les utilisateurs"}
+      </button>
+
+      {users.map(user => (
+        <UserCard key={user.id} user={user} />
+      ))}
+    </div>
+  );
+};
+
+export default App;
+\end{lstlisting}
+
+Sauvegardez les deux fichiers. La page se met à jour automatiquement. Le résultat est \textbf{identique} à avant, mais le code est mieux organisé.
+
+\begin{attentionbox}[Vérification]
+Si vous voyez une erreur du type \texttt{UserCard is not defined} : vérifiez que l'import est correct. Le chemin est relatif : \texttt{"./components/UserCard"} (avec le \texttt{./} au début).
+\end{attentionbox}
+
+% ===========================================================================
+\section{Partie 2 --- Les props}
+\label{sec:props}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Comprendre comment les données circulent entre composants grâce aux props.
+\end{objectifbox}
+
+\subsection{Comment les données circulent}
+
+Dans le code qu'on vient d'écrire, regardez cette ligne dans \texttt{App.jsx} :
+
+\begin{lstlisting}
+<UserCard key={user.id} user={user} />
+\end{lstlisting}
+
+Et cette ligne dans \texttt{UserCard.jsx} :
+
+\begin{lstlisting}
+const UserCard = ({ user }) => {
+\end{lstlisting}
+
+Le mot \texttt{user} apparaît des deux côtés. Voici ce qui se passe :
+
+\begin{enumerate}[nosep]
+    \item \texttt{App} \textbf{envoie} l'objet \texttt{user} au composant \texttt{UserCard} via l'attribut \texttt{user=\{user\}}.
+    \item \texttt{UserCard} \textbf{reçoit} cet objet dans ses \textbf{props} (propriétés).
+    \item L'écriture \texttt{(\{ user \})} est une \textbf{déstructuration} : on extrait directement la propriété \texttt{user} de l'objet props.
+\end{enumerate}
+
+\begin{infobox}[Analogie : la fiche de commande]
+Imaginez un restaurant. Le serveur (le composant parent) remplit une fiche de commande et la passe au cuisinier (le composant enfant). La fiche contient les informations nécessaires : «~1 thiéboudienne, pas trop pimenté~». Le cuisinier lit la fiche et prépare le plat. Il ne modifie \textbf{pas} la fiche — il la lit seulement.
+
+Les props fonctionnent pareil : le parent écrit, l'enfant lit. \textbf{Les props sont en lecture seule.}
+\end{infobox}
+
+\subsection{Props multiples}
+
+Un composant peut recevoir autant de props que nécessaire. Modifions \texttt{UserCard} pour recevoir une prop supplémentaire qui contrôle l'affichage de l'email :
+
+\begin{lstlisting}
+const UserCard = ({ user, afficherEmail }) => {
+  return (
+    <div style={{ border: "1px solid #ccc", padding: "1rem",
+                  margin: "0.5rem 0", borderRadius: "8px" }}>
+      <h3 style={{ margin: "0 0 0.5rem 0" }}>{user.name}</h3>
+      {afficherEmail && (
+        <p style={{ margin: "0.2rem 0", color: "#555" }}>
+          Email : {user.email}
+        </p>
+      )}
+      <p style={{ margin: "0.2rem 0", color: "#555" }}>
+        Entreprise : {user.company.name}
+      </p>
+    </div>
+  );
+};
+
+export default UserCard;
+\end{lstlisting}
+
+Dans \texttt{App.jsx} :
+
+\begin{lstlisting}
+<UserCard key={user.id} user={user} afficherEmail={true} />
+\end{lstlisting}
+
+La syntaxe \texttt{\{afficherEmail \&\& (...)\}} signifie : «~si \texttt{afficherEmail} est vrai, affiche ce bloc~». C'est du \textbf{rendu conditionnel}.
+
+\begin{retenirbox}[Les props en résumé]
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Concept} & \textbf{Explication} \\
+\midrule
+Passer une prop & \texttt{<Composant nom=\{valeur\} />} \\
+Recevoir une prop & \texttt{const Composant = (\{ nom \}) => \{ ... \}} \\
+Props multiples & \texttt{<Composant a=\{1\} b=\{"texte"\} c=\{true\} />} \\
+Lecture seule & L'enfant ne modifie \textbf{jamais} les props reçues \\
+\texttt{key} & Identifiant unique dans un \texttt{.map()} (pas une prop classique) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+Pour la suite du lab, retirez la prop \texttt{afficherEmail} et revenez à la version simple de \texttt{UserCard} (qui affiche toujours l'email). On ajoute cette prop uniquement pour illustrer le concept.
+
+% ===========================================================================
+\section{Partie 3 --- CSS Modules}
+\label{sec:css-modules}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Remplacer les styles en ligne par des CSS Modules pour une meilleure organisation.
+\end{objectifbox}
+
+\subsection{Le problème des styles en ligne}
+
+Dans le code actuel, les styles sont écrits directement dans le JSX :
+
+\begin{lstlisting}
+<div style={{ border: "1px solid #ccc", padding: "1rem",
+              margin: "0.5rem 0", borderRadius: "8px" }}>
+\end{lstlisting}
+
+Trois problèmes :
+\begin{itemize}[nosep]
+    \item Le code est \textbf{difficile à lire} (mélange de HTML et de CSS).
+    \item On ne peut pas utiliser les \textbf{pseudo-classes} (\texttt{:hover}, \texttt{:focus}).
+    \item Si deux composants utilisent la même classe CSS, il y a un risque de \textbf{collision de noms}.
+\end{itemize}
+
+\subsection{CSS Modules : du CSS scopé par composant}
+
+Un \textbf{CSS Module} est un fichier CSS classique dont les noms de classes sont \textbf{automatiquement rendus uniques} par Vite. Chaque composant a son propre fichier \texttt{.module.css}. Pas de collision possible.
+
+Créez le fichier \texttt{src/components/UserCard.module.css} :
+
+\begin{lstlisting}[style=css]
+.card {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nom {
+  margin: 0 0 0.5rem 0;
+}
+
+.info {
+  margin: 0.2rem 0;
+  color: #555;
+}
+\end{lstlisting}
+
+Notez le \texttt{:hover} : on peut maintenant utiliser les pseudo-classes, ce qui était impossible avec les styles en ligne.
+
+\subsection{Utiliser le CSS Module dans le composant}
+
+Modifiez \texttt{src/components/UserCard.jsx} :
+
+\begin{lstlisting}
+import styles from "./UserCard.module.css";
+
+const UserCard = ({ user }) => {
+  return (
+    <div className={styles.card}>
+      <h3 className={styles.nom}>{user.name}</h3>
+      <p className={styles.info}>Email : {user.email}</p>
+      <p className={styles.info}>
+        Entreprise : {user.company.name}
+      </p>
+    </div>
+  );
+};
+
+export default UserCard;
+\end{lstlisting}
+
+\begin{infobox}[Comment fonctionne un CSS Module]
+\begin{enumerate}[nosep]
+    \item Vous écrivez \texttt{.card} dans le fichier CSS.
+    \item Vite le transforme en quelque chose comme \texttt{.UserCard\_card\_x7k2q} (un nom unique).
+    \item Vous y accédez avec \texttt{styles.card} dans le JSX.
+    \item Résultat : même si un autre composant a aussi une classe \texttt{.card}, il n'y a \textbf{aucune collision}.
+\end{enumerate}
+
+Notez aussi : en React, on écrit \texttt{className} au lieu de \texttt{class} (car \texttt{class} est un mot réservé en JavaScript).
+\end{infobox}
+
+\subsection{CSS Module pour App}
+
+Créez \texttt{src/App.module.css} :
+
+\begin{lstlisting}[style=css]
+.container {
+  max-width: 600px;
+  margin: 2rem auto;
+  font-family: sans-serif;
+  padding: 0 1rem;
+}
+
+.titre {
+  color: #333;
+}
+
+.bouton {
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+  transition: background 0.2s;
+}
+
+.bouton:hover {
+  background: #eee;
+}
+
+.bouton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+\end{lstlisting}
+
+Modifiez \texttt{src/App.jsx} :
+
+\begin{lstlisting}
+import { useState } from "react";
+import UserCard from "./components/UserCard";
+import styles from "./App.module.css";
+
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [chargement, setChargement] = useState(false);
+
+  const chargerUtilisateurs = async () => {
+    setChargement(true);
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Erreur :", error);
+    }
+    setChargement(false);
+  };
+
+  return (
+    <div className={styles.container}>
+      <h1 className={styles.titre}>Annuaire des utilisateurs</h1>
+      <button className={styles.bouton}
+              onClick={chargerUtilisateurs}
+              disabled={chargement}>
+        {chargement ? "Chargement..." : "Charger les utilisateurs"}
+      </button>
+
+      {users.map(user => (
+        <UserCard key={user.id} user={user} />
+      ))}
+    </div>
+  );
+};
+
+export default App;
+\end{lstlisting}
+
+Sauvegardez et vérifiez dans le navigateur. L'application fonctionne comme avant, avec en plus un effet \texttt{:hover} sur les cartes et sur le bouton.
+
+\begin{retenirbox}[Avant / après : les styles]
+\begin{center}
+\begin{tabular}{lp{5cm}p{5cm}}
+\toprule
+& \textbf{Styles en ligne} (Lab 1) & \textbf{CSS Modules} (Lab 2) \\
+\midrule
+\textbf{Syntaxe} & \texttt{style=\{\{ color: "red" \}\}} & \texttt{className=\{styles.nom\}} \\
+\textbf{Pseudo-classes} & Impossible & \texttt{:hover}, \texttt{:focus}, \texttt{:disabled} \\
+\textbf{Collision} & Aucun risque (mais pas pratique) & Aucun risque (noms rendus uniques) \\
+\textbf{Lisibilité} & Mélange JS + CSS & Séparation claire \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+% ===========================================================================
+\section{Partie 4 --- Créer le composant SearchBar}
+\label{sec:searchbar}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 20 minutes]
+Créer un composant de recherche et le connecter à la liste pour filtrer les utilisateurs en temps réel.
+\end{objectifbox}
+
+\subsection{Où placer la recherche ?}
+
+On veut qu'en tapant dans un champ de recherche, la liste se filtre instantanément. Pour cela, il faut que :
+
+\begin{enumerate}[nosep]
+    \item Le composant \texttt{SearchBar} connaisse le texte tapé par l'utilisateur.
+    \item Le composant \texttt{App} connaisse aussi ce texte pour filtrer la liste.
+\end{enumerate}
+
+Le texte de recherche est donc un \textbf{état partagé} entre \texttt{SearchBar} et \texttt{App}. En React, quand deux composants ont besoin du même état, on le place dans leur \textbf{parent commun}. C'est le principe du \emph{lifting state up} (remonter l'état).
+
+\begin{infobox}[Analogie : le tableau de la classe]
+Imaginez que Fatou et Moussa doivent consulter la même information. Au lieu que chacun ait sa propre copie (qui risque de diverger), on écrit l'information au tableau --- visible par tous. Le tableau, c'est le composant parent. L'information, c'est l'état.
+\end{infobox}
+
+\subsection{Créer \texttt{SearchBar.module.css}}
+
+Créez \texttt{src/components/SearchBar.module.css} :
+
+\begin{lstlisting}[style=css]
+.container {
+  margin: 1rem 0;
+}
+
+.input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #666;
+}
+\end{lstlisting}
+
+\subsection{Créer \texttt{SearchBar.jsx}}
+
+Créez \texttt{src/components/SearchBar.jsx} :
+
+\begin{lstlisting}
+import styles from "./SearchBar.module.css";
+
+const SearchBar = ({ recherche, onRecherche }) => {
+  return (
+    <div className={styles.container}>
+      <input
+        className={styles.input}
+        type="text"
+        placeholder="Rechercher un utilisateur..."
+        value={recherche}
+        onChange={e => onRecherche(e.target.value)}
+      />
+    </div>
+  );
+};
+
+export default SearchBar;
+\end{lstlisting}
+
+Le composant reçoit \textbf{deux props} :
+\begin{itemize}[nosep]
+    \item \texttt{recherche} : la valeur actuelle du champ (vient du parent).
+    \item \texttt{onRecherche} : une \textbf{fonction} que le parent fournit. Quand l'utilisateur tape, on appelle cette fonction avec le nouveau texte.
+\end{itemize}
+
+\begin{attentionbox}[Passer une fonction comme prop]
+En React, on passe souvent des fonctions comme props. Ici, \texttt{onRecherche} est une fonction fournie par \texttt{App}. Quand \texttt{SearchBar} appelle \texttt{onRecherche("Fatou")}, c'est en réalité \texttt{App} qui reçoit \texttt{"Fatou"} et met à jour son état. Le composant enfant \textbf{informe} le parent, sans modifier l'état directement.
+\end{attentionbox}
+
+\subsection{Connecter \texttt{SearchBar} dans \texttt{App.jsx}}
+
+Modifiez \texttt{src/App.jsx} :
+
+\begin{lstlisting}
+import { useState } from "react";
+import UserCard from "./components/UserCard";
+import SearchBar from "./components/SearchBar";
+import styles from "./App.module.css";
+
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [chargement, setChargement] = useState(false);
+  const [recherche, setRecherche] = useState("");
+
+  const chargerUtilisateurs = async () => {
+    setChargement(true);
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Erreur :", error);
+    }
+    setChargement(false);
+  };
+
+  const usersFiltres = users.filter(user =>
+    user.name.toLowerCase().includes(
+      recherche.toLowerCase()
+    )
+  );
+
+  return (
+    <div className={styles.container}>
+      <h1 className={styles.titre}>Annuaire des utilisateurs</h1>
+      <button className={styles.bouton}
+              onClick={chargerUtilisateurs}
+              disabled={chargement}>
+        {chargement ? "Chargement..." : "Charger les utilisateurs"}
+      </button>
+
+      <SearchBar
+        recherche={recherche}
+        onRecherche={setRecherche}
+      />
+
+      <p className={styles.compteur}>
+        {usersFiltres.length} utilisateur(s) trouvé(s)
+      </p>
+
+      {usersFiltres.map(user => (
+        <UserCard key={user.id} user={user} />
+      ))}
+    </div>
+  );
+};
+
+export default App;
+\end{lstlisting}
+
+Ajoutez la classe \texttt{.compteur} dans \texttt{src/App.module.css} :
+
+\begin{lstlisting}[style=css]
+.compteur {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+\end{lstlisting}
+
+\subsection{Tester le filtre}
+
+Sauvegardez tout. Chargez les utilisateurs, puis tapez dans le champ de recherche. La liste se filtre \textbf{en temps réel} à chaque lettre tapée. Le compteur indique le nombre de résultats.
+
+\begin{retenirbox}[Flux de données du filtre]
+Voici comment les données circulent dans l'application :
+
+\begin{enumerate}[nosep]
+    \item L'utilisateur tape «~lea~» dans \texttt{SearchBar}.
+    \item \texttt{SearchBar} appelle \texttt{onRecherche("lea")}, qui est en réalité \texttt{setRecherche("lea")} dans \texttt{App}.
+    \item L'état \texttt{recherche} dans \texttt{App} passe à \texttt{"lea"}.
+    \item React re-rend \texttt{App}. Le filtre \texttt{users.filter(...)} ne garde que les utilisateurs dont le nom contient «~lea~».
+    \item Le tableau filtré est passé au \texttt{.map()}, qui ne crée des \texttt{UserCard} que pour les résultats.
+\end{enumerate}
+
+Le flux est \textbf{unidirectionnel} : les données descendent (parent $\to$ enfant via props), les événements remontent (enfant $\to$ parent via fonctions callback).
+\end{retenirbox}
+
+% ===========================================================================
+\section{Bilan --- Structure du projet}
+\label{sec:bilan}
+% ===========================================================================
+
+Votre projet a maintenant cette structure :
+
+\begin{lstlisting}[style=terminal]
+annuaire-react/
+  src/
+    App.jsx
+    App.module.css
+    components/
+      UserCard.jsx
+      UserCard.module.css
+      SearchBar.jsx
+      SearchBar.module.css
+    main.jsx
+  index.html
+  package.json
+\end{lstlisting}
+
+Chaque composant a \textbf{deux fichiers} : un \texttt{.jsx} pour la logique et un \texttt{.module.css} pour le style. Si Fatou veut modifier l'apparence des cartes, elle ne touche que \texttt{UserCard.module.css}. Si Moussa veut changer le comportement de la recherche, il ne touche que \texttt{SearchBar.jsx}. Personne ne se marche dessus.
+
+\begin{retenirbox}[Avant / après : la structure]
+\begin{center}
+\begin{tabular}{lp{5cm}p{5cm}}
+\toprule
+& \textbf{Lab 1} & \textbf{Lab 2} \\
+\midrule
+\textbf{Fichiers} & 1 fichier (\texttt{App.jsx}) & 6 fichiers (3 composants $\times$ 2) \\
+\textbf{Styles} & En ligne (\texttt{style=\{\{...\}\}}) & CSS Modules (\texttt{.module.css}) \\
+\textbf{Recherche} & Aucune & Filtre en temps réel \\
+\textbf{Réutilisabilité} & Aucune & \texttt{UserCard} réutilisable partout \\
+\textbf{Collaboration} & Difficile (1 fichier) & Facile (fichiers séparés) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+% ===========================================================================
+\section{Aide-mémoire}
+\label{sec:aide-memoire}
+% ===========================================================================
+
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Concept} & \textbf{Syntaxe / Exemple} \\
+\midrule
+Créer un composant & \texttt{const MonComposant = () => <div>...</div>;} \\
+Exporter & \texttt{export default MonComposant;} \\
+Importer & \texttt{import MonComposant from "./MonComposant";} \\
+\midrule
+Passer une prop & \texttt{<Enfant nom=\{valeur\} />} \\
+Recevoir une prop & \texttt{const Enfant = (\{ nom \}) => ...} \\
+Prop fonction & \texttt{<Enfant onAction=\{maFonction\} />} \\
+Rendu conditionnel & \texttt{\{condition \&\& <Element />\}} \\
+\midrule
+CSS Module (fichier) & \texttt{MonComposant.module.css} \\
+CSS Module (import) & \texttt{import styles from "./MonComposant.module.css";} \\
+CSS Module (usage) & \texttt{className=\{styles.maClasse\}} \\
+\midrule
+Filtrer un tableau & \texttt{tableau.filter(item => condition)} \\
+Lifting state up & L'état partagé vit dans le parent commun \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ===========================================================================
+\section{Résumé et conclusion}
+% ===========================================================================
+
+Dans ce lab, vous avez :
+
+\begin{enumerate}[nosep]
+    \item \textbf{Extrait} la carte utilisateur dans un composant \texttt{UserCard} réutilisable.
+    \item Compris les \textbf{props} : des données en lecture seule passées du parent vers l'enfant.
+    \item Remplacé les styles en ligne par des \textbf{CSS Modules} (un fichier \texttt{.module.css} par composant).
+    \item Créé un composant \texttt{SearchBar} et implémenté un \textbf{filtre en temps réel}.
+    \item Appliqué le \emph{lifting state up} : l'état de recherche vit dans \texttt{App} et descend vers \texttt{SearchBar} et la liste filtrée.
+\end{enumerate}
+
+Voici où vous en êtes dans la progression du cours :
+
+\begin{center}
+\begin{tabular}{lcp{7.5cm}}
+\toprule
+\textbf{Étape} & \textbf{Statut} & \textbf{Ce que vous savez faire} \\
+\midrule
+\textbf{DOM et événements} & \cmark{} & Sélecteurs, événements, modification du DOM \\
+\textbf{Fonctions JS} & \cmark{} & Déclaration, expression, fléchée, \emph{hoisting} \\
+\textbf{Asynchrone} & \cmark{} & \texttt{fetch}, \texttt{async/await}, gestion d'erreurs \\
+\textbf{React --- les bases} & \cmark{} & Composant, JSX, \texttt{useState}, \texttt{.map()} \\
+\textbf{Composants et props} & \cmark{} & Découpage, props, CSS Modules, lifting state up \\
+\textbf{useEffect et cycle de vie} & $\to$ Lab 3 & Charger au montage, loading, détail \\
+\textbf{Formulaires et routing} & $\to$ Lab 4 & Inputs contrôlés, React Router \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{projetbox}[Et ensuite ?]
+L'annuaire affiche des utilisateurs et permet de les filtrer. Mais il faut encore cliquer sur un bouton pour charger les données. Dans le \textbf{Lab 3}, vous apprendrez \texttt{useEffect} pour charger les données \textbf{automatiquement} au démarrage, gérer les états de chargement et d'erreur proprement, et créer une page de détail pour chaque utilisateur.
+\end{projetbox}
+
+% ===========================================================================
+\section*{Exercice bonus --- Pour aller plus loin}
+% ===========================================================================
+
+\begin{infobox}[Bonus : un composant Header]
+Si vous avez terminé en avance, créez un composant \texttt{Header.jsx} + \texttt{Header.module.css} qui contient le titre de l'application et le bouton de chargement. Indices :
+
+\begin{enumerate}[nosep]
+    \item Créez \texttt{src/components/Header.jsx} et \texttt{src/components/Header.module.css}.
+    \item Le composant \texttt{Header} reçoit trois props : \texttt{onCharger} (la fonction de chargement), \texttt{chargement} (booléen), et \texttt{nbResultats} (nombre).
+    \item Dans \texttt{App.jsx}, remplacez le \texttt{<h1>} et le \texttt{<button>} par \texttt{<Header />}.
+    \item L'application doit fonctionner exactement comme avant.
+\end{enumerate}
+
+Cet exercice renforce le découpage en composants et les props (y compris passer des fonctions).
+\end{infobox}
+
+\vspace{1cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab 2 --- Composants, Props et CSS Modules --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous savez découper une application React en composants,\\
+passer des données avec les props et styliser avec CSS Modules.\\[0.2cm]
+Prochaine étape : \texttt{useEffect}, chargement automatique et page de détail.\\[0.3cm]
+\textit{Un composant = une responsabilité. Un fichier = un composant.}\\[0.5cm]
+\end{minipage}
+}
+\end{center}
+
+\end{document}

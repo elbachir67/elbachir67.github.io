@@ -35,6 +35,15 @@ EXCLUS = {"site_libs"}
 # Les liens qui sortent du site : lychee s'en charge, et un `mailto:` n'est pas un fichier.
 SCHEMAS_EXTERNES = {"http", "https", "mailto", "tel", "data", "javascript", "ftp", "about"}
 MOTIF_LIEN = re.compile(r'(?:href|src)\s*=\s*"([^"]*)"')
+# Les blocs et extraits de code d'une page : leur contenu est **montré**, pas suivi. Un lab de
+# Next.js affiche `<Link href="/users">` comme exemple de JSX ; l'attribut y est du texte, et non
+# une promesse du site. Le contrôle des numéros de téléphone retire déjà le code de la même façon.
+MOTIF_CODE = re.compile(r"<pre\b.*?</pre>|<code\b.*?</code>", re.S)
+
+
+def hors_code(html: str) -> str:
+    """La page sans ses blocs de code, pour n'y chercher que de vrais liens."""
+    return MOTIF_CODE.sub(" ", html)
 # `fichier: "ressources/tp-1.pdf"` dans cours.yml. Le YAML est lu à l'expression régulière, comme
 # le fait déjà verifier_conversion.py : le dépôt n'a pas de dépendance YAML.
 MOTIF_FICHIER_YAML = re.compile(r'fichier:\s*"([^"]+)"')
@@ -85,7 +94,7 @@ def liens_casses(site: Path) -> list[tuple[str, str]]:
     ecarts = []
     for page in pages_html(site):
         vus = set()
-        for lien in MOTIF_LIEN.findall(page.read_text(encoding="utf-8", errors="ignore")):
+        for lien in MOTIF_LIEN.findall(hors_code(page.read_text(encoding="utf-8", errors="ignore"))):
             if lien in vus:
                 continue
             vus.add(lien)

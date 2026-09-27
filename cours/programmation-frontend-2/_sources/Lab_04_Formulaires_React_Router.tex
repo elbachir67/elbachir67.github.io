@@ -1,0 +1,1058 @@
+% ===========================================================================
+%  Programmation Frontend — Lab 4 : Formulaires et React Router
+%  ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+\usepackage{listings}
+\lstdefinelanguage{JavaScript}{keywords={break,case,catch,continue,debugger,default,delete,do,else,finally,for,function,if,in,instanceof,new,return,switch,this,throw,try,typeof,var,void,while,with,const,let,class,export,extends,import,super,yield,async,await,of,from,true,false,null,undefined},morecomment=[l]{//},morecomment=[s]{/*}{*/},morestring=[b]',morestring=[b]",morestring=[b]`,sensitive=true}
+\lstdefinelanguage{CSS}{keywords={color,background,border,padding,margin,font,display,flex,align,justify,width,height,gap,cursor,none,solid,center,column,row,wrap,pointer,radius,size,weight,family,items,content,direction,transform,transition,hover,box,shadow,max,min,text,decoration,opacity,position,sticky,top,letter,spacing,uppercase},morecomment=[s]{/*}{*/},morestring=[b]',morestring=[b]",sensitive=true}
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{gray!8},frame=single,framerule=0.5pt,rulecolor=\color{gray!40},breaklines=true,breakatwhitespace=true,showstringspaces=false,tabsize=2,xleftmargin=4pt,xrightmargin=4pt,aboveskip=8pt,belowskip=8pt,language=JavaScript,keywordstyle=\color{blue!70!black}\bfseries,commentstyle=\color{green!50!black}\itshape,stringstyle=\color{red!60!black},literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1 {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1 {→}{{$\rightarrow$}}1}
+\lstdefinestyle{terminal}{language={},keywordstyle={},commentstyle={},stringstyle={},basicstyle=\ttfamily\small,backgroundcolor=\color{black!5}}
+\lstdefinestyle{css}{language=CSS,keywordstyle=\color{blue!70!black}\bfseries,commentstyle=\color{green!50!black}\itshape,stringstyle=\color{red!60!black}}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small Prog. Frontend --- Lab 4 : Formulaires et React Router}
+\fancyhead[R]{\small ESP/UCAD}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{\vspace{-1cm}\textbf{\LARGE Programmation Frontend}\\[0.8cm]\textbf{\huge Lab 4 --- Formulaires et React Router}\\[0.3cm]\textbf{\Large Multi-pages, navigation et saisie de données}\\[0.5cm]\large ESP/UCAD --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\Département Génie Informatique\\Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\vspace{0.5cm}
+
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Durée estimée} & 2h (une séance) \\
+\textbf{Prérequis} & Avoir terminé le Lab 3 (\texttt{useEffect}, loading/erreur, vue détail). \\
+\textbf{Fichiers de départ} & Le projet \texttt{annuaire-react/} du Lab 3 \\
+\textbf{Livrables} & SPA avec 4 pages (accueil, liste, détail, ajout), navigation et formulaire \\
+\textbf{Validation} & Chaque vue a sa propre URL. Le formulaire valide et envoie les données. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du lab]
+À l'issue de ce lab, chaque étudiant sera capable de :
+\begin{enumerate}[nosep]
+\item Installer et configurer \textbf{React Router} pour créer une application multi-pages
+\item Créer des \textbf{routes}, des \textbf{liens} (\texttt{Link}) et une \textbf{barre de navigation}
+\item Lire les \textbf{paramètres d'URL} avec \texttt{useParams()}
+\item Créer un \textbf{formulaire contrôlé} avec \texttt{useState}
+\item \textbf{Valider} les champs et afficher les erreurs
+\item Envoyer des données avec \texttt{fetch} en méthode \texttt{POST}
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\newpage
+
+% ===========================================================================
+\section{Point de départ --- Le problème du Lab 3}
+% ===========================================================================
+
+Au Lab 3, la navigation entre la liste et le détail est gérée par un état \texttt{selectedUserId}. Ça fonctionne, mais :
+
+\begin{itemize}[nosep]
+\item L'\textbf{URL ne change pas}. Liste ou détail, l'adresse reste \texttt{localhost:5173}.
+\item Le \textbf{bouton retour} du navigateur ne fonctionne pas.
+\item On ne peut pas \textbf{partager un lien} vers un utilisateur précis.
+\item On ne peut pas \textbf{ouvrir un profil dans un nouvel onglet}.
+\end{itemize}
+
+React Router résout tout cela : chaque vue obtient sa propre URL.
+
+\begin{objectifbox}[Étape 0 --- Installation de React Router]
+Dans le terminal, à la racine du projet :
+
+\begin{lstlisting}[style=terminal]
+cd annuaire-react
+npm install react-router-dom
+\end{lstlisting}
+
+Vérifiez que la ligne \texttt{"react-router-dom"} apparaît dans \texttt{package.json} sous \texttt{dependencies}.
+\end{objectifbox}
+
+% ===========================================================================
+\section{Partie 1 --- Mettre en place le routeur}
+\label{sec:routeur}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Configurer React Router et définir les routes de l'application.
+\end{objectifbox}
+
+\subsection{Envelopper l'application dans \texttt{BrowserRouter}}
+
+Modifiez \texttt{src/main.jsx} :
+
+\begin{lstlisting}
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>
+);
+\end{lstlisting}
+
+\texttt{BrowserRouter} active le système de routing dans toute l'application. Tous les composants enfants pourront utiliser \texttt{Link}, \texttt{useParams}, etc.
+
+\subsection{Créer les dossiers}
+
+\begin{lstlisting}[style=terminal]
+mkdir -p src/pages
+\end{lstlisting}
+
+On sépare les \textbf{pages} (composants liés à une route) des \textbf{composants} réutilisables.
+
+\subsection{Définir les routes dans \texttt{App.jsx}}
+
+Remplacez \textbf{tout le contenu} de \texttt{src/App.jsx} :
+
+\begin{lstlisting}
+import { Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import UserList from "./pages/UserList";
+import UserDetail from "./pages/UserDetail";
+import AddUser from "./pages/AddUser";
+import styles from "./App.module.css";
+
+const App = () => {
+  return (
+    <div className={styles.app}>
+      <Navbar />
+      <main className={styles.main}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/users"
+                 element={<UserList />} />
+          <Route path="/users/:id"
+                 element={<UserDetail />} />
+          <Route path="/users/add"
+                 element={<AddUser />} />
+        </Routes>
+      </main>
+    </div>
+  );
+};
+
+export default App;
+\end{lstlisting}
+
+\begin{retenirbox}[Les routes de l'annuaire]
+\begin{center}
+\begin{tabular}{llp{5.5cm}}
+\toprule
+\textbf{URL} & \textbf{Page} & \textbf{Description} \\
+\midrule
+\texttt{/} & \texttt{Home} & Page d'accueil \\
+\texttt{/users} & \texttt{UserList} & Liste avec recherche, tri et favoris \\
+\texttt{/users/:id} & \texttt{UserDetail} & Détail d'un utilisateur (\texttt{:id} est un paramètre) \\
+\texttt{/users/add} & \texttt{AddUser} & Formulaire d'ajout \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+Remplacez \texttt{src/App.module.css} :
+
+\begin{lstlisting}[style=css]
+.app {
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+\end{lstlisting}
+
+Ajoutez aussi un reset CSS global dans \texttt{index.html}, dans la balise \texttt{<head>} :
+
+\begin{lstlisting}[language=HTML]
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box; margin: 0; padding: 0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, sans-serif;
+    color: #2d3436;
+    background: #f5f6fa;
+    line-height: 1.6;
+  }
+  a { text-decoration: none; color: inherit; }
+</style>
+\end{lstlisting}
+
+\begin{infobox}[App.jsx a changé de rôle]
+Au Lab 3, \texttt{App.jsx} contenait toute la logique (états, fetch, filtrage). Maintenant, il ne fait que \textbf{deux choses} : afficher la \texttt{Navbar} et définir les \texttt{Routes}. Chaque page gère sa propre logique. Le code est mieux organisé.
+\end{infobox}
+
+% ===========================================================================
+\section{Partie 2 --- Navigation avec Navbar et Link}
+\label{sec:navbar}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Créer une barre de navigation qui fonctionne sans rechargement de page.
+\end{objectifbox}
+
+Créez \texttt{src/components/Navbar.jsx} :
+
+\begin{lstlisting}
+import { NavLink } from "react-router-dom";
+import styles from "./Navbar.module.css";
+
+const Navbar = () => {
+  return (
+    <nav className={styles.nav}>
+      <div className={styles.container}>
+        <NavLink to="/" className={styles.logo}>
+          Annuaire
+        </NavLink>
+        <div className={styles.links}>
+          <NavLink to="/users"
+            className={({ isActive }) =>
+              isActive
+                ? `${styles.link} ${styles.active}`
+                : styles.link
+            }>
+            Liste
+          </NavLink>
+          <NavLink to="/users/add"
+            className={({ isActive }) =>
+              isActive
+                ? `${styles.link} ${styles.active}`
+                : styles.link
+            }>
+            + Ajouter
+          </NavLink>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
+\end{lstlisting}
+
+\begin{attentionbox}[\texttt{Link} vs \texttt{NavLink} vs \texttt{<a>}]
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Élément} & \textbf{Usage} \\
+\midrule
+\texttt{<a href="...">} & Lien HTML classique. \textbf{Recharge} toute la page. Ne jamais utiliser pour la navigation interne. \\
+\texttt{<Link to="...">} & Lien React Router. Change l'URL \textbf{sans} recharger la page. \\
+\texttt{<NavLink to="...">} & Comme \texttt{Link}, mais fournit en plus \texttt{isActive} pour styliser le lien de la page courante. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{attentionbox}
+
+Créez \texttt{src/components/Navbar.module.css} :
+
+\begin{lstlisting}[style=css]
+.nav {
+  background: #2d3436;
+  padding: 0 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 56px;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.links { display: flex; gap: 0.25rem; }
+
+.link {
+  color: #b2bec3;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+\end{lstlisting}
+
+% ===========================================================================
+\section{Partie 3 --- Les pages}
+\label{sec:pages}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Créer les pages Home, UserList et déplacer UserDetail.
+\end{objectifbox}
+
+\subsection{Page d'accueil}
+
+Créez \texttt{src/pages/Home.jsx} :
+
+\begin{lstlisting}
+import { Link } from "react-router-dom";
+import styles from "./Home.module.css";
+
+const Home = () => {
+  return (
+    <div className={styles.home}>
+      <h1 className={styles.titre}>
+        Annuaire des utilisateurs
+      </h1>
+      <p className={styles.description}>
+        Consultez, recherchez et ajoutez des utilisateurs.
+      </p>
+      <div className={styles.actions}>
+        <Link to="/users" className={styles.bouton}>
+          Voir la liste
+        </Link>
+        <Link to="/users/add"
+              className={styles.boutonSecondaire}>
+          Ajouter un utilisateur
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+export default Home;
+\end{lstlisting}
+
+Créez \texttt{src/pages/Home.module.css} :
+
+\begin{lstlisting}[style=css]
+.home { text-align: center; padding: 3rem 1rem; }
+
+.titre {
+  font-size: 2rem; color: #2d3436;
+  margin-bottom: 1rem;
+}
+
+.description {
+  color: #636e72; font-size: 1.05rem;
+  max-width: 450px; margin: 0 auto 2rem auto;
+}
+
+.actions {
+  display: flex; gap: 1rem;
+  justify-content: center; flex-wrap: wrap;
+}
+
+.bouton {
+  padding: 0.7rem 1.8rem; background: #0984e3;
+  color: #fff; border-radius: 8px;
+  font-weight: 500; transition: background 0.15s;
+}
+.bouton:hover { background: #0770c2; }
+
+.boutonSecondaire {
+  padding: 0.7rem 1.8rem; background: #fff;
+  color: #0984e3; border: 1px solid #0984e3;
+  border-radius: 8px; font-weight: 500;
+}
+.boutonSecondaire:hover { background: #ebf5fb; }
+\end{lstlisting}
+
+\subsection{Page de liste}
+
+Créez \texttt{src/pages/UserList.jsx}. Cette page reprend la logique qui était dans \texttt{App.jsx} au Lab 3 :
+
+\begin{lstlisting}
+import { useState, useEffect } from "react";
+import UserCard from "../components/UserCard";
+import SearchBar from "../components/SearchBar";
+import styles from "./UserList.module.css";
+
+const UserList = () => {
+  const [users, setUsers] = useState([]);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState(null);
+  const [recherche, setRecherche] = useState("");
+  const [triAscendant, setTriAscendant] = useState(true);
+  const [favoris, setFavoris] = useState([]);
+
+  useEffect(() => {
+    const charger = async () => {
+      try {
+        const response = await fetch(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+        if (!response.ok)
+          throw new Error("Erreur serveur");
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        setErreur(error.message);
+      }
+      setChargement(false);
+    };
+    charger();
+  }, []);
+
+  const toggleFavori = (userId) => {
+    if (favoris.includes(userId)) {
+      setFavoris(
+        favoris.filter((id) => id !== userId)
+      );
+    } else {
+      setFavoris([...favoris, userId]);
+    }
+  };
+
+  if (chargement)
+    return <p>Chargement en cours...</p>;
+  if (erreur)
+    return <p className={styles.erreur}>
+      Erreur : {erreur}</p>;
+
+  const usersFiltres = users
+    .filter((u) =>
+      u.name.toLowerCase()
+        .includes(recherche.toLowerCase())
+    )
+    .sort((a, b) =>
+      triAscendant
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name)
+    );
+
+  return (
+    <div>
+      <h1 className={styles.titre}>
+        Liste des utilisateurs
+      </h1>
+      <SearchBar recherche={recherche}
+                 onRecherche={setRecherche} />
+      <div className={styles.barre}>
+        <span className={styles.compteur}>
+          {usersFiltres.length} utilisateur(s)
+        </span>
+        {favoris.length > 0 && (
+          <span className={styles.favoris}>
+            {favoris.length} favori(s)
+          </span>
+        )}
+        <button className={styles.boutonTri}
+                onClick={() =>
+                  setTriAscendant(!triAscendant)
+                }>
+          {triAscendant ? "A → Z" : "Z → A"}
+        </button>
+      </div>
+      {usersFiltres.map((user) => (
+        <UserCard key={user.id} user={user}
+          estFavori={favoris.includes(user.id)}
+          onToggleFavori={toggleFavori} />
+      ))}
+    </div>
+  );
+};
+
+export default UserList;
+\end{lstlisting}
+
+\subsection{Modifier \texttt{UserCard} pour utiliser \texttt{Link}}
+
+Au Lab 3, les cartes utilisaient \texttt{onClick} pour naviguer par état. Maintenant, on utilise \texttt{Link} pour naviguer par URL. Modifiez \texttt{src/components/UserCard.jsx} :
+
+\begin{lstlisting}
+import { Link } from "react-router-dom";
+import styles from "./UserCard.module.css";
+
+const UserCard = ({
+  user, estFavori, onToggleFavori
+}) => {
+  return (
+    <div className={styles.card}>
+      <div className={styles.header}>
+        <Link to={`/users/${user.id}`}
+              className={styles.lien}>
+          <h3 className={styles.nom}>{user.name}</h3>
+        </Link>
+        <button className={styles.etoile}
+                onClick={() =>
+                  onToggleFavori(user.id)
+                }>
+          {estFavori ? "\u2605" : "\u2606"}
+        </button>
+      </div>
+      <p className={styles.info}>
+        Email : {user.email}
+      </p>
+      <p className={styles.info}>
+        Entreprise : {user.company.name}
+      </p>
+      <Link to={`/users/${user.id}`}
+            className={styles.voir}>
+        Voir le profil →
+      </Link>
+    </div>
+  );
+};
+
+export default UserCard;
+\end{lstlisting}
+
+\begin{infobox}[Plus besoin de \texttt{e.stopPropagation()}]
+Au Lab 3, le clic sur l'étoile déclenchait aussi le \texttt{onClick} de la carte. On avait besoin de \texttt{e.stopPropagation()}. Maintenant, la navigation se fait par \texttt{Link} (un lien, pas un \texttt{onClick} sur la carte entière). Le bouton étoile n'entre plus en conflit.
+\end{infobox}
+
+\subsection{Page de détail avec \texttt{useParams}}
+
+Créez \texttt{src/pages/UserDetail.jsx}. Le composant lit l'identifiant \textbf{depuis l'URL} au lieu de le recevoir en prop :
+
+\begin{lstlisting}
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import styles from "./UserDetail.module.css";
+
+const UserDetail = () => {
+  const { id } = useParams();
+  const [user, setUser] = useState(null);
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState(null);
+
+  useEffect(() => {
+    const charger = async () => {
+      setChargement(true);
+      try {
+        const response = await fetch(
+          `https://jsonplaceholder.typicode.com/users/${id}`
+        );
+        if (!response.ok)
+          throw new Error("Utilisateur introuvable");
+        const data = await response.json();
+        setUser(data);
+      } catch (error) {
+        setErreur(error.message);
+      }
+      setChargement(false);
+    };
+    charger();
+  }, [id]);
+
+  if (chargement) return <p>Chargement...</p>;
+
+  if (erreur) {
+    return (
+      <div>
+        <p>{erreur}</p>
+        <Link to="/users">Retour à la liste</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <Link to="/users" className={styles.retour}>
+        ← Retour à la liste
+      </Link>
+      <div className={styles.profil}>
+        <div className={styles.avatar}>
+          {user.name.charAt(0)}
+        </div>
+        <h1 className={styles.nom}>{user.name}</h1>
+        <p className={styles.username}>
+          @{user.username}
+        </p>
+      </div>
+      <div className={styles.carte}>
+        <h2 className={styles.section}>Coordonnées</h2>
+        <div className={styles.champ}>
+          <span className={styles.label}>Email</span>
+          <span>{user.email}</span>
+        </div>
+        <div className={styles.champ}>
+          <span className={styles.label}>Tél.</span>
+          <span>{user.phone}</span>
+        </div>
+        <div className={styles.champ}>
+          <span className={styles.label}>Site</span>
+          <span>{user.website}</span>
+        </div>
+      </div>
+      <div className={styles.carte}>
+        <h2 className={styles.section}>Entreprise</h2>
+        <div className={styles.champ}>
+          <span className={styles.label}>Nom</span>
+          <span>{user.company.name}</span>
+        </div>
+        <div className={styles.champ}>
+          <span className={styles.label}>Ville</span>
+          <span>{user.address.city}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UserDetail;
+\end{lstlisting}
+
+\begin{retenirbox}[Lab 3 vs Lab 4 : la page de détail]
+\begin{center}
+\begin{tabular}{lp{4.5cm}p{4.5cm}}
+\toprule
+& \textbf{Lab 3} & \textbf{Lab 4} \\
+\midrule
+\textbf{L'identifiant vient de} & Une prop \texttt{userId} (passée par App) & L'URL via \texttt{useParams()} \\
+\textbf{L'URL} & Ne change pas & \texttt{/users/3} \\
+\textbf{Bouton retour navigateur} & Ne fonctionne pas & Fonctionne \\
+\textbf{Partage de lien} & Impossible & Possible \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+Supprimez l'ancien \texttt{src/components/UserDetail.jsx} et son CSS Module --- il est remplacé par la page. Les fichiers CSS des pages (\texttt{UserDetail.module.css}, \texttt{UserList.module.css}) sont fournis dans le script de setup.
+
+% ===========================================================================
+\section{Partie 4 --- Formulaire contrôlé}
+\label{sec:formulaire}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 20 minutes]
+Créer un formulaire pour ajouter un utilisateur. Comprendre les inputs contrôlés.
+\end{objectifbox}
+
+\subsection{Input contrôlé vs non contrôlé}
+
+Un \textbf{input contrôlé} est un champ dont la valeur est stockée dans l'état React. À chaque frappe, l'état se met à jour, et React re-rend le composant avec la nouvelle valeur.
+
+\begin{center}
+\begin{tabular}{lp{5cm}p{5cm}}
+\toprule
+& \textbf{Non contrôlé} & \textbf{Contrôlé} \\
+\midrule
+\textbf{Valeur stockée dans} & Le DOM (le navigateur) & L'état React \\
+\textbf{Lecture} & \texttt{inputRef.current.value} & \texttt{nom} (variable d'état) \\
+\textbf{Avantage} & Simple pour les cas basiques & Total contrôle (validation, formatage) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+En React, on utilise \textbf{toujours} des inputs contrôlés. Le principe : \texttt{value=\{état\}} + \texttt{onChange=\{fn\}}.
+
+\subsection{Créer \texttt{AddUser.jsx}}
+
+Créez \texttt{src/pages/AddUser.jsx} :
+
+\begin{lstlisting}
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./AddUser.module.css";
+
+const AddUser = () => {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+  });
+  const [erreurs, setErreurs] = useState({});
+  const [enCours, setEnCours] = useState(false);
+  const [soumis, setSoumis] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (erreurs[name]) {
+      setErreurs({ ...erreurs, [name]: null });
+    }
+  };
+
+  const valider = () => {
+    const err = {};
+    if (!form.name.trim())
+      err.name = "Le nom est obligatoire";
+    if (!form.email.trim())
+      err.email = "L'email est obligatoire";
+    else if (!form.email.includes("@"))
+      err.email = "L'email doit contenir un @";
+    if (!form.phone.trim())
+      err.phone = "Le téléphone est obligatoire";
+    return err;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const err = valider();
+    if (Object.keys(err).length > 0) {
+      setErreurs(err);
+      return;
+    }
+
+    setEnCours(true);
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/users",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            company: {
+              name: form.company || "Non renseigné",
+            },
+          }),
+        }
+      );
+      if (!response.ok)
+        throw new Error("Erreur serveur");
+
+      const data = await response.json();
+      console.log("Utilisateur créé :", data);
+      setSoumis(true);
+      setTimeout(() => navigate("/users"), 2000);
+    } catch (error) {
+      setErreurs({ submit: error.message });
+    }
+    setEnCours(false);
+  };
+
+  if (soumis) {
+    return (
+      <div className={styles.succes}>
+        <h2>Utilisateur ajouté</h2>
+        <p>Redirection vers la liste...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h1 className={styles.titre}>
+        Ajouter un utilisateur
+      </h1>
+      <div className={styles.carte}>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.groupe}>
+            <label className={styles.label}
+                   htmlFor="name">
+              Nom complet *
+            </label>
+            <input className={styles.input}
+              type="text" id="name" name="name"
+              placeholder="Fatou Ndiaye"
+              value={form.name}
+              onChange={handleChange} />
+            {erreurs.name && (
+              <p className={styles.erreur}>
+                {erreurs.name}
+              </p>
+            )}
+          </div>
+
+          <div className={styles.groupe}>
+            <label className={styles.label}
+                   htmlFor="email">
+              Email *
+            </label>
+            <input className={styles.input}
+              type="text" id="email" name="email"
+              placeholder="fatou.ndiaye@ucad.edu.sn"
+              value={form.email}
+              onChange={handleChange} />
+            {erreurs.email && (
+              <p className={styles.erreur}>
+                {erreurs.email}
+              </p>
+            )}
+          </div>
+
+          <div className={styles.groupe}>
+            <label className={styles.label}
+                   htmlFor="phone">
+              Téléphone *
+            </label>
+            <input className={styles.input}
+              type="text" id="phone" name="phone"
+              placeholder="77 123 45 67"
+              value={form.phone}
+              onChange={handleChange} />
+            {erreurs.phone && (
+              <p className={styles.erreur}>
+                {erreurs.phone}
+              </p>
+            )}
+          </div>
+
+          <div className={styles.groupe}>
+            <label className={styles.label}
+                   htmlFor="company">
+              Entreprise
+            </label>
+            <input className={styles.input}
+              type="text" id="company" name="company"
+              placeholder="ESP/UCAD"
+              value={form.company}
+              onChange={handleChange} />
+          </div>
+
+          {erreurs.submit && (
+            <p className={styles.erreurGlobale}>
+              {erreurs.submit}
+            </p>
+          )}
+
+          <button type="submit"
+                  className={styles.bouton}
+                  disabled={enCours}>
+            {enCours ? "Envoi..." : "Ajouter"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default AddUser;
+\end{lstlisting}
+
+\begin{retenirbox}[Décoder le formulaire]
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Élément} & \textbf{Rôle} \\
+\midrule
+\texttt{value=\{form.name\}} & L'input affiche la valeur de l'état (input contrôlé) \\
+\texttt{onChange=\{handleChange\}} & À chaque frappe, met à jour l'état \\
+\texttt{e.preventDefault()} & Empêche le rechargement de la page à la soumission \\
+\texttt{name="name"} & L'attribut \texttt{name} permet à \texttt{handleChange} de savoir quel champ mettre à jour \\
+\texttt{[name]: value} & Syntaxe ES6 : clé dynamique dans un objet \\
+\texttt{useNavigate()} & Permet de naviguer par code (après soumission) \\
+\texttt{method: "POST"} & Envoie les données au serveur (au lieu de les lire) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+\begin{attentionbox}[JSONPlaceholder simule le POST]
+L'API JSONPlaceholder accepte les requêtes POST et retourne un objet avec un \texttt{id} généré. Mais les données ne sont \textbf{pas réellement enregistrées}. Si vous rechargez la liste, le nouvel utilisateur n'apparaît pas. C'est normal --- c'est une API de test. Au Lab 6, on se connectera à un vrai backend Django.
+\end{attentionbox}
+
+Les fichiers CSS pour les pages (\texttt{AddUser.module.css}, \texttt{UserDetail.module.css}, \texttt{UserList.module.css}) sont fournis dans le script de setup. Ils suivent la même logique que les labs précédents : un fichier \texttt{.module.css} par composant.
+
+% ===========================================================================
+\section{Bilan --- Structure du projet}
+% ===========================================================================
+
+\begin{lstlisting}[style=terminal]
+annuaire-react/
+  src/
+    App.jsx               <-- Routes seulement
+    App.module.css
+    components/
+      Navbar.jsx          <-- nouveau
+      Navbar.module.css   <-- nouveau
+      UserCard.jsx        <-- modifié (Link)
+      UserCard.module.css
+      SearchBar.jsx
+      SearchBar.module.css
+    pages/                <-- nouveau dossier
+      Home.jsx
+      Home.module.css
+      UserList.jsx        <-- logique déplacée ici
+      UserList.module.css
+      UserDetail.jsx      <-- useParams
+      UserDetail.module.css
+      AddUser.jsx         <-- nouveau
+      AddUser.module.css
+  index.html
+  package.json
+\end{lstlisting}
+
+\begin{retenirbox}[Avant / après : Lab 3 vs Lab 4]
+\begin{center}
+\begin{tabular}{lp{4.5cm}p{4.5cm}}
+\toprule
+& \textbf{Lab 3} & \textbf{Lab 4} \\
+\midrule
+\textbf{Navigation} & État \texttt{selectedUserId} & URL (\texttt{/users}, \texttt{/users/3}) \\
+\textbf{Bouton retour} & Ne fonctionne pas & Fonctionne \\
+\textbf{Partage de lien} & Impossible & \texttt{/users/3} \\
+\textbf{Ajout} & Aucun & Formulaire contrôlé + POST \\
+\textbf{Lien actif} & Aucun & NavLink avec style actif \\
+\textbf{App.jsx} & Toute la logique & Routes seulement \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+% ===========================================================================
+\section{Aide-mémoire}
+% ===========================================================================
+
+\begin{center}
+\begin{tabular}{lp{7.5cm}}
+\toprule
+\textbf{Concept} & \textbf{Syntaxe} \\
+\midrule
+Installer & \texttt{npm install react-router-dom} \\
+Envelopper & \texttt{<BrowserRouter><App /></BrowserRouter>} \\
+Définir une route & \texttt{<Route path="/x" element=\{<Page />\} />} \\
+Paramètre d'URL & \texttt{path="/users/:id"} \\
+Lire le paramètre & \texttt{const \{ id \} = useParams();} \\
+Lien sans rechargement & \texttt{<Link to="/users">...</Link>} \\
+Lien avec style actif & \texttt{<NavLink to="/users" className=\{...\}>} \\
+Navigation par code & \texttt{const navigate = useNavigate(); navigate("/users");} \\
+\midrule
+Input contrôlé & \texttt{<input value=\{état\} onChange=\{fn\} />} \\
+Empêcher le rechargement & \texttt{e.preventDefault()} \\
+Clé dynamique & \texttt{setForm(\{ ...form, [name]: value \})} \\
+POST avec fetch & \texttt{fetch(url, \{ method: "POST", body: JSON.stringify(data) \})} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ===========================================================================
+\section{Résumé et conclusion}
+% ===========================================================================
+
+Dans ce lab, vous avez :
+\begin{enumerate}[nosep]
+\item Installé \textbf{React Router} et défini 4 routes avec leurs URL.
+\item Créé une \textbf{Navbar} avec des \texttt{NavLink} qui indiquent la page active.
+\item Utilisé \texttt{useParams()} pour lire l'identifiant de l'utilisateur depuis l'URL.
+\item Créé un \textbf{formulaire contrôlé} avec validation et envoi en POST.
+\item Utilisé \texttt{useNavigate()} pour rediriger après la soumission.
+\end{enumerate}
+
+\begin{center}
+\begin{tabular}{lcp{7cm}}
+\toprule
+\textbf{Étape} & \textbf{Statut} & \textbf{Ce que vous savez faire} \\
+\midrule
+\textbf{DOM et événements} & \cmark{} & Sélecteurs, événements \\
+\textbf{Fonctions JS} & \cmark{} & Déclaration, expression, fléchée \\
+\textbf{Asynchrone} & \cmark{} & \texttt{fetch}, \texttt{async/await} \\
+\textbf{React --- les bases} & \cmark{} & Composant, JSX, Vite \\
+\textbf{Composants et props} & \cmark{} & Découpage, props, CSS Modules \\
+\textbf{État React} & \cmark{} & \texttt{useState}, re-rendu, immutabilité \\
+\textbf{useEffect} & \cmark{} & Montage, dépendances, loading/erreur \\
+\textbf{Router et formulaires} & \cmark{} & Routes, Link, useParams, inputs contrôlés, POST \\
+\textbf{Next.js} & $\to$ Lab 5 & App Router, server vs client \\
+\textbf{API Django} & $\to$ Lab 6 & CORS, auth, CRUD \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{projetbox}[Et ensuite ?]
+L'annuaire est une SPA complète avec 4 pages, de la navigation, un formulaire et des appels API. Mais React seul a des limites : pas de SEO (le contenu est généré côté client), un premier chargement lent (tout le JS est téléchargé d'un coup), et un routing configuré manuellement.
+
+Dans le \textbf{Lab 5}, vous migrerez l'annuaire vers \textbf{Next.js} : routing par fichiers, layouts, composants serveur, et \texttt{loading.js} automatique.
+\end{projetbox}
+
+\section*{Exercice bonus}
+
+\begin{infobox}[Bonus : page 404]
+Ajoutez une route «~attrape-tout~» pour les URL invalides :
+\begin{lstlisting}
+<Route path="*" element={<NotFound />} />
+\end{lstlisting}
+Créez \texttt{src/pages/NotFound.jsx} avec un message «~Page introuvable~» et un lien vers l'accueil. Testez en tapant \texttt{/xyz} dans l'URL.
+\end{infobox}
+
+\vspace{1cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab 4 --- Formulaires et React Router --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous savez créer une application multi-pages avec\\
+des routes, de la navigation, et des formulaires contrôlés.\\[0.2cm]
+Prochaine étape : Next.js et le rendu côté serveur.\\[0.3cm]
+\textit{Chaque page a son URL. Chaque URL a sa page.}\\[0.5cm]
+\end{minipage}
+}
+\end{center}
+
+\end{document}

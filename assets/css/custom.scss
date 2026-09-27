@@ -385,11 +385,15 @@ div.quarto-post .listing-categories .listing-category,
 // cours de C écrit ses opérateurs (`&x`, `*p`), et dans un **titre d'encadré**. La règle vaut donc
 // partout où Quarto colore le texte lui-même : le code y reprend la couleur et le fond de ce qui
 // l'entoure, plutôt que de garder les siens.
-.quarto-dark h1 > code,
-.quarto-dark h2 > code,
-.quarto-dark h3 > code,
-.quarto-dark h4 > code,
-.quarto-dark th > code,
+// Le sélecteur d'enfant direct manquait un quatrième cas : un code **dans un gras**, que le lab 3
+// de Programmation Frontend 2 écrit dans ses en-têtes de tableau — `th > strong > code`. La règle
+// porte donc sur les descendants, puisque c'est la couleur héritée qui pose problème, à quelque
+// profondeur que le code se trouve (US-70).
+.quarto-dark h1 code,
+.quarto-dark h2 code,
+.quarto-dark h3 code,
+.quarto-dark h4 code,
+.quarto-dark th code,
 .quarto-dark .callout-title-container code {
   background: transparent;
   color: inherit;

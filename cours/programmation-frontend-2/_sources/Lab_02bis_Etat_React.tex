@@ -1,0 +1,801 @@
+% ===========================================================================
+%  Programmation Frontend — Lab 2bis : L'état React en profondeur
+%  ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Code source ---
+\usepackage{listings}
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else,
+    finally, for, function, if, in, instanceof, new, return, switch, this,
+    throw, try, typeof, var, void, while, with, const, let, class, export,
+    extends, import, super, yield, async, await, of, from, true, false, null,
+    undefined},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  morestring=[b]`,
+  sensitive=true,
+}
+
+\lstdefinelanguage{CSS}{
+  keywords={color, background, border, padding, margin, font, display, flex,
+    align, justify, width, height, gap, cursor, none, solid, center, column,
+    row, wrap, pointer, radius, size, weight, family, items, content,
+    direction, transform, transition, hover, box, shadow, max, min,
+    text, decoration, opacity},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true,
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  language=JavaScript,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\lstdefinestyle{terminal}{
+  language={},
+  keywordstyle={},
+  commentstyle={},
+  stringstyle={},
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{black!5},
+}
+
+\lstdefinestyle{css}{
+  language=CSS,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Prog. Frontend --- Lab 2bis : L'état React en profondeur}
+\fancyhead[R]{\small ESP/UCAD}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Programmation Frontend}\\[0.8cm]
+\textbf{\huge Lab 2bis --- L'état React en profondeur}\\[0.3cm]
+\textbf{\Large Re-rendu, immutabilité et gestion des données}\\[0.5cm]
+\large ESP/UCAD --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Durée estimée} & 2h (une séance) \\
+\textbf{Prérequis} & Avoir terminé le Lab 2 (composants, props, CSS Modules). \\
+\textbf{Fichiers de départ} & Le projet \texttt{annuaire-react/} du Lab 2 \\
+\textbf{Livrables} & Annuaire avec tri A-Z/Z-A, bouton favoris sur chaque carte, compteur de favoris \\
+\textbf{Validation} & Le tri fonctionne, les favoris se togglent, le compteur se met à jour \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du lab]
+À l'issue de ce lab, chaque étudiant sera capable de :
+\begin{enumerate}[nosep]
+    \item Expliquer \textbf{pourquoi} une variable \texttt{let} ne suffit pas pour gérer des données qui changent dans React
+    \item Décrire ce qu'est un \textbf{re-rendu} et quand il se produit
+    \item Distinguer \textbf{état} et \textbf{props}
+    \item Gérer des \textbf{états multiples} indépendants dans un même composant
+    \item Appliquer la règle d'\textbf{immutabilité} pour modifier un tableau dans l'état
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Point de départ --- Le code du Lab 2}
+\label{sec:starter}
+% ===========================================================================
+
+Au Lab 2, vous avez découpé l'annuaire en composants (\texttt{App}, \texttt{UserCard}, \texttt{SearchBar}) avec des CSS Modules. Vous avez utilisé \texttt{useState} pour stocker les utilisateurs, le texte de recherche et l'état de chargement.
+
+Mais on n'a jamais expliqué \textbf{pourquoi} il faut \texttt{useState}. Pourquoi ne pas utiliser une simple variable \texttt{let} ? Pourquoi appeler \texttt{setUsers(data)} au lieu de \texttt{users = data} ?
+
+Ce lab répond à cette question.
+
+\begin{objectifbox}[Étape 0 --- Vérification]
+Ouvrez le projet \texttt{annuaire-react/} dans VS Code. Lancez le serveur :
+
+\begin{lstlisting}[style=terminal]
+cd annuaire-react
+npm run dev
+\end{lstlisting}
+
+Ouvrez \texttt{http://localhost:5173}. Cliquez sur le bouton. Les 10 utilisateurs apparaissent. Le filtre fonctionne.
+\end{objectifbox}
+
+% ===========================================================================
+\section{Partie 1 --- Pourquoi \texttt{let} ne marche pas}
+\label{sec:let}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Comprendre la différence fondamentale entre une variable JavaScript et un état React.
+\end{objectifbox}
+
+\subsection{Le test : un compteur avec \texttt{let}}
+
+Créez un fichier temporaire \texttt{src/Compteur.jsx} :
+
+\begin{lstlisting}
+const Compteur = () => {
+  let count = 0;
+
+  const incrementer = () => {
+    count = count + 1;
+    console.log("count vaut :", count);
+  };
+
+  return (
+    <div>
+      <p>Compteur : {count}</p>
+      <button onClick={incrementer}>+1</button>
+    </div>
+  );
+};
+
+export default Compteur;
+\end{lstlisting}
+
+Pour tester, modifiez temporairement \texttt{src/App.jsx} en ajoutant l'import et en affichant le composant :
+
+\begin{lstlisting}
+import Compteur from "./Compteur";
+
+// Dans le return, ajoutez en haut :
+<Compteur />
+\end{lstlisting}
+
+Cliquez sur le bouton \textbf{+1} plusieurs fois. Regardez :
+\begin{itemize}[nosep]
+    \item La \textbf{console} affiche \texttt{count vaut : 1}, \texttt{2}, \texttt{3}... La variable change bien.
+    \item L'\textbf{écran} affiche toujours \texttt{Compteur : 0}. L'affichage ne bouge pas.
+\end{itemize}
+
+\subsection{Pourquoi ?}
+
+React ne surveille \textbf{pas} les variables JavaScript classiques. Quand vous modifiez \texttt{count} avec \texttt{count = count + 1}, JavaScript met à jour la variable en mémoire, mais \textbf{React ne le sait pas}. Il ne re-rend pas le composant. L'écran reste figé.
+
+\subsection{Le même compteur avec \texttt{useState}}
+
+Modifiez \texttt{src/Compteur.jsx} :
+
+\begin{lstlisting}
+import { useState } from "react";
+
+const Compteur = () => {
+  const [count, setCount] = useState(0);
+
+  const incrementer = () => {
+    setCount(count + 1);
+    console.log("count vaut :", count);
+  };
+
+  return (
+    <div>
+      <p>Compteur : {count}</p>
+      <button onClick={incrementer}>+1</button>
+    </div>
+  );
+};
+
+export default Compteur;
+\end{lstlisting}
+
+Cliquez sur \textbf{+1}. L'écran se met à jour à chaque clic. \texttt{useState} permet à React de \textbf{détecter} le changement et de \textbf{re-rendre} le composant.
+
+\begin{retenirbox}[Variable \texttt{let} vs état \texttt{useState}]
+\begin{center}
+\begin{tabular}{lp{5cm}p{5cm}}
+\toprule
+& \textbf{\texttt{let count = 0}} & \textbf{\texttt{useState(0)}} \\
+\midrule
+\textbf{Modification} & \texttt{count = count + 1} & \texttt{setCount(count + 1)} \\
+\textbf{React le sait ?} & Non & Oui \\
+\textbf{Re-rendu ?} & Non --- l'écran reste figé & Oui --- l'écran se met à jour \\
+\textbf{Survit au re-rendu ?} & Non --- remis à 0 & Oui --- React conserve la valeur \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+\begin{attentionbox}[La console affiche l'ancienne valeur]
+Dans la version \texttt{useState}, la console affiche un coup de retard : quand \texttt{count} vaut 0 et qu'on appelle \texttt{setCount(1)}, le \texttt{console.log} affiche encore 0. C'est normal : \texttt{setCount} \textbf{planifie} un re-rendu avec la nouvelle valeur, mais la variable \texttt{count} dans le rendu actuel ne change pas. La nouvelle valeur sera visible au prochain rendu.
+\end{attentionbox}
+
+% ===========================================================================
+\section{Partie 2 --- Le re-rendu}
+\label{sec:rerendu}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Comprendre ce qui se passe quand un état change.
+\end{objectifbox}
+
+\subsection{Voir le re-rendu}
+
+Ajoutez un \texttt{console.log} \textbf{dans le corps du composant} (en dehors de toute fonction) :
+
+\begin{lstlisting}
+const Compteur = () => {
+  const [count, setCount] = useState(0);
+
+  console.log("Rendu du composant ! count =", count);
+
+  const incrementer = () => {
+    setCount(count + 1);
+  };
+
+  return (
+    <div>
+      <p>Compteur : {count}</p>
+      <button onClick={incrementer}>+1</button>
+    </div>
+  );
+};
+\end{lstlisting}
+
+Ouvrez la console du navigateur (\texttt{F12}). Cliquez sur \textbf{+1} plusieurs fois. Vous verrez :
+
+\begin{lstlisting}[style=terminal]
+Rendu du composant ! count = 0
+Rendu du composant ! count = 1
+Rendu du composant ! count = 2
+Rendu du composant ! count = 3
+\end{lstlisting}
+
+À chaque clic, React \textbf{ré-exécute toute la fonction} \texttt{Compteur} avec la nouvelle valeur de \texttt{count}. C'est le \textbf{re-rendu}.
+
+\begin{infobox}[Analogie : la photo de classe]
+Imaginez que chaque re-rendu est une \textbf{nouvelle photo de classe}. À chaque changement (un élève arrive, un autre part), on ne retouche pas l'ancienne photo --- on en prend une nouvelle. React fonctionne pareil : il ne modifie pas l'ancien affichage, il en \textbf{génère un nouveau} à partir de l'état actuel.
+\end{infobox}
+
+\begin{retenirbox}[Le cycle du re-rendu]
+\begin{enumerate}[nosep]
+    \item L'utilisateur clique sur un bouton (événement).
+    \item Le gestionnaire appelle \texttt{setCount(count + 1)} (mise à jour de l'état).
+    \item React ré-exécute la fonction du composant avec la nouvelle valeur (re-rendu).
+    \item React compare l'ancien résultat et le nouveau, puis met à jour \textbf{uniquement} ce qui a changé dans le DOM.
+\end{enumerate}
+\end{retenirbox}
+
+% ===========================================================================
+\section{Partie 3 --- État vs Props}
+\label{sec:etat-vs-props}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 10 minutes]
+Distinguer clairement l'état et les props.
+\end{objectifbox}
+
+Au Lab 2, vous avez appris les \textbf{props} : des données envoyées par le parent. Maintenant, vous comprenez l'\textbf{état} : des données internes au composant. Les deux sont les mécanismes fondamentaux de React pour gérer les données.
+
+\begin{retenirbox}[État vs Props]
+\begin{center}
+\begin{tabular}{lp{4.3cm}p{4.3cm}}
+\toprule
+& \textbf{État (\texttt{useState})} & \textbf{Props} \\
+\midrule
+\textbf{Qui le crée ?} & Le composant lui-même & Le composant parent \\
+\textbf{Qui le modifie ?} & Le composant (via \texttt{set...}) & Personne --- lecture seule \\
+\textbf{Objectif} & Données internes qui changent & Données reçues de l'extérieur \\
+\textbf{Déclenche un re-rendu ?} & Oui (quand on appelle \texttt{set...}) & Oui (quand le parent re-rend) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+\begin{infobox}[Analogie : le sac et la fiche]
+\textbf{L'état}, c'est ce que vous avez \textbf{dans votre sac}. Vous décidez quoi y mettre, quoi en retirer. Personne d'autre ne touche à votre sac.
+
+\textbf{Les props}, c'est une \textbf{fiche de commande} qu'on vous donne. Vous la lisez, vous l'utilisez, mais vous ne la modifiez pas. Si le contenu de la fiche change, c'est celui qui l'a écrite qui la met à jour.
+\end{infobox}
+
+Dans l'annuaire :
+\begin{itemize}[nosep]
+    \item \texttt{users} est un \textbf{état} de \texttt{App} (App le crée, App le modifie).
+    \item \texttt{user} est une \textbf{prop} de \texttt{UserCard} (App l'envoie, UserCard le lit).
+    \item \texttt{recherche} est un \textbf{état} de \texttt{App}, et une \textbf{prop} de \texttt{SearchBar}.
+\end{itemize}
+
+Le dernier point est important : une même donnée peut être un état dans un composant et une prop dans un autre. L'état vit là où il est créé. Il descend vers les enfants sous forme de props.
+
+Vous pouvez maintenant supprimer \texttt{src/Compteur.jsx} et retirer son import de \texttt{App.jsx}. Il a servi de terrain d'expérimentation.
+
+% ===========================================================================
+\section{Partie 4 --- États multiples : ajouter un tri}
+\label{sec:tri}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Ajouter un bouton de tri à l'annuaire pour illustrer les états multiples.
+\end{objectifbox}
+
+\subsection{Un composant peut avoir plusieurs états}
+
+Chaque appel à \texttt{useState} crée un état \textbf{indépendant}. Dans \texttt{App.jsx}, on a déjà trois états : \texttt{users}, \texttt{chargement} et \texttt{recherche}. On va en ajouter un quatrième : \texttt{triAscendant}.
+
+\subsection{Exercice 1 --- Bouton de tri A-Z / Z-A}
+
+Modifiez \texttt{src/App.jsx}. Ajoutez l'état et le bouton :
+
+\begin{lstlisting}
+import { useState } from "react";
+import UserCard from "./components/UserCard";
+import SearchBar from "./components/SearchBar";
+import styles from "./App.module.css";
+
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [chargement, setChargement] = useState(false);
+  const [recherche, setRecherche] = useState("");
+  const [triAscendant, setTriAscendant] = useState(true);
+
+  const chargerUtilisateurs = async () => {
+    setChargement(true);
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Erreur :", error);
+    }
+    setChargement(false);
+  };
+
+  const usersFiltres = users
+    .filter(user =>
+      user.name.toLowerCase().includes(
+        recherche.toLowerCase()
+      )
+    )
+    .sort((a, b) => {
+      if (triAscendant) {
+        return a.name.localeCompare(b.name);
+      }
+      return b.name.localeCompare(a.name);
+    });
+
+  return (
+    <div className={styles.container}>
+      <h1 className={styles.titre}>
+        Annuaire des utilisateurs
+      </h1>
+      <button className={styles.bouton}
+              onClick={chargerUtilisateurs}
+              disabled={chargement}>
+        {chargement ? "Chargement..." : "Charger"}
+      </button>
+
+      <SearchBar
+        recherche={recherche}
+        onRecherche={setRecherche}
+      />
+
+      <div className={styles.barre}>
+        <p className={styles.compteur}>
+          {usersFiltres.length} utilisateur(s)
+        </p>
+        <button className={styles.boutonTri}
+                onClick={() => setTriAscendant(!triAscendant)}>
+          Tri : {triAscendant ? "A → Z" : "Z → A"}
+        </button>
+      </div>
+
+      {usersFiltres.map(user => (
+        <UserCard key={user.id} user={user} />
+      ))}
+    </div>
+  );
+};
+
+export default App;
+\end{lstlisting}
+
+Ajoutez les classes dans \texttt{src/App.module.css} :
+
+\begin{lstlisting}[style=css]
+.barre {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.boutonTri {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+}
+
+.boutonTri:hover {
+  background: #eee;
+}
+\end{lstlisting}
+
+Sauvegardez. Chargez les utilisateurs, puis cliquez sur le bouton de tri. La liste se réordonne instantanément. Chaque clic bascule entre A$\to$Z et Z$\to$A.
+
+\begin{infobox}[Plusieurs états --- chacun indépendant]
+L'application a maintenant 4 états dans \texttt{App} : \texttt{users}, \texttt{chargement}, \texttt{recherche}, \texttt{triAscendant}. Quand on clique sur le bouton de tri, seul \texttt{triAscendant} change. React re-rend \texttt{App}, recalcule \texttt{usersFiltres} (avec le nouveau tri), et met à jour l'affichage. Les autres états ne bougent pas.
+\end{infobox}
+
+% ===========================================================================
+\section{Partie 5 --- Immutabilité : ne jamais modifier l'état directement}
+\label{sec:immutabilite}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Comprendre la règle d'immutabilité et savoir ajouter/supprimer des éléments dans un tableau d'état.
+\end{objectifbox}
+
+\subsection{Le piège : \texttt{push} ne déclenche rien}
+
+Imaginons que vous vouliez ajouter un utilisateur à la liste. Votre premier réflexe :
+
+\begin{lstlisting}
+// NE FONCTIONNE PAS
+users.push(nouvelUtilisateur);
+setUsers(users);
+\end{lstlisting}
+
+L'écran ne se met \textbf{pas} à jour. Pourquoi ? Parce que \texttt{push} modifie le tableau existant. Quand on appelle \texttt{setUsers(users)}, React compare l'ancien tableau et le nouveau : c'est \textbf{le même objet en mémoire}. React conclut que rien n'a changé et ne re-rend pas.
+
+\begin{attentionbox}[La règle d'or]
+\textbf{Ne modifiez jamais un état directement.} Pas de \texttt{push}, pas de \texttt{splice}, pas de \texttt{users[0] = ...}. Créez toujours une \textbf{copie} avec les modifications souhaitées.
+\end{attentionbox}
+
+\subsection{Les bons patterns}
+
+\begin{center}
+\begin{tabular}{lp{5cm}p{5cm}}
+\toprule
+\textbf{Action} & \textbf{Mauvais} \xmark & \textbf{Bon} \cmark \\
+\midrule
+\textbf{Ajouter} & \texttt{arr.push(x); setArr(arr);} & \texttt{setArr([...arr, x]);} \\
+\textbf{Supprimer} & \texttt{arr.splice(i, 1); setArr(arr);} & \texttt{setArr(arr.filter(...))} \\
+\textbf{Modifier} & \texttt{arr[i].name = "X"; setArr(arr);} & \texttt{setArr(arr.map(...))} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+L'opérateur \texttt{...} (\emph{spread}) crée une \textbf{copie superficielle} du tableau. \texttt{[...arr, x]} signifie : «~un nouveau tableau contenant tous les éléments de \texttt{arr} plus \texttt{x} à la fin~».
+
+\begin{infobox}[Analogie : la liste de courses]
+Imaginez que votre liste de courses est écrite au stylo indélébile. Vous ne pouvez pas barrer un article ni en ajouter un. À la place, vous \textbf{recopiez} toute la liste sur une nouvelle feuille en ajoutant ou en retirant ce que vous voulez. C'est plus de travail, mais vous avez toujours une trace de l'ancienne liste (l'ancien état).
+\end{infobox}
+
+% ===========================================================================
+\section{Partie 6 --- Exercice : les favoris}
+\label{sec:favoris}
+% ===========================================================================
+
+\begin{objectifbox}[Objectif --- 15 minutes]
+Ajouter un système de favoris à l'annuaire. Cet exercice met en pratique les états multiples et l'immutabilité.
+\end{objectifbox}
+
+\subsection{Le principe}
+
+On veut :
+\begin{itemize}[nosep]
+    \item Un bouton \ding{72} (étoile) sur chaque carte.
+    \item Cliquer sur l'étoile ajoute l'utilisateur aux favoris. Recliquer le retire.
+    \item Un compteur en haut indique le nombre de favoris.
+\end{itemize}
+
+L'état \texttt{favoris} est un \textbf{tableau d'identifiants} stocké dans \texttt{App}.
+
+\subsection{Modifier \texttt{App.jsx}}
+
+Ajoutez l'état et la fonction de toggle dans \texttt{src/App.jsx}. Voici les lignes à ajouter (le reste ne change pas) :
+
+\begin{lstlisting}
+// Après les autres useState
+const [favoris, setFavoris] = useState([]);
+
+// Nouvelle fonction
+const toggleFavori = (userId) => {
+  if (favoris.includes(userId)) {
+    // Retirer : garder tous les ids SAUF celui-ci
+    setFavoris(favoris.filter(id => id !== userId));
+  } else {
+    // Ajouter : copier le tableau + ajouter l'id
+    setFavoris([...favoris, userId]);
+  }
+};
+\end{lstlisting}
+
+Dans le \texttt{return}, ajoutez le compteur après la barre de tri et passez les nouvelles props à \texttt{UserCard} :
+
+\begin{lstlisting}
+{favoris.length > 0 && (
+  <p className={styles.favoris}>
+    {favoris.length} favori(s)
+  </p>
+)}
+
+{usersFiltres.map(user => (
+  <UserCard
+    key={user.id}
+    user={user}
+    estFavori={favoris.includes(user.id)}
+    onToggleFavori={toggleFavori}
+  />
+))}
+\end{lstlisting}
+
+Ajoutez la classe dans \texttt{src/App.module.css} :
+
+\begin{lstlisting}[style=css]
+.favoris {
+  color: #e67e22;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin: 0.3rem 0;
+}
+\end{lstlisting}
+
+\subsection{Modifier \texttt{UserCard.jsx}}
+
+Modifiez \texttt{src/components/UserCard.jsx} pour afficher le bouton étoile :
+
+\begin{lstlisting}
+import styles from "./UserCard.module.css";
+
+const UserCard = ({ user, estFavori, onToggleFavori }) => {
+  return (
+    <div className={styles.card}>
+      <div className={styles.header}>
+        <h3 className={styles.nom}>{user.name}</h3>
+        <button className={styles.etoile}
+                onClick={() => onToggleFavori(user.id)}>
+          {estFavori ? "\u2605" : "\u2606"}
+        </button>
+      </div>
+      <p className={styles.info}>Email : {user.email}</p>
+      <p className={styles.info}>
+        Entreprise : {user.company.name}
+      </p>
+    </div>
+  );
+};
+
+export default UserCard;
+\end{lstlisting}
+
+Le caractère \texttt{\textbackslash u2605} est une étoile pleine (\ding{72}), \texttt{\textbackslash u2606} est une étoile vide.
+
+Ajoutez les classes dans \texttt{src/components/UserCard.module.css} :
+
+\begin{lstlisting}[style=css]
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.etoile {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #e67e22;
+  padding: 0;
+  line-height: 1;
+}
+\end{lstlisting}
+
+\subsection{Tester}
+
+Sauvegardez tout. Chargez les utilisateurs. Cliquez sur les étoiles : elles se remplissent et se vident. Le compteur de favoris en haut se met à jour.
+
+Vérifiez aussi que le \textbf{tri} et le \textbf{filtre} fonctionnent toujours avec les favoris.
+
+\begin{retenirbox}[Ce que l'exercice met en pratique]
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Concept} & \textbf{Où dans le code} \\
+\midrule
+État tableau & \texttt{const [favoris, setFavoris] = useState([])} \\
+Immutabilité (ajout) & \texttt{setFavoris([...favoris, userId])} \\
+Immutabilité (retrait) & \texttt{setFavoris(favoris.filter(id => id !== userId))} \\
+Prop fonction & \texttt{onToggleFavori=\{toggleFavori\}} \\
+Rendu conditionnel & \texttt{estFavori ? "\ding{72}" : "étoile vide"} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{retenirbox}
+
+% ===========================================================================
+\section{Aide-mémoire}
+\label{sec:aide-memoire}
+% ===========================================================================
+
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Concept} & \textbf{Syntaxe / Exemple} \\
+\midrule
+Créer un état & \texttt{const [val, setVal] = useState(initial);} \\
+Modifier un état & \texttt{setVal(nouvelleValeur);} \\
+État booléen & \texttt{setActif(!actif);} \\
+\midrule
+Ajouter à un tableau & \texttt{setArr([...arr, nouvelElement]);} \\
+Retirer d'un tableau & \texttt{setArr(arr.filter(x => x !== cible));} \\
+Modifier dans un tableau & \texttt{setArr(arr.map(x => x.id === id ? \{...x, nom: "Y"\} : x));} \\
+\midrule
+Re-rendu & Se produit quand \texttt{set...} est appelé \\
+Immutabilité & Ne jamais modifier l'état directement (\texttt{push}, \texttt{splice}) \\
+État vs props & État = interne (modifiable). Props = externe (lecture seule). \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ===========================================================================
+\section{Résumé et conclusion}
+% ===========================================================================
+
+Dans ce lab, vous avez :
+
+\begin{enumerate}[nosep]
+    \item Compris \textbf{pourquoi \texttt{let} ne suffit pas} : React ne surveille pas les variables classiques.
+    \item Observé le \textbf{re-rendu} : quand un état change, React ré-exécute le composant.
+    \item Distingué \textbf{état et props} : l'état est interne et modifiable, les props sont externes et en lecture seule.
+    \item Géré des \textbf{états multiples} indépendants (tri A-Z/Z-A).
+    \item Appliqué la règle d'\textbf{immutabilité} avec le spread operator (\texttt{...}) et \texttt{.filter()}.
+    \item Implémenté un système de \textbf{favoris} complet.
+\end{enumerate}
+
+Voici où vous en êtes dans la progression du cours :
+
+\begin{center}
+\begin{tabular}{lcp{7.5cm}}
+\toprule
+\textbf{Étape} & \textbf{Statut} & \textbf{Ce que vous savez faire} \\
+\midrule
+\textbf{DOM et événements} & \cmark{} & Sélecteurs, événements, modification du DOM \\
+\textbf{Fonctions JS} & \cmark{} & Déclaration, expression, fléchée \\
+\textbf{Asynchrone} & \cmark{} & \texttt{fetch}, \texttt{async/await} \\
+\textbf{React --- les bases} & \cmark{} & Composant, JSX, Vite, \texttt{.map()} \\
+\textbf{Composants et props} & \cmark{} & Découpage, props, CSS Modules \\
+\textbf{État React} & \cmark{} & \texttt{useState}, re-rendu, immutabilité, état vs props \\
+\textbf{useEffect} & $\to$ Lab 3 & Charger au montage, loading, détail \\
+\textbf{Formulaires et routing} & $\to$ Lab 4 & Inputs contrôlés, React Router \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{projetbox}[Et ensuite ?]
+Vous maîtrisez maintenant les deux mécanismes fondamentaux de React : l'\textbf{état} (données internes) et les \textbf{props} (données reçues). Dans le \textbf{Lab 3}, vous apprendrez \texttt{useEffect} pour exécuter du code «~à côté~» du rendu : charger les données automatiquement au démarrage, gérer le loading et les erreurs, et afficher une vue de détail.
+\end{projetbox}
+
+% ===========================================================================
+\section*{Exercice bonus --- Pour aller plus loin}
+% ===========================================================================
+
+\begin{infobox}[Bonus : afficher uniquement les favoris]
+Si vous avez terminé en avance, ajoutez un bouton «~Voir mes favoris~» qui filtre la liste pour n'afficher que les utilisateurs marqués comme favoris. Indices :
+
+\begin{enumerate}[nosep]
+    \item Ajoutez un état \texttt{const [voirFavoris, setVoirFavoris] = useState(false);}
+    \item Ajoutez un bouton qui bascule cet état.
+    \item Dans le calcul de \texttt{usersFiltres}, ajoutez une condition :\\
+    \texttt{.filter(user => !voirFavoris || favoris.includes(user.id))}
+    \item Le bouton affiche «~Voir mes favoris~» ou «~Voir tous~» selon l'état.
+\end{enumerate}
+\end{infobox}
+
+\vspace{1cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab 2bis --- L'état React --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous savez pourquoi \texttt{useState} existe, ce qu'est un re-rendu,\\
+et comment modifier un état sans enfreindre l'immutabilité.\\[0.2cm]
+Prochaine étape : \texttt{useEffect} et chargement automatique.\\[0.3cm]
+\textit{Modifier l'état = prendre une nouvelle photo.}\\[0.5cm]
+\end{minipage}
+}
+\end{center}
+
+\end{document}

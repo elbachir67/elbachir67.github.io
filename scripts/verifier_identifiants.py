@@ -43,11 +43,18 @@ MOTIF = re.compile(r"""(?<![-\w])id=["']([^"']+)["']""")
 # Les identifiants d'un bloc <script> ne sont pas des éléments du document : un gabarit y écrit
 # souvent du HTML d'exemple.
 SCRIPTS = re.compile(r"<script\b[^>]*>.*?</script>", re.S | re.I)
+# Le **contenu** d'un bloc ou d'un extrait de code, pour la même raison : un cours qui enseigne le
+# HTML l'écrit en toutes lettres. Le lab 5 de Programmation Frontend 2 montre `<div id="root">`
+# deux fois — la racine que React remplit —, et le contrôle y lisait deux éléments en double.
+# Seul le contenu est effacé : la balise garde son propre `id`, celui que Quarto pose sur un bloc
+# de code (`id="cb1"`), et qui est un vrai identifiant du document.
+CODE = re.compile(r"(<(pre|code)\b[^>]*>)(.*?)(</\2>)", re.S | re.I)
 
 
 def doublons(page: Path) -> list[tuple[str, int]]:
     """Identifiants portés par plusieurs éléments de la page, du plus répété au moins."""
     html = SCRIPTS.sub(" ", page.read_text(encoding="utf-8", errors="replace"))
+    html = CODE.sub(lambda trouve: trouve[1] + " " + trouve[4], html)
     comptes = Counter(MOTIF.findall(html))
     return sorted(((nom, n) for nom, n in comptes.items() if n > 1 and nom not in TOLERES),
                   key=lambda paire: -paire[1])
