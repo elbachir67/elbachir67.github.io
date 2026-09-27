@@ -711,8 +711,11 @@ def maths_en_dollars(formule: str) -> str:
 ECHAPPES = "{}[]$%&_#~^"
 MARKDOWN_SPECIAUX = set("{}[]$_#~^")
 MOTIF_ECHAPPE = re.compile(r"\\([" + re.escape(ECHAPPES) + r"])(?:\{\})?")
-# Découpe le texte en alternant hors-code et code en ligne, accents graves compris.
-MOTIF_CODE_EN_LIGNE = re.compile(r"(`+[^`]*`+)")
+# Un code en ligne, clôture comprise. Le motif retient la **longueur** de l'ouverture et ferme sur
+# la même : « `x` » comme « ``a `b` c`` ». Un motif qui s'arrêtait au premier accent grave du
+# contenu coupait le second cas en deux, et les échappements de LaTeX y restaient visibles —
+# « Token \$\{t\} » dans le lab 6 de Programmation Frontend 2 (US-70).
+MOTIF_CODE_EN_LIGNE = re.compile(r"(?P<cloture>`+)(?:(?!(?P=cloture))[\s\S])*?(?P=cloture)")
 
 
 def caracteres_echappes(texte: str) -> str:
@@ -725,15 +728,32 @@ def caracteres_echappes(texte: str) -> str:
     Le tilde de LaTeX, lui, est une espace insécable : il ne le devient qu'hors des codes en ligne,
     où « ~ » désigne le plus souvent un dossier personnel.
     """
-    morceaux = []
-    for morceau in MOTIF_CODE_EN_LIGNE.split(texte):
-        if morceau.startswith("`"):
-            morceaux.append(MOTIF_ECHAPPE.sub(lambda t: t[1], morceau))
-        else:
-            morceaux.append(MOTIF_ECHAPPE.sub(
-                lambda t: ("\\" + t[1]) if t[1] in MARKDOWN_SPECIAUX else t[1],
-                morceau).replace("~", "\u00a0"))
+    def hors_code(morceau: str) -> str:
+        return MOTIF_ECHAPPE.sub(
+            lambda t: ("\\" + t[1]) if t[1] in MARKDOWN_SPECIAUX else t[1],
+            morceau).replace("~", "\u00a0")
+
+    morceaux, position = [], 0
+    for trouve in MOTIF_CODE_EN_LIGNE.finditer(texte):
+        morceaux.append(hors_code(texte[position:trouve.start()]))
+        morceaux.append(MOTIF_ECHAPPE.sub(lambda t: t[1], trouve.group(0)))
+        position = trouve.end()
+    morceaux.append(hors_code(texte[position:]))
     return "".join(morceaux)
+
+
+def code_en_ligne(contenu: str) -> str:
+    """Un code en ligne que son propre contenu ne peut pas clore (US-70).
+
+    Markdown ferme un code en ligne à la première suite d'accents graves de même longueur que son
+    ouverture : la clôture doit donc être plus longue que la plus longue suite du contenu. Un
+    contenu qui commence ou finit par un accent grave reçoit en plus une espace de garde, que le
+    rendu ne montre pas.
+    """
+    plus_longue = max((len(suite) for suite in re.findall(r"`+", contenu)), default=0)
+    cloture = "`" * (plus_longue + 1)
+    marge = " " if contenu.startswith("`") or contenu.endswith("`") else ""
+    return f"{cloture}{marge}{contenu}{marge}{cloture}"
 
 
 def inline(texte: str, conversion: Conversion) -> str:
@@ -803,11 +823,24 @@ def inline(texte: str, conversion: Conversion) -> str:
     # Constaté sur le chapitre 2 du cours de C ; 189 occurrences dans les quatre chapitres.
     texte = re.sub(r"``\s*(.+?)\s*''", "« \\1 »", texte, flags=re.S)
 
+    # `\texttt{}` d'abord, et à part : son contenu peut porter des accents graves. Le lab 6 de
+    # Programmation Frontend 2 montre un gabarit JavaScript dans une cellule de tableau —
+    # `headers: { Authorization: `Token ${t}` }` —, et un code en ligne clos par un seul accent
+    # grave s'y coupait au premier accent du contenu : la cellule sortait en trois morceaux, dont
+    # « Token ${t} » en texte ordinaire, hors du code. Markdown demande une clôture plus longue que
+    # la plus longue suite d'accents du contenu.
+    while True:
+        trouve = re.search(r"\\texttt\{", texte)
+        if not trouve:
+            break
+        contenu, suite = argument(texte, trouve.end() - 1)
+        texte = texte[:trouve.start()] + code_en_ligne(contenu) + texte[suite:]
+
     # Mise en forme.
     remplacements = [
         (r"\\textbf\{", "**", "**"), (r"\\alert\{", "**", "**"),
         (r"\\emph\{", "*", "*"), (r"\\textit\{", "*", "*"),
-        (r"\\texttt\{", "`", "`"), (r"\\textsuperscript\{", "^", "^"),
+        (r"\\textsuperscript\{", "^", "^"),
         # Petites capitales : Pandoc les rend par un attribut, et non par une commande (US-61).
         (r"\\textsc\{", "[", "]{.smallcaps}"),
         # Une adresse littérale devient un lien automatique.
