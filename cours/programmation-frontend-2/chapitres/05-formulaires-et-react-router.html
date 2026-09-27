@@ -1,0 +1,2201 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dr.&nbsp;El Hadji Bassirou TOURÉ, Département Génie Informatique, Université Cheikh Anta Diop de Dakar">
+<meta name="description" content="Lab 4 de Programmation Frontend 2 : les formulaires contrôlés, la validation, et la navigation avec React Router.">
+
+<title>Formulaires et React Router – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-0610580cadf6fa63b47ea27372664db3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-24854bd70495cb5c113c2e0a0cab2f58.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-0610580cadf6fa63b47ea27372664db3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Formulaires et React Router – El Hadji Bassirou Touré">
+<meta property="og:description" content="Lab 4 de Programmation Frontend 2 : les formulaires contrôlés, la validation, et la navigation avec React Router.">
+<meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="Formulaires et React Router – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Lab 4 de Programmation Frontend 2 : les formulaires contrôlés, la validation, et la navigation avec React Router.">
+<meta name="twitter:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="floating nav-fixed cours-page quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#point-de-départ-le-problème-du-lab-3" id="toc-point-de-départ-le-problème-du-lab-3" class="nav-link active" data-scroll-target="#point-de-départ-le-problème-du-lab-3">Point de départ — Le problème du Lab 3</a></li>
+  <li><a href="#sec-routeur" id="toc-sec-routeur" class="nav-link" data-scroll-target="#sec-routeur">Partie 1 — Mettre en place le routeur</a>
+  <ul class="collapse">
+  <li><a href="#envelopper-lapplication-dans-browserrouter" id="toc-envelopper-lapplication-dans-browserrouter" class="nav-link" data-scroll-target="#envelopper-lapplication-dans-browserrouter">Envelopper l’application dans <code>BrowserRouter</code></a></li>
+  <li><a href="#créer-les-dossiers" id="toc-créer-les-dossiers" class="nav-link" data-scroll-target="#créer-les-dossiers">Créer les dossiers</a></li>
+  <li><a href="#définir-les-routes-dans-app.jsx" id="toc-définir-les-routes-dans-app.jsx" class="nav-link" data-scroll-target="#définir-les-routes-dans-app.jsx">Définir les routes dans <code>App.jsx</code></a></li>
+  </ul></li>
+  <li><a href="#sec-navbar" id="toc-sec-navbar" class="nav-link" data-scroll-target="#sec-navbar">Partie 2 — Navigation avec Navbar et Link</a></li>
+  <li><a href="#sec-pages" id="toc-sec-pages" class="nav-link" data-scroll-target="#sec-pages">Partie 3 — Les pages</a>
+  <ul class="collapse">
+  <li><a href="#page-daccueil" id="toc-page-daccueil" class="nav-link" data-scroll-target="#page-daccueil">Page d’accueil</a></li>
+  <li><a href="#page-de-liste" id="toc-page-de-liste" class="nav-link" data-scroll-target="#page-de-liste">Page de liste</a></li>
+  <li><a href="#modifier-usercard-pour-utiliser-link" id="toc-modifier-usercard-pour-utiliser-link" class="nav-link" data-scroll-target="#modifier-usercard-pour-utiliser-link">Modifier <code>UserCard</code> pour utiliser <code>Link</code></a></li>
+  <li><a href="#page-de-détail-avec-useparams" id="toc-page-de-détail-avec-useparams" class="nav-link" data-scroll-target="#page-de-détail-avec-useparams">Page de détail avec <code>useParams</code></a></li>
+  </ul></li>
+  <li><a href="#sec-formulaire" id="toc-sec-formulaire" class="nav-link" data-scroll-target="#sec-formulaire">Partie 4 — Formulaire contrôlé</a>
+  <ul class="collapse">
+  <li><a href="#input-contrôlé-vs-non-contrôlé" id="toc-input-contrôlé-vs-non-contrôlé" class="nav-link" data-scroll-target="#input-contrôlé-vs-non-contrôlé">Input contrôlé vs non contrôlé</a></li>
+  <li><a href="#créer-adduser.jsx" id="toc-créer-adduser.jsx" class="nav-link" data-scroll-target="#créer-adduser.jsx">Créer <code>AddUser.jsx</code></a></li>
+  </ul></li>
+  <li><a href="#bilan-structure-du-projet" id="toc-bilan-structure-du-projet" class="nav-link" data-scroll-target="#bilan-structure-du-projet">Bilan — Structure du projet</a></li>
+  <li><a href="#aide-mémoire" id="toc-aide-mémoire" class="nav-link" data-scroll-target="#aide-mémoire">Aide-mémoire</a></li>
+  <li><a href="#résumé-et-conclusion" id="toc-résumé-et-conclusion" class="nav-link" data-scroll-target="#résumé-et-conclusion">Résumé et conclusion</a></li>
+  <li><a href="#exercice-bonus" id="toc-exercice-bonus" class="nav-link" data-scroll-target="#exercice-bonus">Exercice bonus</a></li>
+  <li>Ressources du chapitre</li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Formulaires et React Router</h1>
+</div>
+
+<div>
+  <div class="description">
+    Lab 4 de Programmation Frontend 2 : les formulaires contrôlés, la validation, et la navigation avec React Router.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Auteur·rice</div>
+    <div class="quarto-title-meta-contents">
+             <p>Dr.&nbsp;El Hadji Bassirou TOURÉ, Département Génie Informatique, Université Cheikh Anta Diop de Dakar </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="encadre-prereqbox callout callout-style-default callout-note callout-titled" title="Informations pratiques">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Informations pratiques
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Durée estimée</strong></th>
+<th>2h (une séance)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Prérequis</strong></td>
+<td>Avoir terminé le Lab 3 (<code>useEffect</code>, loading/erreur, vue détail).</td>
+</tr>
+<tr class="even">
+<td><strong>Fichiers de départ</strong></td>
+<td>Le projet <code>annuaire-react/</code> du Lab 3</td>
+</tr>
+<tr class="odd">
+<td><strong>Livrables</strong></td>
+<td>SPA avec 4 pages (accueil, liste, détail, ajout), navigation et formulaire</td>
+</tr>
+<tr class="even">
+<td><strong>Validation</strong></td>
+<td>Chaque vue a sa propre URL. Le formulaire valide et envoie les données.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectifs du lab">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectifs du lab
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>À l’issue de ce lab, chaque étudiant sera capable de :</p>
+<ol type="1">
+<li>Installer et configurer <strong>React Router</strong> pour créer une application multi-pages</li>
+<li>Créer des <strong>routes</strong>, des <strong>liens</strong> (<code>Link</code>) et une <strong>barre de navigation</strong></li>
+<li>Lire les <strong>paramètres d’URL</strong> avec <code>useParams()</code></li>
+<li>Créer un <strong>formulaire contrôlé</strong> avec <code>useState</code></li>
+<li><strong>Valider</strong> les champs et afficher les erreurs</li>
+<li>Envoyer des données avec <code>fetch</code> en méthode <code>POST</code></li>
+</ol>
+</div>
+</div>
+<section id="point-de-départ-le-problème-du-lab-3" class="level2">
+<h2 class="anchored" data-anchor-id="point-de-départ-le-problème-du-lab-3">Point de départ — Le problème du Lab 3</h2>
+<p>Au Lab 3, la navigation entre la liste et le détail est gérée par un état <code>selectedUserId</code>. Ça fonctionne, mais :</p>
+<ul>
+<li>L’<strong>URL ne change pas</strong>. Liste ou détail, l’adresse reste <code>localhost:5173</code>.</li>
+<li>Le <strong>bouton retour</strong> du navigateur ne fonctionne pas.</li>
+<li>On ne peut pas <strong>partager un lien</strong> vers un utilisateur précis.</li>
+<li>On ne peut pas <strong>ouvrir un profil dans un nouvel onglet</strong>.</li>
+</ul>
+<p>React Router résout tout cela : chaque vue obtient sa propre URL.</p>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Étape 0 --- Installation de React Router">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Étape 0 — Installation de React Router
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Dans le terminal, à la racine du projet :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cd annuaire<span class="op">-</span>react</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>npm install react<span class="op">-</span>router<span class="op">-</span>dom</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Vérifiez que la ligne <code>"react-router-dom"</code> apparaît dans <code>package.json</code> sous <code>dependencies</code>.</p>
+</div>
+</div>
+</section>
+<section id="sec-routeur" class="level2">
+<h2 class="anchored" data-anchor-id="sec-routeur">Partie 1 — Mettre en place le routeur</h2>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectif --- 10 minutes">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectif — 10 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Configurer React Router et définir les routes de l’application.</p>
+</div>
+</div>
+<section id="envelopper-lapplication-dans-browserrouter" class="level3">
+<h3 class="anchored" data-anchor-id="envelopper-lapplication-dans-browserrouter">Envelopper l’application dans <code>BrowserRouter</code></h3>
+<p>Modifiez <code>src/main.jsx</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { StrictMode } <span class="im">from</span> <span class="st">"react"</span><span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { createRoot } <span class="im">from</span> <span class="st">"react-dom/client"</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { BrowserRouter } <span class="im">from</span> <span class="st">"react-router-dom"</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> App <span class="im">from</span> <span class="st">"./App"</span><span class="op">;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">createRoot</span>(<span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="st">"root"</span>))<span class="op">.</span><span class="fu">render</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>StrictMode<span class="op">&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>BrowserRouter<span class="op">&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>App <span class="op">/&gt;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>BrowserRouter<span class="op">&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;/</span>StrictMode<span class="op">&gt;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>BrowserRouter</code> active le système de routing dans toute l’application. Tous les composants enfants pourront utiliser <code>Link</code>, <code>useParams</code>, etc.</p>
+</section>
+<section id="créer-les-dossiers" class="level3">
+<h3 class="anchored" data-anchor-id="créer-les-dossiers">Créer les dossiers</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> src/pages</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>On sépare les <strong>pages</strong> (composants liés à une route) des <strong>composants</strong> réutilisables.</p>
+</section>
+<section id="définir-les-routes-dans-app.jsx" class="level3">
+<h3 class="anchored" data-anchor-id="définir-les-routes-dans-app.jsx">Définir les routes dans <code>App.jsx</code></h3>
+<p>Remplacez <strong>tout le contenu</strong> de <code>src/App.jsx</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { Routes<span class="op">,</span> Route } <span class="im">from</span> <span class="st">"react-router-dom"</span><span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> Navbar <span class="im">from</span> <span class="st">"./components/Navbar"</span><span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> Home <span class="im">from</span> <span class="st">"./pages/Home"</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> UserList <span class="im">from</span> <span class="st">"./pages/UserList"</span><span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> UserDetail <span class="im">from</span> <span class="st">"./pages/UserDetail"</span><span class="op">;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> AddUser <span class="im">from</span> <span class="st">"./pages/AddUser"</span><span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> styles <span class="im">from</span> <span class="st">"./App.module.css"</span><span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> App <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">app</span>}<span class="op">&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>Navbar <span class="op">/&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>main className<span class="op">=</span>{styles<span class="op">.</span><span class="at">main</span>}<span class="op">&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>Routes<span class="op">&gt;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>Route path<span class="op">=</span><span class="st">"/"</span> element<span class="op">=</span>{<span class="op">&lt;</span>Home <span class="op">/&gt;</span>} <span class="op">/&gt;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>Route path<span class="op">=</span><span class="st">"/users"</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                 element<span class="op">=</span>{<span class="op">&lt;</span>UserList <span class="op">/&gt;</span>} <span class="op">/&gt;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>Route path<span class="op">=</span><span class="st">"/users/:id"</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>                 element<span class="op">=</span>{<span class="op">&lt;</span>UserDetail <span class="op">/&gt;</span>} <span class="op">/&gt;</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>Route path<span class="op">=</span><span class="st">"/users/add"</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                 element<span class="op">=</span>{<span class="op">&lt;</span>AddUser <span class="op">/&gt;</span>} <span class="op">/&gt;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>Routes<span class="op">&gt;</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>main<span class="op">&gt;</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> App<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Les routes de l'annuaire">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Les routes de l’annuaire
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>URL</strong></th>
+<th><strong>Page</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>/</code></td>
+<td><code>Home</code></td>
+<td>Page d’accueil</td>
+</tr>
+<tr class="even">
+<td><code>/users</code></td>
+<td><code>UserList</code></td>
+<td>Liste avec recherche, tri et favoris</td>
+</tr>
+<tr class="odd">
+<td><code>/users/:id</code></td>
+<td><code>UserDetail</code></td>
+<td>Détail d’un utilisateur (<code>:id</code> est un paramètre)</td>
+</tr>
+<tr class="even">
+<td><code>/users/add</code></td>
+<td><code>AddUser</code></td>
+<td>Formulaire d’ajout</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Remplacez <code>src/App.module.css</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">app</span> {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  min<span class="op">-</span><span class="dt">height</span><span class="op">:</span> <span class="dv">100</span><span class="er">vh</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">background</span><span class="op">:</span> #f5f6fa<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">main</span> {</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  max<span class="op">-</span><span class="dt">width</span><span class="op">:</span> <span class="dv">700</span><span class="er">px</span><span class="op">;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">margin</span><span class="op">:</span> <span class="dv">0</span> auto<span class="op">;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">padding</span><span class="op">:</span> <span class="dv">2</span><span class="er">rem</span> <span class="dv">1</span><span class="er">rem</span><span class="op">;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ajoutez aussi un reset CSS global dans <code>index.html</code>, dans la balise <code>&lt;head&gt;</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>style<span class="op">&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">*,</span> <span class="op">*::</span>before<span class="op">,</span> <span class="op">*::</span>after {</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    box<span class="op">-</span><span class="dt">sizing</span><span class="op">:</span> border<span class="op">-</span>box<span class="op">;</span> <span class="dt">margin</span><span class="op">:</span> <span class="dv">0</span><span class="op">;</span> <span class="dt">padding</span><span class="op">:</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  body {</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    font<span class="op">-</span><span class="dt">family</span><span class="op">:</span> <span class="op">-</span>apple<span class="op">-</span>system<span class="op">,</span> BlinkMacSystemFont<span class="op">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Segoe UI"</span><span class="op">,</span> Roboto<span class="op">,</span> sans<span class="op">-</span>serif<span class="op">;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> #<span class="dv">2</span><span class="er">d3436</span><span class="op">;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> #f5f6fa<span class="op">;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    line<span class="op">-</span><span class="dt">height</span><span class="op">:</span> <span class="fl">1.6</span><span class="op">;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  a { text<span class="op">-</span><span class="dt">decoration</span><span class="op">:</span> none<span class="op">;</span> <span class="dt">color</span><span class="op">:</span> inherit<span class="op">;</span> }</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;/</span>style<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="App.jsx a changé de rôle">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>App.jsx a changé de rôle
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Au Lab 3, <code>App.jsx</code> contenait toute la logique (états, fetch, filtrage). Maintenant, il ne fait que <strong>deux choses</strong> : afficher la <code>Navbar</code> et définir les <code>Routes</code>. Chaque page gère sa propre logique. Le code est mieux organisé.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-navbar" class="level2">
+<h2 class="anchored" data-anchor-id="sec-navbar">Partie 2 — Navigation avec Navbar et Link</h2>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectif --- 10 minutes">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectif — 10 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Créer une barre de navigation qui fonctionne sans rechargement de page.</p>
+</div>
+</div>
+<p>Créez <code>src/components/Navbar.jsx</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { NavLink } <span class="im">from</span> <span class="st">"react-router-dom"</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> styles <span class="im">from</span> <span class="st">"./Navbar.module.css"</span><span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> Navbar <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>nav className<span class="op">=</span>{styles<span class="op">.</span><span class="at">nav</span>}<span class="op">&gt;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">container</span>}<span class="op">&gt;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>NavLink to<span class="op">=</span><span class="st">"/"</span> className<span class="op">=</span>{styles<span class="op">.</span><span class="at">logo</span>}<span class="op">&gt;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>          Annuaire</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>NavLink<span class="op">&gt;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">links</span>}<span class="op">&gt;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>NavLink to<span class="op">=</span><span class="st">"/users"</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            className<span class="op">=</span>{({ isActive }) <span class="kw">=&gt;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>              isActive</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                <span class="op">?</span> <span class="vs">`</span><span class="sc">${</span>styles<span class="op">.</span><span class="at">link</span><span class="sc">}</span><span class="vs"> </span><span class="sc">${</span>styles<span class="op">.</span><span class="at">active</span><span class="sc">}</span><span class="vs">`</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>                <span class="op">:</span> styles<span class="op">.</span><span class="at">link</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>            }<span class="op">&gt;</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>            Liste</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;/</span>NavLink<span class="op">&gt;</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>NavLink to<span class="op">=</span><span class="st">"/users/add"</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>            className<span class="op">=</span>{({ isActive }) <span class="kw">=&gt;</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>              isActive</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>                <span class="op">?</span> <span class="vs">`</span><span class="sc">${</span>styles<span class="op">.</span><span class="at">link</span><span class="sc">}</span><span class="vs"> </span><span class="sc">${</span>styles<span class="op">.</span><span class="at">active</span><span class="sc">}</span><span class="vs">`</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>                <span class="op">:</span> styles<span class="op">.</span><span class="at">link</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>            }<span class="op">&gt;</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> Ajouter</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;/</span>NavLink<span class="op">&gt;</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>nav<span class="op">&gt;</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> Navbar<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="`Link` vs `NavLink` vs `<a>`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span><code>Link</code> vs <code>NavLink</code> vs <code>&lt;a&gt;</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Élément</strong></th>
+<th><strong>Usage</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>&lt;a href="..."&gt;</code></td>
+<td>Lien HTML classique. <strong>Recharge</strong> toute la page. Ne jamais utiliser pour la navigation interne.</td>
+</tr>
+<tr class="even">
+<td><code>&lt;Link to="..."&gt;</code></td>
+<td>Lien React Router. Change l’URL <strong>sans</strong> recharger la page.</td>
+</tr>
+<tr class="odd">
+<td><code>&lt;NavLink to="..."&gt;</code></td>
+<td>Comme <code>Link</code>, mais fournit en plus <code>isActive</code> pour styliser le lien de la page courante.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Créez <code>src/components/Navbar.module.css</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">nav</span> {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">background</span><span class="op">:</span> #<span class="dv">2</span><span class="er">d3436</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">padding</span><span class="op">:</span> <span class="dv">0</span> <span class="dv">1</span><span class="er">rem</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">position</span><span class="op">:</span> sticky<span class="op">;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">top</span><span class="op">:</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  z<span class="op">-</span><span class="dt">index</span><span class="op">:</span> <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">container</span> {</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  max<span class="op">-</span><span class="dt">width</span><span class="op">:</span> <span class="dv">700</span><span class="er">px</span><span class="op">;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">margin</span><span class="op">:</span> <span class="dv">0</span> auto<span class="op">;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">display</span><span class="op">:</span> flex<span class="op">;</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  justify<span class="op">-</span><span class="dt">content</span><span class="op">:</span> space<span class="op">-</span>between<span class="op">;</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  align<span class="op">-</span><span class="dt">items</span><span class="op">:</span> center<span class="op">;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">height</span><span class="op">:</span> <span class="dv">56</span><span class="er">px</span><span class="op">;</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">logo</span> {</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  font<span class="op">-</span><span class="dt">size</span><span class="op">:</span> <span class="fl">1.25</span>rem<span class="op">;</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  font<span class="op">-</span><span class="dt">weight</span><span class="op">:</span> <span class="dv">700</span><span class="op">;</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> #fff<span class="op">;</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">links</span> { <span class="dt">display</span><span class="op">:</span> flex<span class="op">;</span> <span class="dt">gap</span><span class="op">:</span> <span class="fl">0.25</span>rem<span class="op">;</span> }</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">link</span> {</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> #b2bec3<span class="op">;</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">padding</span><span class="op">:</span> <span class="fl">0.4</span>rem <span class="fl">0.9</span>rem<span class="op">;</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  border<span class="op">-</span><span class="dt">radius</span><span class="op">:</span> <span class="dv">6</span><span class="er">px</span><span class="op">;</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  font<span class="op">-</span><span class="dt">size</span><span class="op">:</span> <span class="fl">0.9</span>rem<span class="op">;</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">transition</span><span class="op">:</span> background <span class="fl">0.15</span>s<span class="op">,</span> color <span class="fl">0.15</span>s<span class="op">;</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">link</span><span class="op">:</span>hover {</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> #fff<span class="op">;</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  <span class="dt">background</span><span class="op">:</span> <span class="fu">rgba</span>(<span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="fl">0.1</span>)<span class="op">;</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">active</span> {</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> #fff<span class="op">;</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>  <span class="dt">background</span><span class="op">:</span> <span class="fu">rgba</span>(<span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="fl">0.15</span>)<span class="op">;</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-pages" class="level2">
+<h2 class="anchored" data-anchor-id="sec-pages">Partie 3 — Les pages</h2>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectif --- 15 minutes">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectif — 15 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Créer les pages Home, UserList et déplacer UserDetail.</p>
+</div>
+</div>
+<section id="page-daccueil" class="level3">
+<h3 class="anchored" data-anchor-id="page-daccueil">Page d’accueil</h3>
+<p>Créez <code>src/pages/Home.jsx</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { Link } <span class="im">from</span> <span class="st">"react-router-dom"</span><span class="op">;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> styles <span class="im">from</span> <span class="st">"./Home.module.css"</span><span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> Home <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">home</span>}<span class="op">&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>h1 className<span class="op">=</span>{styles<span class="op">.</span><span class="at">titre</span>}<span class="op">&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        Annuaire des utilisateurs</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>h1<span class="op">&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>p className<span class="op">=</span>{styles<span class="op">.</span><span class="at">description</span>}<span class="op">&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        Consultez<span class="op">,</span> recherchez et ajoutez des utilisateurs<span class="op">.</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">actions</span>}<span class="op">&gt;</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>Link to<span class="op">=</span><span class="st">"/users"</span> className<span class="op">=</span>{styles<span class="op">.</span><span class="at">bouton</span>}<span class="op">&gt;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>          Voir la liste</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>Link<span class="op">&gt;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>Link to<span class="op">=</span><span class="st">"/users/add"</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>              className<span class="op">=</span>{styles<span class="op">.</span><span class="at">boutonSecondaire</span>}<span class="op">&gt;</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>          Ajouter un utilisateur</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>Link<span class="op">&gt;</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> Home<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Créez <code>src/pages/Home.module.css</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">home</span> { text<span class="op">-</span><span class="dt">align</span><span class="op">:</span> center<span class="op">;</span> <span class="dt">padding</span><span class="op">:</span> <span class="dv">3</span><span class="er">rem</span> <span class="dv">1</span><span class="er">rem</span><span class="op">;</span> }</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">titre</span> {</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  font<span class="op">-</span><span class="dt">size</span><span class="op">:</span> <span class="dv">2</span><span class="er">rem</span><span class="op">;</span> <span class="dt">color</span><span class="op">:</span> #<span class="dv">2</span><span class="er">d3436</span><span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  margin<span class="op">-</span><span class="dt">bottom</span><span class="op">:</span> <span class="dv">1</span><span class="er">rem</span><span class="op">;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">description</span> {</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> #<span class="fl">636e72</span><span class="op">;</span> font<span class="op">-</span><span class="dt">size</span><span class="op">:</span> <span class="fl">1.05</span>rem<span class="op">;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  max<span class="op">-</span><span class="dt">width</span><span class="op">:</span> <span class="dv">450</span><span class="er">px</span><span class="op">;</span> <span class="dt">margin</span><span class="op">:</span> <span class="dv">0</span> auto <span class="dv">2</span><span class="er">rem</span> auto<span class="op">;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">actions</span> {</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">display</span><span class="op">:</span> flex<span class="op">;</span> <span class="dt">gap</span><span class="op">:</span> <span class="dv">1</span><span class="er">rem</span><span class="op">;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  justify<span class="op">-</span><span class="dt">content</span><span class="op">:</span> center<span class="op">;</span> flex<span class="op">-</span><span class="dt">wrap</span><span class="op">:</span> wrap<span class="op">;</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">bouton</span> {</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">padding</span><span class="op">:</span> <span class="fl">0.7</span>rem <span class="fl">1.8</span>rem<span class="op">;</span> <span class="dt">background</span><span class="op">:</span> #<span class="dv">0984</span><span class="er">e3</span><span class="op">;</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> #fff<span class="op">;</span> border<span class="op">-</span><span class="dt">radius</span><span class="op">:</span> <span class="dv">8</span><span class="er">px</span><span class="op">;</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  font<span class="op">-</span><span class="dt">weight</span><span class="op">:</span> <span class="dv">500</span><span class="op">;</span> <span class="dt">transition</span><span class="op">:</span> background <span class="fl">0.15</span>s<span class="op">;</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">bouton</span><span class="op">:</span>hover { <span class="dt">background</span><span class="op">:</span> #<span class="bn">0770</span><span class="er">c2</span><span class="op">;</span> }</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">boutonSecondaire</span> {</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">padding</span><span class="op">:</span> <span class="fl">0.7</span>rem <span class="fl">1.8</span>rem<span class="op">;</span> <span class="dt">background</span><span class="op">:</span> #fff<span class="op">;</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> #<span class="dv">0984</span><span class="er">e3</span><span class="op">;</span> <span class="dt">border</span><span class="op">:</span> <span class="dv">1</span><span class="er">px</span> solid #<span class="dv">0984</span><span class="er">e3</span><span class="op">;</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  border<span class="op">-</span><span class="dt">radius</span><span class="op">:</span> <span class="dv">8</span><span class="er">px</span><span class="op">;</span> font<span class="op">-</span><span class="dt">weight</span><span class="op">:</span> <span class="dv">500</span><span class="op">;</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a><span class="op">.</span><span class="at">boutonSecondaire</span><span class="op">:</span>hover { <span class="dt">background</span><span class="op">:</span> #ebf5fb<span class="op">;</span> }</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="page-de-liste" class="level3">
+<h3 class="anchored" data-anchor-id="page-de-liste">Page de liste</h3>
+<p>Créez <code>src/pages/UserList.jsx</code>. Cette page reprend la logique qui était dans <code>App.jsx</code> au Lab 3 :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { useState<span class="op">,</span> useEffect } <span class="im">from</span> <span class="st">"react"</span><span class="op">;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> UserCard <span class="im">from</span> <span class="st">"../components/UserCard"</span><span class="op">;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> SearchBar <span class="im">from</span> <span class="st">"../components/SearchBar"</span><span class="op">;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> styles <span class="im">from</span> <span class="st">"./UserList.module.css"</span><span class="op">;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> UserList <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [users<span class="op">,</span> setUsers] <span class="op">=</span> <span class="fu">useState</span>([])<span class="op">;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [chargement<span class="op">,</span> setChargement] <span class="op">=</span> <span class="fu">useState</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [erreur<span class="op">,</span> setErreur] <span class="op">=</span> <span class="fu">useState</span>(<span class="kw">null</span>)<span class="op">;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [recherche<span class="op">,</span> setRecherche] <span class="op">=</span> <span class="fu">useState</span>(<span class="st">""</span>)<span class="op">;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [triAscendant<span class="op">,</span> setTriAscendant] <span class="op">=</span> <span class="fu">useState</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [favoris<span class="op">,</span> setFavoris] <span class="op">=</span> <span class="fu">useState</span>([])<span class="op">;</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">useEffect</span>(() <span class="kw">=&gt;</span> {</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> charger <span class="op">=</span> <span class="kw">async</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>      <span class="cf">try</span> {</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> response <span class="op">=</span> <span class="cf">await</span> <span class="fu">fetch</span>(</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>          <span class="st">"https://jsonplaceholder.typicode.com/users"</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        )<span class="op">;</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="op">!</span>response<span class="op">.</span><span class="at">ok</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>          <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(<span class="st">"Erreur serveur"</span>)<span class="op">;</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> data <span class="op">=</span> <span class="cf">await</span> response<span class="op">.</span><span class="fu">json</span>()<span class="op">;</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">setUsers</span>(data)<span class="op">;</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">catch</span> (error) {</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">setErreur</span>(error<span class="op">.</span><span class="at">message</span>)<span class="op">;</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setChargement</span>(<span class="kw">false</span>)<span class="op">;</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    }<span class="op">;</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">charger</span>()<span class="op">;</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span> [])<span class="op">;</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> toggleFavori <span class="op">=</span> (userId) <span class="kw">=&gt;</span> {</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (favoris<span class="op">.</span><span class="fu">includes</span>(userId)) {</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setFavoris</span>(</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>        favoris<span class="op">.</span><span class="fu">filter</span>((id) <span class="kw">=&gt;</span> id <span class="op">!==</span> userId)</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>      )<span class="op">;</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setFavoris</span>([<span class="op">...</span>favoris<span class="op">,</span> userId])<span class="op">;</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (chargement)</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&lt;</span>p<span class="op">&gt;</span>Chargement en cours<span class="op">...&lt;/</span>p<span class="op">&gt;;</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (erreur)</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&lt;</span>p className<span class="op">=</span>{styles<span class="op">.</span><span class="at">erreur</span>}<span class="op">&gt;</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>      <span class="dt">Erreur</span> <span class="op">:</span> {erreur}<span class="op">&lt;/</span>p<span class="op">&gt;;</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> usersFiltres <span class="op">=</span> users</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">filter</span>((u) <span class="kw">=&gt;</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>      u<span class="op">.</span><span class="at">name</span><span class="op">.</span><span class="fu">toLowerCase</span>()</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">includes</span>(recherche<span class="op">.</span><span class="fu">toLowerCase</span>())</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">sort</span>((a<span class="op">,</span> b) <span class="kw">=&gt;</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>      triAscendant</span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>        <span class="op">?</span> a<span class="op">.</span><span class="at">name</span><span class="op">.</span><span class="fu">localeCompare</span>(b<span class="op">.</span><span class="at">name</span>)</span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>        <span class="op">:</span> b<span class="op">.</span><span class="at">name</span><span class="op">.</span><span class="fu">localeCompare</span>(a<span class="op">.</span><span class="at">name</span>)</span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div<span class="op">&gt;</span></span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>h1 className<span class="op">=</span>{styles<span class="op">.</span><span class="at">titre</span>}<span class="op">&gt;</span></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>        Liste des utilisateurs</span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>h1<span class="op">&gt;</span></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>SearchBar recherche<span class="op">=</span>{recherche}</span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>                 onRecherche<span class="op">=</span>{setRecherche} <span class="op">/&gt;</span></span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">barre</span>}<span class="op">&gt;</span></span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>span className<span class="op">=</span>{styles<span class="op">.</span><span class="at">compteur</span>}<span class="op">&gt;</span></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>          {usersFiltres<span class="op">.</span><span class="at">length</span>} <span class="fu">utilisateur</span>(s)</span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>        {favoris<span class="op">.</span><span class="at">length</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> (</span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span className<span class="op">=</span>{styles<span class="op">.</span><span class="at">favoris</span>}<span class="op">&gt;</span></span>
+<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a>            {favoris<span class="op">.</span><span class="at">length</span>} <span class="fu">favori</span>(s)</span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>        )}</span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>button className<span class="op">=</span>{styles<span class="op">.</span><span class="at">boutonTri</span>}</span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a>                onClick<span class="op">=</span>{() <span class="kw">=&gt;</span></span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">setTriAscendant</span>(<span class="op">!</span>triAscendant)</span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a>                }<span class="op">&gt;</span></span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a>          {triAscendant <span class="op">?</span> <span class="st">"A → Z"</span> <span class="op">:</span> <span class="st">"Z → A"</span>}</span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>button<span class="op">&gt;</span></span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a>      {usersFiltres<span class="op">.</span><span class="fu">map</span>((user) <span class="kw">=&gt;</span> (</span>
+<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>UserCard key<span class="op">=</span>{user<span class="op">.</span><span class="at">id</span>} user<span class="op">=</span>{user}</span>
+<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a>          estFavori<span class="op">=</span>{favoris<span class="op">.</span><span class="fu">includes</span>(user<span class="op">.</span><span class="at">id</span>)}</span>
+<span id="cb11-85"><a href="#cb11-85" aria-hidden="true" tabindex="-1"></a>          onToggleFavori<span class="op">=</span>{toggleFavori} <span class="op">/&gt;</span></span>
+<span id="cb11-86"><a href="#cb11-86" aria-hidden="true" tabindex="-1"></a>      ))}</span>
+<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> UserList<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="modifier-usercard-pour-utiliser-link" class="level3">
+<h3 class="anchored" data-anchor-id="modifier-usercard-pour-utiliser-link">Modifier <code>UserCard</code> pour utiliser <code>Link</code></h3>
+<p>Au Lab 3, les cartes utilisaient <code>onClick</code> pour naviguer par état. Maintenant, on utilise <code>Link</code> pour naviguer par URL. Modifiez <code>src/components/UserCard.jsx</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { Link } <span class="im">from</span> <span class="st">"react-router-dom"</span><span class="op">;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> styles <span class="im">from</span> <span class="st">"./UserCard.module.css"</span><span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> UserCard <span class="op">=</span> ({</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  user<span class="op">,</span> estFavori<span class="op">,</span> onToggleFavori</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>}) <span class="kw">=&gt;</span> {</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">card</span>}<span class="op">&gt;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">header</span>}<span class="op">&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>Link to<span class="op">=</span>{<span class="vs">`/users/</span><span class="sc">${</span>user<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">`</span>}</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>              className<span class="op">=</span>{styles<span class="op">.</span><span class="at">lien</span>}<span class="op">&gt;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>h3 className<span class="op">=</span>{styles<span class="op">.</span><span class="at">nom</span>}<span class="op">&gt;</span>{user<span class="op">.</span><span class="at">name</span>}<span class="op">&lt;/</span>h3<span class="op">&gt;</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>Link<span class="op">&gt;</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>button className<span class="op">=</span>{styles<span class="op">.</span><span class="at">etoile</span>}</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>                onClick<span class="op">=</span>{() <span class="kw">=&gt;</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">onToggleFavori</span>(user<span class="op">.</span><span class="at">id</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                }<span class="op">&gt;</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>          {estFavori <span class="op">?</span> <span class="st">"</span><span class="sc">\u2605</span><span class="st">"</span> <span class="op">:</span> <span class="st">"</span><span class="sc">\u2606</span><span class="st">"</span>}</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>button<span class="op">&gt;</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>p className<span class="op">=</span>{styles<span class="op">.</span><span class="at">info</span>}<span class="op">&gt;</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Email</span> <span class="op">:</span> {user<span class="op">.</span><span class="at">email</span>}</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>p className<span class="op">=</span>{styles<span class="op">.</span><span class="at">info</span>}<span class="op">&gt;</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Entreprise</span> <span class="op">:</span> {user<span class="op">.</span><span class="at">company</span><span class="op">.</span><span class="at">name</span>}</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>Link to<span class="op">=</span>{<span class="vs">`/users/</span><span class="sc">${</span>user<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">`</span>}</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>            className<span class="op">=</span>{styles<span class="op">.</span><span class="at">voir</span>}<span class="op">&gt;</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        Voir le profil →</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>Link<span class="op">&gt;</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> UserCard<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Plus besoin de `e.stopPropagation()`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Plus besoin de <code>e.stopPropagation()</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Au Lab 3, le clic sur l’étoile déclenchait aussi le <code>onClick</code> de la carte. On avait besoin de <code>e.stopPropagation()</code>. Maintenant, la navigation se fait par <code>Link</code> (un lien, pas un <code>onClick</code> sur la carte entière). Le bouton étoile n’entre plus en conflit.</p>
+</div>
+</div>
+</section>
+<section id="page-de-détail-avec-useparams" class="level3">
+<h3 class="anchored" data-anchor-id="page-de-détail-avec-useparams">Page de détail avec <code>useParams</code></h3>
+<p>Créez <code>src/pages/UserDetail.jsx</code>. Le composant lit l’identifiant <strong>depuis l’URL</strong> au lieu de le recevoir en prop :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { useState<span class="op">,</span> useEffect } <span class="im">from</span> <span class="st">"react"</span><span class="op">;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { useParams<span class="op">,</span> Link } <span class="im">from</span> <span class="st">"react-router-dom"</span><span class="op">;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> styles <span class="im">from</span> <span class="st">"./UserDetail.module.css"</span><span class="op">;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> UserDetail <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> { id } <span class="op">=</span> <span class="fu">useParams</span>()<span class="op">;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [user<span class="op">,</span> setUser] <span class="op">=</span> <span class="fu">useState</span>(<span class="kw">null</span>)<span class="op">;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [chargement<span class="op">,</span> setChargement] <span class="op">=</span> <span class="fu">useState</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [erreur<span class="op">,</span> setErreur] <span class="op">=</span> <span class="fu">useState</span>(<span class="kw">null</span>)<span class="op">;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">useEffect</span>(() <span class="kw">=&gt;</span> {</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> charger <span class="op">=</span> <span class="kw">async</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setChargement</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>      <span class="cf">try</span> {</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> response <span class="op">=</span> <span class="cf">await</span> <span class="fu">fetch</span>(</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>          <span class="vs">`https://jsonplaceholder.typicode.com/users/</span><span class="sc">${</span>id<span class="sc">}</span><span class="vs">`</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        )<span class="op">;</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="op">!</span>response<span class="op">.</span><span class="at">ok</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>          <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(<span class="st">"Utilisateur introuvable"</span>)<span class="op">;</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> data <span class="op">=</span> <span class="cf">await</span> response<span class="op">.</span><span class="fu">json</span>()<span class="op">;</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">setUser</span>(data)<span class="op">;</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">catch</span> (error) {</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">setErreur</span>(error<span class="op">.</span><span class="at">message</span>)<span class="op">;</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setChargement</span>(<span class="kw">false</span>)<span class="op">;</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    }<span class="op">;</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">charger</span>()<span class="op">;</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span> [id])<span class="op">;</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (chargement) <span class="cf">return</span> <span class="op">&lt;</span>p<span class="op">&gt;</span>Chargement<span class="op">...&lt;/</span>p<span class="op">&gt;;</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (erreur) {</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div<span class="op">&gt;</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>p<span class="op">&gt;</span>{erreur}<span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>Link to<span class="op">=</span><span class="st">"/users"</span><span class="op">&gt;</span>Retour à la liste<span class="op">&lt;/</span>Link<span class="op">&gt;</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div<span class="op">&gt;</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>Link to<span class="op">=</span><span class="st">"/users"</span> className<span class="op">=</span>{styles<span class="op">.</span><span class="at">retour</span>}<span class="op">&gt;</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>        ← Retour à la liste</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>Link<span class="op">&gt;</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">profil</span>}<span class="op">&gt;</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">avatar</span>}<span class="op">&gt;</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>          {user<span class="op">.</span><span class="at">name</span><span class="op">.</span><span class="fu">charAt</span>(<span class="dv">0</span>)}</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>h1 className<span class="op">=</span>{styles<span class="op">.</span><span class="at">nom</span>}<span class="op">&gt;</span>{user<span class="op">.</span><span class="at">name</span>}<span class="op">&lt;/</span>h1<span class="op">&gt;</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>p className<span class="op">=</span>{styles<span class="op">.</span><span class="at">username</span>}<span class="op">&gt;</span></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>          @{user<span class="op">.</span><span class="at">username</span>}</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">carte</span>}<span class="op">&gt;</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>h2 className<span class="op">=</span>{styles<span class="op">.</span><span class="at">section</span>}<span class="op">&gt;</span>Coordonnées<span class="op">&lt;/</span>h2<span class="op">&gt;</span></span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">champ</span>}<span class="op">&gt;</span></span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span className<span class="op">=</span>{styles<span class="op">.</span><span class="at">label</span>}<span class="op">&gt;</span>Email<span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span<span class="op">&gt;</span>{user<span class="op">.</span><span class="at">email</span>}<span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">champ</span>}<span class="op">&gt;</span></span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span className<span class="op">=</span>{styles<span class="op">.</span><span class="at">label</span>}<span class="op">&gt;</span>Tél<span class="op">.&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span<span class="op">&gt;</span>{user<span class="op">.</span><span class="at">phone</span>}<span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">champ</span>}<span class="op">&gt;</span></span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span className<span class="op">=</span>{styles<span class="op">.</span><span class="at">label</span>}<span class="op">&gt;</span>Site<span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span<span class="op">&gt;</span>{user<span class="op">.</span><span class="at">website</span>}<span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">carte</span>}<span class="op">&gt;</span></span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>h2 className<span class="op">=</span>{styles<span class="op">.</span><span class="at">section</span>}<span class="op">&gt;</span>Entreprise<span class="op">&lt;/</span>h2<span class="op">&gt;</span></span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">champ</span>}<span class="op">&gt;</span></span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span className<span class="op">=</span>{styles<span class="op">.</span><span class="at">label</span>}<span class="op">&gt;</span>Nom<span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span<span class="op">&gt;</span>{user<span class="op">.</span><span class="at">company</span><span class="op">.</span><span class="at">name</span>}<span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">champ</span>}<span class="op">&gt;</span></span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span className<span class="op">=</span>{styles<span class="op">.</span><span class="at">label</span>}<span class="op">&gt;</span>Ville<span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>span<span class="op">&gt;</span>{user<span class="op">.</span><span class="at">address</span><span class="op">.</span><span class="at">city</span>}<span class="op">&lt;/</span>span<span class="op">&gt;</span></span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> UserDetail<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Lab 3 vs Lab 4 : la page de détail">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Lab 3 vs Lab 4 : la page de détail
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Lab 3</strong></th>
+<th><strong>Lab 4</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>L’identifiant vient de</strong></td>
+<td>Une prop <code>userId</code> (passée par App)</td>
+<td>L’URL via <code>useParams()</code></td>
+</tr>
+<tr class="even">
+<td><strong>L’URL</strong></td>
+<td>Ne change pas</td>
+<td><code>/users/3</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Bouton retour navigateur</strong></td>
+<td>Ne fonctionne pas</td>
+<td>Fonctionne</td>
+</tr>
+<tr class="even">
+<td><strong>Partage de lien</strong></td>
+<td>Impossible</td>
+<td>Possible</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Supprimez l’ancien <code>src/components/UserDetail.jsx</code> et son CSS Module — il est remplacé par la page. Les fichiers CSS des pages (<code>UserDetail.module.css</code>, <code>UserList.module.css</code>) sont fournis dans le script de setup.</p>
+</section>
+</section>
+<section id="sec-formulaire" class="level2">
+<h2 class="anchored" data-anchor-id="sec-formulaire">Partie 4 — Formulaire contrôlé</h2>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectif --- 20 minutes">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectif — 20 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Créer un formulaire pour ajouter un utilisateur. Comprendre les inputs contrôlés.</p>
+</div>
+</div>
+<section id="input-contrôlé-vs-non-contrôlé" class="level3">
+<h3 class="anchored" data-anchor-id="input-contrôlé-vs-non-contrôlé">Input contrôlé vs non contrôlé</h3>
+<p>Un <strong>input contrôlé</strong> est un champ dont la valeur est stockée dans l’état React. À chaque frappe, l’état se met à jour, et React re-rend le composant avec la nouvelle valeur.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Non contrôlé</strong></th>
+<th><strong>Contrôlé</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Valeur stockée dans</strong></td>
+<td>Le DOM (le navigateur)</td>
+<td>L’état React</td>
+</tr>
+<tr class="even">
+<td><strong>Lecture</strong></td>
+<td><code>inputRef.current.value</code></td>
+<td><code>nom</code> (variable d’état)</td>
+</tr>
+<tr class="odd">
+<td><strong>Avantage</strong></td>
+<td>Simple pour les cas basiques</td>
+<td>Total contrôle (validation, formatage)</td>
+</tr>
+</tbody>
+</table>
+<p>En React, on utilise <strong>toujours</strong> des inputs contrôlés. Le principe : <code>value={état}</code> + <code>onChange={fn}</code>.</p>
+</section>
+<section id="créer-adduser.jsx" class="level3">
+<h3 class="anchored" data-anchor-id="créer-adduser.jsx">Créer <code>AddUser.jsx</code></h3>
+<p>Créez <code>src/pages/AddUser.jsx</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { useState } <span class="im">from</span> <span class="st">"react"</span><span class="op">;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { useNavigate } <span class="im">from</span> <span class="st">"react-router-dom"</span><span class="op">;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> styles <span class="im">from</span> <span class="st">"./AddUser.module.css"</span><span class="op">;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> AddUser <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> navigate <span class="op">=</span> <span class="fu">useNavigate</span>()<span class="op">;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [form<span class="op">,</span> setForm] <span class="op">=</span> <span class="fu">useState</span>({</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">name</span><span class="op">:</span> <span class="st">""</span><span class="op">,</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">email</span><span class="op">:</span> <span class="st">""</span><span class="op">,</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">phone</span><span class="op">:</span> <span class="st">""</span><span class="op">,</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">company</span><span class="op">:</span> <span class="st">""</span><span class="op">,</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [erreurs<span class="op">,</span> setErreurs] <span class="op">=</span> <span class="fu">useState</span>({})<span class="op">;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [enCours<span class="op">,</span> setEnCours] <span class="op">=</span> <span class="fu">useState</span>(<span class="kw">false</span>)<span class="op">;</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [soumis<span class="op">,</span> setSoumis] <span class="op">=</span> <span class="fu">useState</span>(<span class="kw">false</span>)<span class="op">;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> handleChange <span class="op">=</span> (e) <span class="kw">=&gt;</span> {</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> { name<span class="op">,</span> value } <span class="op">=</span> e<span class="op">.</span><span class="at">target</span><span class="op">;</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setForm</span>({ <span class="op">...</span>form<span class="op">,</span> [name]<span class="op">:</span> value })<span class="op">;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (erreurs[name]) {</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setErreurs</span>({ <span class="op">...</span>erreurs<span class="op">,</span> [name]<span class="op">:</span> <span class="kw">null</span> })<span class="op">;</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> valider <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> err <span class="op">=</span> {}<span class="op">;</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="op">!</span>form<span class="op">.</span><span class="at">name</span><span class="op">.</span><span class="fu">trim</span>())</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>      err<span class="op">.</span><span class="at">name</span> <span class="op">=</span> <span class="st">"Le nom est obligatoire"</span><span class="op">;</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="op">!</span>form<span class="op">.</span><span class="at">email</span><span class="op">.</span><span class="fu">trim</span>())</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>      err<span class="op">.</span><span class="at">email</span> <span class="op">=</span> <span class="st">"L'email est obligatoire"</span><span class="op">;</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="cf">if</span> (<span class="op">!</span>form<span class="op">.</span><span class="at">email</span><span class="op">.</span><span class="fu">includes</span>(<span class="st">"@"</span>))</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>      err<span class="op">.</span><span class="at">email</span> <span class="op">=</span> <span class="st">"L'email doit contenir un @"</span><span class="op">;</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="op">!</span>form<span class="op">.</span><span class="at">phone</span><span class="op">.</span><span class="fu">trim</span>())</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>      err<span class="op">.</span><span class="at">phone</span> <span class="op">=</span> <span class="st">"Le téléphone est obligatoire"</span><span class="op">;</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> err<span class="op">;</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> handleSubmit <span class="op">=</span> <span class="kw">async</span> (e) <span class="kw">=&gt;</span> {</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>    e<span class="op">.</span><span class="fu">preventDefault</span>()<span class="op">;</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> err <span class="op">=</span> <span class="fu">valider</span>()<span class="op">;</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(err)<span class="op">.</span><span class="at">length</span> <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setErreurs</span>(err)<span class="op">;</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setEnCours</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> response <span class="op">=</span> <span class="cf">await</span> <span class="fu">fetch</span>(</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>        <span class="st">"https://jsonplaceholder.typicode.com/users"</span><span class="op">,</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>          <span class="dt">method</span><span class="op">:</span> <span class="st">"POST"</span><span class="op">,</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>          <span class="dt">headers</span><span class="op">:</span> {</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Content-Type"</span><span class="op">:</span> <span class="st">"application/json"</span><span class="op">,</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>          }<span class="op">,</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>          <span class="dt">body</span><span class="op">:</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">stringify</span>({</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>            <span class="dt">name</span><span class="op">:</span> form<span class="op">.</span><span class="at">name</span><span class="op">,</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>            <span class="dt">email</span><span class="op">:</span> form<span class="op">.</span><span class="at">email</span><span class="op">,</span></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>            <span class="dt">phone</span><span class="op">:</span> form<span class="op">.</span><span class="at">phone</span><span class="op">,</span></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>            <span class="dt">company</span><span class="op">:</span> {</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>              <span class="dt">name</span><span class="op">:</span> form<span class="op">.</span><span class="at">company</span> <span class="op">||</span> <span class="st">"Non renseigné"</span><span class="op">,</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>            }<span class="op">,</span></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>          })<span class="op">,</span></span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>      )<span class="op">;</span></span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="op">!</span>response<span class="op">.</span><span class="at">ok</span>)</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(<span class="st">"Erreur serveur"</span>)<span class="op">;</span></span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> data <span class="op">=</span> <span class="cf">await</span> response<span class="op">.</span><span class="fu">json</span>()<span class="op">;</span></span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>      <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">"Utilisateur créé :"</span><span class="op">,</span> data)<span class="op">;</span></span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setSoumis</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a>      <span class="pp">setTimeout</span>(() <span class="kw">=&gt;</span> <span class="fu">navigate</span>(<span class="st">"/users"</span>)<span class="op">,</span> <span class="dv">2000</span>)<span class="op">;</span></span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setErreurs</span>({ <span class="dt">submit</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span> })<span class="op">;</span></span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setEnCours</span>(<span class="kw">false</span>)<span class="op">;</span></span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (soumis) {</span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">succes</span>}<span class="op">&gt;</span></span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>h2<span class="op">&gt;</span>Utilisateur ajouté<span class="op">&lt;/</span>h2<span class="op">&gt;</span></span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>p<span class="op">&gt;</span>Redirection vers la liste<span class="op">...&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div<span class="op">&gt;</span></span>
+<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>h1 className<span class="op">=</span>{styles<span class="op">.</span><span class="at">titre</span>}<span class="op">&gt;</span></span>
+<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a>        Ajouter un utilisateur</span>
+<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>h1<span class="op">&gt;</span></span>
+<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">carte</span>}<span class="op">&gt;</span></span>
+<span id="cb14-95"><a href="#cb14-95" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>form onSubmit<span class="op">=</span>{handleSubmit}<span class="op">&gt;</span></span>
+<span id="cb14-96"><a href="#cb14-96" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">groupe</span>}<span class="op">&gt;</span></span>
+<span id="cb14-97"><a href="#cb14-97" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;</span>label className<span class="op">=</span>{styles<span class="op">.</span><span class="at">label</span>}</span>
+<span id="cb14-98"><a href="#cb14-98" aria-hidden="true" tabindex="-1"></a>                   htmlFor<span class="op">=</span><span class="st">"name"</span><span class="op">&gt;</span></span>
+<span id="cb14-99"><a href="#cb14-99" aria-hidden="true" tabindex="-1"></a>              Nom complet <span class="op">*</span></span>
+<span id="cb14-100"><a href="#cb14-100" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;/</span>label<span class="op">&gt;</span></span>
+<span id="cb14-101"><a href="#cb14-101" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;</span>input className<span class="op">=</span>{styles<span class="op">.</span><span class="at">input</span>}</span>
+<span id="cb14-102"><a href="#cb14-102" aria-hidden="true" tabindex="-1"></a>              type<span class="op">=</span><span class="st">"text"</span> id<span class="op">=</span><span class="st">"name"</span> name<span class="op">=</span><span class="st">"name"</span></span>
+<span id="cb14-103"><a href="#cb14-103" aria-hidden="true" tabindex="-1"></a>              placeholder<span class="op">=</span><span class="st">"Fatou Ndiaye"</span></span>
+<span id="cb14-104"><a href="#cb14-104" aria-hidden="true" tabindex="-1"></a>              value<span class="op">=</span>{form<span class="op">.</span><span class="at">name</span>}</span>
+<span id="cb14-105"><a href="#cb14-105" aria-hidden="true" tabindex="-1"></a>              onChange<span class="op">=</span>{handleChange} <span class="op">/&gt;</span></span>
+<span id="cb14-106"><a href="#cb14-106" aria-hidden="true" tabindex="-1"></a>            {erreurs<span class="op">.</span><span class="at">name</span> <span class="op">&amp;&amp;</span> (</span>
+<span id="cb14-107"><a href="#cb14-107" aria-hidden="true" tabindex="-1"></a>              <span class="op">&lt;</span>p className<span class="op">=</span>{styles<span class="op">.</span><span class="at">erreur</span>}<span class="op">&gt;</span></span>
+<span id="cb14-108"><a href="#cb14-108" aria-hidden="true" tabindex="-1"></a>                {erreurs<span class="op">.</span><span class="at">name</span>}</span>
+<span id="cb14-109"><a href="#cb14-109" aria-hidden="true" tabindex="-1"></a>              <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb14-110"><a href="#cb14-110" aria-hidden="true" tabindex="-1"></a>            )}</span>
+<span id="cb14-111"><a href="#cb14-111" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb14-112"><a href="#cb14-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-113"><a href="#cb14-113" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">groupe</span>}<span class="op">&gt;</span></span>
+<span id="cb14-114"><a href="#cb14-114" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;</span>label className<span class="op">=</span>{styles<span class="op">.</span><span class="at">label</span>}</span>
+<span id="cb14-115"><a href="#cb14-115" aria-hidden="true" tabindex="-1"></a>                   htmlFor<span class="op">=</span><span class="st">"email"</span><span class="op">&gt;</span></span>
+<span id="cb14-116"><a href="#cb14-116" aria-hidden="true" tabindex="-1"></a>              Email <span class="op">*</span></span>
+<span id="cb14-117"><a href="#cb14-117" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;/</span>label<span class="op">&gt;</span></span>
+<span id="cb14-118"><a href="#cb14-118" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;</span>input className<span class="op">=</span>{styles<span class="op">.</span><span class="at">input</span>}</span>
+<span id="cb14-119"><a href="#cb14-119" aria-hidden="true" tabindex="-1"></a>              type<span class="op">=</span><span class="st">"text"</span> id<span class="op">=</span><span class="st">"email"</span> name<span class="op">=</span><span class="st">"email"</span></span>
+<span id="cb14-120"><a href="#cb14-120" aria-hidden="true" tabindex="-1"></a>              placeholder<span class="op">=</span><span class="st">"fatou.ndiaye@ucad.edu.sn"</span></span>
+<span id="cb14-121"><a href="#cb14-121" aria-hidden="true" tabindex="-1"></a>              value<span class="op">=</span>{form<span class="op">.</span><span class="at">email</span>}</span>
+<span id="cb14-122"><a href="#cb14-122" aria-hidden="true" tabindex="-1"></a>              onChange<span class="op">=</span>{handleChange} <span class="op">/&gt;</span></span>
+<span id="cb14-123"><a href="#cb14-123" aria-hidden="true" tabindex="-1"></a>            {erreurs<span class="op">.</span><span class="at">email</span> <span class="op">&amp;&amp;</span> (</span>
+<span id="cb14-124"><a href="#cb14-124" aria-hidden="true" tabindex="-1"></a>              <span class="op">&lt;</span>p className<span class="op">=</span>{styles<span class="op">.</span><span class="at">erreur</span>}<span class="op">&gt;</span></span>
+<span id="cb14-125"><a href="#cb14-125" aria-hidden="true" tabindex="-1"></a>                {erreurs<span class="op">.</span><span class="at">email</span>}</span>
+<span id="cb14-126"><a href="#cb14-126" aria-hidden="true" tabindex="-1"></a>              <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb14-127"><a href="#cb14-127" aria-hidden="true" tabindex="-1"></a>            )}</span>
+<span id="cb14-128"><a href="#cb14-128" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb14-129"><a href="#cb14-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-130"><a href="#cb14-130" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">groupe</span>}<span class="op">&gt;</span></span>
+<span id="cb14-131"><a href="#cb14-131" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;</span>label className<span class="op">=</span>{styles<span class="op">.</span><span class="at">label</span>}</span>
+<span id="cb14-132"><a href="#cb14-132" aria-hidden="true" tabindex="-1"></a>                   htmlFor<span class="op">=</span><span class="st">"phone"</span><span class="op">&gt;</span></span>
+<span id="cb14-133"><a href="#cb14-133" aria-hidden="true" tabindex="-1"></a>              Téléphone <span class="op">*</span></span>
+<span id="cb14-134"><a href="#cb14-134" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;/</span>label<span class="op">&gt;</span></span>
+<span id="cb14-135"><a href="#cb14-135" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;</span>input className<span class="op">=</span>{styles<span class="op">.</span><span class="at">input</span>}</span>
+<span id="cb14-136"><a href="#cb14-136" aria-hidden="true" tabindex="-1"></a>              type<span class="op">=</span><span class="st">"text"</span> id<span class="op">=</span><span class="st">"phone"</span> name<span class="op">=</span><span class="st">"phone"</span></span>
+<span id="cb14-137"><a href="#cb14-137" aria-hidden="true" tabindex="-1"></a>              placeholder<span class="op">=</span><span class="st">"77 123 45 67"</span></span>
+<span id="cb14-138"><a href="#cb14-138" aria-hidden="true" tabindex="-1"></a>              value<span class="op">=</span>{form<span class="op">.</span><span class="at">phone</span>}</span>
+<span id="cb14-139"><a href="#cb14-139" aria-hidden="true" tabindex="-1"></a>              onChange<span class="op">=</span>{handleChange} <span class="op">/&gt;</span></span>
+<span id="cb14-140"><a href="#cb14-140" aria-hidden="true" tabindex="-1"></a>            {erreurs<span class="op">.</span><span class="at">phone</span> <span class="op">&amp;&amp;</span> (</span>
+<span id="cb14-141"><a href="#cb14-141" aria-hidden="true" tabindex="-1"></a>              <span class="op">&lt;</span>p className<span class="op">=</span>{styles<span class="op">.</span><span class="at">erreur</span>}<span class="op">&gt;</span></span>
+<span id="cb14-142"><a href="#cb14-142" aria-hidden="true" tabindex="-1"></a>                {erreurs<span class="op">.</span><span class="at">phone</span>}</span>
+<span id="cb14-143"><a href="#cb14-143" aria-hidden="true" tabindex="-1"></a>              <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb14-144"><a href="#cb14-144" aria-hidden="true" tabindex="-1"></a>            )}</span>
+<span id="cb14-145"><a href="#cb14-145" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb14-146"><a href="#cb14-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-147"><a href="#cb14-147" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>div className<span class="op">=</span>{styles<span class="op">.</span><span class="at">groupe</span>}<span class="op">&gt;</span></span>
+<span id="cb14-148"><a href="#cb14-148" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;</span>label className<span class="op">=</span>{styles<span class="op">.</span><span class="at">label</span>}</span>
+<span id="cb14-149"><a href="#cb14-149" aria-hidden="true" tabindex="-1"></a>                   htmlFor<span class="op">=</span><span class="st">"company"</span><span class="op">&gt;</span></span>
+<span id="cb14-150"><a href="#cb14-150" aria-hidden="true" tabindex="-1"></a>              Entreprise</span>
+<span id="cb14-151"><a href="#cb14-151" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;/</span>label<span class="op">&gt;</span></span>
+<span id="cb14-152"><a href="#cb14-152" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;</span>input className<span class="op">=</span>{styles<span class="op">.</span><span class="at">input</span>}</span>
+<span id="cb14-153"><a href="#cb14-153" aria-hidden="true" tabindex="-1"></a>              type<span class="op">=</span><span class="st">"text"</span> id<span class="op">=</span><span class="st">"company"</span> name<span class="op">=</span><span class="st">"company"</span></span>
+<span id="cb14-154"><a href="#cb14-154" aria-hidden="true" tabindex="-1"></a>              placeholder<span class="op">=</span><span class="st">"ESP/UCAD"</span></span>
+<span id="cb14-155"><a href="#cb14-155" aria-hidden="true" tabindex="-1"></a>              value<span class="op">=</span>{form<span class="op">.</span><span class="at">company</span>}</span>
+<span id="cb14-156"><a href="#cb14-156" aria-hidden="true" tabindex="-1"></a>              onChange<span class="op">=</span>{handleChange} <span class="op">/&gt;</span></span>
+<span id="cb14-157"><a href="#cb14-157" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb14-158"><a href="#cb14-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-159"><a href="#cb14-159" aria-hidden="true" tabindex="-1"></a>          {erreurs<span class="op">.</span><span class="at">submit</span> <span class="op">&amp;&amp;</span> (</span>
+<span id="cb14-160"><a href="#cb14-160" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;</span>p className<span class="op">=</span>{styles<span class="op">.</span><span class="at">erreurGlobale</span>}<span class="op">&gt;</span></span>
+<span id="cb14-161"><a href="#cb14-161" aria-hidden="true" tabindex="-1"></a>              {erreurs<span class="op">.</span><span class="at">submit</span>}</span>
+<span id="cb14-162"><a href="#cb14-162" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb14-163"><a href="#cb14-163" aria-hidden="true" tabindex="-1"></a>          )}</span>
+<span id="cb14-164"><a href="#cb14-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-165"><a href="#cb14-165" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>button type<span class="op">=</span><span class="st">"submit"</span></span>
+<span id="cb14-166"><a href="#cb14-166" aria-hidden="true" tabindex="-1"></a>                  className<span class="op">=</span>{styles<span class="op">.</span><span class="at">bouton</span>}</span>
+<span id="cb14-167"><a href="#cb14-167" aria-hidden="true" tabindex="-1"></a>                  disabled<span class="op">=</span>{enCours}<span class="op">&gt;</span></span>
+<span id="cb14-168"><a href="#cb14-168" aria-hidden="true" tabindex="-1"></a>            {enCours <span class="op">?</span> <span class="st">"Envoi..."</span> <span class="op">:</span> <span class="st">"Ajouter"</span>}</span>
+<span id="cb14-169"><a href="#cb14-169" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;/</span>button<span class="op">&gt;</span></span>
+<span id="cb14-170"><a href="#cb14-170" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;/</span>form<span class="op">&gt;</span></span>
+<span id="cb14-171"><a href="#cb14-171" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb14-172"><a href="#cb14-172" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb14-173"><a href="#cb14-173" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb14-174"><a href="#cb14-174" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb14-175"><a href="#cb14-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-176"><a href="#cb14-176" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> AddUser<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Décoder le formulaire">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Décoder le formulaire
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Élément</strong></th>
+<th><strong>Rôle</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>value={form.name}</code></td>
+<td>L’input affiche la valeur de l’état (input contrôlé)</td>
+</tr>
+<tr class="even">
+<td><code>onChange={handleChange}</code></td>
+<td>À chaque frappe, met à jour l’état</td>
+</tr>
+<tr class="odd">
+<td><code>e.preventDefault()</code></td>
+<td>Empêche le rechargement de la page à la soumission</td>
+</tr>
+<tr class="even">
+<td><code>name="name"</code></td>
+<td>L’attribut <code>name</code> permet à <code>handleChange</code> de savoir quel champ mettre à jour</td>
+</tr>
+<tr class="odd">
+<td><code>[name]: value</code></td>
+<td>Syntaxe ES6 : clé dynamique dans un objet</td>
+</tr>
+<tr class="even">
+<td><code>useNavigate()</code></td>
+<td>Permet de naviguer par code (après soumission)</td>
+</tr>
+<tr class="odd">
+<td><code>method: "POST"</code></td>
+<td>Envoie les données au serveur (au lieu de les lire)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="JSONPlaceholder simule le POST">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>JSONPlaceholder simule le POST
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>L’API JSONPlaceholder accepte les requêtes POST et retourne un objet avec un <code>id</code> généré. Mais les données ne sont <strong>pas réellement enregistrées</strong>. Si vous rechargez la liste, le nouvel utilisateur n’apparaît pas. C’est normal — c’est une API de test. Au Lab 6, on se connectera à un vrai backend Django.</p>
+</div>
+</div>
+<p>Les fichiers CSS pour les pages (<code>AddUser.module.css</code>, <code>UserDetail.module.css</code>, <code>UserList.module.css</code>) sont fournis dans le script de setup. Ils suivent la même logique que les labs précédents : un fichier <code>.module.css</code> par composant.</p>
+</section>
+</section>
+<section id="bilan-structure-du-projet" class="level2">
+<h2 class="anchored" data-anchor-id="bilan-structure-du-projet">Bilan — Structure du projet</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>annuaire<span class="op">-</span>react<span class="op">/</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  src<span class="op">/</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    App<span class="op">.</span><span class="at">jsx</span>               <span class="op">&lt;--</span> Routes seulement</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    App<span class="op">.</span><span class="at">module</span><span class="op">.</span><span class="at">css</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    components<span class="op">/</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>      Navbar<span class="op">.</span><span class="at">jsx</span>          <span class="op">&lt;--</span> nouveau</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>      Navbar<span class="op">.</span><span class="at">module</span><span class="op">.</span><span class="at">css</span>   <span class="op">&lt;--</span> nouveau</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      UserCard<span class="op">.</span><span class="at">jsx</span>        <span class="op">&lt;--</span> <span class="fu">modifié</span> (Link)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>      UserCard<span class="op">.</span><span class="at">module</span><span class="op">.</span><span class="at">css</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>      SearchBar<span class="op">.</span><span class="at">jsx</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>      SearchBar<span class="op">.</span><span class="at">module</span><span class="op">.</span><span class="at">css</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    pages<span class="op">/</span>                <span class="op">&lt;--</span> nouveau dossier</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>      Home<span class="op">.</span><span class="at">jsx</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>      Home<span class="op">.</span><span class="at">module</span><span class="op">.</span><span class="at">css</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>      UserList<span class="op">.</span><span class="at">jsx</span>        <span class="op">&lt;--</span> logique déplacée ici</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>      UserList<span class="op">.</span><span class="at">module</span><span class="op">.</span><span class="at">css</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>      UserDetail<span class="op">.</span><span class="at">jsx</span>      <span class="op">&lt;--</span> useParams</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>      UserDetail<span class="op">.</span><span class="at">module</span><span class="op">.</span><span class="at">css</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>      AddUser<span class="op">.</span><span class="at">jsx</span>         <span class="op">&lt;--</span> nouveau</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>      AddUser<span class="op">.</span><span class="at">module</span><span class="op">.</span><span class="at">css</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  index<span class="op">.</span><span class="at">html</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="im">package</span><span class="op">.</span><span class="at">json</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Avant / après : Lab 3 vs Lab 4">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Avant / après : Lab 3 vs Lab 4
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Lab 3</strong></th>
+<th><strong>Lab 4</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Navigation</strong></td>
+<td>État <code>selectedUserId</code></td>
+<td>URL (<code>/users</code>, <code>/users/3</code>)</td>
+</tr>
+<tr class="even">
+<td><strong>Bouton retour</strong></td>
+<td>Ne fonctionne pas</td>
+<td>Fonctionne</td>
+</tr>
+<tr class="odd">
+<td><strong>Partage de lien</strong></td>
+<td>Impossible</td>
+<td><code>/users/3</code></td>
+</tr>
+<tr class="even">
+<td><strong>Ajout</strong></td>
+<td>Aucun</td>
+<td>Formulaire contrôlé + POST</td>
+</tr>
+<tr class="odd">
+<td><strong>Lien actif</strong></td>
+<td>Aucun</td>
+<td>NavLink avec style actif</td>
+</tr>
+<tr class="even">
+<td><strong>App.jsx</strong></td>
+<td>Toute la logique</td>
+<td>Routes seulement</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="aide-mémoire" class="level2">
+<h2 class="anchored" data-anchor-id="aide-mémoire">Aide-mémoire</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Concept</strong></th>
+<th><strong>Syntaxe</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Installer</td>
+<td><code>npm install react-router-dom</code></td>
+</tr>
+<tr class="even">
+<td>Envelopper</td>
+<td><code>&lt;BrowserRouter&gt;&lt;App /&gt;&lt;/BrowserRouter&gt;</code></td>
+</tr>
+<tr class="odd">
+<td>Définir une route</td>
+<td><code>&lt;Route path="/x" element={&lt;Page /&gt;} /&gt;</code></td>
+</tr>
+<tr class="even">
+<td>Paramètre d’URL</td>
+<td><code>path="/users/:id"</code></td>
+</tr>
+<tr class="odd">
+<td>Lire le paramètre</td>
+<td><code>const { id } = useParams();</code></td>
+</tr>
+<tr class="even">
+<td>Lien sans rechargement</td>
+<td><code>&lt;Link to="/users"&gt;...&lt;/Link&gt;</code></td>
+</tr>
+<tr class="odd">
+<td>Lien avec style actif</td>
+<td><code>&lt;NavLink to="/users" className={...}&gt;</code></td>
+</tr>
+<tr class="even">
+<td>Navigation par code</td>
+<td><code>const navigate = useNavigate(); navigate("/users");</code></td>
+</tr>
+<tr class="odd">
+<td>Input contrôlé</td>
+<td><code>&lt;input value={état} onChange={fn} /&gt;</code></td>
+</tr>
+<tr class="even">
+<td>Empêcher le rechargement</td>
+<td><code>e.preventDefault()</code></td>
+</tr>
+<tr class="odd">
+<td>Clé dynamique</td>
+<td><code>setForm({ ...form, [name]: value })</code></td>
+</tr>
+<tr class="even">
+<td>POST avec fetch</td>
+<td><code>fetch(url, { method: "POST", body: JSON.stringify(data) })</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="résumé-et-conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="résumé-et-conclusion">Résumé et conclusion</h2>
+<p>Dans ce lab, vous avez :</p>
+<ol type="1">
+<li>Installé <strong>React Router</strong> et défini 4 routes avec leurs URL.</li>
+<li>Créé une <strong>Navbar</strong> avec des <code>NavLink</code> qui indiquent la page active.</li>
+<li>Utilisé <code>useParams()</code> pour lire l’identifiant de l’utilisateur depuis l’URL.</li>
+<li>Créé un <strong>formulaire contrôlé</strong> avec validation et envoi en POST.</li>
+<li>Utilisé <code>useNavigate()</code> pour rediriger après la soumission.</li>
+</ol>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Étape</strong></th>
+<th><strong>Statut</strong></th>
+<th><strong>Ce que vous savez faire</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>DOM et événements</strong></td>
+<td><!-- NON CONVERTI: \ding -->{51}{}</td>
+<td>Sélecteurs, événements</td>
+</tr>
+<tr class="even">
+<td><strong>Fonctions JS</strong></td>
+<td><!-- NON CONVERTI: \ding -->{51}{}</td>
+<td>Déclaration, expression, fléchée</td>
+</tr>
+<tr class="odd">
+<td><strong>Asynchrone</strong></td>
+<td><!-- NON CONVERTI: \ding -->{51}{}</td>
+<td><code>fetch</code>, <code>async/await</code></td>
+</tr>
+<tr class="even">
+<td><strong>React — les bases</strong></td>
+<td><!-- NON CONVERTI: \ding -->{51}{}</td>
+<td>Composant, JSX, Vite</td>
+</tr>
+<tr class="odd">
+<td><strong>Composants et props</strong></td>
+<td><!-- NON CONVERTI: \ding -->{51}{}</td>
+<td>Découpage, props, CSS Modules</td>
+</tr>
+<tr class="even">
+<td><strong>État React</strong></td>
+<td><!-- NON CONVERTI: \ding -->{51}{}</td>
+<td><code>useState</code>, re-rendu, immutabilité</td>
+</tr>
+<tr class="odd">
+<td><strong>useEffect</strong></td>
+<td><!-- NON CONVERTI: \ding -->{51}{}</td>
+<td>Montage, dépendances, loading/erreur</td>
+</tr>
+<tr class="even">
+<td><strong>Router et formulaires</strong></td>
+<td><!-- NON CONVERTI: \ding -->{51}{}</td>
+<td>Routes, Link, useParams, inputs contrôlés, POST</td>
+</tr>
+<tr class="odd">
+<td><strong>Next.js</strong></td>
+<td><span class="math inline">\(\to\)</span> Lab 5</td>
+<td>App Router, server vs client</td>
+</tr>
+<tr class="even">
+<td><strong>API Django</strong></td>
+<td><span class="math inline">\(\to\)</span> Lab 6</td>
+<td>CORS, auth, CRUD</td>
+</tr>
+</tbody>
+</table>
+<div class="encadre-projetbox callout callout-style-default callout-important callout-titled" title="Et ensuite ?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Et ensuite ?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>L’annuaire est une SPA complète avec 4 pages, de la navigation, un formulaire et des appels API. Mais React seul a des limites : pas de SEO (le contenu est généré côté client), un premier chargement lent (tout le JS est téléchargé d’un coup), et un routing configuré manuellement.</p>
+<p>Dans le <strong>Lab 5</strong>, vous migrerez l’annuaire vers <strong>Next.js</strong> : routing par fichiers, layouts, composants serveur, et <code>loading.js</code> automatique.</p>
+</div>
+</div>
+</section>
+<section id="exercice-bonus" class="level2">
+<h2 class="anchored" data-anchor-id="exercice-bonus">Exercice bonus</h2>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Bonus : page 404">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Bonus : page 404
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Ajoutez une route «&nbsp;attrape-tout&nbsp;» pour les URL invalides :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>Route path<span class="op">=</span><span class="st">"*"</span> element<span class="op">=</span>{<span class="op">&lt;</span>NotFound <span class="op">/&gt;</span>} <span class="op">/&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Créez <code>src/pages/NotFound.jsx</code> avec un message «&nbsp;Page introuvable&nbsp;» et un lien vers l’accueil. Testez en tapant <code>/xyz</code> dans l’URL.</p>
+</div>
+</div>
+<div class="columns">
+<div class="column" style="width:20%;">
+<!-- NON CONVERTI: \fbox -->
+<p>{</p>
+</div><div class="column" style="width:85%;">
+<!-- NON CONVERTI: \textbfLab -->
+<p>4 — Formulaires et React Router — Terminé ✓<br> Vous savez créer une application multi-pages avec<br>des routes, de la navigation, et des formulaires contrôlés.<br> Prochaine étape : Next.js et le rendu côté serveur.<br> <em>Chaque page a son URL. Chaque URL a sa page.</em><br></p>
+</div><div class="column" style="width:20%;">
+<p>}</p>
+</div>
+</div>
+</section>
+<section class="level2">
+<h2 class="anchored" data-anchor-id="">Ressources du chapitre</h2>
+<ul>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-2/ressources/lab-4-formulaires-react-router.pdf" class="seance-ressource" title="Lab 4 — Formulaires et React Router">Lab 4 — Formulaires et React Router</a> <span class="ressource-poids">(149 Ko)</span></li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Retour au sommet</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/elbachir67\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/defilement-cours.js"></script>
+
+
+
+
+</body></html>

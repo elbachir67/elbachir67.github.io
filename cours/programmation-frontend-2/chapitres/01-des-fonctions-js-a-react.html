@@ -1,0 +1,2083 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dr.&nbsp;El Hadji Bassirou TOURÉ, Département Génie Informatique, Université Cheikh Anta Diop de Dakar">
+<meta name="description" content="Lab 1 de Programmation Frontend 2 : les trois formes de fonction en JavaScript, l’asynchrone avec fetch, et une première application React.">
+
+<title>Des fonctions JS à React – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-0610580cadf6fa63b47ea27372664db3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-24854bd70495cb5c113c2e0a0cab2f58.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-0610580cadf6fa63b47ea27372664db3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Des fonctions JS à React – El Hadji Bassirou Touré">
+<meta property="og:description" content="Lab 1 de Programmation Frontend 2 : les trois formes de fonction en JavaScript, l’asynchrone avec fetch, et une première application React.">
+<meta property="og:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="Des fonctions JS à React – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Lab 1 de Programmation Frontend 2 : les trois formes de fonction en JavaScript, l’asynchrone avec fetch, et une première application React.">
+<meta name="twitter:image" content="https://elbachir67.github.io/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="floating nav-fixed cours-page quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#sec-starter" id="toc-sec-starter" class="nav-link active" data-scroll-target="#sec-starter">Le starter — Point de départ</a>
+  <ul class="collapse">
+  <li><a href="#le-fichier-index.html" id="toc-le-fichier-index.html" class="nav-link" data-scroll-target="#le-fichier-index.html">Le fichier <code>index.html</code></a></li>
+  <li><a href="#le-fichier-index.js" id="toc-le-fichier-index.js" class="nav-link" data-scroll-target="#le-fichier-index.js">Le fichier <code>index.js</code></a></li>
+  <li><a href="#testez-le-starter" id="toc-testez-le-starter" class="nav-link" data-scroll-target="#testez-le-starter">Testez le starter</a></li>
+  </ul></li>
+  <li><a href="#sec-fonctions" id="toc-sec-fonctions" class="nav-link" data-scroll-target="#sec-fonctions">Partie 1 — Les trois visages des fonctions</a>
+  <ul class="collapse">
+  <li><a href="#façon-1-la-déclaration-de-fonction" id="toc-façon-1-la-déclaration-de-fonction" class="nav-link" data-scroll-target="#façon-1-la-déclaration-de-fonction">Façon 1 : La déclaration de fonction</a></li>
+  <li><a href="#façon-2-lexpression-de-fonction" id="toc-façon-2-lexpression-de-fonction" class="nav-link" data-scroll-target="#façon-2-lexpression-de-fonction">Façon 2 : L’expression de fonction</a></li>
+  <li><a href="#façon-3-la-fonction-fléchée-arrow-function" id="toc-façon-3-la-fonction-fléchée-arrow-function" class="nav-link" data-scroll-target="#façon-3-la-fonction-fléchée-arrow-function">Façon 3 : La fonction fléchée (<em>arrow function</em>)</a></li>
+  <li><a href="#exercice-1-refactoriser-le-starter" id="toc-exercice-1-refactoriser-le-starter" class="nav-link" data-scroll-target="#exercice-1-refactoriser-le-starter">Exercice 1 — Refactoriser le starter</a></li>
+  </ul></li>
+  <li><a href="#sec-async" id="toc-sec-async" class="nav-link" data-scroll-target="#sec-async">Partie 2 — JavaScript asynchrone</a>
+  <ul class="collapse">
+  <li><a href="#le-problème-attendre-sans-bloquer" id="toc-le-problème-attendre-sans-bloquer" class="nav-link" data-scroll-target="#le-problème-attendre-sans-bloquer">Le problème : attendre sans bloquer</a></li>
+  <li><a href="#lapi-jsonplaceholder" id="toc-lapi-jsonplaceholder" class="nav-link" data-scroll-target="#lapi-jsonplaceholder">L’API JSONPlaceholder</a></li>
+  <li><a href="#récupérer-des-données-avec-fetch" id="toc-récupérer-des-données-avec-fetch" class="nav-link" data-scroll-target="#récupérer-des-données-avec-fetch">Récupérer des données avec <code>fetch</code></a></li>
+  <li><a href="#exercice-2-afficher-des-utilisateurs-dans-le-dom" id="toc-exercice-2-afficher-des-utilisateurs-dans-le-dom" class="nav-link" data-scroll-target="#exercice-2-afficher-des-utilisateurs-dans-le-dom">Exercice 2 — Afficher des utilisateurs dans le DOM</a></li>
+  </ul></li>
+  <li><a href="#sec-react" id="toc-sec-react" class="nav-link" data-scroll-target="#sec-react">Partie 3 — Bienvenue dans React</a>
+  <ul class="collapse">
+  <li><a href="#le-problème-du-dom-manuel" id="toc-le-problème-du-dom-manuel" class="nav-link" data-scroll-target="#le-problème-du-dom-manuel">Le problème du DOM manuel</a></li>
+  <li><a href="#installer-vite-react" id="toc-installer-vite-react" class="nav-link" data-scroll-target="#installer-vite-react">Installer Vite + React</a></li>
+  <li><a href="#comprendre-la-structure-du-projet" id="toc-comprendre-la-structure-du-projet" class="nav-link" data-scroll-target="#comprendre-la-structure-du-projet">Comprendre la structure du projet</a></li>
+  <li><a href="#votre-premier-composant-react" id="toc-votre-premier-composant-react" class="nav-link" data-scroll-target="#votre-premier-composant-react">Votre premier composant React</a></li>
+  <li><a href="#ajouter-de-létat-avec-usestate" id="toc-ajouter-de-létat-avec-usestate" class="nav-link" data-scroll-target="#ajouter-de-létat-avec-usestate">Ajouter de l’état avec <code>useState</code></a></li>
+  <li><a href="#exercice-3-lannuaire-en-react" id="toc-exercice-3-lannuaire-en-react" class="nav-link" data-scroll-target="#exercice-3-lannuaire-en-react">Exercice 3 — L’annuaire en React</a></li>
+  <li><a href="#comparer-les-deux-versions" id="toc-comparer-les-deux-versions" class="nav-link" data-scroll-target="#comparer-les-deux-versions">Comparer les deux versions</a></li>
+  </ul></li>
+  <li><a href="#sec-aide-memoire" id="toc-sec-aide-memoire" class="nav-link" data-scroll-target="#sec-aide-memoire">Aide-mémoire</a></li>
+  <li><a href="#résumé-et-conclusion" id="toc-résumé-et-conclusion" class="nav-link" data-scroll-target="#résumé-et-conclusion">Résumé et conclusion</a></li>
+  <li><a href="#exercice-bonus-pour-aller-plus-loin" id="toc-exercice-bonus-pour-aller-plus-loin" class="nav-link" data-scroll-target="#exercice-bonus-pour-aller-plus-loin">Exercice bonus — Pour aller plus loin</a></li>
+  <li>Ressources du chapitre</li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Des fonctions JS à React</h1>
+</div>
+
+<div>
+  <div class="description">
+    Lab 1 de Programmation Frontend 2 : les trois formes de fonction en JavaScript, l’asynchrone avec fetch, et une première application React.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Auteur·rice</div>
+    <div class="quarto-title-meta-contents">
+             <p>Dr.&nbsp;El Hadji Bassirou TOURÉ, Département Génie Informatique, Université Cheikh Anta Diop de Dakar </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="encadre-prereqbox callout callout-style-default callout-note callout-titled" title="Informations pratiques">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Informations pratiques
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Durée estimée</strong></th>
+<th>1h (une séance)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Prérequis</strong></td>
+<td>Savoir manipuler le DOM (sélecteurs, événements, modification de styles).</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Avoir un éditeur de code (VS Code recommandé) et Node.js installé.</td>
+</tr>
+<tr class="odd">
+<td><strong>Fichiers starter</strong></td>
+<td><code>index.html</code> + <code>index.js</code> (fournis par l’enseignant)</td>
+</tr>
+<tr class="even">
+<td><strong>Livrables</strong></td>
+<td>Un dossier <code>annuaire-react/</code> fonctionnel avec une appli React</td>
+</tr>
+<tr class="odd">
+<td><strong>Validation</strong></td>
+<td>L’application React affiche des utilisateurs récupérés depuis une API</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectifs du lab">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectifs du lab
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>À l’issue de ce lab, chaque étudiant sera capable de :</p>
+<ol type="1">
+<li>Distinguer les <strong>trois façons de déclarer une fonction</strong> en JavaScript (déclaration, expression, fléchée)</li>
+<li>Expliquer ce qu’est une opération <strong>asynchrone</strong> et pourquoi c’est nécessaire</li>
+<li>Utiliser <code>fetch</code> avec <code>async/await</code> pour récupérer des données depuis une API</li>
+<li>Créer une application <strong>React</strong> avec Vite et comprendre le concept de <strong>composant</strong></li>
+<li>Utiliser <code>useState</code> et <code>useEffect</code> pour gérer l’état et les effets de bord</li>
+</ol>
+</div>
+</div>
+<section id="sec-starter" class="level2">
+<h2 class="anchored" data-anchor-id="sec-starter">Le starter — Point de départ</h2>
+<p>Créez un dossier <code>lab-react/</code> et placez-y les deux fichiers suivants.</p>
+<section id="le-fichier-index.html" class="level3">
+<h3 class="anchored" data-anchor-id="le-fichier-index.html">Le fichier <code>index.html</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;!</span>DOCTYPE html<span class="op">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>html lang<span class="op">=</span><span class="st">"en"</span><span class="op">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>head<span class="op">&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>meta charset<span class="op">=</span><span class="st">"UTF-8"</span> <span class="op">/&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>meta name<span class="op">=</span><span class="st">"viewport"</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>          content<span class="op">=</span><span class="st">"width=device-width, initial-scale=1.0"</span> <span class="op">/&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>title<span class="op">&gt;</span>DOM<span class="op">&lt;/</span>title<span class="op">&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>script src<span class="op">=</span><span class="st">"index.js"</span><span class="op">&gt;&lt;/</span>script<span class="op">&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;/</span>head<span class="op">&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>body<span class="op">&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>h2<span class="op">&gt;</span>Manipulation du DOM<span class="op">&lt;/</span>h2<span class="op">&gt;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>p<span class="op">&gt;</span>Premier exemple<span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>input type<span class="op">=</span><span class="st">"button"</span> value<span class="op">=</span><span class="st">"changer couleur"</span> id<span class="op">=</span><span class="st">"b1"</span> <span class="op">/&gt;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;/</span>body<span class="op">&gt;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;/</span>html<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>La page contient un titre <code>&lt;h2&gt;</code>, un paragraphe <code>&lt;p&gt;</code> et un bouton <code>&lt;input&gt;</code> avec l’identifiant <code>b1</code>. Le fichier <code>index.js</code> est chargé via la balise <code>&lt;script&gt;</code>.</p>
+</section>
+<section id="le-fichier-index.js" class="level3">
+<h3 class="anchored" data-anchor-id="le-fichier-index.js">Le fichier <code>index.js</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="st">"use strict"</span><span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>(<span class="kw">function</span> () {</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">window</span><span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"load"</span><span class="op">,</span> init)<span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">init</span>() {</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">id</span>(<span class="st">"b1"</span>)<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> change)<span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">change</span>() {</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> p <span class="op">=</span> <span class="fu">qs</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> h2 <span class="op">=</span> <span class="fu">qs</span>(<span class="st">"h2"</span>)<span class="op">;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    p<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    h2<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"blue"</span><span class="op">;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">id</span>(name) {</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(name)<span class="op">;</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">qs</span>(selector) {</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelector</span>(selector)<span class="op">;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">qsa</span>(query) {</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(query)<span class="op">;</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>})()<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Le JS est encapsulé dans une IIFE<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Il contient trois fonctions utilitaires (<code>id</code>, <code>qs</code>, <code>qsa</code>), une fonction <code>init</code> qui attache un écouteur de clic au bouton, et une fonction <code>change</code> qui modifie les couleurs.</p>
+</section>
+<section id="testez-le-starter" class="level3">
+<h3 class="anchored" data-anchor-id="testez-le-starter">Testez le starter</h3>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Étape 0 --- Vérification">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Étape 0 — Vérification
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Ouvrez <code>index.html</code> dans votre navigateur. Cliquez sur le bouton «&nbsp;changer couleur&nbsp;». Le titre doit passer en <strong>bleu</strong> et le paragraphe en <strong>rouge</strong>.</p>
+<p>Si ça ne fonctionne pas : vérifiez que les deux fichiers sont dans le <strong>même dossier</strong> et que les noms correspondent (<code>index.html</code> charge <code>index.js</code>).</p>
+</div>
+</div>
+<p>Une fois que ça marche, on va <strong>enrichir ce code</strong> en trois étapes : d’abord les fonctions, puis l’asynchrone, et enfin React.</p>
+</section>
+</section>
+<section id="sec-fonctions" class="level2">
+<h2 class="anchored" data-anchor-id="sec-fonctions">Partie 1 — Les trois visages des fonctions</h2>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectif --- 15 minutes">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectif — 15 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Comprendre les trois façons d’écrire une fonction en JavaScript et savoir quand utiliser chacune.</p>
+</div>
+</div>
+<section id="façon-1-la-déclaration-de-fonction" class="level3">
+<h3 class="anchored" data-anchor-id="façon-1-la-déclaration-de-fonction">Façon 1 : La déclaration de fonction</h3>
+<p>C’est celle que vous connaissez déjà. Regardez le starter :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">change</span>() {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> p <span class="op">=</span> <span class="fu">qs</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  p<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>On déclare une fonction avec le mot-clé <code>function</code>, suivi d’un nom. C’est la forme classique.</p>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Particularité : le *hoisting*">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Particularité : le <em>hoisting</em>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Une fonction déclarée peut être appelée <strong>avant</strong> sa définition dans le code. JavaScript la «&nbsp;remonte&nbsp;» automatiquement en haut du fichier. C’est pour cela que dans le starter, <code>init()</code> appelle <code>change()</code> qui est définie plus bas — et ça marche.</p>
+</div>
+</div>
+</section>
+<section id="façon-2-lexpression-de-fonction" class="level3">
+<h3 class="anchored" data-anchor-id="façon-2-lexpression-de-fonction">Façon 2 : L’expression de fonction</h3>
+<p>On peut aussi <strong>stocker une fonction dans une variable</strong>, comme on stocke un nombre ou un texte :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> change <span class="op">=</span> <span class="kw">function</span>() {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> p <span class="op">=</span> <span class="fu">qs</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  p<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>La différence ? Ici, <code>change</code> est une <strong>variable</strong> qui contient une fonction. On ne peut <strong>pas</strong> l’appeler avant sa définition (pas de <em>hoisting</em>).</p>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="À retenir">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>À retenir
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><strong>Déclaration</strong></th>
+<th><code>function maFonction() { ... }</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Expression</strong></td>
+<td><code>const maFonction = function() { ... };</code></td>
+</tr>
+</tbody>
+</table>
+<p>En JavaScript, <strong>une fonction est une valeur</strong> comme une autre. On peut la stocker dans une variable, la passer en paramètre, la retourner. C’est un concept fondamental.</p>
+</div>
+</div>
+</section>
+<section id="façon-3-la-fonction-fléchée-arrow-function" class="level3">
+<h3 class="anchored" data-anchor-id="façon-3-la-fonction-fléchée-arrow-function">Façon 3 : La fonction fléchée (<em>arrow function</em>)</h3>
+<p>Depuis 2015 (ES6), JavaScript offre une syntaxe plus courte :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> change <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> p <span class="op">=</span> <span class="fu">qs</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  p<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>On remplace <code>function()</code> par <code>() =&gt;</code>. C’est la même chose, en plus compact. La flèche se lit «&nbsp;qui fait&nbsp;» : <code>() =&gt; { ... }</code> = «&nbsp;une fonction sans paramètre qui fait …&nbsp;».</p>
+<p>Quand la fonction a <strong>un seul paramètre</strong>, on peut enlever les parenthèses. Quand elle a <strong>une seule ligne</strong>, on peut enlever les accolades et le <code>return</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Avec un paramètre et une seule ligne</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> id <span class="op">=</span> name <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(name)<span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Équivalent de :</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">id</span>(name) {</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(name)<span class="op">;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Les trois formes côte à côte">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Les trois formes côte à côte
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><strong>Forme</strong></th>
+<th><strong>Syntaxe</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Déclaration</td>
+<td><code>function double(x) { return x * 2; }</code></td>
+</tr>
+<tr class="even">
+<td>Expression</td>
+<td><code>const double = function(x) { return x * 2; };</code></td>
+</tr>
+<tr class="odd">
+<td>Fléchée</td>
+<td><code>const double = x =&gt; x * 2;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Les trois font <strong>la même chose</strong>. La fonction fléchée est la plus utilisée dans le code moderne et dans React.</p>
+</div>
+</div>
+</section>
+<section id="exercice-1-refactoriser-le-starter" class="level3">
+<h3 class="anchored" data-anchor-id="exercice-1-refactoriser-le-starter">Exercice 1 — Refactoriser le starter</h3>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="À vous de jouer">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>À vous de jouer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Réécrivez les fonctions utilitaires du starter en utilisant des <strong>fonctions fléchées</strong>. Transformez :</p>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// AVANT (déclarations classiques)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">id</span>(name) {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(name)<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">qs</span>(selector) {</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelector</span>(selector)<span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">qsa</span>(query) {</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(query)<span class="op">;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>En :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// APRÈS (fonctions fléchées)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> id <span class="op">=</span> name <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(name)<span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> qs <span class="op">=</span> selector <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelector</span>(selector)<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> qsa <span class="op">=</span> query <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(query)<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Remplacez aussi la fonction <code>change</code> par une fléchée, et <code>init</code> par une fléchée. Votre starter refactorisé doit ressembler à ceci :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="st">"use strict"</span><span class="op">;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>(<span class="kw">function</span> () {</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">window</span><span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"load"</span><span class="op">,</span> init)<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> init <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">id</span>(<span class="st">"b1"</span>)<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> change)<span class="op">;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> change <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">qs</span>(<span class="st">"p"</span>)<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">qs</span>(<span class="st">"h2"</span>)<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"blue"</span><span class="op">;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> id <span class="op">=</span> name <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(name)<span class="op">;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> qs <span class="op">=</span> selector <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelector</span>(selector)<span class="op">;</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> qsa <span class="op">=</span> query <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(query)<span class="op">;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>})()<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="Attention au *hoisting*">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Attention au <em>hoisting</em>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Si vous testez ce code, il ne fonctionnera <strong>pas</strong> directement ! Pourquoi ? Parce que <code>init</code> est maintenant une expression (pas de <em>hoisting</em>), mais <code>window.addEventListener("load", init)</code> est appelé avant la définition de <code>init</code>.</p>
+<p>La solution : déplacez l’appel <code>window.addEventListener</code> <strong>après</strong> les définitions :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="st">"use strict"</span><span class="op">;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>(<span class="kw">function</span> () {</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> id <span class="op">=</span> name <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(name)<span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> qs <span class="op">=</span> selector <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelector</span>(selector)<span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> qsa <span class="op">=</span> query <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(query)<span class="op">;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> change <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">qs</span>(<span class="st">"p"</span>)<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">qs</span>(<span class="st">"h2"</span>)<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">color</span> <span class="op">=</span> <span class="st">"blue"</span><span class="op">;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> init <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">id</span>(<span class="st">"b1"</span>)<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> change)<span class="op">;</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="bu">window</span><span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"load"</span><span class="op">,</span> init)<span class="op">;</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>})()<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Avec les fonctions fléchées (expressions), <strong>l’ordre des définitions compte</strong>. Pas de <em>hoisting</em>.</p>
+</div>
+</div>
+<p>Sauvegardez <code>index.js</code> et rechargez <code>index.html</code> dans le navigateur. Le bouton doit fonctionner exactement comme avant.</p>
+</section>
+</section>
+<section id="sec-async" class="level2">
+<h2 class="anchored" data-anchor-id="sec-async">Partie 2 — JavaScript asynchrone</h2>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectif --- 20 minutes">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectif — 20 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Comprendre le concept d’asynchrone et savoir récupérer des données depuis une API avec <code>fetch</code> et <code>async/await</code>.</p>
+</div>
+</div>
+<section id="le-problème-attendre-sans-bloquer" class="level3">
+<h3 class="anchored" data-anchor-id="le-problème-attendre-sans-bloquer">Le problème : attendre sans bloquer</h3>
+<p>Imaginez que vous commandez un thiéboudienne au restaurant. Deux scénarios :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Synchrone</strong></th>
+<th><strong>Asynchrone</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Ce qui se passe</strong></td>
+<td>Vous restez debout devant la cuisine, immobile, à attendre que le plat soit prêt.</td>
+<td>Vous vous asseyez, consultez votre téléphone. On vous appelle quand c’est prêt.</td>
+</tr>
+<tr class="even">
+<td><strong>Résultat</strong></td>
+<td>Vous êtes bloqué. Vous ne pouvez rien faire d’autre.</td>
+<td>Vous continuez votre vie. Le plat arrive quand il est prêt.</td>
+</tr>
+</tbody>
+</table>
+<p>JavaScript fonctionne en mode <strong>asynchrone</strong>. Quand on demande des données à un serveur (ce qui prend du temps), JavaScript <strong>n’attend pas</strong>. Il continue d’exécuter le reste du code, et traite les données <strong>quand elles arrivent</strong>.</p>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="À retenir">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>À retenir
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Synchrone</strong> = une chose à la fois, dans l’ordre, en attendant chaque résultat.<br><strong>Asynchrone</strong> = on lance une tâche, on continue autre chose, et on traite le résultat quand il arrive.</p>
+<p>JavaScript est <strong>mono-thread</strong> (un seul fil d’exécution). Sans l’asynchrone, la page se figerait à chaque requête réseau. C’est pour cela que l’asynchrone est <strong>indispensable</strong> en développement web.</p>
+</div>
+</div>
+</section>
+<section id="lapi-jsonplaceholder" class="level3">
+<h3 class="anchored" data-anchor-id="lapi-jsonplaceholder">L’API JSONPlaceholder</h3>
+<p>Pour pratiquer, on va utiliser une API gratuite de test : <a href="https://jsonplaceholder.typicode.com" class="uri">https://jsonplaceholder.typicode.com</a>. Elle fournit de fausses données (utilisateurs, articles, commentaires) au format JSON.</p>
+<p>L’adresse <code>https://jsonplaceholder.typicode.com/users</code> retourne 10 utilisateurs fictifs. Ouvrez cette URL dans votre navigateur pour voir les données.</p>
+<p>Un utilisateur ressemble à ceci :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"id"</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"name"</span><span class="op">:</span> <span class="st">"Leanne Graham"</span><span class="op">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"email"</span><span class="op">:</span> <span class="st">"Sincere@april.biz"</span><span class="op">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"phone"</span><span class="op">:</span> <span class="st">"1-770-736-8031 x56442"</span><span class="op">,</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"company"</span><span class="op">:</span> {</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"name"</span><span class="op">:</span> <span class="st">"Romaguera-Crona"</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="récupérer-des-données-avec-fetch" class="level3">
+<h3 class="anchored" data-anchor-id="récupérer-des-données-avec-fetch">Récupérer des données avec <code>fetch</code></h3>
+<p>La fonction <code>fetch</code> envoie une requête HTTP et retourne une <strong>promesse</strong> (<em>Promise</em>) — c’est-à-dire un objet qui représente un résultat qui <strong>n’est pas encore disponible</strong>.</p>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Qu'est-ce qu'une promesse ?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Qu’est-ce qu’une promesse ?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Quand vous commandez votre thiéboudienne, le serveur vous donne un <strong>ticket avec un numéro</strong>. Ce ticket est une <em>promesse</em> : il ne contient pas le plat, mais il <strong>garantit</strong> que le plat arrivera (ou qu’on vous préviendra s’il y a un problème). En JavaScript, <code>fetch</code> retourne un tel ticket.</p>
+</div>
+</div>
+<section id="méthode-1-.then-pour-comprendre" class="level4">
+<h4 class="anchored" data-anchor-id="méthode-1-.then-pour-comprendre">Méthode 1 : <code>.then()</code> (pour comprendre)</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fetch</span>(<span class="st">"https://jsonplaceholder.typicode.com/users"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(response <span class="kw">=&gt;</span> response<span class="op">.</span><span class="fu">json</span>())  <span class="co">// Convertir la réponse en JSON</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(users <span class="kw">=&gt;</span> {</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(users)<span class="op">;</span>               <span class="co">// Afficher les utilisateurs</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">catch</span>(error <span class="kw">=&gt;</span> {</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">console</span><span class="op">.</span><span class="fu">error</span>(<span class="st">"Erreur :"</span><span class="op">,</span> error)<span class="op">;</span>  <span class="co">// Gérer les erreurs</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Chaque <code>.then()</code> reçoit le résultat de l’étape précédente. C’est une chaîne : requête <span class="math inline">\(\to\)</span> conversion en JSON <span class="math inline">\(\to\)</span> utilisation des données.</p>
+</section>
+<section id="méthode-2-asyncawait-la-méthode-moderne" class="level4">
+<h4 class="anchored" data-anchor-id="méthode-2-asyncawait-la-méthode-moderne">Méthode 2 : <code>async/await</code> (la méthode moderne)</h4>
+<p>La syntaxe <code>async/await</code> fait exactement la même chose, mais en <strong>plus lisible</strong> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> chargerUtilisateurs <span class="op">=</span> <span class="kw">async</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">try</span> {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> response <span class="op">=</span> <span class="cf">await</span> <span class="fu">fetch</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>      <span class="st">"https://jsonplaceholder.typicode.com/users"</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> users <span class="op">=</span> <span class="cf">await</span> response<span class="op">.</span><span class="fu">json</span>()<span class="op">;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(users)<span class="op">;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">catch</span> (error) {</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">console</span><span class="op">.</span><span class="fu">error</span>(<span class="st">"Erreur :"</span><span class="op">,</span> error)<span class="op">;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Décoder `async/await`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Décoder <code>async/await</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Mot-clé</strong></th>
+<th><strong>Signification</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>async</code></td>
+<td>Devant une fonction : «&nbsp;cette fonction contient des opérations asynchrones&nbsp;»</td>
+</tr>
+<tr class="even">
+<td><code>await</code></td>
+<td>Devant une promesse : «&nbsp;attends le résultat avant de continuer&nbsp;»</td>
+</tr>
+<tr class="odd">
+<td><code>try/catch</code></td>
+<td>«&nbsp;Essaie ceci, et si ça échoue, fais cela&nbsp;»</td>
+</tr>
+</tbody>
+</table>
+<p><code>await</code> ne bloque <strong>pas</strong> le navigateur. Il met la fonction en pause et laisse JavaScript continuer d’autres tâches. Quand la réponse arrive, la fonction reprend.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="exercice-2-afficher-des-utilisateurs-dans-le-dom" class="level3">
+<h3 class="anchored" data-anchor-id="exercice-2-afficher-des-utilisateurs-dans-le-dom">Exercice 2 — Afficher des utilisateurs dans le DOM</h3>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="À vous de jouer">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>À vous de jouer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Créez un fichier HTML + JS qui récupère les utilisateurs depuis JSONPlaceholder et les affiche dans la page. Utilisez le patron du starter.</p>
+</div>
+</div>
+<p>Créez un fichier <code>annuaire.html</code> dans votre dossier <code>lab-react/</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;!</span>DOCTYPE html<span class="op">&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>html lang<span class="op">=</span><span class="st">"fr"</span><span class="op">&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>head<span class="op">&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>meta charset<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>title<span class="op">&gt;</span>Annuaire<span class="op">&lt;/</span>title<span class="op">&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>style<span class="op">&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    body { font<span class="op">-</span><span class="dt">family</span><span class="op">:</span> sans<span class="op">-</span>serif<span class="op">;</span> max<span class="op">-</span><span class="dt">width</span><span class="op">:</span> <span class="dv">600</span><span class="er">px</span><span class="op">;</span> <span class="dt">margin</span><span class="op">:</span> <span class="dv">2</span><span class="er">rem</span> auto<span class="op">;</span> }</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="at">card</span> { <span class="dt">border</span><span class="op">:</span> <span class="dv">1</span><span class="er">px</span> solid #ccc<span class="op">;</span> <span class="dt">padding</span><span class="op">:</span> <span class="dv">1</span><span class="er">rem</span><span class="op">;</span> <span class="dt">margin</span><span class="op">:</span> <span class="fl">0.5</span>rem <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>            border<span class="op">-</span><span class="dt">radius</span><span class="op">:</span> <span class="dv">8</span><span class="er">px</span><span class="op">;</span> }</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="at">card</span> h3 { <span class="dt">margin</span><span class="op">:</span> <span class="dv">0</span> <span class="dv">0</span> <span class="fl">0.5</span>rem <span class="dv">0</span><span class="op">;</span> }</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="at">card</span> p { <span class="dt">margin</span><span class="op">:</span> <span class="fl">0.2</span>rem <span class="dv">0</span><span class="op">;</span> <span class="dt">color</span><span class="op">:</span> #<span class="dv">555</span><span class="op">;</span> }</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    #btn<span class="op">-</span>charger { <span class="dt">padding</span><span class="op">:</span> <span class="fl">0.5</span>rem <span class="fl">1.5</span>rem<span class="op">;</span> font<span class="op">-</span><span class="dt">size</span><span class="op">:</span> <span class="dv">1</span><span class="er">rem</span><span class="op">;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                   <span class="dt">cursor</span><span class="op">:</span> pointer<span class="op">;</span> }</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;/</span>style<span class="op">&gt;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;/</span>head<span class="op">&gt;</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>body<span class="op">&gt;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>h1<span class="op">&gt;</span>Annuaire des utilisateurs<span class="op">&lt;/</span>h1<span class="op">&gt;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>button id<span class="op">=</span><span class="st">"btn-charger"</span><span class="op">&gt;</span>Charger les utilisateurs<span class="op">&lt;/</span>button<span class="op">&gt;</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>div id<span class="op">=</span><span class="st">"liste"</span><span class="op">&gt;&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>script src<span class="op">=</span><span class="st">"annuaire.js"</span><span class="op">&gt;&lt;/</span>script<span class="op">&gt;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;/</span>body<span class="op">&gt;</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;/</span>html<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Maintenant, créez <code>annuaire.js</code> dans le même dossier, en suivant le patron du starter :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="st">"use strict"</span><span class="op">;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>(<span class="kw">function</span> () {</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> id <span class="op">=</span> name <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(name)<span class="op">;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Fonction asynchrone qui récupère et affiche les utilisateurs</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> chargerUtilisateurs <span class="op">=</span> <span class="kw">async</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> response <span class="op">=</span> <span class="cf">await</span> <span class="fu">fetch</span>(</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"https://jsonplaceholder.typicode.com/users"</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>      )<span class="op">;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> users <span class="op">=</span> <span class="cf">await</span> response<span class="op">.</span><span class="fu">json</span>()<span class="op">;</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">afficherUtilisateurs</span>(users)<span class="op">;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">id</span>(<span class="st">"liste"</span>)<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Erreur de chargement."</span><span class="op">;</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>      <span class="bu">console</span><span class="op">.</span><span class="fu">error</span>(<span class="st">"Erreur :"</span><span class="op">,</span> error)<span class="op">;</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Fonction qui construit le HTML pour chaque utilisateur</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> afficherUtilisateurs <span class="op">=</span> (users) <span class="kw">=&gt;</span> {</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> liste <span class="op">=</span> <span class="fu">id</span>(<span class="st">"liste"</span>)<span class="op">;</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    liste<span class="op">.</span><span class="at">innerHTML</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span>  <span class="co">// Vider la liste avant de remplir</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    users<span class="op">.</span><span class="fu">forEach</span>(user <span class="kw">=&gt;</span> {</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> card <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>      card<span class="op">.</span><span class="at">classList</span><span class="op">.</span><span class="fu">add</span>(<span class="st">"card"</span>)<span class="op">;</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>      card<span class="op">.</span><span class="at">innerHTML</span> <span class="op">=</span> <span class="vs">`</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;h3&gt;</span><span class="sc">${</span>user<span class="op">.</span><span class="at">name</span><span class="sc">}</span><span class="vs">&lt;/h3&gt;</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;p&gt;Email : </span><span class="sc">${</span>user<span class="op">.</span><span class="at">email</span><span class="sc">}</span><span class="vs">&lt;/p&gt;</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;p&gt;Entreprise : </span><span class="sc">${</span>user<span class="op">.</span><span class="at">company</span><span class="op">.</span><span class="at">name</span><span class="sc">}</span><span class="vs">&lt;/p&gt;</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a><span class="vs">      `</span><span class="op">;</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>      liste<span class="op">.</span><span class="fu">appendChild</span>(card)<span class="op">;</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> init <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">id</span>(<span class="st">"btn-charger"</span>)<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> chargerUtilisateurs)<span class="op">;</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>  <span class="bu">window</span><span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"load"</span><span class="op">,</span> init)<span class="op">;</span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>})()<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ouvrez <code>annuaire.html</code> dans votre navigateur. Cliquez sur le bouton. Les 10 utilisateurs apparaissent.</p>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="Vérification">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Vérification
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Si rien ne s’affiche, ouvrez la <strong>console du navigateur</strong> (<code>F12</code> <span class="math inline">\(\to\)</span> onglet Console). Les erreurs y apparaissent en rouge. Causes fréquentes :</p>
+<ul>
+<li>Erreur de syntaxe dans le JS (guillemet manquant, parenthèse oubliée)</li>
+<li>Fichier <code>annuaire.js</code> pas au même endroit que le HTML</li>
+<li>Pas de connexion internet (l’API est en ligne)</li>
+</ul>
+</div>
+</div>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Bilan de la Partie 2">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Bilan de la Partie 2
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Vous savez maintenant :</p>
+<ol type="1">
+<li>Pourquoi l’asynchrone est nécessaire (ne pas bloquer le navigateur)</li>
+<li>Utiliser <code>fetch</code> + <code>async/await</code> pour récupérer des données</li>
+<li>Construire du HTML dynamiquement à partir de données JSON</li>
+</ol>
+<p>Mais regardez votre code : pour afficher 10 cartes, il faut <code>createElement</code>, <code>innerHTML</code>, <code>appendChild</code>, <code>classList.add</code>… C’est <strong>beaucoup de manipulation manuelle du DOM</strong>. Et si on veut ajouter un champ de recherche ? Un tri ? Un filtre ? Le code devient vite ingérable. React résout ce problème.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-react" class="level2">
+<h2 class="anchored" data-anchor-id="sec-react">Partie 3 — Bienvenue dans React</h2>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectif --- 25 minutes">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectif — 25 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Comprendre pourquoi React existe, créer un projet React avec Vite, et recréer l’annuaire en React.</p>
+</div>
+</div>
+<section id="le-problème-du-dom-manuel" class="level3">
+<h3 class="anchored" data-anchor-id="le-problème-du-dom-manuel">Le problème du DOM manuel</h3>
+<p>Dans l’exercice précédent, vous avez écrit du code comme :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> card <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>card<span class="op">.</span><span class="at">classList</span><span class="op">.</span><span class="fu">add</span>(<span class="st">"card"</span>)<span class="op">;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>card<span class="op">.</span><span class="at">innerHTML</span> <span class="op">=</span> <span class="vs">`&lt;h3&gt;</span><span class="sc">${</span>user<span class="op">.</span><span class="at">name</span><span class="sc">}</span><span class="vs">&lt;/h3&gt;`</span><span class="op">;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>liste<span class="op">.</span><span class="fu">appendChild</span>(card)<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>C’est du code <strong>impératif</strong> : vous dites au navigateur <strong>comment</strong> faire, étape par étape. Avec React, on passe en mode <strong>déclaratif</strong> : on décrit <strong>ce qu’on veut voir</strong>, et React s’occupe de mettre à jour le DOM.</p>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Impératif vs Déclaratif">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Impératif vs Déclaratif
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Impératif</strong> (DOM manuel)</th>
+<th><strong>Déclaratif</strong> (React)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Analogie</strong></td>
+<td>Vous expliquez au cuisinier chaque geste : «&nbsp;coupe l’oignon, fais chauffer l’huile, ajoute le riz…&nbsp;»</td>
+<td>Vous commandez «&nbsp;un thiéboudienne&nbsp;» et le cuisinier sait quoi faire.</td>
+</tr>
+<tr class="even">
+<td><strong>Code</strong></td>
+<td><code>createElement</code>, <code>appendChild</code>, <code>innerHTML</code></td>
+<td>On décrit le résultat souhaité, React gère le DOM.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="installer-vite-react" class="level3">
+<h3 class="anchored" data-anchor-id="installer-vite-react">Installer Vite + React</h3>
+<p><strong>Vite</strong> est un outil qui crée et configure un projet React en une seule commande. Il est rapide, moderne et utilisé en production.</p>
+<p>Ouvrez un terminal et tapez :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>npm create vite@latest annuaire<span class="op">-</span>react <span class="op">--</span> <span class="op">--</span>template react</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cd annuaire<span class="op">-</span>react</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>npm install</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>npm run dev</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Résultat attendu :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>  VITE v6<span class="op">.</span><span class="at">x</span><span class="op">.</span><span class="at">x</span>  ready <span class="kw">in</span> xxx ms</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">-&gt;</span> Local<span class="op">:</span>   http<span class="op">:</span><span class="co">//localhost:5173/</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ouvrez <code>http://localhost:5173</code> dans votre navigateur. Vous voyez la page d’accueil de Vite + React.</p>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="Node.js obligatoire">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Node.js obligatoire
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Si la commande <code>npm</code> n’est pas reconnue, Node.js n’est pas installé. Téléchargez-le sur <a href="https://nodejs.org" class="uri">https://nodejs.org</a> (version LTS). Après l’installation, fermez et rouvrez le terminal.</p>
+</div>
+</div>
+</section>
+<section id="comprendre-la-structure-du-projet" class="level3">
+<h3 class="anchored" data-anchor-id="comprendre-la-structure-du-projet">Comprendre la structure du projet</h3>
+<p>Ouvrez le dossier <code>annuaire-react</code> dans VS Code. Voici les fichiers importants :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Fichier</strong></th>
+<th><strong>Rôle</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>src/App.jsx</code></td>
+<td>Le composant principal — c’est <strong>ici</strong> qu’on va travailler</td>
+</tr>
+<tr class="even">
+<td><code>src/main.jsx</code></td>
+<td>Le point d’entrée — relie React au HTML (ne pas toucher)</td>
+</tr>
+<tr class="odd">
+<td><code>index.html</code></td>
+<td>La page HTML (contient juste un <code>&lt;div id="root"&gt;</code>)</td>
+</tr>
+<tr class="even">
+<td><code>package.json</code></td>
+<td>La liste des dépendances du projet</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="votre-premier-composant-react" class="level3">
+<h3 class="anchored" data-anchor-id="votre-premier-composant-react">Votre premier composant React</h3>
+<p>Ouvrez <code>src/App.jsx</code> et remplacez <strong>tout le contenu</strong> par :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> App <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div<span class="op">&gt;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>h1<span class="op">&gt;</span>Annuaire des utilisateurs<span class="op">&lt;/</span>h1<span class="op">&gt;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>p<span class="op">&gt;</span>Bienvenue dans mon premier composant React <span class="op">!&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> App<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Sauvegardez. La page dans le navigateur se met à jour <strong>automatiquement</strong> (c’est le <em>Hot Module Replacement</em> de Vite — pas besoin de rafraîchir).</p>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Qu'est-ce qu'un composant ?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Qu’est-ce qu’un composant ?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un <strong>composant React</strong> est une fonction qui retourne du <strong>JSX</strong> — un mélange de JavaScript et de HTML. C’est la brique de base de toute application React. Chaque élément visible de l’interface (un bouton, une carte, une liste) est un composant.</p>
+<p>Remarquez : on utilise une <strong>fonction fléchée</strong>. Tout ce que vous avez appris en Partie 1 est utilisé ici.</p>
+</div>
+</div>
+</section>
+<section id="ajouter-de-létat-avec-usestate" class="level3">
+<h3 class="anchored" data-anchor-id="ajouter-de-létat-avec-usestate">Ajouter de l’état avec <code>useState</code></h3>
+<p>On veut que le bouton déclenche le chargement des utilisateurs. Pour cela, on a besoin d’un <strong>état</strong> : une variable que React <strong>surveille</strong>. Quand l’état change, React met à jour l’affichage automatiquement.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { useState } <span class="im">from</span> <span class="st">"react"</span><span class="op">;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> App <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [compteur<span class="op">,</span> setCompteur] <span class="op">=</span> <span class="fu">useState</span>(<span class="dv">0</span>)<span class="op">;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div<span class="op">&gt;</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>h1<span class="op">&gt;</span>Annuaire des utilisateurs<span class="op">&lt;/</span>h1<span class="op">&gt;</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>p<span class="op">&gt;</span>Vous avez cliqué {compteur} fois<span class="op">.&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>button onClick<span class="op">=</span>{() <span class="kw">=&gt;</span> <span class="fu">setCompteur</span>(compteur <span class="op">+</span> <span class="dv">1</span>)}<span class="op">&gt;</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>        Cliquer</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>button<span class="op">&gt;</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> App<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Testez : chaque clic incrémente le compteur. La page se met à jour <strong>sans que vous touchiez au DOM</strong>. Pas de <code>innerHTML</code>, pas de <code>createElement</code>. Vous décrivez le résultat, React s’occupe du reste.</p>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Décoder `useState`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Décoder <code>useState</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Élément</strong></th>
+<th><strong>Signification</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>useState(0)</code></td>
+<td>Crée un état initialisé à <code>0</code></td>
+</tr>
+<tr class="even">
+<td><code>compteur</code></td>
+<td>La valeur actuelle de l’état</td>
+</tr>
+<tr class="odd">
+<td><code>setCompteur</code></td>
+<td>La fonction pour modifier l’état</td>
+</tr>
+<tr class="even">
+<td><code>onClick={...}</code></td>
+<td>L’événement clic (équivalent de <code>addEventListener</code>)</td>
+</tr>
+<tr class="odd">
+<td><code>() =&gt;</code></td>
+<td>Une fonction fléchée (Partie 1 !)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Règle d’or :</strong> ne modifiez <strong>jamais</strong> l’état directement (<code>compteur = 5</code>). Utilisez <strong>toujours</strong> la fonction <code>set...</code> fournie par <code>useState</code>.</p>
+</div>
+</div>
+</section>
+<section id="exercice-3-lannuaire-en-react" class="level3">
+<h3 class="anchored" data-anchor-id="exercice-3-lannuaire-en-react">Exercice 3 — L’annuaire en React</h3>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="À vous de jouer --- Exercice final">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>À vous de jouer — Exercice final
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Recréez l’annuaire de la Partie 2, mais cette fois en React. L’application doit :</p>
+<ol type="1">
+<li>Afficher un bouton «&nbsp;Charger les utilisateurs&nbsp;»</li>
+<li>Au clic, récupérer les données depuis JSONPlaceholder (<code>async/await</code>)</li>
+<li>Afficher chaque utilisateur dans une carte</li>
+</ol>
+</div>
+</div>
+<p>Remplacez le contenu de <code>src/App.jsx</code> par :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { useState } <span class="im">from</span> <span class="st">"react"</span><span class="op">;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> App <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [users<span class="op">,</span> setUsers] <span class="op">=</span> <span class="fu">useState</span>([])<span class="op">;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [chargement<span class="op">,</span> setChargement] <span class="op">=</span> <span class="fu">useState</span>(<span class="kw">false</span>)<span class="op">;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> chargerUtilisateurs <span class="op">=</span> <span class="kw">async</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setChargement</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> response <span class="op">=</span> <span class="cf">await</span> <span class="fu">fetch</span>(</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"https://jsonplaceholder.typicode.com/users"</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>      )<span class="op">;</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> data <span class="op">=</span> <span class="cf">await</span> response<span class="op">.</span><span class="fu">json</span>()<span class="op">;</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setUsers</span>(data)<span class="op">;</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>      <span class="bu">console</span><span class="op">.</span><span class="fu">error</span>(<span class="st">"Erreur :"</span><span class="op">,</span> error)<span class="op">;</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setChargement</span>(<span class="kw">false</span>)<span class="op">;</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div style<span class="op">=</span>{{ <span class="dt">maxWidth</span><span class="op">:</span> <span class="st">"600px"</span><span class="op">,</span> <span class="dt">margin</span><span class="op">:</span> <span class="st">"2rem auto"</span><span class="op">,</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>                  <span class="dt">fontFamily</span><span class="op">:</span> <span class="st">"sans-serif"</span> }}<span class="op">&gt;</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>h1<span class="op">&gt;</span>Annuaire des utilisateurs<span class="op">&lt;/</span>h1<span class="op">&gt;</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>button onClick<span class="op">=</span>{chargerUtilisateurs}</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>              disabled<span class="op">=</span>{chargement}<span class="op">&gt;</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>        {chargement <span class="op">?</span> <span class="st">"Chargement..."</span> <span class="op">:</span> <span class="st">"Charger les utilisateurs"</span>}</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>button<span class="op">&gt;</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>      {users<span class="op">.</span><span class="fu">map</span>(user <span class="kw">=&gt;</span> (</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span>UserCard key<span class="op">=</span>{user<span class="op">.</span><span class="at">id</span>} user<span class="op">=</span>{user} <span class="op">/&gt;</span></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>      ))}</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> UserCard <span class="op">=</span> ({ user }) <span class="kw">=&gt;</span> {</span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span>div style<span class="op">=</span>{{ <span class="dt">border</span><span class="op">:</span> <span class="st">"1px solid #ccc"</span><span class="op">,</span> <span class="dt">padding</span><span class="op">:</span> <span class="st">"1rem"</span><span class="op">,</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>                  <span class="dt">margin</span><span class="op">:</span> <span class="st">"0.5rem 0"</span><span class="op">,</span> <span class="dt">borderRadius</span><span class="op">:</span> <span class="st">"8px"</span> }}<span class="op">&gt;</span></span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>h3 style<span class="op">=</span>{{ <span class="dt">margin</span><span class="op">:</span> <span class="st">"0 0 0.5rem 0"</span> }}<span class="op">&gt;</span>{user<span class="op">.</span><span class="at">name</span>}<span class="op">&lt;/</span>h3<span class="op">&gt;</span></span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>p style<span class="op">=</span>{{ <span class="dt">margin</span><span class="op">:</span> <span class="st">"0.2rem 0"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span> <span class="st">"#555"</span> }}<span class="op">&gt;</span></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Email</span> <span class="op">:</span> {user<span class="op">.</span><span class="at">email</span>}</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;</span>p style<span class="op">=</span>{{ <span class="dt">margin</span><span class="op">:</span> <span class="st">"0.2rem 0"</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span> <span class="st">"#555"</span> }}<span class="op">&gt;</span></span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Entreprise</span> <span class="op">:</span> {user<span class="op">.</span><span class="at">company</span><span class="op">.</span><span class="at">name</span>}</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>      <span class="op">&lt;/</span>p<span class="op">&gt;</span></span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;/</span>div<span class="op">&gt;</span></span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> App<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Sauvegardez et vérifiez dans le navigateur.</p>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Ce qui est nouveau ici">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Ce qui est nouveau ici
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Concept</strong></th>
+<th><strong>Explication</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>users.map(...)</code></td>
+<td>Parcourt le tableau et crée un élément JSX pour chaque utilisateur (remplace la boucle <code>forEach</code> + <code>appendChild</code>)</td>
+</tr>
+<tr class="even">
+<td><code>key={user.id}</code></td>
+<td>Identifiant unique que React utilise pour optimiser les mises à jour</td>
+</tr>
+<tr class="odd">
+<td><code>&lt;UserCard /&gt;</code></td>
+<td>Un <strong>deuxième composant</strong> ! On découpe l’interface en morceaux réutilisables</td>
+</tr>
+<tr class="even">
+<td><code>{ user }</code> dans les props</td>
+<td>On passe des données d’un composant parent à un composant enfant</td>
+</tr>
+<tr class="odd">
+<td><code>disabled={chargement}</code></td>
+<td>Le bouton se désactive pendant le chargement</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="comparer-les-deux-versions" class="level3">
+<h3 class="anchored" data-anchor-id="comparer-les-deux-versions">Comparer les deux versions</h3>
+<p>Prenez un moment pour comparer :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>DOM manuel</strong> (Partie 2)</th>
+<th><strong>React</strong> (Partie 3)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Créer une carte</strong></td>
+<td><code>createElement</code> + <code>innerHTML</code> + <code>appendChild</code></td>
+<td><code>&lt;UserCard user={user} /&gt;</code></td>
+</tr>
+<tr class="even">
+<td><strong>Mettre à jour</strong></td>
+<td>Vider le conteneur + recréer tout</td>
+<td>Modifier l’état, React met à jour tout seul</td>
+</tr>
+<tr class="odd">
+<td><strong>Événement clic</strong></td>
+<td><code>addEventListener("click", fn)</code></td>
+<td><code>onClick={fn}</code></td>
+</tr>
+<tr class="even">
+<td><strong>Données</strong></td>
+<td>Variables globales dans une IIFE</td>
+<td><code>useState</code> — état géré par React</td>
+</tr>
+<tr class="odd">
+<td><strong>État de chargement</strong></td>
+<td>Il faut le gérer manuellement</td>
+<td><code>chargement</code> + texte conditionnel</td>
+</tr>
+</tbody>
+</table>
+<p>React est plus lisible, plus maintenable, et gère automatiquement les mises à jour du DOM. C’est pour cela qu’il est utilisé par Facebook, Airbnb, Netflix et des milliers d’entreprises.</p>
+</section>
+</section>
+<section id="sec-aide-memoire" class="level2">
+<h2 class="anchored" data-anchor-id="sec-aide-memoire">Aide-mémoire</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Concept</strong></th>
+<th><strong>Syntaxe / Exemple</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fonction déclarée</td>
+<td><code>function double(x) { return x * 2; }</code></td>
+</tr>
+<tr class="even">
+<td>Fonction expression</td>
+<td><code>const double = function(x) { return x * 2; };</code></td>
+</tr>
+<tr class="odd">
+<td>Fonction fléchée</td>
+<td><code>const double = x =&gt; x * 2;</code></td>
+</tr>
+<tr class="even">
+<td>fetch + .then()</td>
+<td><code>fetch(url).then(r =&gt; r.json()).then(data =&gt; ...)</code></td>
+</tr>
+<tr class="odd">
+<td>fetch + async/await</td>
+<td><code>const r = await fetch(url); const d = await r.json();</code></td>
+</tr>
+<tr class="even">
+<td>Créer un projet React</td>
+<td><code>npm create vite@latest nom -- --template react</code></td>
+</tr>
+<tr class="odd">
+<td>Lancer le serveur</td>
+<td><code>npm run dev</code></td>
+</tr>
+<tr class="even">
+<td>État React</td>
+<td><code>const [val, setVal] = useState(initial);</code></td>
+</tr>
+<tr class="odd">
+<td>Composant React</td>
+<td><code>const MonComposant = () =&gt; &lt;div&gt;...&lt;/div&gt;;</code></td>
+</tr>
+<tr class="even">
+<td>Passer des données</td>
+<td><code>&lt;Enfant nom={variable} /&gt;</code></td>
+</tr>
+<tr class="odd">
+<td>Boucle en JSX</td>
+<td><code>tableau.map(item =&gt; &lt;Elem key={item.id} /&gt;)</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="résumé-et-conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="résumé-et-conclusion">Résumé et conclusion</h2>
+<p>Dans ce lab, vous avez :</p>
+<ol type="1">
+<li>Découvert les <strong>trois façons d’écrire une fonction</strong> en JavaScript et refactorisé le starter avec des fonctions fléchées.</li>
+<li>Compris le concept <strong>d’asynchrone</strong> et utilisé <code>fetch</code> + <code>async/await</code> pour récupérer des données depuis une API.</li>
+<li>Créé votre <strong>première application React</strong> avec Vite, utilisé <code>useState</code> pour gérer l’état, et construit un composant réutilisable.</li>
+</ol>
+<p>Voici où vous en êtes dans la progression du cours :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Étape</strong></th>
+<th><strong>Statut</strong></th>
+<th><strong>Ce que vous savez faire</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>DOM &amp; événements</strong></td>
+<td>✓</td>
+<td>Sélecteurs, événements, modification du DOM</td>
+</tr>
+<tr class="even">
+<td><strong>Fonctions JS</strong></td>
+<td>✓</td>
+<td>Déclaration, expression, fléchée, <em>hoisting</em></td>
+</tr>
+<tr class="odd">
+<td><strong>Asynchrone</strong></td>
+<td>✓</td>
+<td><code>fetch</code>, <code>async/await</code>, gestion d’erreurs</td>
+</tr>
+<tr class="even">
+<td><strong>React — les bases</strong></td>
+<td>✓</td>
+<td>Composant, JSX, <code>useState</code>, props, <code>.map()</code></td>
+</tr>
+<tr class="odd">
+<td><strong>React — aller plus loin</strong></td>
+<td><span class="math inline">\(\to\)</span> Prochain lab</td>
+<td><code>useEffect</code>, formulaires, routing</td>
+</tr>
+</tbody>
+</table>
+<div class="encadre-projetbox callout callout-style-default callout-important callout-titled" title="Et ensuite ?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Et ensuite ?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Vous avez maintenant les bases pour construire de vraies interfaces utilisateur avec React. Dans les prochains labs, vous apprendrez à gérer les <strong>formulaires</strong>, le <strong>routing</strong> (navigation entre pages), et les <strong>effets de bord</strong> (<code>useEffect</code>) pour charger des données automatiquement au démarrage. Chaque concept s’appuie sur ce que vous avez appris aujourd’hui : les fonctions fléchées, l’asynchrone et les composants.</p>
+</div>
+</div>
+</section>
+<section id="exercice-bonus-pour-aller-plus-loin" class="level2">
+<h2 class="anchored" data-anchor-id="exercice-bonus-pour-aller-plus-loin">Exercice bonus — Pour aller plus loin</h2>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Bonus : ajouter un champ de recherche">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Bonus : ajouter un champ de recherche
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Si vous avez terminé en avance, ajoutez un champ de recherche qui filtre les utilisateurs par nom. Indice :</p>
+<ol type="1">
+<li>Ajoutez un état <code>const [recherche, setRecherche] = useState("");</code></li>
+<li>Ajoutez un <code>&lt;input&gt;</code> avec <code>onChange={e =&gt; setRecherche(e.target.value)}</code></li>
+<li>Filtrez les utilisateurs :<br><code>users.filter(u =&gt; u.name.toLowerCase()</code><br><code>.includes(recherche.toLowerCase()))</code></li>
+<li>Passez le tableau filtré au <code>.map()</code> au lieu de <code>users</code></li>
+</ol>
+<p>Cet exercice combine l’état, les événements et le rendu conditionnel.</p>
+</div>
+</div>
+<div class="columns">
+<div class="column" style="width:20%;">
+<!-- NON CONVERTI: \fbox -->
+<p>{</p>
+</div><div class="column" style="width:85%;">
+<!-- NON CONVERTI: \textbfLab -->
+<p>— Des fonctions JS à React — Terminé ✓<br> Vous savez écrire des fonctions modernes, récupérer des données<br>depuis une API et créer une application React.<br> Prochaine étape : <code>useEffect</code>, formulaires et routing.<br> <em>Chaque composant commence par une fonction fléchée.</em><br></p>
+</div><div class="column" style="width:20%;">
+<p>}</p>
+</div>
+</div>
+</section>
+<section class="level2">
+<h2 class="anchored" data-anchor-id="">Ressources du chapitre</h2>
+<ul>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-2/ressources/lab-1-des-fonctions-js-a-react.pdf" class="seance-ressource" title="Lab 1 — Des fonctions JS à React">Lab 1 — Des fonctions JS à React</a> <span class="ressource-poids">(146 Ko)</span></li>
+</ul>
+
+
+</section>
+
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Retour au sommet</a><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Notes de bas de page</h2>
+
+<ol>
+<li id="fn1"><p>IIFE = <em>Immediately Invoked Function Expression</em> : une fonction qui s’exécute immédiatement.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/elbachir67\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/defilement-cours.js"></script>
+
+
+
+
+</body></html>
