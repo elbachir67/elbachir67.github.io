@@ -173,6 +173,78 @@ $code-block-font-size: 0.7em;
   margin-bottom: 0.3em;
 }
 
+// Sortie d'un programme : le code et ce qu'il affiche forment un seul objet.
+//
+// Les slides de Programmation Python enchaînent un bloc de code, l'étiquette « Résultat → » et un
+// bloc sans langage qui porte ce que le programme a affiché. Sans style, cette sortie n'avait ni
+// fond ni retrait : son texte commençait au bord de la slide, plus à gauche que le code au-dessus,
+// et rien ne disait à l'étudiant que c'est la machine qui répond.
+//
+// Les 102 blocs sans langage des chapitres sont tous des sorties, et tous en Python — ni Introduction
+// au ML ni Architectures Logicielles n'en ont. `pre:not(.sourceCode)` les vise donc tous, et ne vise
+// qu'eux.
+//
+// L'étiquette se reconnaît à sa forme plutôt qu'à son texte, que le CSS ne sait pas lire : un
+// paragraphe fait d'un seul gras, immédiatement suivi d'un bloc sans langage. Les 87 paragraphes de
+// cette forme portent tous « Résultat → », et aucun des autres paragraphes d'un seul gras
+// (« Définition », « À retenir », « Correction »…) n'est suivi d'un tel bloc.
+$sortie-couleur: #3f5265;
+$sortie-encre: #23313d;
+
+// Le bloc de sortie. revealjs pose un fond blanc à la fois sur `pre` et sur `code` : sans neutraliser
+// les deux, un rectangle blanc flotte au milieu de la zone teintée.
+.reveal .slides section pre:not(.sourceCode) {
+  // revealjs compte les boîtes en `content-box` : sans cette ligne, le rembourrage et le filet
+  // s'ajoutent à la largeur et la sortie dépasse le cadre du code de trente pixels sur la droite.
+  box-sizing: border-box;
+  margin: 0 0 0.3em;
+  padding: 0.42em 0.75em;
+  background: color-mix(in srgb, $sortie-couleur 7%, #fff);
+  border: 1px solid $sortie-couleur;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  color: $sortie-encre;
+  box-shadow: none;
+
+  > code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+  }
+}
+
+// L'étiquette devient le bandeau qui sépare le code de sa sortie. La largeur de ligne du texte ne
+// s'applique pas à un bandeau, qui suit le bord du cadre.
+.reveal .slides section p:has(> strong:only-child):has(+ pre:not(.sourceCode)) {
+  box-sizing: border-box;
+  max-width: none;
+  margin: 0;
+  padding: 0.1em 0.75em;
+  font-size: 0.5em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: $sortie-couleur;
+  border: 1px solid $sortie-couleur;
+  border-bottom: none;
+
+  strong {
+    font-weight: 600;
+  }
+}
+
+// Le cadre du code s'ouvre vers le bas pour que le bandeau et la sortie le prolongent — qu'une
+// étiquette les sépare ou non, treize sorties n'en ayant pas : ce sont le plus souvent des erreurs,
+// que le texte de la slide annonce déjà. Quarto enveloppe le bloc de code et son bouton de copie
+// dans un `code-copy-outer-scaffold` : c'est lui, et non le `sourceCode` qui porte le cadre, qui
+// voisine avec la sortie.
+.reveal .slides section .code-copy-outer-scaffold:has(+ pre:not(.sourceCode)) .sourceCode,
+.reveal .slides section .code-copy-outer-scaffold:has(+ p + pre:not(.sourceCode)) .sourceCode {
+  margin-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 // Lien de téléchargement du PDF, discret, en bas de la slide de titre (US-17).
 .reveal .slides section#title-slide .telecharger-pdf {
   display: inline-block;
