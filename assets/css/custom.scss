@@ -377,6 +377,63 @@ div.quarto-post .listing-categories .listing-category,
   white-space: nowrap;
 }
 
+// Sortie d'une cellule exécutée : elle forme un bloc avec le code qui l'a produite.
+//
+// Les TP en notebook (`cours/*/ressources/TP_*.html`) servent 252 sorties de cellule : 109 en
+// Programmation Python, 137 en Introduction au ML, plus quelques-unes ailleurs. Quarto les rend dans
+// un `<pre>` nu, sans fond ni filet, sous un bloc de code, lui, teinté : le texte de la sortie
+// commençait au bord de la colonne et rien ne disait que c'est la machine qui répond. C'est le même
+// défaut que celui corrigé sur les slides (`slides.scss`), et il est ici quatre fois plus étendu.
+//
+// Le traitement est celui des slides, moins le bandeau : les notebooks n'ont pas d'étiquette
+// « Résultat → » à transformer, et rien ne justifie d'en inventer une en CSS. Les treize sorties sans
+// étiquette des slides se soudent déjà de cette façon.
+//
+// Les deux zones se distinguent par leur teinte plutôt que par un libellé, et **la sortie s'écarte
+// du code en allant vers le fond de la page** : plus claire que lui en mode clair, plus sombre en
+// mode sombre. Le code reste le bloc qu'on a écrit, la sortie est ce que la page rend.
+$sortie-cadre: #a9b8c4;
+$sortie-cadre-sombre: #5d6f7d;
+
+// Quarto enveloppe le bloc de code et son bouton de copie dans un `code-copy-outer-scaffold` : c'est
+// lui, et non le `sourceCode` qui porte le fond, qui voisine avec la sortie. Sa marge basse de 17 px
+// est ce qui séparait les deux blocs.
+.cell .code-copy-outer-scaffold:has(+ .cell-output-stdout) .sourceCode {
+  margin-bottom: 0;
+  border: 1px solid $sortie-cadre;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+}
+
+.cell .cell-output-stdout:has(> pre) > pre {
+  box-sizing: border-box;
+  margin: 0 0 1rem;
+  padding: 0.4rem 0.6rem;
+  background: #fbfcfd;
+  border: 1px solid $sortie-cadre;
+  // Le filet du haut est plus appuyé que les autres : c'est la couture entre le code et sa sortie,
+  // et c'est elle qui porte le sens en l'absence de bandeau.
+  border-top: 2px solid $sortie-cadre;
+  border-radius: 0 0 4px 4px;
+  color: #23313d;
+
+  > code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+  }
+}
+
+.quarto-dark .cell .code-copy-outer-scaffold:has(+ .cell-output-stdout) .sourceCode {
+  border-color: $sortie-cadre-sombre;
+}
+
+.quarto-dark .cell .cell-output-stdout:has(> pre) > pre {
+  background: color-mix(in srgb, #7fa6c0 9%, #222);
+  border-color: $sortie-cadre-sombre;
+  color: #f0f4f7;
+}
+
 // Code en ligne là où Quarto impose la couleur du texte (US-50, puis US-59). Quarto donne au code un
 // fond clair **fixe** ; partout où le texte environnant devient blanc en mode sombre, le code se
 // retrouve blanc sur gris très clair — 1,05:1, très loin des 4,5:1 de WCAG AA.
