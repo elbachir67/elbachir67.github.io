@@ -1,9 +1,10 @@
 # Sprint 9 — Trois cours de plus, et des PDF qui disent la vérité
 
 **Objectif :** Programmation Frontend 1, Programmation par Réutilisation de Composants et
-Mathématiques pour le Machine Learning sont en ligne, et plus aucun PDF servi ne diverge de sa
-source sans que la CI le dise.
-**Capacité :** 26 points — sous la vitesse mesurée au Sprint 8 (31 livrés), pour garder de la marge.
+Mathématiques pour le Machine Learning sont en ligne, plus aucun PDF servi ne diverge de sa
+source sans que la CI le dise, et le site répond à son propre nom de domaine.
+**Capacité :** 28 points — 26 à la rédaction, sous la vitesse mesurée au Sprint 8 (31 livrés), pour
+garder de la marge ; puis US-05 (2), ajoutée par le PO à la composition, avant le début du sprint.
 
 ## Règle de sprint
 
@@ -13,15 +14,30 @@ sort, et la capacité ne monte pas.
 ## Entrées PO
 
 - [ ] Métadonnées des trois cours : niveaux, objectifs, prérequis en texte libre.
-- [ ] Mathématiques pour le ML : quel périmètre publier — les quatre modules seuls, ou avec les deux decks (25 ou 61 figures selon l'inventaire).
+- [x] Mathématiques pour le ML : quel périmètre publier — les quatre modules seuls, ou avec les deux decks (25 ou 61 figures selon l'inventaire).
+  **Rendu** — **les quatre modules seuls** ; les deux decks passent au Sprint 10.
+- [x] Nom de domaine (US-05) : **`ebtoure.sn`**, actif chez Wanekoo, gestion DNS incluse,
+  renouvellement automatique activé. Le PO saisit les enregistrements DNS dans son espace Wanekoo.
 - [ ] Textes alternatifs des figures sans légende, brouillons validés en une fois par cours.
 - [ ] Arbitrage sur les PDF que US-76 trouvera divergents.
 
 ## Ordre d'exécution
 
-US-79 → US-76 → US-80 → US-81.
+US-05 → US-79 → US-76 → US-80 → US-81. US-05 commence la première, parce que la propagation DNS
+prend du temps : les enregistrements sont saisis, US-79 avance pendant la propagation, et US-05 se
+termine — GitHub Pages, HTTPS, `site-url` — quand le domaine répond.
 
 ---
+
+### US-05 — Nom de domaine et HTTPS (2 pts)
+
+En tant que PO, je veux diffuser une adresse qui m'appartienne,
+afin que mon site survive à un changement de compte ou d'hébergeur.
+
+- [ ] Domaine configuré sur GitHub Pages (fichier `CNAME`, enregistrements DNS documentés dans le README).
+- [ ] HTTPS actif, redirection depuis `elbachir67.github.io` vérifiée.
+- [ ] `site-url` mis à jour partout : sitemap, flux RSS, métadonnées de partage, liens absolus.
+- [ ] Vérification en ligne après déploiement (règle `Refs #N`), sur les deux langues.
 
 ### US-79 — Programmation Frontend 1 (5 pts)
 
@@ -60,7 +76,8 @@ afin d'y retrouver CM, labs et figures.
 En tant qu'étudiant de M1, je veux les mathématiques du ML en ligne,
 afin de les revoir avant le cours d'Introduction au ML.
 
-- [ ] Le périmètre choisi par le PO importé, modules et éventuels decks.
+- [ ] Le périmètre choisi par le PO importé : **les quatre modules**. Les deux decks n'en font pas
+      partie — ils passent au Sprint 10, décision du PO.
 - [ ] Le cours devient prérequis d'Introduction au Machine Learning dans le graphe d'US-67.
 - [ ] Mathématiques hors ligne numérotées et référencées (US-61).
 - [ ] Textes alternatifs des figures : brouillons proposés, validés par le PO en une fois.
