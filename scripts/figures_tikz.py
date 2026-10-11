@@ -186,7 +186,23 @@ def marquer(svg: str, nom: str) -> str:
     toute référence désigne alors le mauvais. C'est ce qui avait brouillé les figures matplotlib.
     """
     svg = re.sub(r"<svg\b", '<svg class="schema-tikz"', svg, count=1)
-    return identifiants_uniques(svg, nom)
+    return polices_uniques(identifiants_uniques(svg, nom), nom)
+
+
+def polices_uniques(svg: str, nom: str) -> str:
+    """Préfixe par le nom du schéma les polices que dvisvgm embarque.
+
+    dvisvgm appelle ses polices `nf0`, `nf1`… dans chaque schéma, et n'y met que les lettres dont
+    ce schéma a besoin. Incorporés dans la même page, deux schémas déclarent deux `nf0` différents :
+    le navigateur n'en garde qu'un, et les lettres qui lui manquent sortent dans une police de
+    secours, plus large. C'est ce qu'affichait le premier schéma de la séance 1 de Programmation
+    Frontend 1 : « Donne-moi lapage », « quelquepartdans lemonde », lettres de deux polices mêlées.
+
+    Le préfixe commence par une lettre : un nom de police sans guillemets qui commence par un chiffre
+    (« 01-le-web-et-html-01-nf0 ») n'est pas un identifiant CSS. Le navigateur écarte alors la
+    déclaration sans rien dire, et tout le texte du schéma sort dans la police de la page.
+    """
+    return re.sub(r"(font-family[:=]\s*'?)(nf\d+)\b", rf"\g<1>tikz-{nom}-\g<2>", svg)
 
 
 def main() -> int:
