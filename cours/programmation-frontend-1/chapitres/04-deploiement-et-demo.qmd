@@ -1,0 +1,152 @@
+---
+title: "Déploiement et démo"
+cible: "page"
+body-classes: cours-page
+numero: "4"
+ressources:
+  - type: "tp"
+    titre: "Lab 10 — localStorage et finitions"
+    fichier: "ressources/lab-10-localstorage-et-finitions.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-10-localstorage-et-finitions.pdf"
+description: "Séance 4 de Programmation Frontend 1 : mettre Jàng Afrig en ligne sur GitHub Pages, poser le tag v1.0, puis présenter son application à la classe."
+author: ""
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Le dernier jour"}
+Jàng Afrig est terminé sur votre ordinateur (tag `v0.14`) : quatre modes, vraies données, scores sauvegardés, mode Chrono. Mais pour l'instant, **vous seul** pouvez y jouer, sur votre machine.
+
+Aujourd'hui, en deux temps : d'abord on **met l'application en ligne** pour qu'elle soit accessible partout, sur n'importe quel téléphone. Ensuite, chacun **présente son application** à la classe. À la fin de la séance, vous aurez une **adresse web publique** à partager à votre famille.
+:::
+
+::: {.callout-note .encadre-objectifbox title="Objectifs de la séance"}
+1. Comprendre ce qu'est un **hébergeur web**.
+2. Activer **GitHub Pages** sur votre dépôt.
+3. Obtenir une **URL publique** pour Jàng Afrig.
+4. Tester l'application sur **votre téléphone** et la partager.
+5. Poser le tag final : `v1.0`.
+6. Présenter votre application à la classe.
+:::
+
+**Première partie --- Mettre Jàng Afrig en ligne**
+
+## Un hébergeur web, c'est quoi ?
+
+Jusqu'ici, vous ouvriez votre site avec Live Server : il n'existait que sur **votre** ordinateur (à l'adresse `localhost`). Personne d'autre ne pouvait y accéder.
+
+Un **hébergeur web** est un ordinateur, toujours allumé et connecté, qui *publie* votre site pour le monde entier. *Analogie :* cuisiner un bon plat chez soi, c'est bien ; mais pour que les clients le goûtent, il faut une **boutique sur la rue**, avec une adresse. L'hébergeur, c'est cette boutique ; l'URL publique, c'est son adresse.
+
+## GitHub Pages : l'hébergeur gratuit
+
+Bonne nouvelle : votre code est **déjà** sur GitHub. Et GitHub offre un service, **GitHub Pages**, qui héberge **gratuitement** les sites « statiques » --- c'est-à-dire faits de fichiers HTML, CSS et JavaScript, exactement comme Jàng Afrig. Aucun serveur compliqué, aucun paiement : quelques clics suffisent.
+
+{{< svg ../figures/04-deploiement-et-demo-01.svg alt="Votre dépôt jang-afrig (branche main) ; on active GitHub Pages, qui publie le site à une URL publique en …github.io/, accessible partout, sur ordinateurs et téléphones." >}}
+
+*De votre dépôt à une adresse publique, accessible depuis n'importe quel appareil.*
+
+## Activer GitHub Pages, étape par étape
+
+Sur la page de votre dépôt GitHub :
+
+1. Cliquez sur l'onglet **Settings** (Paramètres), en haut du dépôt.
+2. Dans le menu de gauche, cliquez sur **Pages**.
+3. Sous **Source**, choisissez **« Deploy from a branch »** (déployer depuis une branche).
+4. Sélectionnez la branche `main` et le dossier `/ (root)`.
+5. Cliquez sur **Save** (Enregistrer).
+
+`Settings` $\;\rightarrow\;$ `Pages` $\;\rightarrow\;$ `Source : main / (root)` $\;\rightarrow\;$ `Save`
+
+::: {.callout-tip .encadre-infobox title="Patientez une minute"}
+Après le *Save*, GitHub a besoin d'une minute environ pour publier le site. Rechargez la page **Pages** : un encadré vert finit par afficher l'adresse de votre site. C'est gagné.
+:::
+
+## Votre adresse publique
+
+L'URL suit toujours le même modèle, avec **votre** nom d'utilisateur GitHub :
+
+```html
+https://VOTRE-PSEUDO.github.io/jang-afrig/
+```
+
+Par exemple, si votre pseudo GitHub est `fatou-diop`, l'adresse sera :
+
+```html
+https://fatou-diop.github.io/jang-afrig/
+```
+
+Ouvrez-la dans le navigateur : Jàng Afrig s'affiche, en ligne, pour de vrai.
+
+::: {.callout-warning .encadre-attentionbox title="Trois pièges classiques au déploiement"}
+1. **Chemins relatifs** : vos liens doivent être `href="style.css"` (relatif) et *non* `href="/style.css"` (absolu). La barre au début casse le site en ligne.
+2. **Respect de la casse** : en ligne, `Style.css` et `style.css` sont différents. Vérifiez que les noms de fichiers correspondent *exactement* à ceux écrits dans le HTML.
+3. **L'API fonctionne toujours** : GitHub Pages publie en `https`, et REST Countries répond aussi en `https` --- vos appels `fetch` marchent donc en ligne comme en local.
+:::
+
+## Le commit final : tag `v1.0`
+
+Si vous avez fait des derniers ajustements pour le déploiement, enregistrez-les et posez le tag qui marque la **version finale** de Jàng Afrig.
+
+::: {.callout-important .encadre-retenirbox title="Routine Git finale --- tag `v1.0`"}
+```html
+git status
+git add .
+git commit -m "Version 1.0 : application complete et deployee"
+git tag v1.0
+git push
+git push --tags
+```
+
+`v1.0` : la première version « finie et publiée ». Un beau numéro pour clore le projet.
+:::
+
+## Tester sur son téléphone et partager
+
+C'est le moment le plus satisfaisant :
+
+- Ouvrez votre URL publique **sur votre propre téléphone** (en données mobiles ou en Wi-Fi). L'application doit s'y jouer parfaitement.
+- Partagez le lien : envoyez-le sur **WhatsApp** à un ami, ou générez un **QR code** (de nombreux sites gratuits le font à partir d'une URL) à montrer à la classe.
+
+::: {.callout-important .encadre-projetbox title="Votre checklist finale"}
+- [✓] L'application est en ligne à votre URL publique.
+- [✓] Les quatre modes fonctionnent en ligne (avec l'API).
+- [✓] Vous l'avez testée sur votre téléphone.
+- [✓] Le tag `v1.0` est poussé sur GitHub.
+:::
+
+**Deuxième partie --- La démo collective**
+
+## Présenter son application
+
+Chacun (ou chaque binôme) passe au vidéoprojecteur, environ **trois minutes**, pour partager son travail. Pas de stress : c'est un moment de fierté, pas un examen.
+
+::: {.callout-note .encadre-objectifbox title="Le déroulé de votre passage"}
+1. **Montrez votre application** : jouez une question dans un ou deux modes, montrez vos scores.
+2. **Racontez un défi** : un bug qui vous a bloqué, et comment vous l'avez surmonté.
+3. **Partagez une fierté** : la fonctionnalité dont vous êtes le plus content.
+:::
+
+On écoute, on encourage, on applaudit chaque passage. Chaque application est unique : c'est cette diversité qui fait la richesse de la promotion.
+
+## Le chemin parcouru
+
+En quinze séances, vous êtes partis de zéro pour aboutir à une vraie application web, publiée en ligne. Le voyage, vu à travers vos tags Git :
+
+| **Étape** | **Ce que vous saviez faire** |
+| --- | --- |
+| `v0.1` | Une première page HTML structurée |
+| `v0.4` | Un site mis en forme et responsive (CSS) |
+| `v0.7` | Un quiz interactif jouable (JavaScript, DOM) |
+| `v0.8` | Les 54 vrais pays via une API (`fetch`) |
+| `v0.9` | Quatre modes de jeu complets |
+| `v0.14` | Scores sauvegardés, chrono, accessibilité |
+| `v1.0` | **Une application en ligne, partageable au monde** |
+
+Vous savez désormais écrire du **HTML** structuré, le mettre en forme avec du **CSS** responsive, l'animer avec du **JavaScript**, parler à une **API**, sauvegarder des données, versionner avec **Git** et **déployer** un site. Ce sont les fondations du développement web --- et elles sont à vous.
+
+*Félicitations. Jàng Afrig est en ligne, et c'est vous qui l'avez construit.*<br>
+**Aucun devoir maison. Le cours est terminé.**
+
+Dr. El Hadji Bassirou TOURÉ --- École Supérieure Polytechnique --- UCAD<br>Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+
+::: {#ressources-seance}
+:::
