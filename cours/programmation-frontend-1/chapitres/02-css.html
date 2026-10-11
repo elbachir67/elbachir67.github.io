@@ -1,0 +1,2583 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dr.&nbsp;El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar">
+<meta name="description" content="Séance 2 de Programmation Frontend 1 : ce que CSS ajoute à HTML, les sélecteurs, la cascade et la spécificité, le box model et Flexbox.">
+
+<title>CSS – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-639da919b385bb507a4f256153ea904f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-3016115760a7587aebc8f122ce85bbae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-639da919b385bb507a4f256153ea904f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="CSS – El Hadji Bassirou Touré">
+<meta property="og:description" content="Séance 2 de Programmation Frontend 1 : ce que CSS ajoute à HTML, les sélecteurs, la cascade et la spécificité, le box model et Flexbox.">
+<meta property="og:image" content="https://ebtoure.sn/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="CSS – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Séance 2 de Programmation Frontend 1 : ce que CSS ajoute à HTML, les sélecteurs, la cascade et la spécificité, le box model et Flexbox.">
+<meta name="twitter:image" content="https://ebtoure.sn/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="floating nav-fixed cours-page quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#pourquoi-css" id="toc-pourquoi-css" class="nav-link active" data-scroll-target="#pourquoi-css">Pourquoi CSS ?</a>
+  <ul class="collapse">
+  <li><a href="#le-constat-du-lab-2" id="toc-le-constat-du-lab-2" class="nav-link" data-scroll-target="#le-constat-du-lab-2">Le constat du Lab 2</a></li>
+  <li><a href="#que-peut-on-faire-avec-css" id="toc-que-peut-on-faire-avec-css" class="nav-link" data-scroll-target="#que-peut-on-faire-avec-css">Que peut-on faire avec CSS ?</a></li>
+  </ul></li>
+  <li><a href="#trois-façons-dinclure-css" id="toc-trois-façons-dinclure-css" class="nav-link" data-scroll-target="#trois-façons-dinclure-css">Trois façons d’inclure CSS</a>
+  <ul class="collapse">
+  <li><a href="#inline-déconseillé" id="toc-inline-déconseillé" class="nav-link" data-scroll-target="#inline-déconseillé">1. Inline (déconseillé)</a></li>
+  <li><a href="#interne-via-style" id="toc-interne-via-style" class="nav-link" data-scroll-target="#interne-via-style">2. Interne via <code>&lt;style&gt;</code></a></li>
+  <li><a href="#externe-via-link-recommandé" id="toc-externe-via-link-recommandé" class="nav-link" data-scroll-target="#externe-via-link-recommandé">3. Externe via <code>&lt;link&gt;</code> (recommandé)</a></li>
+  </ul></li>
+  <li><a href="#anatomie-dune-règle-css" id="toc-anatomie-dune-règle-css" class="nav-link" data-scroll-target="#anatomie-dune-règle-css">Anatomie d’une règle CSS</a>
+  <ul class="collapse">
+  <li><a href="#une-règle-plus-complète" id="toc-une-règle-plus-complète" class="nav-link" data-scroll-target="#une-règle-plus-complète">Une règle plus complète</a></li>
+  </ul></li>
+  <li><a href="#les-sélecteurs" id="toc-les-sélecteurs" class="nav-link" data-scroll-target="#les-sélecteurs">Les sélecteurs</a>
+  <ul class="collapse">
+  <li><a href="#sélecteur-délément" id="toc-sélecteur-délément" class="nav-link" data-scroll-target="#sélecteur-délément">Sélecteur d’élément</a></li>
+  <li><a href="#sélecteur-de-classe-le-plus-utilisé" id="toc-sélecteur-de-classe-le-plus-utilisé" class="nav-link" data-scroll-target="#sélecteur-de-classe-le-plus-utilisé">Sélecteur de classe (le plus utilisé)</a></li>
+  <li><a href="#sélecteur-didentifiant" id="toc-sélecteur-didentifiant" class="nav-link" data-scroll-target="#sélecteur-didentifiant">Sélecteur d’identifiant</a></li>
+  <li><a href="#sélecteur-descendant" id="toc-sélecteur-descendant" class="nav-link" data-scroll-target="#sélecteur-descendant">Sélecteur descendant</a></li>
+  <li><a href="#pseudo-classes" id="toc-pseudo-classes" class="nav-link" data-scroll-target="#pseudo-classes">Pseudo-classes</a></li>
+  </ul></li>
+  <li><a href="#cascade-et-spécificité" id="toc-cascade-et-spécificité" class="nav-link" data-scroll-target="#cascade-et-spécificité">Cascade et spécificité</a>
+  <ul class="collapse">
+  <li><a href="#le-problème" id="toc-le-problème" class="nav-link" data-scroll-target="#le-problème">Le problème</a></li>
+  <li><a href="#règle-1-la-cascade-le-dernier-gagne" id="toc-règle-1-la-cascade-le-dernier-gagne" class="nav-link" data-scroll-target="#règle-1-la-cascade-le-dernier-gagne">Règle 1 : la cascade (le dernier gagne)</a></li>
+  <li><a href="#règle-2-la-spécificité-le-plus-précis-gagne" id="toc-règle-2-la-spécificité-le-plus-précis-gagne" class="nav-link" data-scroll-target="#règle-2-la-spécificité-le-plus-précis-gagne">Règle 2 : la spécificité (le plus précis gagne)</a></li>
+  <li><a href="#exemple-chiffré" id="toc-exemple-chiffré" class="nav-link" data-scroll-target="#exemple-chiffré">Exemple chiffré</a></li>
+  </ul></li>
+  <li><a href="#le-box-model" id="toc-le-box-model" class="nav-link" data-scroll-target="#le-box-model">Le Box Model</a>
+  <ul class="collapse">
+  <li><a href="#les-4-zones" id="toc-les-4-zones" class="nav-link" data-scroll-target="#les-4-zones">Les 4 zones</a></li>
+  <li><a href="#ce-que-fait-chaque-zone" id="toc-ce-que-fait-chaque-zone" class="nav-link" data-scroll-target="#ce-que-fait-chaque-zone">Ce que fait chaque zone</a></li>
+  <li><a href="#exemple-en-css" id="toc-exemple-en-css" class="nav-link" data-scroll-target="#exemple-en-css">Exemple en CSS</a></li>
+  <li><a href="#le-piège-classique" id="toc-le-piège-classique" class="nav-link" data-scroll-target="#le-piège-classique">Le piège classique</a></li>
+  <li><a href="#démo-en-direct-dans-devtools" id="toc-démo-en-direct-dans-devtools" class="nav-link" data-scroll-target="#démo-en-direct-dans-devtools">Démo en direct dans DevTools</a></li>
+  </ul></li>
+  <li><a href="#flexbox-aligner-et-positionner" id="toc-flexbox-aligner-et-positionner" class="nav-link" data-scroll-target="#flexbox-aligner-et-positionner">Flexbox : aligner et positionner</a>
+  <ul class="collapse">
+  <li><a href="#le-principe" id="toc-le-principe" class="nav-link" data-scroll-target="#le-principe">Le principe</a></li>
+  <li><a href="#les-deux-axes" id="toc-les-deux-axes" class="nav-link" data-scroll-target="#les-deux-axes">Les deux axes</a></li>
+  <li><a href="#les-propriétés-essentielles" id="toc-les-propriétés-essentielles" class="nav-link" data-scroll-target="#les-propriétés-essentielles">Les propriétés essentielles</a></li>
+  <li><a href="#les-valeurs-de-justify-content" id="toc-les-valeurs-de-justify-content" class="nav-link" data-scroll-target="#les-valeurs-de-justify-content">Les valeurs de <code>justify-content</code></a></li>
+  <li><a href="#centrer-un-bouton-le-grand-classique" id="toc-centrer-un-bouton-le-grand-classique" class="nav-link" data-scroll-target="#centrer-un-bouton-le-grand-classique">Centrer un bouton (le grand classique)</a></li>
+  <li><a href="#cas-dusage-typique-la-nav" id="toc-cas-dusage-typique-la-nav" class="nav-link" data-scroll-target="#cas-dusage-typique-la-nav">Cas d’usage typique : la nav</a></li>
+  </ul></li>
+  <li><a href="#mini-exercice-en-classe" id="toc-mini-exercice-en-classe" class="nav-link" data-scroll-target="#mini-exercice-en-classe">Mini-exercice en classe</a>
+  <ul class="collapse">
+  <li><a href="#solution-attendue" id="toc-solution-attendue" class="nav-link" data-scroll-target="#solution-attendue">Solution attendue</a></li>
+  </ul></li>
+  <li><a href="#résumé-et-transition" id="toc-résumé-et-transition" class="nav-link" data-scroll-target="#résumé-et-transition">Résumé et transition</a>
+  <ul class="collapse">
+  <li><a href="#ce-quon-a-vu" id="toc-ce-quon-a-vu" class="nav-link" data-scroll-target="#ce-quon-a-vu">Ce qu’on a vu</a></li>
+  <li><a href="#ce-quon-fera-au-lab-3" id="toc-ce-quon-fera-au-lab-3" class="nav-link" data-scroll-target="#ce-quon-fera-au-lab-3">Ce qu’on fera au Lab 3</a></li>
+  <li><a href="#consigne-pour-la-prochaine-séance" id="toc-consigne-pour-la-prochaine-séance" class="nav-link" data-scroll-target="#consigne-pour-la-prochaine-séance">Consigne pour la prochaine séance</a></li>
+  </ul></li>
+  <li>Ressources du chapitre</li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">CSS</h1>
+</div>
+
+<div>
+  <div class="description">
+    Séance 2 de Programmation Frontend 1 : ce que CSS ajoute à HTML, les sélecteurs, la cascade et la spécificité, le box model et Flexbox.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Auteur·rice</div>
+    <div class="quarto-title-meta-contents">
+             <p>Dr.&nbsp;El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="encadre-prereqbox callout callout-style-default callout-note callout-titled" title="Informations pratiques">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Informations pratiques
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Type</strong></th>
+<th>Cours Magistral (CM)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Séance</strong></td>
+<td>S4 — ouverture du bloc CSS</td>
+</tr>
+<tr class="even">
+<td><strong>Prérequis</strong></td>
+<td>Lab 2 terminé (5 pages HTML poussées avec tag <code>v0.2</code>)</td>
+</tr>
+<tr class="odd">
+<td><strong>Ce qu’on verra après</strong></td>
+<td>Lab 3 : styliser Jàng Afrig (S5)</td>
+</tr>
+<tr class="even">
+<td><strong>Devoir</strong></td>
+<td>Aucun. Lire le PDF du Lab 3 pour la prochaine séance.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectifs du CM">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectifs du CM
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>À la fin de cette séance, vous saurez :</p>
+<ol type="1">
+<li>Expliquer ce que CSS <strong>ajoute</strong> à HTML</li>
+<li>Inclure du CSS dans une page (<code>&lt;link&gt;</code>, <code>&lt;style&gt;</code>, inline)</li>
+<li>Écrire des <strong>sélecteurs</strong> : élément, classe, id, descendant, pseudo-classes</li>
+<li>Comprendre la <strong>cascade</strong> et la <strong>spécificité</strong> (qui gagne quand plusieurs règles s’appliquent)</li>
+<li>Maîtriser le <strong>Box Model</strong> : content, padding, border, margin</li>
+<li>Utiliser <strong>Flexbox</strong> pour aligner et positionner des éléments</li>
+</ol>
+</div>
+</div>
+<section id="pourquoi-css" class="level2">
+<h2 class="anchored" data-anchor-id="pourquoi-css">Pourquoi CSS ?</h2>
+<section id="le-constat-du-lab-2" class="level3">
+<h3 class="anchored" data-anchor-id="le-constat-du-lab-2">Le constat du Lab 2</h3>
+<p>À la fin du Lab 2, votre application Jàng Afrig est <strong>complète structurellement</strong> : 5 pages, sémantique, formulaire, navigation. Mais visuellement, c’est…</p>
+<div id="fig-avant-apres" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-avant-apres-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><span class="figure-cours"><svg role="img" aria-label="La page d'accueil de Jàng Afrig, deux fois côte à côte. Sans CSS : titre, liens soulignés et liste à puces des cinq modes de jeu, en noir sur blanc. Avec CSS : un bandeau coloré pour le titre, une barre de navigation, des titres en couleur et les cinq modes de jeu en boutons." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="455.022486pt" height="212.323009pt" viewbox="-70.007476 -70.007479 455.022486 212.323009">
+<style type="text/css">
+@font-face{font-family:tikz-02-css-01-nf0;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:tikz-02-css-01-nf1;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:tikz-02-css-01-nf2;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+
+</style>
+<g id="02-css-01-page1">
+<g stroke-miterlimit="10" transform="translate(-70.007476,-57.105921)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#c0c0c0">
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#c0c0c0">
+<path d="M224.50687-.4H4.4C2.19083-.4 .4-2.19083 .4-4.4V-195.56927C.4-197.77844 2.19083-199.56927 4.4-199.56927H224.50687C226.71603-199.56927 228.50687-197.77844 228.50687-195.56927V-4.4C228.50687-2.19083 226.71603-.4 224.50687-.4ZM.4-199.56927"></path>
+</g>
+</g>
+</g>
+<g transform="translate(8.4,-162.35858)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-70.007476,-57.105921)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-02-css-01-nf1" font-size="11.955168" x="-70.007476" y="-173.947672">Jàng<tspan x="-42.008479">A</tspan><tspan x="-35.277714">frig</tspan></text>
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-70.007476" y="-165.97756">Appr<tspan x="-56.122552">endr</tspan><tspan x="-42.628163">e</tspan><tspan x="-37.774371">l’</tspan><tspan x="-34.85233">A</tspan><tspan x="-31.128302">frique,</tspan><tspan x="-10.701908">un</tspan><tspan x="-1.698676">p</tspan><tspan x="2.074169">ays</tspan><tspan x="13.162581">à</tspan><tspan x="18.072164">la</tspan><tspan x="24.760078">f</tspan><tspan x="26.726696">ois</tspan></text>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-70.007476" y="-154.022392"><tspan fill="#66f">Ac</tspan><tspan fill="#66f" x="-63.180082">cueil</tspan></text>
+<rect x="-70.007476" y="-152.922573" height=".338711" width="20.754173" fill="#66f"></rect>
+</g>
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-47.85854" y="-154.022392">|</text>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-44.783079" y="-154.022392"><tspan fill="#66f">Jouer</tspan></text>
+<rect x="-44.783079" y="-152.922573" height=".338711" width="16.800007" fill="#66f"></rect>
+</g>
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-26.588309" y="-154.022392">|</text>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-23.512848" y="-154.022392"><tspan fill="#66f">Mes</tspan><tspan fill="#66f" x="-10.667026">Sc</tspan><tspan fill="#66f" x="-3.909371">or</tspan><tspan fill="#66f" x="2.220635">es</tspan></text>
+<rect x="-23.512848" y="-152.922573" height=".338711" width="32.114571" fill="#66f"></rect>
+</g>
+<text font-family="tikz-02-css-01-nf1" font-size="6.973848" x="-70.007476" y="-142.067223">Bienv<tspan x="-52.67049">enue</tspan></text>
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-70.007476" y="-134.097111">Bienv<tspan x="-53.688672">enue</tspan><tspan x="-37.767383">sur</tspan></text>
+<text font-family="tikz-02-css-01-nf1" font-size="6.973848" x="-27.236878" y="-134.097111">Jàng<tspan x="-10.904132">A</tspan><tspan x="-6.977863">frig</tspan></text>
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="3.824628" y="-134.097111">,<tspan x="6.95588">un</tspan><tspan x="15.959111">quiz</tspan><tspan x="29.697586">g</tspan><tspan x="33.114764">éogr</tspan><tspan x="46.120992">aphique</tspan><tspan x="71.533688">sur</tspan><tspan x="82.064193">les</tspan><tspan x="91.618358">54</tspan><tspan x="99.945127">p</tspan><tspan x="103.717971">ays</tspan><tspan x="114.806384">afric</tspan><tspan x="127.603388">ains.</tspan></text>
+<text font-family="tikz-02-css-01-nf1" font-size="6.973848" x="-70.007476" y="-122.141943">L<tspan x="-66.492664">es</tspan><tspan x="-58.396032">modes</tspan><tspan x="-36.456313">de</tspan><tspan x="-27.453081">jeu</tspan></text>
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-70.007476" y="-114.171831">•<tspan x="-66.492663">Capit</tspan><tspan x="-51.199017">ales</tspan><tspan x="-70.007476" y="-106.201719">•</tspan><tspan x="-66.492663">Dr</tspan><tspan x="-59.951193">ape</tspan><tspan x="-49.2045">aux</tspan><tspan x="-70.007476" y="-98.231607">•</tspan><tspan x="-66.492663">Langues</tspan><tspan x="-70.007476" y="-90.261495">•</tspan><tspan x="-66.492663">V</tspan><tspan x="-63.005735">oisins</tspan><tspan x="-70.007476" y="-82.291383">•</tspan><tspan x="-66.492663">Chr</tspan><tspan x="-56.366643">ono</tspan></text>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-70.007476" y="-70.336215"><tspan fill="#66f">V</tspan><tspan fill="#66f" x="-66.520548">oir</tspan><tspan fill="#66f" x="-57.210467">le</tspan><tspan fill="#66f" x="-50.578343">classement</tspan><tspan fill="#66f" x="-15.995037">c</tspan><tspan fill="#66f" x="-12.961416">omple</tspan><tspan fill="#66f" x="5.637829">t</tspan></text>
+<rect x="-70.007476" y="-67.890446" height=".338711" width="78.002458" fill="#66f"></rect>
+</g>
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-70.007476" y="-57.105921">©<tspan x="-63.42417">2025–2026</tspan><tspan x="-30.953939">Jàng</tspan><tspan x="-15.367395">A</tspan><tspan x="-11.643367">frig</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(96.69644,3.64098)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-70.007476,-57.105921)scale(-1,-1)">
+<g fill="#900">
+<g stroke="none">
+<text font-family="tikz-02-css-01-nf1" font-size="8.966376" x="-70.007476" y="-57.105921"><tspan fill="#900">Sans</tspan><tspan fill="#900" x="-49.402741">C</tspan><tspan fill="#900" x="-44.435367">S</tspan><tspan fill="#900" x="-39.61146">S</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#e6f3f3">
+<g stroke="#66b3b3">
+<g stroke-width="1.0">
+<g stroke-width="0.8">
+<g fill="#e6f3f3">
+<g stroke="#66b3b3">
+<g stroke-width="1.0">
+<path d="M452.22882-.5H232.12195C229.91278-.5 228.12195-2.29083 228.12195-4.5V-195.66928C228.12195-197.87845 229.91278-199.66928 232.12195-199.66928H452.22882C454.43799-199.66928 456.22882-197.87845 456.22882-195.66928V-4.5C456.22882-2.29083 454.43799-.5 452.22882-.5ZM228.12195-199.66928"></path>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(236.12195,-170.47011)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-70.007476,-57.105921)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<g fill="black">
+<g fill="black">
+<g fill="black">
+<rect x="-69.608977" y="-198.486663" height="24.37957" width="139.205838" fill="#b3d9d9"></rect>
+</g>
+<g fill="black">
+<g fill="black">
+<text font-family="tikz-02-css-01-nf1" font-size="11.955168" x="-26.630224" y="-186.495633"><tspan fill="#fff">Jàng</tspan><tspan fill="#fff" x="1.368774">A</tspan><tspan fill="#fff" x="8.099538">frig</tspan></text>
+</g>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf0" font-size="6.973848" x="-30.425957" y="-178.525521"><tspan fill="#fff">Appr</tspan><tspan fill="#fff" x="-17.091967">endr</tspan><tspan fill="#fff" x="-4.03693">e</tspan><tspan fill="#fff" x=".70528">l’</tspan><tspan fill="#fff" x="3.613373">A</tspan><tspan fill="#fff" x="7.051477">f</tspan><tspan fill="#fff" x="8.976252">rique…</tspan></text>
+</g>
+</g>
+</g>
+<rect x="-70.007476" y="-198.885162" height=".3985" width="140.002837" fill="#004040"></rect>
+<rect x="-70.007476" y="-198.685912" height="24.778069" width=".3985" fill="#004040"></rect>
+<rect x="69.596861" y="-198.685912" height="24.778069" width=".3985" fill="#004040"></rect>
+<rect x="-70.007476" y="-174.107093" height=".3985" width="140.002837" fill="#004040"></rect>
+</g>
+<g fill="black">
+<g fill="black">
+<g fill="black">
+<rect x="-69.608977" y="-166.336246" height="12.567876" width="139.205838" fill="#f2f2f2"></rect>
+</g>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf1" font-size="8.966376" x="-43.524375" y="-156.86476">Ac<tspan x="-34.450401">cueil</tspan></text>
+<text font-family="tikz-02-css-01-nf2" font-size="8.966376" x="-13.693238" y="-156.86476">•<tspan x="-9.174181">Jouer</tspan><tspan x="14.219097">•</tspan><tspan x="18.738154">Sc</tspan><tspan x="27.426577">or</tspan><tspan x="35.308025">es</tspan></text>
+</g>
+</g>
+<rect x="-70.007476" y="-166.734745" height=".3985" width="140.002837" fill="#ccc"></rect>
+<rect x="-70.007476" y="-166.535496" height="12.966375" width=".3985" fill="#ccc"></rect>
+<rect x="69.596861" y="-166.535496" height="12.966375" width=".3985" fill="#ccc"></rect>
+<rect x="-70.007476" y="-153.76837" height=".3985" width="140.002837" fill="#ccc"></rect>
+</g>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf1" font-size="6.973848" x="-70.007476" y="-141.353925"><tspan fill="#004040">Bienv</tspan><tspan fill="#004040" x="-52.67049">enue</tspan></text>
+</g>
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-70.007476" y="-133.383813">Bienv<tspan x="-53.688672">enue</tspan><tspan x="-37.767383">sur</tspan></text>
+<text font-family="tikz-02-css-01-nf1" font-size="6.973848" x="-27.236878" y="-133.383813">Jàng<tspan x="-10.904132">A</tspan><tspan x="-6.977863">frig</tspan></text>
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="3.824628" y="-133.383813">,<tspan x="6.95588">un</tspan><tspan x="15.959111">quiz</tspan><tspan x="29.697586">g</tspan><tspan x="33.114764">éogr</tspan><tspan x="46.120992">aphique</tspan><tspan x="71.533688">sur</tspan><tspan x="82.064193">les</tspan><tspan x="91.618358">54</tspan><tspan x="99.945127">p</tspan><tspan x="103.717971">ays</tspan><tspan x="114.806384">afric</tspan><tspan x="127.603388">ains.</tspan></text>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf1" font-size="6.973848" x="-70.007476" y="-119.436117"><tspan fill="#004040">L</tspan><tspan fill="#004040" x="-66.492664">es</tspan><tspan fill="#004040" x="-58.396032">modes</tspan><tspan fill="#004040" x="-36.456313">de</tspan><tspan fill="#004040" x="-27.453081">jeu</tspan></text>
+</g>
+<g fill="black">
+<g fill="black">
+<g fill="black">
+<rect x="-69.608977" y="-114.681957" height="12.372594" width="65.505301" fill="#ffe6cc"></rect>
+</g>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-50.340246" y="-106.727792">Capit<tspan x="-35.046601">ales</tspan></text>
+</g>
+</g>
+<rect x="-70.007476" y="-115.080457" height=".3985" width="66.3023" fill="#804000"></rect>
+<rect x="-70.007476" y="-114.881207" height="12.771093" width=".3985" fill="#804000"></rect>
+<rect x="-4.103676" y="-114.881207" height="12.771093" width=".3985" fill="#804000"></rect>
+<rect x="-70.007476" y="-102.309364" height=".3985" width="66.3023" fill="#804000"></rect>
+</g>
+<g fill="black">
+<g fill="black">
+<g fill="black">
+<rect x=".080615" y="-114.486691" height="11.98206" width="65.505301" fill="#ffe6cc"></rect>
+</g>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="18.979729" y="-106.923059">Dr<tspan x="25.5212">ape</tspan><tspan x="36.267892">aux</tspan></text>
+</g>
+</g>
+<rect x="-.317884" y="-114.88519" height=".3985" width="66.3023" fill="#804000"></rect>
+<rect x="-.317884" y="-114.68594" height="12.38056" width=".3985" fill="#804000"></rect>
+<rect x="65.585916" y="-114.68594" height="12.38056" width=".3985" fill="#804000"></rect>
+<rect x="-.317884" y="-102.50463" height=".3985" width="66.3023" fill="#804000"></rect>
+</g>
+<g fill="black">
+<g fill="black">
+<g fill="black">
+<rect x="-69.608977" y="-97.527308" height="12.114559" width="65.505301" fill="#ffe6cc"></rect>
+</g>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-49.060545" y="-89.963677">Langues</text>
+</g>
+</g>
+<rect x="-70.007476" y="-97.925808" height=".3985" width="66.3023" fill="#804000"></rect>
+<rect x="-70.007476" y="-97.726558" height="12.513058" width=".3985" fill="#804000"></rect>
+<rect x="-4.103676" y="-97.726558" height="12.513058" width=".3985" fill="#804000"></rect>
+<rect x="-70.007476" y="-85.41275" height=".3985" width="66.3023" fill="#804000"></rect>
+</g>
+<g fill="black">
+<g fill="black">
+<g fill="black">
+<rect x=".080615" y="-96.92059" height="10.901122" width="65.505301" fill="#ffe6cc"></rect>
+</g>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="22.654943" y="-89.091946">V<tspan x="26.141871">oisins</tspan></text>
+</g>
+</g>
+<rect x="-.317884" y="-97.31909" height=".3985" width="66.3023" fill="#804000"></rect>
+<rect x="-.317884" y="-97.11984" height="11.299622" width=".3985" fill="#804000"></rect>
+<rect x="65.585916" y="-97.11984" height="11.299622" width=".3985" fill="#804000"></rect>
+<rect x="-.317884" y="-86.019468" height=".3985" width="66.3023" fill="#804000"></rect>
+</g>
+<g fill="black">
+<g fill="black">
+<g fill="black">
+<rect x="-69.608977" y="-80.630695" height="11.026643" width="65.505301" fill="#ffe6cc"></rect>
+</g>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf2" font-size="6.973848" x="-47.60651" y="-72.676529">Chr<tspan x="-37.48049">ono</tspan></text>
+</g>
+</g>
+<rect x="-70.007476" y="-81.029194" height=".3985" width="66.3023" fill="#804000"></rect>
+<rect x="-70.007476" y="-80.829944" height="11.425143" width=".3985" fill="#804000"></rect>
+<rect x="-4.103676" y="-80.829944" height="11.425143" width=".3985" fill="#804000"></rect>
+<rect x="-70.007476" y="-69.604051" height=".3985" width="66.3023" fill="#804000"></rect>
+</g>
+<g fill="black">
+<text font-family="tikz-02-css-01-nf0" font-size="6.973848" x="-70.007476" y="-57.105921"><tspan fill="#808080">©</tspan><tspan fill="#808080" x="-63.975104">2025–2026</tspan><tspan fill="#808080" x="-32.571872">Jàng</tspan><tspan fill="#808080" x="-16.887694">A</tspan><tspan fill="#808080" x="-13.44959">f</tspan><tspan fill="#808080" x="-11.524815">rig</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(324.60289,3.64098)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-70.007476,-57.105921)scale(-1,-1)">
+<g fill="#004c4c">
+<g stroke="none">
+<text font-family="tikz-02-css-01-nf1" font-size="8.966376" x="-70.007476" y="-57.105921"><tspan fill="#004d4d">A</tspan><tspan fill="#004d4d" x="-65.013202">v</tspan><tspan fill="#004d4d" x="-60.395524">ec</tspan><tspan fill="#004d4d" x="-49.770366">C</tspan><tspan fill="#004d4d" x="-44.802992">S</tspan><tspan fill="#004d4d" x="-39.979085">S</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-avant-apres-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: La même page HTML, sans puis avec CSS.
+</figcaption>
+</figure>
+</div>
+<p><strong>Le HTML est strictement le même</strong> dans les deux cas. Seul un fichier CSS a été ajouté à droite. CSS, c’est la technologie qui transforme un document brut en <strong>interface visuelle</strong>.</p>
+</section>
+<section id="que-peut-on-faire-avec-css" class="level3">
+<h3 class="anchored" data-anchor-id="que-peut-on-faire-avec-css">Que peut-on faire avec CSS ?</h3>
+<ul>
+<li>Choisir des <strong>couleurs</strong> (texte, fond, bordures)</li>
+<li>Choisir des <strong>polices</strong> (Google Fonts, etc.)</li>
+<li>Définir des <strong>tailles</strong> et des <strong>espacements</strong></li>
+<li>Positionner les éléments (alignement, grilles, colonnes)</li>
+<li>Faire du <strong>responsive</strong> (s’adapter au téléphone)</li>
+<li>Ajouter des <strong>animations</strong> et des <strong>effets</strong> au survol</li>
+</ul>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="CSS = Cascading Style Sheets">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>CSS = Cascading Style Sheets
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>CSS signifie <em>Cascading Style Sheets</em> («&nbsp;feuilles de style en cascade&nbsp;»). <strong>Cascading</strong> parce que les règles CSS <em>s’empilent</em> et se combinent — on verra ce que ça veut dire à la section sur la cascade.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="trois-façons-dinclure-css" class="level2">
+<h2 class="anchored" data-anchor-id="trois-façons-dinclure-css">Trois façons d’inclure CSS</h2>
+<p>CSS peut être placé à <strong>trois endroits</strong> différents dans une page HTML. Chacune a ses usages et ses limites.</p>
+<section id="inline-déconseillé" class="level3">
+<h3 class="anchored" data-anchor-id="inline-déconseillé">1. Inline (déconseillé)</h3>
+<p>Directement dans une balise HTML, via l’attribut <code>style</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>&lt;h1 style="color<span class="in">:</span> red; font-size<span class="in">:</span> 32px;"<span class="op">&gt;</span>Jàng Afrig&lt;/h1<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Quand l’utiliser :</strong> jamais en pratique. C’est OK pour un test rapide.</p>
+<p><strong>Pourquoi déconseillé :</strong> on mélange structure et style. Si on change d’avis sur la couleur, il faut aller modifier <em>chaque</em> balise.</p>
+</section>
+<section id="interne-via-style" class="level3">
+<h3 class="anchored" data-anchor-id="interne-via-style">2. Interne via <code>&lt;style&gt;</code></h3>
+<p>Dans le <code>&lt;head&gt;</code> de la page :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>&lt;head<span class="op">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    &lt;style<span class="op">&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        h1 { <span class="kw">color</span><span class="ch">:</span> <span class="cn">red</span><span class="op">;</span> <span class="kw">font-size</span><span class="ch">:</span> <span class="dv">32</span><span class="dt">px</span><span class="op">;</span> }</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    &lt;/style<span class="op">&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>&lt;/head<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Quand l’utiliser :</strong> prototype rapide, démo en classe, page unique.</p>
+<p><strong>Limite :</strong> le style ne s’applique qu’à <em>cette</em> page. Pour appliquer le même style à 5 pages, il faut copier-coller 5 fois.</p>
+</section>
+<section id="externe-via-link-recommandé" class="level3">
+<h3 class="anchored" data-anchor-id="externe-via-link-recommandé">3. Externe via <code>&lt;link&gt;</code> (recommandé)</h3>
+<p>Dans un fichier séparé (par convention <code>style.css</code>), lié depuis le <code>&lt;head&gt;</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>&lt;head<span class="op">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    &lt;link rel="stylesheet" href="style<span class="fu">.css</span>"<span class="op">&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>&lt;/head<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Et dans <code>style.css</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>h1 {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">red</span><span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">font-size</span><span class="ch">:</span> <span class="dv">32</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Quand l’utiliser :</strong> <strong>toujours, en production</strong>.</p>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Pourquoi externe ?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Pourquoi externe ?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Réutilisable</strong> : un seul <code>style.css</code> pour les 5 pages</li>
+<li><strong>Maintenable</strong> : changer une couleur = modifier un seul endroit</li>
+<li><strong>Performant</strong> : le navigateur télécharge le CSS une fois et le réutilise</li>
+<li><strong>Lisible</strong> : HTML et CSS séparés, chacun son fichier</li>
+</ul>
+<p>C’est la convention que vous adopterez au Lab 3.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="anatomie-dune-règle-css" class="level2">
+<h2 class="anchored" data-anchor-id="anatomie-dune-règle-css">Anatomie d’une règle CSS</h2>
+<p>Une règle CSS, c’est toujours <strong>la même structure</strong> :</p>
+<div id="fig-anatomie-css" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-anatomie-css-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><span class="figure-cours"><svg role="img" aria-label="La règle h1 { color: red; } annotée : h1 est le sélecteur, color la propriété, red la valeur. Les accolades ouvrent et ferment le bloc, et le point-virgule marque la fin de la propriété." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="216.951462pt" height="92.065594pt" viewbox="-70.007476 -70.007473 216.951462 92.065594">
+<style type="text/css">
+@font-face{font-family:tikz-02-css-02-nf0;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAXUAAoAAAAACmgAAAWIAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgTwKjGSJVgsoAAE2AiQDTAQgBYIsByAbAwgAjsN0OyvbJMmVB0I/zzb/zwXn22Cti5RFpqtEELe21/26C+VXBM9/f6Nz/yTQJBpIMyWWBBZkVhJGsLPCO7Niu/AmjqV+ROBTOzxnB+CTPkgkRq9AXnA62g3HwwHwdCriTb7TXToA8DxBK8ACYCf29D8pLC8G9E3igLhYAdDEgIFPAFt1x5ARxNR/JNr+33WAhEA5fkAC6f//qTBqAKVUmBBLFDmQCkQR1fJDQEtHz6BVh05duvXo02/AoCFf/o3+L7DRumt7m761NsM38U+whQMgoJJwJAQCPBHohcUeqCiLQbA+AJKPgaLdcXhv7+Jg5zzNRSQShbhYk/Y21lHOElsPEE13tiFkT/hAs1m2W+C6D7mVaGY4gTOZGMZvXd6Z+DueG66Si88H7T+u5RmzWRC4xQ9TmEOPCJ6neBMrcDaEXxUITnjrflNGHVnPbbqUeI9neFPhXcX69Vpr3pS/V6hkeCUwEHGUrxg+zP8OH92+75x0H08xJEWoiDrCjwQ57gaQXGAcBEcaRxNpJ4o2eztvUt6BDodGkjksFJpCDrr2TsSZYk5SNgjhpHA3zzMzF62XWzATS2deLMj2XIZoIqnnQsDkWQVnnkiZrReD7gtGK64HcP0xWr5I+qCAV3Iv2bVJ52XbHwWeexS67phMKD0cdD9gvymF2WcuWMd7bnkYcPZhyFUtr7xnlq2Oily1QmbL1oD7pTbjEhd4guf4V6/acpQ8K/jVkf06opZkTSbpZjnHcVsqYWQIbrhjIuvFwMb6pxWedWIO+e97QDHkCXpoVZsdlY37s/PfPSSfi21aFb6DRmySZVF5aBMqg7LNtnxgw94dc/h3lp+t+CjYXmh/7gdXAkrDW3Ed1rgg4ObGFV14ws/JHoV/nomqxmrbn9kUJzfmQB3FCI/YPaM1zj1lqGCeo85FP2tuBbaiyjknK5x+mhj6cM0xiuopdVHb18qromcYNtbBJ+/nWxdmN/54QuU006pAH1+KNSPNAkeDi371/DrsgzLvrihxcx+UzFE/IkVeL/w8+fhu88wir09dBwee99HzaHpe2fNyxxrH8gF1GbxKgn100z3ab1QjUWuGP+X6e9XwA5sZbMxOPSbHVsnr18T/6b8x9ZNK2yKVMvZmMdYYhUZVSdlIhdmjr+EJWoj54x3+Bu+Pq377bDVqRK2zJAaXlh2L1JgW0y7W19tx+dWpVW3VUpUdl10zbOQg5OvasnB2FaLR53G/sguX0is+MzhVlWDJi4zNNsVpDTtufvYs8h3+7RkvO5rg0PwiGFklVRFv0uonZZL6ra2xPbButjN7dPaFmGrERHqVrKjHbm5a/G1+++4/clqGMxhpec2NszXohwLrPZ4FnjluzT8WSt7KDb59oTp/G2iHxmA5prFTXU+04N6vdZ9Z1vldXf18TezPC569oGTwhF5xvdMjsgN3nypSsgXVKzQJP7Ax/2QEsZDwltxrUtxj/E0ObWK51XPLFH1uZ4p6112rPXjjkPzYIdDtKgmn2nSfbr5XfSZrfBeeXutYoW068dHn9iV3XlJ2J1yHpwAAAFD3XZyvk8NNdum/WuIiaK39PwXPwl4BgCWMUnKtL8AXCKhMxDhAYh9JZADoB0XhQd4oyA3f5c2FVn8DI6R2KhrFnbaQ1j87LEZgsxoCMgGGcanKfArddIgWL55DViIKvgSjW1EgTE3zIw64rAjOgTMtkKRAMVSWJLjyHZdEnRWgIW3qMFNErJ5pwZmGKSY2kiZEm/pZIX1Qqlaou/q7DNFv9s6YyGg79Jfm+bqh1v4hYycVF5kIZdQGtOpCKddNR6+PKRVTiV360wbRlCbdr1U33hkjMkmmAwtVXbTi+oh6OqfGaB+3zpBW/R/cqBMlTqREuBYAAA==) format('woff2');}
+@font-face{font-family:tikz-02-css-02-nf1;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAVMAAoAAAAACaQAAAUCAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgQwKjAiIYgscAAE2AiQDHgQgBYIsByAbMQdAHoXpdpa1SZLrS5rSz3/b+nNnAGXGiAjCiIDNhDYKtJdtdCPK2vf6L6J4+Ha+f1cQZYURBFaigc0nutuU1/8A0HKn329W9DqeRVMlJpOHiERRixyt0EQj9yumW6nLFupCarsNx4Z2/EEAPP5Bp4AKsA978Z8enLw16JuTBXyDDkCkARIC64Fx9bCBxttw0v3vLgA+AEWI0v9vIGMAcKoeHMJQ9FlNaLFBJ3gLEaoWA1OdJq06DBqW3ySv1z3+kNOfYNIYCZFTToaMQB2Hm5RqA/QDYJNPSbkiCAZDaPRiNAiS0Pe0VTdT9TNRI52CgmtFcwYET86d1ydx3nM/OZLOk1ffWUqPivUopFDG5ijt5Bvc5UfrxZzrZMtNE+nUfYN5g80wveuEYAlJDedvWV5ZM+SeE+Cp5bvx2K+Xt71dMFMoNX1XeNXf/rL5mB9PbiI0EARsRvH0FOZbW/myZ55CISmUmSFmTmIq2oyTlLqzU3j5hT4ylO2o2MgcWQVoYjvh/maevJj4Rzu14jD1hYK5TDKQ/4Nq01v5sh1P6WVxwYTHWsGRzTx7WdHkGooA+cg4WxeuQSpIdxJ38sEk/dVEyCl85s1NHXlE5RGjALathnbYVJ8ryXP0SbWIM3c7Qm6yZoomtqd3m5i3fxAqlFqg2dR5x0f+Qpkxj0fI4+4b8SDvVQStnzcCkfNivozNmXM4EjQnMoeppDm7+wFOCGmelCU+MhWaIsnF0I0LhkjqslTga+P0t8JlxuNGIN6Kn7I3zKnK27/dVrriv6tEacu/8KMpXq+2L+NNvvsx0rjkthKibyPNU1WaPv+BpsoOp6qAVv4HPP9k3oen9i5ztRU+RMDPQYG1Ngc0jT6LCoO3rZpX+0WsIrwc9XNQJWkfe/GH0laK9Z/4s4jgrKxvIqjcH6cKcC9pE88AJZWWxaAogZHLU+0qIfxnTlUq4m4/0XgT5WydiVpGUBWq6RrORZ/fubnkolhwXVTEmfxEU3dRKHknM+nh8dac3FKUAvG7gnsmshTetqokHRSV4dWIO4pqUGUft0SNHfvLiYEf3I4VZ0UhSGopzB8uxR2gn1hJwX1ykogofSEJFQuuCwqXb8lXhenxWNKGi0Lpys7HdS5/08G67hPu3Y5x8OZgiP8jqw5eSkaG24f/HjYiQggbtsHbj0yvyUMfF+eS/ai6i7tkcaNKUFJmUctvG5SEktNruKfTquGLPXoxbashEIN1sNKDTRqDf3B7RmzG8hewTX5UcUooYIHTgncB1EOfdWM55lwV5yWvTDPfqcP0xbasp380w/R4fBDjmPZnhyma39I5+o5/OerBuLHbl7wGiiywYD8DuwDvAvUWqzznGk7gU+P5Rnor1a9FVE01lSkDwz+d8Amj8N3dMEtZUPwcA5sxpYhfd2M1Fqd+d1lySxrtU4fhBWj7GFjvv2BZqRn2qypOAbj0/6H/sScAoAqTJ0xFR2AVtGjF/4sQ6sOS/9gmL+EKpHIQTEuMUPZChEAA1AWr2OANEUYgBNdGohAFTptGpyLp0WlwlpMJRmzgUKIDmpUhkE5BU0anMlBDp6HpCxC8jDTsiwoV3Fva8hlZ3rVgq7eHF72mR+N4Rk99Zw+72crXIwDSVOtSr4WVdK0YmDoAaLkCLN4KeOyd6mcuf8ibB68ZnghaLr5qGCaGtUY/zs7Qo16nla2ZZYQvDwFwLycE) format('woff2');}
+
+</style>
+<g id="02-css-02-page1">
+<g stroke-miterlimit="10" transform="translate(35.029862,-15.421555)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g transform="translate(-52.52994,-3.33)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(35.029862,-15.421555)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<g fill="black">
+<text font-family="tikz-02-css-02-nf1" font-size="11.955168" x="35.029862" y="-15.421555"><tspan fill="#0000b3">h1</tspan></text>
+<g fill="black">
+<text font-family="tikz-02-css-02-nf1" font-size="11.955168" x="47.343686" y="-15.421555">{</text>
+<g fill="black">
+<text font-family="tikz-02-css-02-nf1" font-size="11.955168" x="59.657501" y="-15.421555"><tspan fill="#bf0040">color</tspan></text>
+<g fill="black">
+<text font-family="tikz-02-css-02-nf1" font-size="11.955168" x="90.442059" y="-15.421555">:</text>
+<g fill="black">
+<text font-family="tikz-02-css-02-nf1" font-size="11.955168" x="102.755875" y="-15.421555"><tspan fill="#008000">red</tspan></text>
+<g fill="black">
+<text font-family="tikz-02-css-02-nf1" font-size="11.955168" x="121.22661" y="-15.421555">;<tspan x="133.540426">}</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#0000b3" stroke="#0000b3">
+<g stroke-width="0.8">
+<path d="M-85.35823-22.76227L-77.18004-6.40593" fill="none"></path>
+<g transform="matrix(0.44717,0.89436,-0.89436,0.44717,-77.00117,-6.0482)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g fill="#b30000" stroke="#b30000">
+<g fill="#0000b3" stroke="#0000b3">
+<g fill="#b30000" stroke="#b30000">
+<g fill="#0000b3" stroke="#0000b3">
+</g>
+</g>
+<g transform="translate(-102.09825,-32.54124)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(35.029862,-15.421555)scale(-1,-1)">
+<g fill="#0000b3">
+<g stroke="none">
+<text font-family="tikz-02-css-02-nf0" font-size="8.966376" x="35.029862" y="-15.421555"><tspan fill="#0000b3">sélecteur</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#c00040" stroke="#c00040">
+<g stroke-width="0.8">
+<path d="M-11.38092-22.76227V-6.49045" fill="none"></path>
+<g transform="matrix(0.0,1.0,-1.0,0.0,-11.38092,-6.09045)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g fill="#b30000" stroke="#b30000">
+<g fill="#c00040" stroke="#c00040">
+<g fill="#b30000" stroke="#b30000">
+<g fill="#c00040" stroke="#c00040">
+</g>
+</g>
+<g transform="translate(-28.25594,-32.54124)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(35.029862,-15.421555)scale(-1,-1)">
+<g fill="#c00040">
+<g stroke="none">
+<text font-family="tikz-02-css-02-nf0" font-size="8.966376" x="35.029862" y="-15.421555"><tspan fill="#bf0040">p</tspan><tspan fill="#bf0040" x="39.530982">rop</tspan><tspan fill="#bf0040" x="51.788016">riété</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#008000" stroke="#008000">
+<g stroke-width="0.8">
+<path d="M39.83366-22.76227V-6.49045" fill="none"></path>
+<g transform="matrix(0.0,1.0,-1.0,0.0,39.83366,-6.09045)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g fill="#b30000" stroke="#b30000">
+<g fill="#008000" stroke="#008000">
+<g fill="#b30000" stroke="#b30000">
+<g fill="#008000" stroke="#008000">
+</g>
+</g>
+<g transform="translate(28.34966,-32.54124)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(35.029862,-15.421555)scale(-1,-1)">
+<g fill="#008000">
+<g stroke="none">
+<text font-family="tikz-02-css-02-nf0" font-size="8.966376" x="35.029862" y="-15.421555"><tspan fill="#008000">valeur</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#808080" stroke="#808080">
+<g stroke-width="0.8">
+<path d="M-42.67911 22.76227V9.33589" fill="none"></path>
+<g transform="matrix(0.0,-1.0,1.0,0.0,-42.67911,8.9359)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g fill="#808080" stroke="#808080">
+<g fill="#808080" stroke="#808080">
+</g>
+<g transform="translate(-77.39664,26.39424)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(35.029862,-15.421555)scale(-1,-1)">
+<g fill="#808080">
+<g stroke="none">
+<text font-family="tikz-02-css-02-nf0" font-size="8.966376" x="35.029862" y="-15.421555"><tspan fill="#808080">accolade</tspan><tspan fill="#808080" x="70.823641">ouvrante</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#808080" stroke="#808080">
+<g stroke-width="0.8">
+<path d="M14.22636 39.83366L54.84544 9.01938" fill="none"></path>
+<g transform="matrix(0.79666,-0.60435,0.60435,0.79666,55.16411,8.77763)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g fill="#808080" stroke="#808080">
+<g fill="#808080" stroke="#808080">
+</g>
+<g transform="translate(-15.05066,45.11264)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(35.029862,-15.421555)scale(-1,-1)">
+<g fill="#808080">
+<g stroke="none">
+<text font-family="tikz-02-css-02-nf0" font-size="8.966376" x="35.029862" y="-15.421555"><tspan fill="#808080">ﬁn</tspan><tspan fill="#808080" x="47.806954">de</tspan><tspan fill="#808080" x="59.741206">p</tspan><tspan fill="#808080" x="64.242325">rop</tspan><tspan fill="#808080" x="76.49936">riété</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#808080" stroke="#808080">
+<g stroke-width="0.8">
+<path d="M73.9773 22.76227V9.33589" fill="none"></path>
+<g transform="matrix(0.0,-1.0,1.0,0.0,73.9773,8.9359)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-2.56 3.12257C-2.0923 1.24901-1.05006 .3643 0 0C-1.05006-.3643-2.0923-1.24901-2.56-3.12257" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g fill="#808080" stroke="#808080">
+<g fill="#808080" stroke="#808080">
+</g>
+<g transform="translate(38.95377,26.39424)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(35.029862,-15.421555)scale(-1,-1)">
+<g fill="#808080">
+<g stroke="none">
+<text font-family="tikz-02-css-02-nf0" font-size="8.966376" x="35.029862" y="-15.421555"><tspan fill="#808080">accolade</tspan><tspan fill="#808080" x="70.823641">fermante</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-anatomie-css-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Anatomie d’une règle CSS.
+</figcaption>
+</figure>
+</div>
+<section id="une-règle-plus-complète" class="level3">
+<h3 class="anchored" data-anchor-id="une-règle-plus-complète">Une règle plus complète</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>h1 {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">red</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">font-size</span><span class="ch">:</span> <span class="dv">32</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">text-align</span><span class="ch">:</span> <span class="dv">center</span><span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">margin-bottom</span><span class="ch">:</span> <span class="dv">20</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong>Sélecteur</strong> : <code>h1</code> — cible <em>tous les <code>&lt;h1&gt;</code></em> de la page</li>
+<li><strong>Bloc</strong> : entre <code>{</code> et <code>}</code></li>
+<li><strong>Propriétés</strong> : <code>color</code>, <code>font-size</code>, <code>text-align</code>, <code>margin-bottom</code></li>
+<li>Chaque <strong>déclaration</strong> (propriété : valeur) finit par un <code>;</code></li>
+</ul>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Le point-virgule">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Le point-virgule
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le <code>;</code> après chaque déclaration est <strong>techniquement</strong> optionnel pour la dernière, mais <strong>toujours mettez-le</strong>. Vous oublierez d’en mettre un quand vous ajouterez une nouvelle propriété, et vous chercherez le bug pendant 20 minutes.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="les-sélecteurs" class="level2">
+<h2 class="anchored" data-anchor-id="les-sélecteurs">Les sélecteurs</h2>
+<p>Les <strong>sélecteurs</strong> disent «&nbsp;à quels éléments cette règle s’applique&nbsp;». CSS en propose plusieurs dizaines, mais 5 vous suffiront pour 90% des cas.</p>
+<section id="sélecteur-délément" class="level3">
+<h3 class="anchored" data-anchor-id="sélecteur-délément">Sélecteur d’élément</h3>
+<p>Cible <strong>toutes les balises de ce type</strong> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>p {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">gray</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math inline">\(\to\)</span> tous les <code>&lt;p&gt;</code> de toutes les pages liant ce CSS deviennent gris.</p>
+</section>
+<section id="sélecteur-de-classe-le-plus-utilisé" class="level3">
+<h3 class="anchored" data-anchor-id="sélecteur-de-classe-le-plus-utilisé">Sélecteur de classe (le plus utilisé)</h3>
+<p>Cible toutes les balises ayant un attribut <code>class="..."</code>. On préfixe le nom par un point :</p>
+<p>HTML :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>&lt;button class="btn-primary"<span class="op">&gt;</span>Commencer&lt;/button<span class="op">&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>&lt;button class="btn-secondary"<span class="op">&gt;</span>Annuler&lt;/button<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>CSS :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.btn-primary</span> {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">background-color</span><span class="ch">:</span> <span class="cn">green</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">white</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">.btn-secondary</span> {</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">background-color</span><span class="ch">:</span> <span class="cn">gray</span><span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">white</span><span class="op">;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Une classe peut être utilisée sur plusieurs éléments</strong>. C’est ça qui fait sa puissance.</p>
+</section>
+<section id="sélecteur-didentifiant" class="level3">
+<h3 class="anchored" data-anchor-id="sélecteur-didentifiant">Sélecteur d’identifiant</h3>
+<p>Cible la balise ayant un attribut <code>id="..."</code>. Préfixé par <code>#</code> :</p>
+<p>HTML :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>&lt;header id="entete-principal"<span class="op">&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    &lt;h1<span class="op">&gt;</span>Jàng Afrig&lt;/h1<span class="op">&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>&lt;/header<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>CSS :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#entete-principal</span> {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">background-color</span><span class="ch">:</span> <span class="cn">teal</span><span class="op">;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="`id` vs. `class`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span><code>id</code> vs.&nbsp;<code>class</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Un <code>id</code> doit être <strong>unique</strong> sur la page (un seul <code>#entete-principal</code>)</li>
+<li>Une <code>class</code> peut être <strong>réutilisée</strong> (plusieurs <code>.btn-primary</code>)</li>
+</ul>
+<p><strong>En pratique, on utilise presque toujours des classes.</strong> Les <code>id</code> servent surtout à JS plus tard.</p>
+</div>
+</div>
+</section>
+<section id="sélecteur-descendant" class="level3">
+<h3 class="anchored" data-anchor-id="sélecteur-descendant">Sélecteur descendant</h3>
+<p>Cible une balise <em>à l’intérieur d’une autre</em> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>nav a {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">white</span><span class="op">;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">text-decoration</span><span class="ch">:</span> <span class="dv">none</span><span class="op">;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math inline">\(\to\)</span> tous les <code>&lt;a&gt;</code> qui sont <em>à l’intérieur</em> d’un <code>&lt;nav&gt;</code> deviennent blancs et sans soulignement. Les autres <code>&lt;a&gt;</code> de la page ne sont pas touchés.</p>
+</section>
+<section id="pseudo-classes" class="level3">
+<h3 class="anchored" data-anchor-id="pseudo-classes">Pseudo-classes</h3>
+<p>Cible un élément <em>dans un certain état</em> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>button<span class="in">:hover</span> {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">background-color</span><span class="ch">:</span> <span class="cn">orange</span><span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>a<span class="in">:visited</span> {</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">purple</span><span class="op">;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>input<span class="in">:focus</span> {</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">border-color</span><span class="ch">:</span> <span class="cn">green</span><span class="op">;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>:hover</code> : quand la souris passe dessus</li>
+<li><code>:focus</code> : quand l’élément est sélectionné (au clavier ou cliqué)</li>
+<li><code>:visited</code> : pour un lien déjà cliqué</li>
+</ul>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Démo en direct">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Démo en direct
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le prof va montrer en direct, dans la console DevTools, comment ces sélecteurs s’appliquent à la page d’accueil de Jàng Afrig.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="cascade-et-spécificité" class="level2">
+<h2 class="anchored" data-anchor-id="cascade-et-spécificité">Cascade et spécificité</h2>
+<section id="le-problème" class="level3">
+<h3 class="anchored" data-anchor-id="le-problème">Le problème</h3>
+<p>Que se passe-t-il quand <strong>deux règles différentes</strong> essaient de styler <strong>le même élément</strong> avec <strong>deux valeurs incompatibles</strong> ?</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>p { <span class="kw">color</span><span class="ch">:</span> <span class="cn">red</span><span class="op">;</span> }</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>p { <span class="kw">color</span><span class="ch">:</span> <span class="cn">blue</span><span class="op">;</span> }</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Question :</strong> les paragraphes seront rouges ou bleus ?</p>
+</section>
+<section id="règle-1-la-cascade-le-dernier-gagne" class="level3">
+<h3 class="anchored" data-anchor-id="règle-1-la-cascade-le-dernier-gagne">Règle 1 : la cascade (le dernier gagne)</h3>
+<p>Si deux règles ont la <strong>même spécificité</strong>, c’est <strong>la dernière écrite</strong> qui gagne.</p>
+<div id="fig-cascade" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cascade-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><span class="figure-cours"><svg role="img" aria-label="Deux règles empilées, p { color: red; } puis p { color: blue; } : la plus basse gagne, et le résultat affiché est bleu." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="227.568648pt" height="107.273146pt" viewbox="-70.007476 -70.007481 227.568648 107.273146">
+<style type="text/css">
+@font-face{font-family:tikz-02-css-03-nf0;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAKEAAoAAAAABGgAAAI6AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAATAqCNIIOCwwAATYCJAMUBCAFgiAHIBuHA4Aeg23LOcZEVcVhLv8vYia+H/Hwz37uvvdluDVOh0joKtGSWYXVZRqt/hBpViJ1+2Pc+wb5mwPgJKrJkcnX1/8A9J8td5xIAd1WQNaywA80aClGAdbeA25rixOPzHIbm50IlyE06kgDilyMVqjIT97zrryW8vGVFnaIoGtMcKjL5+wYEHQuq4TuEqXYAhAA9ASJAlP4BKbwWwMG9EnpXJREWT3Br02vdi0FWLQCA6hxDLwDUAJSCjE2IDQ9LH9W740QFRh08OVzf394d3fU8OjzKLpmCLsxY2cIsbIj34eHo8dHsV+PsvjgvU6Di9fGndfDw7GAWNmeFMMfjjSN4BvM9iy+YZtMfsbA0c6do5i1idlH1kXbAp/TqS1PIMR14DUrippy8ggca3BS63fQd1UGsx8vfsurxDDNvhRoruUp4S1sbAiGxEioiRf1pT/b0hf0TRkB8cHqcCbqCEan4LzSxlXhEYuJu3r4FnMDh6swg3YC9/NPvRPk2vZfMGit6EgGgEDw5yz/HSJl+N9XlCDqPZu8APokCO5VkQ0s8Vze8FQ2INfBImVhA8s8rcEIDypLUwrggDc8Kg2Do1QYRmXQGGqFRcGAOZr4RNkvLNDGUartoDLDG7XaDQesSjf4qUdYcgaCnRzNcNiRSWNE9i3dIDI7LiM7JgnBpmmDhxRZ0kWIguAhTLIMCGzJojF4i5IuQ5wUyRCYaBg0ZROS6W6YTFEiHx8uD0KkbHEyZIuRBIGNRhsfAAA=) format('woff2');}
+@font-face{font-family:cmsy9;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAH0AAoAAAAAA5QAAAGqAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAANAp0fAsGAAE2AiQDCAQgBYIyByAb4wJgngPuzkKXi1BaRm2YYAjF+iQe+sban93ZM0O14q2R7XWalnCRUEiZGGj2x7j3fSgZqlzIW1ai05x1XQlg3S30TbuMSnCLpF3C7R9j0Vf8/+BNHuADffiIJjjw2dbxD/JAA84kjz9ommJA2Dclh5KciMNDO3ZDrZ8xqVE+ysUfzYTl8aeCmyBgdSCHQLp72gsAj5YjFO9HC/TF+oAA4D9AQcUqlMAqtEMgpeBo+R+azwHKf1gBicAxcAZAAuL4hTS71b9NJz82OLsrTOY2++GhPkefpd3XZhXD88tW7pNj/EXXj8K+A1T0CWKvA619o8jEXPczYpXL2dn2qfeDEtzx6XCCNQAIBF/v/r859X3jUQkAgH+on0ICegoIxtDmLi8564+gKvU6bSJQHEPMBGkG3rGa4tDUTGkztEo7moPtgU0yKJF9YZ8PaBq4pc26Htox8NwPXBpasP7/rC52yyUP1sJsMAUmz49P9PRWy150xGpwQNSgM9qsMjMib5BwvRd1FhepQXBRLfcIMwMTg2Toy4JvBdI36LgQPXaVxa7QIawMHFAAIwUAAAA=) format('woff2');}
+@font-face{font-family:tikz-02-css-03-nf1;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAASMAAoAAAAAB4gAAARCAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAdAqIAIYyCxoAATYCJAMwBCAFgiAHIBvvBSAeBe6eDbe8hqlx2ZT58N+2/tzLiAFGgrmzbRRiJ2hP2cVGdM2A+/q70/4HyJbd/wL20yeuqR+tyZEAllaLBmsaRhvsBjjany8tkpP8byTTAfjehoYdiYdDp6sJDGhbQEVsZC3sALqdvvrfC2tmknzbdTASR4BTAzwB4oG2CZM7oUYwJjH4f4EBKTXLDAKBAlBJXlCB0AyaSm5QifENQQva0Yk+WDAWEzBpUCEYzYrP5Pbba48dtttmi80REKUFoUenG0CGAOSBEmZKAGkoBYjLzHVx8dR6aR11AVoXH2GN4T78eatg+1RMkgcwVzHwyRhJ5lljzOcUyAP8cnVSDLvefcWrCKNGchJvyjGKKFpzZc5L5hR++evIaKdGDcfdsCWsUHiZC5YFm2gTrU7L5VRO6Xwoc847/Pbcl5YC/A9QFG5vgFavKAVPygxv+eVCzjv+iU0UZc4ot0W3W1OdXLPCllHsVLaSef6N9w/Ub/LWDT2oqdVwd2wJjxR2W4DkVLuH2ITHnMQ1ZvdFzDp5+XWoVItlfrk1MoOJuPJmyI7bpuvWIFs7lk+9LVy8qd92K+mVEiDL/GMrmTekViPthMw/Emtd3mH2pdND9kPE7WnJ4y2f9fZb4o6X67bUApdksP8LeW/tGX566H4Jt2ak4rIm21wLkS7Nr/cp5lpp8IChIaPlpyy7og4pYkg5zI3hX4SZ1ploQlF8nIl0qebgB03wANufuXagbPQ9r5ZSPuSrVf6K9jQTTSqJLyVddJY0oiI0NvLbEDNG3UJ9ma6IcvbaO5an9V09aFMtKqz6qqS4gVSRwhaUBv6WYwfRlLv3J+buOZz+qsWUE7Ohgn5lNrtk67uLyxtpZqkIgc7LrVm53VTRRIOfZqVndTqGPNo2YkRFWHKYHGEaV0TjiuLNpJVOwXiHPGR4iLOmlM2Z7u361U+SCLblpyzGtIiP+vFtQqajy6L01NLUmAk6ajJjXW1tXiMc3618kKXKauLDfsw210HwapYW2mRNj9EeVTsHxv+YRTisMdYath8wZFeQsy8Zp6urvk7MdCKZdWV5qCOJ2dv2ZJNx/wQG/Nn6Nj5TQ/I6KnBC8zYxM3nIxIy0snTjeB3MZoyrqc1rKm35KZMxLxQMAAAQAASYlX1EaXRN/c1BxYCWDM6QFtDvADiAPuh+/im6wGDaixgQeJ+WLgBIKHJI+OAahWA6Eiz5FqMoC4r/i6B+YOmIwZOdg/9THeJAAGgRvMkIajhhNkgEnV1RYaCCs2IHDdwUNVTwX+wEPYKgAmEcQeCH+KAwUKNcsYMPBEUNNfrqTojG+LNkZ1WzZQJrtHQYDnMlQ2Q0DvyYv3Xb5O4Jkzv7WWNkPKowBpMwHq1oB4sqNMOCCWBhhAUdMEBAOyyagG6MgQUsDIhEdAELPMswNmMi2tFWasE0xtiGyejGhNZO9IOFEZFOjU8A) format('woff2');}
+@font-face{font-family:tikz-02-css-03-nf2;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAVoAAoAAAAAClwAAAUdAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgRQKjTSJbAseAAE2AiQDIAQgBYIsByAbxQcAHoVxTGyg0sR67TG/n/9O+3NnkjSZQkkKaAoyLsx0xWwhLqD0qc6Cn88mKs/9m0BmYsFQOCJVKJUKUqDm/zHAwDn10RTpb7vwkfbI1CjK5tO9AWeP4lsk6EEb1P82LBzlgMZw5psB97AdAA8dSYAKsB/77D8mnL0N6BvKBc7FAKDSAA2B7ZB71xcAjZe2pvLfTQCuF4WBnfn//1kMRol3BhMOESjEx+tSgVPgxVu2HLnylKpQqVqdFm0x6rUwmiInCcMG32hAn3MkIQ2nRK27Jjxg3Yp9Wi2FV2O0E3FiUIw2jaWjaG+iqCenrSDP/mTl6OZeMHDbdO6u9vC9k3dE0wrNtl0f5m2ib2m4X+OWydU1Hby7xckHObu73H2/3oETQxpUomeuc54lf3JRE74Q7O1x9/fDHu/qgngv9Jksp9fW8jbenb8vGNbYEVwLNbtiJF4gTixpd/ax3XZ9epjn9fb2eM/uafTPs65VDMywiRNDOpt8r6UymeCK1AwRPXPawyn4KfL9s3w0tu9m5u41wqAPU2wPCBUQwWCuwIbce2UOAdP4U/thJ3bJHI2FrbBKNb5aeThhHXJ/4UR3IrC4PCUYecUz7CGrs8v8bHMUDCxYGJe0PcVYM2MK3JPJP7lToaiiwPXH5o9HuQkINrAaOut9y6ReKKbMclo0s+9186IOGrZe4rdEmc2yNuq7hGaZWcKtu5YLWjB43uPGBSYMWC3yFNaCgQ7p7b2+a+4pDyfO5Zjfc3VFav4Y28BwvS/mKNBd3TiQNK9Q/lVqPR4/+Ok084Mz8U/iH78m3aAQJueNePDrm2Q1tQlQCPyvvOSxpIzbnX9Jvjofp60mdz0tAgSp7IhMQyFRgkQIv/TCbTxFOZIEEbyp0O8LyUvDM1F7B8qAgBMkeXuqhhLIoLxxYi+ylLataIc2SQHuXxj5UAMLFooCkWOzb4e5hATlLSe9H2sgpR0JBW7VtKMMLKuxTYDEiwYj9uelmuyNFTwaxe7+xuSZcCLA/6MkQYhCUXCkMKs7QASvKqgei/3peC46LMYyUVqLOAPPwbKbU4mTYDPDc3w/TIaoRXawJ8jomkifgEy7eB8l+Jg4l39fSr46f/ibw7xqLtHUw5s34f0blNnULkAU4AwoE+iNYiEGQHqkCIXGciriOF0B50R657mY9C1TfbZb7pfn5ziLnaak37hMf52t2/OnVmq/2vkH3hyUXgbxT/X9V+SX55U3peTGZpJLEr9aulmtrUo3EIrMbLfSt2vlh0Y32lvJJscFhaFMQrtcdc2DlVs1WXGyfVNL5cpouCG8d6Lf+IFMoAfIipkzzu5HMiiVN+1vitOxY+7OMwbWC9UcIuCHm+SNiQsTwruBivbxozoGMy48TiYmXob37tQlSTqeL3KaMdCZr+EwEj4Mw4bEHpPrymVgc+yYtQomNGd65k223MaHgARGvCyZKV7OL8jAxUsAAADo+RTDV3k6Q9nnVzpOAbL2f92oYM8BgA7zlHyyg2ALGIionBIwl4HF9Z/CVWCIYMKNOw8Mehg8eUAAlLhHrUGihHbo0KvaOSlwiQRZVPKYLBqcwWyCJmM41BiAUOsFLAqaVBYVWzaLhqYxTCC1v26Q/tQBbkU5teY7/Td3OtqTkor3LMfk1hfV1BeUGTrbu0GMLLWKlDMUq+LbSV8N6vJnOJ8Tvs5dowjzDDmyR9JDw1XlvuJ4hDy5zmxNHG+uekVqnAXKZCDO7LnBEUEIAA==) format('woff2');}
+@font-face{font-family:tikz-02-css-03-nf3;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAR4AAoAAAAAB2wAAAQvAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAdAqHYIYBCxwAATYCJAM0BCAFgiAHIBvCBVGUDU4B4GdCNoe6TpNZqdmYKlYlvks3EcKT3y2fN6f1JTtQqykhJkW04wLBaQCAA0t8Gn737dHNtsZvp/FrOkR+zPZQiCHweP77G537JrGiiALKJLJmkpqgABNZlF1qZn/8T1xTP5q+9SkB7JuL0vN8VSzRGIUb8AgnNhAZuO9z0YT5WDOl8+FRR4DLy6ylALrXq7+DNdXPR9WIjwUgKkHiJs7tXctZOZG0F7z/H+CRmQOC2KmGoLo5gAMOKRyv7UwbHF6aGpLW6B2+d64XAWtk+0zt087e13lsY2gJAimN9W4AOyA9kDUa8SACZZAIFHkGh7zRglmpXS0c7XkL5udkp3RQBDUevj3vzopbc2/WLb/ttqP1qOvWm0zBzEbJYBDrhQaBcmyFPM8kCtJyk95k5t0FFw0hOTfMhUajSAW/qwb9mBZiMHjuetVuEsBcGKu1tws65881SuZs3VumYBDvzDDp1ZxZXP4ygzKO0Zblx+edWHFs7lHJJCsYvys42PegZNLnvpOevCG7TUnPTX4HltuR8Vp/8SZ2vUp8ZpTmGsDAxziByDIDg0B33mOHgmOvSiaZY9Qgr3iT7a8T9DcNvZcNosZUd6bCiLkulnqImStjDS0ycxQ1nECFtRaTeWb5UWrMYcEggnXQlxLFaDl2+Klzutbapdkl0DTqOu5mL2jsEziNwKFp7/s+zJVIL8qqWvNtjge07XOf7tE+vpfOy6lNqsA4HjNtdRFyUbNJ3mUdF16wb2+p5wN1SGfQ2XrUDqM5Nn/6cFWwc25+rnbxdE1PureagyvrwbxFZCadtXRxJ1o5xYb8P/Mg9Z6q7c1HHv0551eIP4pPaLdfZaTPNkLvposxZEkrDXqc3wfxu9UlsuunuM//GJ9wUt1I6NCkOM2xnZxWwcjGSGFe+2MZYL6OupBb+yWth2VdRTVa6MVRBx3+uOqJjZ8vNOiILqupFl/VFdDWodSmWFvGC7sL9izOX2yniQ3b+8p9Af5h2wm9kyHFkKUtNOhJeIf4PVeVp5RHw/rq14p8oYKj63rv92LRYjKTTl+4tA5t6Jo55JpSrqptkHSFSPhPG32/auHRpuJ9u7H41NtT4qlibRGvqyyTyxHTZv0poBSkK/ttZVmBvgRfvWy1Nz0K2iqltln7AgAQAIG4Yf+K1jj9qTkedMnUl+6qbwA1CgCIdO6iJ9f2bw3IeGKZ0W8PTMmtAqkA8fkguiKJfgUJUZ2XZxqgilSSX1RVQghAIwgHQNrmgtnKEBqYyDyORlZgbEAl4n4BBC68cEhnAcJNUlvmKVXJCk70spLSUCOIMfE+7K+V4wbxIyV+oMWxUTEy9tn+Bl1ns53VAPFRSag1Oaw0C9SSRhsQb0QJ07NWm8ZkBGJFiREHC8PRGL20s0zc4fH0XU6NrbsyAPGibjW7AQ==) format('woff2');}
+
+</style>
+<g id="02-css-03-page1">
+<g stroke-miterlimit="10" transform="translate(43.776846,-55.435762)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g stroke-width="0.8">
+<g fill="#f1d1d1">
+<g stroke="#9a6262">
+<g stroke-width="0.8">
+<g fill="#f1d1d1">
+<g stroke="#9a6262">
+<path d="M109.81102 14.22636H-109.81102C-112.02019 14.22636-113.81102 12.43553-113.81102 10.22636V-10.22636C-113.81102-12.43553-112.02019-14.22636-109.81102-14.22636H109.81102C112.02019-14.22636 113.81102-12.43553 113.81102-10.22636V10.22636C113.81102 12.43553 112.02019 14.22636 109.81102 14.22636ZM-113.81102-14.22636"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-40.16255,-2.12401)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(43.776846,-55.435762)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-02-css-03-nf2" font-size="8.966376" x="43.776846" y="-55.435762">p<tspan x="53.191547">{</tspan><tspan x="62.606248">color:</tspan><tspan x="95.557687">red;</tspan><tspan x="119.09443">}</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#f1e9d1">
+<g stroke="#9a8c62">
+<g stroke-width="0.8">
+<g fill="#f1e9d1">
+<g stroke="#9a8c62">
+<path d="M109.81102-17.8718H-109.81102C-112.02019-17.8718-113.81102-19.66263-113.81102-21.8718V-42.32452C-113.81102-44.53369-112.02019-46.32452-109.81102-46.32452H109.81102C112.02019-46.32452 113.81102-44.53369 113.81102-42.32452V-21.8718C113.81102-19.66263 112.02019-17.8718 109.81102-17.8718ZM-113.81102-46.32452"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-83.91502,-34.38866)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(43.776846,-55.435762)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-02-css-03-nf2" font-size="8.966376" x="43.776846" y="-55.435762">p<tspan x="53.191547">{</tspan><tspan x="62.606248">color:</tspan><tspan x="95.557687">blue;</tspan><tspan x="123.801777">}</tspan></text>
+<text font-family="tikz-02-css-03-nf1" font-size="8.966376" x="139.268779" y="-55.435762">(plus<tspan x="158.976877">bas</tspan></text>
+<text font-family="cmsy9" font-size="8.966376" x="173.99556" y="-55.435762">→</text>
+<text font-family="tikz-02-css-03-nf1" font-size="8.966376" x="185.004219" y="-55.435762">gagne)</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#d1f1e1">
+<g stroke="#629a7e">
+<g stroke-width="0.8">
+<g fill="#d1f1e1">
+<g stroke="#629a7e">
+<path d="M109.81102-64.19633H-109.81102C-112.02019-64.19633-113.81102-65.98717-113.81102-68.19633V-88.64906C-113.81102-90.85823-112.02019-92.64906-109.81102-92.64906H109.81102C112.02019-92.64906 113.81102-90.85823 113.81102-88.64906V-68.19633C113.81102-65.98717 112.02019-64.19633 109.81102-64.19633ZM-113.81102-92.64906"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-40.9575,-81.6762)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(43.776846,-55.435762)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-02-css-03-nf3" font-size="8.966376" x="43.776846" y="-55.435762">R<tspan x="48.789054">ésult</tspan><tspan x="66.999769">a</tspan><tspan x="71.393286">t</tspan><tspan x="76.217199">aﬀiché</tspan><tspan x="103.322557">:</tspan></text>
+<g fill="black">
+<text font-family="tikz-02-css-03-nf0" font-size="8.966376" x="107.946228" y="-55.435762"><tspan fill="#0000b3">bleu</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#808080" stroke="#808080">
+<path d="M0-46.72452V-58.36395" fill="none"></path>
+<g transform="matrix(0.0,-1.0,1.0,0.0,0.0,-55.26053)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M7.3966 0L1.29175 2.30243L3.30342 0L1.29175-2.30243Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cascade-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Quand deux règles de même spécificité s’opposent, la dernière écrite gagne.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="règle-2-la-spécificité-le-plus-précis-gagne" class="level3">
+<h3 class="anchored" data-anchor-id="règle-2-la-spécificité-le-plus-précis-gagne">Règle 2 : la spécificité (le plus précis gagne)</h3>
+<p>Mais si une règle est <strong>plus précise</strong>, elle l’emporte, peu importe l’ordre. La spécificité se calcule comme suit :</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><strong>Type de sélecteur</strong></th>
+<th><strong>Score</strong></th>
+<th><strong>Exemple</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sélecteur d’élément</td>
+<td>1</td>
+<td><code>p</code></td>
+</tr>
+<tr class="even">
+<td>Sélecteur descendant</td>
+<td>2 (1+1)</td>
+<td><code>nav a</code></td>
+</tr>
+<tr class="odd">
+<td>Sélecteur de classe</td>
+<td>10</td>
+<td><code>.btn-primary</code></td>
+</tr>
+<tr class="even">
+<td>Sélecteur d’identifiant</td>
+<td>100</td>
+<td><code>#entete-principal</code></td>
+</tr>
+<tr class="odd">
+<td><code>style="..."</code> inline</td>
+<td>1000</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exemple-chiffré" class="level3">
+<h3 class="anchored" data-anchor-id="exemple-chiffré">Exemple chiffré</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>p { <span class="kw">color</span><span class="ch">:</span> <span class="cn">red</span><span class="op">;</span> }                      <span class="co">/* score 1   */</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.intro</span> { <span class="kw">color</span><span class="ch">:</span> <span class="cn">blue</span><span class="op">;</span> }                <span class="co">/* score 10  */</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#message-special</span> { <span class="kw">color</span><span class="ch">:</span> <span class="cn">green</span><span class="op">;</span> }     <span class="co">/* score 100 */</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Pour ce HTML :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>&lt;p class="intro" id="message-special"<span class="op">&gt;</span>Texte&lt;/p<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Le texte sera…<strong>vert</strong> (le <code>#message-special</code> a le score le plus élevé).</p>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Conseil pratique">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Conseil pratique
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Préférez les classes</strong> (<code>.</code>) aux ids (<code>#</code>)</li>
+<li><strong>Évitez les sélecteurs trop précis</strong> comme <code>header nav ul li a</code></li>
+<li><strong>N’utilisez jamais <code>style="..."</code> inline</strong> sauf en dernier recours</li>
+</ul>
+<p>Si vous gardez des règles simples (1-2 niveaux de précision), vous éviterez 99% des bugs de spécificité.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="le-box-model" class="level2">
+<h2 class="anchored" data-anchor-id="le-box-model">Le Box Model</h2>
+<p><strong>Le Box Model est sans doute le concept CSS le plus important.</strong> Tout élément HTML est une <strong>boîte</strong>, et chaque boîte a 4 zones.</p>
+<section id="les-4-zones" class="level3">
+<h3 class="anchored" data-anchor-id="les-4-zones">Les 4 zones</h3>
+<div id="fig-boxmodel" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-boxmodel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><span class="figure-cours"><svg role="img" aria-label="Le box model en rectangles emboîtés : margin à l'extérieur, puis border, puis padding, et content au centre." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="284.26144pt" height="217.961245pt" viewbox="-70.007476 -70.007481 284.26144 217.961245">
+<style type="text/css">
+@font-face{font-family:tikz-02-css-04-nf0;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAATEAAoAAAAAB+gAAAR3AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgQwKiDCGMwseAAE2AiQDOAQgBYIsByAbHAYAHoVx41NCiUMc8J3T1pqoRTz9fr899z3ELX06Q6JE8dA8kYJHQmc6JVskNB9q0xqoQ6qemjoJFTNbcwhn+nPL/2yAiWvyR1kUR7IPpIMircN209HQovF1JbqBj0Y6ANl8t/Y+HNNDxGztd6pIC6o8Qd2giXIDv/hvUNcZg745ysAoPEjQTAif4eS0MAlwWlVaT/13BdSPkINf8v+/iwWVPIhNKHZXl44TwKbdmhixEqRIlylLnnyFSjMstGov2aw0T5swZhQYsv2gvgLVze5JQD+QBQDyDKbGHyDFpScD44MiEgKCNDEudnqRERraEOOjHSIsFk59iKPn2LI2gRGMGVkyjngPQ67wNT0Kp5izcixdlCR5kZnnhCqLJT9H4fJzt6YsDKdwksQwpUHnfeN7meELtO1IbWkriyCwhywxGSQKDX5FqXjFKBZZeC6BDdyQVByNIF0WKD+MYFYeo/AlUmeD8NVXK98T+iiyjeIIjqLhPl6Ux+TERpkmgo5NYWuUG2mwQy/gCnbmbkceEhhBtlGZcBd57DqfGX/DGDA7kp96qnr4VHNwU57yWlN7pLJEWmCLLNdBQmb8icrBE42LOIL5kCUfhiihOIqhdAQbn1B55JUXj4SiDJIUGXPCcZyXNpOEITivTDyOqv3n5OZu/v/ioerWLJTq7fTWKyQ8zitH75XKnVhmHankD8r+zeQMlGb6wjOkPMgTUfV/Fv4PLf63HVjYm8pPt2dTZjR9vOrUAI/2ak8HQgwzbncfzSjIG3gf8PnkDy9M1xMfdR34fqEuQKW9UgIaHxJJzfWBUI69VvkUY+hhgL0eGS9q7wVbtSRFC0S6eoOdXz/T/YTHMJY92wd89akLzc0+8sftYNEaHtcEYy84GoptFkoUT+hrCoM/85bL1OOMzgWeW3o/QkHOOWAxMOphoFJJrHBMrP7bhh4GgOcMW/Uke8tNJ7jXKbzf+E9GzHM/PvdgpuFNMCwg+DeQe5VImKqLgSKhlFrhRPHk6dYYOA6Oa0sI58ddAiz9UwNEgvlx+5CiJBwM1okxNuqODQIgTFfWszscvhlt+9Ylbe4Ph+QiG0zEJ+T6IAT6wZU2L+Mq4yAZ/aOb8AeO6nfHAS6T4Hg8Ut0JjuUPvjLlwD8NlarxXr6Lvlf9hj83v3xNlwcmL8IPo4IeYsqkYCqnE88rbosExwyLGLDU0hYWmge6afbFJaEhpWAEgCB8mmluRfFb/8rNVmPTf8omG8i3KpGuF0NbmQXs/yMeSwH0KE5kBoDcgJP1fJ0v4F7ogBECOPob1uz3HgsqfDbSB5ZSDhLzNcjKUyAHQrdGtTmi0e4a5AH0uXS1VulTm3QYVJtVZla3G6WITeo24bAl1FqzHbXJsFi1WbOrWrt1lbvY7i/oYFBMZl5mov4vX8pAV3/MbN9fHl+YkleYlEE30jUF3mLkS5GJzkeWeAlymz/ISmXKqyXSx+RKnhRZLNIZ0HXZAbdAZqwzH5UgPhWr5Mocr1CKvDdPkoHOiC5TbAQAAAA=) format('woff2');}
+@font-face{font-family:tikz-02-css-04-nf1;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+
+</style>
+<g id="02-css-04-page1">
+<g stroke-miterlimit="10" transform="translate(-69.608977,128.816134)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g fill="#f1d1d1">
+<g stroke="#9a6262">
+<g stroke-width="0.8">
+<path d="M0 2V197.1692C0 198.27379 .89542 199.1692 2 199.1692H282.52744C283.63202 199.1692 284.52744 198.27379 284.52744 197.1692V2C284.52744 .89542 283.63202 0 282.52744 0H2C.89542 0 0 .89542 0 2ZM284.52744 199.1692"></path>
+</g>
+</g>
+</g>
+<g fill="#6e4646" stroke="#6e4646">
+<g fill="#6e4646" stroke="#6e4646">
+</g>
+<g transform="translate(6.37842,186.73376)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-69.608977,128.816134)scale(-1,-1)">
+<g fill="#6e4646">
+<g stroke="none">
+<text font-family="tikz-02-css-04-nf1" font-size="8.966376" x="-69.608977" y="128.816134"><tspan fill="#6e4646">ma</tspan><tspan fill="#6e4646" x="-57.405746">rgin</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#eedaad">
+<g stroke="#9a7e3f">
+<g stroke-width="0.8">
+<path d="M28.45274 28.45274V170.71646H256.07469V28.45274ZM256.07469 170.71646"></path>
+</g>
+</g>
+</g>
+<g fill="#6e5a2d" stroke="#6e5a2d">
+<g fill="#6e5a2d" stroke="#6e5a2d">
+</g>
+<g transform="translate(34.83116,158.09203)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-69.608977,128.816134)scale(-1,-1)">
+<g fill="#6e5a2d">
+<g stroke="none">
+<text font-family="tikz-02-css-04-nf1" font-size="8.966376" x="-69.608977" y="128.816134"><tspan fill="#6e5a2d">b</tspan><tspan fill="#6e5a2d" x="-64.300875">o</tspan><tspan fill="#6e5a2d" x="-59.647333">rder</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#e1f1d1">
+<g stroke="#7e9a62">
+<g stroke-width="0.8">
+<path d="M42.67911 42.67911V156.49008H241.84831V42.67911ZM241.84831 156.49008"></path>
+</g>
+</g>
+</g>
+<g fill="#5a6e46" stroke="#5a6e46">
+<g fill="#5a6e46" stroke="#5a6e46">
+</g>
+<g transform="translate(49.05753,143.86566)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-69.608977,128.816134)scale(-1,-1)">
+<g fill="#5a6e46">
+<g stroke="none">
+<text font-family="tikz-02-css-04-nf1" font-size="8.966376" x="-69.608977" y="128.816134"><tspan fill="#5a6e46">padding</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#bcdaee">
+<g stroke="#547e9a">
+<g stroke-width="0.8">
+<path d="M85.35823 71.13185V128.03734H199.1692V71.13185ZM199.1692 128.03734"></path>
+</g>
+</g>
+</g>
+<g fill="#fff" stroke="#fff">
+<g fill="#fff" stroke="#fff">
+</g>
+<g transform="translate(124.86372,96.6946)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-69.608977,128.816134)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-02-css-04-nf1" font-size="9.96264" x="-69.608977" y="128.816134">content</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#808080" stroke="#808080">
+<g fill="#808080" stroke="#808080">
+</g>
+<g transform="translate(99.24367,-13.63542)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-69.608977,128.816134)scale(-1,-1)">
+<g fill="#808080">
+<g stroke="none">
+<text font-family="tikz-02-css-04-nf0" font-size="8.966376" x="-69.608977" y="128.816134"><tspan fill="#808080">(la</tspan><tspan fill="#808080" x="-56.320802">zone</tspan><tspan fill="#808080" x="-35.769862">visible</tspan><tspan fill="#808080" x="-9.462509">totale)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-boxmodel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Le Box Model : content au centre, entouré de padding, border, margin.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="ce-que-fait-chaque-zone" class="level3">
+<h3 class="anchored" data-anchor-id="ce-que-fait-chaque-zone">Ce que fait chaque zone</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Zone</strong></th>
+<th><strong>Rôle</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>content</strong></td>
+<td>Le contenu réel : texte, image, autre balise. Sa taille est définie par <code>width</code> et <code>height</code>.</td>
+</tr>
+<tr class="even">
+<td><strong>padding</strong></td>
+<td>Espace <em>intérieur</em> entre le contenu et la bordure. «&nbsp;Du rembourrage à l’intérieur de la boîte&nbsp;».</td>
+</tr>
+<tr class="odd">
+<td><strong>border</strong></td>
+<td>La bordure visible (épaisseur, style, couleur).</td>
+</tr>
+<tr class="even">
+<td><strong>margin</strong></td>
+<td>Espace <em>extérieur</em> entre cette boîte et les boîtes voisines. «&nbsp;Du vide autour de la boîte&nbsp;».</td>
+</tr>
+</tbody>
+</table>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="L'analogie du paquet cadeau">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>L’analogie du paquet cadeau
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>content</strong> : le cadeau lui-même</li>
+<li><strong>padding</strong> : le papier de soie autour, dans la boîte</li>
+<li><strong>border</strong> : le carton de la boîte</li>
+<li><strong>margin</strong> : l’espace que vous laissez <em>autour</em> pour ne pas écraser les autres paquets</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="exemple-en-css" class="level3">
+<h3 class="anchored" data-anchor-id="exemple-en-css">Exemple en CSS</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.carte-mode</span> {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">width</span><span class="ch">:</span> <span class="dv">200</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">padding</span><span class="ch">:</span> <span class="dv">20</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">border</span><span class="ch">:</span> <span class="dv">2</span><span class="dt">px</span> <span class="dv">solid</span> <span class="cn">teal</span><span class="op">;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">margin</span><span class="ch">:</span> <span class="dv">10</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">background-color</span><span class="ch">:</span> <span class="cn">#f4f4f4</span><span class="op">;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="le-piège-classique" class="level3">
+<h3 class="anchored" data-anchor-id="le-piège-classique">Le piège classique</h3>
+<p>Par défaut, <code>width</code> ne mesure que le <strong>content</strong>. Donc une boîte de 200px avec <code>padding: 20px</code> occupe en réalité <strong>240px</strong> de large (200 + 20 + 20).</p>
+<p><strong>Solution</strong> : ajouter cette règle au début de votre CSS pour que <code>width</code> inclue padding et border :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="op">*</span> {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">box-sizing</span><span class="ch">:</span> <span class="dv">border-box</span><span class="op">;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Réflexe pro">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Réflexe pro
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Toujours mettre <code>box-sizing: border-box</code></strong> en début de fichier CSS. C’est le réflexe de tous les développeurs web modernes. Sans ça, vos calculs de largeur seront faux et vous galérerez en responsive.</p>
+</div>
+</div>
+</section>
+<section id="démo-en-direct-dans-devtools" class="level3">
+<h3 class="anchored" data-anchor-id="démo-en-direct-dans-devtools">Démo en direct dans DevTools</h3>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Le Box Model dans DevTools">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Le Box Model dans DevTools
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le prof va montrer en direct comment voir le Box Model d’un élément :</p>
+<ol type="1">
+<li>Clic droit sur l’élément <span class="math inline">\(\to\)</span> <strong>Inspecter</strong></li>
+<li>Onglet <strong>Computed</strong> ou panneau de droite</li>
+<li>Le Box Model s’affiche avec les valeurs réelles de chaque zone</li>
+</ol>
+<p>C’est l’outil que vous utiliserez <em>tout le temps</em> pour débugger votre CSS.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="flexbox-aligner-et-positionner" class="level2">
+<h2 class="anchored" data-anchor-id="flexbox-aligner-et-positionner">Flexbox : aligner et positionner</h2>
+<p>Avant Flexbox, centrer un bouton verticalement dans une page demandait des <em>hacks</em>. Avec Flexbox, c’est trois lignes.</p>
+<section id="le-principe" class="level3">
+<h3 class="anchored" data-anchor-id="le-principe">Le principe</h3>
+<p>Flexbox transforme un élément parent en <strong>conteneur flexible</strong> (un «&nbsp;flex container&nbsp;»). Ses enfants directs deviennent des <strong>flex items</strong> qui peuvent être alignés et distribués librement.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.conteneur</span> {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">display</span><span class="ch">:</span> <span class="dv">flex</span><span class="op">;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>C’est tout. Le parent passe en mode flex, et ses enfants se mettent <strong>en ligne horizontale</strong> par défaut.</p>
+</section>
+<section id="les-deux-axes" class="level3">
+<h3 class="anchored" data-anchor-id="les-deux-axes">Les deux axes</h3>
+<div id="fig-flex-axes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-flex-axes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><span class="figure-cours"><svg role="img" aria-label="Un conteneur Flexbox et ses quatre éléments, numérotés de 1 à 4 et alignés en ligne. L'axe principal, horizontal, est piloté par justify-content ; l'axe secondaire, vertical, par align-items." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="363.733729pt" height="114.992747pt" viewbox="-70.007476 -70.007481 363.733729 114.992747">
+<style type="text/css">
+@font-face{font-family:tikz-02-css-05-nf0;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:tikz-02-css-05-nf1;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAQwAAoAAAAABqgAAAPmAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAbAqGMIUKCxgAATYCJAMsBCAFgiAHIBs7BWCuBmwiw8NqxFd1zh3SRjpx2efcFqHY1I/x8P3a67lvIbAlAFVLyD7T8YyuU8XkCVUrbITJP16vfrI5CO8sZU9WZZasyE746DTvfm3/zBwxGTpDPBKSSeNCBE9EXjfNKqEQyTd4c+eCD4/BbNwna5pA3BeJi57I738B++ntIrr8b/7PpYvENVAC2GYVtD8cbRdA0Qy7542ZQEdwYkdiZ9vyESVRhYTo6dYePdoKsrgWpxSkK+lji0HDjOLqGhNDilgiZRxg65H0KKAyzHMOWh6Qi/lAYLaGn0LrneAiMRRW7tYBC1wyXIgY8RIlS/VcG8OMBPkb1P7SVZdddMF5/WESXZmiC9AO+Eesg9AcEA1OfojKkLVp01EhqNq0k+XFNFZasxA/OMj5B9U5+QOOPuVhXWUiF37ld8zu4McfXA1GVG69p2ZJFtCzRq9XW/7TCq+zxhPEcbL0VB5V3huqO9vG23D2zvIRfuZCzzF6/25tnc0io8uegyH+7PQJ+6fLz19mTE6KhZxq7m/PkixgSddiaY0xv2xSLqt+VD7WaPDdysGoXa//yDCP7Xv3OHCITox60btXSMYugVvy20PzVnZcPSLGnh47H1j1uwo0qBQWeZKWnW6Vg/Ve9Jwof3Fy71tha6Y8mbiZTiA0xhaaO9YAeKzBCZ9q7Nztn+q/vxJszlXCknzyHD/wSpXTR7js3cNI0q/jR41Cv+uENtu9FYSdwW6D/N3I9ibH02rT1LDForMCaPN399Q3Zpw7hWy33OlunAaS6y0YdfDKy3AqyOZk/m1mFC4qL2AHBGSVM8kDdArBiA7cecuKGeQ/7PE1tCLFHMe7U9UOzjLFHke7o0rD12NzHW6y0UPuq77DHzx3tVYoKfhXdT7DQTk76UBNRyw65a0Ud5HVVHwb3rabv2CdNKgFVhz0tvCbPx6aTqM/VZNgTfJ/HTN/uw6nzX4nhdTWFHdf02lZZhFhVzB62CvOAZKvrVvAbUNyr2N4u/9uJDoWwrOymf0P0D4QcwvrzeDY+3eDEFbMNh/883f3i+7+ZqRtowYgELyo6S7J1Pr/kizHU2pDWkvNqJfCXIfJAphwVsQ0yFYF/WxiBDAL+dyyQNpP/fwzOqkMS4HcYz0UkEH8GQJDZTAcjkyzURMMhluj0cxlWityodJOLmV6Tm/UjRBc5A1CD5qKnCstlAtdeMql0t5Go3GSb2WdbiFEClIjIlWuRUBFUZkGfnGfPjw9JiU9KgGpKWqCG7I0ycJEQNyEIKRA1BAiqfAUIdnExCBDqEGRMhC2SggO+hCpIoSDUFlCHy5djJTWKAkQNYqfND4DAA==) format('woff2');}
+@font-face{font-family:tikz-02-css-05-nf2;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAUsAAoAAAAACJQAAATjAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAbAqJeIdeCyQAATYCJANEBCAFgiAHIBunBhFVo1GC/EwwTxr9rOcRld1iIcGO5PRLPkSn/ZvJVjuFkdRKhUV5EpIzsPgCAqAB/okI6uZSXcjGJr+KQYX7C5+4pn60RVsuAKyLoq3KopUGFo0b7QY00t3MBuLTTYb3EFCG3NLZe8DhdAMMFGQFbAC6iT79zxPLzwT55rBBGnEABFtAJMBnoN/YCQNhCxMmcfjvFMCBNKDS/1dUCsCge8IAQnNoy7jD1bedIh290R+DMQyjMBaT8jIwCdyXGYEx3+D/F+1pdzva1ta2tAGBUm4gwjHpA5B+APWLwVwVINgB6rLeDSfvRJx8I+2Yl723O2/nxTk4eTIHN9453I0RZuDJfT2PcQyM6LqsSWeexEq3daaqoqIIZjODqGmF8kE1w/o8ZLvGw4BgwvIgo8vWeqvwUA1TlE5GZPmEsZ04kk5GGfi8iqTpMjgo1K26SPnwC4p8vogoT/y29g4D+kG1WTiUeUcRVNWaJx5QRH+39WGcRBiXARwAzmaupVswEwP3PQlls2+1pT5LxRZfx51qlrVRvKAwA6M9LNdmX7denXVF1DTZhnGzDrIYcU/ssHhZN6uqQHnD7GORlguxtHfXyx9WpPP6bM2izFJFGxZ2WM8adZfWIqLTSn06fy4fVx9yx2ndGiXsu/fESEWLViirZj1406PMR1q4/hX+VjnCs/I7QbMuZjxUw2YprFNiong8RWZtIi9JglA1ZemkKd05tYEeI10nT0F097Rhm47TMq63DNcFUxrqlX4Z5b0wbgS6qTxrT7sw3rRqJv5gDRhl9Cvv8U5l+CzTRIN/derAISLKkuxQUU/Cjz2q7ZIaxhsGTOqCSPoOSVpVUe9COxb1xm6nxUNIFTGvvZe6eYv/wG8XXJhWO6Z2C26xSjRKKEbTova1LihroEXmhIw+vQsn0ruEfh4+9XRCZYTtuB+ypQb+d8cUhLMRWLKIzKQzNywaim7St7Jr/Y6mwlpSSkoLageMzOv6VwzB76wHRlownU6famlFvHWDTf3Rdc+mnnyrIoxM/jHlxeydUenlMJNV8Fn9Yfvps3G9g7eNxLJFZCadtsTaA8PI0IVD+LaUN6tSTuQWGzuH9AhE2T/r/qmtjH6z6q26t6rexBO+DgXtaEhZl+FHGHEfYUHZP1Mci0MaEowtqBmCXnnrYjO/+iHgwEQZgawfli+iM+nM5YseXHb1mfQiuXZBE+62L0Tp5QtTbv5VHTaqC4MWYwKdM32pgFK0ck1rmuJj0ytRj0XtJ469mN3TL9L2qtbUnBM4s/+KR6Ux0FnawOi+hUJl2k+lxNd+ydYx9dV+MA8S25DVEcGKWwc0n7Tx/vK/nY3VTuYhHXDebLfy552JzUlSgH9485bV3JbfdhlbTXKsHNMKAAABQADd49M/e7rk/2pv4KC2/5/epp9AsQdFngAzlCOyIZz/j0aAzBlOqYEGoaoFw0GfRz1oIOLJe4iitYil7ogiAcghUSilNSij2ZwpIxvo3D14U2c4OwjALbLfFVrgzWCacIKJyTFwMm0wrqAtGnCc5xtsQOYAwj/zzuTYajJteEtBW0KHNXnGMUvgyVbORtoIpTVoxpRslIX/Cd39xnssgFuTM9Fa7ywBbedspI1Qkjh4fLSXg4ZMycYoaE4lwp6v7Eyfb+37jfeoBdKSx7S+Ag==) format('woff2');}
+
+</style>
+<g id="02-css-05-page1">
+<g stroke-miterlimit="10" transform="translate(-60.905713,-21.220867)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g stroke="#c0c0c0">
+<g stroke-width="0.8">
+<g stroke-dasharray="3.0,3.0" stroke-dashoffset="0.0">
+<g fill="#f9f9f9">
+<path d="M-8.5359-15.91682V44.36957C-8.5359 46.57874-6.74507 48.36957-4.5359 48.36957H232.15785C234.36702 48.36957 236.15785 46.57874 236.15785 44.36957V-15.91682C236.15785-18.12599 234.36702-19.91682 232.15785-19.91682H-4.5359C-6.74507-19.91682-8.5359-18.12599-8.5359-15.91682ZM236.15785 48.36957"></path>
+</g>
+</g>
+</g>
+</g>
+<g fill="#c1d9f1">
+<g stroke="#46709a">
+<g stroke-width="0.8">
+<g fill="#c1d9f1">
+<g stroke="#46709a">
+<g stroke-width="0.8">
+<path d="M42.52455 28.45273H5.84544C4.18857 28.45273 2.84544 27.1096 2.84544 25.45273V3C2.84544 1.34312 4.18857 0 5.84544 0H42.52455C44.18143 0 45.52455 1.34312 45.52455 3V25.45273C45.52455 27.1096 44.18143 28.45273 42.52455 28.45273ZM2.84544 0"></path>
+</g>
+</g>
+</g>
+<g transform="translate(21.809,11.36887)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-60.905713,-21.220867)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-02-css-05-nf2" font-size="8.966376" x="-60.905713" y="-21.220867">1</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#c1d9f1">
+<g stroke="#46709a">
+<g stroke-width="0.8">
+<g fill="#c1d9f1">
+<g stroke="#46709a">
+<g stroke-width="0.8">
+<path d="M93.73914 28.45273H57.06003C55.40315 28.45273 54.06003 27.1096 54.06003 25.45273V3C54.06003 1.34312 55.40315 0 57.06003 0H93.73914C95.39601 0 96.73914 1.34312 96.73914 3V25.45273C96.73914 27.1096 95.39601 28.45273 93.73914 28.45273ZM54.06003 0"></path>
+</g>
+</g>
+</g>
+<g transform="translate(73.02359,11.31487)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-60.905713,-21.220867)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-02-css-05-nf2" font-size="8.966376" x="-60.905713" y="-21.220867">2</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#c1d9f1">
+<g stroke="#46709a">
+<g stroke-width="0.8">
+<g fill="#c1d9f1">
+<g stroke="#46709a">
+<g stroke-width="0.8">
+<path d="M144.95416 28.45273H108.27505C106.61818 28.45273 105.27505 27.1096 105.27505 25.45273V3C105.27505 1.34312 106.61818 0 108.27505 0H144.95416C146.61104 0 147.95416 1.34312 147.95416 3V25.45273C147.95416 27.1096 146.61104 28.45273 144.95416 28.45273ZM105.27505 0"></path>
+</g>
+</g>
+</g>
+<g transform="translate(124.23862,11.36887)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-60.905713,-21.220867)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-02-css-05-nf2" font-size="8.966376" x="-60.905713" y="-21.220867">3</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#c1d9f1">
+<g stroke="#46709a">
+<g stroke-width="0.8">
+<g fill="#c1d9f1">
+<g stroke="#46709a">
+<g stroke-width="0.8">
+<path d="M196.16919 28.45273H159.49008C157.8332 28.45273 156.49008 27.1096 156.49008 25.45273V3C156.49008 1.34312 157.8332 0 159.49008 0H196.16919C197.82607 0 199.16919 1.34312 199.16919 3V25.45273C199.16919 27.1096 197.82607 28.45273 196.16919 28.45273ZM156.49008 0"></path>
+</g>
+</g>
+</g>
+<g transform="translate(175.45364,11.36887)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-60.905713,-21.220867)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-02-css-05-nf2" font-size="8.966376" x="-60.905713" y="-21.220867">4</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g stroke-width="1.2">
+<g fill="#dc5050" stroke="#dc5050">
+<path d="M-8.5359-36.98865H240.64833" fill="none"></path>
+<g transform="translate(241.24832,-36.98865)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-3.04 3.84514C-2.4846 1.53802-1.24696 .4486 0 0C-1.24696-.4486-2.4846-1.53802-3.04-3.84514" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#dc5050" stroke="#dc5050">
+<g fill="#dc5050" stroke="#dc5050">
+</g>
+<g transform="translate(-5.00293,-50.79506)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-60.905713,-21.220867)scale(-1,-1)">
+<g fill="#dc5050">
+<g stroke="none">
+<text font-family="tikz-02-css-05-nf2" font-size="8.966376" x="-60.905713" y="-21.220867"><tspan fill="#dc5050">ax</tspan><tspan fill="#dc5050" x="-51.804835">e</tspan><tspan fill="#dc5050" x="-45.366974">princip</tspan><tspan fill="#dc5050" x="-17.356014">al</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#dc5050" stroke="#dc5050">
+<g fill="#dc5050" stroke="#dc5050">
+</g>
+<g transform="translate(-5.00293,-61.52544)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-60.905713,-21.220867)scale(-1,-1)">
+<g fill="#dc5050">
+<g stroke="none">
+<text font-family="tikz-02-css-05-nf1" font-size="6.973848" x="-60.905713" y="-21.220867"><tspan fill="#dc5050">(pilot</tspan><tspan fill="#dc5050" x="-45.988648">é</tspan><tspan fill="#dc5050" x="-41.239463">par</tspan></text>
+<text font-family="tikz-02-css-05-nf0" font-size="6.973848" x="-29.983679" y="-21.220867"><tspan fill="#dc5050">justify-content</tspan></text>
+<text font-family="tikz-02-css-05-nf1" font-size="6.973848" x="24.935375" y="-21.220867"><tspan fill="#dc5050">)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g stroke-width="1.2">
+<g fill="#328c50" stroke="#328c50">
+<path d="M284.52744-19.91682V47.16959" fill="none"></path>
+<g transform="matrix(0.0,1.0,-1.0,0.0,284.52744,47.76958)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linecap="round">
+ <g stroke-linejoin="round">
+ <path d="M-3.04 3.84514C-2.4846 1.53802-1.24696 .4486 0 0C-1.24696-.4486-2.4846-1.53802-3.04-3.84514" fill="none"></path>
+ </g>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#328c50" stroke="#328c50">
+<g fill="#328c50" stroke="#328c50">
+</g>
+<g transform="translate(293.75087,36.63417)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-60.905713,-21.220867)scale(-1,-1)">
+<g fill="#328c50">
+<g stroke="none">
+<text font-family="tikz-02-css-05-nf2" font-size="8.966376" x="-60.905713" y="-21.220867"><tspan fill="#328c50">ax</tspan><tspan fill="#328c50" x="-51.804835">e</tspan><tspan fill="#328c50" x="-45.366974">sec</tspan><tspan fill="#328c50" x="-32.814046">ondair</tspan><tspan fill="#328c50" x="-6.892249">e</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#328c50" stroke="#328c50">
+<g fill="#328c50" stroke="#328c50">
+</g>
+<g transform="translate(293.75087,23.75229)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-60.905713,-21.220867)scale(-1,-1)">
+<g fill="#328c50">
+<g stroke="none">
+<text font-family="tikz-02-css-05-nf1" font-size="6.973848" x="-60.905713" y="-21.220867"><tspan fill="#328c50">(pilot</tspan><tspan fill="#328c50" x="-45.988648">é</tspan><tspan fill="#328c50" x="-41.239463">par</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g fill="#328c50" stroke="#328c50">
+<g fill="#328c50" stroke="#328c50">
+</g>
+<g transform="translate(293.75087,12.46585)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-60.905713,-21.220867)scale(-1,-1)">
+<g fill="#328c50">
+<g stroke="none">
+<text font-family="tikz-02-css-05-nf0" font-size="6.973848" x="-60.905713" y="-21.220867"><tspan fill="#328c50">align-items</tspan></text>
+<text font-family="tikz-02-css-05-nf1" font-size="6.973848" x="-20.63174" y="-21.220867"><tspan fill="#328c50">)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-flex-axes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Les deux axes de Flexbox : principal (horizontal) et secondaire (vertical).
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="les-propriétés-essentielles" class="level3">
+<h3 class="anchored" data-anchor-id="les-propriétés-essentielles">Les propriétés essentielles</h3>
+<section id="sur-le-conteneur" class="level4">
+<h4 class="anchored" data-anchor-id="sur-le-conteneur">Sur le conteneur :</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Propriété</strong></th>
+<th><strong>Rôle</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>display: flex</code></td>
+<td>Active Flexbox sur le conteneur</td>
+</tr>
+<tr class="even">
+<td><code>flex-direction</code></td>
+<td><code>row</code> (par défaut, horizontal) ou <code>column</code> (vertical)</td>
+</tr>
+<tr class="odd">
+<td><code>justify-content</code></td>
+<td>Aligne les items sur <strong>l’axe principal</strong></td>
+</tr>
+<tr class="even">
+<td><code>align-items</code></td>
+<td>Aligne les items sur <strong>l’axe secondaire</strong></td>
+</tr>
+<tr class="odd">
+<td><code>flex-wrap</code></td>
+<td><code>wrap</code> : retour à la ligne si pas la place</td>
+</tr>
+<tr class="even">
+<td><code>gap</code></td>
+<td>Espace entre les items</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="les-valeurs-de-justify-content" class="level3">
+<h3 class="anchored" data-anchor-id="les-valeurs-de-justify-content">Les valeurs de <code>justify-content</code></h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Valeur</strong></th>
+<th><strong>Effet</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>flex-start</code></td>
+<td>Items collés à gauche (par défaut)</td>
+</tr>
+<tr class="even">
+<td><code>center</code></td>
+<td>Items centrés horizontalement</td>
+</tr>
+<tr class="odd">
+<td><code>flex-end</code></td>
+<td>Items collés à droite</td>
+</tr>
+<tr class="even">
+<td><code>space-between</code></td>
+<td>Premier à gauche, dernier à droite, le reste réparti</td>
+</tr>
+<tr class="odd">
+<td><code>space-around</code></td>
+<td>Espacement égal autour de chaque item</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="centrer-un-bouton-le-grand-classique" class="level3">
+<h3 class="anchored" data-anchor-id="centrer-un-bouton-le-grand-classique">Centrer un bouton (le grand classique)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.parent</span> {</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">display</span><span class="ch">:</span> <span class="dv">flex</span><span class="op">;</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">justify-content</span><span class="ch">:</span> <span class="dv">center</span><span class="op">;</span>   <span class="co">/* centré horizontalement */</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">align-items</span><span class="ch">:</span> <span class="dv">center</span><span class="op">;</span>       <span class="co">/* centré verticalement */</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">height</span><span class="ch">:</span> <span class="dv">200</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>3 lignes pour centrer parfaitement, à droite ET en bas, à hauteur ET en largeur. Avant Flexbox (avant 2015), c’était un cauchemar.</p>
+</section>
+<section id="cas-dusage-typique-la-nav" class="level3">
+<h3 class="anchored" data-anchor-id="cas-dusage-typique-la-nav">Cas d’usage typique : la nav</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>&lt;nav class="nav-principale"<span class="op">&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    &lt;a href="index<span class="fu">.html</span>"<span class="op">&gt;</span>Accueil&lt;/a<span class="op">&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    &lt;a href="quiz<span class="fu">.html</span>"<span class="op">&gt;</span>Jouer&lt;/a<span class="op">&gt;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    &lt;a href="scores<span class="fu">.html</span>"<span class="op">&gt;</span>Mes Scores&lt;/a<span class="op">&gt;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    &lt;a href="apropos<span class="fu">.html</span>"<span class="op">&gt;</span>À propos&lt;/a<span class="op">&gt;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>&lt;/nav<span class="op">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.nav-principale</span> {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">display</span><span class="ch">:</span> <span class="dv">flex</span><span class="op">;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">justify-content</span><span class="ch">:</span> <span class="dv">space-between</span><span class="op">;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">padding</span><span class="ch">:</span> <span class="dv">10</span><span class="dt">px</span> <span class="dv">20</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">background-color</span><span class="ch">:</span> <span class="cn">teal</span><span class="op">;</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">.nav-principale</span> a {</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">white</span><span class="op">;</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">text-decoration</span><span class="ch">:</span> <span class="dv">none</span><span class="op">;</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math inline">\(\to\)</span> une barre de navigation propre avec liens espacés et fond coloré, en quelques lignes.</p>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Mémo Flexbox">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Mémo Flexbox
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Les 5 propriétés à connaître :</p>
+<ol type="1">
+<li><code>display: flex</code> (active Flexbox)</li>
+<li><code>justify-content</code> (axe principal)</li>
+<li><code>align-items</code> (axe secondaire)</li>
+<li><code>flex-wrap: wrap</code> (retour à la ligne)</li>
+<li><code>gap</code> (espacement entre items)</li>
+</ol>
+<p>Avec ces 5, vous gérez 95% des layouts d’application.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="mini-exercice-en-classe" class="level2">
+<h2 class="anchored" data-anchor-id="mini-exercice-en-classe">Mini-exercice en classe</h2>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Exercice guidé --- on le fait ensemble">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Exercice guidé — on le fait ensemble
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Énoncé.</strong> Sur la page d’accueil de Jàng Afrig, ajoutons une règle CSS qui :</p>
+<ol type="1">
+<li>Met le <code>&lt;header&gt;</code> sur fond <strong>teal</strong> avec texte <strong>blanc</strong></li>
+<li>Aligne les liens du <code>&lt;nav&gt;</code> en <strong>ligne horizontale</strong>, espacés <strong>equitablement</strong></li>
+<li>Centre le bouton « Commencer » horizontalement dans son conteneur</li>
+</ol>
+<p><strong>On va l’écrire ensemble</strong> dans un <code>&lt;style&gt;</code> interne pour aller vite (au Lab 3, on basculera en fichier externe).</p>
+</div>
+</div>
+<section id="solution-attendue" class="level3">
+<h3 class="anchored" data-anchor-id="solution-attendue">Solution attendue</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Box-sizing pour tout */</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="op">*</span> { <span class="kw">box-sizing</span><span class="ch">:</span> <span class="dv">border-box</span><span class="op">;</span> }</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">/* Header coloré */</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>header {</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">background-color</span><span class="ch">:</span> <span class="cn">teal</span><span class="op">;</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">white</span><span class="op">;</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">padding</span><span class="ch">:</span> <span class="dv">20</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">text-align</span><span class="ch">:</span> <span class="dv">center</span><span class="op">;</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co">/* Nav en flex */</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>nav {</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">display</span><span class="ch">:</span> <span class="dv">flex</span><span class="op">;</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">justify-content</span><span class="ch">:</span> <span class="dv">space-around</span><span class="op">;</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">background-color</span><span class="ch">:</span> <span class="cn">#006644</span><span class="op">;</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">padding</span><span class="ch">:</span> <span class="dv">10</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>nav a {</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">color</span><span class="ch">:</span> <span class="cn">white</span><span class="op">;</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">text-decoration</span><span class="ch">:</span> <span class="dv">none</span><span class="op">;</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="co">/* Bouton centré */</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a><span class="fu">.bouton-conteneur</span> {</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">display</span><span class="ch">:</span> <span class="dv">flex</span><span class="op">;</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">justify-content</span><span class="ch">:</span> <span class="dv">center</span><span class="op">;</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">padding</span><span class="ch">:</span> <span class="dv">20</span><span class="dt">px</span><span class="op">;</span></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Si vous bloquez">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Si vous bloquez
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Pas de panique. Ce sera <em>exactement</em> ce qu’on fait au Lab 3, en détail, étape par étape. L’objectif aujourd’hui est de <strong>voir la mécanique</strong>, pas de tout mémoriser.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="résumé-et-transition" class="level2">
+<h2 class="anchored" data-anchor-id="résumé-et-transition">Résumé et transition</h2>
+<section id="ce-quon-a-vu" class="level3">
+<h3 class="anchored" data-anchor-id="ce-quon-a-vu">Ce qu’on a vu</h3>
+<ul>
+<li>CSS = <strong>Cascading Style Sheets</strong> : la couche visuelle du Web</li>
+<li><strong>3 façons d’inclure</strong> CSS : inline, <code>&lt;style&gt;</code>, <code>&lt;link&gt;</code> (recommandé)</li>
+<li>Anatomie d’une règle : <code>sélecteur { propriété: valeur; }</code></li>
+<li><strong>5 sélecteurs</strong> : élément, classe (<code>.</code>), id (<code>#</code>), descendant, pseudo-classes (<code>:hover</code>)</li>
+<li><strong>Cascade</strong> : à spécificité égale, le dernier gagne</li>
+<li><strong>Spécificité</strong> : id (100) &gt; classe (10) &gt; élément (1)</li>
+<li><strong>Box Model</strong> : content + padding + border + margin</li>
+<li>Réflexe : toujours <code>box-sizing: border-box</code></li>
+<li><strong>Flexbox</strong> : 5 propriétés pour aligner et positionner</li>
+</ul>
+</section>
+<section id="ce-quon-fera-au-lab-3" class="level3">
+<h3 class="anchored" data-anchor-id="ce-quon-fera-au-lab-3">Ce qu’on fera au Lab 3</h3>
+<ul>
+<li>Créer le fichier <code>style.css</code> dans le repo</li>
+<li>Le lier aux 5 pages avec <code>&lt;link&gt;</code></li>
+<li>Définir la <strong>palette panafricaine</strong> (vert, jaune, rouge + neutre)</li>
+<li>Utiliser une <strong>police Google Fonts</strong></li>
+<li>Styliser le <code>&lt;header&gt;</code>, le <code>&lt;nav&gt;</code>, les sections, le footer</li>
+<li>Créer des <strong>boutons</strong> stylés avec <code>:hover</code></li>
+<li>Tag <code>v0.3</code></li>
+</ul>
+</section>
+<section id="consigne-pour-la-prochaine-séance" class="level3">
+<h3 class="anchored" data-anchor-id="consigne-pour-la-prochaine-séance">Consigne pour la prochaine séance</h3>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="Avant le Lab 3">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Avant le Lab 3
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Lisez</strong> le PDF du Lab 3.</li>
+<li><strong>Vérifiez</strong> que vos 5 pages HTML s’affichent toujours correctement (<code>git pull</code> d’abord si vous avez travaillé sur un autre ordinateur).</li>
+<li><strong>Choisissez 1 ou 2 polices</strong> sur <a href="https://fonts.google.com">Google Fonts</a> qui vous plaisent. Idée : une « sans-serif » moderne pour le texte (<em>Poppins</em>, <em>Inter</em>, <em>Nunito</em>…) et une plus marquée pour les titres.</li>
+</ol>
+<p>Aucun code à écrire à la maison.</p>
+</div>
+</div>
+<div class="columns">
+<div class="column" style="width:85%;">
+<p><strong>CM2 — Terminé ✓</strong><br> Vous savez comment CSS donne vie au HTML.<br>Prochaine étape : <strong>habiller Jàng Afrig</strong>.<br> <em>Rendez-vous au Lab 3 !</em><br></p>
+</div>
+</div>
+</section>
+</section>
+<section class="level2">
+<h2 class="anchored" data-anchor-id="">Ressources du chapitre</h2>
+<ul>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-1/ressources/lab-3-css-en-pratique.pdf" class="seance-ressource" title="Lab 3 — CSS en pratique">Lab 3 — CSS en pratique</a> <span class="ressource-poids">(142 Ko)</span></li>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-1/ressources/lab-4-responsive-mobile.pdf" class="seance-ressource" title="Lab 4 — Responsive mobile">Lab 4 — Responsive mobile</a> <span class="ressource-poids">(142 Ko)</span></li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Retour au sommet</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/ebtoure\.sn");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/defilement-cours.js"></script>
+
+
+
+
+</body></html>

@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dr.&nbsp;El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar">
+<meta name="description" content="Séance 1 de Programmation Frontend 1 : comment une page web arrive dans le navigateur, les rôles de HTML, CSS et JavaScript, et l’anatomie d’une page HTML.">
+
+<title>Le Web et HTML – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-639da919b385bb507a4f256153ea904f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-3016115760a7587aebc8f122ce85bbae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-639da919b385bb507a4f256153ea904f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Le Web et HTML – El Hadji Bassirou Touré">
+<meta property="og:description" content="Séance 1 de Programmation Frontend 1 : comment une page web arrive dans le navigateur, les rôles de HTML, CSS et JavaScript, et l’anatomie d’une page HTML.">
+<meta property="og:image" content="https://ebtoure.sn/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="Le Web et HTML – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Séance 1 de Programmation Frontend 1 : comment une page web arrive dans le navigateur, les rôles de HTML, CSS et JavaScript, et l’anatomie d’une page HTML.">
+<meta name="twitter:image" content="https://ebtoure.sn/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="floating nav-fixed cours-page quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#une-page-web-cest-quoi" id="toc-une-page-web-cest-quoi" class="nav-link active" data-scroll-target="#une-page-web-cest-quoi">Une page web, c’est quoi ?</a>
+  <ul class="collapse">
+  <li><a href="#lanalogie-de-la-maison" id="toc-lanalogie-de-la-maison" class="nav-link" data-scroll-target="#lanalogie-de-la-maison">L’analogie de la maison</a></li>
+  <li><a href="#pourquoi-commencer-par-html" id="toc-pourquoi-commencer-par-html" class="nav-link" data-scroll-target="#pourquoi-commencer-par-html">Pourquoi commencer par HTML ?</a></li>
+  </ul></li>
+  <li><a href="#comment-une-page-web-arrive-dans-mon-navigateur" id="toc-comment-une-page-web-arrive-dans-mon-navigateur" class="nav-link" data-scroll-target="#comment-une-page-web-arrive-dans-mon-navigateur">Comment une page web arrive dans mon navigateur ?</a>
+  <ul class="collapse">
+  <li><a href="#le-modèle-client-serveur" id="toc-le-modèle-client-serveur" class="nav-link" data-scroll-target="#le-modèle-client-serveur">Le modèle client / serveur</a></li>
+  <li><a href="#ce-que-le-serveur-envoie-du-texte-rien-que-du-texte" id="toc-ce-que-le-serveur-envoie-du-texte-rien-que-du-texte" class="nav-link" data-scroll-target="#ce-que-le-serveur-envoie-du-texte-rien-que-du-texte">Ce que le serveur envoie : du texte, rien que du texte</a></li>
+  </ul></li>
+  <li><a href="#anatomie-dune-page-html" id="toc-anatomie-dune-page-html" class="nav-link" data-scroll-target="#anatomie-dune-page-html">Anatomie d’une page HTML</a>
+  <ul class="collapse">
+  <li><a href="#le-squelette-minimal" id="toc-le-squelette-minimal" class="nav-link" data-scroll-target="#le-squelette-minimal">Le squelette minimal</a></li>
+  <li><a href="#ce-que-fait-chaque-ligne" id="toc-ce-que-fait-chaque-ligne" class="nav-link" data-scroll-target="#ce-que-fait-chaque-ligne">Ce que fait chaque ligne</a></li>
+  <li><a href="#une-balise-cest-quoi-exactement" id="toc-une-balise-cest-quoi-exactement" class="nav-link" data-scroll-target="#une-balise-cest-quoi-exactement">Une balise, c’est quoi exactement ?</a></li>
+  </ul></li>
+  <li><a href="#les-balises-de-contenu" id="toc-les-balises-de-contenu" class="nav-link" data-scroll-target="#les-balises-de-contenu">Les balises de contenu</a>
+  <ul class="collapse">
+  <li><a href="#les-titres" id="toc-les-titres" class="nav-link" data-scroll-target="#les-titres">Les titres</a></li>
+  <li><a href="#les-paragraphes" id="toc-les-paragraphes" class="nav-link" data-scroll-target="#les-paragraphes">Les paragraphes</a></li>
+  <li><a href="#la-mise-en-forme-inline" id="toc-la-mise-en-forme-inline" class="nav-link" data-scroll-target="#la-mise-en-forme-inline">La mise en forme inline</a></li>
+  <li><a href="#les-listes" id="toc-les-listes" class="nav-link" data-scroll-target="#les-listes">Les listes</a></li>
+  <li><a href="#les-tableaux" id="toc-les-tableaux" class="nav-link" data-scroll-target="#les-tableaux">Les tableaux</a></li>
+  <li><a href="#les-liens" id="toc-les-liens" class="nav-link" data-scroll-target="#les-liens">Les liens</a></li>
+  <li><a href="#les-images" id="toc-les-images" class="nav-link" data-scroll-target="#les-images">Les images</a></li>
+  </ul></li>
+  <li><a href="#ce-quon-va-construire-jàng-afrig" id="toc-ce-quon-va-construire-jàng-afrig" class="nav-link" data-scroll-target="#ce-quon-va-construire-jàng-afrig">Ce qu’on va construire : Jàng Afrig</a>
+  <ul class="collapse">
+  <li><a href="#le-projet-fil-rouge" id="toc-le-projet-fil-rouge" class="nav-link" data-scroll-target="#le-projet-fil-rouge">Le projet fil rouge</a></li>
+  <li><a href="#les-5-pages-de-lapplication" id="toc-les-5-pages-de-lapplication" class="nav-link" data-scroll-target="#les-5-pages-de-lapplication">Les 5 pages de l’application</a></li>
+  <li><a href="#laventure-par-étapes" id="toc-laventure-par-étapes" class="nav-link" data-scroll-target="#laventure-par-étapes">L’aventure par étapes</a></li>
+  </ul></li>
+  <li><a href="#le-workflow-du-cours" id="toc-le-workflow-du-cours" class="nav-link" data-scroll-target="#le-workflow-du-cours">Le workflow du cours</a>
+  <ul class="collapse">
+  <li><a href="#le-rythme-hebdomadaire" id="toc-le-rythme-hebdomadaire" class="nav-link" data-scroll-target="#le-rythme-hebdomadaire">Le rythme hebdomadaire</a></li>
+  <li><a href="#la-règle-dor-1-lab-1-tag-git" id="toc-la-règle-dor-1-lab-1-tag-git" class="nav-link" data-scroll-target="#la-règle-dor-1-lab-1-tag-git">La règle d’or : 1 Lab = 1 tag Git</a></li>
+  <li><a href="#le-rapport-à-la-fin-de-chaque-lab" id="toc-le-rapport-à-la-fin-de-chaque-lab" class="nav-link" data-scroll-target="#le-rapport-à-la-fin-de-chaque-lab">Le rapport à la fin de chaque Lab</a></li>
+  </ul></li>
+  <li><a href="#routine-git-rappel" id="toc-routine-git-rappel" class="nav-link" data-scroll-target="#routine-git-rappel">Routine Git : rappel</a></li>
+  <li><a href="#mini-exercice-en-classe" id="toc-mini-exercice-en-classe" class="nav-link" data-scroll-target="#mini-exercice-en-classe">Mini-exercice en classe</a>
+  <ul class="collapse">
+  <li><a href="#solution-attendue" id="toc-solution-attendue" class="nav-link" data-scroll-target="#solution-attendue">Solution attendue</a></li>
+  </ul></li>
+  <li><a href="#résumé-et-transition" id="toc-résumé-et-transition" class="nav-link" data-scroll-target="#résumé-et-transition">Résumé et transition</a>
+  <ul class="collapse">
+  <li><a href="#ce-quon-a-vu" id="toc-ce-quon-a-vu" class="nav-link" data-scroll-target="#ce-quon-a-vu">Ce qu’on a vu</a></li>
+  <li><a href="#ce-quon-fera-au-lab-1" id="toc-ce-quon-fera-au-lab-1" class="nav-link" data-scroll-target="#ce-quon-fera-au-lab-1">Ce qu’on fera au Lab 1</a></li>
+  <li><a href="#consigne-pour-la-prochaine-séance" id="toc-consigne-pour-la-prochaine-séance" class="nav-link" data-scroll-target="#consigne-pour-la-prochaine-séance">Consigne pour la prochaine séance</a></li>
+  </ul></li>
+  <li>Ressources du chapitre</li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Le Web et HTML</h1>
+</div>
+
+<div>
+  <div class="description">
+    Séance 1 de Programmation Frontend 1 : comment une page web arrive dans le navigateur, les rôles de HTML, CSS et JavaScript, et l’anatomie d’une page HTML.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Auteur·rice</div>
+    <div class="quarto-title-meta-contents">
+             <p>Dr.&nbsp;El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="encadre-prereqbox callout callout-style-default callout-note callout-titled" title="Informations pratiques">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Informations pratiques
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Type</strong></th>
+<th>Cours Magistral (CM)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Séance</strong></td>
+<td>S1 — première séance du semestre</td>
+</tr>
+<tr class="even">
+<td><strong>Prérequis</strong></td>
+<td>Lab 0 terminé (environnement installé + repo <code>jang-afrig</code>)</td>
+</tr>
+<tr class="odd">
+<td><strong>Ce qu’on verra après</strong></td>
+<td>Lab 1 : Ma première page HTML (S2)</td>
+</tr>
+<tr class="even">
+<td><strong>Devoir</strong></td>
+<td>Aucun. Juste lire le PDF du Lab 1 pour la prochaine séance.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectifs du CM">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectifs du CM
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>À la fin de cette séance, vous saurez :</p>
+<ol type="1">
+<li>Expliquer <strong>comment une page web arrive</strong> dans votre navigateur</li>
+<li>Distinguer <strong>les trois rôles</strong> : HTML, CSS, JavaScript</li>
+<li>Décrire <strong>l’anatomie</strong> d’une page HTML (DOCTYPE, <code>head</code>, <code>body</code>)</li>
+<li>Utiliser les <strong>balises de contenu</strong> essentielles (titres, paragraphes, listes, tableaux, liens, images)</li>
+<li>Imbriquer des listes et fusionner des cellules de tableau (<code>colspan</code>, <code>rowspan</code>)</li>
+<li>Comprendre <strong>ce qu’on va construire</strong> : Jàng Afrig</li>
+</ol>
+</div>
+</div>
+<section id="une-page-web-cest-quoi" class="level2">
+<h2 class="anchored" data-anchor-id="une-page-web-cest-quoi">Une page web, c’est quoi ?</h2>
+<p>Ouvrez un navigateur, tapez <a href="https://ucad.sn" class="uri">https://ucad.sn</a> et appuyez sur Entrée. Vous voyez une page avec des titres, du texte, des images, des menus, des couleurs, des animations. Cette page n’existe pas par magie : quelqu’un l’a <strong>construite</strong>. Et bientôt, vous saurez la construire aussi.</p>
+<section id="lanalogie-de-la-maison" class="level3">
+<h3 class="anchored" data-anchor-id="lanalogie-de-la-maison">L’analogie de la maison</h3>
+<p>Une page web est comme une maison. Trois technologies la composent, chacune avec un rôle précis :</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><strong>Technologie</strong></th>
+<th><strong>Rôle</strong></th>
+<th><strong>Dans la maison</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>HTML</strong></td>
+<td>Structure</td>
+<td>Murs, cloisons, fondations</td>
+</tr>
+<tr class="even">
+<td><strong>CSS</strong></td>
+<td>Décoration</td>
+<td>Peinture, meubles, couleurs</td>
+</tr>
+<tr class="odd">
+<td><strong>JavaScript</strong></td>
+<td>Comportement</td>
+<td>Électricité, eau, interrupteurs</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Une page <strong>HTML seule</strong> est une maison en briques brutes : fonctionnelle mais austère.</li>
+<li>Une page <strong>HTML + CSS</strong> est une maison décorée : on aime y être.</li>
+<li>Une page <strong>HTML + CSS + JavaScript</strong> est une maison <em>vivante</em> : on peut allumer la lumière, monter le son, ouvrir l’eau.</li>
+</ul>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="À retenir">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>À retenir
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>HTML structure</strong> le contenu. <strong>CSS</strong> l’habille. <strong>JavaScript</strong> le rend interactif.</p>
+<p>Dans ce cours, on apprend les trois, <strong>dans cet ordre</strong>. Aujourd’hui, on pose les fondations : <strong>HTML</strong>.</p>
+</div>
+</div>
+</section>
+<section id="pourquoi-commencer-par-html" class="level3">
+<h3 class="anchored" data-anchor-id="pourquoi-commencer-par-html">Pourquoi commencer par HTML ?</h3>
+<p>Parce qu’on ne décore pas une maison qu’on n’a pas encore construite. HTML est le <strong>socle</strong>. Sans HTML, ni CSS ni JavaScript ne peuvent exister. Les trois semaines qui suivent porteront intégralement sur HTML. Ensuite CSS, ensuite JavaScript.</p>
+</section>
+</section>
+<section id="comment-une-page-web-arrive-dans-mon-navigateur" class="level2">
+<h2 class="anchored" data-anchor-id="comment-une-page-web-arrive-dans-mon-navigateur">Comment une page web arrive dans mon navigateur ?</h2>
+<p>Vous tapez <a href="https://ucad.sn" class="uri">https://ucad.sn</a> dans votre navigateur. En moins d’une seconde, la page s’affiche. Que s’est-il passé ? Votre navigateur a discuté avec un <strong>serveur</strong> quelque part dans le monde.</p>
+<section id="le-modèle-client-serveur" class="level3">
+<h3 class="anchored" data-anchor-id="le-modèle-client-serveur">Le modèle client / serveur</h3>
+<div id="fig-client-serveur" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-client-serveur-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><span class="figure-cours"><svg role="img" aria-label="À gauche, votre navigateur (Chrome, Firefox), à Dakar sur votre PC ; à droite, le serveur, un ordinateur quelque part dans le monde. Une flèche va du navigateur au serveur : « 1. Donne-moi la page ucad.sn » ; une autre revient : « 2. Voici le code HTML »." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="370.097893pt" height="63.159093pt" viewbox="-70.007476 -70.007481 370.097893 63.159093">
+<style type="text/css">
+@font-face{font-family:tikz-01-le-web-et-html-01-nf0;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:tikz-01-le-web-et-html-01-nf1;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:tikz-01-le-web-et-html-01-nf2;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAATAAAoAAAAAB4QAAAR3AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAbAqHeIYSCx4AATYCJAM4BCAFgiAHIBvPBUAuB2xjGvQVwcbQBpVlB5oi70v2X15B3WC8rFrLnpk9nDCXB3SELEzYhi0bH5s4cmENKHT+f/Kyn0ydGmMUsk8LK8lrb3s4yfDwP+697/1ByVRSXVwEI+xENYW804UUyP/P/1qA3aZYV02CGpoliQ40CfO1PreXbSvVkK6TUz35yU7wL6i2uPm/pl40RXGkpsthLuiDrzzaaEIbRoMNMIoHuDexAfn2Bq6F5Fl/k7CoIyDS0CEW4EF596fLRC6Jv+jAR6gDsg0UAp+Byfr6AlChkXol+N8EBkrnqgZGlQFEj4ICcUr0ggh055YzjcSTRR4FFFFBvdxwYsup/gb2zhqtJIKYEKgkuiMBsgBoeA01AKAAc1RgCIbORsWPVlONdvC0jBelqR6SoRelmKUmGFqOJeGUkIKlxhHaTVgPcYZj48mHJFQjY/9DwmUP8eEu/qxg/wVVu04SuSByJi4YNtTaenTYiYiDa48bJuJ3Eq7Rh84LFgnrJ9MdP03oXIB79rf9p82GMd15hAfuH7nddWv4RufNpMdf4nmsxrD9PBxdY6I8PHyr6/bIzc4bmGjXdTIAl05UQ7ZWmR1XuDJr0yU7j3EfuPsy2fU0/ND5yHlm58kRu9z9Ry+yOW6YcO/BB5mPn9lfa8aT9YzgTp2v2oO0edXuWtI3P2QR2oNoUE8CBorPwxjh5F2JI5REeXOF03ld0J3nd9/4gPVjcTiR4W9LjFidt1LvgFtnK+PBDmZz1iX2+HZYfrHCJVRDRD54EtmWNKeDinTUI0FgN57l3oA+FPxpvXJeEM9Qqf2M/HCNX1pZmHR9TDp/kVdlvV4B423IBto6OpIOpaJkoFgjUXKCkjPOkdKU4nRL+PXMBlfERyuAdxyKfWnc4sRqov1NKXFCwUV5LBLMQeIqouMt1d1U7bKi07NdfSGyJ6fxXemPSXRPjEnm10m/amgjxdZr6sBc6yYVP/5JiWef4Ok6xRMX8yMtT5twgbQdgusgM2Se6/9zTeYbEsBSMxcm2tANtGNi8IlpyW58Uxv6qyTNx/Ivn/huyqKcLDfyJp95c4CEvGp2jnusv+JrtDBVGx2pDgsyg4CauERwKGZgnjH5UWeVY17+iYwgrYDiZFDWGIToWki875VhynpDbatN9U3Pffvb2Gta1AWv0AYhdVkuC1y/32vanhY5/79B0984VACXF//1R34K9YaRxWsQ7P3pnfkHKbm3vroDtwod11c1MaANgXZ0X74BXFguhVaX+XR96ocyQPRsobwC1iZCOv0nCf7oF7MkA4awwEkGg490hCUWqRCP0BeDhEt/cJOmaEIAIRRBAYAe133WQSwcjFLdIASjaaGEmTZC4mafOKyhQEoeiATswTTYtJoWMcSbNjaLNZ9sqp+K3TFZ5TVUxXK+/K0GZJnZbujf/dS59UU19QVlVEVmIWKooI5qcsiDSgxZlFMDFQXl5CMnnjxMam647nKoyBAjjXBApRwOdxa15JELsmlq3bnUU0RNewFlUFEgPtPkBA==) format('woff2');}
+
+</style>
+<g id="01-le-web-et-html-01-page1">
+<g stroke-miterlimit="10" transform="translate(-12.916073,-38.427932)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g stroke-width="0.8">
+<g fill="#e0edf7">
+<g stroke="#2d82c8">
+<g stroke-width="0.8">
+<g fill="#e0edf7">
+<g stroke="#2d82c8">
+<path d="M48.9055 31.29797H-48.9055C-53.32384 31.29797-56.9055 27.71631-56.9055 23.29797V-23.29797C-56.9055-27.71631-53.32384-31.29797-48.9055-31.29797H48.9055C53.32384-31.29797 56.9055-27.71631 56.9055-23.29797V23.29797C56.9055 27.71631 53.32384 31.29797 48.9055 31.29797ZM-56.9055-31.29797"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-36.62999,-16.01999)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-12.916073,-38.427932)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-01-nf2" font-size="9.96264" x="-12.916073" y="-64.330796">V<tspan x="-7.566137">o</tspan><tspan x="-2.295895">tr</tspan><tspan x="5.385294">e</tspan><tspan x="12.53847">navig</tspan><tspan x="36.578318">a</tspan><tspan x="41.649309">t</tspan><tspan x="45.28568">eur</tspan></text>
+<text font-family="tikz-01-le-web-et-html-01-nf1" font-size="8.966376" x="-8.701911" y="-50.3831">(Chr<tspan x="7.034083">ome,</tspan><tspan x="27.800213">Fir</tspan><tspan x="37.457004">ef</tspan><tspan x="44.432848">o</tspan><tspan x="49.140196">x)</tspan></text>
+<text font-family="tikz-01-le-web-et-html-01-nf1" font-size="6.973848" x="-6.260504" y="-38.427932">à<tspan x="-1.350921">Dak</tspan><tspan x="9.835124">ar</tspan><tspan x="15.372357">,</tspan><tspan x="18.503609">sur</tspan><tspan x="29.034113">v</tspan><tspan x="32.263005">o</tspan><tspan x="35.924272">tr</tspan><tspan x="40.631612">e</tspan><tspan x="45.485404">PC</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#f7e5e2">
+<g stroke="#c8503c">
+<g stroke-width="0.8">
+<g fill="#f7e5e2">
+<g stroke="#c8503c">
+<path d="M305.78027 31.29797H207.96927C203.55093 31.29797 199.96927 27.71631 199.96927 23.29797V-23.29797C199.96927-27.71631 203.55093-31.29797 207.96927-31.29797H305.78027C310.19861-31.29797 313.78027-27.71631 313.78027-23.29797V23.29797C313.78027 27.71631 310.19861 31.29797 305.78027 31.29797ZM199.96927-31.29797"></path>
+</g>
+</g>
+</g>
+<g transform="translate(215.85481,-15.5425)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-12.916073,-38.427932)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-01-nf2" font-size="9.96264" x="5.101369" y="-64.330796">L<tspan x="10.12254">e</tspan><tspan x="17.275715">ser</tspan><tspan x="30.884689">v</tspan><tspan x="36.015447">eur</tspan></text>
+<text font-family="tikz-01-le-web-et-html-01-nf1" font-size="8.966376" x="-.405523" y="-50.3831">(un<tspan x="13.886884">or</tspan><tspan x="21.768332">dina</tspan><tspan x="38.248524">t</tspan><tspan x="41.153623">eur)</tspan></text>
+<text font-family="tikz-01-le-web-et-html-01-nf1" font-size="6.973848" x="-12.916073" y="-38.427932">quelque<tspan x="12.503597">p</tspan><tspan x="16.276442">art</tspan><tspan x="25.963111">dans</tspan><tspan x="41.479917">le</tspan><tspan x="48.11204">monde</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g stroke-width="1.2">
+<g fill="#2d82c8" stroke="#2d82c8">
+<path d="M57.3055 14.22636H193.34125" fill="none"></path>
+<g transform="translate(189.61082,14.22636)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M8.24968 0L1.93771 2.38663L4.03041 0L1.93771-2.38663Z"></path>
+ </g>
+ </g>
+</g>
+<g fill="#fff">
+<g fill="#fff">
+<path d="M70.79538 14.82635H186.07938V29.21435H70.79538Z" stroke="none"></path>
+</g>
+<g transform="translate(73.79538,19.80635)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-12.916073,-38.427932)scale(-1,-1)">
+<g fill="#2d82c8">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-01-nf0" font-size="8.966376" x="-12.916073" y="-38.427932"><tspan fill="#2d82c8">1.</tspan><tspan fill="#2d82c8" x="-4.051307">Donne</tspan><tspan fill="#2d82c8" x="19.718561">-moi</tspan><tspan fill="#2d82c8" x="38.090669">la</tspan><tspan fill="#2d82c8" x="46.922552">page</tspan><tspan fill="#2d82c8" x="67.392792">uc</tspan><tspan fill="#2d82c8" x="75.866015">ad.sn</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g stroke-width="1.2">
+<g fill="#c8503c" stroke="#c8503c">
+<path d="M199.56927-14.22636H63.53352" fill="none"></path>
+<g transform="matrix(-1.0,0.0,0.0,-1.0,67.26395,-14.22636)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M8.24968 0L1.93771 2.38663L4.03041 0L1.93771-2.38663Z"></path>
+ </g>
+ </g>
+</g>
+<g fill="#fff">
+<g fill="#fff">
+<path d="M87.36888-27.34235H169.5059V-14.82636H87.36888Z" stroke="none"></path>
+</g>
+<g transform="translate(90.36888,-24.23434)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-12.916073,-38.427932)scale(-1,-1)">
+<g fill="#c8503c">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-01-nf0" font-size="8.966376" x="-12.916073" y="-38.427932"><tspan fill="#c8503c">2.</tspan><tspan fill="#c8503c" x="-4.051307">V</tspan><tspan fill="#c8503c" x=".153928">oici</tspan><tspan fill="#c8503c" x="14.706359">le</tspan><tspan fill="#c8503c" x="23.027159">c</tspan><tspan fill="#c8503c" x="26.819935">ode</tspan><tspan fill="#c8503c" x="42.322802">HTML</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-client-serveur-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Le dialogue entre votre navigateur (client) et un serveur.
+</figcaption>
+</figure>
+</div>
+<ol type="1">
+<li>Vous tapez une adresse. Votre navigateur envoie une <strong>requête</strong> au serveur qui héberge le site.</li>
+<li>Le serveur répond en vous envoyant du <strong>code HTML</strong> (plus parfois du CSS, du JavaScript, des images).</li>
+<li>Votre navigateur <strong>lit</strong> ce code HTML et <strong>affiche</strong> une page à l’écran.</li>
+</ol>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="L'analogie du restaurant">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>L’analogie du restaurant
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Vous entrez dans un restaurant (<strong>le navigateur ouvre le site</strong>). Vous dites au serveur : « Je voudrais le thiéboudienne » (<strong>la requête</strong>). Le serveur va en cuisine, prépare votre plat et vous l’apporte (<strong>la réponse du serveur web</strong>). Vous mangez ce qu’on vous a servi (<strong>le navigateur affiche la page</strong>).</p>
+</div>
+</div>
+</section>
+<section id="ce-que-le-serveur-envoie-du-texte-rien-que-du-texte" class="level3">
+<h3 class="anchored" data-anchor-id="ce-que-le-serveur-envoie-du-texte-rien-que-du-texte">Ce que le serveur envoie : du texte, rien que du texte</h3>
+<p>C’est le point étonnant : quand le serveur répond, il envoie juste un <strong>gros fichier texte</strong>. Ce fichier s’appelle du <strong>HTML</strong>. C’est ensuite votre navigateur qui transforme ce texte en page visuelle.</p>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="À retenir">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>À retenir
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le serveur envoie du <strong>texte</strong> (HTML). Le navigateur transforme ce texte en <strong>page visuelle</strong>. Votre travail de développeur web : <strong>écrire ce texte</strong>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="anatomie-dune-page-html" class="level2">
+<h2 class="anchored" data-anchor-id="anatomie-dune-page-html">Anatomie d’une page HTML</h2>
+<p>Une page HTML a toujours la même forme. Comme une lettre officielle a un en-tête, un corps et une signature, une page HTML a trois parties :</p>
+<div id="fig-anatomie" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-anatomie-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><span class="figure-cours"><svg role="img" aria-label="Arbre d'une page HTML : <html> a deux enfants, <head> et <body>. <head> contient <title> et <meta> ; <body> contient <h1>, <p> et <img>." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="264.93333pt" height="115.946839pt" viewbox="-70.007476 -70.007479 264.93333 115.946839">
+<style type="text/css">
+@font-face{font-family:tikz-01-le-web-et-html-02-nf0;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:tikz-01-le-web-et-html-02-nf1;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAW8AAoAAAAAChAAAAVvAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgQwKjGCJMAscAAE2AiQDHgQgBYI+ByAbkQejomYOTlSAfy7wHHofDtQaEbUWNZImEmKpjiGemTgbd/3/36bd94aQZAai6EREIRXaUxpRIStfFdeogO963anMdpHWp18rtVlRek7fnKaXekOVxfSjc8JVuEMYz9vu/d2EAqDizALxaf0PUNxxbE1tgRWQBoyvMXWa8L4EoAFVZZ2rIxqzmvCVs5Ni3m+R3R20MERdAYjio0PcAH5174scLG15kwsY8QSg8wEDge3QfVvhorK6Y/91kI/JbDrnR5aJARBsEQIi8ax6Ls0HgaQyV6cXE8vHpe1IGA5f566ZgvBJ0rgRyQ/rdzQEIKHGAy3qC9CAN4UHANJojECa5q9VHEDHCIKEYcJgdyVdIqBilJoBIynpk3Tp6WGLVNMvle41yXsGRB2dvYOfqboekWiPeTM61tVnlpD9UZS4V9ypW7jpWLT2RvwpG+lwhDud9WP3yZyRU5I9Zno6K+amwm4PhV5Fv64O2WyBg/cUWQbrsMZmq9Heid9kJPVDAQTZc2LzSTG11ySDB/V2e82UI++YLRA22XNvOhcOaCXkHjN9rsbhqHM66/eWIhYHpkQ3jj1UXrPVTKYZzaBKRF1rt8OINlqAq6F01pR+Q2Y7XpclM4/ZQsVO6zlBDxvEFBr/ysEPgMCx6RgCbHbqYUIZ6gzWrJv2Whq7TsNpEvR9BDEUjoUD7L9HTw8bKLR5TLTHFgoG3YS2+4wTU4YoQqufPinWO8Rnqb1JFit1PWlQPCojU04c/SgoWxS8zhr7uBlsQFEakASHfvOAM4eG9w7KiLpN2kYYsNeXuTprSHdo6djdvqEncSD2XM6JK8Hj+XtN0NMj2nsxYTgkpMlqOL2NzZ0e9KqT6PW5VGksvl8mAbQt/56h8pJPD8/7tz7RlzDX+xu8mlFO355/11jJeOuiUK//l/q/60PePK03U2kofjAHxNEBgkOMKTO3TBhYgZqq3VHBZPkOnPhvJvZR/iC5Taa/cIv3XYDbuj0f9hziXp8qKtEQi+IRKZpARxQj8NcLrFm7oQ51LHb6YBnzDP8ZxVBKAVsYHEVqFfOhBi3dWNnlnVurvqSeTRdEp9VqUkurQBhNubjCwDA3UyFRg5ZtRJ34kzXr69BsYrsMPFdwpH9GsS7Tzjz3kcuppZUo1zunRl01qxaeL+PPsp5qIz7F2zajDtS5YUsr6sbd65rhy9TQf+vmKFK1uD3epyOgdq2nen7yPC5vDgOCKNLFDLAUHeDigp947CiAYhXOMUWyVBbFjF+islxs5KOoS5Tyw+BvMyY/OcQVFED5y0juNbBl/DVXyJAn2NWP1gwjgR0Da/AwyQUproh5SvLbfdl4hg2OVwss34xjKwLHvsZv9EEx8IPfU88E4AcTURP3kYANZXa2q5LSztVnSrfNWFS+z/eXbx4A+wJ3rd5Yj+rR6g1YgzSrNzcgqGg6iqoWpC6o+LyoAqlhfmGjurKgEe5tx3mdOaugbh4qflPBPVW84cqLsFX1DBUNc6+Vr7nhn8LaUeiMGLijugOon3Sx8v7L9OixCNWPm/4kbiw9JyF3Ye9Fwq3HPh48cr4LLONcShcnFKqe8mVdig/scq3dGmnyH9nid+xlu7eqfDwIHoC1H4eltRSAB8yp2SrX4AWAoOgpNMaZEAOU8D1pKBEUBGYCyCJHQwCESmQOAGHSBlwGkaLL8BD6WHZDoTWXjxB1OkkmFgG1JyDJ5rVzefgWcN1ILOPy8e0pklIdulGgPUhRNDoj/2Qfjknn1n5KTi167pO8n9uq1XEkK6HEYzMBlUpM/ApECZCu3qhlR8WJ1OlgsdCE0iRLhYfnQ5GrZZME+7ucJuFuzZRfeT4hQzIlAhCHAAAAAA==) format('woff2');}
+
+</style>
+<g id="01-le-web-et-html-02-page1">
+<g stroke-miterlimit="10" transform="translate(54.891493,-60.557927)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g stroke-width="0.8">
+<g fill="#fbe5df">
+<g stroke="#e44d26">
+<g stroke-width="0.8">
+<g fill="#fbe5df">
+<g stroke="#e44d26">
+<path d="M17.75 9.08499H-17.75C-19.95917 9.08499-21.75 7.29416-21.75 5.08499V-5.08499C-21.75-7.29416-19.95917-9.08499-17.75-9.08499H17.75C19.95917-9.08499 21.75-7.29416 21.75-5.08499V5.08499C21.75 7.29416 19.95917 9.08499 17.75 9.08499ZM-21.75-9.08499"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-15.75,-3.025)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(54.891493,-60.557927)scale(-1,-1)">
+<g fill="#e44d26">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-02-nf1" font-size="9.96264" x="54.891493" y="-60.557927"><tspan fill="#e44d26">&lt;html&gt;</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#eae4f4">
+<g stroke="#6e46b4">
+<g stroke-width="0.8">
+<g fill="#eae4f4">
+<g stroke="#6e46b4">
+<path d="M-53.38187-39.28459H-88.88187C-91.09103-39.28459-92.88187-41.07542-92.88187-43.28459V-53.45457C-92.88187-55.66374-91.09103-57.45457-88.88187-57.45457H-53.38187C-51.1727-57.45457-49.38187-55.66374-49.38187-53.45457V-43.28459C-49.38187-41.07542-51.1727-39.28459-53.38187-39.28459ZM-92.88187-57.45457"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-86.88187,-51.39458)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(54.891493,-60.557927)scale(-1,-1)">
+<g fill="#6e46b4">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-02-nf1" font-size="9.96264" x="54.891493" y="-60.557927"><tspan fill="#6e46b4">&lt;head&gt;</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M-13.94742-9.48499L-54.28854-36.91032" fill="none"></path>
+<g transform="matrix(-0.82697,-0.56218,0.56218,-0.82697,-52.48683,-35.6855)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M4.55135 0L1.29172 1.23544L2.3787 0L1.29172-1.23544Z"></path>
+ </g>
+ </g>
+</g>
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#b7a3da">
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#b7a3da">
+<path d="M-83.8923-87.96718H-120.96735C-123.17651-87.96718-124.96735-89.75801-124.96735-91.96718V-101.51115C-124.96735-103.72032-123.17651-105.51115-120.96735-105.51115H-83.8923C-81.68314-105.51115-79.8923-103.72032-79.8923-101.51115V-91.96718C-79.8923-89.75801-81.68314-87.96718-83.8923-87.96718ZM-124.96735-105.51115"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-118.96735,-99.46617)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(54.891493,-60.557927)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-02-nf0" font-size="8.966376" x="54.891493" y="-60.557927">&lt;title&gt;</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M-77.26665-57.85457L-94.59082-84.61914" fill="none"></path>
+<g transform="matrix(-0.54337,-0.83946,0.83946,-0.54337,-93.40698,-82.7902)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M4.55135 0L1.29172 1.23544L2.3787 0L1.29172-1.23544Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#b7a3da">
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#b7a3da">
+<path d="M-23.65884-88.20117H-56.00888C-58.21805-88.20117-60.00888-89.992-60.00888-92.20117V-101.27716C-60.00888-103.48633-58.21805-105.27716-56.00888-105.27716H-23.65884C-21.44968-105.27716-19.65884-103.48633-19.65884-101.27716V-92.20117C-19.65884-89.992-21.44968-88.20117-23.65884-88.20117ZM-60.00888-105.27716"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-54.00888,-99.23218)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(54.891493,-60.557927)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-02-nf0" font-size="8.966376" x="54.891493" y="-60.557927">&lt;meta&gt;</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M-64.99376-57.85457L-47.52135-84.85303" fill="none"></path>
+<g transform="matrix(0.5433,-0.8395,0.8395,0.5433,-48.70505,-83.02402)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M4.55135 0L1.29172 1.23544L2.3787 0L1.29172-1.23544Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#e0f1ea">
+<g stroke="#2da06e">
+<g stroke-width="0.8">
+<g fill="#e0f1ea">
+<g stroke="#2da06e">
+<path d="M88.88191-38.20459H53.38191C51.17274-38.20459 49.38191-39.99542 49.38191-42.20459V-54.53458C49.38191-56.74374 51.17274-58.53458 53.38191-58.53458H88.88191C91.09108-58.53458 92.88191-56.74374 92.88191-54.53458V-42.20459C92.88191-39.99542 91.09108-38.20459 88.88191-38.20459ZM49.38191-58.53458"></path>
+</g>
+</g>
+</g>
+<g transform="translate(55.38191,-50.31458)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(54.891493,-60.557927)scale(-1,-1)">
+<g fill="#2da06e">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-02-nf1" font-size="9.96264" x="54.891493" y="-60.557927"><tspan fill="#2da06e">&lt;body&gt;</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M13.9467-9.48499L52.7014-35.83037" fill="none"></path>
+<g transform="matrix(0.82697,-0.56216,0.56216,0.82697,50.89969,-34.60559)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M4.55135 0L1.29172 1.23544L2.3787 0L1.29172-1.23544Z"></path>
+ </g>
+ </g>
+</g>
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#96d0b7">
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#96d0b7">
+<path d="M31.36691-87.94017H8.46689C6.25772-87.94017 4.46689-89.731 4.46689-91.94017V-101.53816C4.46689-103.74733 6.25772-105.53816 8.46689-105.53816H31.36691C33.57608-105.53816 35.36691-103.74733 35.36691-101.53816V-91.94017C35.36691-89.731 33.57608-87.94017 31.36691-87.94017ZM4.46689-105.53816"></path>
+</g>
+</g>
+</g>
+<g transform="translate(10.46689,-99.53816)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(54.891493,-60.557927)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-02-nf0" font-size="8.966376" x="54.891493" y="-60.557927">&lt;h1&gt;</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M59.94435-58.93457L32.20381-85.12923" fill="none"></path>
+<g transform="matrix(-0.72705,-0.68652,0.68652,-0.72705,33.78783,-83.6335)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M4.55135 0L1.29172 1.23544L2.3787 0L1.29172-1.23544Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#96d0b7">
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#96d0b7">
+<path d="M80.21945-87.22467H62.04443C59.83527-87.22467 58.04443-89.0155 58.04443-91.22467V-102.25366C58.04443-104.46283 59.83527-106.25366 62.04443-106.25366H80.21945C82.42862-106.25366 84.21945-104.46283 84.21945-102.25366V-91.22467C84.21945-89.0155 82.42862-87.22467 80.21945-87.22467ZM58.04443-106.25366"></path>
+</g>
+</g>
+</g>
+<g transform="translate(64.04443,-98.25568)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(54.891493,-60.557927)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-02-nf0" font-size="8.966376" x="54.891493" y="-60.557927">&lt;p&gt;</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M71.13191-58.93457L71.13194-83.31284" fill="none"></path>
+<g transform="matrix(0.0,-1.0,1.0,0.0,71.13194,-81.13414)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M4.55135 0L1.29172 1.23544L2.3787 0L1.29172-1.23544Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#96d0b7">
+<g stroke-width="0.8">
+<g fill="#fff">
+<g stroke="#96d0b7">
+<path d="M136.1595-86.98167H108.53447C106.3253-86.98167 104.53447-88.7725 104.53447-90.98167V-102.49666C104.53447-104.70583 106.3253-106.49666 108.53447-106.49666H136.1595C138.36867-106.49666 140.1595-104.70583 140.1595-102.49666V-90.98167C140.1595-88.7725 138.36867-86.98167 136.1595-86.98167ZM104.53447-106.49666"></path>
+</g>
+</g>
+</g>
+<g transform="translate(110.53447,-98.44466)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(54.891493,-60.557927)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-01-le-web-et-html-02-nf0" font-size="8.966376" x="54.891493" y="-60.557927">&lt;img&gt;</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<path d="M82.31996-58.93457L109.04593-84.17078" fill="none"></path>
+<g transform="matrix(0.72704,-0.68651,0.68651,0.72704,107.46194,-82.6751)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M4.55135 0L1.29172 1.23544L2.3787 0L1.29172-1.23544Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-anatomie-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: La structure d’une page HTML : deux grandes zones, <code>head</code> et <code>body</code>.
+</figcaption>
+</figure>
+</div>
+<section id="le-squelette-minimal" class="level3">
+<h3 class="anchored" data-anchor-id="le-squelette-minimal">Le squelette minimal</h3>
+<p>Voici le <strong>squelette minimal</strong> de toute page HTML. Cette structure se retrouve sur <em>chaque</em> site web que vous avez ouvert dans votre vie.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;!DOCTYPE</span> html<span class="dt">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="ot"> lang</span><span class="op">=</span><span class="st">"fr"</span><span class="dt">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> charset</span><span class="op">=</span><span class="st">"UTF-8"</span><span class="dt">&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>Ma page<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Bonjour !<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Ceci est ma première page web.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ce-que-fait-chaque-ligne" class="level3">
+<h3 class="anchored" data-anchor-id="ce-que-fait-chaque-ligne">Ce que fait chaque ligne</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Ligne</strong></th>
+<th><strong>Rôle</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>&lt;!DOCTYPE html&gt;</code></td>
+<td>Dit au navigateur : « Je suis une page HTML moderne (HTML5). »</td>
+</tr>
+<tr class="even">
+<td><code>&lt;html lang="fr"&gt;</code></td>
+<td>Démarre la page. <code>lang="fr"</code> indique la langue (utile pour les moteurs de recherche et les lecteurs d’écran).</td>
+</tr>
+<tr class="odd">
+<td><code>&lt;head&gt;</code></td>
+<td>La partie <em>invisible</em> : informations pour le navigateur (encodage, titre de l’onglet, auteur). Les étudiants qui lisent ne voient jamais cela à l’écran.</td>
+</tr>
+<tr class="even">
+<td><code>&lt;meta charset="UTF-8"&gt;</code></td>
+<td>Permet d’utiliser les accents et les caractères wolof (é, à, ñ…). <strong>Obligatoire pour le français.</strong></td>
+</tr>
+<tr class="odd">
+<td><code>&lt;title&gt;</code></td>
+<td>Le texte affiché dans l’onglet du navigateur.</td>
+</tr>
+<tr class="even">
+<td><code>&lt;body&gt;</code></td>
+<td>La partie <em>visible</em> : tout ce que l’utilisateur va voir sur la page.</td>
+</tr>
+</tbody>
+</table>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="À retenir">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>À retenir
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Tout ce qui est <strong>dans <code>&lt;head&gt;</code></strong> est invisible : c’est pour le navigateur.<br>Tout ce qui est <strong>dans <code>&lt;body&gt;</code></strong> est visible : c’est pour l’utilisateur.</p>
+</div>
+</div>
+</section>
+<section id="une-balise-cest-quoi-exactement" class="level3">
+<h3 class="anchored" data-anchor-id="une-balise-cest-quoi-exactement">Une balise, c’est quoi exactement ?</h3>
+<p>Une <strong>balise</strong> (<em>tag</em> en anglais) est un mot entouré de chevrons <code>&lt;…&gt;</code>. La plupart des balises marchent <strong>par paire</strong> : une balise ouvrante et une balise fermante avec un <code>/</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Un titre<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a> |    |      |</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a> |    |      +-- balise fermante</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a> |    +-------- contenu</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a> +------------- balise ouvrante</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Quelques balises sont <strong>auto-fermantes</strong> (elles n’ont pas besoin d’une balise fermante car elles n’ont pas de contenu à entourer) : <code>&lt;img&gt;</code>, <code>&lt;br&gt;</code>, <code>&lt;meta&gt;</code>, <code>&lt;input&gt;</code>.</p>
+</section>
+</section>
+<section id="les-balises-de-contenu" class="level2">
+<h2 class="anchored" data-anchor-id="les-balises-de-contenu">Les balises de contenu</h2>
+<p>HTML propose <strong>plus de 100 balises</strong>. Heureusement, on en utilise régulièrement seulement une quinzaine. Voici les plus courantes — celles qu’on voit sur toute page web.</p>
+<section id="les-titres" class="level3">
+<h3 class="anchored" data-anchor-id="les-titres">Les titres</h3>
+<p>HTML propose 6 niveaux de titres, de <code>&lt;h1&gt;</code> (le plus grand) à <code>&lt;h6&gt;</code> (le plus petit).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Université Cheikh Anta Diop<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Faculté des Sciences<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h3</span><span class="dt">&gt;</span>Département Informatique<span class="dt">&lt;/</span><span class="kw">h3</span><span class="dt">&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h4</span><span class="dt">&gt;</span>DUT 1ère année<span class="dt">&lt;/</span><span class="kw">h4</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="Règle importante">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Règle importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Il ne doit y avoir <strong>qu’un seul <code>&lt;h1&gt;</code> par page</strong> (le titre principal). Les <code>&lt;h2&gt;</code>, <code>&lt;h3&gt;</code> peuvent apparaître plusieurs fois pour structurer les sections et sous-sections.</p>
+</div>
+</div>
+</section>
+<section id="les-paragraphes" class="level3">
+<h3 class="anchored" data-anchor-id="les-paragraphes">Les paragraphes</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>L'École Supérieure Polytechnique forme des ingénieurs depuis 1964. Elle est située sur le campus de l'UCAD à Fann, Dakar.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Chaque <code>&lt;p&gt;</code> représente <strong>un paragraphe</strong>. Le navigateur ajoute automatiquement un espace entre deux paragraphes consécutifs.</p>
+</section>
+<section id="la-mise-en-forme-inline" class="level3">
+<h3 class="anchored" data-anchor-id="la-mise-en-forme-inline">La mise en forme inline</h3>
+<p>Pour mettre en avant un mot à l’intérieur d’un paragraphe :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Le cours est <span class="dt">&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>obligatoire<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;</span>. Les absences sont <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>vivement déconseillées<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span>.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>&lt;strong&gt;</code> : texte <strong>important</strong> (affiché en gras par défaut)</li>
+<li><code>&lt;em&gt;</code> : texte <em>mis en valeur</em> (affiché en italique par défaut)</li>
+</ul>
+</section>
+<section id="les-listes" class="level3">
+<h3 class="anchored" data-anchor-id="les-listes">Les listes</h3>
+<p><strong>Listes non ordonnées</strong> (à puces) avec <code>&lt;ul&gt;</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Algorithmique<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Mathématiques<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Anglais<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Listes ordonnées</strong> (numérotées) avec <code>&lt;ol&gt;</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ol</span><span class="dt">&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Installer VS Code<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Installer Git<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Créer un compte GitHub<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ol</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Dans les deux cas, chaque élément est un <code>&lt;li&gt;</code> (<em>list item</em>).</p>
+<section id="listes-imbriquées" class="level4">
+<h4 class="anchored" data-anchor-id="listes-imbriquées">Listes imbriquées</h4>
+<p>Une liste peut contenir une autre liste. Il suffit de mettre <code>&lt;ul&gt;</code> ou <code>&lt;ol&gt;</code> <em>à l’intérieur</em> d’un <code>&lt;li&gt;</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Semestre 1</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Algorithmique<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Mathématiques<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Semestre 2</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>HTML / CSS / JavaScript<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Bases de données<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="L'indentation">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>L’indentation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>L’indentation (les espaces en début de ligne) n’est <strong>pas obligatoire</strong> pour le navigateur, mais elle est <strong>obligatoire pour vous</strong>. Sans indentation, un code HTML devient très vite illisible, même pour son auteur. Prenez l’habitude dès maintenant.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="les-tableaux" class="level3">
+<h3 class="anchored" data-anchor-id="les-tableaux">Les tableaux</h3>
+<p>Un tableau HTML se construit ligne par ligne. Les balises essentielles :</p>
+<ul>
+<li><code>&lt;table&gt;</code> : le tableau</li>
+<li><code>&lt;tr&gt;</code> : une ligne (<em>table row</em>)</li>
+<li><code>&lt;th&gt;</code> : une cellule d’en-tête (<em>table header</em>)</li>
+<li><code>&lt;td&gt;</code> : une cellule de données (<em>table data</em>)</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">table</span><span class="dt">&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Prénom<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Note<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>Fatou<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>15<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>Moussa<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>12<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">table</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="fusionner-des-cellules" class="level4">
+<h4 class="anchored" data-anchor-id="fusionner-des-cellules">Fusionner des cellules</h4>
+<p>Pour fusionner plusieurs colonnes ou plusieurs lignes, on utilise les attributs <code>colspan</code> (fusion horizontale) et <code>rowspan</code> (fusion verticale) :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">table</span><span class="dt">&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">th</span><span class="ot"> colspan</span><span class="op">=</span><span class="st">"2"</span><span class="dt">&gt;</span>Lundi<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span>  <span class="co">&lt;!-- fusionne 2 colonnes --&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>Algo<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>HTML<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">table</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>On reverra les tableaux en détail au Lab 2.</p>
+</section>
+</section>
+<section id="les-liens" class="level3">
+<h3 class="anchored" data-anchor-id="les-liens">Les liens</h3>
+<p>Un lien vers une autre page se crée avec la balise <code>&lt;a&gt;</code> (<em>anchor</em>) et l’attribut <code>href</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"https://ucad.sn"</span><span class="dt">&gt;</span>Site de l'UCAD<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"https://esp.sn"</span><span class="dt">&gt;</span>Site de l'ESP<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Le texte entre <code>&lt;a&gt;</code> et <code>&lt;/a&gt;</code> est ce que l’utilisateur voit. L’URL dans <code>href</code> est la destination du clic.</p>
+</section>
+<section id="les-images" class="level3">
+<h3 class="anchored" data-anchor-id="les-images">Les images</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"drapeau-senegal.png"</span><span class="ot"> alt</span><span class="op">=</span><span class="st">"Drapeau du Sénégal"</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>src</code> : le chemin vers le fichier image (relatif ou URL complète)</li>
+<li><code>alt</code> : description textuelle de l’image, <strong>obligatoire</strong>. Elle est lue par les personnes malvoyantes qui utilisent un lecteur d’écran, et affichée si l’image ne se charge pas.</li>
+</ul>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="L'attribut `alt` n'est pas optionnel">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>L’attribut <code>alt</code> n’est pas optionnel
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Une image sans <code>alt</code> est une image qui exclut les personnes aveugles. Prenez l’habitude d’en mettre un à chaque <code>&lt;img&gt;</code>. C’est un geste d’accessibilité — pour certains étudiants malvoyants de votre promotion, c’est la seule façon de « voir » votre page.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="ce-quon-va-construire-jàng-afrig" class="level2">
+<h2 class="anchored" data-anchor-id="ce-quon-va-construire-jàng-afrig">Ce qu’on va construire : Jàng Afrig</h2>
+<p>Avant de plonger dans le code, prenons un moment pour regarder la montagne qu’on va gravir ensemble.</p>
+<section id="le-projet-fil-rouge" class="level3">
+<h3 class="anchored" data-anchor-id="le-projet-fil-rouge">Le projet fil rouge</h3>
+<p><strong>Jàng Afrig</strong> (<em>« apprendre l’Afrique »</em> en wolof) est une application web de <strong>quiz géographique</strong> sur les 54 pays africains. L’utilisateur :</p>
+<ol type="1">
+<li>Choisit un mode de jeu (capitales, drapeaux, langues, voisins…)</li>
+<li>Répond à 10 questions à choix multiples</li>
+<li>Obtient un score à la fin</li>
+<li>Garde un classement local de ses meilleures performances</li>
+</ol>
+</section>
+<section id="les-5-pages-de-lapplication" class="level3">
+<h3 class="anchored" data-anchor-id="les-5-pages-de-lapplication">Les 5 pages de l’application</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><strong>Page</strong></th>
+<th><strong>Contenu</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Accueil</td>
+<td>Choix du mode + saisie du pseudo + meilleur score</td>
+</tr>
+<tr class="even">
+<td>Quiz</td>
+<td>Énoncé d’une question + 4 propositions + barre de progression</td>
+</tr>
+<tr class="odd">
+<td>Résultat</td>
+<td>Score final + bouton rejouer</td>
+</tr>
+<tr class="even">
+<td>Mes Scores</td>
+<td>Classement local top 5 par mode</td>
+</tr>
+<tr class="odd">
+<td>À propos</td>
+<td>Sources des données, technologies utilisées</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="laventure-par-étapes" class="level3">
+<h3 class="anchored" data-anchor-id="laventure-par-étapes">L’aventure par étapes</h3>
+<p>On construit l’app <strong>brique par brique</strong>, à chaque séance :</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><strong>Bloc de séances</strong></th>
+<th><strong>Ce qu’on ajoute à Jàng Afrig</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>S1–S3 (HTML)</td>
+<td>Les 5 pages en HTML brut, sans style</td>
+</tr>
+<tr class="even">
+<td>S4–S6 (CSS)</td>
+<td>Design panafricain, responsive mobile</td>
+</tr>
+<tr class="odd">
+<td>S7–S10 (JS)</td>
+<td>Premier quiz interactif avec 10 pays hardcodés</td>
+</tr>
+<tr class="even">
+<td>S11–S13 (API)</td>
+<td>Connexion à REST Countries, 54 pays réels, 4 modes</td>
+</tr>
+<tr class="odd">
+<td>S14 (polish)</td>
+<td>Chrono, <code>localStorage</code>, finitions</td>
+</tr>
+<tr class="even">
+<td>S15 (Hybride)</td>
+<td>Déploiement en ligne + démo collective</td>
+</tr>
+</tbody>
+</table>
+<div class="encadre-projetbox callout callout-style-default callout-important callout-titled" title="À la fin du semestre">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>À la fin du semestre
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Chacun de vous aura son application accessible sur Internet via une URL publique du type <code>https://*votre-username*.github.io/jang-afrig/</code>. Vous pourrez la partager à votre famille par WhatsApp.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="le-workflow-du-cours" class="level2">
+<h2 class="anchored" data-anchor-id="le-workflow-du-cours">Le workflow du cours</h2>
+<section id="le-rythme-hebdomadaire" class="level3">
+<h3 class="anchored" data-anchor-id="le-rythme-hebdomadaire">Le rythme hebdomadaire</h3>
+<p>Chaque séance suit toujours la même mécanique :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Type de séance</strong></th>
+<th><strong>Déroulement</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>CM</strong></td>
+<td>Rappel <span class="math inline">\(\to\)</span> analogie <span class="math inline">\(\to\)</span> notions nouvelles avec démo du prof <span class="math inline">\(\to\)</span> mini-exercice en classe <span class="math inline">\(\to\)</span> teaser du Lab suivant</td>
+</tr>
+<tr class="even">
+<td><strong>Lab</strong></td>
+<td>Rappel du CM <span class="math inline">\(\to\)</span> démo de l’objectif du jour <span class="math inline">\(\to\)</span> vous codez en pas-à-pas <span class="math inline">\(\to\)</span> exercices d’application <span class="math inline">\(\to\)</span> <strong>routine Git</strong> <span class="math inline">\(\to\)</span> annonce de la séance suivante</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="la-règle-dor-1-lab-1-tag-git" class="level3">
+<h3 class="anchored" data-anchor-id="la-règle-dor-1-lab-1-tag-git">La règle d’or : 1 Lab = 1 tag Git</h3>
+<p>À la fin de chaque Lab, vous poserez un <strong>tag Git</strong> qui marque une version de votre application. Au bout de 10 Labs, votre historique Git ressemblera à ceci :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>v0     Setup initial (Lab 0)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>v0.1   Première page HTML (Lab 1)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>v0.2   HTML structurant (Lab 2)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>v0.3   CSS de base (Lab 3)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>v0.9   Tous les modes avec API (Lab 9)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>v0.14  Polish final (Lab 10)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>v1.0   Déploiement en ligne (S15)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Chaque Lab = une brique posée">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Chaque Lab = une brique posée
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Si vous venez à manquer une séance, vous aurez <strong>un repo en retard d’une brique</strong>. Facile à combler en relisant le PDF du Lab manqué. Mais il faut rattraper <strong>avant</strong> la séance suivante, sinon la dette s’accumule.</p>
+</div>
+</div>
+</section>
+<section id="le-rapport-à-la-fin-de-chaque-lab" class="level3">
+<h3 class="anchored" data-anchor-id="le-rapport-à-la-fin-de-chaque-lab">Le rapport à la fin de chaque Lab</h3>
+<p>Vous avez produit votre premier rapport pour le Lab 0. Même routine pour les 10 Labs à venir :</p>
+<ul>
+<li>1 à 2 pages maximum</li>
+<li>4 sections : <strong>ce que j’ai fait</strong>, <strong>difficultés</strong>, <strong>comment j’ai résolu</strong>, <strong>lien repo</strong></li>
+<li>Déposé dans <code>rapports/rapport-lab-X-NOM-Prenom.pdf</code></li>
+</ul>
+<p>C’est votre <strong>carnet de bord</strong> : un petit effort à chaque Lab, un vrai parcours à la fin du semestre.</p>
+</section>
+</section>
+<section id="routine-git-rappel" class="level2">
+<h2 class="anchored" data-anchor-id="routine-git-rappel">Routine Git : rappel</h2>
+<p>Vous avez appris au Lab 0 les 5 étapes du cycle Git. Rappel rapide — on va la répéter 10 fois dans le semestre.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><strong>Étape</strong></th>
+<th><strong>Commande</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1. Modifier des fichiers dans VS Code</td>
+<td><em>(on édite le code)</em></td>
+</tr>
+<tr class="even">
+<td>2. Voir ce qui a changé</td>
+<td><code>git status</code></td>
+</tr>
+<tr class="odd">
+<td>3. Préparer tous les changements</td>
+<td><code>git add .</code></td>
+</tr>
+<tr class="even">
+<td>4. Enregistrer avec un message</td>
+<td><code>git commit -m "v0.X : titre"</code></td>
+</tr>
+<tr class="odd">
+<td>5. Envoyer sur GitHub</td>
+<td><code>git push</code></td>
+</tr>
+<tr class="even">
+<td>6. Poser un tag de version</td>
+<td><code>git tag v0.X</code></td>
+</tr>
+<tr class="odd">
+<td>7. Envoyer le tag</td>
+<td><code>git push --tags</code></td>
+</tr>
+</tbody>
+</table>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Mémoire musculaire">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Mémoire musculaire
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Au bout de 3 ou 4 Labs, vous taperez cette séquence sans réfléchir. C’est le but. Git doit devenir un <strong>réflexe</strong>, pas un obstacle.</p>
+</div>
+</div>
+</section>
+<section id="mini-exercice-en-classe" class="level2">
+<h2 class="anchored" data-anchor-id="mini-exercice-en-classe">Mini-exercice en classe</h2>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Exercice guidé --- écrit ensemble">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Exercice guidé — écrit ensemble
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>On va écrire <strong>ensemble</strong>, ici et maintenant, notre première page HTML.</p>
+<p><strong>Énoncé.</strong> Créer une page <code>moi.html</code> qui contient :</p>
+<ol type="1">
+<li>Un titre principal <code>&lt;h1&gt;</code> avec votre prénom</li>
+<li>Un paragraphe de présentation avec un <code>&lt;strong&gt;</code> quelque part</li>
+<li>Une liste <code>&lt;ul&gt;</code> de vos 3 matières préférées</li>
+<li>Un lien vers le site de l’UCAD</li>
+</ol>
+</div>
+</div>
+<section id="solution-attendue" class="level3">
+<h3 class="anchored" data-anchor-id="solution-attendue">Solution attendue</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;!DOCTYPE</span> html<span class="dt">&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="ot"> lang</span><span class="op">=</span><span class="st">"fr"</span><span class="dt">&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> charset</span><span class="op">=</span><span class="st">"UTF-8"</span><span class="dt">&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>Ma page<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Fatou<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Je suis étudiante en <span class="dt">&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>DUT1-Informatique<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;</span> à l'ESP, UCAD.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Algorithmique<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Mathématiques<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>HTML/CSS/JS<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"https://ucad.sn"</span><span class="dt">&gt;</span>Site de l'UCAD<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Levez la main">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Levez la main
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Si vous n’arrivez pas à l’écrire en 10 minutes, <strong>levez la main</strong>. C’est normal : c’est votre première page. On la refera calmement ensemble au Lab 1 (séance prochaine).</p>
+</div>
+</div>
+</section>
+</section>
+<section id="résumé-et-transition" class="level2">
+<h2 class="anchored" data-anchor-id="résumé-et-transition">Résumé et transition</h2>
+<section id="ce-quon-a-vu" class="level3">
+<h3 class="anchored" data-anchor-id="ce-quon-a-vu">Ce qu’on a vu</h3>
+<ul>
+<li>Une page web = <strong>HTML</strong> (structure) + <strong>CSS</strong> (déco) + <strong>JS</strong> (comportement)</li>
+<li>Un <strong>navigateur</strong> demande une page à un <strong>serveur</strong> qui répond avec du HTML</li>
+<li>Une page HTML a un <code>&lt;head&gt;</code> (invisible) et un <code>&lt;body&gt;</code> (visible)</li>
+<li>Les balises essentielles : <code>h1</code>-<code>h6</code>, <code>p</code>, <code>strong</code>, <code>em</code>, <code>ul</code>/<code>ol</code>/<code>li</code>, <code>table</code>/<code>tr</code>/<code>th</code>/<code>td</code>, <code>a</code>, <code>img</code></li>
+<li>Jàng Afrig se construira <strong>brique par brique</strong> pendant 15 séances</li>
+<li>1 Lab = 1 commit + 1 tag Git + 1 rapport</li>
+</ul>
+</section>
+<section id="ce-quon-fera-au-lab-1" class="level3">
+<h3 class="anchored" data-anchor-id="ce-quon-fera-au-lab-1">Ce qu’on fera au Lab 1</h3>
+<ul>
+<li>Créer <code>index.html</code> dans votre repo <code>jang-afrig</code></li>
+<li>Construire la <strong>page d’accueil</strong> de Jàng Afrig en HTML brut</li>
+<li>Travailler les listes imbriquées</li>
+<li>Travailler les tableaux avec <code>colspan</code>/<code>rowspan</code></li>
+<li>Premier tag Git : <code>v0.1</code></li>
+</ul>
+</section>
+<section id="consigne-pour-la-prochaine-séance" class="level3">
+<h3 class="anchored" data-anchor-id="consigne-pour-la-prochaine-séance">Consigne pour la prochaine séance</h3>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="Avant le Lab 1">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Avant le Lab 1
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Lisez</strong> le PDF du Lab 1 que le prof vous a distribué (15 min de lecture).</li>
+<li><strong>Vérifiez</strong> que votre environnement fonctionne toujours (<code>code .</code> dans votre dossier <code>jang-afrig</code>, Live Server opérationnel).</li>
+<li><strong>Prévoyez</strong> une capture d’écran d’un drapeau africain de votre choix pour les exercices.</li>
+</ol>
+<p>Aucun devoir de code. Le Lab 1 démarrera du vide (page d’accueil à partir de zéro).</p>
+</div>
+</div>
+<div class="columns">
+<div class="column" style="width:85%;">
+<p><strong>CM1 — Terminé ✓</strong><br> Vous savez comment une page web fonctionne, et comment l’écrire.<br>Prochaine étape : <strong>la construire</strong>.<br> <em>Rendez-vous au Lab 1 !</em><br></p>
+</div>
+</div>
+</section>
+</section>
+<section class="level2">
+<h2 class="anchored" data-anchor-id="">Ressources du chapitre</h2>
+<ul>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-1/ressources/lab-0-mise-en-route.pdf" class="seance-ressource" title="Lab 0 — Mise en route">Lab 0 — Mise en route</a> <span class="ressource-poids">(102 Ko)</span></li>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-1/ressources/lab-1-ma-premiere-page-html.pdf" class="seance-ressource" title="Lab 1 — Ma première page HTML">Lab 1 — Ma première page HTML</a> <span class="ressource-poids">(103 Ko)</span></li>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-1/ressources/lab-2-html-structurant.pdf" class="seance-ressource" title="Lab 2 — HTML structurant">Lab 2 — HTML structurant</a> <span class="ressource-poids">(126 Ko)</span></li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Retour au sommet</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/ebtoure\.sn");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/defilement-cours.js"></script>
+
+
+
+
+</body></html>
