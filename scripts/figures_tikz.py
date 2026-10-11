@@ -42,7 +42,12 @@ from importer_chapitre import identifiants_uniques  # noqa: E402  (même dossier
 
 # Paquets du préambule utiles au dessin. La mise en page de l'article, elle, n'a rien à faire dans
 # un schéma autonome — et `inputenc`/`fontenc` sont incompatibles avec fontspec.
-GARDES = re.compile(r"\s*\\(usepackage|usetikzlibrary|definecolor|tcbuselibrary|pgfplotsset)")
+# Les macros du préambule (`\newcommand`) en font partie : un schéma peut s'en servir. Le schéma
+# de la séance 3 de Programmation Frontend 1 écrit `\code{fetch(url)}` ; sans la définition de
+# `\code`, LaTeX s'arrêtait sur la première, poursuivait en mode non interactif, et le SVG ne gardait
+# qu'une ligne du dessin — sans qu'aucune erreur ne remonte.
+GARDES = re.compile(r"\s*\\(usepackage|usetikzlibrary|definecolor|tcbuselibrary|pgfplotsset"
+                    r"|newcommand|providecommand)")
 ECARTES = ("geometry", "hyperref", "inputenc", "fontenc", "babel", "fancyhdr", "titlesec")
 POLICE = "Source Sans 3"
 
@@ -82,8 +87,23 @@ def porte_du_texte(dessin: str) -> bool:
 def preambule_du_dessin(source: str) -> list[str]:
     """Lignes du préambule à reprendre dans le document autonome."""
     avant = source.split(r"\begin{document}", 1)[0]
-    return [ligne for ligne in avant.splitlines()
-            if GARDES.match(ligne) and not any(mot in ligne for mot in ECARTES)]
+    gardees = []
+    for ligne in avant.splitlines():
+        if not GARDES.match(ligne):
+            continue
+        # Un `\usepackage` peut en charger quatorze d'un coup — les CM de Programmation Frontend 1
+        # mettent `hyperref` et `fancyhdr` avec `tcolorbox`, `xcolor` et `pifont`. Écarter la
+        # ligne entière privait le schéma de ses couleurs et de ses symboles : on n'écarte que les
+        # paquets visés.
+        paquets = re.fullmatch(r"(\s*\\usepackage\s*(?:\[[^\]]*\])?\s*)\{([^}]*)\}(.*)", ligne)
+        if paquets:
+            noms = [nom.strip() for nom in paquets[2].split(",")
+                    if nom.strip() and nom.strip() not in ECARTES]
+            if noms:
+                gardees.append(f"{paquets[1]}{{{','.join(noms)}}}{paquets[3]}")
+        elif not any(mot in ligne for mot in ECARTES):
+            gardees.append(ligne)
+    return gardees
 
 
 def dessins(source: str) -> list[str]:
@@ -123,10 +143,14 @@ def compiler(dessin: str, preambule: list[str], cible: Path) -> str | None:
         latex = subprocess.run(
             ["lualatex", "-interaction=nonstopmode", "--output-format=dvi", "f.tex"],
             cwd=travail, capture_output=True, text=True)
+        fautes = [l for l in (travail / "f.log").read_text(encoding="utf-8", errors="ignore")
+                  .splitlines() if l.startswith("!")]
         if not (travail / "f.dvi").is_file():
-            fautes = [l for l in (travail / "f.log").read_text(encoding="utf-8", errors="ignore")
-                      .splitlines() if l.startswith("!")]
             return fautes[0] if fautes else (latex.stdout or "").strip().splitlines()[-1:][0]
+        # Une erreur n'empêche pas toujours le DVI : en mode non interactif, LaTeX la saute et
+        # continue. Le schéma sortait alors amputé de ce qui suivait l'erreur, et rien ne le disait.
+        if fautes:
+            return fautes[0]
 
         svg = subprocess.run(
             ["dvisvgm", "--font-format=woff2", "--exact", "--no-styles=false", "-o", "f.svg", "f.dvi"],
