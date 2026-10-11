@@ -1,0 +1,543 @@
+---
+title: "Le Web et HTML"
+cible: "page"
+body-classes: cours-page
+numero: "1"
+ressources:
+  - type: "tp"
+    titre: "Lab 0 — Mise en route"
+    fichier: "ressources/lab-0-mise-en-route.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-0-mise-en-route.pdf"
+  - type: "tp"
+    titre: "Lab 1 — Ma première page HTML"
+    fichier: "ressources/lab-1-ma-premiere-page-html.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-1-ma-premiere-page-html.pdf"
+  - type: "tp"
+    titre: "Lab 2 — HTML structurant"
+    fichier: "ressources/lab-2-html-structurant.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-2-html-structurant.pdf"
+description: "Séance 1 de Programmation Frontend 1 : comment une page web arrive dans le navigateur, les rôles de HTML, CSS et JavaScript, et l'anatomie d'une page HTML."
+author: "Dr. El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Informations pratiques"}
+| **Type** | Cours Magistral (CM) |
+| --- | --- |
+| **Séance** | S1 --- première séance du semestre |
+| **Prérequis** | Lab 0 terminé (environnement installé + repo `jang-afrig`) |
+| **Ce qu'on verra après** | Lab 1 : Ma première page HTML (S2) |
+| **Devoir** | Aucun. Juste lire le PDF du Lab 1 pour la prochaine séance. |
+:::
+
+::: {.callout-note .encadre-objectifbox title="Objectifs du CM"}
+À la fin de cette séance, vous saurez :
+
+1. Expliquer **comment une page web arrive** dans votre navigateur
+2. Distinguer **les trois rôles** : HTML, CSS, JavaScript
+3. Décrire **l'anatomie** d'une page HTML (DOCTYPE, `head`, `body`)
+4. Utiliser les **balises de contenu** essentielles (titres, paragraphes, listes, tableaux, liens, images)
+5. Imbriquer des listes et fusionner des cellules de tableau (`colspan`, `rowspan`)
+6. Comprendre **ce qu'on va construire** : Jàng Afrig
+:::
+
+## Une page web, c'est quoi ?
+
+Ouvrez un navigateur, tapez <https://ucad.sn> et appuyez sur Entrée.
+Vous voyez une page avec des titres, du texte, des images, des menus, des
+couleurs, des animations. Cette page n'existe pas par magie : quelqu'un
+l'a **construite**. Et bientôt, vous saurez la construire aussi.
+
+### L'analogie de la maison
+
+Une page web est comme une maison. Trois technologies la composent, chacune
+avec un rôle précis :
+
+| **Technologie** | **Rôle** | **Dans la maison** |
+| --- | --- | --- |
+| **HTML** | Structure | Murs, cloisons, fondations |
+| **CSS** | Décoration | Peinture, meubles, couleurs |
+| **JavaScript** | Comportement | Électricité, eau, interrupteurs |
+
+- Une page **HTML seule** est une maison en briques brutes : fonctionnelle mais austère.
+- Une page **HTML + CSS** est une maison décorée : on aime y être.
+- Une page **HTML + CSS + JavaScript** est une maison *vivante* : on peut allumer la lumière, monter le son, ouvrir l'eau.
+
+::: {.callout-important .encadre-retenirbox title="À retenir"}
+**HTML structure** le contenu. **CSS** l'habille. **JavaScript** le rend interactif.
+
+Dans ce cours, on apprend les trois, **dans cet ordre**. Aujourd'hui, on pose les fondations : **HTML**.
+:::
+
+### Pourquoi commencer par HTML ?
+
+Parce qu'on ne décore pas une maison qu'on n'a pas encore construite. HTML
+est le **socle**. Sans HTML, ni CSS ni JavaScript ne peuvent exister.
+Les trois semaines qui suivent porteront intégralement sur HTML. Ensuite
+CSS, ensuite JavaScript.
+
+## Comment une page web arrive dans mon navigateur ?
+
+Vous tapez <https://ucad.sn> dans votre navigateur. En moins d'une seconde,
+la page s'affiche. Que s'est-il passé ? Votre navigateur a discuté avec un
+**serveur** quelque part dans le monde.
+
+### Le modèle client / serveur
+
+::: {#fig-client-serveur}
+{{< svg ../figures/01-le-web-et-html-01.svg alt="À gauche, votre navigateur (Chrome, Firefox), à Dakar sur votre PC ; à droite, le serveur, un ordinateur quelque part dans le monde. Une flèche va du navigateur au serveur : « 1. Donne-moi la page ucad.sn » ; une autre revient : « 2. Voici le code HTML »." >}}
+
+Le dialogue entre votre navigateur (client) et un serveur.
+:::
+
+1. Vous tapez une adresse. Votre navigateur envoie une **requête** au serveur qui héberge le site.
+2. Le serveur répond en vous envoyant du **code HTML** (plus parfois du CSS, du JavaScript, des images).
+3. Votre navigateur **lit** ce code HTML et **affiche** une page à l'écran.
+
+::: {.callout-tip .encadre-infobox title="L'analogie du restaurant"}
+Vous entrez dans un restaurant (**le navigateur ouvre le site**).
+Vous dites au serveur : « Je voudrais le thiéboudienne » (**la requête**).
+Le serveur va en cuisine, prépare votre plat et vous l'apporte (**la réponse du serveur web**).
+Vous mangez ce qu'on vous a servi (**le navigateur affiche la page**).
+:::
+
+### Ce que le serveur envoie : du texte, rien que du texte
+
+C'est le point étonnant : quand le serveur répond, il envoie juste un
+**gros fichier texte**. Ce fichier s'appelle du **HTML**. C'est
+ensuite votre navigateur qui transforme ce texte en page visuelle.
+
+::: {.callout-important .encadre-retenirbox title="À retenir"}
+Le serveur envoie du **texte** (HTML). Le navigateur transforme ce
+texte en **page visuelle**. Votre travail de développeur web :
+**écrire ce texte**.
+:::
+
+## Anatomie d'une page HTML
+
+Une page HTML a toujours la même forme. Comme une lettre officielle a un
+en-tête, un corps et une signature, une page HTML a trois parties :
+
+::: {#fig-anatomie}
+{{< svg ../figures/01-le-web-et-html-02.svg alt="Arbre d'une page HTML : <html> a deux enfants, <head> et <body>. <head> contient <title> et <meta> ; <body> contient <h1>, <p> et <img>." >}}
+
+La structure d'une page HTML : deux grandes zones, `head` et `body`.
+:::
+
+### Le squelette minimal
+
+Voici le **squelette minimal** de toute page HTML. Cette structure se
+retrouve sur *chaque* site web que vous avez ouvert dans votre vie.
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Ma page</title>
+    </head>
+    <body>
+        <h1>Bonjour !</h1>
+        <p>Ceci est ma première page web.</p>
+    </body>
+</html>
+```
+
+### Ce que fait chaque ligne
+
+| **Ligne** | **Rôle** |
+| --- | --- |
+| `<!DOCTYPE html>` | Dit au navigateur : « Je suis une page HTML moderne (HTML5). » |
+| `<html lang="fr">` | Démarre la page. `lang="fr"` indique la langue (utile pour les moteurs de recherche et les lecteurs d'écran). |
+| `<head>` | La partie *invisible* : informations pour le navigateur (encodage, titre de l'onglet, auteur). Les étudiants qui lisent ne voient jamais cela à l'écran. |
+| `<meta charset="UTF-8">` | Permet d'utiliser les accents et les caractères wolof (é, à, ñ…). **Obligatoire pour le français.** |
+| `<title>` | Le texte affiché dans l'onglet du navigateur. |
+| `<body>` | La partie *visible* : tout ce que l'utilisateur va voir sur la page. |
+
+::: {.callout-important .encadre-retenirbox title="À retenir"}
+Tout ce qui est **dans `<head>`** est invisible : c'est pour
+le navigateur.<br>Tout ce qui est **dans `<body>`** est visible : c'est pour
+l'utilisateur.
+:::
+
+### Une balise, c'est quoi exactement ?
+
+Une **balise** (*tag* en anglais) est un mot entouré de chevrons
+`<…>`. La plupart des balises marchent **par paire** : une
+balise ouvrante et une balise fermante avec un `/`.
+
+```html
+<h1>Un titre</h1>
+ |    |      |
+ |    |      +-- balise fermante
+ |    +-------- contenu
+ +------------- balise ouvrante
+```
+
+Quelques balises sont **auto-fermantes** (elles n'ont pas besoin d'une
+balise fermante car elles n'ont pas de contenu à entourer) :
+`<img>`, `<br>`, `<meta>`, `<input>`.
+
+## Les balises de contenu
+
+HTML propose **plus de 100 balises**. Heureusement, on en utilise
+régulièrement seulement une quinzaine. Voici les plus courantes --- celles
+qu'on voit sur toute page web.
+
+### Les titres
+
+HTML propose 6 niveaux de titres, de `<h1>` (le plus grand) à
+`<h6>` (le plus petit).
+
+```html
+<h1>Université Cheikh Anta Diop</h1>
+<h2>Faculté des Sciences</h2>
+<h3>Département Informatique</h3>
+<h4>DUT 1ère année</h4>
+```
+
+::: {.callout-warning .encadre-attentionbox title="Règle importante"}
+Il ne doit y avoir **qu'un seul `<h1>` par page** (le titre
+principal). Les `<h2>`, `<h3>` peuvent apparaître plusieurs
+fois pour structurer les sections et sous-sections.
+:::
+
+### Les paragraphes
+
+```html
+<p>L'École Supérieure Polytechnique forme des ingénieurs depuis 1964. Elle est située sur le campus de l'UCAD à Fann, Dakar.</p>
+```
+
+Chaque `<p>` représente **un paragraphe**. Le navigateur ajoute
+automatiquement un espace entre deux paragraphes consécutifs.
+
+### La mise en forme inline
+
+Pour mettre en avant un mot à l'intérieur d'un paragraphe :
+
+```html
+<p>Le cours est <strong>obligatoire</strong>. Les absences sont <em>vivement déconseillées</em>.</p>
+```
+
+- `<strong>` : texte **important** (affiché en gras par défaut)
+- `<em>` : texte *mis en valeur* (affiché en italique par défaut)
+
+### Les listes
+
+**Listes non ordonnées** (à puces) avec `<ul>` :
+
+```html
+<ul>
+    <li>Algorithmique</li>
+    <li>Mathématiques</li>
+    <li>Anglais</li>
+</ul>
+```
+
+**Listes ordonnées** (numérotées) avec `<ol>` :
+
+```html
+<ol>
+    <li>Installer VS Code</li>
+    <li>Installer Git</li>
+    <li>Créer un compte GitHub</li>
+</ol>
+```
+
+Dans les deux cas, chaque élément est un `<li>` (*list item*).
+
+#### Listes imbriquées
+
+Une liste peut contenir une autre liste. Il suffit de mettre `<ul>`
+ou `<ol>` *à l'intérieur* d'un `<li>` :
+
+```html
+<ul>
+    <li>Semestre 1
+        <ul>
+            <li>Algorithmique</li>
+            <li>Mathématiques</li>
+        </ul>
+    </li>
+    <li>Semestre 2
+        <ul>
+            <li>HTML / CSS / JavaScript</li>
+            <li>Bases de données</li>
+        </ul>
+    </li>
+</ul>
+```
+
+::: {.callout-tip .encadre-infobox title="L'indentation"}
+L'indentation (les espaces en début de ligne) n'est **pas obligatoire**
+pour le navigateur, mais elle est **obligatoire pour vous**. Sans
+indentation, un code HTML devient très vite illisible, même pour son auteur.
+Prenez l'habitude dès maintenant.
+:::
+
+### Les tableaux
+
+Un tableau HTML se construit ligne par ligne. Les balises essentielles :
+
+- `<table>` : le tableau
+- `<tr>` : une ligne (*table row*)
+- `<th>` : une cellule d'en-tête (*table header*)
+- `<td>` : une cellule de données (*table data*)
+
+```html
+<table>
+    <tr>
+        <th>Prénom</th>
+        <th>Note</th>
+    </tr>
+    <tr>
+        <td>Fatou</td>
+        <td>15</td>
+    </tr>
+    <tr>
+        <td>Moussa</td>
+        <td>12</td>
+    </tr>
+</table>
+```
+
+#### Fusionner des cellules
+
+Pour fusionner plusieurs colonnes ou plusieurs lignes, on utilise les
+attributs `colspan` (fusion horizontale) et `rowspan` (fusion
+verticale) :
+
+```html
+<table>
+    <tr>
+        <th colspan="2">Lundi</th>  <!-- fusionne 2 colonnes -->
+    </tr>
+    <tr>
+        <td>Algo</td>
+        <td>HTML</td>
+    </tr>
+</table>
+```
+
+On reverra les tableaux en détail au Lab 2.
+
+### Les liens
+
+Un lien vers une autre page se crée avec la balise `<a>`
+(*anchor*) et l'attribut `href` :
+
+```html
+<a href="https://ucad.sn">Site de l'UCAD</a>
+<a href="https://esp.sn">Site de l'ESP</a>
+```
+
+Le texte entre `<a>` et `</a>` est ce que l'utilisateur voit.
+L'URL dans `href` est la destination du clic.
+
+### Les images
+
+```html
+<img src="drapeau-senegal.png" alt="Drapeau du Sénégal">
+```
+
+- `src` : le chemin vers le fichier image (relatif ou URL complète)
+- `alt` : description textuelle de l'image, **obligatoire**. Elle est lue par les personnes malvoyantes qui utilisent un lecteur d'écran, et affichée si l'image ne se charge pas.
+
+::: {.callout-warning .encadre-attentionbox title="L'attribut `alt` n'est pas optionnel"}
+Une image sans `alt` est une image qui exclut les personnes
+aveugles. Prenez l'habitude d'en mettre un à chaque `<img>`. C'est
+un geste d'accessibilité --- pour certains étudiants malvoyants de votre
+promotion, c'est la seule façon de « voir » votre page.
+:::
+
+## Ce qu'on va construire : Jàng Afrig
+
+Avant de plonger dans le code, prenons un moment pour regarder la montagne
+qu'on va gravir ensemble.
+
+### Le projet fil rouge
+
+**Jàng Afrig** (*« apprendre l'Afrique »* en wolof) est une
+application web de **quiz géographique** sur les 54 pays africains.
+L'utilisateur :
+
+1. Choisit un mode de jeu (capitales, drapeaux, langues, voisins…)
+2. Répond à 10 questions à choix multiples
+3. Obtient un score à la fin
+4. Garde un classement local de ses meilleures performances
+
+### Les 5 pages de l'application
+
+| **Page** | **Contenu** |
+| --- | --- |
+| Accueil | Choix du mode + saisie du pseudo + meilleur score |
+| Quiz | Énoncé d'une question + 4 propositions + barre de progression |
+| Résultat | Score final + bouton rejouer |
+| Mes Scores | Classement local top 5 par mode |
+| À propos | Sources des données, technologies utilisées |
+
+### L'aventure par étapes
+
+On construit l'app **brique par brique**, à chaque séance :
+
+| **Bloc de séances** | **Ce qu'on ajoute à Jàng Afrig** |
+| --- | --- |
+| S1--S3 (HTML) | Les 5 pages en HTML brut, sans style |
+| S4--S6 (CSS) | Design panafricain, responsive mobile |
+| S7--S10 (JS) | Premier quiz interactif avec 10 pays hardcodés |
+| S11--S13 (API) | Connexion à REST Countries, 54 pays réels, 4 modes |
+| S14 (polish) | Chrono, `localStorage`, finitions |
+| S15 (Hybride) | Déploiement en ligne + démo collective |
+
+::: {.callout-important .encadre-projetbox title="À la fin du semestre"}
+Chacun de vous aura son application accessible sur Internet via une URL
+publique du type `https://*votre-username*.github.io/jang-afrig/`.
+Vous pourrez la partager à votre famille par WhatsApp.
+:::
+
+## Le workflow du cours
+
+### Le rythme hebdomadaire
+
+Chaque séance suit toujours la même mécanique :
+
+| **Type de séance** | **Déroulement** |
+| --- | --- |
+| **CM** | Rappel $\to$ analogie $\to$ notions nouvelles avec démo du prof $\to$ mini-exercice en classe $\to$ teaser du Lab suivant |
+| **Lab** | Rappel du CM $\to$ démo de l'objectif du jour $\to$ vous codez en pas-à-pas $\to$ exercices d'application $\to$ **routine Git** $\to$ annonce de la séance suivante |
+
+### La règle d'or : 1 Lab = 1 tag Git
+
+À la fin de chaque Lab, vous poserez un **tag Git** qui marque une
+version de votre application. Au bout de 10 Labs, votre historique Git
+ressemblera à ceci :
+
+```html
+v0     Setup initial (Lab 0)
+v0.1   Première page HTML (Lab 1)
+v0.2   HTML structurant (Lab 2)
+v0.3   CSS de base (Lab 3)
+...
+v0.9   Tous les modes avec API (Lab 9)
+v0.14  Polish final (Lab 10)
+v1.0   Déploiement en ligne (S15)
+```
+
+::: {.callout-important .encadre-retenirbox title="Chaque Lab = une brique posée"}
+Si vous venez à manquer une séance, vous aurez **un repo en retard
+d'une brique**. Facile à combler en relisant le PDF du Lab manqué. Mais il
+faut rattraper **avant** la séance suivante, sinon la dette s'accumule.
+:::
+
+### Le rapport à la fin de chaque Lab
+
+Vous avez produit votre premier rapport pour le Lab 0. Même routine pour
+les 10 Labs à venir :
+
+- 1 à 2 pages maximum
+- 4 sections : **ce que j'ai fait**, **difficultés**, **comment j'ai résolu**, **lien repo**
+- Déposé dans `rapports/rapport-lab-X-NOM-Prenom.pdf`
+
+C'est votre **carnet de bord** : un petit effort à chaque Lab, un vrai
+parcours à la fin du semestre.
+
+## Routine Git : rappel
+
+Vous avez appris au Lab 0 les 5 étapes du cycle Git. Rappel rapide --- on
+va la répéter 10 fois dans le semestre.
+
+| **Étape** | **Commande** |
+| --- | --- |
+| 1. Modifier des fichiers dans VS Code | *(on édite le code)* |
+| 2. Voir ce qui a changé | `git status` |
+| 3. Préparer tous les changements | `git add .` |
+| 4. Enregistrer avec un message | `git commit -m "v0.X : titre"` |
+| 5. Envoyer sur GitHub | `git push` |
+| 6. Poser un tag de version | `git tag v0.X` |
+| 7. Envoyer le tag | `git push --tags` |
+
+::: {.callout-important .encadre-retenirbox title="Mémoire musculaire"}
+Au bout de 3 ou 4 Labs, vous taperez cette séquence sans réfléchir. C'est
+le but. Git doit devenir un **réflexe**, pas un obstacle.
+:::
+
+## Mini-exercice en classe
+
+::: {.callout-note .encadre-objectifbox title="Exercice guidé --- écrit ensemble"}
+On va écrire **ensemble**, ici et maintenant, notre première page HTML.
+
+**Énoncé.** Créer une page `moi.html` qui contient :
+
+1. Un titre principal `<h1>` avec votre prénom
+2. Un paragraphe de présentation avec un `<strong>` quelque part
+3. Une liste `<ul>` de vos 3 matières préférées
+4. Un lien vers le site de l'UCAD
+:::
+
+### Solution attendue
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Ma page</title>
+    </head>
+    <body>
+        <h1>Fatou</h1>
+        <p>Je suis étudiante en <strong>DUT1-Informatique</strong> à l'ESP, UCAD.</p>
+        <ul>
+            <li>Algorithmique</li>
+            <li>Mathématiques</li>
+            <li>HTML/CSS/JS</li>
+        </ul>
+        <a href="https://ucad.sn">Site de l'UCAD</a>
+    </body>
+</html>
+```
+
+::: {.callout-tip .encadre-infobox title="Levez la main"}
+Si vous n'arrivez pas à l'écrire en 10 minutes, **levez la main**.
+C'est normal : c'est votre première page. On la refera calmement ensemble
+au Lab 1 (séance prochaine).
+:::
+
+## Résumé et transition
+
+### Ce qu'on a vu
+
+- Une page web = **HTML** (structure) + **CSS** (déco) + **JS** (comportement)
+- Un **navigateur** demande une page à un **serveur** qui répond avec du HTML
+- Une page HTML a un `<head>` (invisible) et un `<body>` (visible)
+- Les balises essentielles : `h1`-`h6`, `p`, `strong`, `em`, `ul`/`ol`/`li`, `table`/`tr`/`th`/`td`, `a`, `img`
+- Jàng Afrig se construira **brique par brique** pendant 15 séances
+- 1 Lab = 1 commit + 1 tag Git + 1 rapport
+
+### Ce qu'on fera au Lab 1
+
+- Créer `index.html` dans votre repo `jang-afrig`
+- Construire la **page d'accueil** de Jàng Afrig en HTML brut
+- Travailler les listes imbriquées
+- Travailler les tableaux avec `colspan`/`rowspan`
+- Premier tag Git : `v0.1`
+
+### Consigne pour la prochaine séance
+
+::: {.callout-warning .encadre-attentionbox title="Avant le Lab 1"}
+1. **Lisez** le PDF du Lab 1 que le prof vous a distribué (15 min de lecture).
+2. **Vérifiez** que votre environnement fonctionne toujours (`code .` dans votre dossier `jang-afrig`, Live Server opérationnel).
+3. **Prévoyez** une capture d'écran d'un drapeau africain de votre choix pour les exercices.
+
+Aucun devoir de code. Le Lab 1 démarrera du vide (page d'accueil à partir de zéro).
+:::
+
+::: {.columns}
+::: {.column width="85%"}
+**CM1 --- Terminé ✓**<br>
+Vous savez comment une page web fonctionne, et comment l'écrire.<br>Prochaine étape : **la construire**.<br>
+*Rendez-vous au Lab 1 !*<br>
+:::
+:::
+
+::: {#ressources-seance}
+:::

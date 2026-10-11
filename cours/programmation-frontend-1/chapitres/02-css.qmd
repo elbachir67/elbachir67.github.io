@@ -1,0 +1,635 @@
+---
+title: "CSS"
+cible: "page"
+body-classes: cours-page
+numero: "2"
+ressources:
+  - type: "tp"
+    titre: "Lab 3 — CSS en pratique"
+    fichier: "ressources/lab-3-css-en-pratique.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-3-css-en-pratique.pdf"
+  - type: "tp"
+    titre: "Lab 4 — Responsive mobile"
+    fichier: "ressources/lab-4-responsive-mobile.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-4-responsive-mobile.pdf"
+description: "Séance 2 de Programmation Frontend 1 : ce que CSS ajoute à HTML, les sélecteurs, la cascade et la spécificité, le box model et Flexbox."
+author: "Dr. El Hadji Bassirou TOURÉ, École Supérieure Polytechnique, Département Génie Informatique, Université Cheikh Anta Diop de Dakar"
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Informations pratiques"}
+| **Type** | Cours Magistral (CM) |
+| --- | --- |
+| **Séance** | S4 --- ouverture du bloc CSS |
+| **Prérequis** | Lab 2 terminé (5 pages HTML poussées avec tag `v0.2`) |
+| **Ce qu'on verra après** | Lab 3 : styliser Jàng Afrig (S5) |
+| **Devoir** | Aucun. Lire le PDF du Lab 3 pour la prochaine séance. |
+:::
+
+::: {.callout-note .encadre-objectifbox title="Objectifs du CM"}
+À la fin de cette séance, vous saurez :
+
+1. Expliquer ce que CSS **ajoute** à HTML
+2. Inclure du CSS dans une page (`<link>`, `<style>`, inline)
+3. Écrire des **sélecteurs** : élément, classe, id, descendant, pseudo-classes
+4. Comprendre la **cascade** et la **spécificité** (qui gagne quand plusieurs règles s'appliquent)
+5. Maîtriser le **Box Model** : content, padding, border, margin
+6. Utiliser **Flexbox** pour aligner et positionner des éléments
+:::
+
+## Pourquoi CSS ?
+
+### Le constat du Lab 2
+
+À la fin du Lab 2, votre application Jàng Afrig est **complète
+structurellement** : 5 pages, sémantique, formulaire, navigation. Mais
+visuellement, c'est…
+
+::: {#fig-avant-apres}
+{{< svg ../figures/02-css-01.svg alt="La page d'accueil de Jàng Afrig, deux fois côte à côte. Sans CSS : titre, liens soulignés et liste à puces des cinq modes de jeu, en noir sur blanc. Avec CSS : un bandeau coloré pour le titre, une barre de navigation, des titres en couleur et les cinq modes de jeu en boutons." >}}
+
+La même page HTML, sans puis avec CSS.
+:::
+
+**Le HTML est strictement le même** dans les deux cas. Seul un fichier
+CSS a été ajouté à droite. CSS, c'est la technologie qui transforme un
+document brut en **interface visuelle**.
+
+### Que peut-on faire avec CSS ?
+
+- Choisir des **couleurs** (texte, fond, bordures)
+- Choisir des **polices** (Google Fonts, etc.)
+- Définir des **tailles** et des **espacements**
+- Positionner les éléments (alignement, grilles, colonnes)
+- Faire du **responsive** (s'adapter au téléphone)
+- Ajouter des **animations** et des **effets** au survol
+
+::: {.callout-important .encadre-retenirbox title="CSS = Cascading Style Sheets"}
+CSS signifie *Cascading Style Sheets* (« feuilles de style en
+cascade »). **Cascading** parce que les règles CSS *s'empilent*
+et se combinent --- on verra ce que ça veut dire à la section sur la
+cascade.
+:::
+
+## Trois façons d'inclure CSS
+
+CSS peut être placé à **trois endroits** différents dans une page
+HTML. Chacune a ses usages et ses limites.
+
+### 1. Inline (déconseillé)
+
+Directement dans une balise HTML, via l'attribut `style` :
+
+```css
+<h1 style="color: red; font-size: 32px;">Jàng Afrig</h1>
+```
+
+**Quand l'utiliser :** jamais en pratique. C'est OK pour un test
+rapide.
+
+**Pourquoi déconseillé :** on mélange structure et style. Si on
+change d'avis sur la couleur, il faut aller modifier *chaque* balise.
+
+### 2. Interne via `<style>`
+
+Dans le `<head>` de la page :
+
+```css
+<head>
+    <style>
+        h1 { color: red; font-size: 32px; }
+    </style>
+</head>
+```
+
+**Quand l'utiliser :** prototype rapide, démo en classe, page unique.
+
+**Limite :** le style ne s'applique qu'à *cette* page. Pour
+appliquer le même style à 5 pages, il faut copier-coller 5 fois.
+
+### 3. Externe via `<link>` (recommandé)
+
+Dans un fichier séparé (par convention `style.css`), lié depuis le
+`<head>` :
+
+```css
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+```
+
+Et dans `style.css` :
+
+```css
+h1 {
+    color: red;
+    font-size: 32px;
+}
+```
+
+**Quand l'utiliser :** **toujours, en production**.
+
+::: {.callout-important .encadre-retenirbox title="Pourquoi externe ?"}
+- **Réutilisable** : un seul `style.css` pour les 5 pages
+- **Maintenable** : changer une couleur = modifier un seul endroit
+- **Performant** : le navigateur télécharge le CSS une fois et le réutilise
+- **Lisible** : HTML et CSS séparés, chacun son fichier
+
+C'est la convention que vous adopterez au Lab 3.
+:::
+
+## Anatomie d'une règle CSS
+
+Une règle CSS, c'est toujours **la même structure** :
+
+::: {#fig-anatomie-css}
+{{< svg ../figures/02-css-02.svg alt="La règle h1 { color: red; } annotée : h1 est le sélecteur, color la propriété, red la valeur. Les accolades ouvrent et ferment le bloc, et le point-virgule marque la fin de la propriété." >}}
+
+Anatomie d'une règle CSS.
+:::
+
+### Une règle plus complète
+
+```css
+h1 {
+    color: red;
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+```
+
+- **Sélecteur** : `h1` --- cible *tous les `<h1>`* de la page
+- **Bloc** : entre `{` et `}`
+- **Propriétés** : `color`, `font-size`, `text-align`, `margin-bottom`
+- Chaque **déclaration** (propriété : valeur) finit par un `;`
+
+::: {.callout-important .encadre-retenirbox title="Le point-virgule"}
+Le `;` après chaque déclaration est **techniquement** optionnel
+pour la dernière, mais **toujours mettez-le**. Vous oublierez d'en
+mettre un quand vous ajouterez une nouvelle propriété, et vous chercherez
+le bug pendant 20 minutes.
+:::
+
+## Les sélecteurs
+
+Les **sélecteurs** disent « à quels éléments cette règle
+s'applique ». CSS en propose plusieurs dizaines, mais 5 vous
+suffiront pour 90% des cas.
+
+### Sélecteur d'élément
+
+Cible **toutes les balises de ce type** :
+
+```css
+p {
+    color: gray;
+}
+```
+
+$\to$ tous les `<p>` de toutes les pages liant ce CSS deviennent
+gris.
+
+### Sélecteur de classe (le plus utilisé)
+
+Cible toutes les balises ayant un attribut `class="..."`. On
+préfixe le nom par un point :
+
+HTML :
+
+```css
+<button class="btn-primary">Commencer</button>
+<button class="btn-secondary">Annuler</button>
+```
+
+CSS :
+
+```css
+.btn-primary {
+    background-color: green;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: gray;
+    color: white;
+}
+```
+
+**Une classe peut être utilisée sur plusieurs éléments**. C'est ça
+qui fait sa puissance.
+
+### Sélecteur d'identifiant
+
+Cible la balise ayant un attribut `id="..."`. Préfixé par
+`#` :
+
+HTML :
+
+```css
+<header id="entete-principal">
+    <h1>Jàng Afrig</h1>
+</header>
+```
+
+CSS :
+
+```css
+#entete-principal {
+    background-color: teal;
+}
+```
+
+::: {.callout-warning .encadre-attentionbox title="`id` vs. `class`"}
+- Un `id` doit être **unique** sur la page (un seul `#entete-principal`)
+- Une `class` peut être **réutilisée** (plusieurs `.btn-primary`)
+
+**En pratique, on utilise presque toujours des classes.** Les `id`
+servent surtout à JS plus tard.
+:::
+
+### Sélecteur descendant
+
+Cible une balise *à l'intérieur d'une autre* :
+
+```css
+nav a {
+    color: white;
+    text-decoration: none;
+}
+```
+
+$\to$ tous les `<a>` qui sont *à l'intérieur* d'un `<nav>`
+deviennent blancs et sans soulignement. Les autres `<a>` de la
+page ne sont pas touchés.
+
+### Pseudo-classes
+
+Cible un élément *dans un certain état* :
+
+```css
+button:hover {
+    background-color: orange;
+}
+
+a:visited {
+    color: purple;
+}
+
+input:focus {
+    border-color: green;
+}
+```
+
+- `:hover` : quand la souris passe dessus
+- `:focus` : quand l'élément est sélectionné (au clavier ou cliqué)
+- `:visited` : pour un lien déjà cliqué
+
+::: {.callout-tip .encadre-infobox title="Démo en direct"}
+Le prof va montrer en direct, dans la console DevTools, comment ces
+sélecteurs s'appliquent à la page d'accueil de Jàng Afrig.
+:::
+
+## Cascade et spécificité
+
+### Le problème
+
+Que se passe-t-il quand **deux règles différentes** essaient de styler
+**le même élément** avec **deux valeurs incompatibles** ?
+
+```css
+p { color: red; }
+p { color: blue; }
+```
+
+**Question :** les paragraphes seront rouges ou bleus ?
+
+### Règle 1 : la cascade (le dernier gagne)
+
+Si deux règles ont la **même spécificité**, c'est **la dernière
+écrite** qui gagne.
+
+::: {#fig-cascade}
+{{< svg ../figures/02-css-03.svg alt="Deux règles empilées, p { color: red; } puis p { color: blue; } : la plus basse gagne, et le résultat affiché est bleu." >}}
+
+Quand deux règles de même spécificité s'opposent, la dernière écrite gagne.
+:::
+
+### Règle 2 : la spécificité (le plus précis gagne)
+
+Mais si une règle est **plus précise**, elle l'emporte, peu importe
+l'ordre. La spécificité se calcule comme suit :
+
+| **Type de sélecteur** | **Score** | **Exemple** |
+| --- | --- | --- |
+| Sélecteur d'élément | 1 | `p` |
+| Sélecteur descendant | 2 (1+1) | `nav a` |
+| Sélecteur de classe | 10 | `.btn-primary` |
+| Sélecteur d'identifiant | 100 | `#entete-principal` |
+| `style="..."` inline | 1000 | --- |
+
+### Exemple chiffré
+
+```css
+p { color: red; }                      /* score 1   */
+.intro { color: blue; }                /* score 10  */
+#message-special { color: green; }     /* score 100 */
+```
+
+Pour ce HTML :
+
+```css
+<p class="intro" id="message-special">Texte</p>
+```
+
+Le texte sera…**vert** (le `#message-special` a le score
+le plus élevé).
+
+::: {.callout-important .encadre-retenirbox title="Conseil pratique"}
+- **Préférez les classes** (`.`) aux ids (`#`)
+- **Évitez les sélecteurs trop précis** comme `header nav ul li a`
+- **N'utilisez jamais `style="..."` inline** sauf en dernier recours
+
+Si vous gardez des règles simples (1-2 niveaux de précision), vous éviterez
+99% des bugs de spécificité.
+:::
+
+## Le Box Model
+
+**Le Box Model est sans doute le concept CSS le plus important.**
+Tout élément HTML est une **boîte**, et chaque boîte a 4 zones.
+
+### Les 4 zones
+
+::: {#fig-boxmodel}
+{{< svg ../figures/02-css-04.svg alt="Le box model en rectangles emboîtés : margin à l'extérieur, puis border, puis padding, et content au centre." >}}
+
+Le Box Model : content au centre, entouré de padding, border, margin.
+:::
+
+### Ce que fait chaque zone
+
+| **Zone** | **Rôle** |
+| --- | --- |
+| **content** | Le contenu réel : texte, image, autre balise. Sa taille est définie par `width` et `height`. |
+| **padding** | Espace *intérieur* entre le contenu et la bordure. « Du rembourrage à l'intérieur de la boîte ». |
+| **border** | La bordure visible (épaisseur, style, couleur). |
+| **margin** | Espace *extérieur* entre cette boîte et les boîtes voisines. « Du vide autour de la boîte ». |
+
+::: {.callout-tip .encadre-infobox title="L'analogie du paquet cadeau"}
+- **content** : le cadeau lui-même
+- **padding** : le papier de soie autour, dans la boîte
+- **border** : le carton de la boîte
+- **margin** : l'espace que vous laissez *autour* pour ne pas écraser les autres paquets
+:::
+
+### Exemple en CSS
+
+```css
+.carte-mode {
+    width: 200px;
+    padding: 20px;
+    border: 2px solid teal;
+    margin: 10px;
+    background-color: #f4f4f4;
+}
+```
+
+### Le piège classique
+
+Par défaut, `width` ne mesure que le **content**. Donc une boîte
+de 200px avec `padding: 20px` occupe en réalité **240px** de
+large (200 + 20 + 20).
+
+**Solution** : ajouter cette règle au début de votre CSS pour que
+`width` inclue padding et border :
+
+```css
+* {
+    box-sizing: border-box;
+}
+```
+
+::: {.callout-important .encadre-retenirbox title="Réflexe pro"}
+**Toujours mettre `box-sizing: border-box`** en début de
+fichier CSS. C'est le réflexe de tous les développeurs web modernes. Sans
+ça, vos calculs de largeur seront faux et vous galérerez en responsive.
+:::
+
+### Démo en direct dans DevTools
+
+::: {.callout-tip .encadre-infobox title="Le Box Model dans DevTools"}
+Le prof va montrer en direct comment voir le Box Model d'un élément :
+
+1. Clic droit sur l'élément $\to$ **Inspecter**
+2. Onglet **Computed** ou panneau de droite
+3. Le Box Model s'affiche avec les valeurs réelles de chaque zone
+
+C'est l'outil que vous utiliserez *tout le temps* pour débugger
+votre CSS.
+:::
+
+## Flexbox : aligner et positionner
+
+Avant Flexbox, centrer un bouton verticalement dans une page demandait
+des *hacks*. Avec Flexbox, c'est trois lignes.
+
+### Le principe
+
+Flexbox transforme un élément parent en **conteneur flexible** (un
+« flex container »). Ses enfants directs deviennent des
+**flex items** qui peuvent être alignés et distribués librement.
+
+```css
+.conteneur {
+    display: flex;
+}
+```
+
+C'est tout. Le parent passe en mode flex, et ses enfants se mettent
+**en ligne horizontale** par défaut.
+
+### Les deux axes
+
+::: {#fig-flex-axes}
+{{< svg ../figures/02-css-05.svg alt="Un conteneur Flexbox et ses quatre éléments, numérotés de 1 à 4 et alignés en ligne. L'axe principal, horizontal, est piloté par justify-content ; l'axe secondaire, vertical, par align-items." >}}
+
+Les deux axes de Flexbox : principal (horizontal) et secondaire (vertical).
+:::
+
+### Les propriétés essentielles
+
+#### Sur le conteneur :
+
+| **Propriété** | **Rôle** |
+| --- | --- |
+| `display: flex` | Active Flexbox sur le conteneur |
+| `flex-direction` | `row` (par défaut, horizontal) ou `column` (vertical) |
+| `justify-content` | Aligne les items sur **l'axe principal** |
+| `align-items` | Aligne les items sur **l'axe secondaire** |
+| `flex-wrap` | `wrap` : retour à la ligne si pas la place |
+| `gap` | Espace entre les items |
+
+### Les valeurs de `justify-content`
+
+| **Valeur** | **Effet** |
+| --- | --- |
+| `flex-start` | Items collés à gauche (par défaut) |
+| `center` | Items centrés horizontalement |
+| `flex-end` | Items collés à droite |
+| `space-between` | Premier à gauche, dernier à droite, le reste réparti |
+| `space-around` | Espacement égal autour de chaque item |
+
+### Centrer un bouton (le grand classique)
+
+```css
+.parent {
+    display: flex;
+    justify-content: center;   /* centré horizontalement */
+    align-items: center;       /* centré verticalement */
+    height: 200px;
+}
+```
+
+3 lignes pour centrer parfaitement, à droite ET en bas, à hauteur ET en
+largeur. Avant Flexbox (avant 2015), c'était un cauchemar.
+
+### Cas d'usage typique : la nav
+
+```css
+<nav class="nav-principale">
+    <a href="index.html">Accueil</a>
+    <a href="quiz.html">Jouer</a>
+    <a href="scores.html">Mes Scores</a>
+    <a href="apropos.html">À propos</a>
+</nav>
+```
+
+```css
+.nav-principale {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: teal;
+}
+
+.nav-principale a {
+    color: white;
+    text-decoration: none;
+}
+```
+
+$\to$ une barre de navigation propre avec liens espacés et fond coloré, en
+quelques lignes.
+
+::: {.callout-important .encadre-retenirbox title="Mémo Flexbox"}
+Les 5 propriétés à connaître :
+
+1. `display: flex`   (active Flexbox)
+2. `justify-content`   (axe principal)
+3. `align-items`   (axe secondaire)
+4. `flex-wrap: wrap`   (retour à la ligne)
+5. `gap`   (espacement entre items)
+
+Avec ces 5, vous gérez 95% des layouts d'application.
+:::
+
+## Mini-exercice en classe
+
+::: {.callout-note .encadre-objectifbox title="Exercice guidé --- on le fait ensemble"}
+**Énoncé.** Sur la page d'accueil de Jàng Afrig, ajoutons une règle
+CSS qui :
+
+1. Met le `<header>` sur fond **teal** avec texte **blanc**
+2. Aligne les liens du `<nav>` en **ligne horizontale**, espacés **equitablement**
+3. Centre le bouton « Commencer » horizontalement dans son conteneur
+
+**On va l'écrire ensemble** dans un `<style>` interne pour
+aller vite (au Lab 3, on basculera en fichier externe).
+:::
+
+### Solution attendue
+
+```css
+/* Box-sizing pour tout */
+* { box-sizing: border-box; }
+
+/* Header coloré */
+header {
+    background-color: teal;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Nav en flex */
+nav {
+    display: flex;
+    justify-content: space-around;
+    background-color: #006644;
+    padding: 10px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+}
+
+/* Bouton centré */
+.bouton-conteneur {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+```
+
+::: {.callout-tip .encadre-infobox title="Si vous bloquez"}
+Pas de panique. Ce sera *exactement* ce qu'on fait au Lab 3, en
+détail, étape par étape. L'objectif aujourd'hui est de **voir la
+mécanique**, pas de tout mémoriser.
+:::
+
+## Résumé et transition
+
+### Ce qu'on a vu
+
+- CSS = **Cascading Style Sheets** : la couche visuelle du Web
+- **3 façons d'inclure** CSS : inline, `<style>`, `<link>` (recommandé)
+- Anatomie d'une règle : `sélecteur { propriété: valeur; }`
+- **5 sélecteurs** : élément, classe (`.`), id (`#`), descendant, pseudo-classes (`:hover`)
+- **Cascade** : à spécificité égale, le dernier gagne
+- **Spécificité** : id (100) > classe (10) > élément (1)
+- **Box Model** : content + padding + border + margin
+- Réflexe : toujours `box-sizing: border-box`
+- **Flexbox** : 5 propriétés pour aligner et positionner
+
+### Ce qu'on fera au Lab 3
+
+- Créer le fichier `style.css` dans le repo
+- Le lier aux 5 pages avec `<link>`
+- Définir la **palette panafricaine** (vert, jaune, rouge + neutre)
+- Utiliser une **police Google Fonts**
+- Styliser le `<header>`, le `<nav>`, les sections, le footer
+- Créer des **boutons** stylés avec `:hover`
+- Tag `v0.3`
+
+### Consigne pour la prochaine séance
+
+::: {.callout-warning .encadre-attentionbox title="Avant le Lab 3"}
+1. **Lisez** le PDF du Lab 3.
+2. **Vérifiez** que vos 5 pages HTML s'affichent toujours correctement (`git pull` d'abord si vous avez travaillé sur un autre ordinateur).
+3. **Choisissez 1 ou 2 polices** sur [Google Fonts](https://fonts.google.com) qui vous plaisent. Idée : une « sans-serif » moderne pour le texte (*Poppins*, *Inter*, *Nunito*…) et une plus marquée pour les titres.
+
+Aucun code à écrire à la maison.
+:::
+
+::: {.columns}
+::: {.column width="85%"}
+**CM2 --- Terminé ✓**<br>
+Vous savez comment CSS donne vie au HTML.<br>Prochaine étape : **habiller Jàng Afrig**.<br>
+*Rendez-vous au Lab 3 !*<br>
+:::
+:::
+
+::: {#ressources-seance}
+:::

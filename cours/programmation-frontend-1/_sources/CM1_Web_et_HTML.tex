@@ -1,0 +1,794 @@
+% ===========================================================================
+%  Jàng Afrig — CM1 : Le Web et HTML
+%  Licence 1 DUT1-Informatique — ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+% --- TikZ pour les schémas ---
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit,shadows.blur,trees}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Couleurs pour les schémas ---
+\definecolor{schclient}{RGB}{45,130,200}
+\definecolor{schserveur}{RGB}{200,80,60}
+\definecolor{schhtml}{RGB}{228,77,38}
+\definecolor{schhead}{RGB}{110,70,180}
+\definecolor{schbody}{RGB}{45,160,110}
+
+% --- Code source ---
+\usepackage{listings}
+\lstdefinelanguage{HTML5}{
+  morekeywords={<!DOCTYPE,html,head,meta,title,body,h1,h2,h3,p,ul,ol,li,table,tr,th,td,a,img,strong,em,br,div,span},
+  sensitive=true,
+  morecomment=[s]{<!--}{-->},
+  morestring=[b]",
+}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- CM1 : Le Web et HTML}
+\fancyhead[R]{\small ESP/UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge CM1 --- Le Web et HTML}\\[0.3cm]
+\textbf{\Large Comment fonctionne une page web, et comment on la structure}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+École Supérieure Polytechnique\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Type} & Cours Magistral (CM) \\
+\textbf{Séance} & S1 --- première séance du semestre \\
+\textbf{Prérequis} & Lab 0 terminé (environnement installé + repo \texttt{jang-afrig}) \\
+\textbf{Ce qu'on verra après} & Lab 1 : Ma première page HTML (S2) \\
+\textbf{Devoir} & Aucun. Juste lire le PDF du Lab 1 pour la prochaine séance. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du CM]
+À la fin de cette séance, vous saurez :
+\begin{enumerate}[nosep]
+    \item Expliquer \textbf{comment une page web arrive} dans votre navigateur
+    \item Distinguer \textbf{les trois rôles} : HTML, CSS, JavaScript
+    \item Décrire \textbf{l'anatomie} d'une page HTML (DOCTYPE, \texttt{head}, \texttt{body})
+    \item Utiliser les \textbf{balises de contenu} essentielles (titres, paragraphes, listes, tableaux, liens, images)
+    \item Imbriquer des listes et fusionner des cellules de tableau (\texttt{colspan}, \texttt{rowspan})
+    \item Comprendre \textbf{ce qu'on va construire} : Jàng Afrig
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Une page web, c'est quoi ?}
+% ===========================================================================
+
+Ouvrez un navigateur, tapez \url{https://ucad.sn} et appuyez sur Entrée.
+Vous voyez une page avec des titres, du texte, des images, des menus, des
+couleurs, des animations. Cette page n'existe pas par magie : quelqu'un
+l'a \textbf{construite}. Et bientôt, vous saurez la construire aussi.
+
+\subsection{L'analogie de la maison}
+
+Une page web est comme une maison. Trois technologies la composent, chacune
+avec un rôle précis :
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Technologie} & \textbf{Rôle} & \textbf{Dans la maison} \\
+\midrule
+\textbf{HTML} & Structure & Murs, cloisons, fondations \\
+\textbf{CSS}  & Décoration & Peinture, meubles, couleurs \\
+\textbf{JavaScript} & Comportement & Électricité, eau, interrupteurs \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Une page \textbf{HTML seule} est une maison en briques brutes : fonctionnelle mais austère.
+    \item Une page \textbf{HTML + CSS} est une maison décorée : on aime y être.
+    \item Une page \textbf{HTML + CSS + JavaScript} est une maison \textit{vivante} : on peut allumer la lumière, monter le son, ouvrir l'eau.
+\end{itemize}
+
+\begin{retenirbox}[À retenir]
+\textbf{HTML structure} le contenu. \textbf{CSS} l'habille. \textbf{JavaScript} le rend interactif.
+
+Dans ce cours, on apprend les trois, \textbf{dans cet ordre}. Aujourd'hui, on pose les fondations : \textbf{HTML}.
+\end{retenirbox}
+
+\subsection{Pourquoi commencer par HTML ?}
+
+Parce qu'on ne décore pas une maison qu'on n'a pas encore construite. HTML
+est le \textbf{socle}. Sans HTML, ni CSS ni JavaScript ne peuvent exister.
+Les trois semaines qui suivent porteront intégralement sur HTML. Ensuite
+CSS, ensuite JavaScript.
+
+\newpage
+
+% ===========================================================================
+\section{Comment une page web arrive dans mon navigateur ?}
+% ===========================================================================
+
+Vous tapez \url{https://ucad.sn} dans votre navigateur. En moins d'une seconde,
+la page s'affiche. Que s'est-il passé ? Votre navigateur a discuté avec un
+\textbf{serveur} quelque part dans le monde.
+
+\subsection{Le modèle client / serveur}
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    node distance=2cm,
+    acteur/.style={rounded corners=8pt, draw, thick, minimum width=4cm, minimum height=2.2cm, align=center, font=\bfseries},
+    fleche/.style={-{Stealth[length=3.5mm]}, thick, line width=1.2pt},
+    lib/.style={midway, font=\small\itshape, fill=white, inner sep=3pt}
+]
+    \node[acteur, fill=schclient!15, draw=schclient] (client)
+      {Votre navigateur\\[2pt]\normalfont\small (Chrome, Firefox)\\ \normalfont\scriptsize à Dakar, sur votre PC};
+
+    \node[acteur, fill=schserveur!15, draw=schserveur, right=5cm of client] (serveur)
+      {Le serveur\\[2pt]\normalfont\small (un ordinateur)\\ \normalfont\scriptsize quelque part dans le monde};
+
+    % Flèche aller (requête)
+    \draw[fleche, color=schclient]
+      ([yshift=0.5cm]client.east) -- node[lib, above] {1. Donne-moi la page ucad.sn}
+      ([yshift=0.5cm]serveur.west);
+
+    % Flèche retour (réponse)
+    \draw[fleche, color=schserveur]
+      ([yshift=-0.5cm]serveur.west) -- node[lib, below] {2. Voici le code HTML}
+      ([yshift=-0.5cm]client.east);
+
+\end{tikzpicture}
+\caption{Le dialogue entre votre navigateur (client) et un serveur.}
+\label{fig:client-serveur}
+\end{figure}
+
+\begin{enumerate}[leftmargin=*,nosep]
+    \item Vous tapez une adresse. Votre navigateur envoie une \textbf{requête} au serveur qui héberge le site.
+    \item Le serveur répond en vous envoyant du \textbf{code HTML} (plus parfois du CSS, du JavaScript, des images).
+    \item Votre navigateur \textbf{lit} ce code HTML et \textbf{affiche} une page à l'écran.
+\end{enumerate}
+
+\begin{infobox}[L'analogie du restaurant]
+Vous entrez dans un restaurant (\textbf{le navigateur ouvre le site}).
+Vous dites au serveur : «\,Je voudrais le thiéboudienne\,» (\textbf{la requête}).
+Le serveur va en cuisine, prépare votre plat et vous l'apporte (\textbf{la réponse du serveur web}).
+Vous mangez ce qu'on vous a servi (\textbf{le navigateur affiche la page}).
+\end{infobox}
+
+\subsection{Ce que le serveur envoie : du texte, rien que du texte}
+
+C'est le point étonnant : quand le serveur répond, il envoie juste un
+\textbf{gros fichier texte}. Ce fichier s'appelle du \textbf{HTML}. C'est
+ensuite votre navigateur qui transforme ce texte en page visuelle.
+
+\begin{retenirbox}[À retenir]
+Le serveur envoie du \textbf{texte} (HTML). Le navigateur transforme ce
+texte en \textbf{page visuelle}. Votre travail de développeur web :
+\textbf{écrire ce texte}.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Anatomie d'une page HTML}
+% ===========================================================================
+
+Une page HTML a toujours la même forme. Comme une lettre officielle a un
+en-tête, un corps et une signature, une page HTML a trois parties :
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    level distance=1.7cm,
+    sibling distance=5cm,
+    every node/.style={rounded corners=4pt, draw, thick, font=\ttfamily, inner sep=6pt},
+    edge from parent/.style={draw, thick, -{Stealth[length=2mm]}}
+]
+    \node[fill=schhtml!15, draw=schhtml, text=schhtml] {\textbf{<html>}}
+        child {node[fill=schhead!15, draw=schhead, text=schhead] {\textbf{<head>}}
+            child[sibling distance=2.2cm] {node[fill=white, draw=schhead!50] {\small <title>}}
+            child[sibling distance=2.2cm] {node[fill=white, draw=schhead!50] {\small <meta>}}
+        }
+        child {node[fill=schbody!15, draw=schbody, text=schbody] {\textbf{<body>}}
+            child[sibling distance=1.8cm] {node[fill=white, draw=schbody!50] {\small <h1>}}
+            child[sibling distance=1.8cm] {node[fill=white, draw=schbody!50] {\small <p>}}
+            child[sibling distance=1.8cm] {node[fill=white, draw=schbody!50] {\small <img>}}
+        };
+\end{tikzpicture}
+\caption{La structure d'une page HTML : deux grandes zones, \texttt{head} et \texttt{body}.}
+\label{fig:anatomie}
+\end{figure}
+
+\subsection{Le squelette minimal}
+
+Voici le \textbf{squelette minimal} de toute page HTML. Cette structure se
+retrouve sur \emph{chaque} site web que vous avez ouvert dans votre vie.
+
+\begin{lstlisting}[language=HTML5]
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Ma page</title>
+    </head>
+    <body>
+        <h1>Bonjour !</h1>
+        <p>Ceci est ma première page web.</p>
+    </body>
+</html>
+\end{lstlisting}
+
+\subsection{Ce que fait chaque ligne}
+
+\begin{center}
+\begin{tabular}{@{}lp{9cm}@{}}
+\toprule
+\textbf{Ligne} & \textbf{Rôle} \\
+\midrule
+\texttt{<!DOCTYPE html>} & Dit au navigateur : «\,Je suis une page HTML moderne (HTML5).\,» \\
+\addlinespace
+\texttt{<html lang="fr">} & Démarre la page. \texttt{lang="fr"} indique la langue (utile pour les moteurs de recherche et les lecteurs d'écran). \\
+\addlinespace
+\texttt{<head>} & La partie \emph{invisible} : informations pour le navigateur (encodage, titre de l'onglet, auteur). Les étudiants qui lisent ne voient jamais cela à l'écran. \\
+\addlinespace
+\texttt{<meta charset="UTF-8">} & Permet d'utiliser les accents et les caractères wolof (é, à, ñ\ldots). \textbf{Obligatoire pour le français.} \\
+\addlinespace
+\texttt{<title>} & Le texte affiché dans l'onglet du navigateur. \\
+\addlinespace
+\texttt{<body>} & La partie \emph{visible} : tout ce que l'utilisateur va voir sur la page. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{retenirbox}[À retenir]
+Tout ce qui est \textbf{dans \texttt{<head>}} est invisible : c'est pour
+le navigateur.\\
+Tout ce qui est \textbf{dans \texttt{<body>}} est visible : c'est pour
+l'utilisateur.
+\end{retenirbox}
+
+\subsection{Une balise, c'est quoi exactement ?}
+
+Une \textbf{balise} (\emph{tag} en anglais) est un mot entouré de chevrons
+\texttt{<\ldots>}. La plupart des balises marchent \textbf{par paire} : une
+balise ouvrante et une balise fermante avec un \texttt{/}.
+
+\begin{lstlisting}[language=HTML5]
+<h1>Un titre</h1>
+ |    |      |
+ |    |      +-- balise fermante
+ |    +-------- contenu
+ +------------- balise ouvrante
+\end{lstlisting}
+
+Quelques balises sont \textbf{auto-fermantes} (elles n'ont pas besoin d'une
+balise fermante car elles n'ont pas de contenu à entourer) :
+\texttt{<img>}, \texttt{<br>}, \texttt{<meta>}, \texttt{<input>}.
+
+\newpage
+
+% ===========================================================================
+\section{Les balises de contenu}
+% ===========================================================================
+
+HTML propose \textbf{plus de 100 balises}. Heureusement, on en utilise
+régulièrement seulement une quinzaine. Voici les plus courantes --- celles
+qu'on voit sur toute page web.
+
+\subsection{Les titres}
+
+HTML propose 6 niveaux de titres, de \texttt{<h1>} (le plus grand) à
+\texttt{<h6>} (le plus petit).
+
+\begin{lstlisting}[language=HTML5]
+<h1>Université Cheikh Anta Diop</h1>
+<h2>Faculté des Sciences</h2>
+<h3>Département Informatique</h3>
+<h4>DUT 1ère année</h4>
+\end{lstlisting}
+
+\begin{attentionbox}[Règle importante]
+Il ne doit y avoir \textbf{qu'un seul \texttt{<h1>} par page} (le titre
+principal). Les \texttt{<h2>}, \texttt{<h3>} peuvent apparaître plusieurs
+fois pour structurer les sections et sous-sections.
+\end{attentionbox}
+
+\subsection{Les paragraphes}
+
+\begin{lstlisting}[language=HTML5]
+<p>L'École Supérieure Polytechnique forme des ingénieurs depuis 1964. Elle est située sur le campus de l'UCAD à Fann, Dakar.</p>
+\end{lstlisting}
+
+Chaque \texttt{<p>} représente \textbf{un paragraphe}. Le navigateur ajoute
+automatiquement un espace entre deux paragraphes consécutifs.
+
+\subsection{La mise en forme inline}
+
+Pour mettre en avant un mot à l'intérieur d'un paragraphe :
+
+\begin{lstlisting}[language=HTML5]
+<p>Le cours est <strong>obligatoire</strong>. Les absences sont <em>vivement déconseillées</em>.</p>
+\end{lstlisting}
+
+\begin{itemize}[nosep]
+    \item \texttt{<strong>} : texte \textbf{important} (affiché en gras par défaut)
+    \item \texttt{<em>} : texte \emph{mis en valeur} (affiché en italique par défaut)
+\end{itemize}
+
+\subsection{Les listes}
+
+\textbf{Listes non ordonnées} (à puces) avec \texttt{<ul>} :
+
+\begin{lstlisting}[language=HTML5]
+<ul>
+    <li>Algorithmique</li>
+    <li>Mathématiques</li>
+    <li>Anglais</li>
+</ul>
+\end{lstlisting}
+
+\textbf{Listes ordonnées} (numérotées) avec \texttt{<ol>} :
+
+\begin{lstlisting}[language=HTML5]
+<ol>
+    <li>Installer VS Code</li>
+    <li>Installer Git</li>
+    <li>Créer un compte GitHub</li>
+</ol>
+\end{lstlisting}
+
+Dans les deux cas, chaque élément est un \texttt{<li>} (\emph{list item}).
+
+\subsubsection*{Listes imbriquées}
+
+Une liste peut contenir une autre liste. Il suffit de mettre \texttt{<ul>}
+ou \texttt{<ol>} \emph{à l'intérieur} d'un \texttt{<li>} :
+
+\begin{lstlisting}[language=HTML5]
+<ul>
+    <li>Semestre 1
+        <ul>
+            <li>Algorithmique</li>
+            <li>Mathématiques</li>
+        </ul>
+    </li>
+    <li>Semestre 2
+        <ul>
+            <li>HTML / CSS / JavaScript</li>
+            <li>Bases de données</li>
+        </ul>
+    </li>
+</ul>
+\end{lstlisting}
+
+\begin{infobox}[L'indentation]
+L'indentation (les espaces en début de ligne) n'est \textbf{pas obligatoire}
+pour le navigateur, mais elle est \textbf{obligatoire pour vous}. Sans
+indentation, un code HTML devient très vite illisible, même pour son auteur.
+Prenez l'habitude dès maintenant.
+\end{infobox}
+
+\subsection{Les tableaux}
+
+Un tableau HTML se construit ligne par ligne. Les balises essentielles :
+
+\begin{itemize}[nosep]
+    \item \texttt{<table>} : le tableau
+    \item \texttt{<tr>} : une ligne (\emph{table row})
+    \item \texttt{<th>} : une cellule d'en-tête (\emph{table header})
+    \item \texttt{<td>} : une cellule de données (\emph{table data})
+\end{itemize}
+
+\begin{lstlisting}[language=HTML5]
+<table>
+    <tr>
+        <th>Prénom</th>
+        <th>Note</th>
+    </tr>
+    <tr>
+        <td>Fatou</td>
+        <td>15</td>
+    </tr>
+    <tr>
+        <td>Moussa</td>
+        <td>12</td>
+    </tr>
+</table>
+\end{lstlisting}
+
+\subsubsection*{Fusionner des cellules}
+
+Pour fusionner plusieurs colonnes ou plusieurs lignes, on utilise les
+attributs \texttt{colspan} (fusion horizontale) et \texttt{rowspan} (fusion
+verticale) :
+
+\begin{lstlisting}[language=HTML5]
+<table>
+    <tr>
+        <th colspan="2">Lundi</th>  <!-- fusionne 2 colonnes -->
+    </tr>
+    <tr>
+        <td>Algo</td>
+        <td>HTML</td>
+    </tr>
+</table>
+\end{lstlisting}
+
+On reverra les tableaux en détail au Lab 2.
+
+\subsection{Les liens}
+
+Un lien vers une autre page se crée avec la balise \texttt{<a>}
+(\emph{anchor}) et l'attribut \texttt{href} :
+
+\begin{lstlisting}[language=HTML5]
+<a href="https://ucad.sn">Site de l'UCAD</a>
+<a href="https://esp.sn">Site de l'ESP</a>
+\end{lstlisting}
+
+Le texte entre \texttt{<a>} et \texttt{</a>} est ce que l'utilisateur voit.
+L'URL dans \texttt{href} est la destination du clic.
+
+\subsection{Les images}
+
+\begin{lstlisting}[language=HTML5]
+<img src="drapeau-senegal.png" alt="Drapeau du Sénégal">
+\end{lstlisting}
+
+\begin{itemize}[nosep]
+    \item \texttt{src} : le chemin vers le fichier image (relatif ou URL complète)
+    \item \texttt{alt} : description textuelle de l'image, \textbf{obligatoire}. Elle est lue par les personnes malvoyantes qui utilisent un lecteur d'écran, et affichée si l'image ne se charge pas.
+\end{itemize}
+
+\begin{attentionbox}[L'attribut \texttt{alt} n'est pas optionnel]
+Une image sans \texttt{alt} est une image qui exclut les personnes
+aveugles. Prenez l'habitude d'en mettre un à chaque \texttt{<img>}. C'est
+un geste d'accessibilité --- pour certains étudiants malvoyants de votre
+promotion, c'est la seule façon de «\,voir\,» votre page.
+\end{attentionbox}
+
+\newpage
+
+% ===========================================================================
+\section{Ce qu'on va construire : Jàng Afrig}
+% ===========================================================================
+
+Avant de plonger dans le code, prenons un moment pour regarder la montagne
+qu'on va gravir ensemble.
+
+\subsection{Le projet fil rouge}
+
+\textbf{Jàng Afrig} (\textit{«\,apprendre l'Afrique\,»} en wolof) est une
+application web de \textbf{quiz géographique} sur les 54 pays africains.
+L'utilisateur :
+
+\begin{enumerate}[nosep]
+    \item Choisit un mode de jeu (capitales, drapeaux, langues, voisins\ldots)
+    \item Répond à 10 questions à choix multiples
+    \item Obtient un score à la fin
+    \item Garde un classement local de ses meilleures performances
+\end{enumerate}
+
+\subsection{Les 5 pages de l'application}
+
+\begin{center}
+\begin{tabular}{@{}lp{9cm}@{}}
+\toprule
+\textbf{Page} & \textbf{Contenu} \\
+\midrule
+Accueil      & Choix du mode + saisie du pseudo + meilleur score \\
+Quiz         & Énoncé d'une question + 4 propositions + barre de progression \\
+Résultat     & Score final + bouton rejouer \\
+Mes Scores   & Classement local top 5 par mode \\
+À propos     & Sources des données, technologies utilisées \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{L'aventure par étapes}
+
+On construit l'app \textbf{brique par brique}, à chaque séance :
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Bloc de séances} & \textbf{Ce qu'on ajoute à Jàng Afrig} \\
+\midrule
+S1--S3 (HTML)    & Les 5 pages en HTML brut, sans style \\
+S4--S6 (CSS)     & Design panafricain, responsive mobile \\
+S7--S10 (JS)     & Premier quiz interactif avec 10 pays hardcodés \\
+S11--S13 (API)   & Connexion à REST Countries, 54 pays réels, 4 modes \\
+S14 (polish)     & Chrono, \texttt{localStorage}, finitions \\
+S15 (Hybride)    & Déploiement en ligne + démo collective \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{projetbox}[À la fin du semestre]
+Chacun de vous aura son application accessible sur Internet via une URL
+publique du type \texttt{https://\emph{votre-username}.github.io/jang-afrig/}.
+Vous pourrez la partager à votre famille par WhatsApp.
+\end{projetbox}
+
+\newpage
+
+% ===========================================================================
+\section{Le workflow du cours}
+% ===========================================================================
+
+\subsection{Le rythme hebdomadaire}
+
+Chaque séance suit toujours la même mécanique :
+
+\begin{center}
+\begin{tabular}{@{}lp{9cm}@{}}
+\toprule
+\textbf{Type de séance} & \textbf{Déroulement} \\
+\midrule
+\textbf{CM} & Rappel $\to$ analogie $\to$ notions nouvelles avec démo du prof $\to$ mini-exercice en classe $\to$ teaser du Lab suivant \\
+\addlinespace
+\textbf{Lab} & Rappel du CM $\to$ démo de l'objectif du jour $\to$ vous codez en pas-à-pas $\to$ exercices d'application $\to$ \textbf{routine Git} $\to$ annonce de la séance suivante \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{La règle d'or : 1 Lab = 1 tag Git}
+
+À la fin de chaque Lab, vous poserez un \textbf{tag Git} qui marque une
+version de votre application. Au bout de 10 Labs, votre historique Git
+ressemblera à ceci :
+
+\begin{lstlisting}
+v0     Setup initial (Lab 0)
+v0.1   Première page HTML (Lab 1)
+v0.2   HTML structurant (Lab 2)
+v0.3   CSS de base (Lab 3)
+...
+v0.9   Tous les modes avec API (Lab 9)
+v0.14  Polish final (Lab 10)
+v1.0   Déploiement en ligne (S15)
+\end{lstlisting}
+
+\begin{retenirbox}[Chaque Lab = une brique posée]
+Si vous venez à manquer une séance, vous aurez \textbf{un repo en retard
+d'une brique}. Facile à combler en relisant le PDF du Lab manqué. Mais il
+faut rattraper \textbf{avant} la séance suivante, sinon la dette s'accumule.
+\end{retenirbox}
+
+\subsection{Le rapport à la fin de chaque Lab}
+
+Vous avez produit votre premier rapport pour le Lab 0. Même routine pour
+les 10 Labs à venir :
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item 1 à 2 pages maximum
+    \item 4 sections : \textbf{ce que j'ai fait}, \textbf{difficultés}, \textbf{comment j'ai résolu}, \textbf{lien repo}
+    \item Déposé dans \texttt{rapports/rapport-lab-X-NOM-Prenom.pdf}
+\end{itemize}
+
+C'est votre \textbf{carnet de bord} : un petit effort à chaque Lab, un vrai
+parcours à la fin du semestre.
+
+\newpage
+
+% ===========================================================================
+\section{Routine Git : rappel}
+% ===========================================================================
+
+Vous avez appris au Lab 0 les 5 étapes du cycle Git. Rappel rapide --- on
+va la répéter 10 fois dans le semestre.
+
+\begin{center}
+\begin{tabular}{@{}rl@{}}
+\toprule
+\textbf{Étape} & \textbf{Commande} \\
+\midrule
+1. Modifier des fichiers dans VS Code & \emph{(on édite le code)} \\
+2. Voir ce qui a changé                & \texttt{git status} \\
+3. Préparer tous les changements       & \texttt{git add .} \\
+4. Enregistrer avec un message         & \texttt{git commit -m "v0.X : titre"} \\
+5. Envoyer sur GitHub                  & \texttt{git push} \\
+6. Poser un tag de version             & \texttt{git tag v0.X} \\
+7. Envoyer le tag                      & \texttt{git push --tags} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{retenirbox}[Mémoire musculaire]
+Au bout de 3 ou 4 Labs, vous taperez cette séquence sans réfléchir. C'est
+le but. Git doit devenir un \textbf{réflexe}, pas un obstacle.
+\end{retenirbox}
+
+% ===========================================================================
+\section{Mini-exercice en classe}
+% ===========================================================================
+
+\begin{objectifbox}[Exercice guidé --- écrit ensemble]
+On va écrire \textbf{ensemble}, ici et maintenant, notre première page HTML.
+
+\medskip
+
+\textbf{Énoncé.} Créer une page \texttt{moi.html} qui contient :
+\begin{enumerate}[nosep]
+    \item Un titre principal \texttt{<h1>} avec votre prénom
+    \item Un paragraphe de présentation avec un \texttt{<strong>} quelque part
+    \item Une liste \texttt{<ul>} de vos 3 matières préférées
+    \item Un lien vers le site de l'UCAD
+\end{enumerate}
+\end{objectifbox}
+
+\subsection{Solution attendue}
+
+\begin{lstlisting}[language=HTML5]
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Ma page</title>
+    </head>
+    <body>
+        <h1>Fatou</h1>
+        <p>Je suis étudiante en <strong>DUT1-Informatique</strong> à l'ESP, UCAD.</p>
+        <ul>
+            <li>Algorithmique</li>
+            <li>Mathématiques</li>
+            <li>HTML/CSS/JS</li>
+        </ul>
+        <a href="https://ucad.sn">Site de l'UCAD</a>
+    </body>
+</html>
+\end{lstlisting}
+
+\begin{infobox}[Levez la main]
+Si vous n'arrivez pas à l'écrire en 10 minutes, \textbf{levez la main}.
+C'est normal : c'est votre première page. On la refera calmement ensemble
+au Lab 1 (séance prochaine).
+\end{infobox}
+
+% ===========================================================================
+\section{Résumé et transition}
+% ===========================================================================
+
+\subsection{Ce qu'on a vu}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Une page web = \textbf{HTML} (structure) + \textbf{CSS} (déco) + \textbf{JS} (comportement)
+    \item Un \textbf{navigateur} demande une page à un \textbf{serveur} qui répond avec du HTML
+    \item Une page HTML a un \texttt{<head>} (invisible) et un \texttt{<body>} (visible)
+    \item Les balises essentielles : \texttt{h1}-\texttt{h6}, \texttt{p}, \texttt{strong}, \texttt{em}, \texttt{ul}/\texttt{ol}/\texttt{li}, \texttt{table}/\texttt{tr}/\texttt{th}/\texttt{td}, \texttt{a}, \texttt{img}
+    \item Jàng Afrig se construira \textbf{brique par brique} pendant 15 séances
+    \item 1 Lab = 1 commit + 1 tag Git + 1 rapport
+\end{itemize}
+
+\subsection{Ce qu'on fera au Lab 1}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Créer \texttt{index.html} dans votre repo \texttt{jang-afrig}
+    \item Construire la \textbf{page d'accueil} de Jàng Afrig en HTML brut
+    \item Travailler les listes imbriquées
+    \item Travailler les tableaux avec \texttt{colspan}/\texttt{rowspan}
+    \item Premier tag Git : \texttt{v0.1}
+\end{itemize}
+
+\subsection{Consigne pour la prochaine séance}
+
+\begin{attentionbox}[Avant le Lab 1]
+\begin{enumerate}[nosep]
+    \item \textbf{Lisez} le PDF du Lab 1 que le prof vous a distribué (15 min de lecture).
+    \item \textbf{Vérifiez} que votre environnement fonctionne toujours (\texttt{code .} dans votre dossier \texttt{jang-afrig}, Live Server opérationnel).
+    \item \textbf{Prévoyez} une capture d'écran d'un drapeau africain de votre choix pour les exercices.
+\end{enumerate}
+Aucun devoir de code. Le Lab 1 démarrera du vide (page d'accueil à partir de zéro).
+\end{attentionbox}
+
+\vspace{1cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large CM1 --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous savez comment une page web fonctionne, et comment l'écrire.\\
+Prochaine étape : \textbf{la construire}.\\[0.2cm]
+\textit{Rendez-vous au Lab 1 !}\\[0.3cm]
+\vspace{0.3cm}
+\end{minipage}
+}
+\end{center}
+
+\end{document}

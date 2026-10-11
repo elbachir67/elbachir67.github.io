@@ -1,0 +1,303 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== POLICES & LANGUE =====================
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,xcolor,booktabs,hyperref,tcolorbox,enumitem,fancyhdr,array,pifont,longtable,multirow,listings}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+% ===================== BOÎTES =====================
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title={#1},breakable}
+
+% ===================== CODE (listings) =====================
+\definecolor{codebg}{gray}{0.96}
+\definecolor{kwcolor}{RGB}{0,90,160}
+\definecolor{strcolor}{RGB}{160,55,30}
+\definecolor{comcolor}{RGB}{95,120,95}
+\definecolor{ndcolor}{RGB}{120,80,150}
+
+\lstdefinelanguage{JS}{
+  morekeywords={let,const,var,function,return,if,else,for,of,in,while,do,true,false,null,undefined,typeof,break,continue,new,this,async,await,try,catch},
+  morekeywords=[2]{console,log,document,Math,window,fetch,JSON,localStorage},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+\lstdefinestyle{js}{
+  language=JS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{kwcolor},
+  keywordstyle=[2]\color{ndcolor},
+  commentstyle=\color{comcolor}\itshape,
+  stringstyle=\color{strcolor},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {â}{{â}}1 {ê}{{ê}}1
+    {î}{{î}}1 {ô}{{ô}}1 {û}{{û}}1 {ù}{{ù}}1 {ç}{{ç}}1
+    {ï}{{ï}}1 {ë}{{ë}}1 {É}{{É}}1 {È}{{È}}1 {À}{{À}}1
+    {œ}{{œ}}1 {°}{{°}}1 {²}{{²}}1
+}
+
+\lstdefinestyle{html}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {ê}{{ê}}1 {ç}{{ç}}1 {î}{{î}}1
+}
+
+\lstset{style=js}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% ===================== EN-TÊTES =====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- S15 : Déploiement et démo}
+\fancyhead[R]{\small ESP/UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ===================== TITRE =====================
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Séance 15 --- Mise en ligne et démo}\\[0.3cm]
+\textbf{\Large Déploiement sur GitHub Pages --- version \texttt{v1.0}}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Le dernier jour]
+Jàng Afrig est terminé sur votre ordinateur (tag \code{v0.14}) : quatre modes, vraies données, scores sauvegardés, mode Chrono. Mais pour l'instant, \textbf{vous seul} pouvez y jouer, sur votre machine.
+
+\smallskip
+Aujourd'hui, en deux temps : d'abord on \textbf{met l'application en ligne} pour qu'elle soit accessible partout, sur n'importe quel téléphone. Ensuite, chacun \textbf{présente son application} à la classe. À la fin de la séance, vous aurez une \textbf{adresse web publique} à partager à votre famille.
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs de la séance]
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Comprendre ce qu'est un \textbf{hébergeur web}.
+  \item Activer \textbf{GitHub Pages} sur votre dépôt.
+  \item Obtenir une \textbf{URL publique} pour Jàng Afrig.
+  \item Tester l'application sur \textbf{votre téléphone} et la partager.
+  \item Poser le tag final : \code{v1.0}.
+  \item Présenter votre application à la classe.
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\bigskip\hrule\bigskip
+
+\begin{center}\large\textbf{Première partie --- Mettre Jàng Afrig en ligne}\end{center}
+
+% ===================== SECTION 1 =====================
+\section{Un hébergeur web, c'est quoi ?}
+
+Jusqu'ici, vous ouvriez votre site avec Live Server : il n'existait que sur \textbf{votre} ordinateur (à l'adresse \code{localhost}). Personne d'autre ne pouvait y accéder.
+
+Un \textbf{hébergeur web} est un ordinateur, toujours allumé et connecté, qui \emph{publie} votre site pour le monde entier. \emph{Analogie :} cuisiner un bon plat chez soi, c'est bien ; mais pour que les clients le goûtent, il faut une \textbf{boutique sur la rue}, avec une adresse. L'hébergeur, c'est cette boutique ; l'URL publique, c'est son adresse.
+
+% ===================== SECTION 2 =====================
+\section{GitHub Pages : l'hébergeur gratuit}
+
+Bonne nouvelle : votre code est \textbf{déjà} sur GitHub. Et GitHub offre un service, \textbf{GitHub Pages}, qui héberge \textbf{gratuitement} les sites « statiques » --- c'est-à-dire faits de fichiers HTML, CSS et JavaScript, exactement comme Jàng Afrig. Aucun serveur compliqué, aucun paiement : quelques clics suffisent.
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  boite/.style={rectangle, rounded corners=5pt, draw, very thick, align=center, minimum height=1.3cm, minimum width=3.2cm},
+  fl/.style={-{Stealth[length=3mm]}, very thick, gray!65!black},
+  lab/.style={font=\scriptsize, text=gray!50!black, align=center}
+]
+  \node[boite, draw=teal!55!black, fill=teal!6] (repo) {Votre dépôt\\\code{jang-afrig}\\\footnotesize (branche \code{main})};
+  \node[boite, draw=blue!55, fill=blue!6, right=3.0cm of repo] (pages) {GitHub Pages\\\footnotesize (activé)};
+  \node[boite, draw=orange!70, fill=orange!8, right=3.0cm of pages] (url) {URL publique\\\footnotesize \code{...github.io/}};
+
+  \draw[fl] (repo) -- node[lab,above]{on active} (pages);
+  \draw[fl] (pages) -- node[lab,above]{publie} (url);
+
+  \node[align=center, font=\scriptsize] (ordi) at ($(url)+(0,-1.8)$) {Accessible partout :\\ordinateurs \textbf{et} téléphones};
+  \draw[fl] (url) -- (ordi);
+\end{tikzpicture}
+
+\textit{De votre dépôt à une adresse publique, accessible depuis n'importe quel appareil.}
+\end{center}
+
+% ===================== SECTION 3 =====================
+\section{Activer GitHub Pages, étape par étape}
+
+Sur la page de votre dépôt GitHub :
+\begin{enumerate}[leftmargin=*]
+  \item Cliquez sur l'onglet \textbf{Settings} (Paramètres), en haut du dépôt.
+  \item Dans le menu de gauche, cliquez sur \textbf{Pages}.
+  \item Sous \textbf{Source}, choisissez \textbf{« Deploy from a branch »} (déployer depuis une branche).
+  \item Sélectionnez la branche \code{main} et le dossier \code{/ (root)}.
+  \item Cliquez sur \textbf{Save} (Enregistrer).
+\end{enumerate}
+
+\begin{center}
+\code{Settings} $\;\rightarrow\;$ \code{Pages} $\;\rightarrow\;$ \code{Source : main / (root)} $\;\rightarrow\;$ \code{Save}
+\end{center}
+
+\begin{infobox}[Patientez une minute]
+Après le \emph{Save}, GitHub a besoin d'une minute environ pour publier le site. Rechargez la page \textbf{Pages} : un encadré vert finit par afficher l'adresse de votre site. C'est gagné.
+\end{infobox}
+
+% ===================== SECTION 4 =====================
+\section{Votre adresse publique}
+
+L'URL suit toujours le même modèle, avec \textbf{votre} nom d'utilisateur GitHub :
+
+\begin{lstlisting}[style=html]
+https://VOTRE-PSEUDO.github.io/jang-afrig/
+\end{lstlisting}
+
+Par exemple, si votre pseudo GitHub est \code{fatou-diop}, l'adresse sera :
+\begin{lstlisting}[style=html]
+https://fatou-diop.github.io/jang-afrig/
+\end{lstlisting}
+Ouvrez-la dans le navigateur : Jàng Afrig s'affiche, en ligne, pour de vrai.
+
+\begin{attentionbox}[Trois pièges classiques au déploiement]
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textbf{Chemins relatifs} : vos liens doivent être \code{href="style.css"} (relatif) et \emph{non} \code{href="/style.css"} (absolu). La barre au début casse le site en ligne.
+  \item \textbf{Respect de la casse} : en ligne, \code{Style.css} et \code{style.css} sont différents. Vérifiez que les noms de fichiers correspondent \emph{exactement} à ceux écrits dans le HTML.
+  \item \textbf{L'API fonctionne toujours} : GitHub Pages publie en \code{https}, et REST Countries répond aussi en \code{https} --- vos appels \code{fetch} marchent donc en ligne comme en local.
+\end{enumerate}
+\end{attentionbox}
+
+% ===================== SECTION 5 =====================
+\section{Le commit final : tag \texttt{v1.0}}
+
+Si vous avez fait des derniers ajustements pour le déploiement, enregistrez-les et posez le tag qui marque la \textbf{version finale} de Jàng Afrig.
+
+\begin{retenirbox}[Routine Git finale --- tag \texttt{v1.0}]
+\begin{lstlisting}[style=html]
+git status
+git add .
+git commit -m "Version 1.0 : application complete et deployee"
+git tag v1.0
+git push
+git push --tags
+\end{lstlisting}
+\code{v1.0} : la première version « finie et publiée ». Un beau numéro pour clore le projet.
+\end{retenirbox}
+
+% ===================== SECTION 6 =====================
+\section{Tester sur son téléphone et partager}
+
+C'est le moment le plus satisfaisant :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item Ouvrez votre URL publique \textbf{sur votre propre téléphone} (en données mobiles ou en Wi-Fi). L'application doit s'y jouer parfaitement.
+  \item Partagez le lien : envoyez-le sur \textbf{WhatsApp} à un ami, ou générez un \textbf{QR code} (de nombreux sites gratuits le font à partir d'une URL) à montrer à la classe.
+\end{itemize}
+
+\begin{projetbox}[Votre checklist finale]
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item[\cmark] L'application est en ligne à votre URL publique.
+  \item[\cmark] Les quatre modes fonctionnent en ligne (avec l'API).
+  \item[\cmark] Vous l'avez testée sur votre téléphone.
+  \item[\cmark] Le tag \code{v1.0} est poussé sur GitHub.
+\end{itemize}
+\end{projetbox}
+
+\bigskip
+\begin{center}\large\textbf{Deuxième partie --- La démo collective}\end{center}
+
+% ===================== SECTION 7 =====================
+\section{Présenter son application}
+
+Chacun (ou chaque binôme) passe au vidéoprojecteur, environ \textbf{trois minutes}, pour partager son travail. Pas de stress : c'est un moment de fierté, pas un examen.
+
+\begin{objectifbox}[Le déroulé de votre passage]
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Montrez votre application} : jouez une question dans un ou deux modes, montrez vos scores.
+  \item \textbf{Racontez un défi} : un bug qui vous a bloqué, et comment vous l'avez surmonté.
+  \item \textbf{Partagez une fierté} : la fonctionnalité dont vous êtes le plus content.
+\end{enumerate}
+\end{objectifbox}
+
+On écoute, on encourage, on applaudit chaque passage. Chaque application est unique : c'est cette diversité qui fait la richesse de la promotion.
+
+% ===================== CLÔTURE =====================
+\section{Le chemin parcouru}
+
+En quinze séances, vous êtes partis de zéro pour aboutir à une vraie application web, publiée en ligne. Le voyage, vu à travers vos tags Git :
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Étape} & \textbf{Ce que vous saviez faire} \\
+\midrule
+\code{v0.1} & Une première page HTML structurée \\
+\code{v0.4} & Un site mis en forme et responsive (CSS) \\
+\code{v0.7} & Un quiz interactif jouable (JavaScript, DOM) \\
+\code{v0.8} & Les 54 vrais pays via une API (\code{fetch}) \\
+\code{v0.9} & Quatre modes de jeu complets \\
+\code{v0.14} & Scores sauvegardés, chrono, accessibilité \\
+\code{v1.0} & \textbf{Une application en ligne, partageable au monde} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+Vous savez désormais écrire du \textbf{HTML} structuré, le mettre en forme avec du \textbf{CSS} responsive, l'animer avec du \textbf{JavaScript}, parler à une \textbf{API}, sauvegarder des données, versionner avec \textbf{Git} et \textbf{déployer} un site. Ce sont les fondations du développement web --- et elles sont à vous.
+
+\begin{center}
+\textit{Félicitations. Jàng Afrig est en ligne, et c'est vous qui l'avez construit.}\\[4pt]
+\textbf{Aucun devoir maison. Le cours est terminé.}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+\small Dr.~El Hadji Bassirou TOURÉ --- École Supérieure Polytechnique --- UCAD\\
+\small Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+\end{center}
+
+\end{document}

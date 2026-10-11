@@ -1,0 +1,960 @@
+% ===========================================================================
+%  Jàng Afrig — CM2 : CSS — Sélecteurs, Cascade, Box Model, Flexbox
+%  Licence 1 DUT1-Informatique — ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+% --- TikZ pour les schémas ---
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit,shadows.blur,patterns}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Couleurs box model ---
+\definecolor{bmcontent}{RGB}{120,180,220}
+\definecolor{bmpadding}{RGB}{180,220,140}
+\definecolor{bmborder}{RGB}{220,180,90}
+\definecolor{bmmargin}{RGB}{220,140,140}
+
+% --- Couleurs Flexbox ---
+\definecolor{flexitem}{RGB}{100,160,220}
+\definecolor{flexaxe}{RGB}{220,80,80}
+\definecolor{flexcross}{RGB}{50,140,80}
+
+% --- Couleurs cascade ---
+\definecolor{cascade1}{RGB}{220,140,140}
+\definecolor{cascade2}{RGB}{220,200,140}
+\definecolor{cascade3}{RGB}{140,220,180}
+
+% --- Code source CSS et HTML ---
+\usepackage{listings}
+\lstdefinelanguage{HTML5}{
+  morekeywords={<!DOCTYPE,html,head,meta,title,body,h1,h2,h3,h4,p,ul,ol,li,table,tr,th,td,a,img,strong,em,br,div,span,header,nav,main,section,article,footer,aside,form,input,select,option,textarea,label,button,fieldset,legend,style,link},
+  sensitive=true,
+  morecomment=[s]{<!--}{-->},
+  morestring=[b]",
+}
+\lstdefinelanguage{CSS}{
+  morekeywords={color,background-color,background,font-family,font-size,font-weight,text-align,padding,margin,border,border-radius,width,height,max-width,min-width,display,flex,flex-direction,justify-content,align-items,flex-wrap,gap,box-sizing,transition,transform,position,top,bottom,left,right,opacity,cursor,line-height,letter-spacing,box-shadow},
+  sensitive=true,
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- CM2 : CSS}
+\fancyhead[R]{\small ESP/UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge CM2 --- CSS}\\[0.3cm]
+\textbf{\Large Sélecteurs, cascade, box model, Flexbox}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+École Supérieure Polytechnique\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Type} & Cours Magistral (CM) \\
+\textbf{Séance} & S4 --- ouverture du bloc CSS \\
+\textbf{Prérequis} & Lab 2 terminé (5 pages HTML poussées avec tag \texttt{v0.2}) \\
+\textbf{Ce qu'on verra après} & Lab 3 : styliser Jàng Afrig (S5) \\
+\textbf{Devoir} & Aucun. Lire le PDF du Lab 3 pour la prochaine séance. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du CM]
+À la fin de cette séance, vous saurez :
+\begin{enumerate}[nosep]
+    \item Expliquer ce que CSS \textbf{ajoute} à HTML
+    \item Inclure du CSS dans une page (\texttt{<link>}, \texttt{<style>}, inline)
+    \item Écrire des \textbf{sélecteurs} : élément, classe, id, descendant, pseudo-classes
+    \item Comprendre la \textbf{cascade} et la \textbf{spécificité} (qui gagne quand plusieurs règles s'appliquent)
+    \item Maîtriser le \textbf{Box Model} : content, padding, border, margin
+    \item Utiliser \textbf{Flexbox} pour aligner et positionner des éléments
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Pourquoi CSS ?}
+% ===========================================================================
+
+\subsection{Le constat du Lab 2}
+
+À la fin du Lab 2, votre application Jàng Afrig est \textbf{complète
+structurellement} : 5 pages, sémantique, formulaire, navigation. Mais
+visuellement, c'est\ldots
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    page/.style={rounded corners=4pt, draw, thick, minimum width=5.5cm, minimum height=7cm, align=left, font=\scriptsize, anchor=north west, inner sep=8pt}
+]
+    % Page sans CSS (gauche)
+    \node[page, fill=white, draw=gray!50, label={[font=\small\bfseries, text=red!60!black]above:Sans CSS}] (sans) at (0,0) {%
+        \textbf{\large Jàng Afrig}\\
+        Apprendre l'Afrique, un pays à la fois\\[4pt]
+        \textcolor{blue!60}{\underline{Accueil}} | \textcolor{blue!60}{\underline{Jouer}} | \textcolor{blue!60}{\underline{Mes Scores}}\\[4pt]
+        \textbf{Bienvenue}\\
+        Bienvenue sur \textbf{Jàng Afrig}, un quiz géographique sur les 54 pays africains.\\[4pt]
+        \textbf{Les modes de jeu}\\
+        \textbullet{} Capitales\\
+        \textbullet{} Drapeaux\\
+        \textbullet{} Langues\\
+        \textbullet{} Voisins\\
+        \textbullet{} Chrono\\[4pt]
+        \textcolor{blue!60}{\underline{Voir le classement complet}}\\[4pt]
+        © 2025--2026 Jàng Afrig
+    };
+
+    % Page avec CSS (droite)
+    \node[page, fill=teal!10, draw=teal!60, line width=1pt, label={[font=\small\bfseries, text=teal!60!black]above:Avec CSS}] (avec) at (8,0) {%
+        \fcolorbox{teal!50!black}{teal!30}{\parbox{4.7cm}{\centering\textbf{\large\color{white} Jàng Afrig}\\\color{white}\itshape Apprendre l'Afrique\ldots}}\\[6pt]
+        \fcolorbox{gray!40}{gray!10}{\parbox{4.7cm}{\centering\small\textbf{Accueil} \textbullet{} Jouer \textbullet{} Scores}}\\[6pt]
+        \textbf{\color{teal!50!black} Bienvenue}\\
+        Bienvenue sur \textbf{Jàng Afrig}, un quiz géographique sur les 54 pays africains.\\[6pt]
+        \textbf{\color{teal!50!black} Les modes de jeu}\\[2pt]
+        \fcolorbox{orange!50!black}{orange!20}{\parbox{2.1cm}{\centering Capitales}}\hspace{2pt}
+        \fcolorbox{orange!50!black}{orange!20}{\parbox{2.1cm}{\centering Drapeaux}}\\[3pt]
+        \fcolorbox{orange!50!black}{orange!20}{\parbox{2.1cm}{\centering Langues}}\hspace{2pt}
+        \fcolorbox{orange!50!black}{orange!20}{\parbox{2.1cm}{\centering Voisins}}\\[3pt]
+        \fcolorbox{orange!50!black}{orange!20}{\parbox{2.1cm}{\centering Chrono}}\\[6pt]
+        \scriptsize\itshape\color{gray} © 2025--2026 Jàng Afrig
+    };
+\end{tikzpicture}
+\caption{La même page HTML, sans puis avec CSS.}
+\label{fig:avant-apres}
+\end{figure}
+
+\textbf{Le HTML est strictement le même} dans les deux cas. Seul un fichier
+CSS a été ajouté à droite. CSS, c'est la technologie qui transforme un
+document brut en \textbf{interface visuelle}.
+
+\subsection{Que peut-on faire avec CSS ?}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Choisir des \textbf{couleurs} (texte, fond, bordures)
+    \item Choisir des \textbf{polices} (Google Fonts, etc.)
+    \item Définir des \textbf{tailles} et des \textbf{espacements}
+    \item Positionner les éléments (alignement, grilles, colonnes)
+    \item Faire du \textbf{responsive} (s'adapter au téléphone)
+    \item Ajouter des \textbf{animations} et des \textbf{effets} au survol
+\end{itemize}
+
+\begin{retenirbox}[CSS = Cascading Style Sheets]
+CSS signifie \textit{Cascading Style Sheets} (\og{}feuilles de style en
+cascade\fg{}). \textbf{Cascading} parce que les règles CSS \emph{s'empilent}
+et se combinent --- on verra ce que ça veut dire à la section sur la
+cascade.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Trois façons d'inclure CSS}
+% ===========================================================================
+
+CSS peut être placé à \textbf{trois endroits} différents dans une page
+HTML. Chacune a ses usages et ses limites.
+
+\subsection{1. Inline (déconseillé)}
+
+Directement dans une balise HTML, via l'attribut \texttt{style} :
+
+\begin{lstlisting}[language=HTML5]
+<h1 style="color: red; font-size: 32px;">Jàng Afrig</h1>
+\end{lstlisting}
+
+\textbf{Quand l'utiliser :} jamais en pratique. C'est OK pour un test
+rapide.
+
+\textbf{Pourquoi déconseillé :} on mélange structure et style. Si on
+change d'avis sur la couleur, il faut aller modifier \emph{chaque} balise.
+
+\subsection{2. Interne via \texttt{<style>}}
+
+Dans le \texttt{<head>} de la page :
+
+\begin{lstlisting}[language=HTML5]
+<head>
+    <style>
+        h1 { color: red; font-size: 32px; }
+    </style>
+</head>
+\end{lstlisting}
+
+\textbf{Quand l'utiliser :} prototype rapide, démo en classe, page unique.
+
+\textbf{Limite :} le style ne s'applique qu'à \emph{cette} page. Pour
+appliquer le même style à 5 pages, il faut copier-coller 5 fois.
+
+\subsection{3. Externe via \texttt{<link>} (recommandé)}
+
+Dans un fichier séparé (par convention \texttt{style.css}), lié depuis le
+\texttt{<head>} :
+
+\begin{lstlisting}[language=HTML5]
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+\end{lstlisting}
+
+Et dans \texttt{style.css} :
+
+\begin{lstlisting}[language=CSS]
+h1 {
+    color: red;
+    font-size: 32px;
+}
+\end{lstlisting}
+
+\textbf{Quand l'utiliser :} \textbf{toujours, en production}.
+
+\begin{retenirbox}[Pourquoi externe ?]
+\begin{itemize}[nosep]
+    \item \textbf{Réutilisable} : un seul \texttt{style.css} pour les 5 pages
+    \item \textbf{Maintenable} : changer une couleur = modifier un seul endroit
+    \item \textbf{Performant} : le navigateur télécharge le CSS une fois et le réutilise
+    \item \textbf{Lisible} : HTML et CSS séparés, chacun son fichier
+\end{itemize}
+C'est la convention que vous adopterez au Lab 3.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Anatomie d'une règle CSS}
+% ===========================================================================
+
+Une règle CSS, c'est toujours \textbf{la même structure} :
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    every node/.style={font=\ttfamily\large},
+    annotation/.style={font=\sffamily\small\itshape, color=red!70!black}
+]
+    % La règle elle-même (texte avec colorisation manuelle)
+    \node (regle) {\color{blue!70!black}h1\color{black} \{ \color{purple}color\color{black}: \color{green!50!black}red\color{black}; \}};
+
+    % Annotations
+    \draw[->, color=blue!70!black, thick] (-3.0, -0.8) -- (-2.7, -0.2);
+    \node[annotation, color=blue!70!black, anchor=north] at (-3.0, -0.8) {sélecteur};
+
+    \draw[->, color=purple, thick] (-0.4, -0.8) -- (-0.4, -0.2);
+    \node[annotation, color=purple, anchor=north] at (-0.4, -0.8) {propriété};
+
+    \draw[->, color=green!50!black, thick] (1.4, -0.8) -- (1.4, -0.2);
+    \node[annotation, color=green!50!black, anchor=north] at (1.4, -0.8) {valeur};
+
+    \draw[->, color=gray, thick] (-1.5, 0.8) -- (-1.5, 0.3);
+    \node[font=\sffamily\small\itshape, color=gray, anchor=south] at (-1.5, 0.8) {accolade ouvrante};
+
+    \draw[->, color=gray, thick] (0.5, 1.4) -- (1.95, 0.3);
+    \node[font=\sffamily\small\itshape, color=gray, anchor=south] at (0.5, 1.4) {fin de propriété};
+
+    \draw[->, color=gray, thick] (2.6, 0.8) -- (2.6, 0.3);
+    \node[font=\sffamily\small\itshape, color=gray, anchor=south] at (2.6, 0.8) {accolade fermante};
+\end{tikzpicture}
+\caption{Anatomie d'une règle CSS.}
+\label{fig:anatomie-css}
+\end{figure}
+
+\subsection{Une règle plus complète}
+
+\begin{lstlisting}[language=CSS]
+h1 {
+    color: red;
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+\end{lstlisting}
+
+\begin{itemize}[nosep]
+    \item \textbf{Sélecteur} : \texttt{h1} --- cible \emph{tous les \texttt{<h1>}} de la page
+    \item \textbf{Bloc} : entre \texttt{\{} et \texttt{\}}
+    \item \textbf{Propriétés} : \texttt{color}, \texttt{font-size}, \texttt{text-align}, \texttt{margin-bottom}
+    \item Chaque \textbf{déclaration} (propriété : valeur) finit par un \texttt{;}
+\end{itemize}
+
+\begin{retenirbox}[Le point-virgule]
+Le \texttt{;} après chaque déclaration est \textbf{techniquement} optionnel
+pour la dernière, mais \textbf{toujours mettez-le}. Vous oublierez d'en
+mettre un quand vous ajouterez une nouvelle propriété, et vous chercherez
+le bug pendant 20 minutes.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Les sélecteurs}
+% ===========================================================================
+
+Les \textbf{sélecteurs} disent \og{}à quels éléments cette règle
+s'applique\fg{}. CSS en propose plusieurs dizaines, mais 5 vous
+suffiront pour 90\% des cas.
+
+\subsection{Sélecteur d'élément}
+
+Cible \textbf{toutes les balises de ce type} :
+
+\begin{lstlisting}[language=CSS]
+p {
+    color: gray;
+}
+\end{lstlisting}
+
+$\to$ tous les \texttt{<p>} de toutes les pages liant ce CSS deviennent
+gris.
+
+\subsection{Sélecteur de classe (le plus utilisé)}
+
+Cible toutes les balises ayant un attribut \texttt{class="..."}. On
+préfixe le nom par un point :
+
+HTML :
+\begin{lstlisting}[language=HTML5]
+<button class="btn-primary">Commencer</button>
+<button class="btn-secondary">Annuler</button>
+\end{lstlisting}
+
+CSS :
+\begin{lstlisting}[language=CSS]
+.btn-primary {
+    background-color: green;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: gray;
+    color: white;
+}
+\end{lstlisting}
+
+\textbf{Une classe peut être utilisée sur plusieurs éléments}. C'est ça
+qui fait sa puissance.
+
+\subsection{Sélecteur d'identifiant}
+
+Cible la balise ayant un attribut \texttt{id="..."}. Préfixé par
+\texttt{\#} :
+
+HTML :
+\begin{lstlisting}[language=HTML5]
+<header id="entete-principal">
+    <h1>Jàng Afrig</h1>
+</header>
+\end{lstlisting}
+
+CSS :
+\begin{lstlisting}[language=CSS]
+#entete-principal {
+    background-color: teal;
+}
+\end{lstlisting}
+
+\begin{attentionbox}[\texttt{id} vs. \texttt{class}]
+\begin{itemize}[nosep]
+    \item Un \texttt{id} doit être \textbf{unique} sur la page (un seul \texttt{\#entete-principal})
+    \item Une \texttt{class} peut être \textbf{réutilisée} (plusieurs \texttt{.btn-primary})
+\end{itemize}
+\textbf{En pratique, on utilise presque toujours des classes.} Les \texttt{id}
+servent surtout à JS plus tard.
+\end{attentionbox}
+
+\subsection{Sélecteur descendant}
+
+Cible une balise \emph{à l'intérieur d'une autre} :
+
+\begin{lstlisting}[language=CSS]
+nav a {
+    color: white;
+    text-decoration: none;
+}
+\end{lstlisting}
+
+$\to$ tous les \texttt{<a>} qui sont \emph{à l'intérieur} d'un \texttt{<nav>}
+deviennent blancs et sans soulignement. Les autres \texttt{<a>} de la
+page ne sont pas touchés.
+
+\subsection{Pseudo-classes}
+
+Cible un élément \emph{dans un certain état} :
+
+\begin{lstlisting}[language=CSS]
+button:hover {
+    background-color: orange;
+}
+
+a:visited {
+    color: purple;
+}
+
+input:focus {
+    border-color: green;
+}
+\end{lstlisting}
+
+\begin{itemize}[nosep]
+    \item \texttt{:hover} : quand la souris passe dessus
+    \item \texttt{:focus} : quand l'élément est sélectionné (au clavier ou cliqué)
+    \item \texttt{:visited} : pour un lien déjà cliqué
+\end{itemize}
+
+\begin{infobox}[Démo en direct]
+Le prof va montrer en direct, dans la console DevTools, comment ces
+sélecteurs s'appliquent à la page d'accueil de Jàng Afrig.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Cascade et spécificité}
+% ===========================================================================
+
+\subsection{Le problème}
+
+Que se passe-t-il quand \textbf{deux règles différentes} essaient de styler
+\textbf{le même élément} avec \textbf{deux valeurs incompatibles} ?
+
+\begin{lstlisting}[language=CSS]
+p { color: red; }
+p { color: blue; }
+\end{lstlisting}
+
+\textbf{Question :} les paragraphes seront rouges ou bleus ?
+
+\subsection{Règle 1 : la cascade (le dernier gagne)}
+
+Si deux règles ont la \textbf{même spécificité}, c'est \textbf{la dernière
+écrite} qui gagne.
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    couche/.style={rounded corners=4pt, draw, thick, minimum width=8cm, minimum height=1cm, align=center, font=\small}
+]
+    \node[couche, fill=cascade1!40, draw=cascade1!70!black] (c1) {\texttt{p \{ color: red; \}}};
+    \node[couche, fill=cascade2!40, draw=cascade2!70!black, below=0.1cm of c1] (c2) {\texttt{p \{ color: blue; \}} \quad\textit{(plus bas $\to$ gagne)}};
+    \node[couche, fill=cascade3!40, draw=cascade3!70!black, below=0.6cm of c2] (resultat) {Résultat affiché : \textbf{\color{blue!70!black}bleu}};
+
+    \draw[-{Stealth[length=3mm]}, thick, color=gray] (c2.south) -- (resultat.north);
+\end{tikzpicture}
+\caption{Quand deux règles de même spécificité s'opposent, la dernière écrite gagne.}
+\label{fig:cascade}
+\end{figure}
+
+\subsection{Règle 2 : la spécificité (le plus précis gagne)}
+
+Mais si une règle est \textbf{plus précise}, elle l'emporte, peu importe
+l'ordre. La spécificité se calcule comme suit :
+
+\begin{center}
+\begin{tabular}{@{}lcl@{}}
+\toprule
+\textbf{Type de sélecteur} & \textbf{Score} & \textbf{Exemple} \\
+\midrule
+Sélecteur d'élément       & 1   & \texttt{p}              \\
+Sélecteur descendant      & 2 (1+1) & \texttt{nav a}     \\
+Sélecteur de classe       & 10  & \texttt{.btn-primary}   \\
+Sélecteur d'identifiant   & 100 & \texttt{\#entete-principal} \\
+\texttt{style="..."} inline & 1000 & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Exemple chiffré}
+
+\begin{lstlisting}[language=CSS]
+p { color: red; }                      /* score 1   */
+.intro { color: blue; }                /* score 10  */
+#message-special { color: green; }     /* score 100 */
+\end{lstlisting}
+
+Pour ce HTML :
+\begin{lstlisting}[language=HTML5]
+<p class="intro" id="message-special">Texte</p>
+\end{lstlisting}
+
+Le texte sera\ldots \textbf{vert} (le \texttt{\#message-special} a le score
+le plus élevé).
+
+\begin{retenirbox}[Conseil pratique]
+\begin{itemize}[nosep]
+    \item \textbf{Préférez les classes} (\texttt{.}) aux ids (\texttt{\#})
+    \item \textbf{Évitez les sélecteurs trop précis} comme \texttt{header nav ul li a}
+    \item \textbf{N'utilisez jamais \texttt{style="..."} inline} sauf en dernier recours
+\end{itemize}
+Si vous gardez des règles simples (1-2 niveaux de précision), vous éviterez
+99\% des bugs de spécificité.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Le Box Model}
+% ===========================================================================
+
+\textbf{Le Box Model est sans doute le concept CSS le plus important.}
+Tout élément HTML est une \textbf{boîte}, et chaque boîte a 4 zones.
+
+\subsection{Les 4 zones}
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    every node/.style={font=\sffamily\bfseries}
+]
+    % Margin
+    \filldraw[fill=bmmargin!40, draw=bmmargin!70!black, thick, rounded corners=2pt] (0,0) rectangle (10,7);
+    \node[anchor=north west, color=bmmargin!50!black, font=\sffamily\bfseries\small] at (0.1, 6.9) {margin};
+
+    % Border
+    \filldraw[fill=bmborder!50, draw=bmborder!70!black, thick] (1,1) rectangle (9,6);
+    \node[anchor=north west, color=bmborder!50!black, font=\sffamily\bfseries\small] at (1.1, 5.9) {border};
+
+    % Padding
+    \filldraw[fill=bmpadding!40, draw=bmpadding!70!black, thick] (1.5,1.5) rectangle (8.5,5.5);
+    \node[anchor=north west, color=bmpadding!50!black, font=\sffamily\bfseries\small] at (1.6, 5.4) {padding};
+
+    % Content
+    \filldraw[fill=bmcontent!50, draw=bmcontent!70!black, thick] (3,2.5) rectangle (7,4.5);
+    \node[font=\sffamily\bfseries, color=white, text=black] at (5, 3.5) {content};
+
+    % Légendes externes
+    \node[font=\sffamily\small\itshape, color=gray] at (5, -0.4) {(la zone visible totale)};
+\end{tikzpicture}
+\caption{Le Box Model : content au centre, entouré de padding, border, margin.}
+\label{fig:boxmodel}
+\end{figure}
+
+\subsection{Ce que fait chaque zone}
+
+\begin{center}
+\begin{tabular}{@{}lp{8cm}@{}}
+\toprule
+\textbf{Zone}    & \textbf{Rôle} \\
+\midrule
+\textbf{content} & Le contenu réel : texte, image, autre balise. Sa taille est définie par \texttt{width} et \texttt{height}. \\
+\addlinespace
+\textbf{padding} & Espace \emph{intérieur} entre le contenu et la bordure. \og{}Du rembourrage à l'intérieur de la boîte\fg{}. \\
+\addlinespace
+\textbf{border}  & La bordure visible (épaisseur, style, couleur). \\
+\addlinespace
+\textbf{margin}  & Espace \emph{extérieur} entre cette boîte et les boîtes voisines. \og{}Du vide autour de la boîte\fg{}. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{infobox}[L'analogie du paquet cadeau]
+\begin{itemize}[nosep]
+    \item \textbf{content} : le cadeau lui-même
+    \item \textbf{padding} : le papier de soie autour, dans la boîte
+    \item \textbf{border} : le carton de la boîte
+    \item \textbf{margin} : l'espace que vous laissez \emph{autour} pour ne pas écraser les autres paquets
+\end{itemize}
+\end{infobox}
+
+\subsection{Exemple en CSS}
+
+\begin{lstlisting}[language=CSS]
+.carte-mode {
+    width: 200px;
+    padding: 20px;
+    border: 2px solid teal;
+    margin: 10px;
+    background-color: #f4f4f4;
+}
+\end{lstlisting}
+
+\subsection{Le piège classique}
+
+Par défaut, \texttt{width} ne mesure que le \textbf{content}. Donc une boîte
+de 200px avec \texttt{padding: 20px} occupe en réalité \textbf{240px} de
+large (200 + 20 + 20).
+
+\textbf{Solution} : ajouter cette règle au début de votre CSS pour que
+\texttt{width} inclue padding et border :
+
+\begin{lstlisting}[language=CSS]
+* {
+    box-sizing: border-box;
+}
+\end{lstlisting}
+
+\begin{retenirbox}[Réflexe pro]
+\textbf{Toujours mettre \texttt{box-sizing: border-box}} en début de
+fichier CSS. C'est le réflexe de tous les développeurs web modernes. Sans
+ça, vos calculs de largeur seront faux et vous galérerez en responsive.
+\end{retenirbox}
+
+\subsection{Démo en direct dans DevTools}
+
+\begin{infobox}[Le Box Model dans DevTools]
+Le prof va montrer en direct comment voir le Box Model d'un élément :
+\begin{enumerate}[nosep]
+    \item Clic droit sur l'élément $\to$ \textbf{Inspecter}
+    \item Onglet \textbf{Computed} ou panneau de droite
+    \item Le Box Model s'affiche avec les valeurs réelles de chaque zone
+\end{enumerate}
+C'est l'outil que vous utiliserez \emph{tout le temps} pour débugger
+votre CSS.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Flexbox : aligner et positionner}
+% ===========================================================================
+
+Avant Flexbox, centrer un bouton verticalement dans une page demandait
+des \emph{hacks}. Avec Flexbox, c'est trois lignes.
+
+\subsection{Le principe}
+
+Flexbox transforme un élément parent en \textbf{conteneur flexible} (un
+\og{}flex container\fg{}). Ses enfants directs deviennent des
+\textbf{flex items} qui peuvent être alignés et distribués librement.
+
+\begin{lstlisting}[language=CSS]
+.conteneur {
+    display: flex;
+}
+\end{lstlisting}
+
+C'est tout. Le parent passe en mode flex, et ses enfants se mettent
+\textbf{en ligne horizontale} par défaut.
+
+\subsection{Les deux axes}
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    item/.style={rounded corners=3pt, fill=flexitem!40, draw=flexitem!70!black, thick, minimum width=1.5cm, minimum height=1cm, font=\small\bfseries},
+    axe/.style={->, thick, line width=1.2pt}
+]
+    % Conteneur flex
+    \draw[draw=gray!50, thick, dashed, fill=gray!5, rounded corners=4pt] (-0.3, -0.7) rectangle (8.3, 1.7);
+
+    % Items
+    \node[item] (i1) at (0.85, 0.5) {1};
+    \node[item] (i2) at (2.65, 0.5) {2};
+    \node[item] (i3) at (4.45, 0.5) {3};
+    \node[item] (i4) at (6.25, 0.5) {4};
+
+    % Axe principal (horizontal)
+    \draw[axe, color=flexaxe] (-0.3, -1.3) -- (8.5, -1.3);
+    \node[font=\small\bfseries, color=flexaxe, anchor=west] at (-0.3, -1.7) {axe principal};
+    \node[font=\scriptsize\itshape, color=flexaxe, anchor=west] at (-0.3, -2.1) {(piloté par \texttt{justify-content})};
+
+    % Axe secondaire (vertical)
+    \draw[axe, color=flexcross] (10, -0.7) -- (10, 1.7);
+    \node[font=\small\bfseries, color=flexcross, anchor=west] at (10.2, 1.4) {axe secondaire};
+    \node[font=\scriptsize\itshape, color=flexcross, anchor=west] at (10.2, 0.9) {(piloté par};
+    \node[font=\scriptsize\itshape, color=flexcross, anchor=west] at (10.2, 0.5) {\texttt{align-items})};
+\end{tikzpicture}
+\caption{Les deux axes de Flexbox : principal (horizontal) et secondaire (vertical).}
+\label{fig:flex-axes}
+\end{figure}
+
+\subsection{Les propriétés essentielles}
+
+\subsubsection*{Sur le conteneur :}
+
+\begin{center}
+\begin{tabular}{@{}lp{8cm}@{}}
+\toprule
+\textbf{Propriété}        & \textbf{Rôle} \\
+\midrule
+\texttt{display: flex}    & Active Flexbox sur le conteneur \\
+\texttt{flex-direction}   & \texttt{row} (par défaut, horizontal) ou \texttt{column} (vertical) \\
+\texttt{justify-content}  & Aligne les items sur \textbf{l'axe principal} \\
+\texttt{align-items}      & Aligne les items sur \textbf{l'axe secondaire} \\
+\texttt{flex-wrap}        & \texttt{wrap} : retour à la ligne si pas la place \\
+\texttt{gap}              & Espace entre les items \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Les valeurs de \texttt{justify-content}}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Valeur}      & \textbf{Effet} \\
+\midrule
+\texttt{flex-start}    & Items collés à gauche (par défaut) \\
+\texttt{center}        & Items centrés horizontalement \\
+\texttt{flex-end}      & Items collés à droite \\
+\texttt{space-between} & Premier à gauche, dernier à droite, le reste réparti \\
+\texttt{space-around}  & Espacement égal autour de chaque item \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Centrer un bouton (le grand classique)}
+
+\begin{lstlisting}[language=CSS]
+.parent {
+    display: flex;
+    justify-content: center;   /* centré horizontalement */
+    align-items: center;       /* centré verticalement */
+    height: 200px;
+}
+\end{lstlisting}
+
+3 lignes pour centrer parfaitement, à droite ET en bas, à hauteur ET en
+largeur. Avant Flexbox (avant 2015), c'était un cauchemar.
+
+\subsection{Cas d'usage typique : la nav}
+
+\begin{lstlisting}[language=HTML5]
+<nav class="nav-principale">
+    <a href="index.html">Accueil</a>
+    <a href="quiz.html">Jouer</a>
+    <a href="scores.html">Mes Scores</a>
+    <a href="apropos.html">À propos</a>
+</nav>
+\end{lstlisting}
+
+\begin{lstlisting}[language=CSS]
+.nav-principale {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: teal;
+}
+
+.nav-principale a {
+    color: white;
+    text-decoration: none;
+}
+\end{lstlisting}
+
+$\to$ une barre de navigation propre avec liens espacés et fond coloré, en
+quelques lignes.
+
+\begin{retenirbox}[Mémo Flexbox]
+Les 5 propriétés à connaître :
+\begin{enumerate}[nosep]
+    \item \texttt{display: flex} \quad (active Flexbox)
+    \item \texttt{justify-content} \quad (axe principal)
+    \item \texttt{align-items} \quad (axe secondaire)
+    \item \texttt{flex-wrap: wrap} \quad (retour à la ligne)
+    \item \texttt{gap} \quad (espacement entre items)
+\end{enumerate}
+Avec ces 5, vous gérez 95\% des layouts d'application.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Mini-exercice en classe}
+% ===========================================================================
+
+\begin{objectifbox}[Exercice guidé --- on le fait ensemble]
+
+\textbf{Énoncé.} Sur la page d'accueil de Jàng Afrig, ajoutons une règle
+CSS qui :
+\begin{enumerate}[nosep]
+    \item Met le \texttt{<header>} sur fond \textbf{teal} avec texte \textbf{blanc}
+    \item Aligne les liens du \texttt{<nav>} en \textbf{ligne horizontale}, espacés \textbf{equitablement}
+    \item Centre le bouton «\,Commencer\,» horizontalement dans son conteneur
+\end{enumerate}
+
+\medskip
+
+\textbf{On va l'écrire ensemble} dans un \texttt{<style>} interne pour
+aller vite (au Lab 3, on basculera en fichier externe).
+\end{objectifbox}
+
+\subsection{Solution attendue}
+
+\begin{lstlisting}[language=CSS]
+/* Box-sizing pour tout */
+* { box-sizing: border-box; }
+
+/* Header coloré */
+header {
+    background-color: teal;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Nav en flex */
+nav {
+    display: flex;
+    justify-content: space-around;
+    background-color: #006644;
+    padding: 10px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+}
+
+/* Bouton centré */
+.bouton-conteneur {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+\end{lstlisting}
+
+\begin{infobox}[Si vous bloquez]
+Pas de panique. Ce sera \emph{exactement} ce qu'on fait au Lab 3, en
+détail, étape par étape. L'objectif aujourd'hui est de \textbf{voir la
+mécanique}, pas de tout mémoriser.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Résumé et transition}
+% ===========================================================================
+
+\subsection{Ce qu'on a vu}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item CSS = \textbf{Cascading Style Sheets} : la couche visuelle du Web
+    \item \textbf{3 façons d'inclure} CSS : inline, \texttt{<style>}, \texttt{<link>} (recommandé)
+    \item Anatomie d'une règle : \texttt{sélecteur \{ propriété: valeur; \}}
+    \item \textbf{5 sélecteurs} : élément, classe (\texttt{.}), id (\texttt{\#}), descendant, pseudo-classes (\texttt{:hover})
+    \item \textbf{Cascade} : à spécificité égale, le dernier gagne
+    \item \textbf{Spécificité} : id (100) > classe (10) > élément (1)
+    \item \textbf{Box Model} : content + padding + border + margin
+    \item Réflexe : toujours \texttt{box-sizing: border-box}
+    \item \textbf{Flexbox} : 5 propriétés pour aligner et positionner
+\end{itemize}
+
+\subsection{Ce qu'on fera au Lab 3}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Créer le fichier \texttt{style.css} dans le repo
+    \item Le lier aux 5 pages avec \texttt{<link>}
+    \item Définir la \textbf{palette panafricaine} (vert, jaune, rouge + neutre)
+    \item Utiliser une \textbf{police Google Fonts}
+    \item Styliser le \texttt{<header>}, le \texttt{<nav>}, les sections, le footer
+    \item Créer des \textbf{boutons} stylés avec \texttt{:hover}
+    \item Tag \texttt{v0.3}
+\end{itemize}
+
+\subsection{Consigne pour la prochaine séance}
+
+\begin{attentionbox}[Avant le Lab 3]
+\begin{enumerate}[nosep]
+    \item \textbf{Lisez} le PDF du Lab 3.
+    \item \textbf{Vérifiez} que vos 5 pages HTML s'affichent toujours correctement (\texttt{git pull} d'abord si vous avez travaillé sur un autre ordinateur).
+    \item \textbf{Choisissez 1 ou 2 polices} sur \href{https://fonts.google.com}{Google Fonts} qui vous plaisent. Idée : une «\,sans-serif\,» moderne pour le texte (\emph{Poppins}, \emph{Inter}, \emph{Nunito}\ldots) et une plus marquée pour les titres.
+\end{enumerate}
+Aucun code à écrire à la maison.
+\end{attentionbox}
+
+\vspace{0.5cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large CM2 --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous savez comment CSS donne vie au HTML.\\
+Prochaine étape : \textbf{habiller Jàng Afrig}.\\[0.2cm]
+\textit{Rendez-vous au Lab 3 !}\\[0.3cm]
+\vspace{0.3cm}
+\end{minipage}
+}
+\end{center}
+
+\end{document}
