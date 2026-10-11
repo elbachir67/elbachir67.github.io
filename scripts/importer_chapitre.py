@@ -867,13 +867,16 @@ def inline(texte: str, conversion: Conversion) -> str:
     # qui suit `\fg` appartient à la phrase, et reste.
     texte = re.sub(r"\\og\s*(?:\{\})?\s*", "«\u00a0", texte)
     texte = re.sub(r"\s*\\fg(?![A-Za-z])(?:\{\})?", "\u00a0»", texte)
-    # Guillemets écrits directement, avec l'espace fine de LaTeX : « «\,mot\,» » (Programmation
-    # Frontend 1). Non traité, `\,` arrivait tel quel dans le Markdown, qui le lit comme une virgule
-    # échappée : la page affichait « «,Je voudrais le thiéboudienne,» ». L'espace fine insécable est
-    # celle que LaTeX compose. Restreint aux guillemets : les autres `\,` du texte (« 80\,% »)
-    # sont un autre chantier, qui changerait des cours déjà en ligne.
+    # Espace fine de LaTeX, `\,` : « 80\,% », « 10\,000 », « «\,mot\,» ». Non traitée, elle arrivait
+    # telle quelle dans le Markdown, qui la lit comme une virgule échappée : la page affichait
+    # « 80,% », « 10,000 » — un nombre anglais —, « «,Je voudrais le thiéboudienne,» » (#199).
+    # Elle devient l'espace fine insécable que LaTeX compose. Les formules sont déjà de côté, où
+    # MathJax la comprend ; un `\texttt{}` est traité plus bas, sur un texte déjà corrigé. Les
+    # guillemets mangent les blancs qui les touchent, comme le fait `\og`. `\\,` est un saut de
+    # ligne suivi d'une virgule, et reste tel quel.
     texte = re.sub(r"«\s*\\,\s*", "«\u202f", texte)
     texte = re.sub(r"\s*\\,\s*»", "\u202f»", texte)
+    texte = re.sub(r"(?<!\\)\\,", "\u202f", texte)
     # `\href{adresse}{texte}` -> lien Markdown.
     while trouve := re.search(r"\\href\s*\{", texte):
         fin_un = accolade(texte, trouve.end() - 1)

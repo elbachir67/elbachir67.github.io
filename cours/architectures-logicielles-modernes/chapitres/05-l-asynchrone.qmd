@@ -40,7 +40,7 @@ Dernière séance : les événements du Lab 3 quittent la JVM et traversent le r
 Nous avons laissé trois blessures ouvertes — volontairement :
 
 - **La panne synchrone (Lab 4)** : `livraison-service` éteint $\Rightarrow$ la confirmation meurt en 503. Compréhensible pour l'assignation (il *faut* une réponse)... mais les SMS et le paiement, eux, n'exigeaient aucune réponse — pourquoi partager le sort de qui que ce soit ?
-- **Le statut manuel** : la course atteint 100\,%, le service *sait* — et pourtant quelqu'un doit cliquer « Marquer livrée ».
+- **Le statut manuel** : la course atteint 100 %, le service *sait* — et pourtant quelqu'un doit cliquer « Marquer livrée ».
 - **L'état qui s'évapore** : le service redémarre, les courses s'oublient, la base dit le contraire. Deux vérités, aucune réconciliation.
 
 ::: {.callout-important .ucad-ret title="Le diagnostic commun"}
@@ -184,7 +184,7 @@ Extraire `paiement` n'a demandé **ni façade, ni timeout, ni 503** : personne n
 
 Rejouons le crash de la slide « ack » avec notre paiement :
 
-1. `paiement-service` reçoit `CommandeConfirmee` pour CMD-2026-0042, affiche `[PAIEMENT] Encaissement... 3\,500 FCFA`...
+1. `paiement-service` reçoit `CommandeConfirmee` pour CMD-2026-0042, affiche `[PAIEMENT] Encaissement... 3 500 FCFA`...
 2. ...et **crashe** juste avant d'envoyer l'ack (coupure, OOM, redéploiement — la vie).
 3. La queue n'a pas reçu d'ack : au redémarrage, elle **redonne le même message**.
 4. Sans précaution : **deuxième encaissement** de CMD-2026-0042. Le client paie deux fois son mafé.

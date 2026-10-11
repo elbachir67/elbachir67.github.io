@@ -201,8 +201,19 @@ def polices_uniques(svg: str, nom: str) -> str:
     Le préfixe commence par une lettre : un nom de police sans guillemets qui commence par un chiffre
     (« 01-le-web-et-html-01-nf0 ») n'est pas un identifiant CSS. Le navigateur écarte alors la
     déclaration sans rien dire, et tout le texte du schéma sort dans la police de la page.
+
+    **Toutes** les polices déclarées sont préfixées, et non les seules `nfN` : un schéma qui porte une
+    formule embarque aussi les polices mathématiques sous leur vrai nom (`cmmi7`, `cmr5`…), réduites
+    de la même façon à ses lettres. Trois schémas de la séance 3 d'Introduction à l'IA déclaraient
+    chacun leur `cmmi7` (#199). Un nom déjà préfixé n'est pas repris : l'opération peut être rejouée.
     """
-    return re.sub(r"(font-family[:=]\s*'?)(nf\d+)\b", rf"\g<1>tikz-{nom}-\g<2>", svg)
+    for police in sorted(set(re.findall(r"@font-face\s*\{\s*font-family\s*:\s*([^;}\s]+)", svg)),
+                         key=len, reverse=True):
+        if police.startswith("tikz-"):
+            continue
+        svg = re.sub(rf"(font-family\s*[:=]\s*['\"]?){re.escape(police)}(?![\w-])",
+                     rf"\g<1>tikz-{nom}-{police}", svg)
+    return svg
 
 
 def main() -> int:
