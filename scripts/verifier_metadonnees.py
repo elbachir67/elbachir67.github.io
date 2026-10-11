@@ -10,6 +10,11 @@ Vérifie, pour chaque page HTML (hors site_libs/) :
 - les métadonnées de partage og:title, og:description, og:image et twitter:card ;
 - une image d'aperçu en URL absolue https, présente dans le site rendu.
 Vérifie aussi que sitemap.xml liste chaque page et que robots.txt indique ce sitemap.
+
+Nom de domaine (US-05) : le fichier CNAME doit être publié — sans lui, chaque déploiement sur gh-pages
+retirerait le domaine des réglages de GitHub Pages —, et aucune page, aucun plan de site, aucun flux
+ne doit plus désigner l'ancienne adresse elbachir67.github.io. Le plan du site, l'image d'aperçu et
+robots.txt doivent désigner le domaine du CNAME.
 """
 
 from __future__ import annotations
@@ -24,6 +29,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 BALISES_REQUISES = ["og:title", "og:description", "og:image", "twitter:card"]
+# Adresse du site avant US-05. « github.com/elbachir67/elbachir67.github.io » nomme le dépôt, et non le
+# site : le motif exige un schéma juste avant l'hôte.
+ANCIENNE_ADRESSE = re.compile(r"://elbachir67\.github\.io\b")
 # Page laissée vide par Quarto à la place d'un brouillon (« draft-mode: gone ») : elle n'a ni en-tête ni
 # contenu, et n'est pas publiée. Rien à y vérifier.
 MOTIF_BROUILLON = re.compile(r"<head\b", re.I)
@@ -69,6 +77,21 @@ def main() -> int:
     def erreur(fichier, message):
         erreurs.append((str(fichier), message))
 
+    cname = racine / "CNAME"
+    domaine = cname.read_text(encoding="utf-8").strip() if cname.is_file() else ""
+    if not domaine:
+        erreur(cname, "CNAME absent ou vide : le déploiement retirerait le nom de domaine de GitHub Pages")
+
+    def hors_domaine(fichier, adresse, nature):
+        if domaine and urlparse(adresse).netloc != domaine:
+            erreur(fichier, f"{nature} hors du domaine {domaine} : {adresse}")
+
+    for fichier in sorted(racine.rglob("*")):
+        if fichier.suffix in {".html", ".xml", ".txt", ".json"} and "site_libs" not in fichier.parts:
+            texte = fichier.read_text(encoding="utf-8", errors="replace")
+            if ANCIENNE_ADRESSE.search(texte):
+                erreur(fichier, "désigne encore l'ancienne adresse elbachir67.github.io")
+
     pages = sorted(p for p in racine.rglob("*.html") if "site_libs" not in p.relative_to(racine).parts)
     brouillons = [p for p in pages if brouillon(p.read_text(encoding="utf-8"))]
     pages = [p for p in pages if p not in brouillons]
@@ -93,6 +116,7 @@ def main() -> int:
                 erreur(page, f"og:image n'est pas une URL https absolue : {image}")
             elif not (racine / url.path.lstrip("/")).is_file():
                 erreur(page, f"og:image introuvable dans le site rendu : {image}")
+            hors_domaine(page, image, "og:image")
 
     for (langue, valeur), liste, nature in [(v, l, "titre") for v, l in titres.items()] + \
                                            [(v, l, "description") for v, l in descriptions.items()]:
@@ -107,6 +131,8 @@ def main() -> int:
         espace = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
         adresses = [loc.text or "" for loc in ET.parse(sitemap).getroot().findall("s:url/s:loc", espace)]
         chemins = {urlparse(a).path.lstrip("/") for a in adresses}
+        for adresse in {f"https://{urlparse(a).netloc}/" for a in adresses}:
+            hors_domaine(sitemap, adresse, "adresse du plan du site")
         for page in pages:
             if page.relative_to(racine).as_posix() not in chemins:
                 erreur(page, "page absente de sitemap.xml")
@@ -114,8 +140,11 @@ def main() -> int:
     robots = racine / "robots.txt"
     if not robots.is_file():
         erreur(robots, "robots.txt absent")
-    elif not re.search(r"(?im)^Sitemap:\s*https://\S+/sitemap\.xml\s*$", robots.read_text(encoding="utf-8")):
+    elif not (trouve := re.search(r"(?im)^Sitemap:\s*(https://\S+/sitemap\.xml)\s*$",
+                                  robots.read_text(encoding="utf-8"))):
         erreur(robots, "robots.txt n'indique pas l'adresse de sitemap.xml")
+    else:
+        hors_domaine(robots, trouve.group(1), "adresse du plan du site")
 
     for fichier, message in erreurs:
         if os.environ.get("GITHUB_ACTIONS"):
@@ -127,7 +156,7 @@ def main() -> int:
     langues = ", ".join(sorted({l for l, _ in titres} - {""})) or "aucune"
     ignores = f" ({len(brouillons)} brouillon(s) non publié(s) ignoré(s))" if brouillons else ""
     print(f"OK : {len(pages)} page(s) avec titre et description uniques par langue ({langues}), "
-          f"métadonnées de partage, sitemap.xml et robots.txt.{ignores}")
+          f"métadonnées de partage, sitemap.xml et robots.txt, domaine {domaine}.{ignores}")
     return 0
 
 
