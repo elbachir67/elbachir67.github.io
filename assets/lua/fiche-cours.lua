@@ -288,7 +288,12 @@ function Pandoc(doc)
       -- « seances » pour un cours en slides, « chapitres » pour un cours rédigé : le même tableau,
       -- sous le mot qui convient au cours.
       if div.identifier == "seances" or div.identifier == "chapitres" then
-        return seances(doc)
+        local blocs = seances(doc)
+        -- Ce qui manque encore au cours, au-dessus de la table des séances (champ « incomplet »).
+        if cours.incomplet and cours.incomplet.fr then
+          blocs:insert(1, pandoc.Para(cours.incomplet.fr))
+        end
+        return blocs
       end
       if div.identifier == "ressources-cours" then
         return ressources_du_cours(cours, pandoc.path.directory(quarto.doc.input_file))

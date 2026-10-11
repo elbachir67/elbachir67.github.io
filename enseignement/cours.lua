@@ -10,9 +10,9 @@ local INSECABLE = "\u{A0}"
 local STATUTS = { ["a-venir"] = true, ["en-ligne"] = true }
 
 local LIBELLES = {
-  fr = { niveau = "Niveau", niveaux = "Niveaux", a_venir = "Bientôt en ligne",
+  fr = { langue = "fr", niveau = "Niveau", niveaux = "Niveaux", a_venir = "Bientôt en ligne",
          en_ligne = "En ligne", seance = "séance", seances = "séances" },
-  en = { niveau = "Level", niveaux = "Levels", a_venir = "Coming soon",
+  en = { langue = "en", niveau = "Level", niveaux = "Levels", a_venir = "Coming soon",
          en_ligne = "Online", seance = "session", seances = "sessions" },
 }
 
@@ -124,6 +124,13 @@ local function carte(cours, mots)
     pandoc.Para(pandoc.Inlines(libelle_niveaux .. INSECABLE .. ": " .. table.concat(niveaux, ", "))),
     pandoc.Para({ pastille }),
   }
+
+  -- Un cours en ligne mais incomplet le dit sur sa carte, dans la langue du catalogue : la page du
+  -- cours, elle, n'existe qu'en français.
+  if cours.incomplet and cours.incomplet[mots.langue] then
+    table.insert(blocs, pandoc.Para({ pandoc.Span(cours.incomplet[mots.langue],
+      { class = "cours-incomplet" }) }))
+  end
 
   -- Le champ skill de cours.yml n'est jamais affiché.
   local corps = pandoc.Div(blocs, { class = "card-body" })
