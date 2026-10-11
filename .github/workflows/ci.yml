@@ -94,6 +94,13 @@ jobs:
       - name: Vérifier l'unicité des identifiants
         run: python scripts/verifier_identifiants.py _site
 
+      # Une police ou un glyphe n'appartient qu'à un SVG de la page, et une espace fine de la source
+      # ne s'affiche jamais en virgule (#199). Deux schémas TikZ d'une même page déclaraient chacun
+      # leur police « nf0 » : « struc t Point p ». Et « 80\,% » s'affichait « 80,% ». Ni l'un ni
+      # l'autre ne passe par un identifiant : le contrôle ci-dessus ne pouvait pas les voir.
+      - name: Vérifier les polices des figures et les espaces fines
+        run: python scripts/verifier_polices_espaces.py _site
+
       # Rien de non publiable dans le site (US-59) : documents réservés à l'enseignant — repérés par
       # leur nom de fichier, et par les liens qui y mènent — et termes que le PO ne veut pas voir
       # publiés. La correction se fait à la source, puis l'import est rejoué.
