@@ -62,7 +62,7 @@ d'un tuteur IA encadré.
 | US-24 | EP4 | Aperçu déployé par PR | C | 3 | — |
 | US-32 | EP6 | Journalisation anonymisée des questions + consentement | S | 5 | — |
 | US-33 | EP6 | Tableau de bord enseignant (concepts bloquants) | C | 8 | — |
-| US-05 | EP1 | Nom de domaine personnalisé + HTTPS | S | 2 | — |
+| US-05 | EP1 | Nom de domaine personnalisé + HTTPS (`ebtoure.sn`) | S | 2 | 9 |
 | US-38 | EP2 | Page Contact bilingue (formulaire non requis : email protégé, affiliations) | S | 2 | — |
 | US-39 | EP1 | Traduire les données du CV et du catalogue des cours (et non les seuls libellés) | S | 3 | — |
 | US-40 | EP3 | Conversion d'un CM rédigé en page de cours (structure, maths, callouts) | M | 8 | livrée |
@@ -99,9 +99,12 @@ d'un tuteur IA encadré.
 | US-73 | EP3 | Les figures de PRC, régénérées en SVG et à un chemin relatif | M | 2 | 8 |
 | US-74 | EP3 | La numérotation des séances est continue (Introduction à l'IA) | M | 2 | 8 |
 | US-75 | EP3 | Rien de non publiable dans un PDF non plus (le contrôle lit leur texte) | M | 3 | 8 |
-| US-76 | EP1 | Une ressource est ce que sa source produit (recompilation vérifiée en CI) | M | 5 | 9 |
+| US-76 | EP1 | Une ressource est ce que sa source produit (recompilation locale, fraîcheur vérifiée en CI) | M | 5 | 9 |
 | US-78 | EP3 | Les blocs de code ne sont plus lus comme des mathématiques | M | 3 | 8 |
 | US-77 | EP1 | Redirections : les adresses d'hier mènent encore quelque part | C | 2 | — |
+| US-79 | EP3 | Migration de Programmation Frontend 1 (L1) | M | 5 | 9 |
+| US-80 | EP3 | Migration de Programmation par Réutilisation de Composants (L2) | M | 8 | 9 |
+| US-81 | EP3 | Migration de Mathématiques pour le Machine Learning (M1), les quatre modules | M | 8 | 9 |
 
 ### Stories décrites par le PO
 
@@ -267,6 +270,12 @@ fichiers de Frontend 1 et trois de PRC. Le dernier critère d'US-70 demandait de
 d'estimer un tel manque **sans le contourner** : c'est ce qui a été fait, et le PO a **échangé**
 US-76 contre US-78 plutôt que d'ajouter au sprint clos.
 
+**Sprint 9 — composition.** Trois migrations (US-79, US-80, US-81) et US-76, reportée du Sprint 8,
+pour 26 points. Le PO y ajoute **US-05** à la composition, avant le début du sprint : le domaine
+**`ebtoure.sn`** est acheté chez Wanekoo, gestion DNS incluse. La capacité passe à **28 points**, et
+US-05 ouvre l'ordre d'exécution parce que la propagation DNS prend du temps. **Mathématiques pour le
+ML** : le PO publie **les quatre modules seuls** au Sprint 9 ; les deux decks passent au Sprint 10.
+
 ## Roadmap
 
 | Sprint | Objectif | Pts |
@@ -279,5 +288,6 @@ US-76 contre US-78 plutôt que d'ajouter au sprint clos.
 | 6 | Les cours rédigés entrent dans la chaîne | 26 livrés sur 26 |
 | 7 | Achever le C, publier le ML, préparer les cours rédigés | 41 livrés sur 20 |
 | 8 | Un catalogue juste, des cours liés entre eux, et la migration qui continue | 31 |
+| 9 | Trois cours de plus, et des PDF qui disent la vérité (et le nom de domaine) | 28 |
 
 Durée d'un sprint : 1 semaine, ajustable par le PO selon la charge d'enseignement.
