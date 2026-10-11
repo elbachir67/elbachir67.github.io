@@ -1,0 +1,350 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== POLICES & LANGUE =====================
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,xcolor,booktabs,hyperref,tcolorbox,enumitem,fancyhdr,array,pifont,longtable,multirow,listings}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+% ===================== BOÎTES =====================
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title={#1},breakable}
+
+% ===================== CODE (listings) =====================
+\definecolor{codebg}{gray}{0.96}
+\definecolor{kwcolor}{RGB}{0,90,160}
+\definecolor{strcolor}{RGB}{160,55,30}
+\definecolor{comcolor}{RGB}{95,120,95}
+\definecolor{ndcolor}{RGB}{120,80,150}
+
+\lstdefinelanguage{JS}{
+  morekeywords={let,const,var,function,return,if,else,for,of,in,while,do,true,false,null,undefined,typeof,break,continue,new,this,async,await,try,catch,throw,finally},
+  morekeywords=[2]{console,log,table,document,Math,window,alert,prompt,forEach,map,filter,push,pop,querySelector,querySelectorAll,addEventListener,classList,textContent,innerHTML,createElement,appendChild,getElementById,includes,fetch,json,JSON,then,stringify,parse,setItem,getItem,removeItem,setInterval,clearInterval},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+\lstdefinestyle{js}{
+  language=JS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{kwcolor},
+  keywordstyle=[2]\color{ndcolor},
+  commentstyle=\color{comcolor}\itshape,
+  stringstyle=\color{strcolor},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {â}{{â}}1 {ê}{{ê}}1
+    {î}{{î}}1 {ô}{{ô}}1 {û}{{û}}1 {ù}{{ù}}1 {ç}{{ç}}1
+    {ï}{{ï}}1 {ë}{{ë}}1 {É}{{É}}1 {È}{{È}}1 {À}{{À}}1
+    {œ}{{œ}}1 {°}{{°}}1 {²}{{²}}1
+}
+
+\lstdefinestyle{html}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {ê}{{ê}}1 {ç}{{ç}}1 {î}{{î}}1
+}
+
+\lstset{style=js}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% ===================== EN-TÊTES =====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- CM4 : Le Web moderne}
+\fancyhead[R]{\small ESP/UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ===================== TITRE =====================
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge CM4 --- Le Web moderne}\\[0.3cm]
+\textbf{\Large APIs, JSON et code asynchrone}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Avant ce cours]
+Vous avez construit, au Lab 7, un quiz jouable\ldots\ mais limité à dix pays écrits à la main. Ce cours explique comment une page web va chercher de \emph{vraies} données en ligne, automatiquement. C'est ce qui permettra à Jàng Afrig de connaître les 54 pays africains sans que vous ayez à les taper.
+
+\smallskip
+\textbf{Prérequis :} les fonctions et les objets (CM3, Labs 5--6), et le quiz du Lab 7.
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du CM4]
+À la fin de ce cours, vous comprendrez :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Ce qu'est une \textbf{API} et le style \textbf{REST}.
+  \item Le format \textbf{JSON}, langage d'échange du web.
+  \item La différence entre code \textbf{synchrone} et \textbf{asynchrone}.
+  \item Comment faire une requête avec \code{fetch} + \code{async}/\code{await}.
+  \item Comment se protéger des erreurs avec \code{try}/\code{catch}.
+  \item L'API \textbf{REST Countries}, que nous utiliserons dès le Lab 8.
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\bigskip\hrule\bigskip
+
+% ===================== SECTION 1 =====================
+\section{Qu'est-ce qu'une API ?}
+
+Jusqu'ici, Jàng Afrig vivait en autarcie : toutes ses données étaient dans \code{data.js}. Mais la plupart des applications ont besoin de données qui vivent \emph{ailleurs}, sur un serveur distant : la météo, les prix, la liste des pays\ldots\ Comment les obtenir ?
+
+Grâce à une \textbf{API} (\emph{Application Programming Interface}). Une API, c'est une \textbf{porte d'entrée} qu'un service met à disposition pour qu'on lui demande des données de façon organisée.
+
+\begin{infobox}[L'analogie du restaurant]
+Imaginez un restaurant :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \textbf{Vous}, à table, êtes la \emph{page web}.
+  \item La \textbf{cuisine} (que vous ne voyez pas) est la \emph{base de données} du service.
+  \item Le \textbf{serveur} qui fait la navette est l'\emph{API}.
+  \item Le \textbf{menu} liste ce que vous pouvez commander (les \emph{adresses} disponibles).
+  \item Votre \textbf{commande} est la \emph{requête} ; le \textbf{plat} qui arrive est la \emph{réponse}.
+\end{itemize}
+Vous n'entrez jamais dans la cuisine : vous passez \emph{toujours} par le serveur. De même, une page ne touche jamais directement la base de données : elle passe par l'API.
+\end{infobox}
+
+% ===================== SECTION 2 =====================
+\section{REST : commander proprement}
+
+\textbf{REST} est le style d'API le plus répandu sur le web. Son idée : chaque donnée a une \textbf{adresse} (une URL), et on agit dessus avec un petit nombre de \textbf{verbes}.
+
+\begin{center}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Verbe HTTP} & \textbf{Action} & \textbf{Au restaurant} \\
+\midrule
+\code{GET}    & Lire une donnée      & Consulter le menu / recevoir un plat \\
+\code{POST}   & Créer une donnée     & Passer une nouvelle commande \\
+\code{PUT}    & Modifier une donnée  & Changer sa commande \\
+\code{DELETE} & Supprimer une donnée & Annuler sa commande \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{retenirbox}[Pour Jàng Afrig, un seul verbe]
+Notre quiz ne fait que \textbf{lire} des données (la liste des pays). Nous n'utiliserons donc que le verbe \code{GET} --- le plus simple. C'est d'ailleurs ce que fait votre navigateur quand vous tapez une adresse : un \code{GET}.
+\end{retenirbox}
+
+% ===================== SECTION 3 =====================
+\section{JSON : la langue d'échange}
+
+Quand l'API répond, elle n'envoie pas une page web : elle envoie des \textbf{données brutes}, dans un format que tout le monde comprend, le \textbf{JSON} (\emph{JavaScript Object Notation}).
+
+Bonne nouvelle : le JSON ressemble \emph{trait pour trait} aux objets et tableaux JavaScript que vous connaissez déjà (CM3, Lab 6).
+
+\begin{lstlisting}[style=js]
+{
+  "cca3": "SEN",
+  "name": { "common": "Senegal" },
+  "capital": ["Dakar"],
+  "languages": { "fra": "French", "wol": "Wolof" }
+}
+\end{lstlisting}
+
+On y reconnaît : des \textbf{objets} (entre \code{\{ \}}), des \textbf{tableaux} (entre \code{[ ]}), du texte, des nombres. La seule particularité : en JSON, les noms de propriétés sont \emph{toujours} entre guillemets.
+
+\begin{attentionbox}[Attention à la forme des champs]
+Deux pièges fréquents avec REST Countries :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item Le nom est \emph{niché} : on y accède par \code{pays.name.common} (et non \code{pays.name}).
+  \item La capitale est un \textbf{tableau} : on prend le premier élément, \code{pays.capital[0]}.
+\end{itemize}
+\end{attentionbox}
+
+% ===================== SECTION 4 =====================
+\section{Synchrone ou asynchrone : pourquoi Internet est « lent »}
+
+Aller chercher des données en ligne prend du temps (le signal voyage, le serveur réfléchit). Pendant ce temps, que fait votre page ? Deux stratégies :
+
+\begin{infobox}[L'analogie du café]
+\textbf{Au comptoir (synchrone) :} vous commandez un café, et vous \emph{restez planté} devant la machine jusqu'à ce qu'il soit prêt. Vous ne faites rien d'autre. Si la page faisait ça, elle se \textbf{figerait} à chaque requête.
+
+\smallskip
+\textbf{Via une application (asynchrone) :} vous commandez, puis vous allez vous asseoir et discuter. Quand le café est prêt, une \textbf{notification} vous prévient. La page reste \emph{vivante} pendant l'attente.
+\end{infobox}
+
+Le web moderne est \textbf{asynchrone} : on lance la requête, la page continue de fonctionner, et on traite la réponse \emph{quand elle arrive}.
+
+\subsection{Les promesses}
+Quand on lance une requête asynchrone, on ne reçoit pas la donnée tout de suite : on reçoit une \textbf{promesse} (\emph{promise}), c'est-à-dire un objet qui dit \emph{« je te répondrai plus tard, avec le résultat ou avec une erreur »}. C'est le ticket que vous donne le café : la preuve qu'une réponse arrivera.
+
+% ===================== SECTION 5 =====================
+\section{\texttt{fetch} + \texttt{async}/\texttt{await} : la requête en pratique}
+
+\code{fetch(url)} lance une requête vers une adresse. Comme c'est asynchrone, on utilise deux mots-clés pour attendre proprement la réponse :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \code{async} devant une fonction : « cette fonction contient de l'attente ».
+  \item \code{await} devant une opération : « attends ici que ce soit prêt, sans figer la page ».
+\end{itemize}
+
+\begin{lstlisting}[style=js]
+async function chargerPays() {
+  const reponse = await fetch("https://restcountries.com/v3.1/region/africa");
+  const donnees = await reponse.json(); // transformer la réponse en objets JS
+  return donnees;
+}
+\end{lstlisting}
+
+\textbf{Pourquoi deux \code{await} ?}
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Le premier attend que le serveur \emph{réponde} (le facteur revient avec le colis).
+  \item Le second attend que la réponse soit \emph{convertie} en objets JavaScript utilisables, avec \code{.json()} (on ouvre le colis).
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  boite/.style={rectangle, rounded corners=4pt, draw, very thick, align=center, minimum height=1.3cm, minimum width=3.2cm},
+  arr/.style={-{Stealth[length=3mm]}, very thick},
+  lab/.style={font=\scriptsize, align=center}
+]
+  \node[boite, draw=blue!55, fill=blue!6] (client) {\textbf{Votre page}\\\scriptsize (le navigateur)};
+  \node[boite, draw=teal!55!black, fill=teal!6, right=5.2cm of client] (api) {\textbf{API REST Countries}\\\scriptsize (serveur distant)};
+
+  \draw[arr, blue!55!black] ([yshift=4mm]client.east) -- node[lab, above]{\textbf{1.} requête \code{GET}\\\scriptsize \code{fetch(url)}} ([yshift=4mm]api.west);
+  \draw[arr, teal!55!black] ([yshift=-4mm]api.west) -- node[lab, below]{\textbf{2.} réponse\\\scriptsize données \code{JSON}} ([yshift=-4mm]client.east);
+\end{tikzpicture}
+
+\textit{Le dialogue client $\leftrightarrow$ API : la page demande, l'API répond en JSON.}
+\end{center}
+
+% ===================== SECTION 6 =====================
+\section{\texttt{try}/\texttt{catch} : le filet de sécurité}
+
+Et si la connexion saute, ou si le serveur ne répond pas ? Sans précaution, l'application plante. On entoure donc la requête d'un \textbf{filet} : \code{try} (essaie) / \code{catch} (attrape l'erreur).
+
+\begin{lstlisting}[style=js]
+async function chargerPays() {
+  try {
+    const reponse = await fetch("https://restcountries.com/v3.1/region/africa");
+    const donnees = await reponse.json();
+    return donnees;
+  } catch (erreur) {
+    console.log("Connexion impossible :", erreur);
+    return []; // on renvoie une liste vide plutôt que de planter
+  }
+}
+\end{lstlisting}
+
+\emph{Analogie :} c'est la ceinture de sécurité. On espère ne jamais s'en servir, mais le jour où ça secoue, elle évite la catastrophe.
+
+% ===================== SECTION 7 =====================
+\section{Notre fournisseur : REST Countries v3.1}
+
+C'est l'API que nous utiliserons : \textbf{gratuite, sans inscription, sans clé}. Pour récupérer les pays d'Afrique, on demande la région \code{africa}, en précisant les \textbf{champs} qui nous intéressent (pour ne recevoir que l'utile) :
+
+\begin{lstlisting}[style=html]
+https://restcountries.com/v3.1/region/africa?fields=name,capital,cca3,flags,languages,borders
+\end{lstlisting}
+
+\begin{center}
+\begin{tabular}{l l}
+\toprule
+\textbf{Champ} & \textbf{Contenu (et accès)} \\
+\midrule
+\code{name.common}  & Nom courant du pays --- \code{pays.name.common} \\
+\code{capital}      & Capitale (tableau) --- \code{pays.capital[0]} \\
+\code{cca3}         & Code à 3 lettres --- \code{pays.cca3} (ex. \code{"SEN"}) \\
+\code{flags.svg}    & Adresse de l'image du drapeau \\
+\code{languages}    & Langues parlées (objet) \\
+\code{borders}      & Pays voisins (tableau de codes) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{infobox}[Démo en direct]
+Collez l'adresse ci-dessus dans la barre d'un navigateur : vous verrez le JSON brut d'une cinquantaine de pays africains. Puis, dans la console (F12), nous lancerons \code{chargerPays()} et nous afficherons le résultat avec \code{console.table} : les vrais pays apparaissent, en direct.
+\end{infobox}
+
+\begin{retenirbox}[Les réflexes du jour]
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Une API se demande avec une \textbf{URL} et un \textbf{verbe} (pour nous : \code{GET}).
+  \item La réponse arrive en \textbf{JSON} (objets et tableaux familiers).
+  \item On attend la réponse avec \code{await fetch(...)} puis \code{await reponse.json()}.
+  \item On protège toujours la requête avec \code{try}/\code{catch}.
+\end{enumerate}
+\end{retenirbox}
+
+% ===================== MINI-EXO =====================
+\section{Mini-exercice en classe}
+
+\begin{objectifbox}[À faire ensemble, dans la console]
+\begin{enumerate}[leftmargin=*]
+  \item Ouvrez une page quelconque, puis la console (F12).
+  \item Copiez-collez la fonction \code{chargerPays} (version avec \code{try}/\code{catch}).
+  \item Tapez : \code{const pays = await chargerPays();} puis \code{console.table(pays);}.
+  \item Combien de pays voyez-vous ? Affichez le nom courant du premier : \code{pays[0].name.common}.
+\end{enumerate}
+\emph{Astuce :} la console moderne accepte \code{await} directement, sans fonction autour.
+\end{objectifbox}
+
+% ===================== RÉSUMÉ =====================
+\section{Résumé et transition}
+
+Une API est une porte d'entrée vers des données distantes ; on la sollicite avec une URL et le verbe \code{GET} ; elle répond en JSON ; et on récupère ce JSON sans figer la page grâce à \code{async}/\code{await}, le tout protégé par \code{try}/\code{catch}.
+
+Au \textbf{Lab 8}, on met tout cela en pratique : on remplace les dix pays écrits à la main par les \textbf{vrais pays africains} de REST Countries. Le mode Capitales continuera de fonctionner --- mais avec, cette fois, toute l'Afrique.
+
+\begin{center}
+\textit{La théorie est posée. Au Lab 8, Jàng Afrig se connecte au monde réel.}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+\small Dr.~El Hadji Bassirou TOURÉ --- École Supérieure Polytechnique --- UCAD\\
+\small Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+\end{center}
+
+\end{document}

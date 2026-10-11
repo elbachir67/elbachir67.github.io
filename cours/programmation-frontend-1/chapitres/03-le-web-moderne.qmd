@@ -1,0 +1,203 @@
+---
+title: "Le Web moderne"
+cible: "page"
+body-classes: cours-page
+numero: "3"
+ressources:
+  - type: "tp"
+    titre: "Lab 8 — Fetch + REST Countries"
+    fichier: "ressources/lab-8-fetch-rest-countries.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-8-fetch-rest-countries.pdf"
+  - type: "tp"
+    titre: "Lab 9 — Les modes de jeu"
+    fichier: "ressources/lab-9-les-modes-de-jeu.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-9-les-modes-de-jeu.pdf"
+description: "Séance 3 de Programmation Frontend 1 : les API et le style REST, le format JSON, le code asynchrone avec fetch, async et await, et l'API REST Countries."
+author: ""
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Avant ce cours"}
+Vous avez construit, au Lab 7, un quiz jouable…\ mais limité à dix pays écrits à la main. Ce cours explique comment une page web va chercher de *vraies* données en ligne, automatiquement. C'est ce qui permettra à Jàng Afrig de connaître les 54 pays africains sans que vous ayez à les taper.
+
+**Prérequis :** les fonctions et les objets (CM3, Labs 5--6), et le quiz du Lab 7.
+:::
+
+::: {.callout-note .encadre-objectifbox title="Objectifs du CM4"}
+À la fin de ce cours, vous comprendrez :
+
+1. Ce qu'est une **API** et le style **REST**.
+2. Le format **JSON**, langage d'échange du web.
+3. La différence entre code **synchrone** et **asynchrone**.
+4. Comment faire une requête avec `fetch` + `async`/`await`.
+5. Comment se protéger des erreurs avec `try`/`catch`.
+6. L'API **REST Countries**, que nous utiliserons dès le Lab 8.
+:::
+
+## Qu'est-ce qu'une API ?
+
+Jusqu'ici, Jàng Afrig vivait en autarcie : toutes ses données étaient dans `data.js`. Mais la plupart des applications ont besoin de données qui vivent *ailleurs*, sur un serveur distant : la météo, les prix, la liste des pays…\ Comment les obtenir ?
+
+Grâce à une **API** (*Application Programming Interface*). Une API, c'est une **porte d'entrée** qu'un service met à disposition pour qu'on lui demande des données de façon organisée.
+
+::: {.callout-tip .encadre-infobox title="L'analogie du restaurant"}
+Imaginez un restaurant :
+
+- **Vous**, à table, êtes la *page web*.
+- La **cuisine** (que vous ne voyez pas) est la *base de données* du service.
+- Le **serveur** qui fait la navette est l'*API*.
+- Le **menu** liste ce que vous pouvez commander (les *adresses* disponibles).
+- Votre **commande** est la *requête* ; le **plat** qui arrive est la *réponse*.
+
+Vous n'entrez jamais dans la cuisine : vous passez *toujours* par le serveur. De même, une page ne touche jamais directement la base de données : elle passe par l'API.
+:::
+
+## REST : commander proprement
+
+**REST** est le style d'API le plus répandu sur le web. Son idée : chaque donnée a une **adresse** (une URL), et on agit dessus avec un petit nombre de **verbes**.
+
+| **Verbe HTTP** | **Action** | **Au restaurant** |
+| --- | --- | --- |
+| `GET` | Lire une donnée | Consulter le menu / recevoir un plat |
+| `POST` | Créer une donnée | Passer une nouvelle commande |
+| `PUT` | Modifier une donnée | Changer sa commande |
+| `DELETE` | Supprimer une donnée | Annuler sa commande |
+
+::: {.callout-important .encadre-retenirbox title="Pour Jàng Afrig, un seul verbe"}
+Notre quiz ne fait que **lire** des données (la liste des pays). Nous n'utiliserons donc que le verbe `GET` --- le plus simple. C'est d'ailleurs ce que fait votre navigateur quand vous tapez une adresse : un `GET`.
+:::
+
+## JSON : la langue d'échange
+
+Quand l'API répond, elle n'envoie pas une page web : elle envoie des **données brutes**, dans un format que tout le monde comprend, le **JSON** (*JavaScript Object Notation*).
+
+Bonne nouvelle : le JSON ressemble *trait pour trait* aux objets et tableaux JavaScript que vous connaissez déjà (CM3, Lab 6).
+
+```javascript
+{
+  "cca3": "SEN",
+  "name": { "common": "Senegal" },
+  "capital": ["Dakar"],
+  "languages": { "fra": "French", "wol": "Wolof" }
+}
+```
+
+On y reconnaît : des **objets** (entre `{ }`), des **tableaux** (entre `[ ]`), du texte, des nombres. La seule particularité : en JSON, les noms de propriétés sont *toujours* entre guillemets.
+
+::: {.callout-warning .encadre-attentionbox title="Attention à la forme des champs"}
+Deux pièges fréquents avec REST Countries :
+
+- Le nom est *niché* : on y accède par `pays.name.common` (et non `pays.name`).
+- La capitale est un **tableau** : on prend le premier élément, `pays.capital[0]`.
+:::
+
+## Synchrone ou asynchrone : pourquoi Internet est « lent »
+
+Aller chercher des données en ligne prend du temps (le signal voyage, le serveur réfléchit). Pendant ce temps, que fait votre page ? Deux stratégies :
+
+::: {.callout-tip .encadre-infobox title="L'analogie du café"}
+**Au comptoir (synchrone) :** vous commandez un café, et vous *restez planté* devant la machine jusqu'à ce qu'il soit prêt. Vous ne faites rien d'autre. Si la page faisait ça, elle se **figerait** à chaque requête.
+
+**Via une application (asynchrone) :** vous commandez, puis vous allez vous asseoir et discuter. Quand le café est prêt, une **notification** vous prévient. La page reste *vivante* pendant l'attente.
+:::
+
+Le web moderne est **asynchrone** : on lance la requête, la page continue de fonctionner, et on traite la réponse *quand elle arrive*.
+
+### Les promesses
+
+Quand on lance une requête asynchrone, on ne reçoit pas la donnée tout de suite : on reçoit une **promesse** (*promise*), c'est-à-dire un objet qui dit *« je te répondrai plus tard, avec le résultat ou avec une erreur »*. C'est le ticket que vous donne le café : la preuve qu'une réponse arrivera.
+
+## `fetch` + `async`/`await` : la requête en pratique
+
+`fetch(url)` lance une requête vers une adresse. Comme c'est asynchrone, on utilise deux mots-clés pour attendre proprement la réponse :
+
+- `async` devant une fonction : « cette fonction contient de l'attente ».
+- `await` devant une opération : « attends ici que ce soit prêt, sans figer la page ».
+
+```javascript
+async function chargerPays() {
+  const reponse = await fetch("https://restcountries.com/v3.1/region/africa");
+  const donnees = await reponse.json(); // transformer la réponse en objets JS
+  return donnees;
+}
+```
+
+**Pourquoi deux `await` ?**
+
+1. Le premier attend que le serveur *réponde* (le facteur revient avec le colis).
+2. Le second attend que la réponse soit *convertie* en objets JavaScript utilisables, avec `.json()` (on ouvre le colis).
+
+{{< svg ../figures/03-le-web-moderne-01.svg alt="Votre page (le navigateur) envoie une requête GET, fetch(url), à l'API REST Countries (serveur distant), qui répond par des données JSON." >}}
+
+*Le dialogue client $\leftrightarrow$ API : la page demande, l'API répond en JSON.*
+
+## `try`/`catch` : le filet de sécurité
+
+Et si la connexion saute, ou si le serveur ne répond pas ? Sans précaution, l'application plante. On entoure donc la requête d'un **filet** : `try` (essaie) / `catch` (attrape l'erreur).
+
+```javascript
+async function chargerPays() {
+  try {
+    const reponse = await fetch("https://restcountries.com/v3.1/region/africa");
+    const donnees = await reponse.json();
+    return donnees;
+  } catch (erreur) {
+    console.log("Connexion impossible :", erreur);
+    return []; // on renvoie une liste vide plutôt que de planter
+  }
+}
+```
+
+*Analogie :* c'est la ceinture de sécurité. On espère ne jamais s'en servir, mais le jour où ça secoue, elle évite la catastrophe.
+
+## Notre fournisseur : REST Countries v3.1
+
+C'est l'API que nous utiliserons : **gratuite, sans inscription, sans clé**. Pour récupérer les pays d'Afrique, on demande la région `africa`, en précisant les **champs** qui nous intéressent (pour ne recevoir que l'utile) :
+
+```javascript
+https://restcountries.com/v3.1/region/africa?fields=name,capital,cca3,flags,languages,borders
+```
+
+| **Champ** | **Contenu (et accès)** |
+| --- | --- |
+| `name.common` | Nom courant du pays --- `pays.name.common` |
+| `capital` | Capitale (tableau) --- `pays.capital[0]` |
+| `cca3` | Code à 3 lettres --- `pays.cca3` (ex. `"SEN"`) |
+| `flags.svg` | Adresse de l'image du drapeau |
+| `languages` | Langues parlées (objet) |
+| `borders` | Pays voisins (tableau de codes) |
+
+::: {.callout-tip .encadre-infobox title="Démo en direct"}
+Collez l'adresse ci-dessus dans la barre d'un navigateur : vous verrez le JSON brut d'une cinquantaine de pays africains. Puis, dans la console (F12), nous lancerons `chargerPays()` et nous afficherons le résultat avec `console.table` : les vrais pays apparaissent, en direct.
+:::
+
+::: {.callout-important .encadre-retenirbox title="Les réflexes du jour"}
+1. Une API se demande avec une **URL** et un **verbe** (pour nous : `GET`).
+2. La réponse arrive en **JSON** (objets et tableaux familiers).
+3. On attend la réponse avec `await fetch(...)` puis `await reponse.json()`.
+4. On protège toujours la requête avec `try`/`catch`.
+:::
+
+## Mini-exercice en classe
+
+::: {.callout-note .encadre-objectifbox title="À faire ensemble, dans la console"}
+1. Ouvrez une page quelconque, puis la console (F12).
+2. Copiez-collez la fonction `chargerPays` (version avec `try`/`catch`).
+3. Tapez : `const pays = await chargerPays();` puis `console.table(pays);`.
+4. Combien de pays voyez-vous ? Affichez le nom courant du premier : `pays[0].name.common`.
+
+*Astuce :* la console moderne accepte `await` directement, sans fonction autour.
+:::
+
+## Résumé et transition
+
+Une API est une porte d'entrée vers des données distantes ; on la sollicite avec une URL et le verbe `GET` ; elle répond en JSON ; et on récupère ce JSON sans figer la page grâce à `async`/`await`, le tout protégé par `try`/`catch`.
+
+Au **Lab 8**, on met tout cela en pratique : on remplace les dix pays écrits à la main par les **vrais pays africains** de REST Countries. Le mode Capitales continuera de fonctionner --- mais avec, cette fois, toute l'Afrique.
+
+*La théorie est posée. Au Lab 8, Jàng Afrig se connecte au monde réel.*
+
+Dr. El Hadji Bassirou TOURÉ --- École Supérieure Polytechnique --- UCAD<br>Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+
+::: {#ressources-seance}
+:::
