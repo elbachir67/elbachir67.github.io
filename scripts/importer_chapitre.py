@@ -282,6 +282,32 @@ def macros_du_theme(texte: str, preambule: str = "") -> str:
         # coupé. `\resultat`, qui vaut « Résultat $\rightarrow$ », est traité à part plus bas.
         if "$" not in corps_macro and "\\begin" not in corps_macro:
             definitions[nom] = corps_macro
+    # Macros du préambule à **un** argument qui ne font que mettre en forme leur argument —
+    # `\newcommand{\code}[1]{\texttt{#1}}`, dans les CM de Programmation Frontend 1. Elles sont
+    # développées dans le texte courant, et jamais dans un bloc de code : un exemple de code peut
+    # porter le même nom. Sans cela, chaque `\code{…}` était signalé comme non converti, 81 fois sur
+    # deux séances.
+    a_un_argument = {}
+    for trouve in re.finditer(r"\\(?:new|renew|provide)command\s*\{\\([A-Za-z]+)\}\s*\[1\]\s*\{",
+                              preambule):
+        fin = accolade(preambule, trouve.end() - 1)
+        corps_macro = preambule[trouve.end():fin]
+        if re.fullmatch(r"\\(?:texttt|textbf|emph|textit)\{#1\}", corps_macro):
+            a_un_argument[trouve[1]] = corps_macro
+    if a_un_argument:
+        morceaux = re.split(r"(\\begin\{(?:lstlisting|verbatim)\}.*?\\end\{(?:lstlisting|verbatim)\})",
+                            texte, flags=re.S)
+        for indice in range(0, len(morceaux), 2):
+            for nom, corps_macro in a_un_argument.items():
+                motif_macro = re.compile(rf"\\{nom}\s*\{{")
+                morceau = morceaux[indice]
+                while trouve := motif_macro.search(morceau):
+                    fin = accolade(morceau, trouve.end() - 1)
+                    morceau = (morceau[:trouve.start()]
+                               + corps_macro.replace("#1", morceau[trouve.end():fin])
+                               + morceau[fin + 1:])
+                morceaux[indice] = morceau
+        texte = "".join(morceaux)
     # Deux écritures des colonnes Beamer coexistent dans le même cours : `\column{0.5\linewidth}`
     # et `\begin{column}{0.5\textwidth}…\end{column}`. On ramène la seconde à la première, pour que
     # `colonnes()` n'ait qu'une forme à connaître.
@@ -335,6 +361,15 @@ def macros_du_theme(texte: str, preambule: str = "") -> str:
 
     texte = texte.replace("\\resultat", "\n\n**Résultat →**\n\n")
 
+    # `\fbox{…}` encadre un texte — la bannière de fin de séance de Programmation Frontend 1 et 2.
+    # Le cadre est du style ; le texte reste. Sans cette règle, l'accolade ouvrante et la fermante
+    # s'affichaient de part et d'autre de la bannière. Elle est levée ici, sur le document entier :
+    # la bannière contient un `minipage`, que la conversion découpe en colonnes avant de lire le
+    # texte, ce qui sépare les deux accolades.
+    while trouve := re.search(r"\\fbox\s*\{", texte):
+        fin = accolade(texte, trouve.end() - 1)
+        texte = texte[:trouve.start()] + texte[trouve.end():fin] + texte[fin + 1:]
+
     # `\ucadformula{…}` -> formule hors ligne. Le contenu se lit en comptant les accolades : une
     # formule en contient (`\frac{1}{n}`), et une expression régulière s'arrêterait à la première.
     motif = re.compile(r"\\ucadformula\s*\{")
@@ -381,6 +416,12 @@ def retirer_tailles(texte: str) -> str:
         trouve = motif.search(texte)
         if not trouve:
             return texte
+        # « \textbf{\Large CM1 …} » : l'accolade est celle de l'argument de `\textbf`, et non un
+        # groupe. Seule la taille part ; l'enlever avec l'accolade laissait « \textbfCM1 », que la
+        # conversion ne reconnaissait plus — la bannière de fin des CM de Frontend 1 perdait son titre.
+        if re.search(r"\\[A-Za-z]+\s*$", texte[:trouve.start()]):
+            texte = texte[:trouve.start() + 1] + texte[trouve.end():]
+            continue
         fin = accolade(texte, trouve.start())
         texte = texte[:trouve.start()] + texte[trouve.end():fin] + texte[fin + 1:]
 
@@ -822,6 +863,20 @@ def inline(texte: str, conversion: Conversion) -> str:
     # ligne de tableau, et Pandoc rendait le tout en bloc de lignes, barres verticales apparentes.
     # Constaté sur le chapitre 2 du cours de C ; 189 occurrences dans les quatre chapitres.
     texte = re.sub(r"``\s*(.+?)\s*''", "« \\1 »", texte, flags=re.S)
+    # Guillemets de babel-french : « \og mot\fg{} ». L'espace qui suit `\og` est la sienne ; celle
+    # qui suit `\fg` appartient à la phrase, et reste.
+    texte = re.sub(r"\\og\s*(?:\{\})?\s*", "«\u00a0", texte)
+    texte = re.sub(r"\s*\\fg(?![A-Za-z])(?:\{\})?", "\u00a0»", texte)
+    # `\href{adresse}{texte}` -> lien Markdown.
+    while trouve := re.search(r"\\href\s*\{", texte):
+        fin_un = accolade(texte, trouve.end() - 1)
+        suivant = re.match(r"\s*\{", texte[fin_un + 1:])
+        if not suivant:
+            break
+        debut_deux = fin_un + 1 + suivant.end() - 1
+        fin_deux = accolade(texte, debut_deux)
+        texte = (texte[:trouve.start()] + "[" + texte[debut_deux + 1:fin_deux] + "]("
+                 + texte[trouve.end():fin_un] + ")" + texte[fin_deux + 1:])
 
     # `\texttt{}` d'abord, et à part : son contenu peut porter des accents graves. Le lab 6 de
     # Programmation Frontend 2 montre un gabarit JavaScript dans une cellule de tableau —
