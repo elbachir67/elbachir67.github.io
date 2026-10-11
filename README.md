@@ -1,4 +1,4 @@
-# elbachir67.github.io
+# ebtoure.sn
 
 [![Déploiement](https://github.com/elbachir67/elbachir67.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/elbachir67/elbachir67.github.io/actions/workflows/deploy.yml)
 
@@ -6,7 +6,7 @@ Sources du site académique personnel de **Dr. El Hadji Bassirou Touré**,
 Maître de Conférences Titulaire au DMI / FST / UCAD.
 
 Site statique [Quarto](https://quarto.org) publié sur GitHub Pages
-(voir [ADR-0001](_specs/adr/0001-stack-quarto-github-pages.md)).
+(voir [ADR-0001](_specs/adr/0001-stack-quarto-github-pages.md)), à l'adresse **<https://ebtoure.sn>**.
 
 ## Prérequis
 
@@ -44,6 +44,7 @@ _extensions/             Extensions Quarto versionnées (academicons, email-prot
 scripts/                 Scripts (rendre.py, publications.py, verifier_*.py)
 en/                      Pages anglaises (mêmes données, libellés traduits)
 robots.txt               Consignes aux robots d'indexation (publié tel quel)
+CNAME                    Nom de domaine du site, lu par GitHub Pages (publié tel quel)
 _specs/                  Backlog, sprints, ADR (non publiés)
 _freeze/                 Résultats d'exécution gelés (versionnés)
 ```
@@ -192,6 +193,36 @@ deux pages partagent le même titre ou la même description, si une métadonnée
 ```bash
 python3 scripts/verifier_metadonnees.py    # après quarto render
 ```
+
+## Nom de domaine
+
+Le site répond à **`ebtoure.sn`** (US-05). Le domaine est enregistré chez **Wanekoo**, qui en gère aussi
+les DNS (serveurs `ns1.wanekoodns.net` et `ns2.wanekoodns.net`). `www.ebtoure.sn` et
+`elbachir67.github.io` redirigent vers `https://ebtoure.sn` ; c'est GitHub Pages qui s'en charge.
+
+| Type | Hôte | Valeur |
+|---|---|---|
+| A | `@` | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` |
+| AAAA | `@` | `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153` |
+| CNAME | `www` | `elbachir67.github.io` |
+
+Ce sont les adresses publiées par GitHub
+([documentation](https://docs.github.com/fr/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site)) :
+un enregistrement par adresse, quatre de chaque famille. Aucun enregistrement de parking ou de redirection
+web ne doit subsister sur `@` ou `www`. Le certificat HTTPS est émis par Let's Encrypt : un enregistrement CAA,
+s'il en était ajouté un, devrait l'autoriser.
+
+Trois éléments déclarent le domaine, et doivent rester d'accord :
+
+- le fichier **`CNAME`** à la racine, publié tel quel. GitHub Pages lit le domaine dans le CNAME de la branche
+  `gh-pages` : un déploiement qui ne le publierait plus retirerait le domaine des réglages du dépôt ;
+- **`site-url`** dans `_quarto.yml`, d'où viennent le plan du site, le flux RSS, les métadonnées de partage
+  et les liens absolus ;
+- l'adresse du plan du site dans **`robots.txt`**.
+
+`scripts/verifier_metadonnees.py` échoue si le CNAME manque au site rendu, si le plan du site, l'image
+d'aperçu ou `robots.txt` désignent un autre domaine, ou si un fichier publié désigne encore
+`elbachir67.github.io`.
 
 ## Email protégé
 
