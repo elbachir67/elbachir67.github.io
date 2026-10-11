@@ -867,6 +867,13 @@ def inline(texte: str, conversion: Conversion) -> str:
     # qui suit `\fg` appartient à la phrase, et reste.
     texte = re.sub(r"\\og\s*(?:\{\})?\s*", "«\u00a0", texte)
     texte = re.sub(r"\s*\\fg(?![A-Za-z])(?:\{\})?", "\u00a0»", texte)
+    # Guillemets écrits directement, avec l'espace fine de LaTeX : « «\,mot\,» » (Programmation
+    # Frontend 1). Non traité, `\,` arrivait tel quel dans le Markdown, qui le lit comme une virgule
+    # échappée : la page affichait « «,Je voudrais le thiéboudienne,» ». L'espace fine insécable est
+    # celle que LaTeX compose. Restreint aux guillemets : les autres `\,` du texte (« 80\,% »)
+    # sont un autre chantier, qui changerait des cours déjà en ligne.
+    texte = re.sub(r"«\s*\\,\s*", "«\u202f", texte)
+    texte = re.sub(r"\s*\\,\s*»", "\u202f»", texte)
     # `\href{adresse}{texte}` -> lien Markdown.
     while trouve := re.search(r"\\href\s*\{", texte):
         fin_un = accolade(texte, trouve.end() - 1)
