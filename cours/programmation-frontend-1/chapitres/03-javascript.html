@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="">
+<meta name="description" content="Séance 3 de Programmation Frontend 1 : pourquoi JavaScript, le fichier et la console, les variables, les opérateurs et les conditions, les boucles et les fonctions.">
+
+<title>JavaScript – El Hadji Bassirou Touré</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-639da919b385bb507a4f256153ea904f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-3016115760a7587aebc8f122ce85bbae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-639da919b385bb507a4f256153ea904f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+<link rel="preload" href="../../../site_libs/bootstrap/assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="JavaScript – El Hadji Bassirou Touré">
+<meta property="og:description" content="Séance 3 de Programmation Frontend 1 : pourquoi JavaScript, le fichier et la console, les variables, les opérateurs et les conditions, les boucles et les fonctions.">
+<meta property="og:image" content="https://ebtoure.sn/assets/img/profil.jpg">
+<meta property="og:site_name" content="El Hadji Bassirou Touré">
+<meta property="og:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<meta name="twitter:title" content="JavaScript – El Hadji Bassirou Touré">
+<meta name="twitter:description" content="Séance 3 de Programmation Frontend 1 : pourquoi JavaScript, le fichier et la console, les variables, les opérateurs et les conditions, les boucles et les fonctions.">
+<meta name="twitter:image" content="https://ebtoure.sn/assets/img/profil.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image:alt" content="Portrait d'El Hadji Bassirou Touré">
+<link rel="alternate" type="application/rss+xml" title="Blog — El Hadji Bassirou Touré" href="/blog/index.xml">
+</head>
+
+<body class="floating nav-fixed cours-page quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">El Hadji Bassirou Touré</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Accueil</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../recherche/index.html"> 
+<span class="menu-text">Recherche</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../publications/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../enseignement/index.html"> 
+<span class="menu-text">Enseignement</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../cv/index.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../en/" rel="alternate"> 
+<span class="menu-text">English</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sur cette page</h2>
+   
+  <ul>
+  <li><a href="#introduction-de-la-maison-figée-à-la-maison-vivante" id="toc-introduction-de-la-maison-figée-à-la-maison-vivante" class="nav-link active" data-scroll-target="#introduction-de-la-maison-figée-à-la-maison-vivante">Introduction : de la maison figée à la maison vivante</a></li>
+  <li><a href="#pourquoi-javascript-les-trois-couches-du-web" id="toc-pourquoi-javascript-les-trois-couches-du-web" class="nav-link" data-scroll-target="#pourquoi-javascript-les-trois-couches-du-web">Pourquoi JavaScript ? Les trois couches du Web</a>
+  <ul class="collapse">
+  <li><a href="#html-décrit-css-habille-javascript-anime" id="toc-html-décrit-css-habille-javascript-anime" class="nav-link" data-scroll-target="#html-décrit-css-habille-javascript-anime">HTML décrit, CSS habille, JavaScript anime</a></li>
+  <li><a href="#concrètement-quest-ce-que-javascript-sait-faire" id="toc-concrètement-quest-ce-que-javascript-sait-faire" class="nav-link" data-scroll-target="#concrètement-quest-ce-que-javascript-sait-faire">Concrètement, qu’est-ce que JavaScript sait faire ?</a></li>
+  <li><a href="#une-petite-histoire-vraie" id="toc-une-petite-histoire-vraie" class="nav-link" data-scroll-target="#une-petite-histoire-vraie">Une petite histoire (vraie)</a></li>
+  </ul></li>
+  <li><a href="#où-vit-le-javascript-le-fichier-et-la-console" id="toc-où-vit-le-javascript-le-fichier-et-la-console" class="nav-link" data-scroll-target="#où-vit-le-javascript-le-fichier-et-la-console">Où vit le JavaScript ? Le fichier et la console</a>
+  <ul class="collapse">
+  <li><a href="#brancher-un-fichier-javascript-à-une-page" id="toc-brancher-un-fichier-javascript-à-une-page" class="nav-link" data-scroll-target="#brancher-un-fichier-javascript-à-une-page">Brancher un fichier JavaScript à une page</a></li>
+  <li><a href="#la-console-le-laboratoire-du-développeur" id="toc-la-console-le-laboratoire-du-développeur" class="nav-link" data-scroll-target="#la-console-le-laboratoire-du-développeur">La console : le laboratoire du développeur</a></li>
+  </ul></li>
+  <li><a href="#les-variables-ranger-linformation" id="toc-les-variables-ranger-linformation" class="nav-link" data-scroll-target="#les-variables-ranger-linformation">Les variables : ranger l’information</a>
+  <ul class="collapse">
+  <li><a href="#une-variable-cest-un-casier-étiqueté" id="toc-une-variable-cest-un-casier-étiqueté" class="nav-link" data-scroll-target="#une-variable-cest-un-casier-étiqueté">Une variable, c’est un casier étiqueté</a></li>
+  <li><a href="#let-ou-const-deux-types-détiquettes" id="toc-let-ou-const-deux-types-détiquettes" class="nav-link" data-scroll-target="#let-ou-const-deux-types-détiquettes"><code>let</code> ou <code>const</code> : deux types d’étiquettes</a></li>
+  <li><a href="#les-types-de-base-la-nature-du-contenu" id="toc-les-types-de-base-la-nature-du-contenu" class="nav-link" data-scroll-target="#les-types-de-base-la-nature-du-contenu">Les types de base : la nature du contenu</a></li>
+  <li><a href="#insérer-une-valeur-dans-un-texte-les-template-strings" id="toc-insérer-une-valeur-dans-un-texte-les-template-strings" class="nav-link" data-scroll-target="#insérer-une-valeur-dans-un-texte-les-template-strings">Insérer une valeur dans un texte : les <em>template strings</em></a></li>
+  </ul></li>
+  <li><a href="#opérateurs-et-conditions-faire-des-choix" id="toc-opérateurs-et-conditions-faire-des-choix" class="nav-link" data-scroll-target="#opérateurs-et-conditions-faire-des-choix">Opérateurs et conditions : faire des choix</a>
+  <ul class="collapse">
+  <li><a href="#les-opérateurs-calculer-et-comparer" id="toc-les-opérateurs-calculer-et-comparer" class="nav-link" data-scroll-target="#les-opérateurs-calculer-et-comparer">Les opérateurs : calculer et comparer</a></li>
+  <li><a href="#la-condition-if-un-aiguillage" id="toc-la-condition-if-un-aiguillage" class="nav-link" data-scroll-target="#la-condition-if-un-aiguillage">La condition <code>if</code> : un aiguillage</a></li>
+  <li><a href="#le-ternaire-un-if-en-une-ligne" id="toc-le-ternaire-un-if-en-une-ligne" class="nav-link" data-scroll-target="#le-ternaire-un-if-en-une-ligne">Le ternaire : un <code>if</code> en une ligne</a></li>
+  </ul></li>
+  <li><a href="#les-boucles-répéter-sans-se-fatiguer" id="toc-les-boucles-répéter-sans-se-fatiguer" class="nav-link" data-scroll-target="#les-boucles-répéter-sans-se-fatiguer">Les boucles : répéter sans se fatiguer</a>
+  <ul class="collapse">
+  <li><a href="#pourquoi-des-boucles" id="toc-pourquoi-des-boucles" class="nav-link" data-scroll-target="#pourquoi-des-boucles">Pourquoi des boucles ?</a></li>
+  <li><a href="#la-boucle-for-classique" id="toc-la-boucle-for-classique" class="nav-link" data-scroll-target="#la-boucle-for-classique">La boucle <code>for</code> classique</a></li>
+  <li><a href="#la-boucle-for...of-pour-chaque" id="toc-la-boucle-for...of-pour-chaque" class="nav-link" data-scroll-target="#la-boucle-for...of-pour-chaque">La boucle <code>for...of</code> : « pour chaque »</a></li>
+  </ul></li>
+  <li><a href="#les-fonctions-des-machines-réutilisables" id="toc-les-fonctions-des-machines-réutilisables" class="nav-link" data-scroll-target="#les-fonctions-des-machines-réutilisables">Les fonctions : des machines réutilisables</a>
+  <ul class="collapse">
+  <li><a href="#quest-ce-quune-fonction" id="toc-quest-ce-quune-fonction" class="nav-link" data-scroll-target="#quest-ce-quune-fonction">Qu’est-ce qu’une fonction ?</a></li>
+  <li><a href="#écrire-et-appeler-une-fonction" id="toc-écrire-et-appeler-une-fonction" class="nav-link" data-scroll-target="#écrire-et-appeler-une-fonction">Écrire et appeler une fonction</a></li>
+  <li><a href="#les-fonctions-fléchées-une-autre-écriture" id="toc-les-fonctions-fléchées-une-autre-écriture" class="nav-link" data-scroll-target="#les-fonctions-fléchées-une-autre-écriture">Les fonctions fléchées : une autre écriture</a></li>
+  </ul></li>
+  <li><a href="#mini-exercice-en-classe-le-convertisseur-de-température" id="toc-mini-exercice-en-classe-le-convertisseur-de-température" class="nav-link" data-scroll-target="#mini-exercice-en-classe-le-convertisseur-de-température">Mini-exercice en classe : le convertisseur de température</a></li>
+  <li><a href="#résumé-et-transition" id="toc-résumé-et-transition" class="nav-link" data-scroll-target="#résumé-et-transition">Résumé et transition</a>
+  <ul class="collapse">
+  <li><a href="#aide-mémoire-du-cm3" id="toc-aide-mémoire-du-cm3" class="nav-link" data-scroll-target="#aide-mémoire-du-cm3">Aide-mémoire du CM3</a></li>
+  <li><a href="#les-trois-règles-dor-à-ne-jamais-oublier" id="toc-les-trois-règles-dor-à-ne-jamais-oublier" class="nav-link" data-scroll-target="#les-trois-règles-dor-à-ne-jamais-oublier">Les trois règles d’or à ne jamais oublier</a></li>
+  <li><a href="#ce-quon-fera-au-prochain-tp" id="toc-ce-quon-fera-au-prochain-tp" class="nav-link" data-scroll-target="#ce-quon-fera-au-prochain-tp">Ce qu’on fera au prochain TP</a></li>
+  </ul></li>
+  <li>Ressources du chapitre</li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">JavaScript</h1>
+</div>
+
+<div>
+  <div class="description">
+    Séance 3 de Programmation Frontend 1 : pourquoi JavaScript, le fichier et la console, les variables, les opérateurs et les conditions, les boucles et les fonctions.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="encadre-prereqbox callout callout-style-default callout-note callout-titled" title="Informations pratiques">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Informations pratiques
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Où sommes-nous dans le cours ?</strong> Vos pages Jàng Afrig sont jolies, responsives…&nbsp;mais elles ne <em>font</em> rien. On clique sur un bouton : il ne se passe rien. C’est le moment d’ajouter la troisième et dernière brique du Web.</p>
+<p><strong>Ce que vous devez déjà avoir :</strong></p>
+<ul>
+<li>L’environnement du Lab&nbsp;0 prêt (VS Code, Live Server, Git, repo <code>jang-afrig</code>).</li>
+<li>Les bases d’algorithmique du S1 : variable, condition, boucle, fonction (en pseudo-code).</li>
+<li>Le HTML et le CSS des séances précédentes (CM1, CM2, Labs 1 à 4).</li>
+</ul>
+<p><strong>Bonne nouvelle :</strong> vous <em>connaissez déjà</em> la plupart des idées de ce CM. Vous les avez vues en algorithmique. Aujourd’hui, on leur donne une vraie syntaxe, dans un vrai langage, qui s’exécute dans votre navigateur.</p>
+<p><strong>Et après ?</strong> Au Lab&nbsp;5, vous quittez la console pour écrire votre premier fichier <code>script.js</code> et coder des fonctions concrètes (convertisseur FCFA, calcul de moyenne, etc.).</p>
+</div>
+</div>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="Objectifs du CM3">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Objectifs du CM3
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>À la fin de cette séance, vous serez capable de :</p>
+<ol type="1">
+<li>Expliquer <strong>pourquoi</strong> JavaScript existe et ce qu’il ajoute à HTML/CSS.</li>
+<li>Ouvrir la <strong>console</strong> de votre navigateur et y exécuter du code.</li>
+<li>Déclarer des <strong>variables</strong> (<code>let</code>, <code>const</code>) et reconnaître les types de base.</li>
+<li>Écrire des <strong>conditions</strong> et utiliser les bons <strong>opérateurs</strong> (<code>===</code>, <code>&amp;&amp;</code>, <code>||</code>).</li>
+<li>Écrire des <strong>boucles</strong> (<code>for</code>, <code>for...of</code>) pour répéter une action.</li>
+<li>Écrire et appeler une <strong>fonction</strong> qui reçoit des informations et renvoie un résultat.</li>
+</ol>
+</div>
+</div>
+<section id="introduction-de-la-maison-figée-à-la-maison-vivante" class="level2">
+<h2 class="anchored" data-anchor-id="introduction-de-la-maison-figée-à-la-maison-vivante">Introduction : de la maison figée à la maison vivante</h2>
+<p>Depuis le début du cours, on construit une <strong>maison</strong>. Au CM1, on a posé les <em>murs et les pièces</em> : c’est le HTML, la structure. Aux CM2 et aux Labs CSS, on a fait la <em>peinture, le carrelage, la décoration</em> : c’est le CSS, l’apparence.</p>
+<p>Mais une maison sans électricité, c’est une belle maison…&nbsp;morte. On appuie sur l’interrupteur : rien. On sonne à la porte : silence. C’est exactement l’état de vos pages Jàng Afrig en ce moment : magnifiques, mais inertes.</p>
+<p><strong>JavaScript, c’est l’électricité et le système nerveux de la maison.</strong> C’est lui qui fait que l’interrupteur allume la lumière, que la sonnette retentit quand on appuie, que le thermostat réagit. En clair : <strong>JavaScript fait <em>agir</em> la page</strong>.</p>
+<p><strong>La question de ce CM :</strong><br> <em>Qu’est-ce qu’un vrai langage de programmation, et qu’apporte JavaScript que HTML et CSS ne savent pas faire ?</em></p>
+</section>
+<section id="pourquoi-javascript-les-trois-couches-du-web" class="level2">
+<h2 class="anchored" data-anchor-id="pourquoi-javascript-les-trois-couches-du-web">Pourquoi JavaScript ? Les trois couches du Web</h2>
+<section id="html-décrit-css-habille-javascript-anime" class="level3">
+<h3 class="anchored" data-anchor-id="html-décrit-css-habille-javascript-anime">HTML décrit, CSS habille, JavaScript anime</h3>
+<p>Une page web moderne repose sur <strong>trois couches</strong> qui collaborent. Chacune a un rôle précis, et aucune ne fait le travail des autres.</p>
+<p><span class="figure-cours"><svg role="img" aria-label="HTML, la structure (les pièces, le squelette) : « Voici un bouton. » ; puis CSS, l'apparence (couleurs, polices, layout) : « Il est vert et arrondi. » ; puis JavaScript, le comportement (réactions, calculs, vie) : « Au clic, +1 au score ! »" class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="361.768628pt" height="84.067806pt" viewbox="-70.007476 -70.00748 361.768628 84.067806">
+<style type="text/css">
+@font-face{font-family:tikz-03-javascript-01-nf0;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:tikz-03-javascript-01-nf1;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:tikz-03-javascript-01-nf2;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAARsAAoAAAAAB2gAAAQgAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgQwKhziFZgsgAAE2AiQDPAQgBYIgByAbxwUAHoVNWTfWniQpcuZ3183n/c36mwA9UzIugowYK6ZOWf96YsLz3x/tvNunihsPKOGVlg0oDizawJrIAi20Lf+JAOb/XLpobY00ndEGtjfaB1z5+qLVjivsgO6wQAZ0IAd+IHi6zTrCQ4mhOKyOjjoBXALIMghA7/TxzxlLp1/fmEVSmQHBBCKBz6LXcUxfmBQZ0/DfCYBH5rz3KIf/AQAK4ADOOATgjDcO4MkeR1SkXKUaEk1P/Q0zwihj/iDvWK3pG/x/xQXnnXPSXntst9EG662LAMYO5avpAKQB5NZZHhaJyhRBEXL3gbWtyT3EysXKlTc7iLYuTFtgUQxD1fUc6cqCV5Kuy0aR/IoJjDKO8SInUvmVoh4vOX2TcIxOM8DbwItajieobayryE5VlSRRUWQd0K6WRvW8zoza8CBTeVAeXugGuVf+6x+nyPd19cYykdhBbLLFolg4rhMukBTZbMhUDDz3Sj2bR169PDZrlr0pDdKB1FvSwix5H8St7lxwZfrVhZenXZIFFnDQSNPr3k6yNMpouxmqIZ7JxmXGMfmksTBE2nPnUTzVLBaViERVGRiRXrYwTD7HWpmsy0bicZr7sVnHD3H7uD0nT89Avt4j57rW/xa2DSc90Xc/tBo1nRfjZrkLdY815PNau2mt2+dueM/mk7xJ3fmfHz92pvjQmvO9B84hAR/zVPff3tc/PCs2ZEK/8L2bFvzKCSVsXPrRjv+a2/9LOSqOE0qSf4Vnr2RKbECdltsSENNOcm3jjilBUk0LLaPStKH9SfaQqLN13QXxxaSBRFoPuyoHfl6soph0GovnPmenmqae88ENVoq6FfLVn1tW26FoTvPKolJ6aLlj6e2inw8nnowqDTKN+iFdqRV/t45DYG8IFs0jU+nUdfMGoqN6lrav3VafW0UKSWFOVZ+hWe3/yn4o+qz5p6o09E352+q35W9Q+Dw34fpfFQHD2tHvgjGZMXmxhEJNrX5VfWR4cilqzGs5duTZdBR9Jlg3v6hKaMjwntp72YPCMAjddjQe0PwuHVYjOGycvGn8mPEPaeNzz2b3/tNx9sDf6/K/d650rscNTpWF3y/b/TcAAES6PymtG9xll/2rFccDcNH/52Y+AVihAIDAXe6Q68P6j14BuT0/ITeBLhCXE6iLGU5xRF3HGnXJQHAy4BlvRNZHIeWFjFShqNahqObBIe6wRgB2QlYcDploCsKAbVCS8Tg2sS5g7HUTjtd2kTtfHNLMIDylNp1nUq8LXCm6icmgVBRvxCOx2aQNGemfNKRP4isNJMTGy8CP+wv0GtN/5Ji+g/2TYlPRZKjRRuipN39NNEOM5C/JEH0kUvQ2wkj9DTWEvwSx4uXhsmAIjl0zSm+9QA/jPXsvY/Q3strXYP6SxJ5qfAAAAA==) format('woff2');}
+
+</style>
+<g id="03-javascript-01-page1">
+<g stroke-miterlimit="10" transform="translate(-19.516763,-38.427932)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g stroke-width="0.8">
+<g stroke="#7373ff">
+<g fill="#f0f0ff">
+<g stroke-width="0.8">
+<g stroke="#7373ff">
+<g fill="#f0f0ff">
+<path d="M46.28006 31.29797H-46.28006C-48.48923 31.29797-50.28006 29.50714-50.28006 27.29797V-27.29797C-50.28006-29.50714-48.48923-31.29797-46.28006-31.29797H46.28006C48.48923-31.29797 50.28006-29.50714 50.28006-27.29797V27.29797C50.28006 29.50714 48.48923 31.29797 46.28006 31.29797ZM-50.28006-31.29797"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-46.94708,9.636)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-19.516763,-38.427932)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-01-nf2" font-size="8.966376" x="16.002126" y="-38.427932">HTML</text>
+<text font-family="tikz-03-javascript-01-nf1" font-size="7.970112" x="6.716117" y="-25.974632">La<tspan x="17.595001">s</tspan><tspan x="20.775072">truc</tspan><tspan x="34.125008">tur</tspan><tspan x="43.840573">e</tspan><tspan x="-14.352565" y="-15.015728">(les</tspan><tspan x=".375883">pièc</tspan><tspan x="14.180118">es,</tspan><tspan x="26.445801">le</tspan><tspan x="35.419828">squele</tspan><tspan x="57.377485">t</tspan><tspan x="59.911977">t</tspan><tspan x="62.494293">e)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g stroke="#73b9b9">
+<g fill="#f0f8f8">
+<g stroke-width="0.8">
+<g stroke="#73b9b9">
+<g fill="#f0f8f8">
+<path d="M177.16284 31.29797H84.60272C82.39355 31.29797 80.60272 29.50714 80.60272 27.29797V-27.29797C80.60272-29.50714 82.39355-31.29797 84.60272-31.29797H177.16284C179.37201-31.29797 181.16284-29.50714 181.16284-27.29797V27.29797C181.16284 29.50714 179.37201 31.29797 177.16284 31.29797ZM80.60272-31.29797"></path>
+</g>
+</g>
+</g>
+<g transform="translate(83.9357,9.598)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-19.516763,-38.427932)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-01-nf2" font-size="8.966376" x="19.866647" y="-38.427932">C<tspan x="24.83402">S</tspan><tspan x="29.657928">S</tspan></text>
+<text font-family="tikz-03-javascript-01-nf1" font-size="7.970112" x="7.301751" y="-25.974632">L<tspan x="10.553563">’</tspan><tspan x="12.02006">app</tspan><tspan x="24.772239">ar</tspan><tspan x="31.475102">enc</tspan><tspan x="43.254928">e</tspan><tspan x="-16.683971" y="-15.015728">(c</tspan><tspan x="-10.802028">ouleur</tspan><tspan x="10.90856">s,</tspan><tspan x="19.221067">polic</tspan><tspan x="35.424306">es,</tspan><tspan x="47.689989">lay</tspan><tspan x="57.429468">out)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g stroke="#ffa64c">
+<g fill="#fff5eb">
+<g stroke-width="0.8">
+<g stroke="#ffa64c">
+<g fill="#fff5eb">
+<path d="M308.04521 31.29797H215.48509C213.27592 31.29797 211.48509 29.50714 211.48509 27.29797V-27.29797C211.48509-29.50714 213.27592-31.29797 215.48509-31.29797H308.04521C310.25438-31.29797 312.04521-29.50714 312.04521-27.29797V27.29797C312.04521 29.50714 310.25438 31.29797 308.04521 31.29797ZM211.48509-31.29797"></path>
+</g>
+</g>
+</g>
+<g transform="translate(214.81807,9.2005)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-19.516763,-38.427932)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-01-nf2" font-size="8.966376" x="6.21534" y="-38.427932">Jav<tspan x="20.0146">aScrip</tspan><tspan x="44.860435">t</tspan></text>
+<text font-family="tikz-03-javascript-01-nf1" font-size="7.970112" x="-3.130974" y="-25.974632">L<tspan x=".646866">e</tspan><tspan x="7.588514">c</tspan><tspan x="11.055514">omport</tspan><tspan x="36.073696">ement</tspan><tspan x="-11.81025" y="-15.015728">(r</tspan><tspan x="-6.70938">é</tspan><tspan x="-2.867785">ac</tspan><tspan x="4.70382">tions,</tspan><tspan x="26.350325">c</tspan><tspan x="29.904993">alculs,</tspan><tspan x="54.269306">vie)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="1.2">
+<g fill="#595959" stroke="#595959">
+<path d="M50.68005 0H73.9747" fill="none"></path>
+<g transform="translate(70.24428,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M8.24968 0L1.93771 2.38663L4.03041 0L1.93771-2.38663Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g stroke-width="1.2">
+<g fill="#595959" stroke="#595959">
+<path d="M181.56284 0H204.85707" fill="none"></path>
+<g transform="translate(201.12665,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M8.24968 0L1.93771 2.38663L4.03041 0L1.93771-2.38663Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g transform="translate(-31.18668,-48.04012)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-19.516763,-38.427932)scale(-1,-1)">
+<g fill="#404040">
+<g stroke="none">
+<text font-family="tikz-03-javascript-01-nf0" font-size="7.970112" x="-19.516763" y="-38.427932"><tspan fill="#404040">«</tspan><tspan fill="#404040" x="-14.639048">V</tspan><tspan fill="#404040" x="-10.901069">oici</tspan><tspan fill="#404040" x="2.034429">un</tspan><tspan fill="#404040" x="11.973165">bout</tspan><tspan fill="#404040" x="27.004799">on.</tspan><tspan fill="#404040" x="39.339889">»</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(93.1321,-48.04012)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-19.516763,-38.427932)scale(-1,-1)">
+<g fill="#404040">
+<g stroke="none">
+<text font-family="tikz-03-javascript-01-nf0" font-size="7.970112" x="-19.516763" y="-38.427932"><tspan fill="#404040">«</tspan><tspan fill="#404040" x="-14.639048">Il</tspan><tspan fill="#404040" x="-9.083874">est</tspan><tspan fill="#404040" x="2.13008">v</tspan><tspan fill="#404040" x="5.668812">ert</tspan><tspan fill="#404040" x="16.404559">e</tspan><tspan fill="#404040" x="20.094719">t</tspan><tspan fill="#404040" x="24.279034">arr</tspan><tspan fill="#404040" x="33.930838">ondi.</tspan><tspan fill="#404040" x="52.418855">»</tspan></text>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(224.31848,-48.04012)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-19.516763,-38.427932)scale(-1,-1)">
+<g fill="#404040">
+<g stroke="none">
+<text font-family="tikz-03-javascript-01-nf0" font-size="7.970112" x="-19.516763" y="-38.427932"><tspan fill="#404040">«</tspan><tspan fill="#404040" x="-14.639048">A</tspan><tspan fill="#404040" x="-10.653994">u</tspan><tspan fill="#404040" x="-4.899567">clic,</tspan><tspan fill="#404040" x="9.422731">+1</tspan><tspan fill="#404040" x="18.668067">au</tspan><tspan fill="#404040" x="28.702444">sc</tspan><tspan fill="#404040" x="35.277793">or</tspan><tspan fill="#404040" x="42.020506">e</tspan><tspan fill="#404040" x="47.440189">!</tspan><tspan fill="#404040" x="51.813137">»</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+<p>Autrement dit :</p>
+<ul>
+<li><strong>HTML</strong> sait dire <em>« il y a un bouton ici »</em>. Il ne sait pas le rendre joli, ni le faire réagir.</li>
+<li><strong>CSS</strong> sait dire <em>« ce bouton est vert, arrondi, et grossit au survol »</em>. Mais il est incapable de compter, de décider, ou de mémoriser quoi que ce soit.</li>
+<li><strong>JavaScript</strong> est le seul des trois qui sait <strong>décider</strong>, <strong>calculer</strong>, <strong>réagir</strong>, <strong>retenir</strong>. C’est un <em>vrai langage de programmation</em>, comme le pseudo-code que vous avez appris, mais qui tourne pour de vrai dans le navigateur.</li>
+</ul>
+</section>
+<section id="concrètement-quest-ce-que-javascript-sait-faire" class="level3">
+<h3 class="anchored" data-anchor-id="concrètement-quest-ce-que-javascript-sait-faire">Concrètement, qu’est-ce que JavaScript sait faire ?</h3>
+<p>Voici quelques exemples que l’on rencontrera dans Jàng Afrig :</p>
+<ul>
+<li><strong>Réagir</strong> à un clic sur le bouton « Capitales » et afficher la page Quiz.</li>
+<li><strong>Calculer</strong> le score (+1 à chaque bonne réponse) et le comparer à 10.</li>
+<li><strong>Modifier</strong> le texte d’une question sans recharger la page.</li>
+<li><strong>Mémoriser</strong> les meilleurs scores du joueur.</li>
+<li><strong>Parler</strong> à un service en ligne (l’API REST Countries) pour récupérer les 54 pays.</li>
+</ul>
+<p>Rien de tout cela n’est possible avec HTML et CSS seuls. C’est pour ça que JavaScript existe.</p>
+</section>
+<section id="une-petite-histoire-vraie" class="level3">
+<h3 class="anchored" data-anchor-id="une-petite-histoire-vraie">Une petite histoire (vraie)</h3>
+<p>JavaScript a été créé en <strong>1995</strong> par <strong>Brendan Eich</strong>, un ingénieur de Netscape (le navigateur de l’époque). On lui a demandé un langage pour rendre les pages interactives…&nbsp;et il l’a conçu en <strong>dix jours</strong>. Oui, dix jours pour un langage qui fait aujourd’hui tourner la quasi-totalité du Web mondial.</p>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Le saviez-vous ?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Le saviez-vous ?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le nom « JavaScript » est un coup de <em>marketing</em>. À l’époque, le langage « Java » était à la mode, alors Netscape a choisi un nom qui sonnait pareil pour profiter de la hype. Mais attention : <strong>Java et JavaScript sont deux langages totalement différents</strong>, aussi proches que « carotte » et « carotté ». Ne les confondez jamais.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="où-vit-le-javascript-le-fichier-et-la-console" class="level2">
+<h2 class="anchored" data-anchor-id="où-vit-le-javascript-le-fichier-et-la-console">Où vit le JavaScript ? Le fichier et la console</h2>
+<section id="brancher-un-fichier-javascript-à-une-page" class="level3">
+<h3 class="anchored" data-anchor-id="brancher-un-fichier-javascript-à-une-page">Brancher un fichier JavaScript à une page</h3>
+<p>Comme pour le CSS (qu’on relie avec <code>&lt;link&gt;</code>), on écrit le JavaScript dans un fichier séparé, en général nommé <code>script.js</code>, et on le <em>branche</em> à la page HTML avec la balise <code>&lt;script&gt;</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;!DOCTYPE</span> html<span class="dt">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="ot"> lang</span><span class="op">=</span><span class="st">"fr"</span><span class="dt">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> charset</span><span class="op">=</span><span class="st">"UTF-8"</span><span class="dt">&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>Jàng Afrig<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">link</span><span class="ot"> rel</span><span class="op">=</span><span class="st">"stylesheet"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"style.css"</span><span class="dt">&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> src</span><span class="op">=</span><span class="st">"script.js"</span><span class="ot"> defer</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Jàng Afrig<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">button</span><span class="dt">&gt;</span>Commencer<span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Deux mots importants ici :</p>
+<ul>
+<li><code>src="script.js"</code> indique <em>où</em> se trouve le code, exactement comme <code>href</code> pour une feuille de style.</li>
+<li><code>defer</code> dit au navigateur : <em>« charge ce script, mais ne l’exécute qu’une fois toute la page construite »</em>.</li>
+</ul>
+<p><strong>Pourquoi <code>defer</code> ?</strong> Imaginez un invité qui arrive pour réparer l’électricité d’une salle de fête. S’il commence à brancher les câbles <em>avant</em> que les tables et les prises soient installées, il ne trouve rien et tout plante. <code>defer</code> lui dit : <em>« attends que la salle soit prête, ensuite tu travailles »</em>. Sans <code>defer</code>, le JavaScript essaie souvent d’agir sur des éléments qui n’existent pas encore : c’est une source de bugs classique. <strong>Dans ce cours, on mettra toujours <code>defer</code>.</strong></p>
+<p><span class="figure-cours"><svg role="img" aria-label="Le navigateur lit le HTML de haut en bas, puis construit la page (tous les éléments) ; le script defer attend sagement ; page prête : le JS s'exécute, et JS peut lire et modifier la page." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="331.290341pt" height="112.144946pt" viewbox="-70.007476 -70.007476 331.290341 112.144946">
+<style type="text/css">
+@font-face{font-family:tikz-03-javascript-02-nf0;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAM4AAoAAAAABWAAAALsAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAATAqEJIM6CwwAATYCJAMOBCAFgiwHIBs5BAguB3gyspMFThVbVy3VgsWSCjzqUQXni3t+S/BE+7U3s3LnqFaaeGiWzBqePXEhIpZIRCiVfokfMq57NK5m9oQ32GAnM9HNSmyfpIajc4sSPJDFB+ioqDiihQY6shGuZ7okmxFt7l5sgiELC7Vt4mathWvTmN55QpFkcRRoVBiN+a89rZGwNwgTl9MfQE/PY5K+2IuNufK/BLoIEwrbuEACiSQNdANpg/MG4FBVwwWY3MoDDvrJ/6W0OrEn8gMQEsALUMFjMLdSmASSOWbL/x/BrvSO/YEQACgwoBSFgFJU3YCkOKXmyMiZQ0AtCSeRMILGYQ31gOB5eskw2DqsfWshL6PF4qasvlFxqhyQaY/bb97B7SecOOhB6mC8ZkKMbqbAzvFYuIzcdO4/veuXefRJ+m3Z9dApYsNiVgmZuj8ZO2vonRgO4ROAsVWQ1jfZMC3dH9cCNqtHphSUu8zyHrxNCUYRmZhxa0nTxI6oFz+fHoz/L5op4CwaP9iKLeaRtxRPkeyjGJP8SowisWXlEeh4lQxoXw90erWqVSTi5S/vtmvK0eGhGhxHN3TxjgzsdJyAv6dbHvfGmFRSX4NiVGV1tMaShOIo9uyPdpe5tLUdPeXk7WbfPE1jf2fi6O+yBheU8W18tKGxIS7d/qH7820cv/iPvpR1f+jbbGvc9g+9nGMTksa62P98agP83tKkyPWu+kK6jKFFGdt/dH9Wviv0enaN/XNx2nMYqpVledUwc3fS3ggACBDkBpJVogRs3zKWYG/40RLNgSFOZ6tnbIkeinhVwlWYpGHUMRXmdClC4DSvMyeYJm3BIrBIrVGWUUQ5KaWUZzSsTqqkjEI6gTDPukZZ3gzllIulPG9zTGpW+c2pPbGiMzOjLNHwTVAZ6RtWZ/53r48vTMkrTMpQNNE3B18iVip6gB8DKRkzcHo75hjC+81CxTBgRF8dA3o4/Xx5TSQjrWK5Mm48OxXLHQUdwIQ+cxQBnwAAAAA=) format('woff2');}
+@font-face{font-family:tikz-03-javascript-02-nf1;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+@font-face{font-family:tikz-03-javascript-02-nf2;src:url(data:application/x-font-woff2;base64,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) format('woff2');}
+
+</style>
+<g id="03-javascript-02-page1">
+<g stroke-miterlimit="10" transform="translate(-25.186176,-48.349147)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#7373ff">
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#7373ff">
+<path d="M41.58939 21.33955H-41.58939C-43.24626 21.33955-44.58939 19.99643-44.58939 18.33955V-18.33955C-44.58939-19.99643-43.24626-21.33955-41.58939-21.33955H41.58939C43.24626-21.33955 44.58939-19.99643 44.58939-18.33955V18.33955C44.58939 19.99643 43.24626 21.33955 41.58939 21.33955ZM-44.58939-21.33955"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-41.25641,6.77199)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-25.186176,-48.349147)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-02-nf2" font-size="7.970112" x="-7.023071" y="-48.349147">L<tspan x="-3.245231">e</tspan><tspan x="3.364364">navig</tspan><tspan x="21.313051">a</tspan><tspan x="25.218406">t</tspan><tspan x="27.800723">eur</tspan></text>
+<text font-family="tikz-03-javascript-02-nf1" font-size="7.970112" x="-3.712655" y="-38.884639">lit<tspan x="6.475521">le</tspan><tspan x="15.539911">HTML</tspan></text>
+<text font-family="tikz-03-javascript-02-nf2" font-size="7.970112" x="-9.930549" y="-29.420131">de<tspan x="1.102459">haut</tspan><tspan x="19.141195">en</tspan><tspan x="30.110443">b</tspan><tspan x="34.406334">as</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#73b9b9">
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#73b9b9">
+<path d="M162.86635 21.33955H79.68758C78.0307 21.33955 76.68758 19.99643 76.68758 18.33955V-18.33955C76.68758-19.99643 78.0307-21.33955 79.68758-21.33955H162.86635C164.52322-21.33955 165.86635-19.99643 165.86635-18.33955V18.33955C165.86635 19.99643 164.52322 21.33955 162.86635 21.33955ZM76.68758-21.33955"></path>
+</g>
+</g>
+</g>
+<g transform="translate(80.02055,2.562)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-25.186176,-48.349147)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-02-nf2" font-size="7.970112" x="-17.761185" y="-48.349147">Il</text>
+<text font-family="tikz-03-javascript-02-nf1" font-size="7.970112" x="-10.976247" y="-48.349147">c<tspan x="-7.477366">ons</tspan><tspan x="4.876304">truit</tspan><tspan x="23.536709">la</tspan><tspan x="32.67283">p</tspan><tspan x="37.152036">ag</tspan><tspan x="45.464866">e</tspan></text>
+<text font-family="tikz-03-javascript-02-nf2" font-size="7.970112" x="-16.512678" y="-38.884639">(t<tspan x="-11.515417">ous</tspan><tspan x="3.136022">les</tspan><tspan x="15.117473">élément</tspan><tspan x="42.590448">s)</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#b3b3b3">
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#b3b3b3">
+<path d="M284.14331 21.33955H200.96454C199.30766 21.33955 197.96454 19.99643 197.96454 18.33955V-18.33955C197.96454-19.99643 199.30766-21.33955 200.96454-21.33955H284.14331C285.80019-21.33955 287.14331-19.99643 287.14331-18.33955V18.33955C287.14331 19.99643 285.80019 21.33955 284.14331 21.33955ZM197.96454-21.33955"></path>
+</g>
+</g>
+</g>
+<g transform="translate(201.29752,2.87)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-25.186176,-48.349147)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-02-nf2" font-size="7.970112" x="-10.527128" y="-48.349147">L<tspan x="-6.749288">e</tspan><tspan x="-.139692">scrip</tspan><tspan x="15.848351">t</tspan></text>
+<text font-family="tikz-03-javascript-02-nf0" font-size="7.970112" x="21.198669" y="-48.349147">defer</text>
+<text font-family="tikz-03-javascript-02-nf1" font-size="7.970112" x="-13.383224" y="-38.884639">a<tspan x="-9.326434">t</tspan><tspan x="-6.433287">t</tspan><tspan x="-3.524193">end</tspan></text>
+<text font-family="tikz-03-javascript-02-nf2" font-size="7.970112" x="12.386524" y="-38.884639">sag<tspan x="23.648293">ement</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#ffa64c">
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#ffa64c">
+<path d="M162.86635-47.74684H79.68758C78.0307-47.74684 76.68758-49.08997 76.68758-50.74684V-87.42595C76.68758-89.08282 78.0307-90.42595 79.68758-90.42595H162.86635C164.52322-90.42595 165.86635-89.08282 165.86635-87.42595V-50.74684C165.86635-49.08997 164.52322-47.74684 162.86635-47.74684ZM76.68758-90.42595"></path>
+</g>
+</g>
+</g>
+<g transform="translate(80.02055,-67.22841)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-25.186176,-48.349147)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-02-nf2" font-size="7.970112" x="-4.513668" y="-48.349147">P<tspan x="-.345293">ag</tspan><tspan x="7.576999">e</tspan><tspan x="14.186595">pr</tspan><tspan x="21.295933">ê</tspan><tspan x="25.169405">t</tspan><tspan x="27.751722">e</tspan><tspan x="34.361318">:</tspan><tspan x="-10.35176" y="-38.884639">le</tspan></text>
+<text font-family="tikz-03-javascript-02-nf1" font-size="7.970112" x="-1.709786" y="-38.884639">JS<tspan x="9.434804">s</tspan><tspan x="12.838036">’</tspan><tspan x="14.87838">e</tspan><tspan x="18.87937">x</tspan><tspan x="22.768792">écut</tspan><tspan x="38.05547">e</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#ffa64c">
+<g stroke-width="0.8">
+<g fill="#fafafa">
+<g stroke="#ffa64c">
+<path d="M284.14331-47.74684H200.96454C199.30766-47.74684 197.96454-49.08997 197.96454-50.74684V-87.42595C197.96454-89.08282 199.30766-90.42595 200.96454-90.42595H284.14331C285.80019-90.42595 287.14331-89.08282 287.14331-87.42595V-50.74684C287.14331-49.08997 285.80019-47.74684 284.14331-47.74684ZM197.96454-90.42595"></path>
+</g>
+</g>
+</g>
+<g transform="translate(201.29752,-66.3324)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(-25.186176,-48.349147)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-02-nf2" font-size="7.970112" x="-9.213223" y="-48.349147">JS<tspan x="1.524891">peut</tspan></text>
+<text font-family="tikz-03-javascript-02-nf1" font-size="7.970112" x="19.587538" y="-48.349147">lir<tspan x="27.159143">e</tspan><tspan x="33.944081">e</tspan><tspan x="37.992896">t</tspan><tspan x="-12.977914" y="-38.884639">modifier</tspan></text>
+<text font-family="tikz-03-javascript-02-nf2" font-size="7.970112" x="19.917112" y="-38.884639">la<tspan x="28.622847">p</tspan><tspan x="32.934678">ag</tspan><tspan x="40.85697">e</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#595959" stroke="#595959">
+<path d="M44.98938 0H70.8552" fill="none"></path>
+<g transform="translate(67.75177,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M7.3966 0L1.29175 2.30243L3.30342 0L1.29175-2.30243Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#595959" stroke="#595959">
+<path d="M166.26634 0H192.13216" fill="none"></path>
+<g transform="translate(189.02873,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M7.3966 0L1.29175 2.30243L3.30342 0L1.29175-2.30243Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#595959" stroke="#595959">
+<path d="M242.55392-21.73955V-69.0864H171.69873" fill="none"></path>
+<g transform="matrix(-1.0,0.0,0.0,-1.0,174.80215,-69.0864)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M7.3966 0L1.29175 2.30243L3.30342 0L1.29175-2.30243Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g stroke-width="0.8">
+<g fill="#595959" stroke="#595959">
+<path d="M166.26634-69.0864H192.13216" fill="none"></path>
+<g transform="translate(189.02873,-69.0864)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M7.3966 0L1.29175 2.30243L3.30342 0L1.29175-2.30243Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+<p><em>Le chemin du JavaScript : il attend que la page soit prête, puis il l’anime.</em></p>
+</section>
+<section id="la-console-le-laboratoire-du-développeur" class="level3">
+<h3 class="anchored" data-anchor-id="la-console-le-laboratoire-du-développeur">La console : le laboratoire du développeur</h3>
+<p>Avant même d’écrire un fichier, on peut tester du JavaScript directement dans le navigateur, grâce à la <strong>console</strong>. C’est un petit espace où l’on tape du code et où l’on voit le résultat immédiatement, <strong>sans rien casser dans la page</strong>.</p>
+<p><strong>Analogie :</strong> la console est votre <em>cahier de brouillon</em> ou votre <em>paillasse de laboratoire</em>. On y teste une idée, on jette, on recommence. Aucun risque.</p>
+<p><strong>Comment l’ouvrir ?</strong> Sur n’importe quelle page, appuyez sur la touche <strong>F12</strong> (ou clic droit <span class="math inline">\(\rightarrow\)</span> <em>Inspecter</em>), puis cliquez sur l’onglet <strong>Console</strong>.</p>
+<p><strong>La commande reine : <code>console.log</code>.</strong> Elle sert à <strong>afficher un message</strong> dans la console. C’est l’équivalent du « Afficher » de votre pseudo-code.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">"Salam, Jàng Afrig !"</span>)<span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">"Bienvenue à Dakar"</span>)<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Démo en direct">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Démo en direct
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>On ouvre ensemble une page, on appuie sur <strong>F12</strong>, on va dans <strong>Console</strong>, et on tape <code>console.log("Salam")</code>. Le message s’affiche. On essaiera aussi une opération comme <code>2 + 3</code> : la console répond <code>5</code>. <strong>La console calcule !</strong></p>
+</div>
+</div>
+</section>
+</section>
+<section id="les-variables-ranger-linformation" class="level2">
+<h2 class="anchored" data-anchor-id="les-variables-ranger-linformation">Les variables : ranger l’information</h2>
+<section id="une-variable-cest-un-casier-étiqueté" class="level3">
+<h3 class="anchored" data-anchor-id="une-variable-cest-un-casier-étiqueté">Une variable, c’est un casier étiqueté</h3>
+<p>En algorithmique, vous avez déjà manipulé des <strong>variables</strong>. L’idée est identique en JavaScript : une variable est un <strong>casier</strong> dans lequel on range une valeur, et qui porte une <strong>étiquette</strong> (son nom) pour qu’on puisse la retrouver.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> score <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> ville <span class="op">=</span> <span class="st">"Dakar"</span><span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>On lit : <em>« range <code>0</code> dans le casier appelé <code>score</code> »</em> et <em>« range le texte <code>"Dakar"</code> dans le casier <code>ville</code> »</em>.</p>
+</section>
+<section id="let-ou-const-deux-types-détiquettes" class="level3">
+<h3 class="anchored" data-anchor-id="let-ou-const-deux-types-détiquettes"><code>let</code> ou <code>const</code> : deux types d’étiquettes</h3>
+<p>JavaScript propose deux façons de créer un casier, selon que son contenu va changer ou non.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Mot-clé</strong></th>
+<th><strong>Analogie</strong></th>
+<th><strong>Quand l’utiliser</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>const</code></td>
+<td>Une étiquette <strong>gravée</strong> : le contenu ne changera plus.</td>
+<td>Par défaut, presque toujours.</td>
+</tr>
+<tr class="even">
+<td><code>let</code></td>
+<td>Une <strong>ardoise</strong> effaçable : on pourra réécrire dedans.</td>
+<td>Seulement si la valeur doit changer (ex. un score qui augmente).</td>
+</tr>
+</tbody>
+</table>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="La règle d'or de ce cours">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>La règle d’or de ce cours
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong><code>const</code> par défaut.</strong> On n’utilise <code>let</code> que lorsqu’on est <em>sûr</em> que la valeur va changer. Et on n’utilise <strong>jamais</strong> l’ancien mot-clé <code>var</code> (vu dans de vieux codes) : il est source de bugs et appartient au passé.</p>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> score <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>     <span class="co">// va changer pendant le quiz -&gt; let</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> score <span class="op">+</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// autorisé : on réécrit l'ardoise</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> ville <span class="op">=</span> <span class="st">"Dakar"</span><span class="op">;</span> <span class="co">// ne changera pas -&gt; const</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">// ville = "Thiès";    // INTERDIT : erreur, l'étiquette est gravée</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="les-types-de-base-la-nature-du-contenu" class="level3">
+<h3 class="anchored" data-anchor-id="les-types-de-base-la-nature-du-contenu">Les types de base : la nature du contenu</h3>
+<p>Tout ce qu’on range dans un casier a une <strong>nature</strong>, qu’on appelle un <em>type</em>. Pour ce cours, trois types suffisent :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Type</strong></th>
+<th><strong>Ce que c’est</strong></th>
+<th><strong>Exemples</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>number</code></td>
+<td>Un nombre (entier ou décimal). <em>Pas de guillemets.</em></td>
+<td><code>0</code>, <code>54</code>, <code>19.5</code></td>
+</tr>
+<tr class="even">
+<td><code>string</code></td>
+<td>Du texte. <em>Toujours entre guillemets.</em></td>
+<td><code>"Dakar"</code>, <code>"Fatou"</code>, <code>"54"</code></td>
+</tr>
+<tr class="odd">
+<td><code>boolean</code></td>
+<td>Vrai ou faux. Deux valeurs seulement.</td>
+<td><code>true</code>, <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="Piège classique : `54` n'est pas `&quot;54&quot;`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Piège classique : <code>54</code> n’est pas <code>"54"</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>54</code> (sans guillemets) est un <strong>nombre</strong> : on peut l’additionner. <code>"54"</code> (avec guillemets) est un <strong>texte</strong> : c’est juste une suite de caractères. <code>2 + 2</code> donne <code>4</code>, mais <code>"2" + "2"</code> donne <code>"22"</code> (les textes se collent bout à bout). Surveillez bien vos guillemets !</p>
+</div>
+</div>
+</section>
+<section id="insérer-une-valeur-dans-un-texte-les-template-strings" class="level3">
+<h3 class="anchored" data-anchor-id="insérer-une-valeur-dans-un-texte-les-template-strings">Insérer une valeur dans un texte : les <em>template strings</em></h3>
+<p>On a souvent besoin de fabriquer une phrase à partir de variables. La façon moderne et lisible utilise des <strong>accents graves</strong> (le caractère <code>`</code>, touche en haut à gauche du clavier) et le motif <em>dollar-accolades</em> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> prenom <span class="op">=</span> <span class="st">"Aminata"</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> score <span class="op">=</span> <span class="dv">8</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="vs">`Bravo </span><span class="sc">${</span>prenom<span class="sc">}</span><span class="vs">, tu as </span><span class="sc">${</span>score<span class="sc">}</span><span class="vs"> bonnes réponses sur 10 !`</span>)<span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Affiche : Bravo Aminata, tu as 8 bonnes réponses sur 10 !</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Analogie :</strong> une <em>phrase à trous</em>. On écrit la phrase normalement, et là où on veut glisser une variable, on ouvre un « trou » avec <code>${...}</code>. JavaScript remplit les trous automatiquement.</p>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Démo en direct">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Démo en direct
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Dans la console, on déclare <code>const ville = "Saint-Louis"</code> puis on tape <code>`Je vais à ${ville}`</code>. La console fabrique la phrase complète sous nos yeux.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="opérateurs-et-conditions-faire-des-choix" class="level2">
+<h2 class="anchored" data-anchor-id="opérateurs-et-conditions-faire-des-choix">Opérateurs et conditions : faire des choix</h2>
+<section id="les-opérateurs-calculer-et-comparer" class="level3">
+<h3 class="anchored" data-anchor-id="les-opérateurs-calculer-et-comparer">Les opérateurs : calculer et comparer</h3>
+<p><strong>Opérateurs de calcul.</strong> Identiques aux mathématiques, à une exception près :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Opérateur</strong></th>
+<th><strong>Rôle</strong></th>
+<th><strong>Exemple</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>+</code> <code>-</code> <code>*</code> <code>/</code></td>
+<td>addition, soustraction, multiplication, division</td>
+<td><code>7 * 3</code> vaut <code>21</code></td>
+</tr>
+<tr class="even">
+<td><code>%</code></td>
+<td><strong>modulo</strong> : le <em>reste</em> d’une division</td>
+<td><code>17 % 5</code> vaut <code>2</code></td>
+</tr>
+</tbody>
+</table>
+<p>Le <strong>modulo</strong> mérite une explication. <em>Analogie :</em> on partage <strong>17 mangues</strong> entre <strong>5 enfants</strong>. Chacun en reçoit 3 (<span class="math inline">\(5 \times 3 = 15\)</span>), et il <strong>reste 2</strong> mangues. Le modulo, c’est ce reste : <code>17 % 5</code> vaut <code>2</code>. Très pratique pour savoir si un nombre est pair (<code>n % 2 === 0</code>) ou multiple de 5.</p>
+<p><strong>Opérateurs de comparaison.</strong> Ils renvoient toujours un booléen (<code>true</code> ou <code>false</code>) :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Opérateur</strong></th>
+<th><strong>Signifie</strong></th>
+<th><strong>Opérateur</strong></th>
+<th><strong>Signifie</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>===</code></td>
+<td>strictement égal</td>
+<td><code>!==</code></td>
+<td>strictement différent</td>
+</tr>
+<tr class="even">
+<td><code>&lt;</code> <code>&gt;</code></td>
+<td>plus petit / plus grand</td>
+<td><code>&lt;=</code> <code>&gt;=</code></td>
+<td>inférieur ou égal / supérieur ou égal</td>
+</tr>
+</tbody>
+</table>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Règle d'or : toujours `===`, jamais `==`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Règle d’or : toujours <code>===</code>, jamais <code>==</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>JavaScript possède deux opérateurs d’égalité : <code>==</code> (deux signes) et <code>===</code> (trois signes). Le premier est <em>laxiste</em> : il considère que le nombre <code>5</code> et le texte <code>"5"</code> sont égaux, ce qui crée des bugs sournois. Le second, <code>===</code>, est <em>strict</em> : il vérifie aussi le type. <strong>Dans ce cours, on utilise toujours <code>===</code> (et <code>!==</code>).</strong></p>
+</div>
+</div>
+<p><strong>Opérateurs logiques.</strong> Pour combiner plusieurs conditions :</p>
+<ul>
+<li><code>&amp;&amp;</code> (<strong>ET</strong>) : vrai seulement si <em>les deux</em> conditions sont vraies.</li>
+<li><code>||</code> (<strong>OU</strong>) : vrai si <em>au moins une</em> condition est vraie.</li>
+</ul>
+<p><em>Analogie :</em> pour entrer à un concours, il faut être inscrit <strong>ET</strong> avoir sa carte d’étudiant (les deux). Pour avoir une réduction, il suffit d’être étudiant <strong>OU</strong> d’avoir moins de 18 ans (l’un suffit).</p>
+</section>
+<section id="la-condition-if-un-aiguillage" class="level3">
+<h3 class="anchored" data-anchor-id="la-condition-if-un-aiguillage">La condition <code>if</code> : un aiguillage</h3>
+<p>Une condition permet à votre programme de <strong>choisir un chemin</strong> selon la situation. <em>Analogie :</em> un aiguillage de train, ou un panneau routier « si la route est barrée, prenez à droite ».</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> age <span class="op">=</span> <span class="dv">20</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (age <span class="op">&gt;=</span> <span class="dv">18</span>) {</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">"Vous êtes majeur."</span>)<span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">"Vous êtes mineur."</span>)<span class="op">;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>On peut enchaîner plusieurs cas avec <code>else if</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> note <span class="op">=</span> <span class="dv">14</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (note <span class="op">&gt;=</span> <span class="dv">16</span>) {</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">"Très bien"</span>)<span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (note <span class="op">&gt;=</span> <span class="dv">12</span>) {</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">"Bien"</span>)<span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (note <span class="op">&gt;=</span> <span class="dv">10</span>) {</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">"Passable"</span>)<span class="op">;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">"À retravailler"</span>)<span class="op">;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="le-ternaire-un-if-en-une-ligne" class="level3">
+<h3 class="anchored" data-anchor-id="le-ternaire-un-if-en-une-ligne">Le ternaire : un <code>if</code> en une ligne</h3>
+<p>Quand le choix est simple (deux issues seulement), on peut écrire la condition de façon condensée avec l’opérateur <strong>ternaire</strong> <code>condition ? valeurSiVrai : valeurSiFaux</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> age <span class="op">=</span> <span class="dv">20</span><span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> statut <span class="op">=</span> age <span class="op">&gt;=</span> <span class="dv">18</span> <span class="op">?</span> <span class="st">"majeur"</span> <span class="op">:</span> <span class="st">"mineur"</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(statut)<span class="op">;</span> <span class="co">// "majeur"</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cela se lit : <em>« l’âge est-il <span class="math inline">\(\geq\)</span> 18 ? Si oui, “majeur” ; sinon, “mineur” »</em>. C’est exactement le même résultat que le <code>if/else</code> plus haut, en plus court.</p>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Démo en direct">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Démo en direct
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>On teste dans la console : on déclare <code>const score = 7</code>, puis on tape la condition <code>score &gt;= 5 ? "Réussi" : "Échoué"</code>. La console répond <code>"Réussi"</code>. On change <code>score</code> et on relance.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="les-boucles-répéter-sans-se-fatiguer" class="level2">
+<h2 class="anchored" data-anchor-id="les-boucles-répéter-sans-se-fatiguer">Les boucles : répéter sans se fatiguer</h2>
+<section id="pourquoi-des-boucles" class="level3">
+<h3 class="anchored" data-anchor-id="pourquoi-des-boucles">Pourquoi des boucles ?</h3>
+<p>Imaginez que vous deviez afficher les 10 questions d’un quiz, ou parcourir les 54 pays africains. Vous n’allez pas écrire 54 lignes à la main ! Une <strong>boucle</strong> répète une action automatiquement.</p>
+<p><em>Analogie :</em> faire l’appel en classe. Vous ne « réinventez » pas la consigne pour chaque étudiant ; vous appliquez la même action (« dire le nom, cocher présent ») à chacun, l’un après l’autre.</p>
+</section>
+<section id="la-boucle-for-classique" class="level3">
+<h3 class="anchored" data-anchor-id="la-boucle-for-classique">La boucle <code>for</code> classique</h3>
+<p>Elle répète un bloc un nombre précis de fois, à l’aide d’un <strong>compteur</strong> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Affiche les nombres de 1 à 5</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;=</span> <span class="dv">5</span><span class="op">;</span> i<span class="op">++</span>) {</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(i)<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Les trois parties entre parenthèses se lisent : <em>« je pars de <code>i = 1</code> ; je continue tant que <code>i &lt;= 5</code> ; à chaque tour j’ajoute 1 à <code>i</code> (<code>i++</code>) »</em>.</p>
+</section>
+<section id="la-boucle-for...of-pour-chaque" class="level3">
+<h3 class="anchored" data-anchor-id="la-boucle-for...of-pour-chaque">La boucle <code>for...of</code> : « pour chaque »</h3>
+<p>Quand on a une <strong>liste</strong> (un tableau) et qu’on veut traiter <em>chaque</em> élément, <code>for...of</code> est plus simple et plus lisible :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> villes <span class="op">=</span> [<span class="st">"Dakar"</span><span class="op">,</span> <span class="st">"Thiès"</span><span class="op">,</span> <span class="st">"Saint-Louis"</span><span class="op">,</span> <span class="st">"Ziguinchor"</span>]<span class="op">;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (<span class="kw">const</span> ville <span class="kw">of</span> villes) {</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="vs">`Ville : </span><span class="sc">${</span>ville<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>On lit : <em>« pour chaque <code>ville</code> de la liste <code>villes</code>, affiche-la »</em>. <em>Analogie :</em> distribuer une copie d’examen à chaque étudiant de la rangée, un par un, sans en oublier.</p>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="À venir au Lab 6">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>À venir au Lab 6
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Il existe des façons encore plus élégantes de parcourir des listes : <code>forEach</code>, <code>map</code>, <code>filter</code>. On les découvrira au Lab&nbsp;6. Pour aujourd’hui, <code>for</code> et <code>for...of</code> suffisent largement.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="les-fonctions-des-machines-réutilisables" class="level2">
+<h2 class="anchored" data-anchor-id="les-fonctions-des-machines-réutilisables">Les fonctions : des machines réutilisables</h2>
+<section id="quest-ce-quune-fonction" class="level3">
+<h3 class="anchored" data-anchor-id="quest-ce-quune-fonction">Qu’est-ce qu’une fonction ?</h3>
+<p>Une <strong>fonction</strong> est un <strong>bloc de code réutilisable</strong> : on l’écrit une fois, on lui donne un nom, et on peut l’appeler autant de fois qu’on veut.</p>
+<p><em>Analogie :</em> un <strong>distributeur de jus</strong>. On y met une pièce (l’<strong>entrée</strong>), la machine fait son travail à l’intérieur (le <strong>traitement</strong>), et elle rend un jus (la <strong>sortie</strong>). Une fonction, c’est pareil : elle reçoit des informations, les transforme, et renvoie un résultat.</p>
+<p><span class="figure-cours"><svg role="img" aria-label="Entrée (largeur, hauteur) → fonction aireRectangle → sortie : l'aire (return)." class="schema-tikz" version="1.1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="312.325031pt" height="46.151482pt" viewbox="-70.007476 -70.007472 312.325031 46.151482">
+<style type="text/css">
+@font-face{font-family:tikz-03-javascript-03-nf0;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAS8AAoAAAAACLQAAARxAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAdAqKPId6CxYAATYCJAMYBCAFgiwHIBurBkAehXEbXRSV5oz+dyk0RKc1sxuwoFM6FYMK2Ny/D6qEnJxrsC+AB/jLvb/0gO9wUoPTxNI48EAXeECJxFHbs6z+BwDFOP+X0/sHdi1dAxMNOIIbjbVoLZvjedTLex6eNpe2gQMMWAJrqd2JQUN7xQsAGknwCigAckSe/KcCLg9m+E0TAZNABYBBApgQACvzNg2FgCRbfZb7b4/WB4Zh2f5n2QgAUK4KFKQSZHkUoHvbs+UrVKRMhRp16inbHc9zw4Zm0X59unXJUgB0NA1UqpkAPAFIhsm3PAAglomC/ouRoUt2pTJdtVwsLewq+6bMtu5qdUmCZTIjnH/ohnMFZyHOU6p9c7SZBTjpZn7PRSoFuqfpvdM8KJHo9D9xOX/v0Whuv7fKEUcm4+E4XyoF+yk1xriUPf1Iv3dWdZc3IuPdlhjUYnO01/W6plTmDSUSzsyOWpdG17DpNJ0ulXIlktdlvFHcumdkdFR9BeI4f/uB6uI9+vYxZ+TsdRH2/Lw4eSJE7S6HtiXCpOfxyr4pNVrXjGBWlQ5HV2g7Eg6g76axwwbUTJidB3rx0PNSLoY2V7LWVZNhPeE4cL5fw1UV9s3Ruha0JOhtuRdYxPl3jnPHbOS2jAfPkekZPN+v4upB3zr7/Km2wEWOqNYeR4KP8xkX98vsbdz4GEb+CzUNKX/G+R/9NrvUfR4D0+OoaGiQYe2f8QqBwPr7A6btP5GvGlBzepegySpG8tICZDm5umtvbfCjUsEr1hbMEhFDrWUd3CpI7r292WgJ8qIApsPMDiwLyUHymzJpSz/afZsWdOXKvR87yUKHqFoLx5hAxD8maBtUW6XXlPVvrQX/XmEOg7PTI+AH/+GuALn+dK1jJ6L5ESAoBr8a92CBbnwgySzwp/Mf+p3kv1xgUFZ6JKxi52+MqsXlHL1ELYhv4DQmJJUHuo3cfCsQegjAYuU0lOUIlBrKA1G/8E3WW0KjTxh3jK9w/JDQNSvhW6w3hRMAn9VXVvX6KMxY87CFbSrwZ4eAqI+V6CF4GFLeFMWs/cn6Soh9hSnNBN7ICCb8ijXsCL05RO9Tstv6ayHNKYvObKNA3hpyGsvJiinCL1lfCWMcY7be+aWwEjPS0jPhuoYgV8+Dy4sUfkwIrEr2Q+K/4okesN4UcRPkD9wO5BOm9nc8EE19odyYqH9H3zSr6qFseyKFc+zMOCQAJM4B+y/KdMxIS1n9XBWMNrPGrUg1kQe14ULJr1Hy5VcsznutmfLev1JQAkgL/1/UQmoBABQInfwqRoLUgIEUtaJc24I+PMzialuSwRuDAW0cN00TBeXV9lpk6IBEIEVYHgJ0X274RHQqgAT05bT7NBhBwUwFkBHPPT4BSRqfSE0On4SkKUnjoOOTuuJ2jm6oK2ZHgcP7p4dl57Df9C/h+byG4tqGwnIDJztXECVbnWIVDESrlCdfjdJV9GQBBzyIr1ZxYBtgsZNDQaiughLnhuTL8+RoXovnaVCs1lOo/AiJEzuuUJM0CAAA) format('woff2');}
+@font-face{font-family:tikz-03-javascript-03-nf1;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAATEAAoAAAAAB+gAAAR6AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgRQKiDCGOAsgAAE2AiQDPAQgBYIgByAbIQZRlA5OieLngm2rgPWGlgkx/+1iGn6IDIjhhgz+3ax5L8GSijg9o2pQrKJLgnXFBXadntqae0hOTL8Mq63hlUzbUG9I8T+KORF127t5fIHXQBLMJLNmEsw8our/kf7vU6dq3nKxXIDGpFjc16DQouwOWpNlL5FaS9jzWq1YEKm5NfWzhyqTgXMeiAY9w0/RBWDydl6kAnr17hfnhWLmp8RRFh2AqUHoAwJ47cjzaZlRuJJZ/H8IWOQAOqFQwCmAIeMwCMryfYppojDCPOFpA+RKtVZvsjhcy4UAKETeU+h9ikO22GyTjTZYZ623vbW/QTASCc7QHgdkA8jjAQugkAiomKAYFHnWGRYZoU3Wxavj9LpwVsfHRCVEnFWU5WWKq1WSfEFRbFMUv+xsDwaXSmKp4ooLnPKf5vsvQpJ4Fa8ERUkSPJyXowzf7/LLAicGZKesNFbbjkiFzacVezAoUC7nhOSEaogkpa+9O0wmSEmDvcZztk3zlCbTgzHHJCFcdg9EQfiSwmTCK90l0twxm12nct45r98lZyBVR/N5CGfX3zFQuyPtzZM8r0CSvMcf+x8FHvgeehQlUxa4LZV30tcGeYangwO7/Lv7d/p2iLJLxbNr9frsLWYonlfsF6xmFCFwp57qj7NfqerPF7Zx26RiKsqyi+GIy8WDB0ffvchv1Zec6DOcvkziArtSNtuvitIHh5tG2b4Ks33ZNLq6dljNZz/WfFo7HN7DVTKq/fTH2s/yH1ttHG39Msz6FSx7jd5COF5MCa8uSsmxGmCyDcPADY/GwieSMejoGWKN2pU3dGPq/LRh0zZQf7OjsgvTcI039rbAjAGvudZGlj5l27ihPf2ytnBEwQEPHJMwqMQ6f1KPPtFsNRtXzg8fXZepZZDMj4Z/BVlIF61eOQJDGNUr1s8tEMfsdYyxwkI/bP4YkSd+67JyXQx9acylMVixkiyk85evdmMoRi6cmFzdqXF4RZMd5d8Yi/DPV4OmWGAsspbOqYmMaHotzxJGescP6sSLt/aaxpBhtJl0j/J2Ql98uUA7qXTYXmY+7CuGzTxx4NzkPd4zk+9V+VvgqNUS0zDG+VlSFa9pM0D4o/KecCX/XPrL6p+xR9tH6MQZwrz4YWSfBsCVNq29rMeQ9RahF+qEYrJqCC24Zh3b/1k8z7dWbMj0RNvzU39rLt/XhN+0XTC60R7VauxguXW29SutK2PCS57ccDd1GVwnRrv7npqa8INGn/05EejNXAwACIBA/lvZEFv/t5ZhwTeFUru2vwC0KAAgcCaa6C35f5+hPpYi7RhkhyC+vV4IxbWLyqIsjxXlX4ayMPgXtqjQ22IIGSGMlxOCCQdEasAA8PxJzmLcI8LBnMUIV2gVXhStxkjdz0mSgUGGDkSKSkez1HpolQROWk1tYsYpNv0F2h7kywk/uaEPoEuGYur7zb+mevrzaWd4QyUcVrfj9OHgkI8/QZnJGsRpSoeO9lYIGYNiALDbC4ifu9Qqd7hf8kd69M7m1gzKGO41OgM=) format('woff2');}
+@font-face{font-family:tikz-03-javascript-03-nf2;src:url(data:application/x-font-woff2;base64,d09GMgABAAAAAAPgAAoAAAAABuAAAAOUAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAdAqGWIUlCxoAATYCJAMwBCAFgiAHIBtiBUAehU1ZN/aEqyjHn20Cgo6gfuy3974ZYo1EZsgMlUgySXilqzSxUokakldKgW7Hv3Pea50U9WDqVVxSzEPZHP2amkYmpp8b8T9wTl4FNVAUANQp0gb4aMsQP+jpQNVcVHo6HvjAN7fmJw6j5GDqbdigHraHTHzFNPBBuuHc/DOCqRaNL5dKQIiBkAdiBpxhbrW7DgSSfOTB/30gCw0Bgcz/DIRSbLSNDSCwPOWH6uHiSVKgSq0Gau06fYz0zQM1KPGbZk7sXrN65dLFi+whJKvwLngT0zeIOXRWII5hDqYi3GqPidDYmCduw8T19v5L+FiuRgKjRVvFEZOvOEpjbCy7Fi6/xshZVjFGR0kZOYUvvRkku0rLKKqCUU6l86Tbgi9QUpoei5Btoeo23cAxzTmlvBMNK8wka+mQsRzZEQrjlmMsmHPnIOkmrUvDgNFKlUwlzR6d0pweOzlyYrh85I5NoWkpRyuzuctx4RFXzkr+sUXL5YdZDbOQGqE9y2/ZMSfppks3fH1KFUgrxsawDMZMp4y5yI48yseXKjBjac6KdaRk7pvhN8tMSLCoJK152+VURKvsvIpRtI7PHrmDNEvFSUnSDXUDiiQ8DueUx/kmorxwl7Q+yezfJyogkXSrB+wrhPH5iEzk1fwmKImqweLFa3KjM1B8xA9k1Kojiv/JbMH09KVq/0G3CptVapj0v+/gyVgpNEfTfqOWsvdhqs+e8FjfosZSKyjey2hN51lB3ihRg2JTtHVTt0U7Su8u6i6aCwk/i34ykp2ReJT5KPXhxAX6JbHd2R6++ZC+AuX9i1yDP/2w3NKjAKtKtan5HDKRNnyl5lX23vHOmNsCJdaN/ycpPzL88sKsyJrpa/EuwC9Py18G5XNyaxZff/nQir7uvuuc/HcLpVmDJovKpQVdx1aTW7cBA1G/D58LY8+X6Ub+FXGzuML/n3Q+wwWKOOJ8H5ylTEj//0UyBfTq2/ftIPVBTgoDx3jGKRmAU5TQD0sIS+kSUig4xRJIiPmgjzgUZ/cA7ggCM2XDkA5oQ5HJ4tIeSTkYPSmPy3J1mRkbXChbglgILhKPQK7EZ0IuCQg0p7X4at+91RZUEB14AFHrv33y/Lx90fIr/A2quxs6uuta8ADvYCig1qVdlRq4AhUIHXABCLX8ydVo16GBGgHnx5svFUiJEzy0FTrVqPYq9VlttW4NOirrtMAF8M6pewIAAAA=) format('woff2');}
+
+</style>
+<g id="03-javascript-03-page1">
+<g stroke-miterlimit="10" transform="translate(93.60312,-46.931733)scale(0.996264,-0.996264)">
+<g fill="#000" stroke="#000">
+<g stroke-width="0.4">
+<g stroke-width="0.8">
+<g fill="#fff5eb">
+<g stroke="#ffa64c">
+<g stroke-width="0.8">
+<g fill="#fff5eb">
+<g stroke="#ffa64c">
+<path d="M44.36958 22.76228H-44.36958C-46.57875 22.76228-48.36958 20.97145-48.36958 18.76228V-18.76228C-48.36958-20.97145-46.57875-22.76228-44.36958-22.76228H44.36958C46.57875-22.76228 48.36958-20.97145 48.36958-18.76228V18.76228C48.36958 20.97145 46.57875 22.76228 44.36958 22.76228ZM-48.36958-22.76228"></path>
+</g>
+</g>
+</g>
+<g transform="translate(-22.82799,-7.8575)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(93.60312,-46.931733)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-03-nf2" font-size="8.966376" x="99.753564" y="-57.890637">f<tspan x="102.721438">onc</tspan><tspan x="116.924181">tion</tspan></text>
+<text font-family="tikz-03-javascript-03-nf1" font-size="7.970112" x="93.60312" y="-46.931733">air<tspan x="102.26663">eR</tspan><tspan x="110.675097">ec</tspan><tspan x="118.182941">t</tspan><tspan x="120.709467">angle</tspan></text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(-160.89116,-7.97649)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(93.60312,-46.931733)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-03-nf2" font-size="8.966376" x="111.89503" y="-57.890637">Entr<tspan x="128.850451">ée</tspan></text>
+<text font-family="tikz-03-javascript-03-nf0" font-size="7.970112" x="93.60312" y="-46.931733">largeur</text>
+<text font-family="tikz-03-javascript-03-nf1" font-size="7.970112" x="123.228027" y="-46.931733">,</text>
+<text font-family="tikz-03-javascript-03-nf0" font-size="7.970112" x="126.806613" y="-46.931733">hauteur</text>
+</g>
+</g>
+</g>
+</g>
+<g transform="translate(97.82713,-8.0495)">
+<g stroke="none" transform="scale(-1.00375,1.00375)translate(93.60312,-46.931733)scale(-1,-1)">
+<g fill="#000">
+<g stroke="none">
+<text font-family="tikz-03-javascript-03-nf2" font-size="8.966376" x="105.527414" y="-57.890637">Sortie</text>
+<text font-family="tikz-03-javascript-03-nf1" font-size="7.970112" x="93.60312" y="-46.931733">l’<tspan x="97.101995">air</tspan><tspan x="105.765505">e</tspan><tspan x="111.312709">(</tspan></text>
+<text font-family="tikz-03-javascript-03-nf0" font-size="7.970112" x="113.727653" y="-46.931733">return</text>
+<text font-family="tikz-03-javascript-03-nf1" font-size="7.970112" x="139.12043" y="-46.931733">)</text>
+</g>
+</g>
+</g>
+</g>
+<g stroke-width="1.2">
+<g fill="#595959" stroke="#595959">
+<path d="M-94.29416 0H-54.03731" fill="none"></path>
+<g transform="translate(-57.30539,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M6.82703 0L1.9376 1.85318L3.56807 0L1.9376-1.85318Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+<g stroke-width="1.2">
+<g fill="#595959" stroke="#595959">
+<path d="M48.76958 0H89.02643" fill="none"></path>
+<g transform="translate(85.75835,0.0)">
+<g stroke-dasharray="none" stroke-dashoffset="0.0">
+ <g stroke-linejoin="miter">
+ <path d="M6.82703 0L1.9376 1.85318L3.56807 0L1.9376-1.85318Z"></path>
+ </g>
+ </g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg></span></p>
+</section>
+<section id="écrire-et-appeler-une-fonction" class="level3">
+<h3 class="anchored" data-anchor-id="écrire-et-appeler-une-fonction">Écrire et appeler une fonction</h3>
+<p>On la déclare avec le mot-clé <code>function</code>, on liste ses <strong>paramètres</strong> (les entrées) entre parenthèses, et on renvoie le résultat avec <code>return</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Déclaration de la fonction</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">aireRectangle</span>(largeur<span class="op">,</span> hauteur) {</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> aire <span class="op">=</span> largeur <span class="op">*</span> hauteur<span class="op">;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> aire<span class="op">;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Appel de la fonction (on lui donne des valeurs)</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> a <span class="op">=</span> <span class="fu">aireRectangle</span>(<span class="dv">4</span><span class="op">,</span> <span class="dv">3</span>)<span class="op">;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(a)<span class="op">;</span> <span class="co">// 12</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="fu">aireRectangle</span>(<span class="dv">10</span><span class="op">,</span> <span class="dv">2</span>))<span class="op">;</span> <span class="co">// 20 : réutilisable à volonté !</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Quelques mots de vocabulaire :</p>
+<ul>
+<li>Les <strong>paramètres</strong> (<code>largeur</code>, <code>hauteur</code>) sont les noms des entrées dans la définition.</li>
+<li>Les <strong>arguments</strong> (<code>4</code>, <code>3</code>) sont les vraies valeurs qu’on donne lors de l’appel.</li>
+<li><code>return</code> renvoie le résultat à l’extérieur. Sans <code>return</code>, la fonction ne « rend » rien.</li>
+</ul>
+</section>
+<section id="les-fonctions-fléchées-une-autre-écriture" class="level3">
+<h3 class="anchored" data-anchor-id="les-fonctions-fléchées-une-autre-écriture">Les fonctions fléchées : une autre écriture</h3>
+<p>Vous croiserez souvent une écriture plus courte des fonctions, avec une « flèche » <code>=&gt;</code> :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Écriture classique</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">direBonjour</span>(nom) {</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="vs">`Bonjour </span><span class="sc">${</span>nom<span class="sc">}</span><span class="vs"> !`</span><span class="op">;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Exactement la même chose, en fonction fléchée</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> direBonjour2 <span class="op">=</span> (nom) <span class="kw">=&gt;</span> {</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="vs">`Bonjour </span><span class="sc">${</span>nom<span class="sc">}</span><span class="vs"> !`</span><span class="op">;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-attentionbox callout callout-style-default callout-warning callout-titled" title="Prenez-la telle quelle pour l'instant">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Avertissement</span>Prenez-la telle quelle pour l’instant
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>La fonction fléchée <code>() =&gt; { }</code> est juste une <strong>autre manière d’écrire une fonction</strong>, en plus court. Les deux versions ci-dessus font <em>exactement</em> la même chose. Pour aujourd’hui, contentez-vous de la reconnaître : on en aura besoin au Lab&nbsp;6 et au Lab&nbsp;7. <strong>Vous comprendrez tous ses détails en L2.</strong></p>
+</div>
+</div>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Démo en direct">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Démo en direct
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Dans la console, on définit ensemble <code>function carre(n) { return n * n; }</code>, puis on appelle <code>carre(7)</code>. La console répond <code>49</code>. On rappelle <code>carre(12)</code> : <code>144</code>. Une fonction écrite une fois, utilisée partout.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="mini-exercice-en-classe-le-convertisseur-de-température" class="level2">
+<h2 class="anchored" data-anchor-id="mini-exercice-en-classe-le-convertisseur-de-température">Mini-exercice en classe : le convertisseur de température</h2>
+<p>On met tout en pratique. À Dakar, il fait souvent autour de <strong>30 °C</strong>. Mais sur certains sites internationaux, les températures sont en <strong>degrés Fahrenheit</strong>. Écrivons une fonction qui fait la conversion.</p>
+<p><strong>Formule :</strong> <span class="math inline">\(\text{F} = \text{C} \times 1{,}8 + 32\)</span>.</p>
+<div class="encadre-objectifbox callout callout-style-default callout-note callout-titled" title="À faire ensemble, dans la console ou un fichier">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>À faire ensemble, dans la console ou un fichier
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>Écrire une fonction <code>celsiusVersFahrenheit(c)</code> qui reçoit une température en Celsius et <strong>renvoie</strong> la température en Fahrenheit.</li>
+<li>L’appeler avec <code>30</code> (la température de Dakar) et afficher le résultat avec une jolie phrase grâce à une <em>template string</em>.</li>
+<li><strong>Bonus :</strong> ajouter une condition qui affiche « Il fait chaud ! » si la température dépasse 28 °C, et « Température agréable » sinon (avec un <code>if/else</code> ou un ternaire).</li>
+</ol>
+</div>
+</div>
+<p><strong>Squelette de départ</strong> (à compléter ensemble) :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">celsiusVersFahrenheit</span>(c) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ... à compléter : renvoyer c * 1.8 + 32</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> tempDakar <span class="op">=</span> <span class="dv">30</span><span class="op">;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> enFahrenheit <span class="op">=</span> <span class="fu">celsiusVersFahrenheit</span>(tempDakar)<span class="op">;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="vs">`À Dakar, </span><span class="sc">${</span>tempDakar<span class="sc">}</span><span class="vs">°C = </span><span class="sc">${</span>enFahrenheit<span class="sc">}</span><span class="vs">°F`</span>)<span class="op">;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">// Bonus : message selon la chaleur</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> message <span class="op">=</span> tempDakar <span class="op">&gt;</span> <span class="dv">28</span> <span class="op">?</span> <span class="st">"Il fait chaud !"</span> <span class="op">:</span> <span class="st">"Température agréable"</span><span class="op">;</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(message)<span class="op">;</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="encadre-infobox callout callout-style-default callout-tip callout-titled" title="Second défi, si le temps le permet : conversion FCFA">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>Second défi, si le temps le permet : conversion FCFA
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Sur le même modèle, écrire <code>fcfaVersEuro(montant)</code> sachant que <strong>1 EUR = 656 FCFA</strong> (taux fixe). Tester avec <code>10000</code> FCFA. Indice : il faut <em>diviser</em> le montant par 656.</p>
+</div>
+</div>
+</section>
+<section id="résumé-et-transition" class="level2">
+<h2 class="anchored" data-anchor-id="résumé-et-transition">Résumé et transition</h2>
+<section id="aide-mémoire-du-cm3" class="level3">
+<h3 class="anchored" data-anchor-id="aide-mémoire-du-cm3">Aide-mémoire du CM3</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Notion</strong></th>
+<th><strong>À retenir</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Rôle de JS</td>
+<td>HTML structure, CSS habille, <strong>JS anime</strong> (décide, calcule, réagit).</td>
+</tr>
+<tr class="even">
+<td><code>&lt;script defer&gt;</code></td>
+<td>Brancher le JS, exécuté <em>après</em> la construction de la page.</td>
+</tr>
+<tr class="odd">
+<td>Console (F12)</td>
+<td>Le brouillon pour tester du code ; <code>console.log(...)</code> affiche.</td>
+</tr>
+<tr class="even">
+<td><code>const</code> / <code>let</code></td>
+<td><code>const</code> par défaut ; <code>let</code> si la valeur change ; jamais <code>var</code>.</td>
+</tr>
+<tr class="odd">
+<td>Types</td>
+<td><code>number</code>, <code>string</code> (avec guillemets), <code>boolean</code> (<code>true</code>/<code>false</code>).</td>
+</tr>
+<tr class="even">
+<td>Template string</td>
+<td>Phrase à trous : <code>`Bonjour ${nom}`</code>.</td>
+</tr>
+<tr class="odd">
+<td>Comparaison</td>
+<td>Toujours <code>===</code> et <code>!==</code> (jamais <code>==</code>).</td>
+</tr>
+<tr class="even">
+<td>Logique</td>
+<td><code>&amp;&amp;</code> (et), <code>||</code> (ou).</td>
+</tr>
+<tr class="odd">
+<td>Condition</td>
+<td><code>if / else if / else</code> ; ternaire <code>cond ? a : b</code>.</td>
+</tr>
+<tr class="even">
+<td>Boucles</td>
+<td><code>for</code> (compteur), <code>for...of</code> (« pour chaque »).</td>
+</tr>
+<tr class="odd">
+<td>Fonction</td>
+<td><code>function nom(params) { return ...  }</code> ; réutilisable.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="les-trois-règles-dor-à-ne-jamais-oublier" class="level3">
+<h3 class="anchored" data-anchor-id="les-trois-règles-dor-à-ne-jamais-oublier">Les trois règles d’or à ne jamais oublier</h3>
+<div class="encadre-retenirbox callout callout-style-default callout-important callout-titled" title="Les trois règles de ce cours">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Les trois règles de ce cours
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong><code>const</code> par défaut</strong>, <code>let</code> seulement si ça change. Jamais <code>var</code>.</li>
+<li><strong>Toujours <code>===</code></strong>, jamais <code>==</code>.</li>
+<li><strong>Toujours <code>defer</code></strong> sur la balise <code>&lt;script&gt;</code>.</li>
+</ol>
+</div>
+</div>
+</section>
+<section id="ce-quon-fera-au-prochain-tp" class="level3">
+<h3 class="anchored" data-anchor-id="ce-quon-fera-au-prochain-tp">Ce qu’on fera au prochain TP</h3>
+<p>Aujourd’hui, tout s’est passé dans la <strong>console</strong>, notre brouillon. Au <strong>Lab&nbsp;5</strong>, on passe au sérieux : on crée le fichier <code>script.js</code> dans le repo <code>jang-afrig</code>, on le branche à la page, et on écrit nos premières vraies fonctions, toutes tropicalisées :</p>
+<ul>
+<li>un convertisseur FCFA <span class="math inline">\(\rightarrow\)</span> EUR,</li>
+<li>le calcul de la moyenne d’un étudiant DUT1-Info,</li>
+<li>une fonction <code>estMajeur(age)</code>,</li>
+<li>un FizzBuzz « à la sénégalaise », et le test du palindrome.</li>
+</ul>
+<p><em>Votre maison Jàng Afrig a maintenant l’électricité. Au Lab&nbsp;5, on allume la première ampoule.</em></p>
+<p>Dr.&nbsp;El Hadji Bassirou TOURÉ — UCAD<br>Licence 1 DUT1-Informatique — Fondamentaux du Web — 2025–2026</p>
+</section>
+</section>
+<section class="level2">
+<h2 class="anchored" data-anchor-id="">Ressources du chapitre</h2>
+<ul>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-1/ressources/lab-5-javascript-en-pratique.pdf" class="seance-ressource" title="Lab 5 — JavaScript en pratique">Lab 5 — JavaScript en pratique</a> <span class="ressource-poids">(99 Ko)</span></li>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-1/ressources/lab-6-tableaux-et-objets.pdf" class="seance-ressource" title="Lab 6 — Tableaux et objets">Lab 6 — Tableaux et objets</a> <span class="ressource-poids">(114 Ko)</span></li>
+<li><strong>TP</strong> · <a href="../../../cours/programmation-frontend-1/ressources/lab-7-dom-et-evenements.pdf" class="seance-ressource" title="Lab 7 — DOM et événements">Lab 7 — DOM et événements</a> <span class="ressource-poids">(119 Ko)</span></li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Retour au sommet</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copié");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copié");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/ebtoure\.sn");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 El Hadji Bassirou Touré · DMI/FST/UCAD</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p><a href="https://scholar.google.com/citations?user=JsZhGvQAAAAJ" aria-label="Google Scholar"><i class="ai  ai-google-scholar" aria-label="google-scholar"></i></a> <a href="https://orcid.org/0009-0008-8554-8425" aria-label="ORCID"><i class="ai  ai-orcid" aria-label="orcid"></i></a> <a href="https://github.com/elbachir67" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a></p>
+</div>
+  </div>
+</footer>
+<script src="../../../assets/js/bascule-langue.js"></script>
+<script src="../../../assets/js/defilement-cours.js"></script>
+
+
+
+
+</body></html>
