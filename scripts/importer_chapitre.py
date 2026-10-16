@@ -370,6 +370,32 @@ def macros_du_theme(texte: str, preambule: str = "") -> str:
         fin = accolade(texte, trouve.end() - 1)
         texte = texte[:trouve.start()] + texte[trouve.end():fin] + texte[fin + 1:]
 
+    # `\parbox[pos]{largeur}{texte}` fixe la largeur d'un texte, souvent dans un `\fbox` — la
+    # question d'ouverture du CM3 de Programmation Frontend 1. La largeur est du style ; le texte
+    # reste, comme pour `\fbox`.
+    while trouve := re.search(r"\\parbox\s*(?:\[[^\]]*\]\s*)*\{", texte):
+        fin_largeur = accolade(texte, trouve.end() - 1)
+        suivant = re.match(r"\s*\{", texte[fin_largeur + 1:])
+        if not suivant:
+            break
+        debut = fin_largeur + 1 + suivant.end()
+        fin = accolade(texte, debut - 1)
+        texte = texte[:trouve.start()] + texte[debut:fin] + texte[fin + 1:]
+
+    # `\paragraph{Titre.} texte` : un titre en gras en tête de paragraphe, comme LaTeX l'imprime.
+    # Hors des blocs de code, où un exemple pourrait porter le même mot. Sans cette règle, six
+    # paragraphes du CM3 de Programmation Frontend 1 se signalaient comme non convertis.
+    morceaux = re.split(r"(\\begin\{(?:lstlisting|verbatim)\}.*?\\end\{(?:lstlisting|verbatim)\})",
+                        texte, flags=re.S)
+    for indice in range(0, len(morceaux), 2):
+        morceau = morceaux[indice]
+        while trouve := re.search(r"\\paragraph\*?\s*\{", morceau):
+            fin = accolade(morceau, trouve.end() - 1)
+            titre = morceau[trouve.end():fin]
+            morceau = morceau[:trouve.start()] + f"\n\n\\textbf{{{titre}}}" + morceau[fin + 1:]
+        morceaux[indice] = morceau
+    texte = "".join(morceaux)
+
     # `\ucadformula{…}` -> formule hors ligne. Le contenu se lit en comptant les accolades : une
     # formule en contient (`\frac{1}{n}`), et une expression régulière s'arrêterait à la première.
     motif = re.compile(r"\\ucadformula\s*\{")
