@@ -15,7 +15,7 @@ Rien : tout le contenu a été converti.
 - bloc 1 : `javascript`
 - bloc 2 : `javascript`
 - bloc 3 : `javascript`
-- bloc 4 : `javascript`
+- bloc 4 : `html`
 
 ## Tableaux
 

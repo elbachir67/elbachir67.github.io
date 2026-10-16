@@ -69,7 +69,9 @@ CARACTERES = {"oe": "œ", "ldots": "\u2026", "dots": "\u2026", "textbackslash": 
 
 # Styles de `lstlisting` définis par beamerucad.sty : « out » et « err » sont des sorties de
 # programme, « sh » une commande shell. Sans style, c'est du code dans le langage du cours.
-STYLES_CODE = {"out": "", "err": "", "sh": "bash"}
+# `[style=html]` : une page HTML dans un cours de JavaScript (Programmation Frontend 1). Sans cette
+# entrée, le bloc prenait le langage du cours et sa coloration était celle de JavaScript.
+STYLES_CODE = {"out": "", "err": "", "sh": "bash", "html": "html"}
 
 # Encadrés de beamerucad.sty : type de callout Quarto, classe de couleur, titre par défaut.
 ENCADRES = {
