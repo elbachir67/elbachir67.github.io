@@ -1,0 +1,459 @@
+---
+title: "JavaScript"
+cible: "page"
+body-classes: cours-page
+numero: "3"
+ressources:
+  - type: "tp"
+    titre: "Lab 5 — JavaScript en pratique"
+    fichier: "ressources/lab-5-javascript-en-pratique.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-5-javascript-en-pratique.pdf"
+  - type: "tp"
+    titre: "Lab 6 — Tableaux et objets"
+    fichier: "ressources/lab-6-tableaux-et-objets.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-6-tableaux-et-objets.pdf"
+  - type: "tp"
+    titre: "Lab 7 — DOM et événements"
+    fichier: "ressources/lab-7-dom-et-evenements.pdf"
+    chemin: "/cours/programmation-frontend-1/ressources/lab-7-dom-et-evenements.pdf"
+description: "Séance 3 de Programmation Frontend 1 : pourquoi JavaScript, le fichier et la console, les variables, les opérateurs et les conditions, les boucles et les fonctions."
+author: ""
+toc: true
+toc-location: left
+---
+::: {.callout-note .encadre-prereqbox title="Informations pratiques"}
+**Où sommes-nous dans le cours ?** Vos pages Jàng Afrig sont jolies, responsives…\ mais elles ne *font* rien. On clique sur un bouton : il ne se passe rien. C'est le moment d'ajouter la troisième et dernière brique du Web.
+
+**Ce que vous devez déjà avoir :**
+
+- L'environnement du Lab 0 prêt (VS Code, Live Server, Git, repo `jang-afrig`).
+- Les bases d'algorithmique du S1 : variable, condition, boucle, fonction (en pseudo-code).
+- Le HTML et le CSS des séances précédentes (CM1, CM2, Labs 1 à 4).
+
+**Bonne nouvelle :** vous *connaissez déjà* la plupart des idées de ce CM. Vous les avez vues en algorithmique. Aujourd'hui, on leur donne une vraie syntaxe, dans un vrai langage, qui s'exécute dans votre navigateur.
+
+**Et après ?** Au Lab 5, vous quittez la console pour écrire votre premier fichier `script.js` et coder des fonctions concrètes (convertisseur FCFA, calcul de moyenne, etc.).
+:::
+
+::: {.callout-note .encadre-objectifbox title="Objectifs du CM3"}
+À la fin de cette séance, vous serez capable de :
+
+1. Expliquer **pourquoi** JavaScript existe et ce qu'il ajoute à HTML/CSS.
+2. Ouvrir la **console** de votre navigateur et y exécuter du code.
+3. Déclarer des **variables** (`let`, `const`) et reconnaître les types de base.
+4. Écrire des **conditions** et utiliser les bons **opérateurs** (`===`, `&&`, `||`).
+5. Écrire des **boucles** (`for`, `for...of`) pour répéter une action.
+6. Écrire et appeler une **fonction** qui reçoit des informations et renvoie un résultat.
+:::
+
+## Introduction : de la maison figée à la maison vivante
+
+Depuis le début du cours, on construit une **maison**. Au CM1, on a posé les *murs et les pièces* : c'est le HTML, la structure. Aux CM2 et aux Labs CSS, on a fait la *peinture, le carrelage, la décoration* : c'est le CSS, l'apparence.
+
+Mais une maison sans électricité, c'est une belle maison…\ morte. On appuie sur l'interrupteur : rien. On sonne à la porte : silence. C'est exactement l'état de vos pages Jàng Afrig en ce moment : magnifiques, mais inertes.
+
+**JavaScript, c'est l'électricité et le système nerveux de la maison.** C'est lui qui fait que l'interrupteur allume la lumière, que la sonnette retentit quand on appuie, que le thermostat réagit. En clair : **JavaScript fait *agir* la page**.
+
+**La question de ce CM :**<br>
+*Qu'est-ce qu'un vrai langage de programmation, et qu'apporte JavaScript que HTML et CSS ne savent pas faire ?*
+
+## Pourquoi JavaScript ? Les trois couches du Web
+
+### HTML décrit, CSS habille, JavaScript anime
+
+Une page web moderne repose sur **trois couches** qui collaborent. Chacune a un rôle précis, et aucune ne fait le travail des autres.
+
+{{< svg ../figures/03-javascript-01.svg alt="HTML, la structure (les pièces, le squelette) : « Voici un bouton. » ; puis CSS, l'apparence (couleurs, polices, layout) : « Il est vert et arrondi. » ; puis JavaScript, le comportement (réactions, calculs, vie) : « Au clic, +1 au score ! »" >}}
+
+Autrement dit :
+
+- **HTML** sait dire *« il y a un bouton ici »*. Il ne sait pas le rendre joli, ni le faire réagir.
+- **CSS** sait dire *« ce bouton est vert, arrondi, et grossit au survol »*. Mais il est incapable de compter, de décider, ou de mémoriser quoi que ce soit.
+- **JavaScript** est le seul des trois qui sait **décider**, **calculer**, **réagir**, **retenir**. C'est un *vrai langage de programmation*, comme le pseudo-code que vous avez appris, mais qui tourne pour de vrai dans le navigateur.
+
+### Concrètement, qu'est-ce que JavaScript sait faire ?
+
+Voici quelques exemples que l'on rencontrera dans Jàng Afrig :
+
+- **Réagir** à un clic sur le bouton « Capitales » et afficher la page Quiz.
+- **Calculer** le score (+1 à chaque bonne réponse) et le comparer à 10.
+- **Modifier** le texte d'une question sans recharger la page.
+- **Mémoriser** les meilleurs scores du joueur.
+- **Parler** à un service en ligne (l'API REST Countries) pour récupérer les 54 pays.
+
+Rien de tout cela n'est possible avec HTML et CSS seuls. C'est pour ça que JavaScript existe.
+
+### Une petite histoire (vraie)
+
+JavaScript a été créé en **1995** par **Brendan Eich**, un ingénieur de Netscape (le navigateur de l'époque). On lui a demandé un langage pour rendre les pages interactives…\ et il l'a conçu en **dix jours**. Oui, dix jours pour un langage qui fait aujourd'hui tourner la quasi-totalité du Web mondial.
+
+::: {.callout-tip .encadre-infobox title="Le saviez-vous ?"}
+Le nom « JavaScript » est un coup de *marketing*. À l'époque, le langage « Java » était à la mode, alors Netscape a choisi un nom qui sonnait pareil pour profiter de la hype. Mais attention : **Java et JavaScript sont deux langages totalement différents**, aussi proches que « carotte » et « carotté ». Ne les confondez jamais.
+:::
+
+## Où vit le JavaScript ? Le fichier et la console
+
+### Brancher un fichier JavaScript à une page
+
+Comme pour le CSS (qu'on relie avec `<link>`), on écrit le JavaScript dans un fichier séparé, en général nommé `script.js`, et on le *branche* à la page HTML avec la balise `<script>` :
+
+```javascript
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <title>Jàng Afrig</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <h1>Jàng Afrig</h1>
+    <button>Commencer</button>
+  </body>
+</html>
+```
+
+Deux mots importants ici :
+
+- `src="script.js"` indique *où* se trouve le code, exactement comme `href` pour une feuille de style.
+- `defer` dit au navigateur : *« charge ce script, mais ne l'exécute qu'une fois toute la page construite »*.
+
+**Pourquoi `defer` ?** Imaginez un invité qui arrive pour réparer l'électricité d'une salle de fête. S'il commence à brancher les câbles *avant* que les tables et les prises soient installées, il ne trouve rien et tout plante. `defer` lui dit : *« attends que la salle soit prête, ensuite tu travailles »*. Sans `defer`, le JavaScript essaie souvent d'agir sur des éléments qui n'existent pas encore : c'est une source de bugs classique. **Dans ce cours, on mettra toujours `defer`.**
+
+{{< svg ../figures/03-javascript-02.svg alt="Le navigateur lit le HTML de haut en bas, puis construit la page (tous les éléments) ; le script defer attend sagement ; page prête : le JS s'exécute, et JS peut lire et modifier la page." >}}
+
+*Le chemin du JavaScript : il attend que la page soit prête, puis il l'anime.*
+
+### La console : le laboratoire du développeur
+
+Avant même d'écrire un fichier, on peut tester du JavaScript directement dans le navigateur, grâce à la **console**. C'est un petit espace où l'on tape du code et où l'on voit le résultat immédiatement, **sans rien casser dans la page**.
+
+**Analogie :** la console est votre *cahier de brouillon* ou votre *paillasse de laboratoire*. On y teste une idée, on jette, on recommence. Aucun risque.
+
+**Comment l'ouvrir ?** Sur n'importe quelle page, appuyez sur la touche **F12** (ou clic droit $\rightarrow$ *Inspecter*), puis cliquez sur l'onglet **Console**.
+
+**La commande reine : `console.log`.** Elle sert à **afficher un message** dans la console. C'est l'équivalent du « Afficher » de votre pseudo-code.
+
+```javascript
+console.log("Salam, Jàng Afrig !");
+console.log("Bienvenue à Dakar");
+```
+
+::: {.callout-tip .encadre-infobox title="Démo en direct"}
+On ouvre ensemble une page, on appuie sur **F12**, on va dans **Console**, et on tape `console.log("Salam")`. Le message s'affiche. On essaiera aussi une opération comme `2 + 3` : la console répond `5`. **La console calcule !**
+:::
+
+## Les variables : ranger l'information
+
+### Une variable, c'est un casier étiqueté
+
+En algorithmique, vous avez déjà manipulé des **variables**. L'idée est identique en JavaScript : une variable est un **casier** dans lequel on range une valeur, et qui porte une **étiquette** (son nom) pour qu'on puisse la retrouver.
+
+```javascript
+let score = 0;
+const ville = "Dakar";
+```
+
+On lit : *« range `0` dans le casier appelé `score` »* et *« range le texte `"Dakar"` dans le casier `ville` »*.
+
+### `let` ou `const` : deux types d'étiquettes
+
+JavaScript propose deux façons de créer un casier, selon que son contenu va changer ou non.
+
+| **Mot-clé** | **Analogie** | **Quand l'utiliser** |
+| --- | --- | --- |
+| `const` | Une étiquette **gravée** : le contenu ne changera plus. | Par défaut, presque toujours. |
+| `let` | Une **ardoise** effaçable : on pourra réécrire dedans. | Seulement si la valeur doit changer (ex. un score qui augmente). |
+
+::: {.callout-important .encadre-retenirbox title="La règle d'or de ce cours"}
+**`const` par défaut.** On n'utilise `let` que lorsqu'on est *sûr* que la valeur va changer. Et on n'utilise **jamais** l'ancien mot-clé `var` (vu dans de vieux codes) : il est source de bugs et appartient au passé.
+:::
+
+```javascript
+let score = 0;     // va changer pendant le quiz -> let
+score = score + 1; // autorisé : on réécrit l'ardoise
+
+const ville = "Dakar"; // ne changera pas -> const
+// ville = "Thiès";    // INTERDIT : erreur, l'étiquette est gravée
+```
+
+### Les types de base : la nature du contenu
+
+Tout ce qu'on range dans un casier a une **nature**, qu'on appelle un *type*. Pour ce cours, trois types suffisent :
+
+| **Type** | **Ce que c'est** | **Exemples** |
+| --- | --- | --- |
+| `number` | Un nombre (entier ou décimal). *Pas de guillemets.* | `0`, `54`, `19.5` |
+| `string` | Du texte. *Toujours entre guillemets.* | `"Dakar"`, `"Fatou"`, `"54"` |
+| `boolean` | Vrai ou faux. Deux valeurs seulement. | `true`, `false` |
+
+::: {.callout-warning .encadre-attentionbox title="Piège classique : `54` n'est pas `\"54\"`"}
+`54` (sans guillemets) est un **nombre** : on peut l'additionner. `"54"` (avec guillemets) est un **texte** : c'est juste une suite de caractères. `2 + 2` donne `4`, mais `"2" + "2"` donne `"22"` (les textes se collent bout à bout). Surveillez bien vos guillemets !
+:::
+
+### Insérer une valeur dans un texte : les *template strings*
+
+On a souvent besoin de fabriquer une phrase à partir de variables. La façon moderne et lisible utilise des **accents graves** (le caractère `` ` ``, touche en haut à gauche du clavier) et le motif *dollar-accolades* :
+
+```javascript
+const prenom = "Aminata";
+const score = 8;
+
+console.log(`Bravo ${prenom}, tu as ${score} bonnes réponses sur 10 !`);
+// Affiche : Bravo Aminata, tu as 8 bonnes réponses sur 10 !
+```
+
+**Analogie :** une *phrase à trous*. On écrit la phrase normalement, et là où on veut glisser une variable, on ouvre un « trou » avec `${...}`. JavaScript remplit les trous automatiquement.
+
+::: {.callout-tip .encadre-infobox title="Démo en direct"}
+Dans la console, on déclare `const ville = "Saint-Louis"` puis on tape `` `Je vais à ${ville}` ``. La console fabrique la phrase complète sous nos yeux.
+:::
+
+## Opérateurs et conditions : faire des choix
+
+### Les opérateurs : calculer et comparer
+
+**Opérateurs de calcul.** Identiques aux mathématiques, à une exception près :
+
+| **Opérateur** | **Rôle** | **Exemple** |
+| --- | --- | --- |
+| `+`   `-`   `*`   `/` | addition, soustraction, multiplication, division | `7 * 3` vaut `21` |
+| `%` | **modulo** : le *reste* d'une division | `17 % 5` vaut `2` |
+
+Le **modulo** mérite une explication. *Analogie :* on partage **17 mangues** entre **5 enfants**. Chacun en reçoit 3 ($5 \times 3 = 15$), et il **reste 2** mangues. Le modulo, c'est ce reste : `17 % 5` vaut `2`. Très pratique pour savoir si un nombre est pair (`n % 2 === 0`) ou multiple de 5.
+
+**Opérateurs de comparaison.** Ils renvoient toujours un booléen (`true` ou `false`) :
+
+| **Opérateur** | **Signifie** | **Opérateur** | **Signifie** |
+| --- | --- | --- | --- |
+| `===` | strictement égal | `!==` | strictement différent |
+| `<`   `>` | plus petit / plus grand | `<=`   `>=` | inférieur ou égal / supérieur ou égal |
+
+::: {.callout-important .encadre-retenirbox title="Règle d'or : toujours `===`, jamais `==`"}
+JavaScript possède deux opérateurs d'égalité : `==` (deux signes) et `===` (trois signes). Le premier est *laxiste* : il considère que le nombre `5` et le texte `"5"` sont égaux, ce qui crée des bugs sournois. Le second, `===`, est *strict* : il vérifie aussi le type. **Dans ce cours, on utilise toujours `===` (et `!==`).**
+:::
+
+**Opérateurs logiques.** Pour combiner plusieurs conditions :
+
+- `&&` (**ET**) : vrai seulement si *les deux* conditions sont vraies.
+- `||` (**OU**) : vrai si *au moins une* condition est vraie.
+
+*Analogie :* pour entrer à un concours, il faut être inscrit **ET** avoir sa carte d'étudiant (les deux). Pour avoir une réduction, il suffit d'être étudiant **OU** d'avoir moins de 18 ans (l'un suffit).
+
+### La condition `if` : un aiguillage
+
+Une condition permet à votre programme de **choisir un chemin** selon la situation. *Analogie :* un aiguillage de train, ou un panneau routier « si la route est barrée, prenez à droite ».
+
+```javascript
+const age = 20;
+
+if (age >= 18) {
+  console.log("Vous êtes majeur.");
+} else {
+  console.log("Vous êtes mineur.");
+}
+```
+
+On peut enchaîner plusieurs cas avec `else if` :
+
+```javascript
+const note = 14;
+
+if (note >= 16) {
+  console.log("Très bien");
+} else if (note >= 12) {
+  console.log("Bien");
+} else if (note >= 10) {
+  console.log("Passable");
+} else {
+  console.log("À retravailler");
+}
+```
+
+### Le ternaire : un `if` en une ligne
+
+Quand le choix est simple (deux issues seulement), on peut écrire la condition de façon condensée avec l'opérateur **ternaire** `condition ? valeurSiVrai : valeurSiFaux` :
+
+```javascript
+const age = 20;
+const statut = age >= 18 ? "majeur" : "mineur";
+console.log(statut); // "majeur"
+```
+
+Cela se lit : *« l'âge est-il $\geq$ 18 ? Si oui, "majeur" ; sinon, "mineur" »*. C'est exactement le même résultat que le `if/else` plus haut, en plus court.
+
+::: {.callout-tip .encadre-infobox title="Démo en direct"}
+On teste dans la console : on déclare `const score = 7`, puis on tape la condition `score >= 5 ? "Réussi" : "Échoué"`. La console répond `"Réussi"`. On change `score` et on relance.
+:::
+
+## Les boucles : répéter sans se fatiguer
+
+### Pourquoi des boucles ?
+
+Imaginez que vous deviez afficher les 10 questions d'un quiz, ou parcourir les 54 pays africains. Vous n'allez pas écrire 54 lignes à la main ! Une **boucle** répète une action automatiquement.
+
+*Analogie :* faire l'appel en classe. Vous ne « réinventez » pas la consigne pour chaque étudiant ; vous appliquez la même action (« dire le nom, cocher présent ») à chacun, l'un après l'autre.
+
+### La boucle `for` classique
+
+Elle répète un bloc un nombre précis de fois, à l'aide d'un **compteur** :
+
+```javascript
+// Affiche les nombres de 1 à 5
+for (let i = 1; i <= 5; i++) {
+  console.log(i);
+}
+```
+
+Les trois parties entre parenthèses se lisent : *« je pars de `i = 1` ; je continue tant que `i <= 5` ; à chaque tour j'ajoute 1 à `i` (`i++`) »*.
+
+### La boucle `for...of` : « pour chaque »
+
+Quand on a une **liste** (un tableau) et qu'on veut traiter *chaque* élément, `for...of` est plus simple et plus lisible :
+
+```javascript
+const villes = ["Dakar", "Thiès", "Saint-Louis", "Ziguinchor"];
+
+for (const ville of villes) {
+  console.log(`Ville : ${ville}`);
+}
+```
+
+On lit : *« pour chaque `ville` de la liste `villes`, affiche-la »*. *Analogie :* distribuer une copie d'examen à chaque étudiant de la rangée, un par un, sans en oublier.
+
+::: {.callout-tip .encadre-infobox title="À venir au Lab 6"}
+Il existe des façons encore plus élégantes de parcourir des listes : `forEach`, `map`, `filter`. On les découvrira au Lab 6. Pour aujourd'hui, `for` et `for...of` suffisent largement.
+:::
+
+## Les fonctions : des machines réutilisables
+
+### Qu'est-ce qu'une fonction ?
+
+Une **fonction** est un **bloc de code réutilisable** : on l'écrit une fois, on lui donne un nom, et on peut l'appeler autant de fois qu'on veut.
+
+*Analogie :* un **distributeur de jus**. On y met une pièce (l'**entrée**), la machine fait son travail à l'intérieur (le **traitement**), et elle rend un jus (la **sortie**). Une fonction, c'est pareil : elle reçoit des informations, les transforme, et renvoie un résultat.
+
+{{< svg ../figures/03-javascript-03.svg alt="Entrée (largeur, hauteur) → fonction aireRectangle → sortie : l'aire (return)." >}}
+
+### Écrire et appeler une fonction
+
+On la déclare avec le mot-clé `function`, on liste ses **paramètres** (les entrées) entre parenthèses, et on renvoie le résultat avec `return` :
+
+```javascript
+// Déclaration de la fonction
+function aireRectangle(largeur, hauteur) {
+  const aire = largeur * hauteur;
+  return aire;
+}
+
+// Appel de la fonction (on lui donne des valeurs)
+const a = aireRectangle(4, 3);
+console.log(a); // 12
+
+console.log(aireRectangle(10, 2)); // 20 : réutilisable à volonté !
+```
+
+Quelques mots de vocabulaire :
+
+- Les **paramètres** (`largeur`, `hauteur`) sont les noms des entrées dans la définition.
+- Les **arguments** (`4`, `3`) sont les vraies valeurs qu'on donne lors de l'appel.
+- `return` renvoie le résultat à l'extérieur. Sans `return`, la fonction ne « rend » rien.
+
+### Les fonctions fléchées : une autre écriture
+
+Vous croiserez souvent une écriture plus courte des fonctions, avec une « flèche » `=>` :
+
+```javascript
+// Écriture classique
+function direBonjour(nom) {
+  return `Bonjour ${nom} !`;
+}
+
+// Exactement la même chose, en fonction fléchée
+const direBonjour2 = (nom) => {
+  return `Bonjour ${nom} !`;
+};
+```
+
+::: {.callout-warning .encadre-attentionbox title="Prenez-la telle quelle pour l'instant"}
+La fonction fléchée `() => { }` est juste une **autre manière d'écrire une fonction**, en plus court. Les deux versions ci-dessus font *exactement* la même chose. Pour aujourd'hui, contentez-vous de la reconnaître : on en aura besoin au Lab 6 et au Lab 7. **Vous comprendrez tous ses détails en L2.**
+:::
+
+::: {.callout-tip .encadre-infobox title="Démo en direct"}
+Dans la console, on définit ensemble `function carre(n) { return n * n; }`, puis on appelle `carre(7)`. La console répond `49`. On rappelle `carre(12)` : `144`. Une fonction écrite une fois, utilisée partout.
+:::
+
+## Mini-exercice en classe : le convertisseur de température
+
+On met tout en pratique. À Dakar, il fait souvent autour de **30 °C**. Mais sur certains sites internationaux, les températures sont en **degrés Fahrenheit**. Écrivons une fonction qui fait la conversion.
+
+**Formule :** $\text{F} = \text{C} \times 1{,}8 + 32$.
+
+::: {.callout-note .encadre-objectifbox title="À faire ensemble, dans la console ou un fichier"}
+1. Écrire une fonction `celsiusVersFahrenheit(c)` qui reçoit une température en Celsius et **renvoie** la température en Fahrenheit.
+2. L'appeler avec `30` (la température de Dakar) et afficher le résultat avec une jolie phrase grâce à une *template string*.
+3. **Bonus :** ajouter une condition qui affiche « Il fait chaud ! » si la température dépasse 28 °C, et « Température agréable » sinon (avec un `if/else` ou un ternaire).
+:::
+
+**Squelette de départ** (à compléter ensemble) :
+
+```javascript
+function celsiusVersFahrenheit(c) {
+  // ... à compléter : renvoyer c * 1.8 + 32
+}
+
+const tempDakar = 30;
+const enFahrenheit = celsiusVersFahrenheit(tempDakar);
+
+console.log(`À Dakar, ${tempDakar}°C = ${enFahrenheit}°F`);
+
+// Bonus : message selon la chaleur
+const message = tempDakar > 28 ? "Il fait chaud !" : "Température agréable";
+console.log(message);
+```
+
+::: {.callout-tip .encadre-infobox title="Second défi, si le temps le permet : conversion FCFA"}
+Sur le même modèle, écrire `fcfaVersEuro(montant)` sachant que **1 EUR = 656 FCFA** (taux fixe). Tester avec `10000` FCFA. Indice : il faut *diviser* le montant par 656.
+:::
+
+## Résumé et transition
+
+### Aide-mémoire du CM3
+
+| **Notion** | **À retenir** |
+| --- | --- |
+| Rôle de JS | HTML structure, CSS habille, **JS anime** (décide, calcule, réagit). |
+| `<script defer>` | Brancher le JS, exécuté *après* la construction de la page. |
+| Console (F12) | Le brouillon pour tester du code ; `console.log(...)` affiche. |
+| `const` / `let` | `const` par défaut ; `let` si la valeur change ; jamais `var`. |
+| Types | `number`, `string` (avec guillemets), `boolean` (`true`/`false`). |
+| Template string | Phrase à trous : `` `Bonjour ${nom}` ``. |
+| Comparaison | Toujours `===` et `!==` (jamais `==`). |
+| Logique | `&&` (et), `||` (ou). |
+| Condition | `if / else if / else` ; ternaire `cond ? a : b`. |
+| Boucles | `for` (compteur), `for...of` (« pour chaque »). |
+| Fonction | `function nom(params) { return ...  }` ; réutilisable. |
+
+### Les trois règles d'or à ne jamais oublier
+
+::: {.callout-important .encadre-retenirbox title="Les trois règles de ce cours"}
+1. **`const` par défaut**, `let` seulement si ça change. Jamais `var`.
+2. **Toujours `===`**, jamais `==`.
+3. **Toujours `defer`** sur la balise `<script>`.
+:::
+
+### Ce qu'on fera au prochain TP
+
+Aujourd'hui, tout s'est passé dans la **console**, notre brouillon. Au **Lab 5**, on passe au sérieux : on crée le fichier `script.js` dans le repo `jang-afrig`, on le branche à la page, et on écrit nos premières vraies fonctions, toutes tropicalisées :
+
+- un convertisseur FCFA $\rightarrow$ EUR,
+- le calcul de la moyenne d'un étudiant DUT1-Info,
+- une fonction `estMajeur(age)`,
+- un FizzBuzz « à la sénégalaise », et le test du palindrome.
+
+*Votre maison Jàng Afrig a maintenant l'électricité. Au Lab 5, on allume la première ampoule.*
+
+Dr. El Hadji Bassirou TOURÉ --- UCAD<br>Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+
+::: {#ressources-seance}
+:::
