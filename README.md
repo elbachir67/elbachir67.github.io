@@ -596,6 +596,28 @@ git add _freeze                       # le gel accompagne la modification du cod
 - Chaque réexécution change l'identifiant aléatoire de la cellule dans `execute-results/html.json` : un
   rendu sans changement de code ne produit donc pas de différence, mais une réexécution volontaire, si.
 
+### Ressources PDF (US-76)
+
+Un PDF de ressource (lab, TD, TP, fiche, plan) est le **produit de sa source**, et non un fichier
+déposé. Chaque cours décrit les siens dans `cours/<slug>/_sources/ressources.toml` ; la source vit
+dans `_sources/`, à côté de celles des chapitres.
+
+```bash
+python3 scripts/compiler_ressources.py                    # compile et compare, sans rien remplacer
+python3 scripts/compiler_ressources.py --remplacer        # remplace ce dont seule la forme change
+python3 scripts/compiler_ressources.py --remplacer \
+    --accepter programmation-frontend-1/lab-2-html-structurant.pdf   # écart de texte accepté par le PO
+```
+
+- **En local, jamais en CI** : il faut la distribution LaTeX (LuaLaTeX si la source charge
+  `fontspec`, pdflatex sinon) et `pdftotext` (poppler).
+- La comparaison porte sur le **texte** extrait des deux PDF. Un PDF dont seule la forme change est
+  remplacé ; un PDF dont le texte change ne l'est qu'avec l'accord du PO, nommément.
+- La CI (`scripts/verifier_ressources.py`) vérifie qu'aucune ressource n'est **plus ancienne que sa
+  source** : l'empreinte de la source au moment de la compilation est enregistrée, et une source
+  modifiée depuis fait échouer le contrôle. Un PDF que sa source ne produit pas encore porte un champ
+  `en_attente` qui dit pourquoi, et il est listé sans faire échouer la CI.
+
 ## Accessibilité
 
 Le site rendu est audité par [axe-core](https://github.com/dequelabs/axe-core), dans les règles WCAG 2.2
