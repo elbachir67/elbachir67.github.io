@@ -1,0 +1,668 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== POLICES & LANGUE =====================
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,xcolor,booktabs,hyperref,tcolorbox,enumitem,fancyhdr,array,pifont,longtable,multirow,listings}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+% ===================== BOÎTES =====================
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title={#1},breakable}
+
+% ===================== CODE (listings) =====================
+\definecolor{codebg}{gray}{0.96}
+\definecolor{kwcolor}{RGB}{0,90,160}
+\definecolor{strcolor}{RGB}{160,55,30}
+\definecolor{comcolor}{RGB}{95,120,95}
+\definecolor{ndcolor}{RGB}{120,80,150}
+
+\lstdefinelanguage{JS}{
+  morekeywords={let,const,var,function,return,if,else,for,of,in,while,do,true,false,null,undefined,typeof,break,continue,new,this},
+  morekeywords=[2]{console,log,table,document,Math,window,alert,prompt},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+\lstdefinestyle{js}{
+  language=JS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{kwcolor},
+  keywordstyle=[2]\color{ndcolor},
+  commentstyle=\color{comcolor}\itshape,
+  stringstyle=\color{strcolor},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {â}{{â}}1 {ê}{{ê}}1
+    {î}{{î}}1 {ô}{{ô}}1 {û}{{û}}1 {ù}{{ù}}1 {ç}{{ç}}1
+    {ï}{{ï}}1 {ë}{{ë}}1 {É}{{É}}1 {È}{{È}}1 {À}{{À}}1
+    {œ}{{œ}}1 {°}{{°}}1 {²}{{²}}1
+}
+
+\lstdefinestyle{html}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {ê}{{ê}}1 {ç}{{ç}}1 {î}{{î}}1
+}
+
+\lstset{style=js}
+
+% Code en ligne
+\newcommand{\code}[1]{\texttt{#1}}
+
+% ===================== EN-TÊTES =====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- CM3 : JavaScript}
+\fancyhead[R]{\small ESP/UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ===================== TITRE =====================
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge CM3 --- JavaScript}\\[0.3cm]
+\textbf{\Large Le langage qui anime les pages}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+% ===================== PRÉREQUIS =====================
+\begin{prereqbox}[Informations pratiques]
+\textbf{Où sommes-nous dans le cours ?} Vos pages Jàng Afrig sont jolies, responsives\ldots\ mais elles ne \emph{font} rien. On clique sur un bouton : il ne se passe rien. C'est le moment d'ajouter la troisième et dernière brique du Web.
+
+\smallskip
+\textbf{Ce que vous devez déjà avoir :}
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item L'environnement du Lab~0 prêt (VS Code, Live Server, Git, repo \code{jang-afrig}).
+  \item Les bases d'algorithmique du S1 : variable, condition, boucle, fonction (en pseudo-code).
+  \item Le HTML et le CSS des séances précédentes (CM1, CM2, Labs 1 à 4).
+\end{itemize}
+
+\smallskip
+\textbf{Bonne nouvelle :} vous \emph{connaissez déjà} la plupart des idées de ce CM. Vous les avez vues en algorithmique. Aujourd'hui, on leur donne une vraie syntaxe, dans un vrai langage, qui s'exécute dans votre navigateur.
+
+\smallskip
+\textbf{Et après ?} Au Lab~5, vous quittez la console pour écrire votre premier fichier \code{script.js} et coder des fonctions concrètes (convertisseur FCFA, calcul de moyenne, etc.).
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du CM3]
+À la fin de cette séance, vous serez capable de :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Expliquer \textbf{pourquoi} JavaScript existe et ce qu'il ajoute à HTML/CSS.
+  \item Ouvrir la \textbf{console} de votre navigateur et y exécuter du code.
+  \item Déclarer des \textbf{variables} (\code{let}, \code{const}) et reconnaître les types de base.
+  \item Écrire des \textbf{conditions} et utiliser les bons \textbf{opérateurs} (\code{===}, \code{\&\&}, \code{||}).
+  \item Écrire des \textbf{boucles} (\code{for}, \code{for...of}) pour répéter une action.
+  \item Écrire et appeler une \textbf{fonction} qui reçoit des informations et renvoie un résultat.
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\bigskip
+\hrule
+\bigskip
+
+% ===================== INTRO =====================
+\section*{Introduction : de la maison figée à la maison vivante}
+\addcontentsline{toc}{section}{Introduction}
+
+Depuis le début du cours, on construit une \textbf{maison}. Au CM1, on a posé les \emph{murs et les pièces} : c'est le HTML, la structure. Aux CM2 et aux Labs CSS, on a fait la \emph{peinture, le carrelage, la décoration} : c'est le CSS, l'apparence.
+
+Mais une maison sans électricité, c'est une belle maison\ldots\ morte. On appuie sur l'interrupteur : rien. On sonne à la porte : silence. C'est exactement l'état de vos pages Jàng Afrig en ce moment : magnifiques, mais inertes.
+
+\textbf{JavaScript, c'est l'électricité et le système nerveux de la maison.} C'est lui qui fait que l'interrupteur allume la lumière, que la sonnette retentit quand on appuie, que le thermostat réagit. En clair : \textbf{JavaScript fait \emph{agir} la page}.
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{\centering
+\textbf{La question de ce CM :}\\[2pt]
+\emph{Qu'est-ce qu'un vrai langage de programmation, et qu'apporte JavaScript que HTML et CSS ne savent pas faire ?}}}
+\end{center}
+
+% ===================== SECTION 1 =====================
+\section{Pourquoi JavaScript ? Les trois couches du Web}
+
+\subsection{HTML décrit, CSS habille, JavaScript anime}
+
+Une page web moderne repose sur \textbf{trois couches} qui collaborent. Chacune a un rôle précis, et aucune ne fait le travail des autres.
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  layer/.style={rectangle, rounded corners=4pt, draw, thick, minimum width=3.5cm, minimum height=2.2cm, align=center, text width=3.3cm},
+  arr/.style={-{Stealth[length=3.5mm]}, very thick, gray!70!black}
+]
+  \node[layer, draw=blue!55, fill=blue!6] (html) at (0,0)
+    {\textbf{HTML}\\[3pt]\footnotesize La structure\\(les pièces, le squelette)};
+  \node[layer, draw=teal!55, fill=teal!6] (css) at (4.6,0)
+    {\textbf{CSS}\\[3pt]\footnotesize L'apparence\\(couleurs, polices, layout)};
+  \node[layer, draw=orange!70, fill=orange!8] (js) at (9.2,0)
+    {\textbf{JavaScript}\\[3pt]\footnotesize Le comportement\\(réactions, calculs, vie)};
+
+  \draw[arr] (html) -- (css);
+  \draw[arr] (css) -- (js);
+
+  \node[below=0.25cm of html, font=\footnotesize, text=gray!50!black] {\emph{« Voici un bouton. »}};
+  \node[below=0.25cm of css, font=\footnotesize, text=gray!50!black] {\emph{« Il est vert et arrondi. »}};
+  \node[below=0.25cm of js, font=\footnotesize, text=gray!50!black] {\emph{« Au clic, +1 au score ! »}};
+\end{tikzpicture}
+\end{center}
+
+Autrement dit :
+\begin{itemize}[leftmargin=*]
+  \item \textbf{HTML} sait dire \emph{« il y a un bouton ici »}. Il ne sait pas le rendre joli, ni le faire réagir.
+  \item \textbf{CSS} sait dire \emph{« ce bouton est vert, arrondi, et grossit au survol »}. Mais il est incapable de compter, de décider, ou de mémoriser quoi que ce soit.
+  \item \textbf{JavaScript} est le seul des trois qui sait \textbf{décider}, \textbf{calculer}, \textbf{réagir}, \textbf{retenir}. C'est un \emph{vrai langage de programmation}, comme le pseudo-code que vous avez appris, mais qui tourne pour de vrai dans le navigateur.
+\end{itemize}
+
+\subsection{Concrètement, qu'est-ce que JavaScript sait faire ?}
+
+Voici quelques exemples que l'on rencontrera dans Jàng Afrig :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \textbf{Réagir} à un clic sur le bouton « Capitales » et afficher la page Quiz.
+  \item \textbf{Calculer} le score (+1 à chaque bonne réponse) et le comparer à 10.
+  \item \textbf{Modifier} le texte d'une question sans recharger la page.
+  \item \textbf{Mémoriser} les meilleurs scores du joueur.
+  \item \textbf{Parler} à un service en ligne (l'API REST Countries) pour récupérer les 54 pays.
+\end{itemize}
+
+Rien de tout cela n'est possible avec HTML et CSS seuls. C'est pour ça que JavaScript existe.
+
+\subsection{Une petite histoire (vraie)}
+
+JavaScript a été créé en \textbf{1995} par \textbf{Brendan Eich}, un ingénieur de Netscape (le navigateur de l'époque). On lui a demandé un langage pour rendre les pages interactives\ldots\ et il l'a conçu en \textbf{dix jours}. Oui, dix jours pour un langage qui fait aujourd'hui tourner la quasi-totalité du Web mondial.
+
+\begin{infobox}[Le saviez-vous ?]
+Le nom « JavaScript » est un coup de \emph{marketing}. À l'époque, le langage « Java » était à la mode, alors Netscape a choisi un nom qui sonnait pareil pour profiter de la hype. Mais attention : \textbf{Java et JavaScript sont deux langages totalement différents}, aussi proches que « carotte » et « carotté ». Ne les confondez jamais.
+\end{infobox}
+
+% ===================== SECTION 2 =====================
+\section{Où vit le JavaScript ? Le fichier et la console}
+
+\subsection{Brancher un fichier JavaScript à une page}
+
+Comme pour le CSS (qu'on relie avec \code{<link>}), on écrit le JavaScript dans un fichier séparé, en général nommé \code{script.js}, et on le \emph{branche} à la page HTML avec la balise \code{<script>} :
+
+\begin{lstlisting}[style=html]
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <title>Jàng Afrig</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <h1>Jàng Afrig</h1>
+    <button>Commencer</button>
+  </body>
+</html>
+\end{lstlisting}
+
+Deux mots importants ici :
+\begin{itemize}[leftmargin=*]
+  \item \code{src="script.js"} indique \emph{où} se trouve le code, exactement comme \code{href} pour une feuille de style.
+  \item \code{defer} dit au navigateur : \emph{« charge ce script, mais ne l'exécute qu'une fois toute la page construite »}.
+\end{itemize}
+
+\paragraph{Pourquoi \code{defer} ?} Imaginez un invité qui arrive pour réparer l'électricité d'une salle de fête. S'il commence à brancher les câbles \emph{avant} que les tables et les prises soient installées, il ne trouve rien et tout plante. \code{defer} lui dit : \emph{« attends que la salle soit prête, ensuite tu travailles »}. Sans \code{defer}, le JavaScript essaie souvent d'agir sur des éléments qui n'existent pas encore : c'est une source de bugs classique. \textbf{Dans ce cours, on mettra toujours \code{defer}.}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  flowbox/.style={rectangle, rounded corners=3pt, draw, thick, align=center, text width=2.9cm, minimum height=1.5cm, fill=gray!4},
+  arr/.style={-{Stealth[length=3mm]}, thick, gray!70!black}
+]
+  \node[flowbox, draw=blue!55] (lit) {Le navigateur \textbf{lit le HTML}\\de haut en bas};
+  \node[flowbox, draw=teal!55, right=1.1cm of lit] (build) {Il \textbf{construit la page}\\(tous les éléments)};
+  \node[flowbox, draw=gray!60, right=1.1cm of build] (wait) {Le script \code{defer}\\\textbf{attend} sagement};
+  \node[flowbox, draw=orange!70, below=0.9cm of build] (run) {Page prête :\\le \textbf{JS s'exécute}};
+  \node[flowbox, draw=orange!70, right=1.1cm of run] (act) {JS peut \textbf{lire et}\\\textbf{modifier} la page};
+
+  \draw[arr] (lit) -- (build);
+  \draw[arr] (build) -- (wait);
+  \draw[arr] (wait.south) |- (run.east);
+  \draw[arr] (run) -- (act);
+\end{tikzpicture}
+
+\textit{Le chemin du JavaScript : il attend que la page soit prête, puis il l'anime.}
+\end{center}
+
+\subsection{La console : le laboratoire du développeur}
+
+Avant même d'écrire un fichier, on peut tester du JavaScript directement dans le navigateur, grâce à la \textbf{console}. C'est un petit espace où l'on tape du code et où l'on voit le résultat immédiatement, \textbf{sans rien casser dans la page}.
+
+\textbf{Analogie :} la console est votre \emph{cahier de brouillon} ou votre \emph{paillasse de laboratoire}. On y teste une idée, on jette, on recommence. Aucun risque.
+
+\paragraph{Comment l'ouvrir ?} Sur n'importe quelle page, appuyez sur la touche \textbf{F12} (ou clic droit $\rightarrow$ \emph{Inspecter}), puis cliquez sur l'onglet \textbf{Console}.
+
+\paragraph{La commande reine : \code{console.log}.} Elle sert à \textbf{afficher un message} dans la console. C'est l'équivalent du « Afficher » de votre pseudo-code.
+
+\begin{lstlisting}[style=js]
+console.log("Salam, Jàng Afrig !");
+console.log("Bienvenue à Dakar");
+\end{lstlisting}
+
+\begin{infobox}[Démo en direct]
+On ouvre ensemble une page, on appuie sur \textbf{F12}, on va dans \textbf{Console}, et on tape \code{console.log("Salam")}. Le message s'affiche. On essaiera aussi une opération comme \code{2 + 3} : la console répond \code{5}. \textbf{La console calcule !}
+\end{infobox}
+
+% ===================== SECTION 3 =====================
+\section{Les variables : ranger l'information}
+
+\subsection{Une variable, c'est un casier étiqueté}
+
+En algorithmique, vous avez déjà manipulé des \textbf{variables}. L'idée est identique en JavaScript : une variable est un \textbf{casier} dans lequel on range une valeur, et qui porte une \textbf{étiquette} (son nom) pour qu'on puisse la retrouver.
+
+\begin{lstlisting}[style=js]
+let score = 0;
+const ville = "Dakar";
+\end{lstlisting}
+
+On lit : \emph{« range \code{0} dans le casier appelé \code{score} »} et \emph{« range le texte \code{"Dakar"} dans le casier \code{ville} »}.
+
+\subsection{\code{let} ou \code{const} : deux types d'étiquettes}
+
+JavaScript propose deux façons de créer un casier, selon que son contenu va changer ou non.
+
+\begin{center}
+\begin{tabular}{>{\raggedright}p{2.3cm} p{5.2cm} p{5.2cm}}
+\toprule
+\textbf{Mot-clé} & \textbf{Analogie} & \textbf{Quand l'utiliser} \\
+\midrule
+\code{const} & Une étiquette \textbf{gravée} : le contenu ne changera plus. & Par défaut, presque toujours. \\
+\addlinespace
+\code{let} & Une \textbf{ardoise} effaçable : on pourra réécrire dedans. & Seulement si la valeur doit changer (ex. un score qui augmente). \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{retenirbox}[La règle d'or de ce cours]
+\textbf{\code{const} par défaut.} On n'utilise \code{let} que lorsqu'on est \emph{sûr} que la valeur va changer. Et on n'utilise \textbf{jamais} l'ancien mot-clé \code{var} (vu dans de vieux codes) : il est source de bugs et appartient au passé.
+\end{retenirbox}
+
+\begin{lstlisting}[style=js]
+let score = 0;     // va changer pendant le quiz -> let
+score = score + 1; // autorisé : on réécrit l'ardoise
+
+const ville = "Dakar"; // ne changera pas -> const
+// ville = "Thiès";    // INTERDIT : erreur, l'étiquette est gravée
+\end{lstlisting}
+
+\subsection{Les types de base : la nature du contenu}
+
+Tout ce qu'on range dans un casier a une \textbf{nature}, qu'on appelle un \emph{type}. Pour ce cours, trois types suffisent :
+
+\begin{center}
+\begin{tabular}{p{2.6cm} p{4.5cm} p{5cm}}
+\toprule
+\textbf{Type} & \textbf{Ce que c'est} & \textbf{Exemples} \\
+\midrule
+\code{number} & Un nombre (entier ou décimal). \emph{Pas de guillemets.} & \code{0}, \code{54}, \code{19.5} \\
+\addlinespace
+\code{string} & Du texte. \emph{Toujours entre guillemets.} & \code{"Dakar"}, \code{"Fatou"}, \code{"54"} \\
+\addlinespace
+\code{boolean} & Vrai ou faux. Deux valeurs seulement. & \code{true}, \code{false} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{attentionbox}[Piège classique : \code{54} n'est pas \code{"54"}]
+\code{54} (sans guillemets) est un \textbf{nombre} : on peut l'additionner. \code{"54"} (avec guillemets) est un \textbf{texte} : c'est juste une suite de caractères. \code{2 + 2} donne \code{4}, mais \code{"2" + "2"} donne \code{"22"} (les textes se collent bout à bout). Surveillez bien vos guillemets !
+\end{attentionbox}
+
+\subsection{Insérer une valeur dans un texte : les \emph{template strings}}
+
+On a souvent besoin de fabriquer une phrase à partir de variables. La façon moderne et lisible utilise des \textbf{accents graves} (le caractère \texttt{`}, touche en haut à gauche du clavier) et le motif \emph{dollar-accolades} :
+
+\begin{lstlisting}[style=js]
+const prenom = "Aminata";
+const score = 8;
+
+console.log(`Bravo ${prenom}, tu as ${score} bonnes réponses sur 10 !`);
+// Affiche : Bravo Aminata, tu as 8 bonnes réponses sur 10 !
+\end{lstlisting}
+
+\textbf{Analogie :} une \emph{phrase à trous}. On écrit la phrase normalement, et là où on veut glisser une variable, on ouvre un « trou » avec \code{\$\{...\}}. JavaScript remplit les trous automatiquement.
+
+\begin{infobox}[Démo en direct]
+Dans la console, on déclare \code{const ville = "Saint-Louis"} puis on tape \code{`Je vais à \$\{ville\}`}. La console fabrique la phrase complète sous nos yeux.
+\end{infobox}
+
+% ===================== SECTION 4 =====================
+\section{Opérateurs et conditions : faire des choix}
+
+\subsection{Les opérateurs : calculer et comparer}
+
+\paragraph{Opérateurs de calcul.} Identiques aux mathématiques, à une exception près :
+\begin{center}
+\begin{tabular}{c l l}
+\toprule
+\textbf{Opérateur} & \textbf{Rôle} & \textbf{Exemple} \\
+\midrule
+\code{+} \quad \code{-} \quad \code{*} \quad \code{/} & addition, soustraction, multiplication, division & \code{7 * 3} vaut \code{21} \\
+\code{\%} & \textbf{modulo} : le \emph{reste} d'une division & \code{17 \% 5} vaut \code{2} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le \textbf{modulo} mérite une explication. \emph{Analogie :} on partage \textbf{17 mangues} entre \textbf{5 enfants}. Chacun en reçoit 3 ($5 \times 3 = 15$), et il \textbf{reste 2} mangues. Le modulo, c'est ce reste : \code{17 \% 5} vaut \code{2}. Très pratique pour savoir si un nombre est pair (\code{n \% 2 === 0}) ou multiple de 5.
+
+\paragraph{Opérateurs de comparaison.} Ils renvoient toujours un booléen (\code{true} ou \code{false}) :
+\begin{center}
+\begin{tabular}{c l c l}
+\toprule
+\textbf{Opérateur} & \textbf{Signifie} & \textbf{Opérateur} & \textbf{Signifie} \\
+\midrule
+\code{===} & strictement égal & \code{!==} & strictement différent \\
+\code{<} \quad \code{>} & plus petit / plus grand & \code{<=} \quad \code{>=} & inférieur ou égal / supérieur ou égal \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{retenirbox}[Règle d'or : toujours \code{===}, jamais \code{==}]
+JavaScript possède deux opérateurs d'égalité : \code{==} (deux signes) et \code{===} (trois signes). Le premier est \emph{laxiste} : il considère que le nombre \code{5} et le texte \code{"5"} sont égaux, ce qui crée des bugs sournois. Le second, \code{===}, est \emph{strict} : il vérifie aussi le type. \textbf{Dans ce cours, on utilise toujours \code{===} (et \code{!==}).}
+\end{retenirbox}
+
+\paragraph{Opérateurs logiques.} Pour combiner plusieurs conditions :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \code{\&\&} (\textbf{ET}) : vrai seulement si \emph{les deux} conditions sont vraies.
+  \item \code{||} (\textbf{OU}) : vrai si \emph{au moins une} condition est vraie.
+\end{itemize}
+\emph{Analogie :} pour entrer à un concours, il faut être inscrit \textbf{ET} avoir sa carte d'étudiant (les deux). Pour avoir une réduction, il suffit d'être étudiant \textbf{OU} d'avoir moins de 18 ans (l'un suffit).
+
+\subsection{La condition \code{if} : un aiguillage}
+
+Une condition permet à votre programme de \textbf{choisir un chemin} selon la situation. \emph{Analogie :} un aiguillage de train, ou un panneau routier « si la route est barrée, prenez à droite ».
+
+\begin{lstlisting}[style=js]
+const age = 20;
+
+if (age >= 18) {
+  console.log("Vous êtes majeur.");
+} else {
+  console.log("Vous êtes mineur.");
+}
+\end{lstlisting}
+
+On peut enchaîner plusieurs cas avec \code{else if} :
+
+\begin{lstlisting}[style=js]
+const note = 14;
+
+if (note >= 16) {
+  console.log("Très bien");
+} else if (note >= 12) {
+  console.log("Bien");
+} else if (note >= 10) {
+  console.log("Passable");
+} else {
+  console.log("À retravailler");
+}
+\end{lstlisting}
+
+\subsection{Le ternaire : un \code{if} en une ligne}
+
+Quand le choix est simple (deux issues seulement), on peut écrire la condition de façon condensée avec l'opérateur \textbf{ternaire} \code{condition ? valeurSiVrai : valeurSiFaux} :
+
+\begin{lstlisting}[style=js]
+const age = 20;
+const statut = age >= 18 ? "majeur" : "mineur";
+console.log(statut); // "majeur"
+\end{lstlisting}
+
+Cela se lit : \emph{« l'âge est-il $\geq$ 18 ? Si oui, "majeur" ; sinon, "mineur" »}. C'est exactement le même résultat que le \code{if/else} plus haut, en plus court.
+
+\begin{infobox}[Démo en direct]
+On teste dans la console : on déclare \code{const score = 7}, puis on tape la condition \code{score >= 5 ? "Réussi" : "Échoué"}. La console répond \code{"Réussi"}. On change \code{score} et on relance.
+\end{infobox}
+
+% ===================== SECTION 5 =====================
+\section{Les boucles : répéter sans se fatiguer}
+
+\subsection{Pourquoi des boucles ?}
+
+Imaginez que vous deviez afficher les 10 questions d'un quiz, ou parcourir les 54 pays africains. Vous n'allez pas écrire 54 lignes à la main ! Une \textbf{boucle} répète une action automatiquement.
+
+\emph{Analogie :} faire l'appel en classe. Vous ne « réinventez » pas la consigne pour chaque étudiant ; vous appliquez la même action (« dire le nom, cocher présent ») à chacun, l'un après l'autre.
+
+\subsection{La boucle \code{for} classique}
+
+Elle répète un bloc un nombre précis de fois, à l'aide d'un \textbf{compteur} :
+
+\begin{lstlisting}[style=js]
+// Affiche les nombres de 1 à 5
+for (let i = 1; i <= 5; i++) {
+  console.log(i);
+}
+\end{lstlisting}
+
+Les trois parties entre parenthèses se lisent : \emph{« je pars de \code{i = 1} ; je continue tant que \code{i <= 5} ; à chaque tour j'ajoute 1 à \code{i} (\code{i++}) »}.
+
+\subsection{La boucle \code{for...of} : « pour chaque »}
+
+Quand on a une \textbf{liste} (un tableau) et qu'on veut traiter \emph{chaque} élément, \code{for...of} est plus simple et plus lisible :
+
+\begin{lstlisting}[style=js]
+const villes = ["Dakar", "Thiès", "Saint-Louis", "Ziguinchor"];
+
+for (const ville of villes) {
+  console.log(`Ville : ${ville}`);
+}
+\end{lstlisting}
+
+On lit : \emph{« pour chaque \code{ville} de la liste \code{villes}, affiche-la »}. \emph{Analogie :} distribuer une copie d'examen à chaque étudiant de la rangée, un par un, sans en oublier.
+
+\begin{infobox}[À venir au Lab 6]
+Il existe des façons encore plus élégantes de parcourir des listes : \code{forEach}, \code{map}, \code{filter}. On les découvrira au Lab~6. Pour aujourd'hui, \code{for} et \code{for...of} suffisent largement.
+\end{infobox}
+
+% ===================== SECTION 6 =====================
+\section{Les fonctions : des machines réutilisables}
+
+\subsection{Qu'est-ce qu'une fonction ?}
+
+Une \textbf{fonction} est un \textbf{bloc de code réutilisable} : on l'écrit une fois, on lui donne un nom, et on peut l'appeler autant de fois qu'on veut.
+
+\emph{Analogie :} un \textbf{distributeur de jus}. On y met une pièce (l'\textbf{entrée}), la machine fait son travail à l'intérieur (le \textbf{traitement}), et elle rend un jus (la \textbf{sortie}). Une fonction, c'est pareil : elle reçoit des informations, les transforme, et renvoie un résultat.
+
+\begin{center}
+\begin{tikzpicture}[font=\small, node distance=1cm]
+  \node[draw, rounded corners, thick, fill=orange!8, draw=orange!70, minimum width=3.4cm, minimum height=1.6cm, align=center] (f) {\textbf{fonction}\\\footnotesize aireRectangle};
+  \node[left=1.6cm of f, align=center] (in) {\textbf{Entrée}\\\footnotesize \code{largeur}, \code{hauteur}};
+  \node[right=1.6cm of f, align=center] (out) {\textbf{Sortie}\\\footnotesize l'aire (\code{return})};
+  \draw[-{Stealth[length=3mm]}, very thick, gray!70!black] (in) -- (f);
+  \draw[-{Stealth[length=3mm]}, very thick, gray!70!black] (f) -- (out);
+\end{tikzpicture}
+\end{center}
+
+\subsection{Écrire et appeler une fonction}
+
+On la déclare avec le mot-clé \code{function}, on liste ses \textbf{paramètres} (les entrées) entre parenthèses, et on renvoie le résultat avec \code{return} :
+
+\begin{lstlisting}[style=js]
+// Déclaration de la fonction
+function aireRectangle(largeur, hauteur) {
+  const aire = largeur * hauteur;
+  return aire;
+}
+
+// Appel de la fonction (on lui donne des valeurs)
+const a = aireRectangle(4, 3);
+console.log(a); // 12
+
+console.log(aireRectangle(10, 2)); // 20 : réutilisable à volonté !
+\end{lstlisting}
+
+Quelques mots de vocabulaire :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item Les \textbf{paramètres} (\code{largeur}, \code{hauteur}) sont les noms des entrées dans la définition.
+  \item Les \textbf{arguments} (\code{4}, \code{3}) sont les vraies valeurs qu'on donne lors de l'appel.
+  \item \code{return} renvoie le résultat à l'extérieur. Sans \code{return}, la fonction ne « rend » rien.
+\end{itemize}
+
+\subsection{Les fonctions fléchées : une autre écriture}
+
+Vous croiserez souvent une écriture plus courte des fonctions, avec une « flèche » \code{=>} :
+
+\begin{lstlisting}[style=js]
+// Écriture classique
+function direBonjour(nom) {
+  return `Bonjour ${nom} !`;
+}
+
+// Exactement la même chose, en fonction fléchée
+const direBonjour2 = (nom) => {
+  return `Bonjour ${nom} !`;
+};
+\end{lstlisting}
+
+\begin{attentionbox}[Prenez-la telle quelle pour l'instant]
+La fonction fléchée \code{() => \{ \}} est juste une \textbf{autre manière d'écrire une fonction}, en plus court. Les deux versions ci-dessus font \emph{exactement} la même chose. Pour aujourd'hui, contentez-vous de la reconnaître : on en aura besoin au Lab~6 et au Lab~7. \textbf{Vous comprendrez tous ses détails en L2.}
+\end{attentionbox}
+
+\begin{infobox}[Démo en direct]
+Dans la console, on définit ensemble \code{function carre(n) \{ return n * n; \}}, puis on appelle \code{carre(7)}. La console répond \code{49}. On rappelle \code{carre(12)} : \code{144}. Une fonction écrite une fois, utilisée partout.
+\end{infobox}
+
+% ===================== SECTION 7 — MINI-EXO =====================
+\section{Mini-exercice en classe : le convertisseur de température}
+
+On met tout en pratique. À Dakar, il fait souvent autour de \textbf{30\,°C}. Mais sur certains sites internationaux, les températures sont en \textbf{degrés Fahrenheit}. Écrivons une fonction qui fait la conversion.
+
+\textbf{Formule :} $\text{F} = \text{C} \times 1{,}8 + 32$.
+
+\begin{objectifbox}[À faire ensemble, dans la console ou un fichier]
+\begin{enumerate}[leftmargin=*]
+  \item Écrire une fonction \code{celsiusVersFahrenheit(c)} qui reçoit une température en Celsius et \textbf{renvoie} la température en Fahrenheit.
+  \item L'appeler avec \code{30} (la température de Dakar) et afficher le résultat avec une jolie phrase grâce à une \emph{template string}.
+  \item \textbf{Bonus :} ajouter une condition qui affiche « Il fait chaud ! » si la température dépasse 28\,°C, et « Température agréable » sinon (avec un \code{if/else} ou un ternaire).
+\end{enumerate}
+\end{objectifbox}
+
+\textbf{Squelette de départ} (à compléter ensemble) :
+
+\begin{lstlisting}[style=js]
+function celsiusVersFahrenheit(c) {
+  // ... à compléter : renvoyer c * 1.8 + 32
+}
+
+const tempDakar = 30;
+const enFahrenheit = celsiusVersFahrenheit(tempDakar);
+
+console.log(`À Dakar, ${tempDakar}°C = ${enFahrenheit}°F`);
+
+// Bonus : message selon la chaleur
+const message = tempDakar > 28 ? "Il fait chaud !" : "Température agréable";
+console.log(message);
+\end{lstlisting}
+
+\begin{infobox}[Second défi, si le temps le permet : conversion FCFA]
+Sur le même modèle, écrire \code{fcfaVersEuro(montant)} sachant que \textbf{1\,EUR = 656 FCFA} (taux fixe). Tester avec \code{10000} FCFA. Indice : il faut \emph{diviser} le montant par 656.
+\end{infobox}
+
+% ===================== RÉSUMÉ =====================
+\section{Résumé et transition}
+
+\subsection{Aide-mémoire du CM3}
+
+\begin{center}
+\begin{tabular}{p{4cm} p{8.5cm}}
+\toprule
+\textbf{Notion} & \textbf{À retenir} \\
+\midrule
+Rôle de JS & HTML structure, CSS habille, \textbf{JS anime} (décide, calcule, réagit). \\
+\code{<script defer>} & Brancher le JS, exécuté \emph{après} la construction de la page. \\
+Console (F12) & Le brouillon pour tester du code ; \code{console.log(...)} affiche. \\
+\code{const} / \code{let} & \code{const} par défaut ; \code{let} si la valeur change ; jamais \code{var}. \\
+Types & \code{number}, \code{string} (avec guillemets), \code{boolean} (\code{true}/\code{false}). \\
+Template string & Phrase à trous : \code{`Bonjour \$\{nom\}`}. \\
+Comparaison & Toujours \code{===} et \code{!==} (jamais \code{==}). \\
+Logique & \code{\&\&} (et), \code{||} (ou). \\
+Condition & \code{if / else if / else} ; ternaire \code{cond ? a : b}. \\
+Boucles & \code{for} (compteur), \code{for...of} (« pour chaque »). \\
+Fonction & \code{function nom(params) \{ return ...\, \}} ; réutilisable. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Les trois règles d'or à ne jamais oublier}
+
+\begin{retenirbox}[Les trois règles de ce cours]
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textbf{\code{const} par défaut}, \code{let} seulement si ça change. Jamais \code{var}.
+  \item \textbf{Toujours \code{===}}, jamais \code{==}.
+  \item \textbf{Toujours \code{defer}} sur la balise \code{<script>}.
+\end{enumerate}
+\end{retenirbox}
+
+\subsection{Ce qu'on fera au prochain TP}
+
+Aujourd'hui, tout s'est passé dans la \textbf{console}, notre brouillon. Au \textbf{Lab~5}, on passe au sérieux : on crée le fichier \code{script.js} dans le repo \code{jang-afrig}, on le branche à la page, et on écrit nos premières vraies fonctions, toutes tropicalisées :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item un convertisseur FCFA $\rightarrow$ EUR,
+  \item le calcul de la moyenne d'un étudiant DUT1-Info,
+  \item une fonction \code{estMajeur(age)},
+  \item un FizzBuzz « à la sénégalaise », et le test du palindrome.
+\end{itemize}
+
+\begin{center}
+\textit{Votre maison Jàng Afrig a maintenant l'électricité. Au Lab~5, on allume la première ampoule.}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+\small Dr.~El Hadji Bassirou TOURÉ --- UCAD\\
+\small Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+\end{center}
+
+\end{document}

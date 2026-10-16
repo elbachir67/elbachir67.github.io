@@ -41,6 +41,16 @@ def brouillon(html: str) -> bool:
     return MOTIF_BROUILLON.search(html) is None
 
 
+# Page de redirection que Quarto écrit pour un alias : l'ancienne adresse d'une séance renumérotée.
+# Elle n'a ni description ni métadonnées de partage, et c'est voulu : elle ne doit pas être
+# référencée, seulement renvoyer vers la nouvelle adresse. Elle ne figure donc pas au plan du site.
+MOTIF_REDIRECTION = re.compile(r"<title>Redirect</title>\s*<script[^>]*>\s*var redirects = ")
+
+
+def redirection(html: str) -> bool:
+    return MOTIF_REDIRECTION.search(html) is not None
+
+
 class LecteurEntete(HTMLParser):
     """Relève le titre et les balises <meta> d'une page."""
 
@@ -94,7 +104,8 @@ def main() -> int:
 
     pages = sorted(p for p in racine.rglob("*.html") if "site_libs" not in p.relative_to(racine).parts)
     brouillons = [p for p in pages if brouillon(p.read_text(encoding="utf-8"))]
-    pages = [p for p in pages if p not in brouillons]
+    redirections = [p for p in pages if redirection(p.read_text(encoding="utf-8"))]
+    pages = [p for p in pages if p not in brouillons and p not in redirections]
     titres, descriptions = defaultdict(list), defaultdict(list)
     for page in pages:
         lecteur = LecteurEntete()
@@ -136,6 +147,23 @@ def main() -> int:
         for page in pages:
             if page.relative_to(racine).as_posix() not in chemins:
                 erreur(page, "page absente de sitemap.xml")
+        for page in redirections:
+            if page.relative_to(racine).as_posix() in chemins:
+                erreur(page, "redirection présente dans sitemap.xml : seule la nouvelle adresse y figure")
+
+    # Une redirection désigne sa cible comme adresse canonique, en URL absolue du domaine
+    # (scripts/rendre.py) : c'est la nouvelle adresse qu'un moteur de recherche doit retenir.
+    for page in redirections:
+        texte = page.read_text(encoding="utf-8")
+        cible = re.search(r'var redirects = \{"":"([^"]+)"', texte)[1]
+        attendue = (page.parent / cible).resolve().relative_to(racine.resolve()).as_posix()
+        canonique = re.search(r'<link rel="canonical" href="([^"]+)"', texte)
+        if not canonique:
+            erreur(page, f"redirection sans <link rel=\"canonical\"> vers {attendue}")
+        elif urlparse(canonique[1]).path.lstrip("/") != attendue:
+            erreur(page, f"adresse canonique {canonique[1]} : la redirection mène à {attendue}")
+        else:
+            hors_domaine(page, canonique[1], "adresse canonique")
 
     robots = racine / "robots.txt"
     if not robots.is_file():
@@ -155,6 +183,8 @@ def main() -> int:
         return 1
     langues = ", ".join(sorted({l for l, _ in titres} - {""})) or "aucune"
     ignores = f" ({len(brouillons)} brouillon(s) non publié(s) ignoré(s))" if brouillons else ""
+    if redirections:
+        ignores += f" ({len(redirections)} redirection(s), hors du plan du site)"
     print(f"OK : {len(pages)} page(s) avec titre et description uniques par langue ({langues}), "
           f"métadonnées de partage, sitemap.xml et robots.txt, domaine {domaine}.{ignores}")
     return 0

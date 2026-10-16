@@ -9,7 +9,8 @@
 3. `_site-en/en/` est copié dans `_site/en/`.
 4. Les deux plans de site sont fusionnés dans `_site/sitemap.xml`, et chaque séance de cours est imprimée
    en PDF à côté de sa page (US-17).
-5. Le flux RSS du blog est annoncé dans l'en-tête de chaque page, dans la langue de la page.
+5. Le flux RSS du blog est annoncé dans l'en-tête de chaque page, dans la langue de la page, et chaque
+   page de redirection (alias d'une séance renumérotée) désigne sa cible comme adresse canonique.
 6. Chaque langue garde son index de recherche : le français à la racine, l'anglais dans `_site/en/`, les pages
    anglaises étant rattachées à cette racine. Une recherche ne renvoie donc que des pages de la langue lue.
 
@@ -35,6 +36,8 @@ RACINE = Path(__file__).resolve().parent.parent
 SORTIE_FR = RACINE / "_site"
 SORTIE_EN = RACINE / "_site-en"
 ESPACE = "http://www.sitemaps.org/schemas/sitemap/0.9"
+# Page de redirection écrite par Quarto pour un alias : sa cible est la valeur de la clé vide.
+MOTIF_REDIRECTION = re.compile(r'<title>Redirect</title>\s*<script[^>]*>\s*var redirects = \{"":"([^"]+)"')
 MOTIF_DECALAGE = re.compile(r'(<meta name="quarto:offset" content=")((?:\.\./)*)(")')
 
 
@@ -148,6 +151,29 @@ def annoncer_le_flux() -> None:
     print(f"-> flux RSS annoncé sur {annoncees} page(s)")
 
 
+def canoniser_les_redirections() -> None:
+    """Donne à chaque page de redirection l'adresse canonique de sa cible (US-79).
+
+    Quarto écrit, à l'ancienne adresse d'une page renumérotée, une page qui redirige en JavaScript :
+    GitHub Pages ne sait pas répondre par un 301. Un moteur de recherche qui la trouve doit savoir que
+    l'adresse à retenir est la nouvelle ; c'est ce que dit `<link rel="canonical">`, en adresse absolue.
+    """
+    site = re.search(r'^site-url: &site-url "([^"]+)"', (RACINE / "_quarto.yml").read_text(encoding="utf-8"),
+                     re.M)[1].rstrip("/")
+    canonisees = 0
+    for page in (p for p in SORTIE_FR.rglob("*.html") if "site_libs" not in p.parts):
+        texte = page.read_text(encoding="utf-8")
+        trouve = MOTIF_REDIRECTION.search(texte)
+        if not trouve or 'rel="canonical"' in texte:
+            continue
+        cible = (page.parent / trouve[1]).resolve().relative_to(SORTIE_FR.resolve()).as_posix()
+        lien = f'<link rel="canonical" href="{site}/{cible}">'
+        page.write_text(texte.replace("</head>", lien + "\n</head>", 1), encoding="utf-8")
+        canonisees += 1
+    if canonisees:
+        print(f"-> adresse canonique posée sur {canonisees} page(s) de redirection")
+
+
 def pdf_des_seances() -> None:
     """Imprime chaque présentation en PDF, à côté de sa page (US-17).
 
@@ -175,6 +201,7 @@ def main() -> int:
     index_de_recherche_par_langue()
     zoom_des_slides()
     annoncer_le_flux()
+    canoniser_les_redirections()
     pdf_des_seances()
     return 0
 
