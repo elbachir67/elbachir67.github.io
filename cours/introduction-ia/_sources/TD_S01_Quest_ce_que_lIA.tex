@@ -1,0 +1,262 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+
+% En-tête et pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small TD S01 -- Qu'est-ce que l'IA ?}
+\fancyhead[R]{\small Introduction à l'IA -- M1 IABD}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Boîte pour les exercices
+\newtcolorbox{exercicebox}[1][]{
+    colback=blue!5,
+    colframe=blue!50,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\title{\textbf{TD Séance 1 : Qu'est-ce que l'Intelligence Artificielle ?}\\
+\large Introduction à l'Intelligence Artificielle --- Énoncés}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Faculté des Sciences et Techniques\\
+Université Cheikh Anta Diop de Dakar}
+\date{M1 IABD --- Semestre 1}
+
+\begin{document}
+
+\maketitle
+
+\vspace{0.5cm}
+
+\begin{center}
+\fbox{\parbox{0.9\textwidth}{
+\textbf{Objectifs du TD :}
+\begin{itemize}[nosep]
+    \item Maîtriser la distinction IA / ML / DL
+    \item Savoir appliquer le cadre PEAS à un problème
+    \item Caractériser les environnements selon leurs propriétés
+    \item Identifier le type d'agent approprié à une situation
+    \item Réfléchir aux limites des définitions classiques de l'IA
+\end{itemize}
+}}
+\end{center}
+
+\vspace{1cm}
+
+%=============================================================================
+\section*{Exercice 1 : Classification IA / ML / DL \hfill \textit{(20 min)}}
+%=============================================================================
+
+\begin{exercicebox}[Énoncé]
+Pour chacun des systèmes suivants, indiquez s'il relève de :
+\begin{itemize}
+    \item[(a)] IA mais pas ML (IA symbolique, algorithmique)
+    \item[(b)] ML mais pas DL
+    \item[(c)] Deep Learning
+\end{itemize}
+
+Justifiez brièvement chaque réponse.
+
+\begin{enumerate}
+    \item Un algorithme de navigation GPS qui calcule le plus court chemin
+    \item Un système de recommandation Netflix utilisant un réseau de neurones à 50 couches
+    \item Un filtre anti-spam utilisant Naive Bayes
+    \item Wolfram Alpha résolvant des intégrales symboliquement
+    \item AlphaGo battant le champion du monde de Go
+    \item Un arbre de décision pour prédire si un client va résilier son abonnement
+    \item Un système expert médical basé sur des règles if-then
+    \item GPT-4 générant du texte
+    \item Un algorithme k-means pour segmenter des clients
+    \item Un solveur SAT vérifiant la satisfiabilité d'une formule logique
+\end{enumerate}
+\end{exercicebox}
+
+\vspace{1cm}
+
+%=============================================================================
+\section*{Exercice 2 : Analyse PEAS \hfill \textit{(30 min)}}
+%=============================================================================
+
+\begin{exercicebox}[Énoncé]
+Définissez le cadre PEAS (Performance, Environment, Actuators, Sensors) pour les agents suivants. Pour chaque composante, donnez au moins 3-4 éléments pertinents.
+
+\begin{enumerate}
+    \item Un robot aspirateur autonome (type Roomba)
+    \item Un système de trading haute fréquence
+    \item Un assistant vocal (type Alexa/Siri)
+\end{enumerate}
+
+Pour chaque agent, précisez également :
+\begin{itemize}
+    \item Quel compromis existe entre les différents critères de performance ?
+    \item Quelle est la principale difficulté liée à l'environnement ?
+\end{itemize}
+\end{exercicebox}
+
+\vspace{1cm}
+
+%=============================================================================
+\section*{Exercice 3 : Types d'environnements \hfill \textit{(25 min)}}
+%=============================================================================
+
+\begin{exercicebox}[Énoncé]
+Pour chaque environnement ci-dessous, caractérisez-le selon les 6 dimensions vues en cours :
+\begin{itemize}
+    \item Observable : Total / Partiel
+    \item Déterministe : Oui / Non
+    \item Épisodique : Oui / Non
+    \item Statique : Oui / Non
+    \item Discret : Oui / Non
+    \item Nombre d'agents : Un / Plusieurs
+\end{itemize}
+
+Complétez le tableau suivant et justifiez chaque réponse :
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Environnement} & \textbf{Obs.} & \textbf{Dét.} & \textbf{Épis.} & \textbf{Stat.} & \textbf{Disc.} & \textbf{Agents} \\
+\hline
+Le jeu du morpion & & & & & & \\
+\hline
+La bourse (pour un trader) & & & & & & \\
+\hline
+Un examen QCM en ligne & & & & & & \\
+\hline
+Une partie de poker Texas Hold'em & & & & & & \\
+\hline
+Un match de football (robot joueur) & & & & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+Questions complémentaires :
+\begin{enumerate}
+    \item Quel environnement est le plus facile à gérer pour un agent ? Pourquoi ?
+    \item Quel environnement est le plus difficile ? Pourquoi ?
+    \item Pour la bourse, expliquez pourquoi elle est « partiellement observable » même si on a accès aux prix en temps réel.
+\end{enumerate}
+\end{exercicebox}
+
+\vspace{1cm}
+
+%=============================================================================
+\section*{Exercice 4 : Type d'agent approprié \hfill \textit{(25 min)}}
+%=============================================================================
+
+\begin{exercicebox}[Énoncé]
+Pour chaque situation, déterminez le type d'agent \textbf{le plus simple} qui pourrait la gérer efficacement. Choisissez parmi :
+\begin{itemize}
+    \item Agent réflexe simple
+    \item Agent basé sur modèle (réflexe avec état)
+    \item Agent basé sur buts
+    \item Agent basé sur utilité
+    \item Agent apprenant
+\end{itemize}
+
+Justifiez votre choix en expliquant :
+\begin{itemize}
+    \item Pourquoi un agent plus simple ne suffirait pas
+    \item Pourquoi un agent plus complexe serait inutilement sophistiqué
+\end{itemize}
+
+\textbf{Situations :}
+\begin{enumerate}
+    \item Un distributeur automatique de boissons
+    \item Un thermostat intelligent qui apprend les préférences de l'utilisateur
+    \item Un système de recommandation de films
+    \item Un planificateur de trajet GPS
+    \item Une porte automatique dans un supermarché
+    \item Un robot qui joue aux échecs contre des adversaires de niveaux variés
+    \item Un système de contrôle de feux de circulation adaptatif
+\end{enumerate}
+\end{exercicebox}
+
+\vspace{1cm}
+
+%=============================================================================
+\section*{Exercice 5 : Réflexion -- Limites du test de Turing \hfill \textit{(20 min)}}
+%=============================================================================
+
+\begin{exercicebox}[Énoncé]
+Un système réussit le test de Turing : lors d'une conversation textuelle de 5 minutes, 30\% des juges humains le confondent avec un humain (seuil traditionnellement accepté).
+
+\textbf{Questions :}
+\begin{enumerate}
+    \item \textbf{Ce système est-il nécessairement intelligent ?} 
+    
+    Argumentez en considérant :
+    \begin{itemize}
+        \item L'argument de la « Chambre chinoise » de John Searle
+        \item Le cas du programme ELIZA (1966)
+        \item La distinction entre « simuler » et « comprendre »
+    \end{itemize}
+    
+    \item \textbf{Un système peut-il être intelligent sans réussir le test de Turing ?}
+    
+    Donnez au moins trois exemples de systèmes d'IA reconnus comme performants qui échoueraient probablement au test de Turing.
+    
+    \item \textbf{Quelles capacités le test de Turing ne mesure-t-il pas ?}
+    
+    Listez au moins 5 capacités considérées comme « intelligentes » mais non évaluées par ce test.
+    
+    \item \textbf{Question ouverte :} Proposez un test alternatif qui vous semblerait plus approprié pour évaluer l'intelligence d'un système artificiel. Justifiez votre proposition.
+\end{enumerate}
+\end{exercicebox}
+
+\vspace{1cm}
+
+%=============================================================================
+\section*{Exercice 6 (Bonus) : Conception d'un agent \hfill \textit{(30 min)}}
+%=============================================================================
+
+\begin{exercicebox}[Énoncé]
+Vous devez concevoir un agent pour un \textbf{robot livreur de colis} dans un campus universitaire.
+
+\textbf{Partie A -- Analyse PEAS}
+\begin{enumerate}
+    \item Définissez complètement le cadre PEAS pour cet agent.
+    \item Identifiez les conflits potentiels entre les critères de performance.
+\end{enumerate}
+
+\textbf{Partie B -- Caractérisation de l'environnement}
+\begin{enumerate}
+    \item Caractérisez l'environnement selon les 6 dimensions.
+    \item Quelles sont les principales sources d'incertitude ?
+    \item Comment l'environnement varie-t-il entre le jour et la nuit ?
+\end{enumerate}
+
+\textbf{Partie C -- Architecture de l'agent}
+\begin{enumerate}
+    \item Quel type d'agent recommanderiez-vous ? Justifiez.
+    \item Décrivez les principales composantes de cet agent :
+    \begin{itemize}
+        \item État interne (si applicable)
+        \item Règles ou politique de décision
+        \item Mécanisme d'apprentissage (si applicable)
+    \end{itemize}
+    \item Donnez un exemple de situation où l'agent devrait :
+    \begin{itemize}
+        \item Utiliser son modèle de l'environnement
+        \item Réviser ses croyances
+        \item Faire un compromis entre ses objectifs
+    \end{itemize}
+\end{enumerate}
+\end{exercicebox}
+
+\end{document}

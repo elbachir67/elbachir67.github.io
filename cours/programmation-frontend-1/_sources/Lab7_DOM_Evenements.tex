@@ -1,0 +1,623 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== POLICES & LANGUE =====================
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,xcolor,booktabs,hyperref,tcolorbox,enumitem,fancyhdr,array,pifont,longtable,multirow,listings}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+% ===================== BOÎTES =====================
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title={#1},breakable}
+
+% ===================== CODE (listings) =====================
+\definecolor{codebg}{gray}{0.96}
+\definecolor{kwcolor}{RGB}{0,90,160}
+\definecolor{strcolor}{RGB}{160,55,30}
+\definecolor{comcolor}{RGB}{95,120,95}
+\definecolor{ndcolor}{RGB}{120,80,150}
+
+\lstdefinelanguage{JS}{
+  morekeywords={let,const,var,function,return,if,else,for,of,in,while,do,true,false,null,undefined,typeof,break,continue,new,this},
+  morekeywords=[2]{console,log,table,document,Math,window,alert,prompt,forEach,map,filter,push,pop,querySelector,querySelectorAll,addEventListener,classList,textContent,innerHTML,createElement,appendChild,getElementById,includes},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+\lstdefinestyle{js}{
+  language=JS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{kwcolor},
+  keywordstyle=[2]\color{ndcolor},
+  commentstyle=\color{comcolor}\itshape,
+  stringstyle=\color{strcolor},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {â}{{â}}1 {ê}{{ê}}1
+    {î}{{î}}1 {ô}{{ô}}1 {û}{{û}}1 {ù}{{ù}}1 {ç}{{ç}}1
+    {ï}{{ï}}1 {ë}{{ë}}1 {É}{{É}}1 {È}{{È}}1 {À}{{À}}1
+    {œ}{{œ}}1 {°}{{°}}1 {²}{{²}}1
+}
+
+\lstdefinestyle{html}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {ê}{{ê}}1 {ç}{{ç}}1 {î}{{î}}1
+}
+
+\lstset{style=js}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% ===================== EN-TÊTES =====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 7 : DOM et événements}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ===================== TITRE =====================
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 7 --- DOM et événements}\\[0.3cm]
+\textbf{\Large Le premier quiz Jàng Afrig jouable}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Informations pratiques]
+\textbf{Le grand jour.} Jusqu'ici, tout votre code s'affichait dans la console. Aujourd'hui, JavaScript va enfin \textbf{modifier la page visible} et \textbf{réagir aux clics}. À la fin de la séance, Jàng Afrig sera un \emph{vrai quiz jouable} du début à la fin.
+
+\smallskip
+\textbf{Avant de commencer :}
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \code{data.js} (Lab 6, tag \code{v0.6}) avec les pays et \code{choisirAuHasard}.
+  \item \code{script.js} branché, et vos pages HTML/CSS des Labs 1 à 4.
+  \item Les méthodes de tableaux du Lab 6 (\code{forEach}, accès par index).
+\end{itemize}
+
+\smallskip
+\textbf{Validation de fin :} on lance le quiz, on répond à 10 questions, le score s'affiche, on peut rejouer. Tag \code{v0.7} poussé + rapport déposé.
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab 7]
+À la fin, vous saurez :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Comprendre le \textbf{DOM} : la page vue comme un arbre par JavaScript.
+  \item \textbf{Sélectionner} un élément (\code{querySelector}, \code{querySelectorAll}).
+  \item \textbf{Lire et modifier} le contenu d'un élément (\code{textContent}, \code{value}).
+  \item Afficher/masquer des éléments avec \code{classList}.
+  \item \textbf{Réagir} aux clics avec \code{addEventListener}.
+  \item Assembler tout cela pour faire un \textbf{quiz Capitales} complet et jouable.
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\bigskip\hrule\bigskip
+
+\section*{Rappel express des Labs 5 et 6}
+\addcontentsline{toc}{section}{Rappel express des Labs 5 et 6}
+Vous savez écrire des fonctions, décider avec \code{if}, parcourir avec \code{forEach}, et vous avez \code{data.js} avec un tableau de pays et la fonction \code{choisirAuHasard}. On va brancher tout ça sur la page.
+
+% ===================== SECTION 1 =====================
+\section{Le DOM : la page vue comme un arbre}
+
+Quand le navigateur lit votre HTML, il en construit une représentation en mémoire, organisée comme un \textbf{arbre}. On l'appelle le \textbf{DOM} (\emph{Document Object Model}). \emph{Analogie :} l'arbre généalogique d'une famille --- une balise \code{<body>} a des « enfants » (\code{<header>}, \code{<main>}\ldots), qui ont eux-mêmes des enfants.
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  every node/.style={rectangle, rounded corners=2pt, draw, thick, inner sep=3pt},
+  html/.style={fill=blue!8, draw=blue!55},
+  branche/.style={fill=teal!8, draw=teal!55!black},
+  feuille/.style={fill=gray!6, draw=gray!55},
+  ed/.style={draw, gray!60!black, thick}
+]
+  \node[html]    (html)   at (0,3.6)      {\code{<html>}};
+  \node[branche] (head)   at (-3.4,2.4)   {\code{<head>}};
+  \node[branche] (body)   at (2.4,2.4)    {\code{<body>}};
+  \node[feuille] (title)  at (-4.7,1.1)   {\code{<title>}};
+  \node[feuille] (script) at (-2.1,1.1)   {\code{<script>}};
+  \node[feuille] (header) at (0.5,1.1)    {\code{<header>}};
+  \node[branche] (main)   at (4.3,1.1)    {\code{<main>}};
+  \node[feuille] (acc)    at (2.6,-0.3)   {\code{\#accueil}};
+  \node[feuille] (quiz)   at (4.4,-0.3)   {\code{\#quiz}};
+  \node[feuille] (res)    at (6.3,-0.3)   {\code{\#resultat}};
+
+  \draw[ed] (html) -- (head);
+  \draw[ed] (html) -- (body);
+  \draw[ed] (head) -- (title);
+  \draw[ed] (head) -- (script);
+  \draw[ed] (body) -- (header);
+  \draw[ed] (body) -- (main);
+  \draw[ed] (main) -- (acc);
+  \draw[ed] (main) -- (quiz);
+  \draw[ed] (main) -- (res);
+\end{tikzpicture}
+
+\textit{Le DOM : un arbre de balises. JavaScript peut s'y promener pour lire ou modifier n'importe quel élément.}
+\end{center}
+
+\begin{infobox}[À voir dans DevTools]
+Ouvrez votre page, appuyez sur \textbf{F12}, et allez dans l'onglet \textbf{Elements} (ou \emph{Éléments}). Vous voyez cet arbre, et vous pouvez déplier chaque branche. C'est la page telle que JavaScript la « voit ».
+\end{infobox}
+
+% ===================== SECTION 2 =====================
+\section{Sélectionner un élément}
+
+Avant de modifier un élément, il faut d'abord le \textbf{désigner}. L'outil principal pour cela est la fonction \code{querySelector} : on lui donne un \textbf{sélecteur CSS}, exactement comme au CM2.
+
+\begin{lstlisting}[style=js]
+const titre = document.querySelector("h1");        // par balise
+const bouton = document.querySelector("#btn-commencer"); // par id (#)
+const premiere = document.querySelector(".reponse");     // 1re classe (.)
+\end{lstlisting}
+
+Pour récupérer \emph{tous} les éléments correspondants (par exemple les 4 boutons de réponse), on utilise \code{querySelectorAll}, qui renvoie une \textbf{liste} :
+
+\begin{lstlisting}[style=js]
+const boutons = document.querySelectorAll(".reponse"); // les 4 boutons
+console.log(boutons.length); // 4
+\end{lstlisting}
+
+\begin{retenirbox}[Le pont avec le CSS]
+Les sélecteurs sont \emph{exactement} ceux du CSS : \code{h1} (balise), \code{\#identifiant} (id), \code{.classe} (classe). Ce que vous saviez cibler en CSS, vous savez maintenant le saisir en JavaScript.
+\end{retenirbox}
+
+% ===================== SECTION 3 =====================
+\section{Lire et modifier le contenu}
+
+\subsection{Le texte d'un élément : \texttt{textContent}}
+\code{textContent} permet de \textbf{lire} ou de \textbf{changer} le texte d'un élément.
+
+\begin{lstlisting}[style=js]
+const titre = document.querySelector("h1");
+
+console.log(titre.textContent);       // lit : "Jàng Afrig"
+titre.textContent = "Bienvenue !";    // modifie : la page change aussitôt
+\end{lstlisting}
+
+\subsection{La valeur d'un champ : \texttt{value}}
+Pour un champ de saisie (\code{<input>}), ce que l'utilisateur a tapé se trouve dans \code{.value}.
+
+\begin{lstlisting}[style=js]
+const champ = document.querySelector("#pseudo");
+console.log(champ.value); // ce que l'utilisateur a écrit dans le champ
+\end{lstlisting}
+
+\begin{infobox}[Démo en direct]
+On sélectionne le \code{<h1>} et on tape \code{titre.textContent = "Test"} : le titre change instantanément à l'écran. C'est la première fois que JavaScript \emph{touche} la page !
+\end{infobox}
+
+% ===================== SECTION 4 =====================
+\section{Afficher et masquer : \texttt{classList}}
+
+JavaScript peut ajouter ou retirer des \textbf{classes CSS} à un élément, en direct, avec \code{classList} :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \code{element.classList.add("cachee")} --- ajoute la classe ;
+  \item \code{element.classList.remove("cachee")} --- retire la classe ;
+  \item \code{element.classList.toggle("cachee")} --- l'ajoute si absente, la retire si présente.
+\end{itemize}
+
+\textbf{L'astuce qui change tout.} Si on crée en CSS une classe qui cache un élément :
+\begin{lstlisting}[style=html]
+.cachee { display: none; }
+\end{lstlisting}
+\ldots alors ajouter/retirer cette classe en JavaScript permet de \textbf{montrer ou cacher} n'importe quelle partie de la page. C'est exactement ce qu'on va utiliser pour passer de l'écran d'accueil à l'écran du quiz.
+
+% ===================== SECTION 5 =====================
+\section{Créer un élément (pour aller plus loin)}
+
+On peut aussi fabriquer un nouvel élément et l'ajouter à la page :
+
+\begin{lstlisting}[style=js]
+const liste = document.querySelector("#mes-villes");
+
+const item = document.createElement("li"); // créer un <li>
+item.textContent = "Dakar";                // lui donner du texte
+liste.appendChild(item);                   // l'accrocher dans la liste
+\end{lstlisting}
+
+\code{createElement} fabrique l'élément, \code{appendChild} l'accroche comme enfant. On n'en aura pas besoin pour le quiz d'aujourd'hui (nos 4 boutons existent déjà en HTML), mais c'est bon à connaître.
+
+% ===================== SECTION 6 =====================
+\section{Réagir aux clics : \texttt{addEventListener}}
+
+Voici le cœur de l'interactivité. \code{addEventListener} permet de dire : \emph{« quand cet événement se produit sur cet élément, exécute cette fonction »}. \emph{Analogie :} on installe une sonnette ; quand on appuie (l'événement \code{click}), elle déclenche une action.
+
+\begin{lstlisting}[style=js]
+const bouton = document.querySelector("#btn-commencer");
+
+bouton.addEventListener("click", () => {
+  console.log("Le bouton a été cliqué !");
+});
+\end{lstlisting}
+
+Les événements les plus courants : \code{click} (clic), \code{submit} (envoi de formulaire), \code{input} (saisie au clavier), \code{keydown} (touche pressée).
+
+\paragraph{Savoir \emph{quel} élément a été cliqué : \texttt{event.target}.} La fonction reçoit un objet \code{event} qui décrit ce qui s'est passé. \code{event.target} est l'élément précis sur lequel on a cliqué --- très utile quand plusieurs boutons partagent le même comportement.
+
+\begin{lstlisting}[style=js]
+const boutons = document.querySelectorAll(".reponse");
+
+boutons.forEach((bouton) => {
+  bouton.addEventListener("click", (event) => {
+    console.log("Tu as cliqué : " + event.target.textContent);
+  });
+});
+\end{lstlisting}
+
+\begin{infobox}[Démo en direct]
+On installe l'écouteur ci-dessus, puis on clique sur chacun des boutons : la console affiche le texte du bouton cliqué. \textbf{Notre quiz fonctionnera exactement sur ce principe.}
+\end{infobox}
+
+% ===================== SECTION 7 =====================
+\section{On assemble : le premier quiz Jàng Afrig}
+
+Place à la construction. On va transformer Jàng Afrig en un quiz à \textbf{trois écrans} : Accueil, Quiz, Résultat. Pour garder le score sans recharger la page, on rassemble ces trois écrans dans \code{index.html} sous forme de \code{<section>}, et on n'en montre qu'une à la fois (avec la classe \code{cachee}). C'est la technique des applications web modernes : \emph{une seule page, plusieurs vues}.
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  etat/.style={rectangle, rounded corners=4pt, draw, very thick, align=center, minimum width=2.4cm, minimum height=1.2cm},
+  arr/.style={-{Stealth[length=3mm]}, very thick, gray!70!black},
+  lab/.style={font=\scriptsize, text=gray!45!black, align=center}
+]
+  \node[etat, draw=blue!55, fill=blue!6] (acc) {\textbf{Accueil}\\\scriptsize saisir pseudo};
+  \node[etat, draw=teal!55!black, fill=teal!6, right=3.2cm of acc] (quiz) {\textbf{Quiz}\\\scriptsize question + 4 choix};
+  \node[etat, draw=orange!70, fill=orange!8, right=3.2cm of quiz] (res) {\textbf{Résultat}\\\scriptsize score final};
+
+  \draw[arr] (acc) -- node[lab,above]{clic\\« Mode Capitales »} (quiz);
+  \draw[arr] (quiz) -- node[lab,above]{10\textsuperscript{e}\\réponse} (res);
+  \draw[arr] (quiz) to[out=120,in=60,looseness=5] node[lab,above]{réponse\\suivante} (quiz);
+  \draw[arr] (res) to[out=-120,in=-60] node[lab,below]{clic « Rejouer »} (acc);
+\end{tikzpicture}
+
+\textit{La navigation du quiz : trois écrans, pilotés par les clics.}
+\end{center}
+
+\subsection{Étape 1 --- restructurer \texttt{index.html} en trois écrans}
+
+Remplacez le contenu du \code{<body>} de \code{index.html} par ceci :
+
+\begin{lstlisting}[style=html]
+<body>
+  <header><h1>Jàng Afrig</h1></header>
+
+  <main>
+    <!-- ÉCRAN 1 : ACCUEIL -->
+    <section id="accueil">
+      <p>Teste tes connaissances sur les capitales africaines !</p>
+      <label for="pseudo">Ton pseudo :</label>
+      <input type="text" id="pseudo" placeholder="Ex : Aminata">
+      <button id="btn-commencer">Mode Capitales</button>
+    </section>
+
+    <!-- ÉCRAN 2 : QUIZ -->
+    <section id="quiz" class="cachee">
+      <p id="progression">Question 1 / 10</p>
+      <h2 id="enonce">Énoncé de la question</h2>
+      <div id="reponses">
+        <button class="reponse">Réponse A</button>
+        <button class="reponse">Réponse B</button>
+        <button class="reponse">Réponse C</button>
+        <button class="reponse">Réponse D</button>
+      </div>
+    </section>
+
+    <!-- ÉCRAN 3 : RÉSULTAT -->
+    <section id="resultat" class="cachee">
+      <h2>Quiz terminé !</h2>
+      <p id="score-final">Ton score</p>
+      <button id="btn-rejouer">Rejouer</button>
+    </section>
+  </main>
+</body>
+\end{lstlisting}
+
+Puis ajoutez cette ligne à la fin de \code{style.css} :
+\begin{lstlisting}[style=html]
+.cachee { display: none; }
+\end{lstlisting}
+
+\subsection{Étape 2 --- compléter \texttt{data.js} (10 pays + mélange)}
+
+Pour un quiz de 10 questions, étoffez le tableau \code{pays} à dix pays, et ajoutez une fonction \code{melanger} (pour brouiller l'ordre des propositions) :
+
+\begin{lstlisting}[style=js]
+const pays = [
+  { cca3: "SEN", nom: "Sénégal",        capitale: "Dakar" },
+  { cca3: "MLI", nom: "Mali",           capitale: "Bamako" },
+  { cca3: "GHA", nom: "Ghana",          capitale: "Accra" },
+  { cca3: "KEN", nom: "Kenya",          capitale: "Nairobi" },
+  { cca3: "MAR", nom: "Maroc",          capitale: "Rabat" },
+  { cca3: "NGA", nom: "Nigéria",        capitale: "Abuja" },
+  { cca3: "EGY", nom: "Égypte",         capitale: "Le Caire" },
+  { cca3: "CIV", nom: "Côte d'Ivoire",  capitale: "Yamoussoukro" },
+  { cca3: "TUN", nom: "Tunisie",        capitale: "Tunis" },
+  { cca3: "ETH", nom: "Éthiopie",       capitale: "Addis-Abeba" }
+];
+
+function choisirAuHasard(tableau) {
+  const index = Math.floor(Math.random() * tableau.length);
+  return tableau[index];
+}
+
+// Mélange un tableau (algorithme classique d'échange)
+function melanger(tableau) {
+  const copie = [...tableau]; // copie du tableau (à prendre tel quel, CM3)
+  for (let i = copie.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = copie[i];
+    copie[i] = copie[j];
+    copie[j] = temp;
+  }
+  return copie;
+}
+\end{lstlisting}
+
+\subsection{Étape 3 --- générer les questions (dans \texttt{script.js})}
+
+Une question = un pays « bonne réponse », sa capitale, et trois autres capitales en distracteurs, le tout mélangé.
+
+\begin{lstlisting}[style=js]
+function genererQuestion() {
+  const bonPays = choisirAuHasard(pays);
+  const bonneReponse = bonPays.capitale;
+
+  // on part de la bonne réponse, puis on ajoute 3 distracteurs distincts
+  const propositions = [bonneReponse];
+  while (propositions.length < 4) {
+    const autre = choisirAuHasard(pays);
+    if (!propositions.includes(autre.capitale)) {
+      propositions.push(autre.capitale);
+    }
+  }
+
+  return {
+    enonce: `Quelle est la capitale du pays : ${bonPays.nom} ?`,
+    bonneReponse: bonneReponse,
+    propositions: melanger(propositions)
+  };
+}
+
+function genererQuestions(nombre) {
+  const liste = [];
+  for (let i = 0; i < nombre; i++) {
+    liste.push(genererQuestion());
+  }
+  return liste;
+}
+\end{lstlisting}
+
+\begin{infobox}[Deux petites nouveautés, à prendre telles quelles]
+\code{while (condition) \{ ... \}} signifie \emph{« tant que la condition est vraie, répète »} (vous l'avez vu en pseudo-code). \code{tableau.includes(x)} renvoie \code{true} si le tableau contient déjà \code{x} : on s'en sert pour éviter deux fois la même capitale.
+\end{infobox}
+
+\subsection{Étape 4 --- la logique des écrans (\texttt{script.js})}
+
+\begin{lstlisting}[style=js]
+// --- On saisit les éléments de la page (une seule fois) ---
+const ecranAccueil  = document.querySelector("#accueil");
+const ecranQuiz     = document.querySelector("#quiz");
+const ecranResultat = document.querySelector("#resultat");
+
+const champPseudo  = document.querySelector("#pseudo");
+const btnCommencer = document.querySelector("#btn-commencer");
+const btnRejouer   = document.querySelector("#btn-rejouer");
+
+const elProgression  = document.querySelector("#progression");
+const elEnonce       = document.querySelector("#enonce");
+const elScoreFinal   = document.querySelector("#score-final");
+const boutonsReponse = document.querySelectorAll(".reponse"); // 4 boutons
+
+// --- L'état du jeu ---
+let questions = [];
+let indexQuestion = 0;
+let score = 0;
+let pseudo = "";
+
+// --- N'afficher qu'un seul écran ---
+function afficherEcran(ecran) {
+  ecranAccueil.classList.add("cachee");
+  ecranQuiz.classList.add("cachee");
+  ecranResultat.classList.add("cachee");
+  ecran.classList.remove("cachee");
+}
+
+// --- Afficher la question courante ---
+function afficherQuestion() {
+  const q = questions[indexQuestion];
+  elProgression.textContent = `Question ${indexQuestion + 1} / ${questions.length}`;
+  elEnonce.textContent = q.enonce;
+
+  // remplir les 4 boutons avec les 4 propositions (i = position du bouton)
+  boutonsReponse.forEach((bouton, i) => {
+    bouton.textContent = q.propositions[i];
+  });
+}
+
+// --- Traiter une réponse cliquée ---
+function repondre(texteChoisi) {
+  const q = questions[indexQuestion];
+  if (texteChoisi === q.bonneReponse) {
+    score = score + 1;
+  }
+  indexQuestion = indexQuestion + 1;
+
+  if (indexQuestion < questions.length) {
+    afficherQuestion();   // question suivante
+  } else {
+    terminerQuiz();       // c'était la dernière
+  }
+}
+
+// --- Fin du quiz ---
+function terminerQuiz() {
+  elScoreFinal.textContent =
+    `Bravo ${pseudo} ! Ton score : ${score} / ${questions.length}`;
+  afficherEcran(ecranResultat);
+}
+
+// --- Démarrer une partie ---
+function demarrerQuiz() {
+  pseudo = champPseudo.value;
+  if (pseudo === "") {
+    pseudo = "Joueur";
+  }
+  score = 0;
+  indexQuestion = 0;
+  questions = genererQuestions(10);
+  afficherEcran(ecranQuiz);
+  afficherQuestion();
+}
+\end{lstlisting}
+
+\subsection{Étape 5 --- brancher les événements}
+
+C'est ce qui relie les boutons aux fonctions. À placer \textbf{tout en bas} de \code{script.js} :
+
+\begin{lstlisting}[style=js]
+// Cliquer sur "Mode Capitales" démarre le quiz
+btnCommencer.addEventListener("click", demarrerQuiz);
+
+// Cliquer sur une réponse appelle repondre() avec le texte du bouton
+boutonsReponse.forEach((bouton) => {
+  bouton.addEventListener("click", (event) => {
+    repondre(event.target.textContent);
+  });
+});
+
+// Cliquer sur "Rejouer" revient à l'accueil
+btnRejouer.addEventListener("click", () => {
+  afficherEcran(ecranAccueil);
+});
+\end{lstlisting}
+
+\begin{infobox}[Vérification --- le grand moment]
+Lancez Live Server. Saisissez un pseudo, cliquez sur \textbf{Mode Capitales} : l'écran du quiz apparaît avec une question et quatre capitales. Cliquez sur une réponse : la question suivante s'affiche. Après 10 réponses, l'écran Résultat montre votre score. Cliquez sur \textbf{Rejouer} : retour à l'accueil. \textbf{Vous venez de coder votre première application interactive !}
+\end{infobox}
+
+% ===================== POUR ALLER PLUS LOIN =====================
+\section{Pour aller plus loin (facultatif)}
+
+\begin{objectifbox}[Deux améliorations à tenter]
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Compter les erreurs} : ajoutez une variable \code{erreurs} (avec \code{let}), incrémentée dans le \code{else} de \code{repondre}, et affichez-la dans l'écran Résultat.
+  \item \textbf{Un petit retour visuel} : ajoutez un élément \code{<p id="feedback"></p>} dans l'écran Quiz, et faites afficher « Bonne réponse ! » ou « Raté » à chaque clic, via \code{textContent}.
+\end{enumerate}
+\end{objectifbox}
+
+% ===================== AIDE-MÉMOIRE =====================
+\section{Aide-mémoire du Lab 7}
+
+\begin{center}
+\begin{tabular}{p{5.4cm} p{7.6cm}}
+\toprule
+\textbf{Besoin} & \textbf{Code} \\
+\midrule
+Sélectionner un élément & \code{document.querySelector("\#id")} \\
+Sélectionner plusieurs & \code{document.querySelectorAll(".classe")} \\
+Lire / changer un texte & \code{element.textContent} \\
+Lire un champ de saisie & \code{champ.value} \\
+Cacher / montrer & \code{element.classList.add/remove("cachee")} \\
+Réagir à un clic & \code{element.addEventListener("click", fonction)} \\
+Élément cliqué & \code{event.target} \\
+Créer / accrocher un élément & \code{createElement(...)} \quad / \quad \code{appendChild(...)} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ===================== GIT =====================
+\section{Sauvegarder mon travail (routine Git)}
+
+\begin{retenirbox}[Routine Git de fin de Lab --- tag \texttt{v0.7}]
+\begin{lstlisting}[style=html]
+git status
+git add .
+git commit -m "Lab 7 : premier quiz fonctionnel (DOM + evenements)"
+git tag v0.7
+git push
+git push --tags
+\end{lstlisting}
+Vérifiez sur GitHub que le commit \emph{et} le tag \code{v0.7} apparaissent.
+\end{retenirbox}
+
+% ===================== RAPPORT =====================
+\begin{attentionbox}[Rapport à produire]
+Déposez \code{rapport-lab-7-NOM-Prenom.pdf} dans \code{rapports/}, avec quatre sections :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textbf{Ce que j'ai fait} : le quiz à trois écrans, la génération de questions, les événements.
+  \item \textbf{Difficultés rencontrées} : vos erreurs (messages copiés). Un quiz a beaucoup de pièces : c'est normal d'avoir des bugs.
+  \item \textbf{Comment je les ai résolues}.
+  \item \textbf{Lien vers mon repo} avec le tag \code{v0.7}.
+\end{enumerate}
+\end{attentionbox}
+
+% ===================== RÉSUMÉ =====================
+\section{Résumé et transition}
+
+C'est une étape majeure : Jàng Afrig est désormais une \textbf{application interactive}. Vous savez sélectionner des éléments, lire et modifier la page, et réagir aux clics. Vous avez relié HTML, CSS et JavaScript en un tout cohérent.
+
+Mais il y a une limite : le quiz ne connaît que \textbf{dix pays}, écrits à la main dans \code{data.js}. L'Afrique en compte \textbf{54} ! Au \textbf{CM4}, on apprendra comment une page web va chercher de \emph{vraies} données en ligne, en parlant à un service distant (une \emph{API}). Puis, au Lab 8, on remplacera nos dix pays par les 54 pays réels, récupérés automatiquement.
+
+\begin{center}
+\textit{Le quiz est jouable. Bientôt, il connaîtra toute l'Afrique.}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+\small Dr.~El Hadji Bassirou TOURÉ --- UCAD\\
+\small Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+\end{center}
+
+\end{document}

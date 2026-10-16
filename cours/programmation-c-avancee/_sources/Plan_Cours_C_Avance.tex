@@ -1,0 +1,1925 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\definecolor{partcolor}{RGB}{0,51,102}
+\definecolor{chaptercolor}{RGB}{0,102,204}
+
+\newtcolorbox{partbox}{
+    colback=partcolor!5,colframe=partcolor,
+    fonttitle=\bfseries\large,breakable,
+    title=PARTIE
+}
+
+\newtcolorbox{chapterbox}[1]{
+    colback=chaptercolor!5,colframe=chaptercolor,
+    fonttitle=\bfseries,breakable,
+    title=#1
+}
+
+\title{\textbf{Plan Complet du Cours}\\
+\LARGE Programmation C Avancée\\
+\large L3 - Université Cheikh Anta Diop de Dakar}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Faculté des Sciences et Techniques}
+\date{Version 1.0 - Novembre 2025}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section*{Vue d'ensemble du cours}
+
+Ce cours couvre la programmation C avancée avec une approche orientée systèmes. L'objectif est de former des programmeurs capables de comprendre les mécanismes sous-jacents et d'écrire du code robuste, performant et sécurisé.
+
+\subsection*{Structure pédagogique}
+
+\begin{itemize}[leftmargin=2cm]
+\item \textbf{CM (Cours Magistral):} 8-12 pages, contenu technique dense avec visualisations mémoire TikZ
+\item \textbf{TD (Travaux Dirigés):} 3-5 pages, exercices forensics avec dumps hexadécimaux, prédiction de sorties
+\item \textbf{TD\_Corrigé:} Solutions détaillées avec explications pas-à-pas
+\item \textbf{TP (Travaux Pratiques):} 4-6 pages, labs pratiques (compilation, debugging, algorithmes)
+\item \textbf{TP\_Pistes:} Indices uniquement, pas de solutions complètes pour les défis algorithmiques
+\end{itemize}
+
+\subsection*{Environnement de travail}
+
+Tous les TPs utilisent un environnement Docker standardisé:
+\begin{verbatim}
+Image: elbachirtoure/c-advanced-course:v1.0
+Outils: gcc, gdb, valgrind, vim, make
+\end{verbatim}
+
+\subsection*{Référence principale}
+
+\textit{Computer Systems: A Programmer's Perspective (3rd Edition)} par Randal E. Bryant \& David R. O'Hallaron
+
+\newpage
+
+\section{TP-1: Setup Environnement}
+
+\textbf{Fichier unique:} \texttt{TP-1\_Setup\_Environnement.tex}
+
+\subsection*{Objectifs}
+\begin{itemize}
+\item Installer et configurer Docker
+\item Maîtriser les commandes Docker de base
+\item Introduction à vim (modes, commandes essentielles)
+\item Premier programme C et compilation
+\end{itemize}
+
+\subsection*{Contenu du TP}
+\begin{itemize}
+\item Installation Docker (Windows/macOS/Linux)
+\item Lancement du container et volumes partagés
+\item Vim: modes (normal, insertion, commande)
+\item Vim: navigation, édition, sauvegarde
+\item Exercices vim progressifs
+\item Premier programme "Hello World"
+\item Compilation avec gcc
+\item Exécution du programme
+\end{itemize}
+
+\textbf{Durée estimée:} 2-3 heures
+
+\textbf{Prérequis:} Aucun
+
+\textbf{Livrables:} Environnement fonctionnel + exercices vim complétés
+
+\newpage
+
+\section{Ch-1: Introduction au Cours}
+
+\textbf{Fichier unique:} \texttt{CM\_Ch-1\_Introduction.tex} (2-3 pages maximum)
+
+\subsection*{Objectifs}
+\begin{itemize}
+\item Comprendre la pertinence du langage C aujourd'hui
+\item Connaître l'histoire et l'évolution du C
+\item Avoir une vue d'ensemble de la structure du cours
+\end{itemize}
+
+\subsection*{Contenu}
+
+\textbf{1. Pourquoi le C?}
+\begin{itemize}
+\item Exemples concrets: Linux kernel, PostgreSQL, nginx, FFmpeg
+\item TensorFlow/PyTorch backends, OpenSSL, Git
+\item Systèmes embarqués, drivers, OS
+\end{itemize}
+
+\textbf{2. Histoire du C}
+\begin{itemize}
+\item Dennis Ritchie, Bell Labs (1972)
+\item K\&R C, ANSI C (C89), C99, C11, C17, C23
+\item Influence sur C++, Java, C\#, etc.
+\end{itemize}
+
+\textbf{3. Structure du cours}
+\begin{itemize}
+\item Les 6 grandes parties (fondamentaux, représentation, mémoire, structures, exécution, outils)
+\item Objectifs généraux du cours
+\item Approche pédagogique (comprendre le "comment ça marche")
+\end{itemize}
+
+\textbf{4. Prérequis}
+\begin{itemize}
+\item Connaissance basique du C (variables, fonctions, boucles)
+\item Notions d'algorithmique
+\item Motivation pour la programmation système
+\end{itemize}
+
+\textbf{5. Environnement de travail}
+\begin{itemize}
+\item Docker container standardisé
+\item Outils: gcc, gdb, valgrind, vim
+\end{itemize}
+
+\textbf{6. Organisation pédagogique}
+\begin{itemize}
+\item CM/TD/TP avec exercices forensics
+\item Projets pratiques
+\end{itemize}
+
+\textbf{Note:} PAS de section sur l'évaluation, l'intégrité académique, ou les conseils méthodologiques.
+
+\newpage
+
+\begin{partbox}
+PARTIE I: FONDAMENTAUX C
+\end{partbox}
+
+\section{Ch0: Syntaxe C Complète}
+
+\textbf{Référence:} Révision complète des bases du C
+
+\subsection*{CM: Cours Magistral (8-10 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Structures de Contrôle}
+   \begin{itemize}
+   \item Blocs et portée (scope)
+   \item if/else, dangling else, opérateur ternaire
+   \item switch et fall-through
+   \item Boucles: while, do-while, for
+   \item break, continue, goto (usage légitime)
+   \end{itemize}
+
+\item \textbf{Types, Opérateurs et Conversions}
+   \begin{itemize}
+   \item Types primitifs et tailles (architecture-dependent)
+   \item Types portables (\texttt{<stdint.h>})
+   \item Opérateurs: arithmétiques, relationnels, logiques, bit-à-bit
+   \item Priorité et associativité des opérateurs
+   \item Conversions implicites et explicites (cast)
+   \item Pièges: signed/unsigned, promotion entière
+   \end{itemize}
+
+\item \textbf{Déclaration vs Définition}
+   \begin{itemize}
+   \item Différence déclaration/définition
+   \item One Definition Rule (ODR)
+   \item Mots-clés: extern, static
+   \item Erreurs de compilation vs linking
+   \end{itemize}
+
+\item \textbf{Points de Séquence et Comportements Indéfinis}
+   \begin{itemize}
+   \item Définition des points de séquence
+   \item Liste exhaustive des points de séquence
+   \item Undefined Behavior (UB): définition et dangers
+   \item Exemples: modifications multiples, ordre d'évaluation
+   \item Débordement d'entiers signés vs non-signés
+   \item Court-circuit des opérateurs logiques
+   \end{itemize}
+
+\item \textbf{Fonctions et Variables}
+   \begin{itemize}
+   \item Déclaration et définition de fonctions
+   \item Passage par valeur vs simulation passage par référence
+   \item Paramètres const
+   \item Portée: bloc, fonction, fichier, globale
+   \item Classes de stockage: auto, static (local/global), const, volatile
+   \item Récursivité
+   \end{itemize}
+
+\item \textbf{Compilation et Debugging}
+   \begin{itemize}
+   \item Les 4 phases: preprocessing, compilation, assemblage, linking
+   \item Options gcc: -Wall, -Wextra, -Werror, -g, -O0/-O2/-O3
+   \item GDB: commandes essentielles (break, run, next, step, print, backtrace)
+   \item Introduction à Valgrind (aperçu uniquement)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations:}
+\begin{itemize}
+\item Diagrammes de portée (scope)
+\item Priorité des opérateurs (tableau)
+\item Phases de compilation (schéma)
+\item PAS de visualisations mémoire détaillées (Ch2+)
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (3-4 pages)}
+
+\textbf{Focus: Prédire la sortie et identifier les erreurs}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Structures de Contrôle}
+   \begin{itemize}
+   \item Dangling else et ambiguïté
+   \item Shadowing et portée de blocs
+   \item Fall-through dans switch
+   \item Goto légitime (gestion d'erreurs)
+   \end{itemize}
+
+\item \textbf{Priorité et Conversions}
+   \begin{itemize}
+   \item Évaluer expressions complexes
+   \item Piège signed/unsigned
+   \item Promotion entière
+   \item Conversions arithmétiques usuelles
+   \end{itemize}
+
+\item \textbf{Points de Séquence et UB}
+   \begin{itemize}
+   \item Modifications multiples entre points de séquence
+   \item Ordre d'évaluation des arguments
+   \item Débordement d'entiers (signed vs unsigned)
+   \end{itemize}
+
+\item \textbf{Déclaration/Définition}
+   \begin{itemize}
+   \item One Definition Rule (ODR)
+   \item Static vs extern
+   \end{itemize}
+
+\item \textbf{Classes de Stockage}
+   \begin{itemize}
+   \item Static local (conservation entre appels)
+   \item Const et volatile
+   \end{itemize}
+
+\item \textbf{Court-circuit}
+   \begin{itemize}
+   \item Sécurité avec \&\& et ||
+   \item Division par zéro évitée
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions détaillées avec explications
+
+\subsection*{TP: Travaux Pratiques (4-5 pages)}
+
+\textbf{Environnement:} Docker (TP-1 complété)
+
+\textbf{Exercices pratiques:}
+\begin{enumerate}
+\item \textbf{Phases de Compilation}
+   \begin{itemize}
+   \item Preprocessing: gcc -E (examiner .i)
+   \item Compilation: gcc -S (examiner .s assembleur)
+   \item Assemblage: gcc -c (générer .o)
+   \item Linking: gcc (créer exécutable)
+   \item Analyse avec nm et file
+   \end{itemize}
+
+\item \textbf{Options de Compilation}
+   \begin{itemize}
+   \item Compiler avec/sans warnings (-Wall -Wextra)
+   \item Niveaux d'optimisation (-O0, -O2, -O3)
+   \item Comparer tailles et performances
+   \end{itemize}
+
+\item \textbf{Debugging avec GDB}
+   \begin{itemize}
+   \item Compilation avec -g
+   \item Breakpoints, step, next
+   \item Inspection de variables (print)
+   \item Pile d'appels (backtrace)
+   \item Exemple avec fonction récursive
+   \end{itemize}
+
+\item \textbf{Projet Simple}
+   \begin{itemize}
+   \item Calculatrice avec opérations basiques
+   \item Utilise seulement: int, float, boucles, fonctions
+   \item PAS de tableaux, PAS de fichiers, PAS de malloc
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices pour le projet
+
+\textbf{Durée estimée:} 3-4 heures
+
+\newpage
+
+\begin{partbox}
+PARTIE II: REPRÉSENTATION DES DONNÉES
+\end{partbox}
+
+\section{Ch1: Représentation Numérique}
+
+\textbf{Référence:} Bryant \& O'Hallaron - Chapitre 2
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Systèmes de Numération}
+   \begin{itemize}
+   \item Binaire (base 2), octale (base 8), hexadécimale (base 16)
+   \item Conversions entre bases
+   \item Notation hexadécimale: TOUJOURS 2 caractères par octet (0A, FF, 00)
+   \end{itemize}
+
+\item \textbf{Représentation des Entiers Non-Signés}
+   \begin{itemize}
+   \item Encodage binaire pur
+   \item Plage: $[0,\ 2^n - 1]$
+   \item Arithmétique modulo $2^n$
+   \end{itemize}
+
+\item \textbf{Représentation des Entiers Signés (Complément à Deux)}
+   \begin{itemize}
+   \item Principe du complément à deux
+   \item Plage: $[-2^{n-1},\ 2^{n-1} - 1]$
+   \item Bit de signe
+   \item Opérations: négation, addition, soustraction
+   \end{itemize}
+
+\item \textbf{Conversions Signed $\leftrightarrow$ Unsigned}
+   \begin{itemize}
+   \item Interprétation du pattern de bits
+   \item Pièges et dangers
+   \item Exemples de bugs critiques
+   \end{itemize}
+
+\item \textbf{Extension de Signe}
+   \begin{itemize}
+   \item Extension de 8 bits à 16 bits, 16 à 32, etc.
+   \item Signed vs unsigned extension
+   \end{itemize}
+
+\item \textbf{Représentation IEEE 754 (Flottants)}
+   \begin{itemize}
+   \item Format: signe, exposant, mantisse
+   \item float (32 bits) et double (64 bits)
+   \item Valeurs spéciales: +0, -0, +$\infty$, -$\infty$, NaN
+   \item Précision et erreurs d'arrondi
+   \item Pourquoi ne jamais comparer avec ==
+   \end{itemize}
+
+\item \textbf{Dépassements et Débordements}
+   \begin{itemize}
+   \item Overflow/underflow signés (UB)
+   \item Overflow/underflow non-signés (défini)
+   \item Détection et prévention
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (5-8 minimum):}
+\begin{itemize}
+\item Conversions binaire $\leftrightarrow$ hex $\leftrightarrow$ décimal
+\item Représentation mémoire de valeurs signées/non-signées
+\item Structure IEEE 754 (décomposition bits)
+\item Exemples de conversions signed/unsigned avec patterns de bits
+\item Dumps hexadécimaux avec 2 chars par octet
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Focus: Exercices forensics avec dumps hexadécimaux}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Conversions de Bases}
+   \begin{itemize}
+   \item Binaire $\rightarrow$ Hex $\rightarrow$ Décimal
+   \item Hex $\rightarrow$ Binaire $\rightarrow$ Décimal (signed/unsigned)
+   \end{itemize}
+
+\item \textbf{Complément à Deux}
+   \begin{itemize}
+   \item Calculer la négation
+   \item Identifier la plage pour n bits
+   \item Détecter overflow
+   \end{itemize}
+
+\item \textbf{Forensics Mémoire}
+   \begin{itemize}
+   \item Dumps hex: interpréter comme signed/unsigned
+   \item Prédire les valeurs en mémoire
+   \item Exemples: 0xFF = -1 (signed) ou 255 (unsigned)
+   \end{itemize}
+
+\item \textbf{IEEE 754}
+   \begin{itemize}
+   \item Décomposer float en bits (signe, exposant, mantisse)
+   \item Calculer la valeur décimale
+   \item Identifier NaN, infinités
+   \end{itemize}
+
+\item \textbf{Pièges Conversions}
+   \begin{itemize}
+   \item Prévoir le résultat de conversions signed/unsigned
+   \item Bugs classiques (comparaisons, boucles)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions avec dumps hex complets (2 chars/octet)
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices pratiques:}
+\begin{enumerate}
+\item \textbf{Conversions et Visualisation}
+   \begin{itemize}
+   \item Programmes pour convertir dec/hex/bin
+   \item Afficher représentation mémoire avec dump hex
+   \end{itemize}
+
+\item \textbf{Exploration Signed/Unsigned}
+   \begin{itemize}
+   \item Comparer comportements
+   \item Reproduire bugs classiques
+   \end{itemize}
+
+\item \textbf{IEEE 754 Exploration}
+   \begin{itemize}
+   \item Décomposer float/double en bits
+   \item Tester valeurs spéciales (NaN, infinités)
+   \end{itemize}
+
+\item \textbf{Projet: Bibliothèque de Conversions}
+   \begin{itemize}
+   \item Implémenter convertisseur universel
+   \item Détection d'overflow
+   \item Tests exhaustifs
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices pour le projet
+
+\newpage
+
+\begin{partbox}
+PARTIE III: MÉMOIRE, POINTEURS, TABLEAUX
+\end{partbox}
+
+\section{Ch2: Organisation Mémoire}
+
+\textbf{Référence:} Bryant Ch.2 (endianness) + minimal assembly
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Modèle Mémoire Linéaire}
+   \begin{itemize}
+   \item Adresses et octets
+   \item Espace d'adressage 32-bit vs 64-bit
+   \item Segments: text, data, bss, heap, stack
+   \end{itemize}
+
+\item \textbf{Endianness}
+   \begin{itemize}
+   \item Little-endian (x86, x86-64)
+   \item Big-endian (anciennes architectures RISC)
+   \item Détection programmatique
+   \item Impact sur le code portable
+   \end{itemize}
+
+\item \textbf{Adressage et Tailles}
+   \begin{itemize}
+   \item sizeof() pour types de base
+   \item Architecture-dependent vs portable types
+   \item Adresses: format hexadécimal
+   \end{itemize}
+
+\item \textbf{Introduction Minimale à l'Assembleur}
+   \begin{itemize}
+   \item Registres de base (rax, rbx, rsp, rbp)
+   \item Instructions essentielles: mov, add, sub, lea
+   \item Suffixes: b (byte), w (word), l (long), q (quad)
+   \item Correspondance C $\rightarrow$ assembleur (exemples simples)
+   \item \textbf{Note:} PAS un cours complet d'assembleur
+   \end{itemize}
+
+\item \textbf{Représentation en Mémoire}
+   \begin{itemize}
+   \item Variables globales vs locales
+   \item Ordre en mémoire
+   \item Dumps hexadécimaux avec GDB
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (6-8):}
+\begin{itemize}
+\item Modèle mémoire linéaire (segments)
+\item Endianness: disposition de 0x12345678 en little/big endian
+\item Correspondance C/assembleur (exemples mov, add)
+\item Dumps mémoire hexadécimaux annotés
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Endianness}
+   \begin{itemize}
+   \item Prédire disposition mémoire little/big endian
+   \item Écrire détecteur d'endianness
+   \end{itemize}
+
+\item \textbf{Forensics Mémoire}
+   \begin{itemize}
+   \item Dumps hex: reconstruire valeurs multi-octets
+   \item Identifier endianness à partir de dump
+   \end{itemize}
+
+\item \textbf{Assembleur Minimal}
+   \begin{itemize}
+   \item Lire code assembleur simple (mov, add)
+   \item Correspondre avec code C
+   \end{itemize}
+
+\item \textbf{Sizeof et Adresses}
+   \begin{itemize}
+   \item Calculer tailles mémoire
+   \item Prédire adresses relatives
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions avec dumps hex
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Exploration Endianness}
+   \begin{itemize}
+   \item Détecteur d'endianness
+   \item Visualiser disposition mémoire
+   \end{itemize}
+
+\item \textbf{GDB et Dumps Mémoire}
+   \begin{itemize}
+   \item Commande x/Nx (examiner mémoire)
+   \item Analyser variables en hex
+   \end{itemize}
+
+\item \textbf{Code C $\rightarrow$ Assembleur}
+   \begin{itemize}
+   \item Compiler avec gcc -S
+   \item Analyser .s généré
+   \item Identifier correspondances
+   \end{itemize}
+
+\item \textbf{Projet: Memory Inspector}
+   \begin{itemize}
+   \item Afficher mémoire en hex
+   \item Interpréter comme différents types
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices projet
+
+\newpage
+
+\section{Ch3: Pointeurs}
+
+\textbf{Référence:} Bryant Ch.3 (pointer arithmetic)
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Concepts de Base}
+   \begin{itemize}
+   \item Définition: adresse mémoire
+   \item Déclaration: int *p;
+   \item Opérateurs: \& (adresse) et * (déréférence)
+   \item NULL et pointeur invalide
+   \end{itemize}
+
+\item \textbf{Arithmétique de Pointeurs}
+   \begin{itemize}
+   \item p + n : avance de n * sizeof(*p) octets
+   \item p - q : nombre d'éléments entre deux pointeurs
+   \item Incrémentation/décrémentation
+   \item Comparaison de pointeurs
+   \end{itemize}
+
+\item \textbf{Pointeurs et Fonctions}
+   \begin{itemize}
+   \item Passage par référence simulé
+   \item Retour de pointeurs (dangers)
+   \item Pointeurs vers fonctions (aperçu)
+   \end{itemize}
+
+\item \textbf{Pointeurs de Pointeurs}
+   \begin{itemize}
+   \item Déclaration: int **pp;
+   \item Usage et utilité
+   \end{itemize}
+
+\item \textbf{Pointeurs const}
+   \begin{itemize}
+   \item const int *p vs int * const p
+   \item const int * const p
+   \end{itemize}
+
+\item \textbf{Pièges et Erreurs}
+   \begin{itemize}
+   \item Déréférence de NULL
+   \item Pointeurs pendants (dangling)
+   \item Pointeurs non initialisés
+   \item Aliasing
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (6-8):}
+\begin{itemize}
+\item Pointeur $\rightarrow$ case mémoire
+\item Arithmétique: p, p+1, p+2 avec adresses
+\item Pointeurs de pointeurs (double indirection)
+\item Dumps hex avec pointeurs
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices forensics:}
+\begin{enumerate}
+\item \textbf{Arithmétique de Pointeurs}
+   \begin{itemize}
+   \item Calculer p+n avec adresses
+   \item Prédire sorties
+   \end{itemize}
+
+\item \textbf{Dumps Hexadécimaux}
+   \begin{itemize}
+   \item Reconstruire structure de pointeurs
+   \item Suivre indirections
+   \end{itemize}
+
+\item \textbf{Erreurs Classiques}
+   \begin{itemize}
+   \item Identifier bugs (NULL, dangling)
+   \item Corriger code défectueux
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions détaillées
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Manipulation de Base}
+   \begin{itemize}
+   \item Swap via pointeurs
+   \item Fonctions modifiant via pointeurs
+   \end{itemize}
+
+\item \textbf{Arithmétique}
+   \begin{itemize}
+   \item Parcourir zone mémoire
+   \item Calculer distances
+   \end{itemize}
+
+\item \textbf{Debugging}
+   \begin{itemize}
+   \item Traquer erreurs avec GDB
+   \item Valgrind: invalid read/write
+   \end{itemize}
+
+\item \textbf{Projet: Generic Swap}
+   \begin{itemize}
+   \item Swap universel avec void*
+   \item Tests sur différents types
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\section{Ch4: Tableaux}
+
+\textbf{Référence:} Bryant Ch.3 Section 3.8 + CSE 333
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Tableaux 1D}
+   \begin{itemize}
+   \item Déclaration et initialisation
+   \item Accès par indice: tab[i]
+   \item Relation avec pointeurs: tab $\equiv$ \&tab[0]
+   \item tab[i] $\equiv$ *(tab + i)
+   \item Décomposition d'adresse
+   \end{itemize}
+
+\item \textbf{Passage de Tableaux aux Fonctions}
+   \begin{itemize}
+   \item Dégénérescence en pointeur
+   \item Nécessité de passer la taille
+   \item Modifications visibles dans l'appelant
+   \end{itemize}
+
+\item \textbf{Tableaux 2D}
+   \begin{itemize}
+   \item Déclaration: int mat[N][M];
+   \item Organisation en mémoire (row-major)
+   \item Adressage: mat[i][j]
+   \item Arithmétique 2D: *(*(mat + i) + j)
+   \end{itemize}
+
+\item \textbf{Tableaux Multidimensionnels}
+   \begin{itemize}
+   \item Tableaux 3D et au-delà
+   \item Calcul d'adresse
+   \end{itemize}
+
+\item \textbf{Pièges}
+   \begin{itemize}
+   \item Dépassement de bornes
+   \item sizeof(tableau) vs sizeof(pointeur)
+   \item Tableaux de taille variable (VLA)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (6-8):}
+\begin{itemize}
+\item Tableau 1D en mémoire avec adresses
+\item Relation tab[i] $\equiv$ *(tab+i)
+\item Tableau 2D: row-major layout
+\item Dumps hex de tableaux
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices forensics:}
+\begin{enumerate}
+\item \textbf{Arithmétique Tableaux}
+   \begin{itemize}
+   \item Prédire adresses
+   \item Calculs avec pointeurs
+   \end{itemize}
+
+\item \textbf{Tableaux 2D}
+   \begin{itemize}
+   \item Layout mémoire
+   \item Accès par arithmétique
+   \end{itemize}
+
+\item \textbf{Dumps Hexadécimaux}
+   \begin{itemize}
+   \item Reconstruire tableau depuis dump
+   \item Identifier dimensions
+   \end{itemize}
+
+\item \textbf{Bugs Classiques}
+   \begin{itemize}
+   \item Dépassement de bornes
+   \item sizeof confusion
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions avec dumps
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Manipulation 1D}
+   \begin{itemize}
+   \item Recherche, tri, statistiques
+   \item Deux méthodes: indices et pointeurs
+   \end{itemize}
+
+\item \textbf{Tableaux 2D}
+   \begin{itemize}
+   \item Opérations matricielles simples
+   \item Transposition, addition
+   \end{itemize}
+
+\item \textbf{Projet: Image Processing}
+   \begin{itemize}
+   \item Tableau 2D comme image
+   \item Filtres simples (moyenne, seuillage)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\section{Ch5: Chaînes de Caractères}
+
+\textbf{Référence:} Bryant Ch.3 + CSE 333
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Représentation}
+   \begin{itemize}
+   \item Tableau de char terminé par '\textbackslash 0'
+   \item char str[] vs char *str
+   \item Chaînes littérales (constantes)
+   \end{itemize}
+
+\item \textbf{Fonctions Standard}
+   \begin{itemize}
+   \item strlen, strcpy, strncpy
+   \item strcmp, strncmp
+   \item strcat, strncat
+   \item strchr, strstr
+   \end{itemize}
+
+\item \textbf{Manipulation Manuelle}
+   \begin{itemize}
+   \item Parcours avec pointeurs
+   \item Modification caractère par caractère
+   \end{itemize}
+
+\item \textbf{Sécurité}
+   \begin{itemize}
+   \item Buffer overflow
+   \item Fonctions dangereuses: strcpy, strcat, gets
+   \item Fonctions sûres: strncpy, strncat, fgets
+   \item Validation d'entrée
+   \end{itemize}
+
+\item \textbf{Conversions}
+   \begin{itemize}
+   \item atoi, atof, strtol, strtod
+   \item sprintf, snprintf
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (5-7):}
+\begin{itemize}
+\item Chaîne en mémoire avec '\textbackslash 0'
+\item Buffer overflow (avant/après)
+\item Dumps hex de chaînes
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Manipulation}
+   \begin{itemize}
+   \item Implémenter strlen, strcpy manuellement
+   \item Prédire sorties
+   \end{itemize}
+
+\item \textbf{Sécurité}
+   \begin{itemize}
+   \item Identifier buffer overflows
+   \item Corriger code vulnérable
+   \end{itemize}
+
+\item \textbf{Forensics}
+   \begin{itemize}
+   \item Dumps hex de chaînes
+   \item Reconstruire texte
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Bibliothèque Chaînes}
+   \begin{itemize}
+   \item Réimplémenter fonctions standard
+   \item Tests exhaustifs
+   \end{itemize}
+
+\item \textbf{Parsing}
+   \begin{itemize}
+   \item Tokenisation
+   \item Extraction de données
+   \end{itemize}
+
+\item \textbf{Projet: Text Editor Simple}
+   \begin{itemize}
+   \item Opérations sur texte
+   \item Sécurisé (pas de overflow)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\begin{partbox}
+PARTIE IV: STRUCTURES ET ALLOCATION
+\end{partbox}
+
+\section{Ch6: Structures et Unions}
+
+\textbf{Référence:} Bryant Ch.3 Section 3.9
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Structures}
+   \begin{itemize}
+   \item Déclaration, définition
+   \item Initialisation
+   \item Accès membres: . et ->
+   \item typedef
+   \end{itemize}
+
+\item \textbf{Alignment et Padding}
+   \begin{itemize}
+   \item Règles d'alignement (architecture-dependent)
+   \item Calcul de padding
+   \item sizeof(struct) vs somme des membres
+   \item Impact sur performances
+   \end{itemize}
+
+\item \textbf{Structures Imbriquées}
+   \begin{itemize}
+   \item Struct dans struct
+   \item Tableaux de structures
+   \item Pointeurs vers structures
+   \end{itemize}
+
+\item \textbf{Unions}
+   \begin{itemize}
+   \item Définition et usage
+   \item Tous les membres partagent la mémoire
+   \item Cas d'usage
+   \end{itemize}
+
+\item \textbf{Bit Fields}
+   \begin{itemize}
+   \item Déclaration
+   \item Usage (registres hardware, protocoles)
+   \item Portabilité
+   \end{itemize}
+
+\item \textbf{Structures Opaques}
+   \begin{itemize}
+   \item Forward declaration
+   \item Encapsulation
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (6-8):}
+\begin{itemize}
+\item Structure avec padding (annotation octets)
+\item Dumps hex de structures
+\item Union: overlap mémoire
+\item Alignement: exemples avant/après réorganisation
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices forensics:}
+\begin{enumerate}
+\item \textbf{Calcul Padding}
+   \begin{itemize}
+   \item Prédire sizeof(struct)
+   \item Identifier padding
+   \end{itemize}
+
+\item \textbf{Dumps Hexadécimaux}
+   \begin{itemize}
+   \item Reconstruire struct depuis dump
+   \item Identifier alignment
+   \end{itemize}
+
+\item \textbf{Optimisation}
+   \begin{itemize}
+   \item Réorganiser membres pour réduire padding
+   \end{itemize}
+
+\item \textbf{Unions}
+   \begin{itemize}
+   \item Comprendre overlap
+   \item Cas d'usage
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Manipulation Structures}
+   \begin{itemize}
+   \item Créer, initialiser, copier
+   \item Tableaux de structures
+   \end{itemize}
+
+\item \textbf{Analyse Mémoire}
+   \begin{itemize}
+   \item GDB: examiner structures
+   \item Dumps hex
+   \end{itemize}
+
+\item \textbf{Projet: Database Simple}
+   \begin{itemize}
+   \item Gestion d'enregistrements
+   \item Recherche, tri
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\section{Ch7: Allocation Dynamique}
+
+\textbf{Référence:} Bryant Ch.9 (Virtual Memory - malloc/free)
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Heap et Allocation}
+   \begin{itemize}
+   \item Différence stack vs heap
+   \item malloc, calloc, realloc, free
+   \item Durée de vie des allocations
+   \end{itemize}
+
+\item \textbf{Gestion de la Mémoire}
+   \begin{itemize}
+   \item Fragmentation interne/externe
+   \item Stratégies d'allocation (first-fit, best-fit)
+   \item Coalescing
+   \end{itemize}
+
+\item \textbf{Erreurs Classiques}
+   \begin{itemize}
+   \item Memory leaks
+   \item Double free
+   \item Use after free
+   \item Buffer overflow
+   \item Pointeurs pendants
+   \end{itemize}
+
+\item \textbf{Valgrind}
+   \begin{itemize}
+   \item Détection de leaks
+   \item Invalid read/write
+   \item Utilisation mémoire non initialisée
+   \end{itemize}
+
+\item \textbf{Allocations Complexes}
+   \begin{itemize}
+   \item Tableaux dynamiques 1D
+   \item Tableaux dynamiques 2D (deux méthodes)
+   \item Structures dynamiques
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (6-8):}
+\begin{itemize}
+\item Heap vs stack
+\item Fragmentation (schémas)
+\item Erreurs: leak, double free, use after free
+\item Dumps hex avec metadata malloc
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Allocation/Libération}
+   \begin{itemize}
+   \item Identifier leaks
+   \item Corriger erreurs
+   \end{itemize}
+
+\item \textbf{Tableaux Dynamiques}
+   \begin{itemize}
+   \item Allocation 2D
+   \item Libération correcte
+   \end{itemize}
+
+\item \textbf{Forensics Valgrind}
+   \begin{itemize}
+   \item Interpréter rapports
+   \item Localiser bugs
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Détection Erreurs}
+   \begin{itemize}
+   \item Programmes bugués
+   \item Valgrind pour diagnostiquer
+   \end{itemize}
+
+\item \textbf{Structures Dynamiques}
+   \begin{itemize}
+   \item Listes chaînées
+   \item Arbres simples
+   \end{itemize}
+
+\item \textbf{Projet: Dynamic Array Library}
+   \begin{itemize}
+   \item Array redimensionnable
+   \item Tests Valgrind (0 leaks)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\begin{partbox}
+PARTIE V: EXÉCUTION ET SYSTÈME
+\end{partbox}
+
+\section{Ch8: Stack et Calling Conventions}
+
+\textbf{Référence:} Bryant Ch.3 (Machine-Level Programming)
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Organisation de la Pile}
+   \begin{itemize}
+   \item Croissance vers adresses basses
+   \item Stack pointer (rsp)
+   \item Base pointer (rbp)
+   \end{itemize}
+
+\item \textbf{Stack Frames}
+   \begin{itemize}
+   \item Structure: paramètres, adresse retour, variables locales
+   \item Prologue et épilogue de fonction
+   \item Frame pointer (optionnel avec -O2)
+   \end{itemize}
+
+\item \textbf{Calling Conventions (x86-64 System V ABI)}
+   \begin{itemize}
+   \item Passage paramètres: registres (rdi, rsi, rdx, rcx, r8, r9) puis stack
+   \item Valeur de retour: rax
+   \item Registres caller-saved vs callee-saved
+   \end{itemize}
+
+\item \textbf{Récursivité}
+   \begin{itemize}
+   \item Stack frames multiples
+   \item Limites et stack overflow
+   \end{itemize}
+
+\item \textbf{Buffer Overflow sur la Stack}
+   \begin{itemize}
+   \item Écrasement adresse de retour
+   \item Protections: stack canaries, ASLR
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (6-8):}
+\begin{itemize}
+\item Stack frame (détaillé)
+\item Évolution stack lors d'appels
+\item Récursivité: frames empilés
+\item Buffer overflow: avant/après
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices forensics:}
+\begin{enumerate}
+\item \textbf{Stack Frames}
+   \begin{itemize}
+   \item Dessiner état stack
+   \item Tracer appels de fonction
+   \end{itemize}
+
+\item \textbf{Calling Conventions}
+   \begin{itemize}
+   \item Identifier registres utilisés
+   \item Paramètres: registres vs stack
+   \end{itemize}
+
+\item \textbf{Dumps GDB}
+   \begin{itemize}
+   \item Examiner stack avec GDB
+   \item Interpréter backtrace
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Exploration avec GDB}
+   \begin{itemize}
+   \item Examiner frames (info frame)
+   \item Remonter la pile (up/down)
+   \end{itemize}
+
+\item \textbf{Assembleur}
+   \begin{itemize}
+   \item Compiler avec -S
+   \item Identifier prologue/épilogue
+   \end{itemize}
+
+\item \textbf{Projet: Stack Tracer}
+   \begin{itemize}
+   \item Afficher call stack
+   \item Analyser récursivité
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\section{Ch9: Memory Layout et Cache}
+
+\textbf{Référence:} Bryant Ch.6 (Memory Hierarchy) + Ch.9 (Virtual Memory)
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Segments Mémoire}
+   \begin{itemize}
+   \item Text: code exécutable
+   \item Data: variables globales initialisées
+   \item BSS: variables globales non initialisées
+   \item Heap: allocation dynamique
+   \item Stack: variables locales, appels
+   \end{itemize}
+
+\item \textbf{Hiérarchie Mémoire}
+   \begin{itemize}
+   \item Registres, L1, L2, L3, RAM, disque
+   \item Latences et bande passante
+   \item Principe de localité (temporelle, spatiale)
+   \end{itemize}
+
+\item \textbf{Cache}
+   \begin{itemize}
+   \item Cache lines (typiquement 64 octets)
+   \item Direct-mapped, set-associative, fully-associative
+   \item Cache hits vs misses
+   \item Cold, capacity, conflict misses
+   \end{itemize}
+
+\item \textbf{Optimisation Cache}
+   \begin{itemize}
+   \item Accès séquentiel vs random
+   \item Blocking/tiling pour matrices
+   \item Cache-friendly data structures
+   \end{itemize}
+
+\item \textbf{Mémoire Virtuelle (introduction)}
+   \begin{itemize}
+   \item Espace d'adressage virtuel vs physique
+   \item Pages et page tables
+   \item TLB (Translation Lookaside Buffer)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (6-8):}
+\begin{itemize}
+\item Layout mémoire complet (segments)
+\item Hiérarchie mémoire (pyramide)
+\item Cache: structure et fonctionnement
+\item Accès matrice: row-major vs column-major
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Segments}
+   \begin{itemize}
+   \item Identifier où variables sont stockées
+   \item Calculer tailles segments
+   \end{itemize}
+
+\item \textbf{Cache}
+   \begin{itemize}
+   \item Calculer hits/misses pour accès donnés
+   \item Analyser patterns d'accès
+   \end{itemize}
+
+\item \textbf{Optimisation}
+   \begin{itemize}
+   \item Comparer versions (cache-friendly vs non)
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Mesure Performances}
+   \begin{itemize}
+   \item Accès séquentiel vs random
+   \item Impact taille cache
+   \end{itemize}
+
+\item \textbf{Optimisation Matrices}
+   \begin{itemize}
+   \item Transposition cache-aware
+   \item Multiplication avec blocking
+   \end{itemize}
+
+\item \textbf{Projet: Cache Simulator}
+   \begin{itemize}
+   \item Simuler cache simple
+   \item Mesurer hits/misses
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\section{Ch10: POSIX File I/O}
+
+\textbf{Référence:} CSE 333 (System calls)
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{File Descriptors}
+   \begin{itemize}
+   \item Concept: entiers identifiant fichiers ouverts
+   \item stdin (0), stdout (1), stderr (2)
+   \item Limite par processus
+   \end{itemize}
+
+\item \textbf{System Calls}
+   \begin{itemize}
+   \item open, close
+   \item read, write
+   \item lseek (positionnement)
+   \item Flags: O\_RDONLY, O\_WRONLY, O\_RDWR, O\_CREAT, O\_APPEND, etc.
+   \item Permissions (mode)
+   \end{itemize}
+
+\item \textbf{Unbuffered vs Buffered I/O}
+   \begin{itemize}
+   \item System calls: accès direct kernel
+   \item stdio (FILE*): bufferisé
+   \item Performances et cas d'usage
+   \end{itemize}
+
+\item \textbf{Gestion d'Erreurs}
+   \begin{itemize}
+   \item Codes de retour (-1 pour erreurs)
+   \item errno et perror
+   \item strerror
+   \end{itemize}
+
+\item \textbf{Opérations Avancées}
+   \begin{itemize}
+   \item dup, dup2 (duplication descripteurs)
+   \item fcntl (contrôle)
+   \item Redirections
+   \end{itemize}
+
+\item \textbf{Directories}
+   \begin{itemize}
+   \item opendir, readdir, closedir
+   \item stat, fstat
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (5-7):}
+\begin{itemize}
+\item Table de descripteurs par processus
+\item Buffering: unbuffered vs buffered
+\item Redirections avec dup2
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{System Calls}
+   \begin{itemize}
+   \item Écrire programmes simples (copie fichier)
+   \item Gestion d'erreurs
+   \end{itemize}
+
+\item \textbf{File Descriptors}
+   \begin{itemize}
+   \item Tracer état descripteurs
+   \item Comprendre redirections
+   \end{itemize}
+
+\item \textbf{Performances}
+   \begin{itemize}
+   \item Comparer read/write vs fread/fwrite
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Manipulation Fichiers}
+   \begin{itemize}
+   \item Copie, concaténation
+   \item Statistiques (taille, permissions)
+   \end{itemize}
+
+\item \textbf{Directories}
+   \begin{itemize}
+   \item Lister récursivement
+   \item Filtrer par extension
+   \end{itemize}
+
+\item \textbf{Projet: File Manager}
+   \begin{itemize}
+   \item Mini gestionnaire de fichiers
+   \item Opérations POSIX
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\begin{partbox}
+PARTIE VI: OUTILS ET TECHNIQUES AVANCÉES
+\end{partbox}
+
+\section{Ch11: Makefiles et Linking}
+
+\textbf{Référence:} CSE 333 (Build systems) + Bryant Ch.7 (Linking)
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Makefiles}
+   \begin{itemize}
+   \item Syntaxe: cibles, dépendances, commandes
+   \item Variables ($CC, $CFLAGS, etc.)
+   \item Règles implicites et patterns
+   \item Phony targets (.PHONY)
+   \item Makefile modulaire
+   \end{itemize}
+
+\item \textbf{Process de Linking}
+   \begin{itemize}
+   \item Symbol resolution
+   \item Relocation
+   \item Fichiers objets (.o)
+   \item Archives statiques (.a)
+   \end{itemize}
+
+\item \textbf{Bibliothèques Statiques}
+   \begin{itemize}
+   \item Création avec ar
+   \item Linking avec -l et -L
+   \item Ordre de linking
+   \end{itemize}
+
+\item \textbf{Bibliothèques Dynamiques (Shared Libraries)}
+   \begin{itemize}
+   \item Création (.so sous Linux, .dll sous Windows)
+   \item Position-Independent Code (-fPIC)
+   \item Loading dynamique (dlopen, dlsym)
+   \item LD\_LIBRARY\_PATH
+   \end{itemize}
+
+\item \textbf{Outils}
+   \begin{itemize}
+   \item nm, objdump, ldd
+   \item Analyse de symboles et dépendances
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (5-7):}
+\begin{itemize}
+\item Graphe de dépendances Makefile
+\item Process de linking (schéma)
+\item Bibliothèques statiques vs dynamiques
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (3-4 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Makefiles}
+   \begin{itemize}
+   \item Écrire Makefile pour projet
+   \item Optimiser avec règles patterns
+   \end{itemize}
+
+\item \textbf{Linking}
+   \begin{itemize}
+   \item Résoudre erreurs de linking
+   \item Ordre correct bibliothèques
+   \end{itemize}
+
+\item \textbf{Bibliothèques}
+   \begin{itemize}
+   \item Créer .a et .so
+   \item Lier programmes avec
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Makefile Complexe}
+   \begin{itemize}
+   \item Projet multi-fichiers
+   \item Règles de nettoyage
+   \end{itemize}
+
+\item \textbf{Bibliothèques}
+   \begin{itemize}
+   \item Créer bibliothèque statique
+   \item Créer bibliothèque dynamique
+   \item Programmes clients
+   \end{itemize}
+
+\item \textbf{Projet: Build System}
+   \begin{itemize}
+   \item Système de build complet
+   \item Tests, documentation
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\section{Ch12: Function Pointers}
+
+\textbf{Référence:} Bryant Ch.3 + patterns
+
+\subsection*{CM: Cours Magistral (8-10 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Concept}
+   \begin{itemize}
+   \item Pointeurs vers fonctions
+   \item Déclaration: int (*func\_ptr)(int, int);
+   \item Assignation et appel
+   \end{itemize}
+
+\item \textbf{Typedef pour Lisibilité}
+   \begin{itemize}
+   \item typedef int (*operation)(int, int);
+   \item Simplification code
+   \end{itemize}
+
+\item \textbf{Callbacks}
+   \begin{itemize}
+   \item Passer fonction en paramètre
+   \item Exemples: qsort, bsearch
+   \end{itemize}
+
+\item \textbf{Dispatch Tables}
+   \begin{itemize}
+   \item Tableaux de pointeurs de fonctions
+   \item Switch alternatif
+   \item State machines
+   \end{itemize}
+
+\item \textbf{Applications}
+   \begin{itemize}
+   \item Plugins et extensibilité
+   \item Event handlers
+   \item Algorithmes génériques
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (4-6):}
+\begin{itemize}
+\item Pointeur de fonction $\rightarrow$ code
+\item Dispatch table (schéma)
+\item Callback (flux d'exécution)
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (3-4 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Déclarations}
+   \begin{itemize}
+   \item Déchiffrer déclarations complexes
+   \item Écrire déclarations
+   \end{itemize}
+
+\item \textbf{Callbacks}
+   \begin{itemize}
+   \item Utiliser qsort avec comparateurs
+   \item Écrire comparateurs personnalisés
+   \end{itemize}
+
+\item \textbf{Dispatch Tables}
+   \begin{itemize}
+   \item Implémenter calculatrice
+   \item State machine simple
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions
+
+\subsection*{TP: Travaux Pratiques (4-5 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Algorithmes Génériques}
+   \begin{itemize}
+   \item Map, filter, reduce
+   \item Tri avec callbacks
+   \end{itemize}
+
+\item \textbf{Event System}
+   \begin{itemize}
+   \item Enregistrement handlers
+   \item Déclenchement événements
+   \end{itemize}
+
+\item \textbf{Projet: Plugin System}
+   \begin{itemize}
+   \item Chargement dynamique
+   \item Interface via function pointers
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\section{Ch13: Preprocessing et Optimisation}
+
+\textbf{Référence:} Bryant Ch.5 (Optimizing Program Performance) + preprocessing
+
+\subsection*{CM: Cours Magistral (10-12 pages)}
+
+\textbf{Contenu théorique:}
+\begin{enumerate}
+\item \textbf{Preprocessing}
+   \begin{itemize}
+   \item Directives: \#include, \#define, \#ifdef, \#ifndef, \#endif
+   \item Macros avec paramètres
+   \item Pièges des macros (effets de bord, priorité)
+   \item Macros vs inline functions
+   \item Conditional compilation
+   \item \#pragma
+   \end{itemize}
+
+\item \textbf{Include Guards}
+   \begin{itemize}
+   \item Prévenir inclusions multiples
+   \item \#pragma once (non-standard mais répandu)
+   \end{itemize}
+
+\item \textbf{Optimisations Compilateur}
+   \begin{itemize}
+   \item Niveaux: -O0, -O1, -O2, -O3, -Os
+   \item Optimisations courantes: inlining, loop unrolling, constant folding
+   \item Profile-guided optimization (PGO)
+   \end{itemize}
+
+\item \textbf{Optimisations Manuel}
+   \begin{itemize}
+   \item Réduction appels de fonction
+   \item Loop hoisting
+   \item Strength reduction
+   \item Cache-aware code
+   \end{itemize}
+
+\item \textbf{Inline Functions}
+   \begin{itemize}
+   \item Keyword inline
+   \item Avantages vs macros
+   \item Limitations
+   \end{itemize}
+
+\item \textbf{Profiling}
+   \begin{itemize}
+   \item gprof
+   \item perf (Linux)
+   \item Identifier hotspots
+   \end{itemize}
+
+\item \textbf{Trade-offs}
+   \begin{itemize}
+   \item Performance vs lisibilité
+   \item Space vs time
+   \item Premature optimization
+   \end{itemize}
+\end{enumerate}
+
+\textbf{Visualisations TikZ (5-7):}
+\begin{itemize}
+\item Expansion de macros
+\item Comparaison code non-optimisé vs optimisé
+\item Impact cache (before/after optimization)
+\end{itemize}
+
+\subsection*{TD: Travaux Dirigés (4-5 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Macros}
+   \begin{itemize}
+   \item Écrire macros correctes
+   \item Identifier bugs dans macros
+   \end{itemize}
+
+\item \textbf{Preprocessing}
+   \begin{itemize}
+   \item Expansion manuelle
+   \item Conditional compilation
+   \end{itemize}
+
+\item \textbf{Optimisations}
+   \begin{itemize}
+   \item Identifier opportunités
+   \item Appliquer transformations
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TD\_Corrigé:} Solutions
+
+\subsection*{TP: Travaux Pratiques (5-6 pages)}
+
+\textbf{Exercices:}
+\begin{enumerate}
+\item \textbf{Analyse Preprocessing}
+   \begin{itemize}
+   \item Examiner .i files
+   \item Comprendre expansions
+   \end{itemize}
+
+\item \textbf{Profiling}
+   \begin{itemize}
+   \item Utiliser gprof
+   \item Identifier hotspots
+   \end{itemize}
+
+\item \textbf{Optimisation}
+   \begin{itemize}
+   \item Programme lent fourni
+   \item Optimiser (manuel + compilateur)
+   \item Mesurer gains
+   \end{itemize}
+
+\item \textbf{Projet: Performance Challenge}
+   \begin{itemize}
+   \item Implémenter algorithme
+   \item Optimiser au maximum
+   \item Benchmark
+   \end{itemize}
+\end{enumerate}
+
+\textbf{TP\_Pistes:} Indices
+
+\newpage
+
+\begin{partbox}
+CHAPITRES OPTIONNELS
+\end{partbox}
+
+\section{Ch14 (Optionnel): Multithreading Basics}
+
+\textbf{Référence:} Bryant Ch.12 (Concurrent Programming) - introduction seulement
+
+\subsection*{CM: Cours Magistral (8-10 pages)}
+
+\textbf{Contenu théorique:}
+\begin{itemize}
+\item Threads vs processus
+\item pthread\_create, pthread\_join
+\item Problèmes: race conditions, deadlocks
+\item Mutexes (pthread\_mutex\_t)
+\item Introduction synchronisation
+\end{itemize}
+
+\textbf{Note:} Cours d'introduction uniquement, pas de traitement exhaustif.
+
+\subsection*{TD \& TP: (3-4 pages chacun)}
+
+Exercices simples de création de threads et synchronisation basique.
+
+\newpage
+
+\section{Ch15 (Optionnel): Networking Basics}
+
+\textbf{Référence:} Bryant Ch.11 (Network Programming) - introduction seulement
+
+\subsection*{CM: Cours Magistral (8-10 pages)}
+
+\textbf{Contenu théorique:}
+\begin{itemize}
+\item Modèle client-serveur
+\item Sockets: socket(), bind(), listen(), accept(), connect()
+\item TCP vs UDP (aperçu)
+\item Exemple simple: echo server
+\end{itemize}
+
+\textbf{Note:} Cours d'introduction uniquement, pas de traitement exhaustif.
+
+\subsection*{TD \& TP: (3-4 pages chacun)}
+
+Exercices simples de communication réseau.
+
+\newpage
+
+\section*{Résumé de la Structure du Cours}
+
+\subsection*{Chapitres Obligatoires}
+
+\begin{itemize}
+\item \textbf{TP-1:} Setup environnement Docker + vim
+\item \textbf{Ch-1:} Introduction (2-3 pages)
+\item \textbf{Ch0:} Syntaxe C complète (fondamentaux)
+\item \textbf{Ch1:} Représentation numérique
+\item \textbf{Ch2:} Organisation mémoire
+\item \textbf{Ch3:} Pointeurs
+\item \textbf{Ch4:} Tableaux
+\item \textbf{Ch5:} Chaînes
+\item \textbf{Ch6:} Structures et unions
+\item \textbf{Ch7:} Allocation dynamique
+\item \textbf{Ch8:} Stack et calling conventions
+\item \textbf{Ch9:} Memory layout et cache
+\item \textbf{Ch10:} POSIX File I/O
+\item \textbf{Ch11:} Makefiles et linking
+\item \textbf{Ch12:} Function pointers
+\item \textbf{Ch13:} Preprocessing et optimisation
+\end{itemize}
+
+\subsection*{Chapitres Optionnels}
+
+\begin{itemize}
+\item \textbf{Ch14:} Multithreading (introduction)
+\item \textbf{Ch15:} Networking (introduction)
+\end{itemize}
+
+\subsection*{Volume Total}
+
+\begin{itemize}
+\item \textbf{CM:} 13 chapitres × 10 pages $\approx$ 130 pages
+\item \textbf{TD:} 13 chapitres × 4 pages $\approx$ 52 pages
+\item \textbf{TD\_Corrigé:} 13 chapitres × 4 pages $\approx$ 52 pages
+\item \textbf{TP:} 13 chapitres × 5 pages $\approx$ 65 pages
+\item \textbf{TP\_Pistes:} 13 chapitres × 2 pages $\approx$ 26 pages
+\item \textbf{TOTAL:} $\approx$ 325 pages de contenu technique dense
+\end{itemize}
+
+\subsection*{Fichiers à Générer (hors optionnels)}
+
+\begin{itemize}
+\item 1 fichier TP-1
+\item 1 fichier Ch-1 (Introduction)
+\item Pour Ch0-Ch13 (14 chapitres): 5 fichiers chacun
+\item \textbf{Total:} 1 + 1 + (14 × 5) = \textbf{72 fichiers}
+\end{itemize}
+
+\end{document}

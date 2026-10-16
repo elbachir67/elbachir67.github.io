@@ -1,0 +1,889 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc}
+\usepackage{multicol}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+% En-tête et pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small TD S05 -- L'IA qui Doute}
+\fancyhead[R]{\small Introduction à l'IA -- M1 IABD}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Boîtes
+\newtcolorbox{exercicebox}[1][]{
+    colback=blue!5,
+    colframe=blue!50,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{rappelbox}[1][]{
+    colback=yellow!10,
+    colframe=yellow!50!black,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{methodebox}[1][]{
+    colback=purple!5,
+    colframe=purple!50,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{attentionbox}[1][]{
+    colback=orange!5,
+    colframe=orange!70,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+% Espace de réponse avec lignes d'écriture
+\usepackage{pgffor}
+\newlength{\ligneespacement}
+\setlength{\ligneespacement}{0.85cm}
+
+\newcommand{\lignesEcriture}[1]{%
+    \foreach \i in {1,...,#1}{%
+        \par\noindent\makebox[\linewidth]{\textcolor{gray!40}{\rule{\linewidth}{0.3pt}}}%
+        \vspace{\ligneespacement}%
+    }%
+}
+
+\newcommand{\espaceReponse}[1][6]{%
+\begin{tcolorbox}[
+    colback=gray!3,
+    colframe=gray!30,
+    breakable,
+    title={\textit{Votre réponse :}},
+    fonttitle=\small\itshape,
+    top=4mm
+]
+\lignesEcriture{#1}
+\end{tcolorbox}
+}
+
+\title{\textbf{TD Séance 5 : L'IA qui Doute}\\
+\large Exercices Progressifs --- Probabilités et Inférence Bayésienne\\[0.3cm]
+\normalsize \textit{Feuille d'énoncés}}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Faculté des Sciences et Techniques\\
+Université Cheikh Anta Diop de Dakar}
+\date{M1 IABD --- Semestre 1}
+
+\begin{document}
+
+\maketitle
+
+\begin{rappelbox}[Organisation de ce TD]
+Ce TD est conçu pour une \textbf{compréhension progressive} du raisonnement probabiliste et de l'inférence bayésienne :
+
+\begin{itemize}[nosep]
+    \item \textbf{Niveau 1} (Ex. 1--2) : Vocabulaire probabiliste, axiomes, distribution jointe
+    \item \textbf{Niveau 2} (Ex. 3--5) : Marginalisation, probabilité conditionnelle, théorème de Bayes
+    \item \textbf{Niveau 3} (Ex. 6--8) : Importance du prior, mise à jour séquentielle, preuve contradictoire
+    \item \textbf{Niveau 4} (Ex. 9--10) : Réseaux bayésiens, d-séparation, Naive Bayes
+\end{itemize}
+
+\textbf{Conseil :} Pour chaque calcul bayésien, suivez la recette en 4 étapes : numérateurs, évidence, division, vérification.
+\end{rappelbox}
+
+\vspace{0.3cm}
+
+%=============================================================================
+% SCÉNARIO FIL ROUGE
+%=============================================================================
+
+Tous les exercices utilisent le scénario suivant :
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{
+\textbf{\large Scénario : L'usine de mangues ``Casamance Export'' à Ziguinchor}
+
+\medskip
+
+Ibrahima est responsable qualité dans une usine de transformation de mangues destinées à l'exportation. Chaque mangue arrivant sur la chaîne de production doit être classée dans l'une de trois catégories :
+
+\begin{itemize}[nosep]
+    \item \textbf{Parfaite (P)} : mangue exportable en l'état
+    \item \textbf{Défaut mineur (D)} : vendable au marché local à prix réduit
+    \item \textbf{Rejet (R)} : impropre à la consommation, compostée
+\end{itemize}
+
+\medskip
+
+La base de données historique de l'usine (10\,000 mangues inspectées en 2024) donne les proportions suivantes :
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Catégorie} & Parfaite (P) & Défaut mineur (D) & Rejet (R) \\
+\midrule
+\textbf{Proportion} & 60\% & 25\% & 15\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+Ibrahima observe trois indicateurs pour chaque mangue :
+\begin{itemize}[nosep]
+    \item \textbf{Couleur (C)} : uniforme (bon signe) ou tachée (mauvais signe)
+    \item \textbf{Texture (T)} : ferme (bon signe) ou molle (mauvais signe)
+    \item \textbf{Calibre (K)} : standard (bon signe) ou hors-norme (mauvais signe)
+\end{itemize}
+
+\medskip
+
+Les données historiques donnent les \textbf{vraisemblances} suivantes :
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Indicateur défavorable} & $P(\cdot \mid \text{Parfaite})$ & $P(\cdot \mid \text{Défaut})$ & $P(\cdot \mid \text{Rejet})$ \\
+\midrule
+Couleur tachée & 0,10 & 0,60 & 0,90 \\
+Texture molle & 0,05 & 0,40 & 0,80 \\
+Calibre hors-norme & 0,08 & 0,35 & 0,50 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Lecture :} ``Parmi les mangues parfaites, 10\% ont une couleur tachée.'' ``Parmi les rejets, 90\% ont une couleur tachée.''
+}}
+\end{center}
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 1 --- Fondations Probabilistes}}
+%=============================================================================
+
+\subsection*{Exercice 1 : Formaliser l'espace probabiliste}
+
+\begin{exercicebox}[Énoncé]
+En utilisant le scénario de l'usine de mangues :
+
+\begin{enumerate}
+    \item Quel est l'\textbf{univers} $\Omega$ pour la variable ``Qualité'' $Q$ ? Listez les résultats possibles.
+    \item Écrivez la \textbf{distribution de probabilité} $P(Q)$. Vérifiez que les trois axiomes de Kolmogorov sont satisfaits.
+    \item Calculez $P(Q \neq \text{Parfaite})$, c'est-à-dire la probabilité qu'une mangue ait un problème.
+    \item Si l'usine traite 500 mangues par jour, combien de rejets Ibrahima doit-il s'attendre à trouver en moyenne ?
+    \item On définit l'événement $A = \{$Parfaite, Défaut$\}$ (``mangue vendable''). Calculez $P(A)$.
+\end{enumerate}
+\end{exercicebox}
+
+\espaceReponse[10]
+
+%=============================================================================
+
+\subsection*{Exercice 2 : Construire la distribution jointe}
+
+\begin{exercicebox}[Énoncé]
+On s'intéresse à deux variables : la qualité $Q$ et la couleur $C$ (tachée ou uniforme).
+
+\begin{enumerate}
+    \item En utilisant la règle du produit $P(Q, C) = P(C \mid Q) \times P(Q)$, remplissez le tableau de la distribution jointe ci-dessous.
+    \item Vérifiez que la somme de toutes les cases vaut 1.
+    \item Que représente \textbf{physiquement} la case $P(\text{Parfaite}, \text{tachée}) = $ ?
+    \item Quelle case du tableau est la plus grande ? Que signifie-t-elle concrètement ?
+\end{enumerate}
+\end{exercicebox}
+
+\begin{methodebox}[Méthode : construire une distribution jointe]
+Pour remplir chaque case du tableau, on utilise la \textbf{règle du produit} :
+$$P(Q = q, C = c) = P(C = c \mid Q = q) \times P(Q = q)$$
+
+\textbf{Exemple :} $P(\text{Parfaite}, \text{tachée}) = P(\text{tachée} \mid \text{Parfaite}) \times P(\text{Parfaite}) = \ldots$
+
+On remplit case par case, puis on vérifie que le total fait 1.
+\end{methodebox}
+
+\noindent\textit{Distribution jointe $P(Q, C)$ à compléter :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|l|c|c|c|}
+\hline
+ & $C = \text{tachée}$ & $C = \text{uniforme}$ & \textbf{Total ligne} \\
+\hline
+$Q = \text{Parfaite}$ & \hspace{2.5cm} & \hspace{2.5cm} & \hspace{1.5cm} \\
+\hline
+$Q = \text{Défaut}$ & & & \\
+\hline
+$Q = \text{Rejet}$ & & & \\
+\hline
+\textbf{Total colonne} & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[5]
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 2 --- Marginalisation, Conditionnelle et Bayes}}
+%=============================================================================
+
+\begin{methodebox}[Méthode pour tous les exercices de ce niveau]
+Trois opérations fondamentales sur le tableau de la jointe :
+
+\begin{itemize}[nosep]
+    \item \textbf{Marginalisation :} Sommer une ligne (ou colonne) pour ``éliminer'' une variable
+    $$P(Q = q) = \sum_{c} P(Q = q, C = c) \quad \text{(somme des lignes)}$$
+    \item \textbf{Conditionnement :} ``Zoomer'' sur une colonne et renormaliser
+    $$P(Q = q \mid C = c) = \frac{P(Q = q, C = c)}{P(C = c)}$$
+    \item \textbf{Bayes :} Inverser le sens du conditionnement
+    $$P(Q \mid C) = \frac{P(C \mid Q) \times P(Q)}{P(C)}$$
+\end{itemize}
+\end{methodebox}
+
+%=============================================================================
+\subsection*{Exercice 3 : Marginalisation --- faire disparaître une variable}
+
+\begin{exercicebox}[Énoncé]
+À partir du tableau de la distribution jointe complété à l'exercice 2 :
+
+\begin{enumerate}
+    \item \textbf{Retrouvez $P(Q)$} en sommant les lignes du tableau. Comparez avec les données initiales du scénario.
+    \item \textbf{Calculez $P(C)$} en sommant les colonnes du tableau.
+    \begin{itemize}
+        \item Quelle est la proportion globale de mangues tachées dans l'usine ?
+        \item Ce chiffre est-il directement donné dans l'énoncé ? D'où vient-il ?
+    \end{itemize}
+    \item Imaginez qu'Ibrahima ferme les yeux et pioche une mangue au hasard. Quelle est la probabilité qu'elle soit tachée ? Justifiez en utilisant la formule des probabilités totales.
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Marginalisation sur les lignes (retrouver $P(Q)$) :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|l|c|c|c|}
+\hline
+$Q$ & $P(Q, \text{tachée})$ & $+ \; P(Q, \text{uniforme})$ & $= P(Q)$ \\
+\hline
+Parfaite & \hspace{2cm} & \hspace{2cm} & \hspace{2cm} \\
+\hline
+Défaut & & & \\
+\hline
+Rejet & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent\textit{Marginalisation sur les colonnes (calculer $P(C)$) :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$C$ & $P(\text{Parfaite}, C)$ & $+ \; P(\text{Défaut}, C)$ & $+ \; P(\text{Rejet}, C)$ & $= P(C)$ \\
+\hline
+tachée & \hspace{1.5cm} & \hspace{1.5cm} & \hspace{1.5cm} & \hspace{1.5cm} \\
+\hline
+uniforme & & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[4]
+
+\newpage
+
+%=============================================================================
+\subsection*{Exercice 4 : Probabilité conditionnelle --- le ``zoom''}
+
+\begin{exercicebox}[Énoncé]
+Ibrahima observe qu'une mangue a la couleur \textbf{tachée}. Il veut savoir : \textit{``sachant qu'elle est tachée, quelle est la probabilité que ce soit un rejet ?''}
+
+\begin{enumerate}
+    \item En utilisant \textbf{uniquement le tableau de la jointe}, calculez :
+    \begin{itemize}
+        \item $P(\text{Parfaite} \mid \text{tachée})$
+        \item $P(\text{Défaut} \mid \text{tachée})$
+        \item $P(\text{Rejet} \mid \text{tachée})$
+    \end{itemize}
+    \item Vérifiez que ces trois probabilités conditionnelles somment à 1.
+    \item Comparez le prior $P(Q)$ avec le posterior $P(Q \mid \text{tachée})$ dans le tableau ci-dessous. Pour chaque catégorie, la probabilité a-t-elle augmenté ou diminué ? Pourquoi ?
+    \item Expliquez avec vos mots le ``zoom'' : pourquoi divise-t-on par $P(\text{tachée})$ ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Calcul de $P(Q \mid \text{tachée})$ par la formule $P(Q \mid C) = P(Q, C) / P(C)$ :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.2}
+\begin{tabular}{|l|c|c|c|}
+\hline
+$Q$ & $P(Q, \text{tachée})$ & $\div \; P(\text{tachée})$ & $= P(Q \mid \text{tachée})$ \\
+\hline
+Parfaite & \hspace{2cm} & $\div$ \hspace{1.5cm} & \hspace{2cm} \\
+\hline
+Défaut & & $\div$ & \\
+\hline
+Rejet & & $\div$ & \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Vérification : total}} & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent\textit{Comparaison avant/après observation :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|l|c|c|c|}
+\hline
+$Q$ & \textbf{Prior} $P(Q)$ & $\xrightarrow{\;\text{tachée}\;}$ \textbf{Posterior} $P(Q \mid \text{tachée})$ & $\uparrow$ ou $\downarrow$ ? \\
+\hline
+Parfaite & 0,60 & \hspace{3cm} & \hspace{1.5cm} \\
+\hline
+Défaut & 0,25 & & \\
+\hline
+Rejet & 0,15 & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[5]
+
+\newpage
+
+%=============================================================================
+\subsection*{Exercice 5 : Le théorème de Bayes --- inverser le raisonnement}
+
+\begin{exercicebox}[Énoncé]
+Refaites le calcul de l'exercice 4, mais cette fois \textbf{en utilisant la formule de Bayes} plutôt que le tableau de la jointe.
+
+\textbf{Données :} On observe une mangue \textbf{tachée}. Calculer $P(Q \mid \text{tachée})$ pour chaque catégorie.
+
+\begin{enumerate}
+    \item \textbf{Étape 1 :} Calculez le \textbf{numérateur} de Bayes pour chaque hypothèse :
+    $\text{Num}(q) = P(\text{tachée} \mid Q = q) \times P(Q = q)$
+    \item \textbf{Étape 2 :} Calculez l'\textbf{évidence} $P(\text{tachée})$ comme somme des numérateurs.
+    \item \textbf{Étape 3 :} Divisez chaque numérateur par l'évidence pour obtenir le posterior.
+    \item \textbf{Étape 4 :} Vérifiez que les posteriors somment à 1.
+    \item Retrouvez-vous les mêmes résultats qu'à l'exercice 4 ? Est-ce normal ?
+\end{enumerate}
+\end{exercicebox}
+
+\begin{methodebox}[Recette de Bayes en 4 étapes]
+$$P(H \mid E) = \frac{P(E \mid H) \times P(H)}{P(E)}$$
+
+\begin{enumerate}[nosep]
+    \item \textbf{Numérateur} : $P(E \mid H) \times P(H)$ pour chaque hypothèse $H$
+    \item \textbf{Évidence} : $P(E) = \sum_{h} P(E \mid H = h) \times P(H = h)$ (somme des numérateurs)
+    \item \textbf{Division} : $P(H \mid E) = \text{Num}(H) / P(E)$
+    \item \textbf{Vérification} : $\sum_{h} P(H = h \mid E) = 1$
+\end{enumerate}
+\end{methodebox}
+
+\noindent\textit{Tableau de Bayes à compléter :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.2}
+\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$Q$ & \textbf{Prior} $P(Q)$ & \textbf{Vraisembl.} $P(\text{tachée} \mid Q)$ & \textbf{Numérateur} & \textbf{Posterior} \\
+\hline
+Parfaite & 0,60 & 0,10 & \hspace{1.8cm} & \hspace{1.8cm} \\
+\hline
+Défaut & 0,25 & 0,60 & & \\
+\hline
+Rejet & 0,15 & 0,90 & & \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Somme (= Évidence $P(\text{tachée})$)}} & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[4]
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 3 --- Prior, Mise à Jour Séquentielle, Preuve Contradictoire}}
+%=============================================================================
+
+\subsection*{Exercice 6 : L'importance capitale du prior}
+
+\begin{exercicebox}[Énoncé]
+\textbf{Même observation, contexte différent.} On compare deux usines qui traitent les mêmes variétés de mangues (mêmes vraisemblances) mais avec des \textbf{priors différents} :
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+& \textbf{Parfaite} & \textbf{Défaut} & \textbf{Rejet} \\
+\midrule
+\textbf{Usine Ziguinchor} (bonne récolte) & 0,60 & 0,25 & 0,15 \\
+\textbf{Usine Tambacounda} (récolte médiocre) & 0,20 & 0,35 & 0,45 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Les vraisemblances $P(\text{tachée} \mid Q)$ restent identiques : 0,10 / 0,60 / 0,90.
+
+\begin{enumerate}
+    \item Appliquez Bayes pour l'usine de Tambacounda avec l'observation ``tachée''. Remplissez le tableau ci-dessous.
+    \item Comparez les posteriors des deux usines. Même observation + même vraisemblance = même conclusion ?
+    \item Expliquez pourquoi le prior fait toute la différence.
+    \item Calculez le \textbf{rapport de vraisemblance} (LR) entre Rejet et Parfaite pour l'observation ``tachée''. Interprétez.
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Bayes pour l'usine de Tambacounda :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.2}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$Q$ & \textbf{Prior} (Tamba) & $P(\text{tachée} \mid Q)$ & \textbf{Numérateur} & \textbf{Posterior} \\
+\hline
+Parfaite & 0,20 & 0,10 & \hspace{1.8cm} & \hspace{1.8cm} \\
+\hline
+Défaut & 0,35 & 0,60 & & \\
+\hline
+Rejet & 0,45 & 0,90 & & \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Évidence}} & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent\textit{Comparaison des deux usines :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|l|c|c|}
+\hline
+& \textbf{Ziguinchor} $P(Q \mid \text{tachée})$ & \textbf{Tambacounda} $P(Q \mid \text{tachée})$ \\
+\hline
+Parfaite & \hspace{3cm} & \hspace{3cm} \\
+\hline
+Défaut & & \\
+\hline
+Rejet & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Rapport de vraisemblance LR(Rejet vs Parfaite) = $\frac{P(\text{tachée} \mid \text{Rejet})}{P(\text{tachée} \mid \text{Parfaite})}$ = \rule{3cm}{0.4pt}
+
+\espaceReponse[5]
+
+\newpage
+
+%=============================================================================
+\subsection*{Exercice 7 : Mise à jour séquentielle --- accumuler les preuves}
+
+\begin{exercicebox}[Énoncé]
+Ibrahima examine une mangue de l'usine de \textbf{Ziguinchor} étape par étape. Il observe successivement trois indicateurs. \textbf{Le posterior de chaque étape devient le prior de l'étape suivante.}
+
+\begin{enumerate}
+    \item \textbf{Observation 1 : couleur tachée.} Vous l'avez déjà calculé (Ex. 5). Recopiez les posteriors.
+    \item \textbf{Observation 2 : texture molle.} En prenant les posteriors de l'étape 1 comme nouveaux priors, appliquez Bayes avec les vraisemblances de la texture.
+    \item \textbf{Observation 3 : calibre hors-norme.} Appliquez Bayes une troisième fois.
+    \item Remplissez le tableau récapitulatif montrant l'évolution des croyances.
+    \item Quelle est la décision d'Ibrahima à la fin des trois observations ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Étape 2 : mise à jour avec la texture (molle). Nouveau prior = posterior de l'étape 1.}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.2}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$Q$ & \textbf{Prior} (= post. étape 1) & $P(\text{molle} \mid Q)$ & \textbf{Num.} & \textbf{Posterior} \\
+\hline
+Parfaite & \hspace{1.8cm} & 0,05 & \hspace{1.5cm} & \hspace{1.5cm} \\
+\hline
+Défaut & & 0,40 & & \\
+\hline
+Rejet & & 0,80 & & \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Évidence}} & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent\textit{Étape 3 : mise à jour avec le calibre (hors-norme). Nouveau prior = posterior de l'étape 2.}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.2}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$Q$ & \textbf{Prior} (= post. étape 2) & $P(\text{hors-norme} \mid Q)$ & \textbf{Num.} & \textbf{Posterior} \\
+\hline
+Parfaite & \hspace{1.8cm} & 0,08 & \hspace{1.5cm} & \hspace{1.5cm} \\
+\hline
+Défaut & & 0,35 & & \\
+\hline
+Rejet & & 0,50 & & \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Évidence}} & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent\textit{Tableau récapitulatif --- évolution des croyances :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$Q$ & \textbf{Prior initial} & \textbf{+Tachée} & \textbf{+Molle} & \textbf{+Hors-norme} \\
+\hline
+Parfaite & 60,0\% & \hspace{1.5cm}\% & \hspace{1.5cm}\% & \hspace{1.5cm}\% \\
+\hline
+Défaut & 25,0\% & \% & \% & \% \\
+\hline
+Rejet & 15,0\% & \% & \% & \% \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Décision d'Ibrahima : \rule{8cm}{0.4pt}
+
+\newpage
+
+%=============================================================================
+\subsection*{Exercice 8 : Quand la preuve contredit}
+
+\begin{exercicebox}[Énoncé]
+Ibrahima examine une autre mangue. Les deux premières observations convergent vers un rejet : couleur tachée puis texture molle (posteriors de l'exercice 7, étape 2). Mais la troisième observation est \textbf{surprenante} :
+
+\textbf{Observation 3 (alternative) : calibre standard} (au lieu de hors-norme).
+
+\begin{enumerate}
+    \item Calculez $P(\text{standard} \mid Q)$ pour chaque catégorie (complémentaire de ``hors-norme'').
+    \item Appliquez Bayes avec les posteriors de l'étape 2 comme priors.
+    \item La probabilité de Rejet a-t-elle augmenté ou diminué ? De combien ?
+    \item Comparez avec l'exercice 7 (calibre hors-norme). Comment la direction de la preuve affecte-t-elle le raisonnement ?
+    \item Ibrahima doit-il quand même rejeter cette mangue ? Justifiez.
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Vraisemblances pour ``calibre standard'' (complémentaire) :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|l|c|c|}
+\hline
+$Q$ & $P(\text{hors-norme} \mid Q)$ & $P(\text{standard} \mid Q) = 1 - \ldots$ \\
+\hline
+Parfaite & 0,08 & \hspace{3cm} \\
+\hline
+Défaut & 0,35 & \\
+\hline
+Rejet & 0,50 & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent\textit{Bayes avec calibre standard :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.2}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$Q$ & \textbf{Prior} (= post. étape 2) & $P(\text{standard} \mid Q)$ & \textbf{Num.} & \textbf{Posterior} \\
+\hline
+Parfaite & \hspace{1.5cm} & \hspace{1.5cm} & \hspace{1.5cm} & \hspace{1.5cm} \\
+\hline
+Défaut & & & & \\
+\hline
+Rejet & & & & \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Évidence}} & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent\textit{Comparaison : preuve convergente vs contradictoire}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|l|c|c|c|}
+\hline
+$Q$ & \textbf{Après étape 2} & \textbf{+Hors-norme} (Ex. 7) & \textbf{+Standard} (Ex. 8) \\
+\hline
+Parfaite & \hspace{1.5cm} & \hspace{1.5cm} & \hspace{1.5cm} \\
+\hline
+Défaut & & & \\
+\hline
+Rejet & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[5]
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 4 --- Réseaux Bayésiens et Classification}}
+%=============================================================================
+
+\subsection*{Exercice 9 : Construire un réseau bayésien}
+
+\begin{exercicebox}[Énoncé]
+L'usine veut modéliser les relations entre toutes les variables pertinentes. En plus de $Q$, $C$, $T$, $K$, on ajoute :
+\begin{itemize}[nosep]
+    \item \textbf{Saison (S)} : saison sèche ou hivernage (influence la qualité des mangues)
+    \item \textbf{Variété (V)} : Kent ou Keitt (influence la qualité)
+\end{itemize}
+
+\begin{enumerate}
+    \item Dessinez le réseau bayésien (DAG) avec les 6 variables. Les arcs représentent des influences causales directes. Justifiez chaque arc.
+    \item Écrivez la \textbf{factorisation} de la distribution jointe selon le réseau :
+    $$P(S, V, Q, C, T, K) = \ldots$$
+    \item \textbf{Comptez les paramètres} du réseau (toutes les variables sont binaires) et comparez avec la jointe brute ($2^6 - 1$).
+    \item Identifiez les \textbf{trois structures canoniques} dans votre réseau :
+    \begin{itemize}
+        \item Une \textbf{chaîne} : $X \to Y \to Z$
+        \item Une \textbf{cause commune} : $X \leftarrow Y \to Z$
+        \item Une \textbf{v-structure} : $X \to Y \leftarrow Z$
+    \end{itemize}
+    \item Pour chaque structure identifiée, répondez : $X$ et $Z$ sont-ils indépendants ? Et si on observe $Y$ ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Réseau bayésien (dessinez les nœuds et les arcs) :}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    var/.style={ellipse, draw=blue!60, fill=blue!10, thick, minimum width=2cm, minimum height=0.8cm, font=\small\bfseries},
+]
+    % Nœuds (positionnés, arcs à dessiner par l'étudiant)
+    \node[var] (S) at (0, 3) {Saison};
+    \node[var] (V) at (5, 3) {Variété};
+    \node[var] (Q) at (2.5, 1.5) {Qualité};
+    \node[var] (C) at (0, 0) {Couleur};
+    \node[var] (T) at (2.5, 0) {Texture};
+    \node[var] (K) at (5, 0) {Calibre};
+    
+    % Les arcs sont à dessiner par l'étudiant !
+    % Lignes pointillées de guidage
+    \draw[dashed, gray!40] (S) -- (Q);
+    \draw[dashed, gray!40] (V) -- (Q);
+    \draw[dashed, gray!40] (Q) -- (C);
+    \draw[dashed, gray!40] (Q) -- (T);
+    \draw[dashed, gray!40] (Q) -- (K);
+\end{tikzpicture}
+
+\textit{(Tracez les flèches sur les lignes pointillées pour indiquer le sens causal)}
+\end{center}
+
+\noindent Factorisation : $P(S, V, Q, C, T, K) = $ \rule{10cm}{0.4pt}
+
+\medskip
+
+\noindent\textit{Comptage des paramètres :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Variable} & \textbf{Parents} & \textbf{Nb de paramètres} \\
+\hline
+$S$ & \hspace{3cm} & \hspace{2cm} \\
+\hline
+$V$ & & \\
+\hline
+$Q$ & & \\
+\hline
+$C$ & & \\
+\hline
+$T$ & & \\
+\hline
+$K$ & & \\
+\hline
+\multicolumn{2}{|r|}{\textbf{Total réseau}} & \\
+\hline
+\multicolumn{2}{|r|}{Jointe brute $2^6 - 1$} & 63 \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent\textit{Structures canoniques et d-séparation :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Structure} & \textbf{Triplet} $X, Y, Z$ & $X \perp Z$ ? & $X \perp Z \mid Y$ ? & \textbf{Obs. $Y$ : bloque/ouvre ?} \\
+\hline
+Chaîne & \hspace{3cm} & \hspace{1.5cm} & \hspace{1.5cm} & \hspace{2.5cm} \\
+\hline
+Cause commune & & & & \\
+\hline
+V-structure & & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[5]
+
+\newpage
+
+%=============================================================================
+\subsection*{Exercice 10 : Inférence par énumération et Naive Bayes}
+
+\begin{exercicebox}[Énoncé]
+\textbf{Partie A --- Inférence par énumération.}
+
+Calculez $P(Q \mid C = \text{tachée}, T = \text{molle})$ directement par la factorisation du réseau $C \leftarrow Q \to T$ (sans variables Saison/Variété).
+
+\begin{enumerate}
+    \item Écrivez la jointe factorisée : $P(Q, C, T) = P(Q) \cdot P(C \mid Q) \cdot P(T \mid Q)$.
+    \item Évaluez pour chaque valeur de $Q$ avec $C = \text{tachée}$ et $T = \text{molle}$.
+    \item Normalisez.
+    \item Comparez avec le résultat de l'exercice 7 (étape 2). Trouvez-vous la même chose ?
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie B --- Naive Bayes : pont vers le Machine Learning.}
+
+Ibrahima veut automatiser le tri. Il dispose d'un historique de 10\,000 mangues classées manuellement. Il construit un classificateur \textbf{Naive Bayes} qui prédit la catégorie à partir des trois indicateurs.
+
+\begin{enumerate}[resume]
+    \item Écrivez la formule du classificateur Naive Bayes :
+    $$P(Q \mid C, T, K) \propto \; ?$$
+    \item Une nouvelle mangue arrive avec : tachée, ferme, standard. Classifiez-la.
+    \item Comparez avec la mangue de l'exercice 7 (tachée, molle, hors-norme). 
+    \item Pourquoi ce classificateur s'appelle-t-il ``naïf'' ? Quelle hypothèse fait-il ?
+    \item \textbf{Lien avec le ML :} Que faudrait-il changer si les vraisemblances n'étaient \textit{pas} données par l'expert mais devaient être \textit{apprises} à partir des données ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Partie A --- Inférence par énumération :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.2}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+$Q$ & $P(Q)$ & $P(\text{tachée} \mid Q)$ & $P(\text{molle} \mid Q)$ & \textbf{Produit} & \textbf{Normalisé} \\
+\hline
+Parfaite & 0,60 & 0,10 & 0,05 & \hspace{1.5cm} & \hspace{1.5cm} \\
+\hline
+Défaut & 0,25 & 0,60 & 0,40 & & \\
+\hline
+Rejet & 0,15 & 0,90 & 0,80 & & \\
+\hline
+\multicolumn{4}{|r|}{\textbf{Somme}} & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\medskip
+
+\noindent\textit{Partie B --- Naive Bayes avec (tachée, ferme, standard) :}
+
+\begin{center}
+\renewcommand{\arraystretch}{2.2}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+$Q$ & $P(Q)$ & $P(\text{tachée} \mid Q)$ & $P(\text{ferme} \mid Q)$ & $P(\text{standard} \mid Q)$ & \textbf{Produit} & \textbf{Normalisé} \\
+\hline
+Parfaite & 0,60 & 0,10 & \hspace{1cm} & \hspace{1cm} & \hspace{1cm} & \hspace{1cm} \\
+\hline
+Défaut & 0,25 & 0,60 & & & & \\
+\hline
+Rejet & 0,15 & 0,90 & & & & \\
+\hline
+\multicolumn{5}{|r|}{\textbf{Somme}} & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[6]
+
+\newpage
+
+%=============================================================================
+\section*{Aide-mémoire}
+%=============================================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|p{4cm}|p{4.5cm}|p{5.5cm}|}
+\hline
+\textbf{Concept} & \textbf{Formule} & \textbf{En français} \\
+\hline
+Complémentaire & $P(\neg A) = 1 - P(A)$ & Ce qui ne se produit pas \\
+\hline
+Distribution jointe & $P(X, Y) = P(Y \mid X) \cdot P(X)$ & Probabilité de la combinaison \\
+\hline
+Marginalisation & $P(X) = \sum_{y} P(X, Y=y)$ & Sommer pour éliminer $Y$ \\
+\hline
+Conditionnelle & $P(X \mid Y) = \frac{P(X, Y)}{P(Y)}$ & Zoomer sur $Y = y$, renormaliser \\
+\hline
+\textbf{Bayes} & $P(H \mid E) = \frac{P(E \mid H) \cdot P(H)}{P(E)}$ & Posterior $\propto$ Vraisemblance $\times$ Prior \\
+\hline
+Probabilités totales & $P(E) = \sum_{h} P(E \mid H=h) \cdot P(H=h)$ & L'évidence = somme des numérateurs \\
+\hline
+Indépendance & $P(X,Y) = P(X) \cdot P(Y)$ & Connaître l'un n'aide pas pour l'autre \\
+\hline
+Réseau bayésien & $P(X_1,\ldots,X_n) = \prod_i P(X_i \mid \text{Pa}(X_i))$ & La jointe = produit des CPTs \\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Structure canonique} & \textbf{Sans observer $B$} & \textbf{En observant $B$} & \textbf{Mnémonique} \\
+\hline
+Chaîne $A \to B \to C$ & $A, C$ dépendants & $A \perp C \mid B$ & \textit{Observer bloque} \\
+\hline
+Cause commune $A \leftarrow B \to C$ & $A, C$ dépendants & $A \perp C \mid B$ & \textit{Observer bloque} \\
+\hline
+V-structure $A \to B \leftarrow C$ & $A \perp C$ & $A, C$ dépendants & \textit{Observer ouvre !} \\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{attentionbox}[Erreur classique à éviter]
+$$P(A \mid B) \neq P(B \mid A)$$
+``90\% des rejets sont tachés'' $\neq$ ``90\% des mangues tachées sont des rejets''
+
+C'est l'\textbf{erreur du procureur}. Toujours utiliser Bayes pour inverser le conditionnement.
+\end{attentionbox}
+
+\end{document}

@@ -1,0 +1,535 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{listings}
+
+\newcommand{\cmark}{\ding{51}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{exercicebox}[1][]{colback=purple!5,colframe=purple!50,
+    fonttitle=\bfseries,title=#1,breakable}
+
+\lstdefinestyle{java}{
+  language=Java,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single, framerule=0.5pt, rulecolor=\color{gray!40},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+  numbers=left, numberstyle=\tiny\color{gray},
+  breaklines=true, showstringspaces=false, tabsize=4,
+  xleftmargin=4pt, xrightmargin=4pt, aboveskip=8pt, belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+}
+
+\lstdefinestyle{bash}{
+  language=bash,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{black!5},
+  frame=single, framerule=0.5pt, rulecolor=\color{gray!40},
+  commentstyle=\color{green!50!black}\itshape,
+  numbers=none, breaklines=true, showstringspaces=false,
+  xleftmargin=4pt, xrightmargin=4pt, aboveskip=8pt, belowskip=8pt,
+  % Le style « bash » était le seul des trois sans table literate : un « é » dans un bloc bash
+  % — « # Se déconnecter » — faisait échouer la compilation. Même table que java et python.
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+}
+
+\lstdefinestyle{python}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{yellow!5},
+  frame=single, framerule=0.5pt, rulecolor=\color{gray!40},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+  numbers=left, numberstyle=\tiny\color{gray},
+  breaklines=true, showstringspaces=false, tabsize=4,
+  xleftmargin=4pt, xrightmargin=4pt, aboveskip=8pt, belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small TP-1 : Setup de l'Environnement}
+\fancyhead[R]{\small ESP/UCAD --- M1}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Structures de Données et}\\
+\textbf{\LARGE Algorithmes Avancés}\\[0.8cm]
+\textbf{\huge TP-1 --- Setup de l'Environnement}\\[0.3cm]
+\textbf{\Large Docker, Java, Gradle, JUnit, Python, Git}\\[0.5cm]
+\large Master 1 --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Prérequis et contexte]
+\textbf{Prérequis :} Un ordinateur (Windows, macOS ou Linux) avec au moins 8~Go de RAM et 10~Go d'espace disque libre.\\[4pt]
+\textbf{Objectif :} Installer et vérifier l'environnement de développement standardisé du cours. Ce TP doit être complété \textbf{avant} la séance S1.\\[4pt]
+\textbf{Principe :} Vous éditez vos fichiers sur votre machine avec l'éditeur de votre choix. Vous compilez et exécutez dans le conteneur Docker via le terminal.
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs concrets]
+À la fin de ce TP, vous serez capable de :
+\begin{enumerate}[nosep]
+    \item Lancer le conteneur Docker du cours et y accéder
+    \item Compiler et exécuter un programme Java dans le conteneur
+    \item Créer un projet Gradle et exécuter \texttt{gradle --no-daemon build}
+    \item Écrire et exécuter un test JUnit~5
+    \item Générer une figure avec Python/matplotlib
+    \item Utiliser les commandes Git de base
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Pourquoi Docker ?}
+% =====================================================================
+
+Tous les étudiants travaillent dans le même environnement, quelle que soit leur machine. Docker crée un \textbf{conteneur} --- un environnement Linux isolé qui contient tous les outils nécessaires.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}l l@{}}
+\toprule
+\textbf{Outil} & \textbf{Usage} \\
+\midrule
+OpenJDK 17 (Temurin) & Compilation et exécution Java \\
+Gradle 8.12 & Construction de projets, dépendances \\
+JUnit 5 & Tests unitaires \\
+Python 3 & Génération de figures (matplotlib) \\
+Git & Contrôle de version \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le principe est simple : votre dossier de travail est \textbf{partagé} entre votre machine et le conteneur. Vous éditez sur votre machine (avec l'éditeur de votre choix : VS Code, Sublime Text, Notepad++...), et vous compilez/testez dans le conteneur.
+
+% =====================================================================
+\section{Installation de Docker}
+% =====================================================================
+
+\subsection{Windows}
+
+\begin{enumerate}[nosep]
+    \item Télécharger \textbf{Docker Desktop}\footnote{\url{https://www.docker.com/products/docker-desktop/}}
+    \item Lancer l'installateur (activer WSL~2 si demandé), redémarrer
+    \item Installer \textbf{Git for Windows} depuis \url{https://gitforwindows.org/}
+    \item Ouvrir \textbf{Git Bash} et vérifier :
+\end{enumerate}
+
+\begin{lstlisting}[style=bash]
+docker --version
+\end{lstlisting}
+
+\begin{attentionbox}[Important --- Windows]
+Sur Windows, utilisez toujours \textbf{Git Bash} pour les commandes Docker de ce cours (pas CMD, pas PowerShell).
+\end{attentionbox}
+
+\subsection{macOS}
+
+\begin{enumerate}[nosep]
+    \item Télécharger \textbf{Docker Desktop}\footnotemark[\value{footnote}]
+    \item Choisir Apple Silicon ou Intel, installer, lancer
+    \item Ouvrir Terminal et vérifier : \texttt{docker --version}
+\end{enumerate}
+
+\subsection{Linux (Ubuntu/Debian)}
+
+\begin{lstlisting}[style=bash]
+sudo apt-get update
+sudo apt-get install docker.io
+sudo usermod -aG docker $USER
+# Se déconnecter et se reconnecter, puis vérifier :
+docker --version
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 1]
+La commande \texttt{docker --version} affiche un numéro de version.
+\end{exercicebox}
+
+% =====================================================================
+\section{Premier lancement du conteneur}
+% =====================================================================
+
+\subsection{Créer un dossier de travail}
+
+Créez un dossier sur votre machine pour tout le cours :
+
+\begin{lstlisting}[style=bash]
+mkdir ~/dsa-m1
+cd ~/dsa-m1
+\end{lstlisting}
+
+\subsection{Lancer le conteneur}
+
+\begin{lstlisting}[style=bash]
+# Linux / macOS
+docker run -it -v "$(pwd):/workspace" elbachirtoure/dsa-java-m1:v1.1
+
+# Windows (Git Bash)
+MSYS_NO_PATHCONV=1 docker run -it -v "$(pwd):/workspace" \
+    elbachirtoure/dsa-java-m1:v1.1
+\end{lstlisting}
+
+La première fois, Docker télécharge l'image ($\sim$800~Mo). Les fois suivantes, le lancement est instantané.
+
+L'option \texttt{-v} monte votre dossier local dans \texttt{/workspace}. Tout fichier créé d'un côté est visible de l'autre.
+
+\begin{infobox}[Message d'accueil]
+Vous voyez le message d'accueil du cours. Tapez \texttt{help-tp} pour l'aide-mémoire.
+\end{infobox}
+
+\subsection{Vérifier l'environnement}
+
+\begin{lstlisting}[style=bash]
+cd /workspace
+java --version
+gradle --version
+python3 --version
+git --version
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 2]
+Java~17, Gradle~8.12, Python~3 et Git sont installés.
+\end{exercicebox}
+
+% =====================================================================
+\section{Hello World en Java}
+% =====================================================================
+
+Sur votre machine, ouvrez votre éditeur préféré et créez le fichier \texttt{Hello.java} dans le dossier \texttt{dsa-m1/} :
+
+\begin{lstlisting}[style=java]
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("Structures de Donnees - M1");
+        System.out.println("Environnement pret !");
+    }
+}
+\end{lstlisting}
+
+Dans le terminal du conteneur :
+
+\begin{lstlisting}[style=bash]
+cd /workspace
+javac Hello.java
+java Hello
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 3]
+Le programme affiche les deux lignes. Modifiez-le pour afficher votre nom, recompilez et exécutez.
+\end{exercicebox}
+
+% =====================================================================
+\section{Premier projet Gradle}
+% =====================================================================
+
+Gradle gère la compilation, les dépendances (JUnit) et les tests.
+
+\subsection{Créer un projet}
+
+\begin{lstlisting}[style=bash]
+cd /workspace
+new-project hello-dsa
+cd hello-dsa
+\end{lstlisting}
+
+Structure créée :
+
+\begin{lstlisting}[style=bash]
+hello-dsa/
+  src/main/java/       # Code source
+  src/test/java/       # Tests JUnit
+  build.gradle          # Configuration
+\end{lstlisting}
+
+\subsection{Ajouter une classe}
+
+Sur votre machine, créez \texttt{hello-dsa/src/main/java/Main.java} :
+
+\begin{lstlisting}[style=java]
+public class Main {
+    private String nom;
+
+    public Main(String nom) {
+        this.nom = nom;
+    }
+
+    public String message() {
+        return "Bienvenue en DSA, " + nom + " !";
+    }
+
+    public static void main(String[] args) {
+        Main s = new Main("Fatou");
+        System.out.println(s.message());
+    }
+}
+\end{lstlisting}
+
+\subsection{Compiler et exécuter}
+
+\begin{lstlisting}[style=bash]
+gradle --no-daemon build
+gradle --no-daemon run
+\end{lstlisting}
+
+\begin{infobox}[Pourquoi \texttt{-{}-no-daemon} ?]
+Sur les volumes Docker partagés avec Windows, le daemon Gradle peut provoquer des erreurs d'entrée/sortie. L'option \texttt{-{}-no-daemon} évite ce problème. Le premier build prend 10--20 secondes, les suivants seront plus rapides.
+\end{infobox}
+
+\begin{exercicebox}[Vérification 4]
+\texttt{gradle --no-daemon run} affiche \texttt{Bienvenue en DSA, Fatou !}
+\end{exercicebox}
+
+% =====================================================================
+\section{Premier test JUnit}
+% =====================================================================
+
+Un test vérifie qu'une méthode fait ce qu'elle est censée faire.
+
+\subsection{Écrire le test}
+
+Créez \texttt{hello-dsa/src/test/java/MainTest.java} :
+
+\begin{lstlisting}[style=java]
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class MainTest {
+
+    @Test
+    void testMessage() {
+        Main s = new Main("Moussa");
+        assertEquals("Bienvenue en DSA, Moussa !", s.message());
+    }
+
+    @Test
+    void testAutreNom() {
+        Main s = new Main("Aminata");
+        assertTrue(s.message().contains("Aminata"));
+    }
+
+    @Test
+    void testNonVide() {
+        Main s = new Main("Cheikh");
+        assertFalse(s.message().isEmpty());
+    }
+}
+\end{lstlisting}
+
+\subsection{Exécuter les tests}
+
+\begin{lstlisting}[style=bash]
+gradle --no-daemon test
+\end{lstlisting}
+
+Résultat attendu :
+
+\begin{lstlisting}[style=bash]
+MainTest > testMessage() PASSED
+MainTest > testAutreNom() PASSED
+MainTest > testNonVide() PASSED
+
+BUILD SUCCESSFUL
+\end{lstlisting}
+
+\begin{infobox}[JUnit --- les assertions essentielles]
+\begin{itemize}[nosep]
+    \item \texttt{assertEquals(attendu, obtenu)} --- vérifie l'égalité
+    \item \texttt{assertTrue(condition)} --- vérifie qu'une condition est vraie
+    \item \texttt{assertFalse(condition)} --- vérifie qu'une condition est fausse
+    \item \texttt{assertThrows(Exception.class, () -> ...)} --- vérifie qu'une exception est levée
+\end{itemize}
+\end{infobox}
+
+\begin{exercicebox}[Vérification 5]
+Les 3 tests passent. Ajoutez un 4e test de votre choix et relancez \texttt{gradle --no-daemon test}.
+\end{exercicebox}
+
+% =====================================================================
+\section{Vérification Python et matplotlib}
+% =====================================================================
+
+Python génère les figures du cours. Créez \texttt{test\_figure.py} dans \texttt{dsa-m1/} :
+
+\begin{lstlisting}[style=python]
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+
+n = np.arange(1, 50)
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(n, np.ones_like(n), label='O(1)', linewidth=2)
+ax.plot(n, np.log2(n), label='O(log n)', linewidth=2)
+ax.plot(n, n, label='O(n)', linewidth=2)
+ax.plot(n, n * np.log2(n), label='O(n log n)', linewidth=2)
+
+ax.set_xlabel('n')
+ax.set_ylabel("Operations")
+ax.set_title('Comparaison des complexites')
+ax.legend()
+ax.set_ylim(0, 200)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+fig.savefig('test_complexites.png', dpi=150)
+print("Figure sauvegardee : test_complexites.png")
+\end{lstlisting}
+
+\begin{lstlisting}[style=bash]
+cd /workspace
+python3 test_figure.py
+\end{lstlisting}
+
+Le fichier \texttt{test\_complexites.png} apparaît dans votre dossier \texttt{dsa-m1/} --- ouvrez-le sur votre machine.
+
+\begin{exercicebox}[Vérification 6]
+La figure affiche 4 courbes de complexité correctement étiquetées.
+\end{exercicebox}
+
+% =====================================================================
+\section{Git --- les bases}
+% =====================================================================
+
+\begin{lstlisting}[style=bash]
+git config --global user.name "Votre Nom"
+git config --global user.email "votre.email@ucad.edu.sn"
+
+cd /workspace/hello-dsa
+git init
+git add .
+git commit -m "TP-1 : premier projet avec JUnit"
+git log --oneline
+\end{lstlisting}
+
+\begin{infobox}[Branche par défaut]
+Le conteneur est configuré pour que \texttt{git init} crée une branche \texttt{main} (et non \texttt{master}).
+\end{infobox}
+
+Modifiez un fichier, puis :
+
+\begin{lstlisting}[style=bash]
+git add .
+git commit -m "TP-1 : ajout d'un test"
+git log --oneline
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 7]
+\texttt{git log --oneline} affiche 2 commits.
+\end{exercicebox}
+
+% =====================================================================
+\section{Aide-mémoire}
+% =====================================================================
+
+\begin{retenirbox}[Commandes Docker]
+\renewcommand{\arraystretch}{1.3}
+\small
+\begin{tabular}{@{}p{8.5cm} p{5cm}@{}}
+\toprule
+\textbf{Commande} & \textbf{Description} \\
+\midrule
+\texttt{docker run -it -v "\$(pwd):/workspace" elbachirtoure/dsa-java-m1:v1.1} & Lancer le conteneur \\
+\texttt{exit} & Quitter le conteneur \\
+\texttt{help-tp} & Aide-mémoire (dans le conteneur) \\
+\texttt{new-project <nom>} & Créer un projet Gradle \\
+\bottomrule
+\end{tabular}
+\end{retenirbox}
+
+\begin{retenirbox}[Outils dans le conteneur]
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}l l l@{}}
+\toprule
+\textbf{Outil} & \textbf{Commande} & \textbf{Usage} \\
+\midrule
+Java & \texttt{javac Fichier.java} & Compiler \\
+     & \texttt{java Fichier} & Exécuter \\
+Gradle & \texttt{gradle --no-daemon build} & Compiler + tests \\
+       & \texttt{gradle --no-daemon test} & Tests uniquement \\
+       & \texttt{gradle --no-daemon run} & Exécuter le main \\
+Python & \texttt{python3 script.py} & Exécuter un script \\
+Git & \texttt{git add . \&\& git commit -m "msg"} & Committer \\
+\bottomrule
+\end{tabular}
+\end{retenirbox}
+
+% =====================================================================
+\section*{Rapport individuel}
+% =====================================================================
+
+\begin{attentionbox}[Rapport individuel --- obligatoire]
+Chaque étudiant rédige un rapport de \textbf{1 à 2 pages} :
+\begin{enumerate}[nosep]
+    \item \textbf{Ce que j'ai fait :} outils installés, programmes écrits
+    \item \textbf{Les difficultés :} erreurs rencontrées
+    \item \textbf{Comment je les ai résolues}
+    \item \textbf{Captures d'écran :}
+    \begin{enumerate}[nosep, label=(\alph*)]
+        \item Message d'accueil du conteneur
+        \item Résultat de \texttt{gradle --no-daemon test} avec les tests passés
+        \item La figure \texttt{test\_complexites.png}
+    \end{enumerate}
+\end{enumerate}
+\textbf{Format :} PDF. \textbf{Nom :} \texttt{rapport-tp1-PRENOM-NOM.pdf}\\
+\textbf{Remise :} Avant la séance S1.
+\end{attentionbox}
+
+\vfill
+\begin{center}
+\rule{0.6\textwidth}{0.4pt}\\[6pt]
+{\small Dr. El Hadji Bassirou TOURÉ --- ESP/UCAD --- M1 --- 2025--2026}
+\end{center}
+
+\end{document}

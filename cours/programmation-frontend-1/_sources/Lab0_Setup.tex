@@ -1,0 +1,818 @@
+% ===========================================================================
+%  Jàng Afrig — Lab 0 : Mise en route
+%  Installation de l'environnement de développement
+%  Licence 1 DUT1-Informatique — ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+% --- TikZ pour les schémas ---
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit,shadows.blur}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Couleurs pour les schémas ---
+\definecolor{outilvscode}{RGB}{0,122,204}
+\definecolor{outilnav}{RGB}{229,103,23}
+\definecolor{outilgit}{RGB}{240,80,50}
+\definecolor{outilgithub}{RGB}{36,41,46}
+\definecolor{fluxlocal}{RGB}{45,160,110}
+\definecolor{fluxdistant}{RGB}{110,70,180}
+
+% --- Code source ---
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 0 : Mise en route}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 0 --- Mise en route}\\[0.3cm]
+\textbf{\Large Préparer son environnement de développement}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Durée estimée} & 1h30 à 2h (à faire chez soi avant la S1) \\
+\textbf{Où} & Chez vous, sur votre ordinateur personnel \\
+\textbf{Prérequis} & Bases d'utilisation d'un terminal + connaissance minimale HTML \\
+\textbf{Matériel} & Un ordinateur (Windows, macOS ou Linux) + connexion Internet \\
+\textbf{Validation} & Un fichier \texttt{index.html} poussé sur votre repo GitHub \\
+\textbf{Rapport} & 1 page : ce que j'ai fait + difficultés + lien repo \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab]
+À la fin de ce Lab, vous aurez :
+\begin{enumerate}[nosep]
+    \item Compris comment les \textbf{4 outils} du développeur web (VS Code, navigateur, Git, GitHub) travaillent ensemble
+    \item Installé \textbf{VS Code} et l'extension \textbf{Live Server}
+    \item Installé et configuré \textbf{Git} avec votre nom et votre email
+    \item Créé un compte \textbf{GitHub} et votre dépôt \texttt{jang-afrig}
+    \item Cloné ce dépôt sur votre ordinateur
+    \item Écrit une première page HTML «\,Hello\,» et l'avoir affichée avec Live Server
+    \item Fait votre \textbf{premier cycle Git} : \texttt{add} $\to$ \texttt{commit} $\to$ \texttt{push}
+    \item Vérifié votre travail sur GitHub
+    \item Rédigé votre premier rapport de Lab
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Le paysage du développeur web}
+% ===========================================================================
+
+Avant de cliquer quoi que ce soit, prenons 5 minutes pour comprendre
+\textbf{avec quels outils vous allez travailler} tout le semestre. Un
+développeur web travaille avec \textbf{quatre outils} qui se complètent,
+comme un artisan dans son atelier :
+
+\begin{itemize}[nosep]
+    \item \textbf{Un éditeur de code} --- VS Code, votre \emph{table de travail}
+    \item \textbf{Un navigateur} --- Chrome ou Firefox, votre \emph{vitrine}
+    \item \textbf{Un outil de versioning} --- Git, votre \emph{carnet de bord}
+    \item \textbf{Un hébergeur} --- GitHub, votre \emph{entrepôt partagé}
+\end{itemize}
+
+Voici comment ils travaillent ensemble :
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    node distance=2cm,
+    outil/.style={rounded corners=6pt, draw, thick, minimum width=3.2cm, minimum height=1.8cm, align=center, font=\small\bfseries, drop shadow={shadow xshift=1pt, shadow yshift=-1pt, opacity=0.3}},
+    fleche/.style={-{Stealth[length=3mm]}, thick, shorten >=2pt, shorten <=2pt},
+    libelle/.style={font=\scriptsize\itshape, midway, fill=white, inner sep=2pt}
+]
+    % Les 4 outils
+    \node[outil, fill=outilvscode!15, draw=outilvscode] (vscode) {VS Code\\ \normalfont\small Écrire le code};
+    \node[outil, fill=outilnav!15, draw=outilnav, right=3cm of vscode] (navigateur) {Navigateur\\ \normalfont\small Afficher la page};
+    \node[outil, fill=outilgit!15, draw=outilgit, below=2cm of vscode] (git) {Git\\ \normalfont\small Sauvegarder les versions};
+    \node[outil, fill=outilgithub!20, draw=outilgithub, below=2cm of navigateur] (github) {GitHub\\ \normalfont\small Stocker en ligne};
+
+    % Flèches
+    \draw[fleche] (vscode) -- node[libelle, above] {j'écris} (navigateur);
+    \draw[fleche] (navigateur) -- node[libelle, below] {je vois, je teste} (vscode);
+
+    \draw[fleche] (vscode) -- node[libelle, right] {j'enregistre} (git);
+    \draw[fleche] (git) -- node[libelle, below] {je pousse} (github);
+\end{tikzpicture}
+\caption{Les quatre outils du développeur web et leurs interactions.}
+\label{fig:outils}
+\end{figure}
+
+\begin{retenirbox}[À retenir]
+\begin{itemize}[nosep]
+    \item J'\textbf{écris} mon code dans VS Code et je le \textbf{teste} dans le navigateur
+    \item J'\textbf{enregistre} mes versions avec Git sur mon ordinateur
+    \item Je \textbf{pousse} mes versions sur GitHub pour les mettre en ligne et les sauvegarder
+\end{itemize}
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Ce qu'on va installer et pourquoi}
+% ===========================================================================
+
+\begin{center}
+\begin{tabular}{@{}lp{8cm}@{}}
+\toprule
+\textbf{Outil} & \textbf{À quoi il sert} \\
+\midrule
+\textbf{VS Code} & L'éditeur de code. C'est là que vous écrirez HTML, CSS, JS. Intelligent : il colore les mots-clés, détecte les erreurs, complète automatiquement. \\
+\addlinespace
+\textbf{Live Server} & Extension de VS Code. Lance un petit serveur local et \textbf{recharge automatiquement} la page dans le navigateur dès que vous enregistrez le code. Gain de temps énorme. \\
+\addlinespace
+\textbf{Git} & Outil de \emph{versioning}. Enregistre l'historique de vos modifications. Vous pouvez revenir en arrière à n'importe quel moment. C'est un gros bouton «\,annuler\,» sans limite. \\
+\addlinespace
+\textbf{GitHub} & Site web qui héberge vos dépôts Git en ligne. Comme Google Drive, mais pour les développeurs. Vous y déposerez tout votre projet Jàng Afrig. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{attentionbox}[Règle d'or]
+Ne passez jamais à l'étape suivante tant que l'étape actuelle n'a pas
+produit le résultat attendu. Si ça bloque, relisez calmement, cherchez la
+coquille. \textbf{Chercher par soi-même fait partie du métier.}
+\end{attentionbox}
+
+% ===========================================================================
+\section{Installer VS Code}
+% ===========================================================================
+
+\subsection{Télécharger et installer}
+
+\begin{enumerate}[nosep]
+    \item Allez sur \url{https://code.visualstudio.com/}
+    \item Cliquez sur le bouton \textbf{Download} correspondant à votre système (Windows, macOS, Linux)
+    \item Lancez le fichier téléchargé et suivez l'assistant
+    \item Gardez les options par défaut ; sur Windows, \textbf{cochez «\,Ajouter à PATH\,»}
+\end{enumerate}
+
+\begin{infobox}[Astuce VS Code]
+VS Code permet de faire énormément de choses via la palette de commandes :
+\texttt{Ctrl+Shift+P} (Windows/Linux) ou \texttt{Cmd+Shift+P} (macOS). On
+s'en servira plusieurs fois dans le semestre.
+\end{infobox}
+
+\subsection{Installer l'extension Live Server}
+
+\begin{enumerate}[nosep]
+    \item Ouvrez VS Code
+    \item Cliquez sur l'icône \textbf{Extensions} dans la barre de gauche (4 carrés)
+    \item Dans la barre de recherche, tapez : \texttt{Live Server}
+    \item Choisissez celui de \textbf{Ritwick Dey} (le plus téléchargé)
+    \item Cliquez sur \textbf{Install}
+\end{enumerate}
+
+\begin{retenirbox}[Pourquoi Live Server ?]
+Sans Live Server, à chaque modification de code, vous devez :
+enregistrer $\to$ aller dans le navigateur $\to$ rafraîchir la page.
+Avec Live Server : vous enregistrez, la page se rafraîchit \textbf{toute
+seule}. Sur 30h de cours, ce petit détail vous économise des heures.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Installer et configurer Git}
+% ===========================================================================
+
+\subsection{Installer Git}
+
+\subsubsection*{Windows}
+\begin{enumerate}[nosep]
+    \item Allez sur \url{https://git-scm.com/download/win}
+    \item Le téléchargement démarre automatiquement
+    \item Lancez le fichier, cliquez \textbf{Next} partout sauf :
+    \item Quand on vous demande l'éditeur par défaut, choisissez \textbf{«\,Use Visual Studio Code\,»}
+\end{enumerate}
+
+\subsubsection*{macOS}
+\begin{lstlisting}
+git --version
+\end{lstlisting}
+Si Git n'est pas installé, macOS vous proposera de l'installer (acceptez).
+
+\subsubsection*{Linux (Ubuntu/Debian)}
+\begin{lstlisting}
+sudo apt update
+sudo apt install git
+\end{lstlisting}
+
+\subsection{Vérifier l'installation}
+
+Ouvrez votre terminal (Git Bash sous Windows, Terminal sous macOS/Linux)
+et tapez :
+
+\begin{lstlisting}
+git --version
+\end{lstlisting}
+
+Résultat attendu :
+
+\begin{lstlisting}
+git version 2.47.1
+\end{lstlisting}
+
+\cmark{} Si vous voyez un numéro de version, Git est installé.
+
+\subsection{Configurer Git avec votre identité}
+
+Git a besoin de savoir \textbf{qui vous êtes}. Chaque enregistrement portera
+votre nom et votre email. Tapez ces deux commandes (avec \textbf{votre}
+vrai nom et \textbf{votre} email étudiant) :
+
+\begin{lstlisting}
+git config --global user.name "Fatou Diop"
+git config --global user.email "fatou.diop@esp.sn"
+\end{lstlisting}
+
+\begin{attentionbox}[Utilisez votre vrai nom et email]
+Remplacez par votre vrai nom (pas un pseudo) et votre email étudiant. Ces
+informations apparaîtront dans l'historique Git et servent à l'évaluation.
+\end{attentionbox}
+
+Vérifiez :
+\begin{lstlisting}
+git config --global user.name
+git config --global user.email
+\end{lstlisting}
+
+Vous devez voir votre nom et email s'afficher. \cmark
+
+\newpage
+
+% ===========================================================================
+\section{Créer votre compte GitHub}
+% ===========================================================================
+
+\subsection{S'inscrire}
+
+\begin{enumerate}[nosep]
+    \item Allez sur \url{https://github.com/}
+    \item Cliquez sur \textbf{Sign up}
+    \item Utilisez le même email que pour Git
+    \item Choisissez un mot de passe solide
+    \item Choisissez un \textbf{nom d'utilisateur} (\emph{username})
+    \item Complétez l'inscription et vérifiez votre email
+\end{enumerate}
+
+\begin{attentionbox}[Choisissez un username professionnel]
+Votre \emph{username} GitHub apparaîtra sur votre CV pendant toute votre
+carrière. Évitez :
+\begin{itemize}[nosep]
+    \item \texttt{fatoudupays221} \xmark{} (trop informel)
+    \item \texttt{xxx\_killer\_xxx} \xmark{} (à ne pas montrer à un recruteur)
+\end{itemize}
+Préférez :
+\begin{itemize}[nosep]
+    \item \texttt{fatou-diop} \cmark
+    \item \texttt{fdiop} \cmark
+    \item \texttt{fatou.diop} \cmark
+\end{itemize}
+\end{attentionbox}
+
+\subsection{Créer votre dépôt jang-afrig}
+
+\begin{enumerate}[nosep]
+    \item Connectez-vous sur GitHub
+    \item Cliquez sur le \textbf{+} en haut à droite $\to$ \textbf{New repository}
+    \item \textbf{Repository name} : \texttt{jang-afrig}
+    \item \textbf{Description} : \texttt{Quiz géographique sur les 54 pays africains}
+    \item Laissez \textbf{Public}
+    \item Cochez \textbf{«\,Add a README file\,»}
+    \item Cliquez \textbf{Create repository}
+\end{enumerate}
+
+\subsection{Récupérer l'URL du dépôt}
+
+Sur la page de votre dépôt, cliquez sur le bouton vert \textbf{Code}, onglet
+\textbf{HTTPS}, copiez l'URL qui finit par \texttt{.git}. Elle ressemble à :
+
+\begin{lstlisting}
+https://github.com/votre-username/jang-afrig.git
+\end{lstlisting}
+
+Gardez-la de côté, on en a besoin à l'étape suivante.
+
+\newpage
+
+% ===========================================================================
+\section{Cloner le dépôt sur votre ordinateur}
+% ===========================================================================
+
+\textbf{Cloner} un dépôt, c'est faire une copie locale sur votre ordinateur.
+Vous pourrez éditer les fichiers chez vous, puis renvoyer vos modifications
+sur GitHub.
+
+\subsection{Créer un dossier pour vos projets}
+
+Dans le terminal, allez dans votre dossier personnel et créez un dossier
+dédié à ce cours :
+
+\begin{lstlisting}
+cd ~
+mkdir cours-web
+cd cours-web
+\end{lstlisting}
+
+\subsection{Cloner le dépôt}
+
+Utilisez la commande \texttt{git clone} avec votre URL (en remplaçant
+\texttt{votre-username}) :
+
+\begin{lstlisting}
+git clone https://github.com/votre-username/jang-afrig.git
+\end{lstlisting}
+
+Résultat attendu :
+
+\begin{lstlisting}
+Cloning into 'jang-afrig'...
+remote: Enumerating objects: 3, done.
+Receiving objects: 100% (3/3), done.
+\end{lstlisting}
+
+Un dossier \texttt{jang-afrig} a été créé. Entrez dedans :
+
+\begin{lstlisting}
+cd jang-afrig
+ls
+\end{lstlisting}
+
+Vous devez voir au moins un fichier \texttt{README.md}.
+
+\newpage
+
+% ===========================================================================
+\section{Créer votre première page HTML}
+% ===========================================================================
+
+\subsection{Ouvrir le dossier dans VS Code}
+
+Dans le terminal, toujours dans le dossier \texttt{jang-afrig}, tapez :
+
+\begin{lstlisting}
+code .
+\end{lstlisting}
+
+\textbf{Attention au point.} Cette commande ouvre le dossier courant dans
+VS Code.
+
+\begin{infobox}[Si \texttt{code .} ne marche pas sur macOS]
+Dans VS Code, \texttt{Cmd+Shift+P} $\to$ tapez «\,shell command\,» $\to$
+«\,Install 'code' command in PATH\,». Sinon, ouvrez VS Code et faites
+\textbf{File $\to$ Open Folder}.
+\end{infobox}
+
+\subsection{Créer index.html}
+
+\begin{enumerate}[nosep]
+    \item Dans l'Explorateur de VS Code (barre de gauche), cliquez sur l'icône «\,Nouveau fichier\,» à côté de \textbf{NJURELGEO}
+    \item Tapez \texttt{index.html}
+    \item Copiez-collez ce code (remplacez «\,Fatou\,» par \textbf{votre prénom}) :
+\end{enumerate}
+
+\begin{lstlisting}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello Fatou</title>
+</head>
+<body>
+    <h1>Hello Fatou !</h1>
+    <p>Bienvenue dans mon premier projet web : Jàng Afrig.</p>
+</body>
+</html>
+\end{lstlisting}
+
+Enregistrez avec \texttt{Ctrl+S} ou \texttt{Cmd+S}.
+
+\subsection{Afficher avec Live Server}
+
+\begin{enumerate}[nosep]
+    \item Clic droit sur \texttt{index.html} dans l'Explorateur
+    \item \textbf{Open with Live Server}
+\end{enumerate}
+
+Votre navigateur s'ouvre sur la page. \cmark
+
+\begin{infobox}[Testez le rechargement automatique]
+Dans VS Code, changez «\,Hello Fatou\,» en «\,Salaam Aleykum Fatou\,» et
+enregistrez. La page se met à jour \textbf{toute seule} dans le navigateur.
+C'est ça la magie de Live Server.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Premier cycle Git : du local vers GitHub}
+% ===========================================================================
+
+Vous avez créé un nouveau fichier sur votre ordinateur. Il faut maintenant
+l'\textbf{enregistrer dans l'historique Git}, puis l'\textbf{envoyer sur
+GitHub}. C'est ce qu'on appelle un \emph{cycle Git}.
+
+Le schéma ci-dessous montre le flux à comprendre :
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    node distance=1.3cm,
+    zone/.style={rounded corners=6pt, draw, thick, minimum width=4.8cm, minimum height=1.1cm, align=center, font=\small\bfseries},
+    fleche/.style={-{Stealth[length=3mm]}, thick, shorten >=3pt, shorten <=3pt, line width=1pt},
+    cmd/.style={font=\ttfamily\small, fill=yellow!15, rounded corners=3pt, inner sep=4pt, draw=yellow!60!black, thick}
+]
+    % Les 4 zones en vertical
+    \node[zone, fill=fluxlocal!10, draw=fluxlocal] (wd) {Fichiers sur mon ordinateur};
+    \node[zone, fill=fluxlocal!15, draw=fluxlocal, below=of wd] (stage) {Zone de préparation};
+    \node[zone, fill=fluxlocal!20, draw=fluxlocal, below=of stage] (local) {Historique local};
+    \node[zone, fill=fluxdistant!15, draw=fluxdistant, below=of local] (remote) {GitHub (en ligne)};
+
+    % Commandes entre les zones
+    \draw[fleche] (wd) -- (stage);
+    \node[cmd, right=0.1cm of $(wd)!0.5!(stage)$] {git add};
+
+    \draw[fleche] (stage) -- (local);
+    \node[cmd, right=0.1cm of $(stage)!0.5!(local)$] {git commit};
+
+    \draw[fleche] (local) -- (remote);
+    \node[cmd, right=0.1cm of $(local)!0.5!(remote)$] {git push};
+
+    % Légende des étapes (à gauche)
+    \node[left=0.3cm of wd, font=\scriptsize\itshape, text=gray] {j'édite};
+    \node[left=0.3cm of stage, font=\scriptsize\itshape, text=gray] {je prépare};
+    \node[left=0.3cm of local, font=\scriptsize\itshape, text=gray] {j'enregistre};
+    \node[left=0.3cm of remote, font=\scriptsize\itshape, text=gray] {je partage};
+
+    % Frame local vs distant
+    \begin{scope}[on background layer]
+        \node[fit=(wd)(stage)(local), rounded corners=10pt, draw=fluxlocal!60, dashed, thick, inner sep=8pt, label={[font=\small\bfseries, text=fluxlocal]right:Sur mon ordinateur}] {};
+        \node[fit=(remote), rounded corners=10pt, draw=fluxdistant!60, dashed, thick, inner sep=8pt, label={[font=\small\bfseries, text=fluxdistant]right:En ligne}] {};
+    \end{scope}
+\end{tikzpicture}
+\caption{Le flux d'un cycle Git : du fichier local jusqu'à GitHub.}
+\label{fig:flux-git}
+\end{figure}
+
+\begin{retenirbox}[L'analogie du colis]
+\begin{itemize}[nosep]
+    \item Vous avez un cadeau chez vous (votre \textbf{fichier}).
+    \item Vous le mettez dans un carton (\texttt{git add} $\to$ zone de préparation).
+    \item Vous fermez le carton et lui mettez une étiquette avec un message (\texttt{git commit}).
+    \item Vous donnez le carton à La Poste pour qu'il parte à l'étranger (\texttt{git push} $\to$ GitHub).
+\end{itemize}
+Chaque carton (\emph{commit}) reste dans l'historique. Vous pouvez toujours
+le retrouver, même 6 mois plus tard.
+\end{retenirbox}
+
+\newpage
+
+\subsection{Ouvrir le terminal dans VS Code}
+
+VS Code a un terminal intégré. Pour l'ouvrir :
+\begin{itemize}[nosep]
+    \item Menu \textbf{Terminal $\to$ New Terminal}
+    \item Raccourci : \texttt{Ctrl+\textasciigrave} / \texttt{Cmd+\textasciigrave}
+\end{itemize}
+
+Le terminal s'ouvre en bas, déjà placé dans \texttt{jang-afrig}.
+
+\subsection{Voir l'état avec git status}
+
+\begin{lstlisting}
+git status
+\end{lstlisting}
+
+Résultat :
+\begin{lstlisting}
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        index.html
+
+nothing added to commit but untracked files present
+\end{lstlisting}
+
+Git dit : «\,Je vois un nouveau fichier, mais je ne le surveille pas encore.\,»
+
+\subsection{Préparer avec git add}
+
+\begin{lstlisting}
+git add index.html
+\end{lstlisting}
+
+Pas de message : Git est silencieux quand tout va bien. Vérifiez :
+
+\begin{lstlisting}
+git status
+\end{lstlisting}
+
+\begin{lstlisting}
+Changes to be committed:
+        new file:   index.html
+\end{lstlisting}
+
+Le fichier est \textbf{préparé}.
+
+\subsection{Enregistrer avec git commit}
+
+\begin{lstlisting}
+git commit -m "v0 : premier setup avec hello world"
+\end{lstlisting}
+
+Le texte entre guillemets est un \textbf{message de commit}. Décrivez
+brièvement ce que vous venez de faire.
+
+\begin{lstlisting}
+[main a1b2c3d] v0 : premier setup avec hello world
+ 1 file changed, 10 insertions(+)
+\end{lstlisting}
+
+\cmark{} Commit enregistré en local.
+
+\subsection{Envoyer sur GitHub avec git push}
+
+\begin{lstlisting}
+git push
+\end{lstlisting}
+
+La première fois, Git vous demandera votre \textbf{username} GitHub et un
+\textbf{token}.
+
+\begin{attentionbox}[GitHub : utilisez un Personal Access Token (PAT)]
+GitHub n'accepte plus les mots de passe depuis 2021. À la place, vous avez
+besoin d'un \textbf{Personal Access Token} (PAT) :
+
+\begin{enumerate}[nosep]
+    \item GitHub $\to$ Settings $\to$ Developer settings $\to$ Personal access tokens $\to$ Tokens (classic)
+    \item \textbf{Generate new token (classic)}
+    \item Nom : «\,cours-web-2026\,»
+    \item Cochez la case \textbf{repo}
+    \item \textbf{Generate} $\to$ \textbf{COPIEZ LE TOKEN TOUT DE SUITE} --- vous ne le reverrez plus
+    \item Utilisez ce token à la place du mot de passe
+\end{enumerate}
+
+Notez-le dans un endroit sûr (gestionnaire de mots de passe).
+\end{attentionbox}
+
+Résultat attendu :
+\begin{lstlisting}
+Enumerating objects: 4, done.
+Writing objects: 100% (3/3), 394 bytes
+To https://github.com/votre-username/jang-afrig.git
+   1a2b3c4..a1b2c3d  main -> main
+\end{lstlisting}
+
+\cmark{} Votre code est sur GitHub.
+
+\subsection{Vérifier sur GitHub}
+
+Allez sur \url{https://github.com/votre-username/jang-afrig}. Vous devez
+voir \texttt{index.html} dans la liste. Cliquez dessus pour voir son contenu.
+
+\newpage
+
+% ===========================================================================
+\section{Aide-mémoire}
+% ===========================================================================
+
+\subsection{Les commandes apprises dans ce Lab}
+
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Commande} & \textbf{Ce qu'elle fait} \\
+\midrule
+\texttt{git --version} & Vérifier que Git est installé \\
+\texttt{git config --global user.name "..."} & Définir votre nom Git \\
+\texttt{git config --global user.email "..."} & Définir votre email Git \\
+\texttt{git clone <url>} & Télécharger un dépôt depuis GitHub \\
+\texttt{git status} & Voir l'état des fichiers \\
+\texttt{git add <fichier>} & Préparer un fichier \\
+\texttt{git commit -m "message"} & Enregistrer les fichiers préparés \\
+\texttt{git push} & Envoyer sur GitHub \\
+\texttt{code .} & Ouvrir le dossier actuel dans VS Code \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Le cycle Git : la routine du semestre}
+
+\begin{center}
+\begin{tabular}{rl}
+1. & Modifier des fichiers dans VS Code \\
+2. & \texttt{git status} \quad (voir ce qui a changé) \\
+3. & \texttt{git add .} \quad (préparer tous les changements) \\
+4. & \texttt{git commit -m "message"} \quad (enregistrer en local) \\
+5. & \texttt{git push} \quad (envoyer sur GitHub) \\
+\end{tabular}
+\end{center}
+
+\begin{retenirbox}[À retenir absolument]
+Ces 5 étapes seront votre routine à la fin de chaque Lab pendant tout le
+semestre. Vous allez les faire 10 fois. Au bout de 3 ou 4, vous les ferez
+sans réfléchir.
+\end{retenirbox}
+
+\subsection{Si quelque chose ne marche pas}
+
+\begin{infobox}[Méthode de déblocage]
+\begin{enumerate}[nosep]
+    \item Relisez votre commande --- une coquille de lettre bloque tout
+    \item Copiez le message d'erreur exact dans un moteur de recherche
+    \item Demandez à un camarade qui a réussi
+    \item Notez le problème et montrez-le au prof au début de la S1
+\end{enumerate}
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Rapport à produire}
+% ===========================================================================
+
+\begin{attentionbox}[Rapport du Lab 0 --- obligatoire]
+À la fin de ce Lab, vous produisez un \textbf{rapport court} de
+\textbf{1 à 2 pages maximum}. Ce sera la routine pour chaque Lab du semestre.
+
+\medskip
+
+\textbf{Format du fichier :}
+\begin{itemize}[nosep]
+    \item PDF, Markdown (\texttt{.md}) ou Word
+    \item Nom : \texttt{rapport-lab-0-NOM-Prenom.pdf}\\
+          (ex. \texttt{rapport-lab-0-DIOP-Fatou.pdf})
+    \item Déposer dans un sous-dossier \texttt{rapports/} de votre repo GitHub
+\end{itemize}
+
+\medskip
+
+\textbf{Contenu obligatoire (4 sections) :}
+
+\begin{enumerate}[nosep]
+    \item \textbf{Ce que j'ai fait} (½ page) : outils installés, configuration Git, création du repo, premier cycle Git.
+    \item \textbf{Difficultés rencontrées} (¼ page) : ce qui m'a bloqué, messages d'erreur rencontrés.
+    \item \textbf{Comment j'ai résolu ces difficultés} (¼ page) : recherche, aide, essais.
+    \item \textbf{Lien vers mon repo GitHub} : \\
+          ex. \url{https://github.com/fatou-diop/jang-afrig}
+\end{enumerate}
+
+\medskip
+
+\textbf{Ton attendu :} honnête et direct. Si quelque chose n'a pas marché
+du premier coup, dites-le. L'erreur fait partie de l'apprentissage et
+\textbf{personne ne vous jugera dessus}. Ce qui compte, c'est que vous
+ayez réfléchi à ce que vous avez fait.
+\end{attentionbox}
+
+% ===========================================================================
+\section{Résumé et conclusion}
+% ===========================================================================
+
+Dans ce Lab, vous avez :
+
+\begin{enumerate}[nosep]
+    \item Compris le rôle des 4 outils et leurs interactions \cmark
+    \item Installé VS Code et Live Server \cmark
+    \item Installé et configuré Git avec votre identité \cmark
+    \item Créé un compte GitHub et votre premier dépôt \cmark
+    \item Cloné ce dépôt sur votre ordinateur \cmark
+    \item Écrit votre première page HTML avec Live Server \cmark
+    \item Fait votre premier cycle Git : \texttt{add} $\to$ \texttt{commit} $\to$ \texttt{push} \cmark
+    \item Rédigé votre premier rapport de Lab \cmark
+\end{enumerate}
+
+\textbf{Votre environnement de développement est prêt.} Vous êtes paré(e)
+pour la S1.
+
+\subsection{Et après ?}
+
+Au CM1 (S1), nous allons :
+
+\begin{itemize}[nosep]
+    \item Faire le tour de ce qu'est vraiment une page web
+    \item Découvrir Jàng Afrig dans le détail
+    \item Approfondir les balises HTML
+    \item Commencer à construire la page d'accueil
+\end{itemize}
+
+\begin{projetbox}[Votre vision à 15 séances]
+Votre dépôt \texttt{jang-afrig} contient aujourd'hui une simple page
+«\,Hello\,». Dans 15 séances, il contiendra une vraie application de quiz
+géographique, en ligne, accessible depuis votre téléphone, utilisant les
+données de 54 pays africains récupérées sur une API.
+
+Vous pourrez la montrer à votre famille via un simple lien.
+\end{projetbox}
+
+\vspace{1cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab 0 --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Votre atelier est prêt. Bienvenue dans le monde du développement web.\\[0.2cm]
+\textit{Rendez-vous au CM1 !}\\[0.3cm]
+\vspace{0.3cm}
+\end{minipage}
+}
+\end{center}
+
+\end{document}

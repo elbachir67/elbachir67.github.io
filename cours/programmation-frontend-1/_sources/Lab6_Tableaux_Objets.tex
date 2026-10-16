@@ -1,0 +1,444 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== POLICES & LANGUE =====================
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,xcolor,booktabs,hyperref,tcolorbox,enumitem,fancyhdr,array,pifont,longtable,multirow,listings}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+% ===================== BOÎTES =====================
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title={#1},breakable}
+
+% ===================== CODE (listings) =====================
+\definecolor{codebg}{gray}{0.96}
+\definecolor{kwcolor}{RGB}{0,90,160}
+\definecolor{strcolor}{RGB}{160,55,30}
+\definecolor{comcolor}{RGB}{95,120,95}
+\definecolor{ndcolor}{RGB}{120,80,150}
+
+\lstdefinelanguage{JS}{
+  morekeywords={let,const,var,function,return,if,else,for,of,in,while,do,true,false,null,undefined,typeof,break,continue,new,this},
+  morekeywords=[2]{console,log,table,document,Math,window,alert,prompt,forEach,map,filter,push,pop,querySelector,querySelectorAll,addEventListener,classList,textContent,innerHTML,createElement,appendChild,getElementById},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+\lstdefinestyle{js}{
+  language=JS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{kwcolor},
+  keywordstyle=[2]\color{ndcolor},
+  commentstyle=\color{comcolor}\itshape,
+  stringstyle=\color{strcolor},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {â}{{â}}1 {ê}{{ê}}1
+    {î}{{î}}1 {ô}{{ô}}1 {û}{{û}}1 {ù}{{ù}}1 {ç}{{ç}}1
+    {ï}{{ï}}1 {ë}{{ë}}1 {É}{{É}}1 {È}{{È}}1 {À}{{À}}1
+    {œ}{{œ}}1 {°}{{°}}1 {²}{{²}}1
+}
+
+\lstdefinestyle{html}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {ê}{{ê}}1 {ç}{{ç}}1 {î}{{î}}1
+}
+
+\lstset{style=js}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% ===================== EN-TÊTES =====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 6 : Tableaux et objets}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ===================== TITRE =====================
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 6 --- Tableaux et objets}\\[0.3cm]
+\textbf{\Large \texttt{forEach}, \texttt{map}, \texttt{filter}}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Informations pratiques]
+\textbf{Où sommes-nous ?} Au Lab 5, vous avez écrit vos premières fonctions. Mais une application manipule rarement \emph{une} donnée : elle jongle avec des \textbf{collections} (54 pays, 10 questions, une liste d'étudiants). Aujourd'hui, on apprend à traiter des collections proprement, et on crée le fichier de données du projet.
+
+\smallskip
+\textbf{Avant de commencer :}
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item Votre \code{script.js} du Lab 5 fonctionne (tag \code{v0.5} posé).
+  \item Vous maîtrisez les fonctions et \code{for...of} du Lab 5.
+  \item La console (F12) est votre terrain d'essai.
+\end{itemize}
+
+\smallskip
+\textbf{Validation de fin :} le fichier \code{data.js} existe, contient cinq pays et une fonction « au hasard », la console affiche vos résultats sans erreur, et le tag \code{v0.6} est poussé avec un rapport.
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab 6]
+À la fin, vous saurez :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Manipuler un tableau (\code{length}, \code{push}, \code{pop}, accès par index).
+  \item Agir sur chaque élément avec \code{forEach}.
+  \item Transformer un tableau avec \code{map}.
+  \item Filtrer un tableau avec \code{filter}.
+  \item Créer et lire des \textbf{objets} (des fiches d'identité).
+  \item Manipuler des \textbf{tableaux d'objets} et les afficher avec \code{console.table}.
+  \item Écrire le fichier \code{data.js} : cinq pays africains + une fonction « au hasard ».
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\bigskip\hrule\bigskip
+
+\section*{Rappel express du Lab 5}
+\addcontentsline{toc}{section}{Rappel express du Lab 5}
+Vous savez écrire une fonction qui renvoie un résultat, décider avec \code{if}/ternaire, et parcourir un tableau avec \code{for...of}. On part de là.
+
+% ===================== SECTION 1 =====================
+\section{Les tableaux : rappel et compléments}
+
+Un \textbf{tableau} est une liste ordonnée de valeurs. \emph{Analogie :} une liste de courses, où chaque article a une position.
+
+\begin{lstlisting}[style=js]
+const villes = ["Dakar", "Thiès", "Saint-Louis", "Ziguinchor"];
+
+console.log(villes[0]);       // "Dakar"  -> on compte à partir de 0 !
+console.log(villes[2]);       // "Saint-Louis"
+console.log(villes.length);   // 4  (le nombre d'éléments)
+
+villes.push("Touba");         // ajoute à la fin
+console.log(villes.length);   // 5
+villes.pop();                 // retire le dernier
+console.log(villes.length);   // 4
+\end{lstlisting}
+
+\begin{attentionbox}[Le piège du débutant : on compte à partir de 0]
+Le \textbf{premier} élément est à l'index \code{0}, pas \code{1}. Donc dans un tableau de 4 éléments, les index vont de \code{0} à \code{3}. \code{villes[4]} n'existe pas et renvoie \code{undefined}.
+\end{attentionbox}
+
+% ===================== SECTION 2 =====================
+\section{\texttt{forEach} : agir sur chaque élément}
+
+On a déjà fait ça avec \code{for...of}. \code{forEach} est une autre manière, très lisible, qui veut dire \emph{« pour chaque élément, fais ceci »}. \emph{Analogie :} l'enseignant fait l'appel et coche chaque nom, l'un après l'autre.
+
+\begin{lstlisting}[style=js]
+const villes = ["Dakar", "Thiès", "Saint-Louis"];
+
+villes.forEach((ville) => {
+  console.log(`Ville : ${ville}`);
+});
+\end{lstlisting}
+
+\begin{infobox}[Rappel CM3 : la flèche \texttt{=>}]
+Le \code{(ville) => \{ ... \}} est une \textbf{fonction fléchée}, vue au CM3 : c'est juste une fonction écrite en plus court, qu'on donne à \code{forEach}. Pour aujourd'hui, recopiez ce modèle tel quel. \code{forEach} appelle cette fonction \emph{une fois pour chaque élément}, en lui passant l'élément courant.
+\end{infobox}
+
+% ===================== SECTION 3 =====================
+\section{\texttt{map} : transformer chaque élément}
+
+\code{map} sert à \textbf{fabriquer un nouveau tableau} en transformant chaque élément de l'ancien. \emph{Analogie :} on passe une pile de feuilles à la photocopieuse réglée « agrandir 200\,\% » : on obtient une \emph{nouvelle} pile, de \emph{même taille}, mais chaque feuille est transformée.
+
+\begin{lstlisting}[style=js]
+const prixFcfa = [656, 1312, 3280]; // des prix en FCFA
+
+const prixEuro = prixFcfa.map((p) => p / 656);
+
+console.log(prixEuro); // [1, 2, 5]
+console.log(prixFcfa); // [656, 1312, 3280] -> l'original n'a pas changé !
+\end{lstlisting}
+
+\textbf{Point clé :} \code{map} renvoie un \textbf{nouveau} tableau de \textbf{même longueur} ; il ne modifie pas l'original.
+
+% ===================== SECTION 4 =====================
+\section{\texttt{filter} : ne garder que certains éléments}
+
+\code{filter} sert à \textbf{garder seulement} les éléments qui passent un test. \emph{Analogie :} au marché, on trie un cageot de mangues pour ne garder que les bonnes ; le cageot ressort plus petit.
+
+\begin{lstlisting}[style=js]
+const notes = [12, 7, 15, 9, 18, 10];
+
+const admis = notes.filter((note) => note >= 10);
+
+console.log(admis); // [12, 15, 18, 10]  -> seulement les notes >= 10
+\end{lstlisting}
+
+\textbf{Point clé :} \code{filter} renvoie un tableau \textbf{plus petit ou égal} : on a gardé un sous-ensemble.
+
+\subsection{\texttt{map} ou \texttt{filter} ? Le réflexe à retenir}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  arr/.style={-{Stealth[length=2.5mm]}, thick, gray!70!black},
+  cell/.style={rectangle, draw, thick, minimum width=0.8cm, minimum height=0.6cm, inner sep=2pt},
+  op/.style={rectangle, rounded corners=3pt, draw, thick, align=center, minimum height=0.9cm, text width=2.6cm}
+]
+  % --- MAP ---
+  \node[font=\bfseries] at (-0.4,1.6) {\code{map} --- transforme (même taille)};
+  \node[cell, fill=gray!8] (m1) at (0,0.9) {1};
+  \node[cell, fill=gray!8, right=1pt of m1] (m2) {2};
+  \node[cell, fill=gray!8, right=1pt of m2] (m3) {3};
+  \node[op, draw=teal!60!black, fill=teal!8, right=0.7cm of m3] (mop) {$\times 2$};
+  \node[cell, fill=teal!12, right=0.7cm of mop] (r1) {2};
+  \node[cell, fill=teal!12, right=1pt of r1] (r2) {4};
+  \node[cell, fill=teal!12, right=1pt of r2] (r3) {6};
+  \draw[arr] (m3) -- (mop);
+  \draw[arr] (mop) -- (r1);
+
+  % --- FILTER ---
+  \node[font=\bfseries] at (-0.3,-0.8) {\code{filter} --- garde (plus petit)};
+  \node[cell, fill=gray!8] (f1) at (0,-1.5) {1};
+  \node[cell, fill=gray!8, right=1pt of f1] (f2) {2};
+  \node[cell, fill=gray!8, right=1pt of f2] (f3) {3};
+  \node[cell, fill=gray!8, right=1pt of f3] (f4) {4};
+  \node[op, draw=orange!70, fill=orange!8, right=0.7cm of f4] (fop) {garder\\les pairs};
+  \node[cell, fill=orange!14, right=0.7cm of fop] (g1) {2};
+  \node[cell, fill=orange!14, right=1pt of g1] (g2) {4};
+  \draw[arr] (f4) -- (fop);
+  \draw[arr] (fop) -- (g1);
+\end{tikzpicture}
+
+\textit{\code{map} garde le même nombre d'éléments en les transformant ; \code{filter} en retire certains.}
+\end{center}
+
+% ===================== SECTION 5 =====================
+\section{Les objets : des fiches d'identité}
+
+Un tableau range des valeurs \emph{par position}. Un \textbf{objet} range des informations \emph{par étiquette} (qu'on appelle une \emph{propriété}). \emph{Analogie :} une carte d'identité, avec des champs nommés « nom », « âge », « ville ».
+
+\begin{lstlisting}[style=js]
+const etudiant = {
+  nom: "Fatou",
+  age: 20,
+  ville: "Dakar"
+};
+
+console.log(etudiant.nom);      // "Fatou"  -> accès par le point
+console.log(etudiant.age);      // 20
+console.log(etudiant["ville"]); // "Dakar"  -> autre écriture, avec crochets
+\end{lstlisting}
+
+Les deux écritures \code{etudiant.nom} et \code{etudiant["nom"]} donnent la même chose. On préfère le \textbf{point} car c'est plus court et plus lisible.
+
+% ===================== SECTION 6 =====================
+\section{Tableaux d'objets : le pattern le plus courant}
+
+La combinaison gagnante : un \textbf{tableau} dont chaque élément est un \textbf{objet}. C'est ainsi qu'on représente une liste de pays, d'étudiants, de produits\ldots
+
+\begin{lstlisting}[style=js]
+const etudiants = [
+  { nom: "Fatou", note: 12 },
+  { nom: "Moussa", note: 8 },
+  { nom: "Awa", note: 15 }
+];
+
+// Parcourir et afficher chaque étudiant
+etudiants.forEach((e) => {
+  console.log(`${e.nom} a eu ${e.note}/20`);
+});
+
+// Vue en tableau dans la console (très pratique pour vérifier)
+console.table(etudiants);
+\end{lstlisting}
+
+\begin{infobox}[Vérification]
+\code{console.table} affiche un \emph{vrai tableau} avec colonnes et lignes dans la console. Essayez : c'est l'outil idéal pour inspecter une liste d'objets.
+\end{infobox}
+
+% ===================== SECTION 7 =====================
+\section{Choisir un élément au hasard}
+
+Un quiz a besoin de tirer une question au hasard. Deux outils :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \code{Math.random()} : un nombre décimal au hasard entre 0 et 1.
+  \item \code{Math.floor(x)} : arrondit \emph{vers le bas} (\code{Math.floor(3.9)} vaut \code{3}).
+\end{itemize}
+
+En combinant les deux, on obtient un index au hasard dans un tableau :
+
+\begin{lstlisting}[style=js]
+function choisirAuHasard(tableau) {
+  const index = Math.floor(Math.random() * tableau.length);
+  return tableau[index];
+}
+
+const villes = ["Dakar", "Thiès", "Saint-Louis", "Ziguinchor"];
+console.log(choisirAuHasard(villes)); // une ville différente à chaque appel
+\end{lstlisting}
+
+\emph{Comment ça marche ?} \code{Math.random() * tableau.length} donne un nombre entre 0 et la taille du tableau ; \code{Math.floor} le transforme en un index entier valide (de 0 à taille$-$1).
+
+% ===================== DATA.JS =====================
+\section{On crée le fichier de données : \texttt{data.js}}
+
+Il est temps de poser la \textbf{matière première} de Jàng Afrig. Créez un fichier \code{data.js} à la racine du projet, et branchez-le \emph{avant} \code{script.js} dans le \code{<head>} :
+
+\begin{lstlisting}[style=html]
+<script src="data.js" defer></script>
+<script src="script.js" defer></script>
+\end{lstlisting}
+
+Dans \code{data.js}, on met cinq pays africains (sous forme de tableau d'objets) et la fonction « au hasard » :
+
+\begin{lstlisting}[style=js]
+// data.js -- les données de Jàng Afrig
+
+const pays = [
+  { cca3: "SEN", nom: "Sénégal", capitale: "Dakar" },
+  { cca3: "MLI", nom: "Mali",    capitale: "Bamako" },
+  { cca3: "GHA", nom: "Ghana",   capitale: "Accra" },
+  { cca3: "KEN", nom: "Kenya",   capitale: "Nairobi" },
+  { cca3: "MAR", nom: "Maroc",   capitale: "Rabat" }
+];
+
+function choisirAuHasard(tableau) {
+  const index = Math.floor(Math.random() * tableau.length);
+  return tableau[index];
+}
+\end{lstlisting}
+
+\begin{infobox}[Vérification]
+Dans \code{script.js}, ajoutez \code{console.table(pays);} puis \code{console.log(choisirAuHasard(pays));}. La console doit montrer le tableau des cinq pays, puis un pays tiré au hasard. \textbf{Ces deux fichiers parlent déjà entre eux} : \code{script.js} utilise des choses définies dans \code{data.js}, parce que \code{data.js} est chargé en premier.
+\end{infobox}
+
+% ===================== EXERCICES =====================
+\section{Exercices d'application}
+
+\begin{objectifbox}[Exercice 1 --- Moyenne d'une classe (\texttt{forEach})]
+Créez un tableau de 10 étudiants DUT1-Info (objets \code{\{ nom, note \}}). Avec \code{forEach}, calculez la \textbf{moyenne de la classe}.\\
+\emph{Indice :} une variable \code{somme} (avec \code{let}), on y ajoute chaque \code{e.note}, puis on divise par \code{etudiants.length}.
+\end{objectifbox}
+
+\begin{objectifbox}[Exercice 2 --- Prix en euros (\texttt{map})]
+À partir d'un tableau de prix en FCFA, fabriquez avec \code{map} le tableau des mêmes prix en euros (diviser par 656).
+\end{objectifbox}
+
+\begin{objectifbox}[Exercice 3 --- Les admis (\texttt{filter})]
+À partir du tableau des 10 étudiants de l'exercice 1, fabriquez avec \code{filter} le tableau des \textbf{seuls étudiants admis} (note $\geq 10$), puis affichez-le avec \code{console.table}.
+\end{objectifbox}
+
+\begin{objectifbox}[Exercice 4 --- Les capitales (\texttt{map})]
+À partir du tableau \code{pays} de \code{data.js}, fabriquez avec \code{map} un tableau qui ne contient que les \textbf{noms des capitales}.\\
+\emph{Indice :} \code{pays.map((p) => p.capitale)}.
+\end{objectifbox}
+
+% ===================== AIDE-MÉMOIRE =====================
+\section{Aide-mémoire du Lab 6}
+
+\begin{center}
+\begin{tabular}{p{4.6cm} p{8.4cm}}
+\toprule
+\textbf{Besoin} & \textbf{Code} \\
+\midrule
+Accéder à un élément & \code{tableau[index]} \quad (index commence à 0) \\
+Taille & \code{tableau.length} \\
+Ajouter / retirer à la fin & \code{tableau.push(x)} \quad / \quad \code{tableau.pop()} \\
+Agir sur chaque élément & \code{tableau.forEach((e) => \{ ... \})} \\
+Transformer (même taille) & \code{tableau.map((e) => ...)} \\
+Filtrer (plus petit) & \code{tableau.filter((e) => condition)} \\
+Lire une propriété d'objet & \code{objet.propriete} \\
+Visualiser une liste d'objets & \code{console.table(tableau)} \\
+Élément au hasard & \code{choisirAuHasard(tableau)} \quad (voir la section~7) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ===================== GIT =====================
+\section{Sauvegarder mon travail (routine Git)}
+
+\begin{retenirbox}[Routine Git de fin de Lab --- tag \texttt{v0.6}]
+\begin{lstlisting}[style=html]
+git status
+git add .
+git commit -m "Lab 6 : data.js et methodes de tableaux"
+git tag v0.6
+git push
+git push --tags
+\end{lstlisting}
+Vérifiez sur GitHub que le commit \emph{et} le tag \code{v0.6} apparaissent.
+\end{retenirbox}
+
+% ===================== RAPPORT =====================
+\begin{attentionbox}[Rapport à produire]
+Déposez \code{rapport-lab-6-NOM-Prenom.pdf} dans le dossier \code{rapports/}, avec quatre sections :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textbf{Ce que j'ai fait} : \code{data.js}, et les exercices \code{forEach}/\code{map}/\code{filter}.
+  \item \textbf{Difficultés rencontrées} : vos erreurs (avec les messages copiés).
+  \item \textbf{Comment je les ai résolues}.
+  \item \textbf{Lien vers mon repo} avec le tag \code{v0.6}.
+\end{enumerate}
+\end{attentionbox}
+
+% ===================== RÉSUMÉ =====================
+\section{Résumé et transition}
+
+Vous savez maintenant manipuler des \textbf{collections} : parcourir (\code{forEach}), transformer (\code{map}), filtrer (\code{filter}), et organiser des données en \textbf{tableaux d'objets}. Surtout, vous avez créé \code{data.js}, le réservoir de données de Jàng Afrig.
+
+Tout ça vit encore dans la console. Au \textbf{Lab 7}, on accomplit le grand saut : on apprend à \textbf{lire et modifier la page visible} (le DOM) et à \textbf{réagir aux clics} (les événements). Résultat : **un premier quiz Capitales jouable**, avec un score, du début à la fin --- toujours sur nos cinq pays, sans Internet pour l'instant.
+
+\begin{center}
+\textit{Les données sont prêtes. Au Lab 7, Jàng Afrig prend enfin vie à l'écran.}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+\small Dr.~El Hadji Bassirou TOURÉ --- UCAD\\
+\small Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+\end{center}
+
+\end{document}

@@ -1,0 +1,412 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== POLICES & LANGUE =====================
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,xcolor,booktabs,hyperref,tcolorbox,enumitem,fancyhdr,array,pifont,longtable,multirow,listings}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+% ===================== BOÎTES =====================
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title={#1},breakable}
+
+% ===================== CODE (listings) =====================
+\definecolor{codebg}{gray}{0.96}
+\definecolor{kwcolor}{RGB}{0,90,160}
+\definecolor{strcolor}{RGB}{160,55,30}
+\definecolor{comcolor}{RGB}{95,120,95}
+\definecolor{ndcolor}{RGB}{120,80,150}
+
+\lstdefinelanguage{JS}{
+  morekeywords={let,const,var,function,return,if,else,for,of,in,while,do,true,false,null,undefined,typeof,break,continue,new,this,async,await,try,catch},
+  morekeywords=[2]{console,log,table,document,Math,window,alert,prompt,confirm,forEach,map,filter,push,pop,slice,querySelector,querySelectorAll,addEventListener,classList,textContent,innerHTML,createElement,appendChild,getElementById,includes,fetch,JSON,then,sort,find,parse,stringify,localStorage,setItem,getItem,removeItem,setInterval,clearInterval,length,json,style,key},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+\lstdefinestyle{js}{
+  language=JS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{kwcolor},
+  keywordstyle=[2]\color{ndcolor},
+  commentstyle=\color{comcolor}\itshape,
+  stringstyle=\color{strcolor},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {â}{{â}}1 {ê}{{ê}}1
+    {î}{{î}}1 {ô}{{ô}}1 {û}{{û}}1 {ù}{{ù}}1 {ç}{{ç}}1
+    {ï}{{ï}}1 {ë}{{ë}}1 {É}{{É}}1 {È}{{È}}1 {À}{{À}}1
+    {œ}{{œ}}1 {°}{{°}}1 {²}{{²}}1
+}
+
+\lstdefinestyle{html}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {ê}{{ê}}1 {ç}{{ç}}1 {î}{{î}}1
+}
+
+\lstset{style=js}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% ===================== EN-TÊTES =====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 10 : localStorage et finitions}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ===================== TITRE =====================
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 10 --- Sauvegarde et finitions}\\[0.3cm]
+\textbf{\Large \texttt{localStorage}, chrono, accessibilité, polish}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Où en sommes-nous ?]
+Au Lab 9, Jàng Afrig propose \textbf{quatre modes de jeu} (Capitales, Drapeaux, Langues, Voisins) avec les vraies données de l'API. L'application est riche, mais il lui manque les \emph{finitions} d'un vrai produit : se souvenir des scores, un mode chronométré, et le soin du détail (accessibilité, confort).
+
+\smallskip
+\textbf{Avant de commencer :} le Lab 9 est terminé (tag \code{v0.9}), les quatre modes fonctionnent.
+
+\smallskip
+\textbf{Validation de fin :} les scores sont sauvegardés et survivent à la fermeture du navigateur, le mode Chrono fonctionne, l'application est soignée. Tag \code{v0.14} poussé + rapport.
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab 10]
+À la fin, vous saurez :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Sauvegarder des données dans le navigateur avec \code{localStorage}.
+  \item Convertir objets et tableaux en texte avec \code{JSON.stringify} / \code{JSON.parse}.
+  \item Enregistrer et afficher un classement des meilleurs scores.
+  \item Effacer des données proprement (avec confirmation).
+  \item Créer un \textbf{mode Chrono} avec \code{setInterval} / \code{clearInterval}.
+  \item Rendre l'application plus \textbf{accessible} (textes alternatifs, navigation au clavier).
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\bigskip\hrule\bigskip
+
+\section*{Rappel express du Lab 9}
+\addcontentsline{toc}{section}{Rappel express du Lab 9}
+Vous avez quatre modes de jeu, une fonction \code{genererQuestion(mode)}, et un score à la fin de chaque partie. Aujourd'hui, on garde ce score en mémoire et on peaufine.
+
+% ===================== SECTION 1 =====================
+\section{\texttt{localStorage} : la mémoire du navigateur}
+
+Jusqu'ici, dès qu'on recharge la page, tout est oublié : le score disparaît. \code{localStorage} est un petit espace de rangement, propre à votre navigateur, qui \textbf{garde les données même après fermeture}. \emph{Analogie :} un cahier de brouillon que le navigateur range dans un tiroir, et qu'il retrouve à chaque visite.
+
+\begin{lstlisting}[style=js]
+localStorage.setItem("pseudo", "Fatou"); // écrire
+const p = localStorage.getItem("pseudo"); // lire -> "Fatou"
+localStorage.removeItem("pseudo");        // effacer
+\end{lstlisting}
+
+\begin{center}
+\begin{tikzpicture}[font=\footnotesize]
+  \node[draw, very thick, rounded corners=5pt, fill=cyan!5, draw=cyan!55!black,
+        minimum width=7.5cm, minimum height=2.4cm, align=center] (box) {};
+  \node[anchor=north] at (box.north) {\textbf{\code{localStorage}} --- le tiroir du navigateur};
+  \node[align=left] at (box.center) {%
+    \code{"pseudo"} \quad$\rightarrow$\quad \code{"Fatou"}\\[2pt]
+    \code{"scores"} \quad$\rightarrow$\quad \code{"[\{...\},\{...\}]"}\\[2pt]
+    \scriptsize\itshape (une clé, une valeur --- en texte)};
+  \node[anchor=north, text=gray!55!black, font=\scriptsize] at ([yshift=-2mm]box.south)
+    {Survit à la fermeture de l'onglet et au redémarrage de l'ordinateur.};
+\end{tikzpicture}
+\end{center}
+
+\begin{attentionbox}[\texttt{localStorage} ne range que du \emph{texte}]
+On ne peut y mettre que des chaînes de caractères. Pour ranger un \textbf{tableau} ou un \textbf{objet}, il faut d'abord le transformer en texte avec \code{JSON.stringify}, et le retransformer en le relisant avec \code{JSON.parse}.
+\end{attentionbox}
+
+\begin{lstlisting}[style=js]
+const scores = [{ pseudo: "Fatou", mode: "capitale", score: 8 }];
+
+localStorage.setItem("scores", JSON.stringify(scores)); // objet -> texte
+const lus = JSON.parse(localStorage.getItem("scores")); // texte -> objet
+\end{lstlisting}
+
+% ===================== SECTION 2 =====================
+\section{Sauvegarder un score}
+
+À la fin de chaque partie, on ajoute le score à la liste déjà rangée. On lit l'ancienne liste (ou un tableau vide la toute première fois), on y ajoute, on réenregistre.
+
+\begin{lstlisting}[style=js]
+function sauverScore(pseudo, mode, score, total) {
+  const ancien = localStorage.getItem("scores");
+  const scores = ancien ? JSON.parse(ancien) : []; // [] si rien encore
+
+  scores.push({ pseudo: pseudo, mode: mode, score: score, total: total });
+  localStorage.setItem("scores", JSON.stringify(scores));
+}
+\end{lstlisting}
+
+On appelle \code{sauverScore(...)} dans \code{terminerQuiz()}, juste après avoir calculé le score. Le \code{ancien ? ... : []} est le ternaire du CM3 : s'il n'y a rien encore, on part d'une liste vide.
+
+% ===================== SECTION 3 =====================
+\section{La page « Mes Scores » (top 5)}
+
+On affiche les cinq meilleurs scores. On lit la liste, on la \textbf{trie} du plus grand au plus petit, on garde les cinq premiers, et on les affiche.
+
+\begin{lstlisting}[style=js]
+function afficherMeilleurs() {
+  const ancien = localStorage.getItem("scores");
+  const scores = ancien ? JSON.parse(ancien) : [];
+
+  scores.sort((a, b) => b.score - a.score); // trie (à prendre tel quel)
+  const top5 = scores.slice(0, 5);          // garde les 5 premiers
+
+  const liste = document.querySelector("#liste-scores");
+  liste.textContent = ""; // on vide avant de remplir
+  top5.forEach((s) => {
+    const item = document.createElement("li");
+    item.textContent = `${s.pseudo} --- ${s.mode} : ${s.score}/${s.total}`;
+    liste.appendChild(item);
+  });
+}
+\end{lstlisting}
+
+\begin{infobox}[Deux lignes à prendre telles quelles]
+\code{scores.sort((a, b) => b.score - a.score)} range les scores \emph{du plus grand au plus petit}. \code{scores.slice(0, 5)} renvoie un nouveau tableau avec seulement les éléments d'index 0 à 4. Recopiez-les telles quelles : on en reparlera en L2.
+\end{infobox}
+
+% ===================== SECTION 4 =====================
+\section{Effacer les scores (avec confirmation)}
+
+Un bouton « Effacer mes scores ». Comme c'est irréversible, on demande confirmation avec \code{confirm(...)}, qui renvoie \code{true} si l'utilisateur clique « OK ».
+
+\begin{lstlisting}[style=js]
+function effacerScores() {
+  const ok = confirm("Effacer définitivement tous tes scores ?");
+  if (ok) {
+    localStorage.removeItem("scores");
+    afficherMeilleurs(); // la liste se rafraîchit (vide)
+  }
+}
+\end{lstlisting}
+
+% ===================== SECTION 5 =====================
+\section{Le mode Chrono}
+
+Un compte à rebours ajoute du piment. \code{setInterval(fonction, 1000)} exécute une fonction \textbf{toutes les 1000 millisecondes} (1 seconde). \code{clearInterval(...)} l'arrête. \emph{Analogie :} on remonte un minuteur de cuisine ; il sonne chaque seconde jusqu'à zéro, et on peut l'arrêter à tout moment.
+
+\begin{lstlisting}[style=js]
+let tempsRestant = 30;
+let chrono = null; // l'identifiant du minuteur
+
+function demarrerChrono() {
+  tempsRestant = 30;
+  elTemps.textContent = tempsRestant;
+
+  chrono = setInterval(() => {
+    tempsRestant = tempsRestant - 1;
+    elTemps.textContent = tempsRestant;
+
+    if (tempsRestant <= 0) {
+      arreterChrono();
+      terminerQuiz(); // le temps est écoulé
+    }
+  }, 1000); // toutes les 1 seconde
+}
+
+function arreterChrono() {
+  clearInterval(chrono);
+}
+\end{lstlisting}
+
+\begin{attentionbox}[Toujours arrêter son minuteur]
+Si on oublie \code{clearInterval}, le minuteur continue de tourner en arrière-plan, même après la fin du quiz. On l'arrête donc dès qu'on n'en a plus besoin (fin du temps, ou réponse à la dernière question).
+\end{attentionbox}
+
+% ===================== SECTION 6 =====================
+\section{La barre de temps (CSS)}
+
+Pour visualiser le temps, une barre qui rétrécit et passe au \textbf{rouge} dans les 10 dernières secondes. En CSS, on prépare la barre et une classe « urgente » :
+
+\begin{lstlisting}[style=html]
+#barre-temps {
+  height: 12px;
+  background: #2a9d8f;     /* vert calme */
+  width: 100%;
+  transition: width 1s linear;
+}
+#barre-temps.urgent { background: #e63946; } /* rouge */
+\end{lstlisting}
+
+Puis, dans le tick du chrono, on ajuste la largeur et on ajoute la classe au bon moment :
+
+\begin{lstlisting}[style=js]
+const pourcent = (tempsRestant / 30) * 100;
+barreTemps.style.width = pourcent + "%"; // rétrécit la barre
+
+if (tempsRestant <= 10) {
+  barreTemps.classList.add("urgent"); // passe au rouge
+}
+\end{lstlisting}
+
+\code{element.style.width} modifie directement le style d'un élément depuis JavaScript --- pratique pour une valeur qui change en continu.
+
+% ===================== SECTION 7 =====================
+\section{Accessibilité : penser à tout le monde}
+
+Une bonne application est utilisable par \textbf{tous}, y compris les personnes qui naviguent avec un lecteur d'écran (qui lit la page à voix haute) ou uniquement au clavier. Deux gestes simples et importants :
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Texte alternatif sur les images} (\code{alt}) : pour le mode Drapeaux, le lecteur d'écran doit pouvoir décrire l'image.
+  \item \textbf{Étiquette sur les boutons-icônes} (\code{aria-label}) : un bouton qui n'affiche qu'un symbole a besoin d'un nom lisible.
+\end{itemize}
+
+\begin{lstlisting}[style=html]
+<img src="..." alt="Drapeau du Sénégal">
+<button aria-label="Rejouer la partie">&#8635;</button>
+\end{lstlisting}
+
+En mode Drapeaux, on remplit donc le \code{alt} en JavaScript au moment d'afficher le drapeau :
+\begin{lstlisting}[style=js]
+imageDrapeau.src = bonPays.flags.svg;
+imageDrapeau.alt = "Drapeau à identifier";
+\end{lstlisting}
+
+% ===================== SECTION 8 =====================
+\section{Navigation au clavier}
+
+Confort supplémentaire : répondre avec les touches \textbf{1, 2, 3, 4} plutôt qu'à la souris. On écoute l'événement \code{keydown} sur toute la page ; \code{event.key} contient la touche pressée (un texte).
+
+\begin{lstlisting}[style=js]
+document.addEventListener("keydown", (event) => {
+  if (event.key === "1") { repondre(boutonsReponse[0].textContent); }
+  if (event.key === "2") { repondre(boutonsReponse[1].textContent); }
+  if (event.key === "3") { repondre(boutonsReponse[2].textContent); }
+  if (event.key === "4") { repondre(boutonsReponse[3].textContent); }
+});
+\end{lstlisting}
+
+% ===================== POUR ALLER PLUS LOIN =====================
+\section{Polish et idées bonus (facultatif)}
+
+\begin{objectifbox}[Quelques finitions à tenter]
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Afficher le \textbf{meilleur score} directement sur l'écran d'accueil.
+  \item Un petit message d'encouragement selon le score (« Excellent ! », « Continue ! »).
+  \item Vérifier que les messages d'erreur réseau (Lab 8) sont clairs et rassurants.
+  \item Soigner les transitions (réutiliser celles du Lab 4) pour des changements d'écran fluides.
+\end{enumerate}
+\end{objectifbox}
+
+% ===================== AIDE-MÉMOIRE =====================
+\section{Aide-mémoire du Lab 10}
+
+\begin{center}
+\begin{tabular}{p{5.6cm} p{7.4cm}}
+\toprule
+\textbf{Besoin} & \textbf{Code} \\
+\midrule
+Écrire / lire une donnée & \code{localStorage.setItem(cle, texte)} / \code{getItem(cle)} \\
+Effacer une donnée & \code{localStorage.removeItem(cle)} \\
+Objet $\rightarrow$ texte / texte $\rightarrow$ objet & \code{JSON.stringify(obj)} / \code{JSON.parse(txt)} \\
+Demander confirmation & \code{confirm("...")} \quad (renvoie \code{true}/\code{false}) \\
+Répéter chaque seconde & \code{setInterval(fonction, 1000)} \\
+Arrêter le minuteur & \code{clearInterval(chrono)} \\
+Changer un style en direct & \code{element.style.width = "50\%"} \\
+Touche pressée & \code{event.key} \quad (dans un écouteur \code{keydown}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ===================== GIT =====================
+\section{Sauvegarder mon travail (routine Git)}
+
+\begin{retenirbox}[Routine Git de fin de Lab --- tag \texttt{v0.14}]
+\begin{lstlisting}[style=html]
+git status
+git add .
+git commit -m "Lab 10 : localStorage, chrono et accessibilite"
+git tag v0.14
+git push
+git push --tags
+\end{lstlisting}
+On passe directement à \code{v0.14} pour garder le tag aligné sur le numéro du Lab. Vérifiez le commit \emph{et} le tag sur GitHub.
+\end{retenirbox}
+
+% ===================== RAPPORT =====================
+\begin{attentionbox}[Rapport à produire]
+Déposez \code{rapport-lab-10-NOM-Prenom.pdf} dans \code{rapports/}, avec quatre sections :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textbf{Ce que j'ai fait} : sauvegarde des scores, page des meilleurs, mode Chrono, accessibilité.
+  \item \textbf{Difficultés rencontrées} (messages d'erreur copiés).
+  \item \textbf{Comment je les ai résolues}.
+  \item \textbf{Lien vers mon repo} avec le tag \code{v0.14}.
+\end{enumerate}
+\end{attentionbox}
+
+% ===================== RÉSUMÉ =====================
+\section{Résumé et transition}
+
+Jàng Afrig est maintenant une \textbf{application complète} : quatre modes de jeu, de vraies données, des scores mémorisés, un mode chronométré, et le souci de tous ses utilisateurs. C'est un vrai petit produit, dont vous pouvez être fier.
+
+Il ne reste qu'une étape, et non des moindres : le \textbf{mettre en ligne}. À la séance 15, on déploiera Jàng Afrig sur \textbf{GitHub Pages}. Vous obtiendrez une \textbf{adresse web publique}, accessible depuis n'importe quel téléphone --- celui d'un ami, d'un parent. Et on posera le tag final : \code{v1.0}.
+
+\begin{center}
+\textit{L'application est prête. À la S15, le monde entier pourra y jouer.}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+\small Dr.~El Hadji Bassirou TOURÉ --- UCAD\\
+\small Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+\end{center}
+
+\end{document}

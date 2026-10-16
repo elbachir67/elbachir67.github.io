@@ -1,0 +1,947 @@
+% ===========================================================================
+%  Jàng Afrig — Lab 2 : HTML structurant
+%  Sémantique, formulaires, navigation entre 5 pages
+%  Licence 1 DUT1-Informatique — ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+% --- TikZ pour les schémas ---
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit,shadows.blur}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Couleurs schémas ---
+\definecolor{pageaccueil}{RGB}{45,130,200}
+\definecolor{pagequiz}{RGB}{200,100,40}
+\definecolor{pageresultat}{RGB}{200,80,60}
+\definecolor{pagescores}{RGB}{120,80,180}
+\definecolor{pageapropos}{RGB}{80,160,80}
+
+% --- Code source HTML5 ---
+\usepackage{listings}
+\lstdefinelanguage{HTML5}{
+  morekeywords={<!DOCTYPE,html,head,meta,title,body,h1,h2,h3,h4,p,ul,ol,li,table,tr,th,td,a,img,strong,em,br,div,span,header,nav,main,section,article,footer,aside,form,input,select,option,textarea,label,button,fieldset,legend},
+  sensitive=true,
+  morecomment=[s]{<!--}{-->},
+  morestring=[b]",
+}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 2 : HTML structurant}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 2 --- HTML structurant}\\[0.3cm]
+\textbf{\Large Sémantique, formulaires, navigation entre 5 pages}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Type} & Lab guidé \\
+\textbf{Séance} & S3 --- deuxième Lab du semestre \\
+\textbf{Prérequis} & Lab 1 terminé (page d'accueil HTML poussée avec tag \texttt{v0.1}) \\
+\textbf{Validation} & 5 pages HTML liées + formulaire fonctionnel + tag \texttt{v0.2} \\
+\textbf{Rapport} & 1-2 pages : ce que j'ai fait + difficultés + lien repo \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab]
+À la fin de ce Lab, vous aurez :
+\begin{enumerate}[nosep]
+    \item Compris et utilisé les \textbf{balises sémantiques} HTML5 (\texttt{header}, \texttt{nav}, \texttt{main}, \texttt{section}, \texttt{footer}, \texttt{aside})
+    \item Refondu votre \texttt{index.html} avec une structure sémantique propre
+    \item Créé les \textbf{4 autres pages} de Jàng Afrig : \texttt{quiz.html}, \texttt{resultat.html}, \texttt{scores.html}, \texttt{apropos.html}
+    \item Construit un \textbf{formulaire} (saisie du pseudo + sélection du mode)
+    \item Lié les 5 pages entre elles avec une \textbf{navigation cohérente}
+    \item \textbf{Validé} votre code HTML sur \href{https://validator.w3.org}{validator.w3.org}
+    \item Posé le tag \textbf{\texttt{v0.2}} sur GitHub
+    \item Rédigé votre rapport de Lab
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Avant de coder}
+% ===========================================================================
+
+\subsection{Là où on en est}
+
+Au Lab 1, vous avez créé une \textbf{page unique} \texttt{index.html} avec
+toute l'information : titre, modes, palmarès, image, liens. Tout sur une
+seule page.
+
+\subsection{Le problème de la page unique}
+
+Une vraie application a \textbf{plusieurs pages}. Imaginez Jàng Afrig
+quand l'app sera complète :
+
+\begin{itemize}[nosep]
+    \item L'utilisateur arrive sur l'accueil
+    \item Il choisit un mode et son pseudo
+    \item Il clique «\,Commencer\,» $\to$ il va sur la page \emph{quiz}
+    \item Il répond à 10 questions
+    \item Il arrive sur la page \emph{résultat} avec son score
+    \item Il peut aller voir la page \emph{mes scores} (classement)
+    \item Il peut consulter la page \emph{à propos} (sources, équipe)
+\end{itemize}
+
+\textbf{5 pages distinctes}, donc \textbf{5 fichiers HTML} dans votre repo.
+
+\subsection{Ce qu'on va construire aujourd'hui}
+
+Les \textbf{5 pages HTML} de Jàng Afrig, sans CSS ni JavaScript. Toutes
+liées entre elles avec une \textbf{barre de navigation} commune.
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    page/.style={rounded corners=6pt, draw, thick, minimum width=2.6cm, minimum height=1.4cm, align=center, font=\small\bfseries},
+    fleche/.style={-{Stealth[length=2.5mm]}, thick, line width=0.8pt, color=gray}
+]
+    \node[page, fill=pageaccueil!15, draw=pageaccueil] (accueil) {Accueil\\\normalfont\scriptsize\texttt{index.html}};
+    \node[page, fill=pagequiz!15, draw=pagequiz, right=2cm of accueil] (quiz) {Quiz\\\normalfont\scriptsize\texttt{quiz.html}};
+    \node[page, fill=pageresultat!15, draw=pageresultat, right=2cm of quiz] (resultat) {Résultat\\\normalfont\scriptsize\texttt{resultat.html}};
+    \node[page, fill=pagescores!15, draw=pagescores, below=1.5cm of quiz] (scores) {Mes Scores\\\normalfont\scriptsize\texttt{scores.html}};
+    \node[page, fill=pageapropos!15, draw=pageapropos, below=1.5cm of resultat] (apropos) {À propos\\\normalfont\scriptsize\texttt{apropos.html}};
+
+    % Flux principal du quiz
+    \draw[fleche, thick, color=pagequiz] (accueil) -- node[above, font=\scriptsize\itshape, fill=white, inner sep=1pt] {Commencer} (quiz);
+    \draw[fleche, thick, color=pageresultat] (quiz) -- node[above, font=\scriptsize\itshape, fill=white, inner sep=1pt] {10 questions} (resultat);
+
+    % Liens nav (toutes pages se lient mutuellement via la nav)
+    \draw[fleche, dashed] (accueil.south) -- (scores.west);
+    \draw[fleche, dashed] (accueil.south) -- (apropos.west);
+    \draw[fleche, dashed] (resultat.south) -- (scores.east);
+    \draw[fleche, dashed] (scores.east) -- (apropos.west);
+
+    \node[below=0.3cm of scores, font=\scriptsize\itshape, text=gray] (lib) {(la nav présente sur toutes les pages permet d'aller partout)};
+\end{tikzpicture}
+\caption{Les 5 pages de Jàng Afrig et leur navigation.}
+\label{fig:pages}
+\end{figure}
+
+\newpage
+
+% ===========================================================================
+\section{Les balises sémantiques HTML5}
+% ===========================================================================
+
+Au Lab 1, vous n'avez utilisé que des balises de \emph{contenu} :
+\texttt{<h1>}, \texttt{<p>}, \texttt{<ul>}, etc. Mais HTML5 propose aussi
+des balises de \textbf{structure}, dites \emph{sémantiques}.
+
+\subsection{Pourquoi «\,sémantique\,» ?}
+
+\textbf{Sémantique} signifie «\,qui a du sens\,». Au lieu de découper sa
+page en boîtes anonymes (\texttt{<div>}, \texttt{<div>}, \texttt{<div>}),
+on utilise des balises qui \textbf{disent ce que la zone contient} :
+header, navigation, contenu principal, footer\ldots
+
+\begin{infobox}[L'analogie du journal]
+Pensez à un journal papier comme \emph{Le Soleil} ou \emph{L'Observateur} :
+\begin{itemize}[nosep]
+    \item En haut : la \textbf{une} (\texttt{<header>}) avec le logo et la date
+    \item Sous la une : un \textbf{sommaire} (\texttt{<nav>}) qui dit où trouver quoi
+    \item Au milieu : les \textbf{articles} (\texttt{<main>} contenant des \texttt{<article>})
+    \item En bas : la \textbf{mention légale} (\texttt{<footer>}) avec contact et imprimeur
+\end{itemize}
+On pourrait tout mettre dans des boîtes anonymes, mais ce serait beaucoup
+moins clair.
+\end{infobox}
+
+\subsection{Les 6 balises à connaître}
+
+\begin{center}
+\begin{tabular}{@{}lp{8cm}@{}}
+\toprule
+\textbf{Balise} & \textbf{Rôle} \\
+\midrule
+\texttt{<header>} & En-tête de la page (logo, titre principal, parfois la nav) \\
+\addlinespace
+\texttt{<nav>}    & Barre de navigation (les liens vers les autres pages) \\
+\addlinespace
+\texttt{<main>}   & Contenu principal de la page. \textbf{Une seule par page.} \\
+\addlinespace
+\texttt{<section>} & Une section thématique du contenu (\emph{ex.} «\,Modes de jeu\,») \\
+\addlinespace
+\texttt{<article>} & Un contenu \emph{autonome} qui pourrait être réutilisé ailleurs (un article de blog, une carte produit, un quiz\ldots) \\
+\addlinespace
+\texttt{<footer>}  & Pied de page (mentions, copyright, liens secondaires) \\
+\addlinespace
+\texttt{<aside>}   & Contenu lié mais pas essentiel (encart, pub, citation latérale) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Sémantique vs. anonyme : le même rendu, du sens en plus}
+
+Visuellement, il n'y a aucune différence entre :
+
+\begin{lstlisting}[language=HTML5]
+<div>
+    <div>Mon site</div>
+    <div>Lien1 Lien2</div>
+</div>
+\end{lstlisting}
+
+et :
+
+\begin{lstlisting}[language=HTML5]
+<header>
+    <h1>Mon site</h1>
+    <nav>Lien1 Lien2</nav>
+</header>
+\end{lstlisting}
+
+Mais le second est compris par les moteurs de recherche, les lecteurs
+d'écran, les outils d'analyse. \textbf{Un code sémantique est un code
+respectueux de l'utilisateur et professionnel.}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 1 : Refondre index.html}
+% ===========================================================================
+
+On reprend votre \texttt{index.html} du Lab 1 et on \textbf{l'enveloppe}
+dans une structure sémantique. Le contenu reste le même, on ajoute juste
+des balises autour.
+
+\subsection{Le nouveau squelette}
+
+\textbf{Remplacez tout le \texttt{<body>}} de votre \texttt{index.html}
+par cette structure :
+
+\begin{lstlisting}[language=HTML5]
+<body>
+
+    <header>
+        <h1>Jàng Afrig</h1>
+        <p>Apprendre l'Afrique, un pays à la fois</p>
+    </header>
+
+    <nav>
+        <a href="index.html">Accueil</a> |
+        <a href="quiz.html">Jouer</a> |
+        <a href="scores.html">Mes Scores</a> |
+        <a href="apropos.html">À propos</a>
+    </nav>
+
+    <main>
+
+        <section>
+            <h2>Bienvenue</h2>
+            <p>
+                Bienvenue sur <strong>Jàng Afrig</strong>, un quiz géographique sur les
+                <strong>54 pays africains</strong>. Choisissez un mode de jeu et battez
+                votre meilleur score !
+            </p>
+        </section>
+
+        <section>
+            <h2>Les modes de jeu</h2>
+            <ul>
+                <li><strong>Capitales</strong> : « Quelle est la capitale du Mali ? »</li>
+                <li><strong>Drapeaux</strong> : « À quel pays appartient ce drapeau ? »</li>
+                <li><strong>Langues</strong> : « Dans quel pays parle-t-on le swahili ? »</li>
+                <li><strong>Voisins</strong> : « Combien de voisins a l'Algérie ? »</li>
+                <li><strong>Chrono</strong> : maximum de bonnes réponses en 60 secondes</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Palmarès des champions</h2>
+            <p><a href="scores.html">Voir le classement complet</a></p>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>
+            &copy; 2025--2026 Jàng Afrig --- Projet pédagogique L1 DUT1-Info, ESP/UCAD.
+            <a href="apropos.html">En savoir plus</a>.
+        </p>
+    </footer>
+
+</body>
+\end{lstlisting}
+
+\textbf{Enregistrez}. Visuellement la page est presque identique à celle
+du Lab 1, mais elle est maintenant \textbf{structurée sémantiquement}. \cmark
+
+\begin{retenirbox}[Ce qui a changé]
+\begin{itemize}[nosep]
+    \item Le bloc titre est dans un \texttt{<header>}
+    \item Les liens vers les pages sont dans un \texttt{<nav>}
+    \item Tout le contenu central est dans un \texttt{<main>}, divisé en 3 \texttt{<section>}
+    \item Les mentions sont dans un \texttt{<footer>}
+    \item Le tableau du palmarès est remplacé par un lien vers \texttt{scores.html} (qu'on va créer)
+\end{itemize}
+\end{retenirbox}
+
+\subsection{L'entité \texttt{\&copy;}}
+
+Vous avez vu \texttt{\&copy;} dans le footer. C'est une \textbf{entité HTML} :
+elle s'affiche \texttt{©}. Quelques entités utiles :
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Entité} & \textbf{Affiche} & \textbf{Quand l'utiliser} \\
+\midrule
+\texttt{\&copy;}  & ©       & Copyright \\
+\texttt{\&nbsp;}  & espace  & Espace insécable (avant : ; ! ?) \\
+\texttt{\&amp;}   & \&      & Le caractère «\,et commercial\,» \\
+\texttt{\&lt;}    & <       & Le chevron ouvrant (sans démarrer une balise) \\
+\texttt{\&gt;}    & >       & Le chevron fermant \\
+\texttt{\&hellip;} & \ldots & Points de suspension \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 2 : La page Quiz avec un formulaire}
+% ===========================================================================
+
+Créez un nouveau fichier \texttt{quiz.html} dans votre repo. C'est la page
+où l'utilisateur saisit son pseudo et choisit son mode de jeu.
+
+\subsection{Code complet de quiz.html}
+
+\begin{lstlisting}[language=HTML5]
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Quiz --- Jàng Afrig</title>
+    </head>
+    <body>
+
+        <header>
+            <h1>Jàng Afrig</h1>
+            <p>Apprendre l'Afrique, un pays à la fois</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a> |
+            <a href="quiz.html">Jouer</a> |
+            <a href="scores.html">Mes Scores</a> |
+            <a href="apropos.html">À propos</a>
+        </nav>
+
+        <main>
+            <section>
+                <h2>Avant de jouer</h2>
+
+                <form>
+                    <p>
+                        <label for="pseudo">Votre pseudo :</label>
+                        <input type="text" id="pseudo" name="pseudo"
+                               placeholder="Ex. Fatou" required>
+                    </p>
+
+                    <p>
+                        <label for="mode">Mode de jeu :</label>
+                        <select id="mode" name="mode" required>
+                            <option value="">-- Choisir un mode --</option>
+                            <option value="capitales">Capitales</option>
+                            <option value="drapeaux">Drapeaux</option>
+                            <option value="langues">Langues</option>
+                            <option value="voisins">Voisins</option>
+                            <option value="chrono">Chrono</option>
+                        </select>
+                    </p>
+
+                    <p>
+                        <button type="submit">Commencer le quiz</button>
+                    </p>
+                </form>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025--2026 Jàng Afrig --- L1 DUT1-Info, ESP/UCAD.</p>
+        </footer>
+
+    </body>
+</html>
+\end{lstlisting}
+
+\textbf{Enregistrez}. Live Server affiche la page (cliquez sur «\,Jouer\,» depuis
+l'accueil). Vous voyez un formulaire avec un champ texte, un menu
+déroulant, et un bouton. \cmark
+
+\subsection{Décortiquer le formulaire}
+
+\begin{center}
+\begin{tabular}{@{}lp{8.5cm}@{}}
+\toprule
+\textbf{Élément} & \textbf{Rôle} \\
+\midrule
+\texttt{<form>} & Conteneur du formulaire (englobe tous les champs) \\
+\addlinespace
+\texttt{<label for="X">} & Étiquette d'un champ. \texttt{for="X"} se lie à \texttt{id="X"}. \\
+\addlinespace
+\texttt{<input type="text">} & Champ de texte sur une ligne \\
+\addlinespace
+\texttt{placeholder="..."} & Texte gris d'aide qui disparaît à la frappe \\
+\addlinespace
+\texttt{required}     & Le champ est obligatoire (validation HTML5 native) \\
+\addlinespace
+\texttt{<select>} + \texttt{<option>} & Menu déroulant à options fixes \\
+\addlinespace
+\texttt{<button type="submit">} & Bouton qui soumet le formulaire \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{infobox}[Test du formulaire]
+Cliquez sur «\,Commencer le quiz\,» sans rien remplir : le navigateur
+\textbf{bloque} l'envoi et affiche un message «\,Veuillez remplir ce
+champ\,». C'est la \emph{validation HTML5 native}, gratuite, sans
+JavaScript.
+\end{infobox}
+
+\begin{attentionbox}[Le formulaire ne mène nulle part pour l'instant]
+Cliquer sur «\,Commencer\,» va recharger la page. C'est normal : il
+manque le JavaScript pour traiter les données. On s'en occupera au
+\textbf{Lab 7}. Pour aujourd'hui, l'objectif est juste d'avoir le
+formulaire \emph{visible et structuré}.
+\end{attentionbox}
+
+\subsection{Pourquoi \texttt{<label>} est important}
+
+L'attribut \texttt{for} d'un \texttt{<label>} relie l'étiquette au champ.
+Cliquer sur «\,Votre pseudo :\,» met le curseur dans le champ. Pour les
+utilisateurs malvoyants, le lecteur d'écran annonce «\,Votre pseudo,
+champ texte\,» au lieu d'un anonyme «\,champ texte\,». \textbf{Toujours
+mettre un \texttt{<label>}.}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 3 : Les 3 autres pages}
+% ===========================================================================
+
+On va créer rapidement les 3 pages restantes. Elles ont toutes la \textbf{même
+structure} (header + nav + main + footer), seul le contenu du \texttt{<main>}
+change.
+
+\subsection{Page resultat.html}
+
+Créez \texttt{resultat.html} avec ce contenu (la partie \texttt{<main>}
+seulement est différente, le reste est identique aux autres pages) :
+
+\begin{lstlisting}[language=HTML5]
+<main>
+    <section>
+        <h2>Résultat de votre partie</h2>
+
+        <p>Bravo <strong>Fatou</strong> !</p>
+        <p>Mode : <em>Capitales</em></p>
+        <p>Score : <strong>8 / 10</strong></p>
+
+        <p>
+            <a href="quiz.html">Rejouer</a> |
+            <a href="scores.html">Voir mes scores</a> |
+            <a href="index.html">Retour à l'accueil</a>
+        </p>
+    </section>
+</main>
+\end{lstlisting}
+
+\textbf{Note :} les valeurs «\,Fatou\,», «\,Capitales\,», «\,8/10\,» sont
+\emph{hardcodées} pour l'instant. Au Lab 7, JavaScript les remplacera par
+les vraies valeurs de la partie.
+
+\subsection{Page scores.html}
+
+Créez \texttt{scores.html}. Le \texttt{<main>} contient le tableau du
+palmarès (récupéré du Lab 1) :
+
+\begin{lstlisting}[language=HTML5]
+<main>
+    <section>
+        <h2>Palmarès des champions</h2>
+
+        <p>Les meilleurs scores enregistrés (données fictives pour l'instant) :</p>
+
+        <table>
+            <tr>
+                <th>Rang</th>
+                <th>Pseudo</th>
+                <th>Mode</th>
+                <th>Score</th>
+                <th>Date</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>Fatou</td>
+                <td>Capitales</td>
+                <td>10/10</td>
+                <td>15 mars 2026</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Moussa</td>
+                <td>Drapeaux</td>
+                <td>9/10</td>
+                <td>12 mars 2026</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Aminata</td>
+                <td>Capitales</td>
+                <td>9/10</td>
+                <td>10 mars 2026</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Cheikh</td>
+                <td>Voisins</td>
+                <td>8/10</td>
+                <td>8 mars 2026</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Awa</td>
+                <td>Langues</td>
+                <td>8/10</td>
+                <td>5 mars 2026</td>
+            </tr>
+        </table>
+    </section>
+</main>
+\end{lstlisting}
+
+\subsection{Page apropos.html}
+
+Créez \texttt{apropos.html}. Le \texttt{<main>} :
+
+\begin{lstlisting}[language=HTML5]
+<main>
+    <section>
+        <h2>À propos de Jàng Afrig</h2>
+        <p>
+            Jàng Afrig est une application web de quiz géographique sur les
+            <strong>54 pays africains</strong>. Le mot <em>jàng</em> signifie
+            « apprendre, étudier » en wolof.
+        </p>
+        <p>
+            Ce projet est développé dans le cadre du cours
+            <strong>Fondamentaux du Web</strong> en L1 DUT1-Informatique
+            à l'École Supérieure Polytechnique (ESP/UCAD).
+        </p>
+    </section>
+
+    <section>
+        <h2>Sources des données</h2>
+        <p>
+            Les données sur les pays sont fournies par
+            <a href="https://restcountries.com">REST Countries v3.1</a>,
+            une API libre et gratuite.
+        </p>
+    </section>
+
+    <section>
+        <h2>Technologies utilisées</h2>
+        <ul>
+            <li>HTML5 pour la structure</li>
+            <li>CSS3 pour la mise en forme</li>
+            <li>JavaScript moderne pour l'interactivité</li>
+            <li>Git et GitHub pour le versioning et l'hébergement</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Code source</h2>
+        <p>
+            Le code est disponible sur GitHub :
+            <a href="https://github.com/votre-username/jang-afrig">
+                github.com/votre-username/jang-afrig
+            </a>
+        </p>
+    </section>
+</main>
+\end{lstlisting}
+
+\begin{retenirbox}[Astuce de productivité]
+Au lieu de retaper le squelette à chaque fois, \textbf{copiez \texttt{quiz.html}}
+puis \textbf{renommez} la copie en \texttt{resultat.html}, et changez
+seulement le contenu du \texttt{<main>}. Pareil pour \texttt{scores.html}
+et \texttt{apropos.html}. C'est ainsi qu'on travaille en vrai.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 4 : Tester la navigation}
+% ===========================================================================
+
+\subsection{Recharger la page d'accueil}
+
+Dans le navigateur (où Live Server tourne) :
+\begin{enumerate}[nosep]
+    \item Allez sur \url{http://127.0.0.1:5500/index.html}
+    \item Cliquez sur «\,Jouer\,» dans la nav $\to$ vous arrivez sur \texttt{quiz.html}
+    \item Cliquez sur «\,Mes Scores\,» $\to$ \texttt{scores.html}
+    \item Cliquez sur «\,À propos\,» $\to$ \texttt{apropos.html}
+    \item Depuis n'importe quelle page, cliquez sur «\,Accueil\,» $\to$ retour à \texttt{index.html}
+\end{enumerate}
+
+\textbf{Toutes les pages sont accessibles depuis n'importe quelle autre.} \cmark
+
+\subsection{Vérification : la nav doit être identique partout}
+
+\begin{attentionbox}[Le piège du copier-coller]
+Si vous changez le menu sur une page, vous devez le changer sur toutes
+les autres. Sinon, l'utilisateur a une nav différente selon où il est :
+incohérent et frustrant.
+
+\medskip
+
+\textbf{Aujourd'hui}, on accepte cette duplication (4 fois le même
+\texttt{<nav>}). \textbf{Plus tard} (en L2 avec un framework, ou même au
+Lab 7 avec JS), on apprendra à ne définir la nav qu'\emph{une seule fois}.
+\end{attentionbox}
+
+\newpage
+
+% ===========================================================================
+\section{Valider votre code HTML}
+% ===========================================================================
+
+Le W3C (World Wide Web Consortium, l'organisme qui définit HTML) propose
+un \textbf{validateur en ligne gratuit} qui détecte les erreurs de syntaxe
+dans votre HTML.
+
+\subsection{Comment l'utiliser}
+
+\begin{enumerate}[nosep]
+    \item Allez sur \url{https://validator.w3.org/nu/}
+    \item Onglet \textbf{Validate by Direct Input}
+    \item Ouvrez \texttt{index.html} dans VS Code, sélectionnez \textbf{tout} (\texttt{Ctrl+A}), copiez (\texttt{Ctrl+C})
+    \item Collez dans la zone de texte du validateur
+    \item Cliquez \textbf{Check}
+\end{enumerate}
+
+\subsection{Lire le rapport}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Bandeau \textbf{vert} : «\,Document checking completed. No errors or warnings to show.\,» $\to$ votre HTML est parfait \cmark
+    \item Bandeau \textbf{rouge} : il y a des erreurs. Le rapport indique la ligne et la nature du problème.
+\end{itemize}
+
+\textbf{Faites tourner le validateur sur les 5 pages.} Corrigez les
+erreurs au fur et à mesure.
+
+\begin{infobox}[Erreurs courantes]
+\begin{itemize}[leftmargin=*,nosep]
+    \item Balise non fermée : \texttt{<p>texte} sans \texttt{</p>}
+    \item Balise mal imbriquée : \texttt{<p><strong>texte</p></strong>}
+    \item Attribut \texttt{alt} manquant sur \texttt{<img>}
+    \item Plusieurs \texttt{<h1>} dans la même page
+    \item Caractères spéciaux non échappés (\texttt{<} au lieu de \texttt{\&lt;} dans du texte)
+\end{itemize}
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Exercices d'application}
+% ===========================================================================
+
+\begin{objectifbox}[Trois mini-exercices]
+\textbf{Exercice 1 --- Ajouter un \texttt{<aside>} sur l'accueil}
+
+Sur \texttt{index.html}, ajoutez un \texttt{<aside>} (encart latéral) après
+le \texttt{<main>} avec un «\,saviez-vous ?\,» géographique. Exemple :
+
+\begin{lstlisting}[language=HTML5]
+<aside>
+    <h3>Le saviez-vous ?</h3>
+    <p>
+        L'Afrique compte <strong>54 pays</strong> reconnus par l'ONU,
+        avec plus de <strong>2000 langues</strong> parlées.
+    </p>
+</aside>
+\end{lstlisting}
+
+\medskip
+
+\textbf{Exercice 2 --- Enrichir le formulaire}
+
+Sur \texttt{quiz.html}, ajoutez dans le \texttt{<form>} :
+\begin{itemize}[nosep]
+    \item Un champ \texttt{<input type="number">} pour choisir le \textbf{nombre de questions} (min 5, max 20, valeur par défaut 10)
+    \item 3 \texttt{<input type="radio">} pour la \textbf{difficulté} : Facile, Moyen, Difficile
+    \item N'oubliez pas les \texttt{<label>} associés
+\end{itemize}
+
+\medskip
+
+\textbf{Exercice 3 --- Page formulaire de contact (bonus)}
+
+Créez une nouvelle page \texttt{contact.html} avec un formulaire complet :
+\begin{itemize}[nosep]
+    \item Nom (\texttt{input type="text"}, required)
+    \item Email (\texttt{input type="email"}, required)
+    \item Sujet (\texttt{select} avec 3 options : Question, Bug, Suggestion)
+    \item Message (\texttt{<textarea>} de 5 lignes, required)
+    \item Bouton «\,Envoyer\,»
+\end{itemize}
+Ajoutez le lien vers cette page dans le \texttt{<nav>} de toutes les pages.
+
+\medskip
+
+\textbf{Validez vos pages au W3C} avant de passer à la suite.
+\end{objectifbox}
+
+\newpage
+
+% ===========================================================================
+\section{Aide-mémoire}
+% ===========================================================================
+
+\subsection{Les balises sémantiques}
+
+\begin{center}
+\begin{tabular}{@{}lp{7.5cm}@{}}
+\toprule
+\textbf{Balise}     & \textbf{Rôle} \\
+\midrule
+\texttt{<header>}   & En-tête (logo, titre principal) \\
+\texttt{<nav>}      & Barre de navigation \\
+\texttt{<main>}     & Contenu principal (un seul par page) \\
+\texttt{<section>}  & Section thématique \\
+\texttt{<article>}  & Contenu autonome réutilisable \\
+\texttt{<aside>}    & Contenu lié mais secondaire \\
+\texttt{<footer>}   & Pied de page \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Les balises de formulaire}
+
+\begin{center}
+\begin{tabular}{@{}lp{7.5cm}@{}}
+\toprule
+\textbf{Balise}                           & \textbf{Rôle} \\
+\midrule
+\texttt{<form>}                           & Conteneur d'un formulaire \\
+\texttt{<label for="X">}                  & Étiquette d'un champ \\
+\texttt{<input type="text">}              & Champ texte \\
+\texttt{<input type="email">}             & Champ email (validation auto) \\
+\texttt{<input type="number">}            & Champ numérique \\
+\texttt{<input type="radio">}             & Bouton radio (choix unique) \\
+\texttt{<input type="checkbox">}          & Case à cocher (choix multiple) \\
+\texttt{<select>} + \texttt{<option>}     & Menu déroulant \\
+\texttt{<textarea>}                       & Champ texte multi-lignes \\
+\texttt{<button type="submit">}           & Bouton de soumission \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Attributs utiles}
+
+\begin{center}
+\begin{tabular}{@{}lp{7.5cm}@{}}
+\toprule
+\textbf{Attribut}         & \textbf{Rôle} \\
+\midrule
+\texttt{id="..."}         & Identifiant unique sur la page (référencé par \texttt{label for}) \\
+\texttt{name="..."}       & Nom du champ (utilisé côté serveur, plus tard) \\
+\texttt{placeholder="..."} & Texte d'aide gris dans un champ vide \\
+\texttt{required}         & Champ obligatoire \\
+\texttt{value="..."}      & Valeur par défaut d'un champ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ===========================================================================
+\section{Routine Git de fin de Lab}
+% ===========================================================================
+
+Dans le terminal intégré de VS Code :
+
+\begin{lstlisting}
+git status
+git add .
+git commit -m "v0.2 : 5 pages HTML semantiques + formulaire"
+git push
+git tag v0.2
+git push --tags
+\end{lstlisting}
+
+Vérifiez sur \url{https://github.com/votre-username/jang-afrig} que :
+\begin{itemize}[nosep]
+    \item Les 5 fichiers HTML sont là (\texttt{index.html}, \texttt{quiz.html}, \texttt{resultat.html}, \texttt{scores.html}, \texttt{apropos.html})
+    \item Le tag \texttt{v0.2} est visible dans l'onglet \textbf{Tags}
+\end{itemize}
+
+% ===========================================================================
+\section{Rapport à produire}
+% ===========================================================================
+
+\begin{attentionbox}[Rapport du Lab 2 --- obligatoire]
+\textbf{Format :} 1-2 pages, déposé dans \texttt{rapports/rapport-lab-2-NOM-Prenom.pdf}
+de votre repo.
+
+\medskip
+
+\textbf{Contenu (4 sections) :}
+\begin{enumerate}[nosep]
+    \item \textbf{Ce que j'ai fait} : 5 pages créées, balises sémantiques utilisées, formulaire construit, exercices d'application complétés, validation W3C passée.
+    \item \textbf{Difficultés rencontrées} : navigation cassée, validateur W3C qui rouspète, formulaire qui se comporte bizarrement\ldots
+    \item \textbf{Comment j'ai résolu ces difficultés} : recherche, aide d'un camarade, lecture de la doc.
+    \item \textbf{Lien vers mon repo GitHub avec le tag v0.2} : \\
+          ex. \url{https://github.com/fatou-diop/jang-afrig/releases/tag/v0.2}
+\end{enumerate}
+\end{attentionbox}
+
+% ===========================================================================
+\section{Résumé et transition}
+% ===========================================================================
+
+\subsection{Ce que vous avez accompli}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Maîtrisé les balises sémantiques HTML5 \cmark
+    \item Construit les 5 pages de Jàng Afrig \cmark
+    \item Construit votre premier formulaire fonctionnel \cmark
+    \item Lié les pages avec une navigation cohérente \cmark
+    \item Validé votre code au W3C \cmark
+    \item Posé le tag \texttt{v0.2} \cmark
+\end{itemize}
+
+\subsection{Le bloc HTML est terminé}
+
+Vous avez vu \textbf{tout ce qu'il faut savoir en HTML} pour ce semestre :
+structure, contenu, sémantique, formulaires, tableaux, liens, images.
+
+\subsection{Ce qu'on fera au CM2 et au Lab 3}
+
+\textbf{CM2 (S4) :} le CSS arrive. Vous découvrirez les sélecteurs, la
+cascade, le box model, et Flexbox.
+
+\textbf{Lab 3 (S5) :} vous habillerez Jàng Afrig avec des couleurs
+panafricaines, des polices Google Fonts, et de jolis boutons. Tag \texttt{v0.3}.
+
+\begin{projetbox}[À ce stade du semestre]
+Votre application a une structure complète et propre. Elle est encore
+moche (texte noir sur fond blanc), mais \textbf{toutes les fondations
+HTML sont posées}. Aux Labs 3 et 4, on transforme ça en application
+visuellement attractive.
+\end{projetbox}
+
+\vspace{0.5cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab 2 --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous avez construit l'ossature complète de Jàng Afrig.\\
+Place à la décoration au CM2 et au Lab 3.\\[0.2cm]
+\textit{Rendez-vous au CM2 !}\\[0.3cm]
+\vspace{0.3cm}
+\end{minipage}
+}
+\end{center}
+
+\end{document}

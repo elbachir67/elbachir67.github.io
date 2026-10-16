@@ -1,0 +1,1053 @@
+% ===========================================================================
+%  Jàng Afrig — Lab 3 : CSS en pratique
+%  Styliser les 5 pages avec palette panafricaine + Google Fonts
+%  Licence 1 DUT1-Informatique — ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+% --- TikZ ---
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit,shadows.blur}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Couleurs palette panafricaine ---
+\definecolor{panvert}{HTML}{0E8A4F}
+\definecolor{panjaune}{HTML}{F5C518}
+\definecolor{panrouge}{HTML}{C8332E}
+\definecolor{pannoir}{HTML}{1A1A1A}
+\definecolor{panblanc}{HTML}{F8F8F8}
+
+% --- Code source ---
+\usepackage{listings}
+\lstdefinelanguage{HTML5}{
+  morekeywords={<!DOCTYPE,html,head,meta,title,body,h1,h2,h3,h4,p,ul,ol,li,table,tr,th,td,a,img,strong,em,br,div,span,header,nav,main,section,article,footer,aside,form,input,select,option,textarea,label,button,fieldset,legend,style,link,class,id,href,src,alt},
+  sensitive=true,
+  morecomment=[s]{<!--}{-->},
+  morestring=[b]",
+}
+\lstdefinelanguage{CSS}{
+  morekeywords={color,background-color,background,font-family,font-size,font-weight,text-align,padding,margin,border,border-radius,width,height,max-width,min-width,display,flex,flex-direction,justify-content,align-items,flex-wrap,gap,box-sizing,transition,transform,position,top,bottom,left,right,opacity,cursor,line-height,letter-spacing,box-shadow,list-style,text-decoration,text-transform,border-collapse,vertical-align,object-fit,overflow},
+  sensitive=true,
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1 {≈}{{$\approx$}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 3 : CSS en pratique}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 3 --- CSS en pratique}\\[0.3cm]
+\textbf{\Large Styliser Jàng Afrig avec une palette panafricaine}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Type} & Lab guidé \\
+\textbf{Séance} & S5 --- premier Lab CSS \\
+\textbf{Prérequis} & Lab 2 terminé (5 pages HTML poussées avec tag \texttt{v0.2}) + CM2 \\
+\textbf{Validation} & 5 pages stylisées + tag \texttt{v0.3} sur GitHub \\
+\textbf{Rapport} & 1-2 pages : ce que j'ai fait + difficultés + lien repo \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab]
+À la fin de ce Lab, vous aurez :
+\begin{enumerate}[nosep]
+    \item Créé un fichier \texttt{style.css} et l'avoir lié aux 5 pages HTML
+    \item Mis en place un \textbf{reset CSS} et \texttt{box-sizing: border-box}
+    \item Importé \textbf{2 polices Google Fonts} (titres + corps)
+    \item Défini une \textbf{palette panafricaine} (vert, jaune, rouge + neutres)
+    \item Stylisé le \textbf{header} et la \textbf{navigation Flexbox}
+    \item Créé des \textbf{cartes} pour les modes de jeu
+    \item Stylisé des \textbf{boutons} avec effet \texttt{:hover}
+    \item Stylisé le \textbf{tableau} du palmarès (bordures + lignes alternées)
+    \item Posé le tag \textbf{\texttt{v0.3}} sur GitHub
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Avant de coder}
+% ===========================================================================
+
+\subsection{Là où on en est}
+
+Au Lab 2, vous avez construit les 5 pages HTML de Jàng Afrig avec une
+structure sémantique propre. Mais visuellement, c'est encore austère :
+texte noir sur fond blanc, liens bleus soulignés, tableau sans bordures.
+
+\subsection{Ce qu'on va construire aujourd'hui}
+
+Un \textbf{fichier \texttt{style.css}} unique, lié aux 5 pages, qui les
+transforme en application visuellement attractive.
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    every node/.style={anchor=north west, inner sep=8pt, font=\scriptsize}
+]
+    \draw[draw=gray!50, thick, rounded corners=4pt, fill=panblanc] (0,0) rectangle (12,9);
+
+    % Header panvert
+    \filldraw[fill=panvert, draw=panvert] (0.05, 8.4) rectangle (11.95, 8.95);
+    \node[font=\small\bfseries, color=white, anchor=center] at (6, 8.7) {Jàng Afrig};
+
+    % Nav panjaune
+    \filldraw[fill=panjaune!50, draw=panjaune!70!black] (0.05, 7.8) rectangle (11.95, 8.4);
+    \node[font=\small, anchor=center] at (3, 8.1) {Accueil};
+    \node[font=\small, anchor=center] at (5.5, 8.1) {Jouer};
+    \node[font=\small, anchor=center] at (8, 8.1) {Mes Scores};
+    \node[font=\small, anchor=center] at (10.5, 8.1) {À propos};
+
+    % Section Bienvenue
+    \node[font=\bfseries\small, color=panvert] at (0.5, 7.5) {Bienvenue};
+    \node[anchor=north west] at (0.5, 7.05) {Bienvenue sur Jàng Afrig, un quiz géographique sur les 54 pays africains.};
+
+    % Section Modes de jeu (cartes)
+    \node[font=\bfseries\small, color=panvert] at (0.5, 6.2) {Les modes de jeu};
+
+    \filldraw[fill=panjaune!20, draw=panjaune!70!black, thick, rounded corners=4pt] (0.5, 4.3) rectangle (3.5, 5.7);
+    \node[font=\small\bfseries, anchor=north] at (2, 5.55) {Capitales};
+    \node[anchor=north, font=\tiny, text width=2.6cm, align=center] at (2, 5.1) {Quelle est la capitale du Mali ?};
+
+    \filldraw[fill=panrouge!20, draw=panrouge!70!black, thick, rounded corners=4pt] (3.7, 4.3) rectangle (6.7, 5.7);
+    \node[font=\small\bfseries, anchor=north] at (5.2, 5.55) {Drapeaux};
+    \node[anchor=north, font=\tiny, text width=2.6cm, align=center] at (5.2, 5.1) {À quel pays appartient ce drapeau ?};
+
+    \filldraw[fill=panvert!20, draw=panvert!70!black, thick, rounded corners=4pt] (6.9, 4.3) rectangle (9.9, 5.7);
+    \node[font=\small\bfseries, anchor=north] at (8.4, 5.55) {Langues};
+    \node[anchor=north, font=\tiny, text width=2.6cm, align=center] at (8.4, 5.1) {Dans quel pays parle-t-on swahili ?};
+
+    % Bouton CTA
+    \filldraw[fill=panvert, draw=panvert!70!black, thick, rounded corners=4pt] (5, 3.3) rectangle (7, 3.85);
+    \node[font=\small\bfseries, color=white, anchor=center] at (6, 3.575) {Commencer};
+
+    % Tableau palmarès
+    \node[font=\bfseries\small, color=panvert] at (0.5, 3) {Palmarès};
+    \filldraw[fill=panvert!10, draw=panvert!70!black, thick] (0.5, 2.5) rectangle (11.5, 2.85);
+    \node[font=\tiny, anchor=west] at (0.8, 2.675) {Rang};
+    \node[font=\tiny, anchor=west] at (3, 2.675) {Pseudo};
+    \node[font=\tiny, anchor=west] at (5.5, 2.675) {Mode};
+    \node[font=\tiny, anchor=west] at (8, 2.675) {Score};
+    \filldraw[fill=panblanc, draw=panvert!40, thick] (0.5, 2.15) rectangle (11.5, 2.5);
+    \node[font=\tiny, anchor=west] at (0.8, 2.325) {1};
+    \node[font=\tiny, anchor=west] at (3, 2.325) {Fatou};
+    \node[font=\tiny, anchor=west] at (5.5, 2.325) {Capitales};
+    \node[font=\tiny, anchor=west] at (8, 2.325) {10/10};
+    \filldraw[fill=panvert!5, draw=panvert!40, thick] (0.5, 1.8) rectangle (11.5, 2.15);
+    \node[font=\tiny, anchor=west] at (0.8, 1.975) {2};
+    \node[font=\tiny, anchor=west] at (3, 1.975) {Moussa};
+    \node[font=\tiny, anchor=west] at (5.5, 1.975) {Drapeaux};
+    \node[font=\tiny, anchor=west] at (8, 1.975) {9/10};
+
+    % Footer
+    \filldraw[fill=pannoir, draw=pannoir] (0.05, 0.05) rectangle (11.95, 0.7);
+    \node[font=\tiny, color=white, anchor=center] at (6, 0.375) {© 2025--2026 Jàng Afrig --- L1 DUT1-Info, ESP/UCAD};
+\end{tikzpicture}
+\caption{Aperçu de l'objectif visuel à atteindre dans ce Lab.}
+\label{fig:apercu}
+\end{figure}
+
+\textbf{Header vert, nav jaune, cartes colorées (vert/jaune/rouge), bouton
+vert, palmarès avec lignes alternées, footer noir.} On y va.
+
+\newpage
+
+% ===========================================================================
+\section{Étape 1 : Créer style.css et le lier aux 5 pages}
+% ===========================================================================
+
+\subsection{Créer le fichier}
+
+Dans VS Code, à la racine de votre repo \texttt{jang-afrig} :
+\begin{enumerate}[nosep]
+    \item Clic sur l'icône «\,Nouveau fichier\,» dans l'Explorateur
+    \item Nommez-le : \texttt{style.css}
+    \item Laissez-le vide pour l'instant (on va le remplir étape par étape)
+\end{enumerate}
+
+\subsection{Lier style.css aux 5 pages}
+
+Dans \textbf{chaque} fichier HTML (\texttt{index.html}, \texttt{quiz.html},
+\texttt{resultat.html}, \texttt{scores.html}, \texttt{apropos.html}),
+ajoutez cette ligne dans le \texttt{<head>} :
+
+\begin{lstlisting}[language=HTML5]
+<head>
+    <meta charset="UTF-8">
+    <title>Jàng Afrig</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+\end{lstlisting}
+
+\textbf{Enregistrez les 5 fichiers}. Pour l'instant, comme \texttt{style.css}
+est vide, rien ne change visuellement. C'est attendu.
+
+\begin{retenirbox}[Le piège du copier-coller]
+Si vous oubliez d'ajouter le \texttt{<link>} sur \emph{une seule} page,
+celle-ci restera moche pendant que les autres seront stylées. Vérifiez
+bien les 5.
+\end{retenirbox}
+
+% ===========================================================================
+\section{Étape 2 : Reset CSS et box-sizing}
+% ===========================================================================
+
+Chaque navigateur applique des styles par défaut différents. Pour démarrer
+sur une base propre, on ajoute un \emph{reset minimal}.
+
+\textbf{Tapez ceci au début de \texttt{style.css}} :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Reset minimal ===== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    color: #1A1A1A;
+    background-color: #F8F8F8;
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. La page change d'apparence : tous les espacements
+sont remis à zéro, les marges des paragraphes disparaissent. C'est moche
+provisoirement, mais on repart d'une base contrôlée. \cmark
+
+\begin{infobox}[Pourquoi ce reset ?]
+\begin{itemize}[nosep]
+    \item \texttt{box-sizing: border-box} : les calculs de largeur incluent padding et border (vu au CM2)
+    \item \texttt{margin: 0; padding: 0} : on annule les marges par défaut du navigateur
+    \item \texttt{line-height: 1.6} : un peu d'air entre les lignes pour la lisibilité
+\end{itemize}
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 3 : La palette panafricaine}
+% ===========================================================================
+
+\subsection{Le choix des couleurs}
+
+On utilise les couleurs panafricaines (présentes sur de nombreux drapeaux
+du continent) :
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Couleur} & \textbf{Code hex} & \textbf{Usage} \\
+\midrule
+\textcolor{panvert}{$\blacksquare$} Vert  & \texttt{\#0E8A4F} & Header, accents, bouton principal \\
+\textcolor{panjaune}{$\blacksquare$} Jaune & \texttt{\#F5C518} & Nav, mise en valeur \\
+\textcolor{panrouge}{$\blacksquare$} Rouge & \texttt{\#C8332E} & Alertes, mode «\,Drapeaux\,» \\
+\textcolor{pannoir}{$\blacksquare$} Noir   & \texttt{\#1A1A1A} & Texte principal, footer \\
+\textcolor{black}{$\square$} Blanc cassé   & \texttt{\#F8F8F8} & Fond de page \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Variables CSS : un seul endroit pour les couleurs}
+
+Plutôt que de répéter \texttt{\#0E8A4F} 20 fois dans le fichier, on définit
+des \textbf{variables CSS} (officiellement appelées \emph{custom properties}).
+
+\textbf{Ajoutez en haut de \texttt{style.css}, juste après le reset :}
+
+\begin{lstlisting}[language=CSS]
+/* ===== Palette panafricaine ===== */
+:root {
+    --vert: #0E8A4F;
+    --jaune: #F5C518;
+    --rouge: #C8332E;
+    --noir: #1A1A1A;
+    --blanc-casse: #F8F8F8;
+}
+\end{lstlisting}
+
+\textbf{Comment les utiliser} dans n'importe quelle règle :
+
+\begin{lstlisting}[language=CSS]
+header {
+    background-color: var(--vert);
+}
+\end{lstlisting}
+
+\begin{retenirbox}[L'avantage des variables]
+Si demain vous décidez de changer le vert pour un \texttt{\#1A9A5F} (un
+peu plus clair), vous changez \textbf{une seule ligne} dans \texttt{:root}
+et toute l'application est mise à jour. Sans variables, il faudrait
+chercher et remplacer 20 occurrences à la main.
+\end{retenirbox}
+
+\begin{infobox}[\texttt{:root}, c'est quoi ?]
+\texttt{:root} est un sélecteur spécial qui cible la racine du document
+(c'est-à-dire \texttt{<html>}). On l'utilise pour déclarer des variables
+\og{}globales\fg{} accessibles partout dans le CSS.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 4 : Importer les polices Google Fonts}
+% ===========================================================================
+
+Les polices par défaut du navigateur sont moches. \textbf{Google Fonts}
+propose plus de 1000 polices gratuites, libres d'utilisation.
+
+\subsection{Choisir 2 polices}
+
+On va utiliser :
+\begin{itemize}[nosep]
+    \item \textbf{Poppins} pour le corps du texte (claire, ronde, moderne)
+    \item \textbf{Montserrat} pour les titres (forte, bien lisible en gros)
+\end{itemize}
+
+\subsection{Méthode 1 : via le \texttt{<link>} HTML (recommandé)}
+
+Dans le \texttt{<head>} de \textbf{chaque} page HTML, \textbf{avant} la
+ligne \texttt{<link rel="stylesheet" href="style.css">}, ajoutez :
+
+\begin{lstlisting}[language=HTML5]
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+\end{lstlisting}
+
+\subsection{Utiliser les polices dans style.css}
+
+\textbf{Mettez à jour le \texttt{body}} dans votre CSS :
+
+\begin{lstlisting}[language=CSS]
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--noir);
+    background-color: var(--blanc-casse);
+}
+
+h1, h2, h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. La page utilise maintenant Poppins pour le texte
+courant et Montserrat pour les titres. \cmark
+
+\begin{attentionbox}[Connexion internet obligatoire]
+Google Fonts est servi en ligne. Sans Internet, les polices ne se chargent
+pas et le navigateur retombe sur \texttt{sans-serif} par défaut. C'est
+\textbf{normal} et ce n'est pas un bug. En production sérieuse, on
+téléchargerait les fichiers de police pour les servir localement, mais
+pour ce cours on garde la simplicité.
+\end{attentionbox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 5 : Styliser le header}
+% ===========================================================================
+
+\textbf{Ajoutez à \texttt{style.css}} :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Header ===== */
+header {
+    background-color: var(--vert);
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-style: italic;
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. Le bandeau du haut est maintenant vert vif avec un
+gros titre blanc «\,Jàng Afrig\,» et un sous-titre italique en dessous. \cmark
+
+\begin{infobox}[Quelques propriétés nouvelles]
+\begin{itemize}[leftmargin=*,nosep]
+    \item \texttt{padding: 30px 20px} \quad raccourci pour 30px haut/bas et 20px gauche/droite
+    \item \texttt{font-size: 2.5rem} \quad 2.5 fois la taille de base ($\approx$ 40px)
+    \item \texttt{letter-spacing: 1px} \quad espacement entre les lettres
+    \item \texttt{opacity: 0.9} \quad transparence à 90\% (1 = opaque, 0 = invisible)
+\end{itemize}
+\end{infobox}
+
+% ===========================================================================
+\section{Étape 6 : Styliser la nav avec Flexbox}
+% ===========================================================================
+
+\textbf{Ajoutez à \texttt{style.css}} :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Navigation ===== */
+nav {
+    background-color: var(--jaune);
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: var(--noir);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 15px 25px;
+    transition: background-color 0.2s;
+}
+
+nav a:hover {
+    background-color: var(--vert);
+    color: white;
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. La nav est maintenant un bandeau jaune avec les
+liens centrés en gras noir. \textbf{Survolez un lien} : il devient vert
+avec texte blanc, en douceur. \cmark
+
+\begin{retenirbox}[L'effet \texttt{:hover} avec \texttt{transition}]
+La propriété \texttt{transition: background-color 0.2s} fait que le
+changement de couleur au survol se fait \textbf{progressivement} sur
+0.2 seconde au lieu d'être brutal. Petit détail, gros effet de
+qualité perçue.
+\end{retenirbox}
+
+\subsection{Pourquoi le « | » a disparu ?}
+
+Au Lab 2, la nav contenait des séparateurs \texttt{|} entre les liens.
+Maintenant qu'on utilise Flexbox + padding, on n'en a plus besoin :
+chaque lien a son propre espace. \textbf{Vous pouvez retirer les
+\texttt{|}} dans le HTML des 5 pages. La nav devient :
+
+\begin{lstlisting}[language=HTML5]
+<nav>
+    <a href="index.html">Accueil</a>
+    <a href="quiz.html">Jouer</a>
+    <a href="scores.html">Mes Scores</a>
+    <a href="apropos.html">À propos</a>
+</nav>
+\end{lstlisting}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 7 : Cartes pour les modes de jeu}
+% ===========================================================================
+
+Les modes de jeu sont actuellement une simple liste \texttt{<ul>}. On va
+les transformer en \textbf{cartes} colorées disposées en grille avec
+Flexbox.
+
+\subsection{Modifier le HTML de index.html}
+
+\textbf{Remplacez} la \texttt{<section>} des modes de jeu dans
+\texttt{index.html} par :
+
+\begin{lstlisting}[language=HTML5]
+<section>
+    <h2>Les modes de jeu</h2>
+    <div class="modes-grille">
+        <div class="carte-mode carte-jaune">
+            <h3>Capitales</h3>
+            <p>« Quelle est la capitale du Mali ? »</p>
+        </div>
+        <div class="carte-mode carte-rouge">
+            <h3>Drapeaux</h3>
+            <p>« À quel pays appartient ce drapeau ? »</p>
+        </div>
+        <div class="carte-mode carte-vert">
+            <h3>Langues</h3>
+            <p>« Dans quel pays parle-t-on le swahili ? »</p>
+        </div>
+        <div class="carte-mode carte-jaune">
+            <h3>Voisins</h3>
+            <p>« Combien de voisins a l'Algérie ? »</p>
+        </div>
+        <div class="carte-mode carte-rouge">
+            <h3>Chrono</h3>
+            <p>Maximum de bonnes réponses en 60 secondes</p>
+        </div>
+    </div>
+</section>
+\end{lstlisting}
+
+\subsection{Ajouter le CSS}
+
+\textbf{Ajoutez à \texttt{style.css}} :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Section principale ===== */
+main {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+main section {
+    margin-bottom: 40px;
+}
+
+main h2 {
+    color: var(--vert);
+    border-bottom: 3px solid var(--jaune);
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+}
+
+/* ===== Grille de cartes (Flexbox) ===== */
+.modes-grille {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.carte-mode {
+    flex: 1 1 200px;
+    padding: 20px;
+    border-radius: 8px;
+    color: var(--noir);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.carte-mode h3 {
+    margin-bottom: 8px;
+}
+
+.carte-jaune  { background-color: var(--jaune); }
+.carte-rouge  { background-color: var(--rouge); color: white; }
+.carte-vert   { background-color: var(--vert);  color: white; }
+\end{lstlisting}
+
+\textbf{Enregistrez}. Les modes de jeu apparaissent maintenant en
+\textbf{cartes colorées en grille}, qui se réorganisent automatiquement
+si la fenêtre rétrécit. \cmark
+
+\begin{infobox}[\texttt{flex: 1 1 200px}, c'est quoi ?]
+Cette syntaxe condensée signifie : \og{}chaque carte peut grandir et
+rétrécir, mais sa largeur \emph{idéale} est 200px\fg{}. Combiné avec
+\texttt{flex-wrap: wrap} sur le parent, les cartes se mettent
+automatiquement sur plusieurs lignes si l'écran est trop étroit. C'est
+le début du \emph{responsive}.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 8 : Boutons stylés}
+% ===========================================================================
+
+Le bouton «\,Commencer\,» de la page \texttt{quiz.html} est moche. On
+le transforme en bouton vert avec effet de survol.
+
+\subsection{Ajouter une classe au bouton}
+
+Dans \texttt{quiz.html}, modifiez le bouton :
+
+\begin{lstlisting}[language=HTML5]
+<button type="submit" class="btn btn-primary">Commencer le quiz</button>
+\end{lstlisting}
+
+\subsection{Styler les boutons en CSS}
+
+\textbf{Ajoutez à \texttt{style.css}} :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Boutons ===== */
+.btn {
+    display: inline-block;
+    padding: 12px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-primary {
+    background-color: var(--vert);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0a6e3f;  /* vert plus foncé */
+}
+
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+.btn-secondary {
+    background-color: var(--blanc-casse);
+    color: var(--noir);
+    border: 2px solid var(--noir);
+}
+
+.btn-secondary:hover {
+    background-color: var(--noir);
+    color: white;
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. Le bouton est maintenant vert avec coins arrondis.
+\textbf{Survolez-le} : il devient vert foncé. \textbf{Cliquez-le} : il
+rétrécit légèrement (effet \og{}enfoncé\fg{}). \cmark
+
+\begin{retenirbox}[Pseudo-classes pour les boutons]
+\begin{itemize}[nosep]
+    \item \texttt{:hover} \quad au survol de la souris
+    \item \texttt{:active} \quad pendant le clic (souris enfoncée)
+    \item \texttt{:focus} \quad quand sélectionné au clavier (\texttt{Tab})
+\end{itemize}
+Pour l'accessibilité, traitez \texttt{:hover} et \texttt{:focus} de la
+même façon (pour les utilisateurs au clavier).
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 9 : Tableau du palmarès}
+% ===========================================================================
+
+Le tableau de \texttt{scores.html} est sans aucune mise en forme. On lui
+donne un look propre.
+
+\textbf{Ajoutez à \texttt{style.css}} :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Tableaux ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+th {
+    background-color: var(--vert);
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Lignes alternées (zébrures) */
+tr:nth-child(even) td {
+    background-color: rgba(245, 197, 24, 0.08);
+}
+
+tr:hover td {
+    background-color: rgba(14, 138, 79, 0.1);
+}
+\end{lstlisting}
+
+\textbf{Enregistrez} et allez sur \texttt{scores.html}. Le tableau est
+maintenant : en-tête vert, lignes claires alternées avec un soupçon de
+jaune, surlignage vert au survol. \cmark
+
+\begin{infobox}[\texttt{tr:nth-child(even)}]
+\texttt{:nth-child(even)} sélectionne les éléments \emph{pairs} (la 2\textsuperscript{e}, la 4\textsuperscript{e}, la 6\textsuperscript{e}\ldots). Combiné avec une couleur très claire, ça crée l'effet \og{}zébrures\fg{} qui aide à suivre les lignes du tableau.
+\end{infobox}
+
+% ===========================================================================
+\section{Étape 10 : Footer}
+% ===========================================================================
+
+\textbf{Ajoutez à \texttt{style.css}} :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Footer ===== */
+footer {
+    background-color: var(--noir);
+    color: var(--blanc-casse);
+    padding: 25px 20px;
+    text-align: center;
+    margin-top: 50px;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: var(--jaune);
+    text-decoration: underline;
+}
+
+footer a:hover {
+    color: white;
+}
+\end{lstlisting}
+
+Le pied de page devient un bandeau noir avec texte clair et liens jaunes. \cmark
+
+\newpage
+
+% ===========================================================================
+\section{Vérification visuelle}
+% ===========================================================================
+
+\subsection{Naviguez entre les 5 pages}
+
+Avec Live Server, parcourez :
+\begin{enumerate}[nosep]
+    \item \texttt{index.html} : header vert, nav jaune, cartes colorées, footer noir
+    \item \texttt{quiz.html} : formulaire avec bouton vert «\,Commencer\,»
+    \item \texttt{resultat.html} : page de résultat
+    \item \texttt{scores.html} : tableau du palmarès stylé
+    \item \texttt{apropos.html} : sections informatives
+\end{enumerate}
+
+\textbf{Toutes les pages partagent le même look.} C'est la magie d'un
+fichier CSS externe lié à toutes les pages. \cmark
+
+\subsection{DevTools : modifier le CSS en direct}
+
+\begin{infobox}[Inspecter et modifier]
+Dans le navigateur :
+\begin{enumerate}[nosep]
+    \item Clic droit sur un élément $\to$ \textbf{Inspecter}
+    \item L'onglet \textbf{Styles} (panneau de droite) montre toutes les règles CSS qui s'appliquent
+    \item \textbf{Modifiez une valeur} (par exemple changez \texttt{background-color: var(--vert)} en \texttt{red}) : la page change instantanément
+    \item Vos changements sont \textbf{temporaires} (ils disparaissent au rafraîchissement). C'est parfait pour expérimenter sans toucher au code.
+\end{enumerate}
+C'est l'outil que tous les développeurs utilisent pour bricoler.
+\end{infobox}
+
+\subsection{Ce qui ne marche pas encore (et c'est normal)}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Le formulaire ne fait toujours rien quand on clique \og{}Commencer\fg{} → c'est pour le \textbf{Lab 7} avec JS
+    \item L'app n'est pas encore optimisée pour téléphone → c'est pour le \textbf{Lab 4} (responsive)
+    \item Les images ne sont pas dans une grille → c'est pour le \textbf{Lab 4} aussi
+\end{itemize}
+
+\newpage
+
+% ===========================================================================
+\section{Exercices d'application}
+% ===========================================================================
+
+\begin{objectifbox}[Trois mini-exercices à enchaîner]
+
+\textbf{Exercice 1 --- Bouton secondaire}
+
+Sur \texttt{resultat.html}, transformez les liens
+\og{}Rejouer\fg{}, \og{}Voir mes scores\fg{}, \og{}Retour à l'accueil\fg{}
+en \textbf{boutons} en utilisant les classes \texttt{.btn} et
+\texttt{.btn-secondary} (déjà dans votre CSS) :
+
+\begin{lstlisting}[language=HTML5]
+<a href="quiz.html" class="btn btn-secondary">Rejouer</a>
+<a href="scores.html" class="btn btn-secondary">Voir mes scores</a>
+<a href="index.html" class="btn btn-secondary">Retour à l'accueil</a>
+\end{lstlisting}
+
+Bonus : disposez-les en ligne avec \texttt{display: flex; gap: 10px;} sur
+leur conteneur.
+
+\medskip
+
+\textbf{Exercice 2 --- Personnaliser une carte de mode}
+
+Modifiez la carte \og{}Chrono\fg{} sur \texttt{index.html} pour :
+\begin{itemize}[nosep]
+    \item Lui donner une nouvelle classe \texttt{.carte-noire}
+    \item Définir cette classe en CSS : fond noir, texte blanc, bordure jaune épaisse
+\end{itemize}
+
+\medskip
+
+\textbf{Exercice 3 --- Inverser les couleurs au survol des cartes}
+
+Faites en sorte qu'au survol d'une carte de mode, ses couleurs
+s'inversent (texte sur fond clair devient fond foncé sur texte clair).
+Indice : utilisez \texttt{.carte-mode:hover} et \texttt{transition}.
+
+\medskip
+
+\textbf{Bonus} : changez la palette ! Remplacez le vert par une autre
+couleur dominante (par exemple un rouge brique \texttt{\#a04436}) et
+observez que toute l'app se met à jour grâce aux variables CSS.
+\end{objectifbox}
+
+\newpage
+
+% ===========================================================================
+\section{Aide-mémoire}
+% ===========================================================================
+
+\subsection{Propriétés CSS vues dans ce Lab}
+
+\begin{center}
+\begin{tabular}{@{}lp{8cm}@{}}
+\toprule
+\textbf{Propriété}              & \textbf{Rôle} \\
+\midrule
+\texttt{background-color}       & Couleur de fond \\
+\texttt{color}                  & Couleur du texte \\
+\texttt{font-family}            & Police de caractères \\
+\texttt{font-size}              & Taille de police (px, rem, em) \\
+\texttt{font-weight}            & Graisse (400 normal, 600 demi-gras, 700 gras) \\
+\texttt{text-align}             & Alignement texte (\texttt{left}, \texttt{center}, \texttt{right}) \\
+\texttt{text-decoration}        & Soulignement (\texttt{underline}, \texttt{none}) \\
+\texttt{padding} / \texttt{margin} & Espacement intérieur / extérieur \\
+\texttt{border} / \texttt{border-radius} & Bordure / arrondi des coins \\
+\texttt{box-shadow}             & Ombre portée \\
+\texttt{display: flex}          & Active Flexbox sur le conteneur \\
+\texttt{flex} (raccourci)       & Comportement d'un flex item \\
+\texttt{gap}                    & Espace entre les flex items \\
+\texttt{transition}             & Animation douce sur changement de propriété \\
+\texttt{cursor: pointer}        & Curseur en main au survol \\
+\texttt{opacity}                & Transparence (0 à 1) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Variables et pseudo-classes}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Définir une variable : \texttt{:root \{ --maCouleur: \#0E8A4F; \}}
+    \item Utiliser une variable : \texttt{color: var(--maCouleur);}
+    \item \texttt{:hover} \quad au survol
+    \item \texttt{:active} \quad pendant le clic
+    \item \texttt{:focus} \quad quand sélectionné
+    \item \texttt{:nth-child(even)} \quad lignes paires
+\end{itemize}
+
+\subsection{Structure type d'un fichier style.css}
+
+\begin{lstlisting}[language=CSS]
+/* 1. Reset minimal     */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* 2. Variables         */
+:root { --vert: #0E8A4F; }
+
+/* 3. Body de base      */
+body { font-family: 'Poppins', sans-serif; }
+
+/* 4. Sélecteurs d'éléments (header, nav, main, footer) */
+header { ... }
+nav { ... }
+
+/* 5. Sélecteurs de classes (composants réutilisables) */
+.btn { ... }
+.carte-mode { ... }
+
+/* 6. États (hover, focus, active) */
+.btn:hover { ... }
+\end{lstlisting}
+
+\newpage
+
+% ===========================================================================
+\section{Routine Git de fin de Lab}
+% ===========================================================================
+
+Dans le terminal intégré de VS Code :
+
+\begin{lstlisting}
+git status
+git add .
+git commit -m "v0.3 : CSS panafricain + Google Fonts"
+git push
+git tag v0.3
+git push --tags
+\end{lstlisting}
+
+Vérifiez sur \url{https://github.com/votre-username/jang-afrig} :
+\begin{itemize}[nosep]
+    \item Le fichier \texttt{style.css} est bien là
+    \item Les 5 pages HTML contiennent le \texttt{<link>}
+    \item Le tag \texttt{v0.3} apparaît dans l'onglet \textbf{Tags}
+\end{itemize}
+
+% ===========================================================================
+\section{Rapport à produire}
+% ===========================================================================
+
+\begin{attentionbox}[Rapport du Lab 3 --- obligatoire]
+\textbf{Format :} 1-2 pages, déposé dans \texttt{rapports/rapport-lab-3-NOM-Prenom.pdf}.
+
+\medskip
+
+\textbf{Contenu (4 sections) :}
+\begin{enumerate}[nosep]
+    \item \textbf{Ce que j'ai fait} : style.css créé et lié, palette définie, polices importées, header/nav/cartes/boutons/tableau/footer stylés, exercices d'application complétés.
+    \item \textbf{Difficultés rencontrées} : variables qui ne fonctionnent pas, polices qui ne se chargent pas, problèmes de spécificité, conflits de styles\ldots
+    \item \textbf{Comment j'ai résolu} : DevTools, MDN, aide d'un camarade.
+    \item \textbf{Lien vers mon repo avec le tag v0.3} : \\
+          ex. \url{https://github.com/fatou-diop/jang-afrig/releases/tag/v0.3}
+\end{enumerate}
+
+\medskip
+
+\textbf{Bonus dans le rapport (facultatif) :} une capture d'écran de votre
+page d'accueil stylée. C'est le premier rendu visuel de votre projet, ça
+mérite d'être archivé.
+\end{attentionbox}
+
+\newpage
+
+% ===========================================================================
+\section{Résumé et transition}
+% ===========================================================================
+
+\subsection{Ce que vous avez accompli}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Créé un fichier \texttt{style.css} unique pour les 5 pages \cmark
+    \item Mis en place reset CSS et \texttt{box-sizing: border-box} \cmark
+    \item Importé 2 polices Google Fonts \cmark
+    \item Défini une palette panafricaine en variables CSS \cmark
+    \item Stylisé header, nav, cartes, boutons, tableau, footer \cmark
+    \item Ajouté des effets \texttt{:hover} et \texttt{transition} \cmark
+    \item Posé le tag \texttt{v0.3} \cmark
+\end{itemize}
+
+\subsection{Ce qu'on fera au Lab 4}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Faire en sorte que l'app soit \textbf{lisible sur téléphone}
+    \item Découvrir les \textbf{media queries}
+    \item Construire un \textbf{layout responsive} (1 colonne mobile, 2-3 colonnes desktop)
+    \item Gérer une grille d'images (drapeaux côte à côte au lieu de empilés)
+    \item Tag \texttt{v0.4}
+\end{itemize}
+
+\begin{projetbox}[À ce stade du semestre]
+Votre application a maintenant un \textbf{vrai look professionnel sur
+ordinateur}. La structure HTML est solide (Lab 2), le style est appliqué
+(Lab 3). Manque le \textbf{responsive} (Lab 4) avant qu'on attaque la
+partie interactivité (JavaScript).
+\end{projetbox}
+
+\vspace{0.5cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab 3 --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous avez transformé un document brut en application stylée.\\
+Place au responsive : que ça marche aussi sur téléphone.\\[0.2cm]
+\textit{Rendez-vous au Lab 4 !}\\[0.3cm]
+\vspace{0.3cm}
+\end{minipage}
+}
+\end{center}
+
+\end{document}

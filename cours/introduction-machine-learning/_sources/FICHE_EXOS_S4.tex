@@ -1,0 +1,390 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.4cm,top=1.1cm,bottom=1.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setstretch{1.0}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+
+\pagestyle{empty}
+
+% ligne de réponse pleine largeur, espacée
+\newcommand{\repligne}{\par\vspace{0.42cm}\noindent\dotfill}
+\newcommand{\zonecalcul}[1]{\par\vspace{0.15cm}\noindent{\small\emph{Espace de calcul :}}\par\vspace{#1}}
+
+\begin{document}
+
+% ============= EN-TETE =============
+\begin{center}
+\textbf{\large Fiche d'exercices --- Séance 4 : des données propres, préparer avant d'apprendre}\\[0.05cm]
+{\small Introduction au ML -- Dr. El Hadji Bassirou TOURÉ -- DMI $\cdot$ FST $\cdot$ UCAD \quad $\bullet$ \quad \textbf{Travail à la main, sans machine}}
+\end{center}
+
+\vspace{-0.15cm}
+\hrule
+\vspace{0.25cm}
+
+{\small Cette fiche reprend, exercice par exercice, les calculs de la Séance 4 : taux de manquants, imputation par la médiane, encodage one-hot, standardisation (z-score), le modèle des $k$ plus proches voisins à la main, le réglage de $k$ par la paire de scores, puis la fuite de données et le Pipeline $f = m \circ \varphi$. Répondre directement sur la fiche.}
+
+\vspace{0.2cm}
+
+\fbox{\begin{minipage}{0.96\textwidth}
+\small\textbf{Aides numériques (valables pour toute la fiche).} Quelques racines carrées utiles :
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|cccccccc}
+$u$ & $1$ & $2$ & $2{,}5$ & $4{,}09$ & $8$ & $10$ & $13{,}70$ & $1{,}049$\\
+\midrule
+$\sqrt{u}$ & $1{,}00$ & $1{,}41$ & $1{,}58$ & $2{,}02$ & $2{,}83$ & $3{,}16$ & $3{,}70$ & $32{,}4$\\
+\end{tabular}
+\end{center}
+Médiane d'un nombre \emph{pair} de valeurs $=$ moyenne des deux valeurs centrales (valeurs triées). Distance euclidienne en dimension $d$ : $d(x,x') = \sqrt{\sum_{j=1}^{d}(x_j - x'_j)^2}$.
+\end{minipage}}
+
+\vspace{0.45cm}
+
+%=============================================================================
+\textbf{\large Exercice 1 -- Taux de manquants}
+
+\vspace{0.15cm}
+
+Au poste de santé de Tivaouane, un registre de $400$ patients a été audité. Après remplacement des zéros \emph{impossibles} par NaN, on compte les valeurs manquantes par colonne :
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+colonne & glycémie & tension & insuline & IMC & fièvre\\
+\hline
+nombre de NaN & $8$ & $28$ & $180$ & $12$ & $0$\\
+\hline
+$m_j$ & & & & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+(a) Rappeler la formule du taux de manquants $m_j$, puis remplir la dernière ligne du tableau.
+\zonecalcul{1.0cm}
+
+\vspace{0.2cm}
+(b) On envisage de \emph{jeter} toute ligne contenant au moins un trou. En supposant que les colonnes à trous ne se chevauchent pas, combien de patients perdrait-on au plus ? Combien en resterait-il ? Quelle proportion du jeu cela représente-t-il ?
+\zonecalcul{1.2cm}
+Patients perdus (au plus) : \makebox[2.5cm]{\dotfill} \quad restants : \makebox[2.5cm]{\dotfill} \quad proportion perdue : \makebox[2.5cm]{\dotfill}
+
+\vspace{0.2cm}
+(c) Pour chacune des cinq colonnes, proposer le traitement le plus raisonnable (imputation par la médiane / aucune action), et justifier en une ligne.
+\repligne
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 2 -- Médiane et imputation}
+
+\vspace{0.15cm}
+
+Une mini-colonne d'insuline ($\mu$U/mL) de huit patients, après remplacement des zéros impossibles, contient :
+\[
+92 \quad \text{NaN} \quad 145 \quad 110 \quad \text{NaN} \quad 130 \quad 88 \quad 410
+\]
+
+(a) Trier les valeurs observées (sans les NaN), puis calculer la médiane.
+\zonecalcul{1.1cm}
+Valeurs triées : \dotfill
+
+\vspace{0.15cm}
+médiane $=$ \makebox[2.5cm]{\dotfill}
+
+\vspace{0.2cm}
+(b) Donner la colonne après imputation par la médiane (les valeurs observées ne bougent pas).
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+position & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ & $8$\\
+\hline
+valeur imputée & & & & & & & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+(c) Calculer la moyenne des valeurs observées. Combien de valeurs observées la moyenne dépasse-t-elle ? Conclure : pourquoi la médiane est-elle préférable ici ?
+\zonecalcul{1.3cm}
+moyenne $=$ \makebox[2.5cm]{\dotfill} \quad la moyenne dépasse \makebox[1.2cm]{\dotfill} valeurs sur $6$.
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 3 -- Encodage one-hot}
+
+\vspace{0.15cm}
+
+Une colonne « groupe sanguin » prend quatre modalités : \textbf{A}, \textbf{AB}, \textbf{B}, \textbf{O} (rangées dans cet ordre alphabétique).
+
+\vspace{0.2cm}
+(a) Combien de colonnes binaires le one-hot produit-il ? \makebox[2cm]{\dotfill}
+
+\vspace{0.2cm}
+(b) Encoder les trois patients suivants (une case « chaude » par ligne) :
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+groupe & A & AB & B & O\\
+\hline
+« B » & & & & \\
+\hline
+« O » & & & & \\
+\hline
+« AB » & & & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+(c) Pourquoi ne pas coder simplement $\text{A}=1,\ \text{AB}=2,\ \text{B}=3,\ \text{O}=4$ ? Expliquer en termes d'\emph{ordre} et de \emph{distance}.
+\repligne
+\repligne
+\repligne
+
+\vspace{0.2cm}
+(d) Calculer la distance euclidienne entre les vecteurs one-hot de « A » et de « B ». Que vaudrait-elle pour deux modalités \emph{quelconques} distinctes ? Qu'en conclure sur la géométrie produite par le one-hot ?
+\zonecalcul{1.0cm}
+$d(\text{one-hot A},\ \text{one-hot B}) = $ \makebox[3cm]{\dotfill}
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 4 -- Standardisation (z-score)}
+
+\vspace{0.15cm}
+
+Sur le jeu d'\emph{entraînement}, deux colonnes ont les statistiques suivantes : \quad hémoglobine $\mu = 12{,}5$, $\sigma = 1{,}8$ (g/dL) \qquad glycémie $\mu = 120$, $\sigma = 28$ (mg/dL).
+
+\vspace{0.2cm}
+(a) Rappeler la formule du z-score, puis calculer celui d'un patient à hémoglobine $15{,}2$ g/dL. Interpréter en une phrase.
+\zonecalcul{1.1cm}
+$z = $ \makebox[2.5cm]{\dotfill}
+\repligne
+
+\vspace{0.2cm}
+(b) Un patient du jeu de \emph{test} a une hémoglobine de $9{,}8$ g/dL. Calculer son z-score. \textbf{Question clé :} faut-il recalculer $\mu$ et $\sigma$ en incluant ce patient ? Justifier.
+\zonecalcul{1.1cm}
+$z = $ \makebox[2.5cm]{\dotfill}
+\repligne
+\repligne
+
+\vspace{0.2cm}
+(c) Un troisième patient a une glycémie de $162$ mg/dL. Calculer son z-score, et le comparer à celui de la question (a). Que permet cette comparaison, alors que les deux colonnes ont des unités différentes ?
+\zonecalcul{1.0cm}
+$z = $ \makebox[2.5cm]{\dotfill}
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 5 -- Les $k$ plus proches voisins, à la main}
+
+\vspace{0.15cm}
+
+\fbox{\begin{minipage}{0.96\textwidth}
+\small Cinq patients d'entraînement sont décrits par deux caractéristiques \textbf{déjà standardisées} $(z_1, z_2)$ et une classe (P $=1$, N $=0$). On veut classer un nouveau patient $\star = (0{,}0,\ 1{,}0)$.
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{c|cc|c}
+voisin & $z_1$ & $z_2$ & classe\\
+\midrule
+$A$ & $1{,}0$ & $2{,}0$ & $1$\\
+$B$ & $-1{,}0$ & $1{,}0$ & $0$\\
+$C$ & $0{,}5$ & $-0{,}5$ & $1$\\
+$D$ & $3{,}0$ & $0{,}0$ & $1$\\
+$E$ & $-2{,}0$ & $-1{,}0$ & $0$\\
+\end{tabular}
+\end{center}
+\end{minipage}}
+
+\vspace{0.2cm}
+(a) Calculer la distance euclidienne de chaque voisin à $\star$, puis donner le rang (du plus proche au plus lointain).
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.9}
+\begin{tabular}{|c|c|c|c|}
+\hline
+voisin & calcul de la distance & distance & rang\\
+\hline
+$A$ & & & \\
+\hline
+$B$ & & & \\
+\hline
+$C$ & & & \\
+\hline
+$D$ & & & \\
+\hline
+$E$ & & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+(b) Donner la prédiction pour $k = 3$ : voisins retenus \makebox[3.5cm]{\dotfill} \quad classes \makebox[2.5cm]{\dotfill} \quad $f(\star) = $ \makebox[1.2cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) Donner la prédiction pour $k = 5$ : classes \makebox[3.5cm]{\dotfill} \quad $f(\star) = $ \makebox[1.2cm]{\dotfill}
+
+\vspace{0.2cm}
+(d) Pourquoi choisit-on presque toujours $k$ \emph{impair} en classification binaire ?
+\repligne
+\repligne
+
+\vspace{0.25cm}
+(e) \textbf{L'échelle est une condition de validité.} Trois patients sont décrits par (âge, insuline) en unités \emph{brutes} : Awa $= (28,\ 100)$, Cheikh $= (31,\ 300)$, Fatou $= (65,\ 108)$. Sur le train, âge : $\mu = 35$, $\sigma = 10$ ; insuline : $\mu = 150$, $\sigma = 100$.
+
+\vspace{0.15cm}
+(e.1) En unités brutes, calculer $d(\text{Awa}, \text{Cheikh})$ et $d(\text{Awa}, \text{Fatou})$. Qui paraît la plus proche d'Awa ?
+\zonecalcul{1.3cm}
+$d_{\text{brut}}(\text{Awa},\text{Cheikh}) = $ \makebox[2.5cm]{\dotfill} \quad $d_{\text{brut}}(\text{Awa},\text{Fatou}) = $ \makebox[2.5cm]{\dotfill} \quad plus proche : \makebox[2cm]{\dotfill}
+
+\vspace{0.15cm}
+(e.2) Standardiser les trois patients (z-score de chaque coordonnée), puis recalculer les deux distances. Qui est maintenant la plus proche d'Awa ?
+\zonecalcul{2.2cm}
+$d_{\text{std}}(\text{Awa},\text{Cheikh}) = $ \makebox[2.5cm]{\dotfill} \quad $d_{\text{std}}(\text{Awa},\text{Fatou}) = $ \makebox[2.5cm]{\dotfill} \quad plus proche : \makebox[2cm]{\dotfill}
+
+\vspace{0.15cm}
+(e.3) L'ordre des voisins s'est-il inversé ? Expliquer en une phrase ce que la standardisation a corrigé.
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 6 -- Le réglage de $k$ : diagnostic}
+
+\vspace{0.15cm}
+
+Sur un jeu de dépistage, le kNN a été entraîné puis évalué pour trois valeurs de $k$. Baseline majoritaire : $0{,}66$. \textbf{Attention au sens de lecture : un \emph{petit} $k$ donne un modèle \emph{complexe}.}
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.9}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+$k$ & accuracy train & accuracy test & écart train $-$ test & diagnostic\\
+\hline
+$1$  & $1{,}00$ & $0{,}71$ & & \\
+\hline
+$15$ & $0{,}80$ & $0{,}78$ & & \\
+\hline
+$300$ & $0{,}67$ & $0{,}66$ & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+(a) Remplir la colonne des écarts.
+
+\vspace{0.15cm}
+(b) Remplir la colonne diagnostic (sous-ajusté / bien ajusté / sur-ajusté), puis justifier chaque cas en une phrase, en s'appuyant sur l'écart \emph{et} sur la baseline.
+
+\vspace{0.2cm}
+$k = 1$ : \dotfill
+\repligne
+
+\vspace{0.15cm}
+$k = 15$ : \dotfill
+\repligne
+
+\vspace{0.15cm}
+$k = 300$ : \dotfill
+\repligne
+
+\vspace{0.2cm}
+(c) Valeur de $k$ à retenir : \makebox[1.5cm]{\dotfill} \quad sur la foi de quel chiffre ? \dotfill
+
+\vspace{0.2cm}
+(d) Le réglage $k = 1$ a la meilleure accuracy d'entraînement ($1{,}00$). Expliquer pourquoi ce chiffre ne doit jamais servir à choisir un modèle, et faire le lien avec la profondeur de l'arbre (Séance 3).
+\repligne
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 7 -- Fuite de données et Pipeline}
+
+\vspace{0.15cm}
+
+(a) Pour chaque protocole, dire s'il y a \emph{fuite} et, le cas échéant, laquelle : \textbf{variable fuyarde} (une colonne contient la réponse) ou \textbf{prétraitement fuyard} ($\mu$, $\sigma$, médianes appris hors du train).
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|p{11.3cm}|c|}
+\hline
+protocole & fuite ? laquelle ?\\
+\hline
+(1) Prédire une réadmission avec la colonne « durée du séjour courant ». & \\
+\hline
+(2) Standardiser tout le jeu, \emph{puis} faire le split train/test. & \\
+\hline
+(3) Imputer le train avec les médianes du train, puis le test avec \emph{ces mêmes} médianes. & \\
+\hline
+(4) Faire le split, puis appeler \texttt{fit\_transform} du scaler sur le jeu de \emph{test}. & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.25cm}
+(b) \textbf{La chaîne $\varphi$ à la main.} Un patient du \emph{test} traverse le Pipeline $f = m \circ \varphi$. Les paramètres ont été appris sur le \emph{train} : $\text{med}_{\text{insuline}} = 120$ ; glycémie $\mu = 120$, $\sigma = 28$ ; insuline $\mu = 150$, $\sigma = 100$ ; âge $\mu = 35$, $\sigma = 10$. Remplir le tableau étape par étape.
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{2.1}
+\begin{tabular}{|l|c|c|c|}
+\hline
+étape & glycémie & insuline & âge\\
+\hline
+brut & $162$ & NaN & $28$\\
+\hline
+après imputation & & & \\
+\hline
+après z-score & & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.15cm}
+Chaque nombre injecté vient-il du train ou du test ? Pourquoi est-ce essentiel ?
+\repligne
+\repligne
+
+\vspace{0.25cm}
+(c) \textbf{Remettre la chaîne dans l'ordre.} Les cinq étapes d'une étude propre, en désordre : \quad (1) score sur le test ; \quad (2) \texttt{train\_test\_split} ; \quad (3) remplacer les zéros impossibles par NaN ; \quad (4) \texttt{fit} du Pipeline sur le train ; \quad (5) construire le Pipeline (imputation $\to$ standardisation $\to$ modèle).
+
+\vspace{0.2cm}
+Ordre correct : \makebox[5cm]{\dotfill}
+
+\vspace{0.2cm}
+Où une inversion de $2$ et $4$ (\texttt{fit} avant le split) créerait-elle une fuite, et de quel type ?
+\repligne
+\repligne
+
+\end{document}

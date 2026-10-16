@@ -1,0 +1,264 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.4cm,top=1.1cm,bottom=1.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setstretch{1.0}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+\pagestyle{empty}
+\newcommand{\repligne}{\par\vspace{0.42cm}\noindent\dotfill}
+\newcommand{\zonecalcul}[1]{\par\vspace{0.15cm}\noindent{\small\emph{Espace de calcul :}}\par\vspace{#1}}
+
+\begin{document}
+
+% ============= EN-TETE =============
+\begin{center}
+\textbf{\large Fiche d'exercices --- Séance 5 : la régression linéaire}\\[0.05cm]
+{\small Introduction au ML -- Dr. El Hadji Bassirou TOURÉ -- DMI $\cdot$ FST $\cdot$ UCAD \quad $\bullet$ \quad \textbf{Travail à la main, sans machine}}
+\end{center}
+\vspace{-0.15cm}
+\hrule
+\vspace{0.25cm}
+
+{\small Cette fiche reprend, exercice par exercice, les calculs de la Séance 5 : lire un coefficient et prédire terme à terme, comparer deux droites par la MSE, la droite plate, l'équation normale à une variable, une itération de descente de gradient, les métriques MAE/RMSE/R², puis l'effet de la régularisation. Répondre directement sur la fiche.}
+
+\vspace{0.2cm}
+
+\fbox{\begin{minipage}{0.96\textwidth}
+\small\textbf{Rappels utiles (valables pour toute la fiche).}
+\begin{itemize}[leftmargin=1.4em,itemsep=0.1em,topsep=0.2em]
+  \item Modèle linéaire : $\hat y = b + w_1 x_1 + \dots + w_d x_d$. Résidu d'un point : $y - \hat y$.
+  \item Erreur quadratique moyenne : $\mathrm{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat y_i)^2$. \quad $\mathrm{RMSE} = \sqrt{\mathrm{MSE}}$. \quad $\mathrm{MAE} = \frac{1}{n}\sum_i |y_i - \hat y_i|$.
+  \item Équation normale à une variable : $\;a = \dfrac{\sum_i (x_i-\bar x)(y_i-\bar y)}{\sum_i (x_i-\bar x)^2}$, \quad $b = \bar y - a\,\bar x$.
+  \item Descente de gradient (modèle $\hat y = a x$, un paramètre) : gradient $\;g = -\dfrac{2}{n}\sum_i x_i\,(y_i - a x_i)$, \quad mise à jour $a \leftarrow a - \eta\, g$.
+  \item Coefficient de détermination : $R^2 = 1 - \dfrac{\sum_i (y_i - \hat y_i)^2}{\sum_i (y_i - \bar y)^2}$.
+\end{itemize}
+\end{minipage}}
+
+\vspace{0.4cm}
+
+%=============================================================================
+\textbf{\large Exercice 1 -- Lire un coefficient et prédire}
+
+\vspace{0.15cm}
+
+Un modèle prédit la durée d'hospitalisation (en jours) à partir de l'âge et de la glycémie d'un patient :
+$$\hat y = 1{,}2 \;+\; 0{,}05\,(\text{âge}) \;+\; 0{,}60\,(\text{glycémie}).$$
+
+\textbf{(a)} Un patient de Ziguinchor a $\text{âge} = 40$ ans et $\text{glycémie} = 9{,}0$. Calculer sa durée prédite $\hat y$, terme par terme.
+\zonecalcul{1.6cm}
+
+\textbf{(b)} Sa durée réelle a été $y = 6{,}0$ jours. Calculer le résidu $y - \hat y$. Le modèle a-t-il surestimé ou sous-estimé ?
+\repligne
+\repligne
+
+\textbf{(c)} Interpréter le coefficient $0{,}60$ de la glycémie en une phrase : que se passe-t-il sur la prédiction si la glycémie augmente d'une unité (l'âge restant fixe) ?
+\repligne
+\repligne
+
+%=============================================================================
+\vspace{0.2cm}
+\textbf{\large Exercice 2 -- Comparer deux droites par leur MSE}
+
+\vspace{0.15cm}
+
+On dispose de quatre patients du dispensaire de Thiès, avec une caractéristique $x$ (standardisée) et la durée $y$ :
+
+\vspace{0.1cm}
+{\small
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$x_i$ & $1$ & $2$ & $3$ & $4$\\
+\hline
+$y_i$ & $2{,}0$ & $2{,}5$ & $4{,}0$ & $5{,}5$\\
+\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+On hésite entre deux droites : \quad droite A : $\hat y = 1 + x$ \qquad droite B : $\hat y = 0{,}5 + 1{,}2\,x$.
+
+\vspace{0.2cm}
+\textbf{(a)} Compléter le tableau des prédictions et des erreurs pour \emph{chaque} droite, puis calculer la MSE de chacune.
+
+\vspace{0.1cm}
+{\small
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|l|c|c|c|c||c|}
+\hline
+ & $x=1$ & $x=2$ & $x=3$ & $x=4$ & \textbf{MSE}\\
+\hline
+A : $\hat y_i$ & & & & & \\
+\hline
+A : $y_i - \hat y_i$ & & & & & \\
+\hline
+B : $\hat y_i$ & & & & & \\
+\hline
+B : $y_i - \hat y_i$ & & & & & \\
+\hline
+\end{tabular}}
+
+\zonecalcul{2.0cm}
+
+\textbf{(b)} Laquelle des deux droites est la « meilleure » au sens de la MSE ? Justifier.
+\repligne
+\repligne
+
+%=============================================================================
+\vspace{0.2cm}
+\textbf{\large Exercice 3 -- La droite plate (baseline)}
+
+\vspace{0.15cm}
+
+La baseline d'une régression prédit, pour \emph{tout} patient, la moyenne $\bar y$ des durées observées. Sur quatre patients de Kaolack : $\;y = (3{,}0,\ 5{,}0,\ 4{,}0,\ 8{,}0)$.
+
+\vspace{0.15cm}
+\textbf{(a)} Calculer la moyenne $\bar y$.
+\repligne
+
+\textbf{(b)} La droite plate prédit $\hat y_i = \bar y$ pour chaque patient. Calculer sa MSE. (On remarquera que cette MSE est exactement la \emph{variance} des $y_i$.)
+\zonecalcul{1.8cm}
+
+\textbf{(c)} Quelle est la RMSE de cette baseline ? Dans quelle unité s'exprime-t-elle ?
+\repligne
+
+%=============================================================================
+\vspace{0.2cm}
+\textbf{\large Exercice 4 -- L'équation normale à une variable}
+
+\vspace{0.15cm}
+
+On cherche la \emph{meilleure} droite $\hat y = a x + b$ pour cinq patients de Saint-Louis :
+
+\vspace{0.1cm}
+{\small
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+$x_i$ & $1$ & $2$ & $3$ & $4$ & $5$\\
+\hline
+$y_i$ & $2{,}0$ & $4{,}0$ & $5{,}0$ & $4{,}0$ & $6{,}0$\\
+\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+\textbf{(a)} Calculer les moyennes $\bar x$ et $\bar y$.
+\repligne
+
+\textbf{(b)} Compléter le tableau, puis calculer la pente $a = \dfrac{\sum (x_i-\bar x)(y_i-\bar y)}{\sum (x_i-\bar x)^2}$.
+
+\vspace{0.1cm}
+{\small
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|l|c|c|c|c|c||c|}
+\hline
+ & $i=1$ & $i=2$ & $i=3$ & $i=4$ & $i=5$ & \textbf{somme}\\
+\hline
+$x_i - \bar x$ & & & & & & \\
+\hline
+$y_i - \bar y$ & & & & & & \\
+\hline
+$(x_i-\bar x)(y_i-\bar y)$ & & & & & & \\
+\hline
+$(x_i-\bar x)^2$ & & & & & & \\
+\hline
+\end{tabular}}
+
+\zonecalcul{1.4cm}
+
+\textbf{(c)} En déduire l'ordonnée à l'origine $b = \bar y - a\,\bar x$, puis écrire l'équation de la droite.
+\repligne
+\repligne
+
+%=============================================================================
+\vspace{0.2cm}
+\textbf{\large Exercice 5 -- Une itération de descente de gradient}
+
+\vspace{0.15cm}
+
+On ajuste un modèle \emph{sans biais} à un seul paramètre, $\hat y = a\,x$, sur trois points : $\;x = (1, 2, 3)$, $\;y = (2, 4, 6)$. Le critère est $J(a) = \frac{1}{n}\sum_i (y_i - a x_i)^2$, et son gradient $\;g = -\frac{2}{n}\sum_i x_i\,(y_i - a x_i)$.
+
+\vspace{0.15cm}
+\textbf{(a)} On part de $a_0 = 0$. Calculer les prédictions $\hat y_i = a_0 x_i$, puis le gradient $g$ en ce point.
+\zonecalcul{1.8cm}
+
+\textbf{(b)} Avec un pas $\eta = 0{,}1$, calculer la nouvelle valeur $a_1 = a_0 - \eta\, g$.
+\repligne
+
+\textbf{(c)} Vers quelle valeur de $a$ cette descente va-t-elle converger ? (Indice : quelle pente passe exactement par les trois points ?)
+\repligne
+
+%=============================================================================
+\vspace{0.2cm}
+\textbf{\large Exercice 6 -- MAE, RMSE et R²}
+
+\vspace{0.15cm}
+
+Un modèle de régression a produit, sur quatre patients de Tivaouane, les durées réelles $y$ et prédites $\hat y$ :
+
+\vspace{0.1cm}
+{\small
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$y_i$ & $10$ & $12$ & $8$ & $15$\\
+\hline
+$\hat y_i$ & $11$ & $11$ & $9$ & $13$\\
+\hline
+$y_i - \hat y_i$ & & & & \\
+\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+\textbf{(a)} Compléter la ligne des erreurs, puis calculer la MAE et la RMSE.
+\zonecalcul{1.8cm}
+
+\textbf{(b)} La RMSE est-elle plus grande ou plus petite que la MAE ? Expliquer pourquoi en une phrase.
+\repligne
+\repligne
+
+\textbf{(c)} Sachant que $\bar y = 11{,}25$ et que $\sum_i (y_i - \bar y)^2 = 26{,}75$, calculer le $R^2$ du modèle. Le modèle fait-il mieux que la baseline-moyenne ?
+\zonecalcul{1.6cm}
+
+%=============================================================================
+\vspace{0.2cm}
+\textbf{\large Exercice 7 -- Ridge et Lasso}
+
+\vspace{0.15cm}
+
+Sur un jeu de variables standardisées, on entraîne une régression Ridge avec différentes valeurs de $\alpha$. On observe la pente associée à une variable :
+
+\vspace{0.1cm}
+{\small
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+$\alpha$ & $0$ & $1$ & $10$ & $100$\\
+\hline
+pente obtenue & $2{,}00$ & $1{,}67$ & $0{,}67$ & $0{,}095$\\
+\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+\textbf{(a)} Décrire en une phrase l'effet de $\alpha$ sur la pente, à la lecture du tableau.
+\repligne
+\repligne
+
+\textbf{(b)} Vers quel modèle tend Ridge quand $\alpha \to \infty$ ? Que vaut alors la prédiction pour tout patient ?
+\repligne
+\repligne
+
+\textbf{(c)} Ridge réduit les coefficients sans les annuler ; Lasso, lui, peut mettre certains coefficients \emph{exactement} à zéro. En une phrase, dire lequel des deux fait de la \textbf{sélection de variables}, et pourquoi c'est utile quand beaucoup de variables sont inutiles.
+\repligne
+\repligne
+
+\textbf{(d)} Pourquoi faut-il \textbf{standardiser} les variables avant d'appliquer Ridge ou Lasso ? (Indice : la pénalité compare les coefficients entre eux.)
+\repligne
+\repligne
+
+\end{document}

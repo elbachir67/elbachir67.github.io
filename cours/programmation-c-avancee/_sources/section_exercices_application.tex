@@ -1,0 +1,155 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{enumitem}
+
+\newtcolorbox{infobox}[1]{colback=blue!5,colframe=blue!75!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{examplebox}[1]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{exercicebox}[1]{colback=orange!5,colframe=orange!75!black,fonttitle=\bfseries,title=#1,breakable}
+
+\title{\textbf{Chapitre 1 : Représentation Numérique}\\
+\large Exercices d'Application (à faire pendant le cours)}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{infobox}{Objectif}
+Ces exercices sont à réaliser \textbf{pendant le cours}, immédiatement après chaque notion. Ils permettent de vérifier la compréhension avant de passer aux TDs.
+\end{infobox}
+
+%==============================================================================
+\section{Exercice A1 : Interprétation Signed/Unsigned}
+%==============================================================================
+
+\begin{exercicebox}{Énoncé}
+Soit le motif binaire $10110100_2$ sur 8 bits. Calculer sa valeur décimale :
+\begin{enumerate}[label=\alph*)]
+    \item Interprété comme \textbf{unsigned} (non signé)
+    \item Interprété comme \textbf{signed} (signé, complément à deux)
+\end{enumerate}
+\end{exercicebox}
+
+\vspace{0.5em}
+
+\begin{center}
+\includegraphics[width=0.95\textwidth]{fig_exo1_signed_unsigned.pdf}
+\end{center}
+
+\begin{examplebox}{Méthode}
+\begin{enumerate}
+    \item \textbf{Unsigned (B2U)} : Additionner les puissances de 2 où le bit vaut 1
+    \[B2U_8 = \sum_{i=0}^{7} b_i \cdot 2^i\]
+    \item \textbf{Signed (B2T)} : Si MSB = 1, le nombre est négatif
+    \[B2T_8 = -b_7 \cdot 2^7 + \sum_{i=0}^{6} b_i \cdot 2^i = -128 + \text{(valeur des 7 bits restants)}\]
+\end{enumerate}
+\end{examplebox}
+
+\vspace{1em}
+
+\begin{exercicebox}{À vous !}
+Appliquer la même méthode au motif $11100011_2$ sur 8 bits.
+
+\vspace{0.5em}
+\textbf{Réponses attendues :}
+\begin{itemize}
+    \item Unsigned : \rule{2cm}{0.4pt}
+    \item Signed : \rule{2cm}{0.4pt}
+\end{itemize}
+\end{exercicebox}
+
+\newpage
+%==============================================================================
+\section{Exercice A2 : Négation en Complément à Deux}
+%==============================================================================
+
+\begin{exercicebox}{Énoncé}
+Calculer la négation de $x = 37$ sur 8 bits en utilisant la formule :
+\[\boxed{-x = \sim x + 1}\]
+(inverser tous les bits, puis ajouter 1)
+\end{exercicebox}
+
+\vspace{0.5em}
+
+\begin{center}
+\includegraphics[width=0.95\textwidth]{fig_exo2_negation.pdf}
+\end{center}
+
+\begin{examplebox}{Méthode}
+\begin{enumerate}
+    \item Écrire $x$ en binaire sur 8 bits
+    \item Inverser tous les bits (0 → 1, 1 → 0) pour obtenir $\sim x$
+    \item Ajouter 1 au résultat
+    \item \textbf{Vérification} : $x + (-x)$ doit donner 0
+\end{enumerate}
+\end{examplebox}
+
+\vspace{1em}
+
+\begin{exercicebox}{À vous !}
+Calculer la négation de $x = 100$ sur 8 bits.
+
+\vspace{0.5em}
+\begin{tabular}{ll}
+$x = 100$ en binaire : & \rule{4cm}{0.4pt} \\[0.5em]
+$\sim x$ : & \rule{4cm}{0.4pt} \\[0.5em]
+$\sim x + 1 = -x$ : & \rule{4cm}{0.4pt} \\[0.5em]
+Vérification $100 + (-100)$ : & \rule{4cm}{0.4pt}
+\end{tabular}
+\end{exercicebox}
+
+\newpage
+%==============================================================================
+\section{Exercice A3 : Encodage IEEE 754}
+%==============================================================================
+
+\begin{exercicebox}{Énoncé}
+Encoder le nombre $-10.75$ en format IEEE 754 float (32 bits).
+
+Donner le résultat final en hexadécimal.
+\end{exercicebox}
+
+\vspace{0.5em}
+
+\begin{center}
+\includegraphics[width=0.95\textwidth]{fig_exo3_ieee754.pdf}
+\end{center}
+
+\begin{examplebox}{Méthode (6 étapes)}
+\begin{enumerate}
+    \item \textbf{Signe} : négatif → $s = 1$, positif → $s = 0$
+    \item \textbf{Conversion binaire} : convertir $|x|$ en binaire (partie entière + fractionnaire)
+    \item \textbf{Normalisation} : mettre sous forme $1.xxxxx \times 2^E$ (décaler la virgule)
+    \item \textbf{Exposant biaisé} : calculer $E + 127$, puis convertir en binaire (8 bits)
+    \item \textbf{Fraction} : prendre les bits après le "1." (23 bits, le 1 est implicite)
+    \item \textbf{Assembler} : concaténer signe | exposant | fraction
+\end{enumerate}
+\end{examplebox}
+
+\vspace{1em}
+
+\begin{exercicebox}{À vous !}
+Encoder $+6.5$ en IEEE 754 float (32 bits).
+
+\vspace{0.5em}
+\begin{tabular}{ll}
+① Signe : & $s = $ \rule{1cm}{0.4pt} \\[0.5em]
+② Binaire de $6.5$ : & \rule{4cm}{0.4pt} \\[0.5em]
+③ Normalisation : & $1.$ \rule{2cm}{0.4pt} $\times 2^{E}$ où $E = $ \rule{1cm}{0.4pt} \\[0.5em]
+④ Exposant biaisé : & $E + 127 = $ \rule{1cm}{0.4pt} $ = $ \rule{3cm}{0.4pt} (binaire) \\[0.5em]
+⑤ Fraction (23 bits) : & \rule{5cm}{0.4pt} \\[0.5em]
+⑥ Résultat hex : & \texttt{0x}\rule{2cm}{0.4pt}
+\end{tabular}
+\end{exercicebox}
+
+\end{document}

@@ -1,0 +1,177 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.4cm,top=1.1cm,bottom=1.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setstretch{1.0}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+\pagestyle{empty}
+\newcommand{\repligne}{\par\vspace{0.42cm}\noindent\dotfill}
+\newcommand{\zonecalcul}[1]{\par\vspace{0.15cm}\noindent{\small\emph{Espace de calcul :}}\par\vspace{#1}}
+\newcommand{\aide}[1]{\fbox{\begin{minipage}{0.96\textwidth}\small #1\end{minipage}}}
+\begin{document}
+\begin{center}
+\textbf{\large Fiche d'exercices --- Séance 10 : les réseaux de neurones}\\[0.05cm]
+{\small Introduction au ML -- Dr. El Hadji Bassirou TOURÉ -- DMI $\cdot$ FST $\cdot$ UCAD \quad $\bullet$ \quad \textbf{Travail à la main, sans machine}}
+\end{center}
+\vspace{-0.15cm}\hrule\vspace{0.25cm}
+{\small Cette fiche reprend, exercice par exercice, les calculs de la Séance 10 : le neurone et la couche sous forme matricielle, la propagation avant, le décompte des paramètres, la nécessité d'une activation non linéaire, un pas complet de rétropropagation, puis le verdict face aux ensembles. Répondre directement sur la fiche.}
+\vspace{0.2cm}
+
+\aide{\textbf{Aides numériques (valables pour toute la fiche).} Sigmoïde : $\sigma(z)=1/(1+e^{-z})$ ; $\sigma(-4{,}5)=0{,}011$ ; $\sigma(-1)=0{,}269$ ; $\sigma(-0{,}85)=0{,}30$ ; $\sigma(0)=0{,}5$ ; $\sigma(1)=0{,}731$ ; $\sigma(1{,}5)=0{,}818$ ; $\sigma(4{,}5)=0{,}989$. ReLU : $\max(0,z)$. Dérivées : $\sigma'(z)=a(1-a)$ avec $a=\sigma(z)$ ; $\text{ReLU}'(z)=1$ si $z>0$, $0$ sinon. $\ln 0{,}731=-0{,}313$ ; $\ln 0{,}3=-1{,}204$.
+Rétropropagation (sortie sigmoïde, entropie croisée) : $\delta^{[L]}=\hat y-y$ ; $\ \boldsymbol\delta^{[\ell]}=(W^{[\ell+1]})^{\top}\boldsymbol\delta^{[\ell+1]}\odot f'(\mathbf z^{[\ell]})$ ; $\ \partial L/\partial W^{[\ell]}=\boldsymbol\delta^{[\ell]}(\mathbf a^{[\ell-1]})^{\top}$ ; $\ \partial L/\partial \mathbf b^{[\ell]}=\boldsymbol\delta^{[\ell]}$ ; mise à jour $w\leftarrow w-\eta\,\partial L/\partial w$.}
+\vspace{0.4cm}
+
+\textbf{\large Exercice 1 -- Le neurone à la main}
+\vspace{0.15cm}
+
+Un neurone à trois entrées a les poids $\mathbf w = (0{,}5;\ -1;\ 1)$ et le biais $b = -1$.
+
+\vspace{0.15cm}
+(a) Pour $\mathbf x = (3;\ 1;\ 2)$, calculer $z = \mathbf w^{\top}\mathbf x + b$ terme à terme, puis la sortie avec la sigmoïde et avec ReLU.
+\zonecalcul{1.0cm}
+$z=$ \makebox[2cm]{\dotfill} \quad $\sigma(z)=$ \makebox[2cm]{\dotfill} \quad ReLU$(z)=$ \makebox[2cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Même question pour $\mathbf x = (1;\ 4;\ 0)$.
+\zonecalcul{0.9cm}
+$z=$ \makebox[2cm]{\dotfill} \quad $\sigma(z)=$ \makebox[2cm]{\dotfill} \quad ReLU$(z)=$ \makebox[2cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) Un neurone à sortie sigmoïde, sans couche cachée : à quel modèle déjà vu est-il identique ?
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 2 -- Une couche, sous forme matricielle}
+\vspace{0.15cm}
+
+Une couche de deux neurones reçoit trois entrées. Chaque \emph{ligne} de $W$ contient les poids d'un neurone :
+\[ W = \begin{pmatrix} 1 & -1 & 0{,}5\\ 0 & 2 & -1\end{pmatrix},\qquad \mathbf b = \begin{pmatrix} 0\\ -1\end{pmatrix},\qquad \mathbf x = \begin{pmatrix} 2\\ 1\\ 4\end{pmatrix}. \]
+
+(a) Quelles sont les dimensions de $W$, $\mathbf x$, $\mathbf b$ et $\mathbf z$ ? \makebox[8cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Calculer $\mathbf z = W\mathbf x + \mathbf b$ ligne par ligne, puis $\mathbf a = \text{ReLU}(\mathbf z)$.
+\zonecalcul{1.3cm}
+$\mathbf z = $ \makebox[3cm]{\dotfill} \quad $\mathbf a = $ \makebox[3cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) On veut ajouter un troisième neurone à la couche. Que faut-il ajouter à $W$ et à $\mathbf b$ ?
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 3 -- La propagation avant d'un réseau 2--2--1}
+\vspace{0.15cm}
+
+\aide{Couche cachée (ReLU) : $W^{[1]} = \begin{pmatrix} 1 & 0{,}5\\ -1 & 1\end{pmatrix}$, $\mathbf b^{[1]} = (0;\ 0{,}5)$. \quad Couche de sortie (sigmoïde) : $W^{[2]} = (1;\ -2)$, $b^{[2]} = -1$. \quad Entrée $\mathbf x = (2;\ 2)$, cible $y = 1$.}
+
+\vspace{0.2cm}
+(a) Calculer $\mathbf z^{[1]}$ et $\mathbf a^{[1]}$.
+\zonecalcul{1.0cm}
+$\mathbf z^{[1]}=$ \makebox[3cm]{\dotfill} \quad $\mathbf a^{[1]}=$ \makebox[3cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Calculer $z^{[2]}$, la prédiction $\hat y$ et la perte $L = -\ln\hat y$.
+\zonecalcul{1.0cm}
+$z^{[2]}=$ \makebox[2cm]{\dotfill} \quad $\hat y=$ \makebox[2cm]{\dotfill} \quad $L=$ \makebox[2cm]{\dotfill}
+
+\vspace{0.45cm}
+\textbf{\large Exercice 4 -- Compter les paramètres}
+\vspace{0.15cm}
+
+(a) Un réseau a $8$ entrées, une première couche cachée de $16$ neurones, une seconde de $8$, et $1$ sortie. Donner la taille de chaque matrice de poids et compter les paramètres.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.8}\begin{tabular}{|c|c|c|c|c|}\hline
+couche & taille de $W$ & nombre de poids & nombre de biais & total\\\hline
+$1$ & & & & \\\hline
+$2$ & & & & \\\hline
+$3$ (sortie) & & & & \\\hline
+\multicolumn{4}{|r|}{total du réseau} & \\\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+(b) Un réseau $5$--$6$--$1$ et une régression logistique sur les mêmes $5$ variables : combien de paramètres chacun ? Qu'en conclure sur le risque de sur-apprentissage ?
+\zonecalcul{0.8cm}
+réseau : \makebox[2cm]{\dotfill} \quad logistique : \makebox[2cm]{\dotfill}
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 5 -- Pourquoi une activation non linéaire ?}
+\vspace{0.15cm}
+
+Deux couches \emph{sans activation} : $\mathbf a^{[1]} = W^{[1]}\mathbf x$ puis $\hat y = W^{[2]}\mathbf a^{[1]}$, avec $W^{[1]} = \begin{pmatrix} 1 & 0\\ 2 & 1\end{pmatrix}$, $W^{[2]} = (3;\ -1)$, $\mathbf x = (2;\ 3)$.
+
+\vspace{0.15cm}
+(a) Calculer $\hat y$ en passant par les deux couches.
+\zonecalcul{0.8cm}
+
+(b) Calculer $W_{\text{eq}} = W^{[2]}W^{[1]}$ puis $W_{\text{eq}}\mathbf x$. Conclure.
+\zonecalcul{0.8cm}
+\repligne
+
+\vspace{0.15cm}
+(c) Calculer $\sigma'$ pour $a = 0{,}5$ et pour $a = 0{,}9$, et $\text{ReLU}'$ pour $z = 2$ et $z = -1$. Pourquoi empiler des sigmoïdes ralentit-il l'apprentissage des premières couches ?
+\zonecalcul{0.7cm}
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 6 -- Une étape de rétropropagation}
+\vspace{0.15cm}
+
+\aide{Un réseau à une couche cachée de deux neurones (sigmoïde) et une sortie sigmoïde. Pour l'entrée $\mathbf x = (1;\ 2)$, la propagation avant a donné : activations cachées $\mathbf a^{[1]} = (0{,}4;\ 0{,}9)$, poids de sortie $W^{[2]} = (0{,}5;\ -0{,}2)$, biais $b^{[2]} = -0{,}87$, d'où $z^{[2]} = 0{,}2 - 0{,}18 - 0{,}87 = -0{,}85$ et $\hat y = \sigma(-0{,}85) = 0{,}30$. La cible est $y = 1$, taux d'apprentissage $\eta = 0{,}5$.}
+
+\vspace{0.2cm}
+(a) Calculer la perte $L = -\ln\hat y$ et l'erreur de sortie $\delta^{[2]} = \hat y - y$.
+\zonecalcul{0.6cm}
+$L=$ \makebox[2cm]{\dotfill} \quad $\delta^{[2]}=$ \makebox[2cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Calculer $\partial L/\partial W^{[2]}$ et $\partial L/\partial b^{[2]}$, puis les nouveaux $W^{[2]}$ et $b^{[2]}$.
+\zonecalcul{1.1cm}
+$\partial L/\partial W^{[2]}=$ \makebox[3cm]{\dotfill} \quad nouveau $W^{[2]}=$ \makebox[3cm]{\dotfill} \quad nouveau $b^{[2]}=$ \makebox[1.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) Rétropropager : calculer $\sigma'(\mathbf z^{[1]}) = \mathbf a^{[1]}\odot(1-\mathbf a^{[1]})$, puis $\boldsymbol\delta^{[1]} = (W^{[2]})^{\top}\delta^{[2]}\odot\sigma'(\mathbf z^{[1]})$ avec les \emph{anciens} poids.
+\zonecalcul{1.3cm}
+$\sigma'(\mathbf z^{[1]})=$ \makebox[3cm]{\dotfill} \quad $\boldsymbol\delta^{[1]}=$ \makebox[3.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(d) En déduire $\partial L/\partial W^{[1]} = \boldsymbol\delta^{[1]}\mathbf x^{\top}$ (matrice $2\times 2$).
+\zonecalcul{1.1cm}
+
+(e) Le premier poids de sortie augmente. Pourquoi est-ce le bon sens, vu la cible ?
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 7 -- Réseau ou ensemble ? Le verdict}
+\vspace{0.15cm}
+
+Sur un registre tabulaire de $8\,000$ patients (cinq variables), on mesure en validation croisée :
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.5}\begin{tabular}{|l|c|c|}\hline
+modèle & AUC CV & temps de réglage\\\hline
+régression logistique & $0{,}70 \pm 0{,}02$ & quelques secondes\\\hline
+gradient boosting & $0{,}71 \pm 0{,}02$ & quelques minutes\\\hline
+réseau $5$--$32$--$16$--$1$ & $0{,}70 \pm 0{,}03$ & une heure\\\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+(a) Quel modèle retenir ? Justifier.
+\repligne\repligne
+
+\vspace{0.15cm}
+(b) Dans quelles situations un réseau de neurones prendrait-il l'avantage ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(c) Citer deux réglages qui décident souvent de la réussite d'un réseau, et une raison pour laquelle standardiser les entrées est indispensable.
+\repligne\repligne
+
+\end{document}

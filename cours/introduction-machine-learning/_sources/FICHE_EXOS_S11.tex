@@ -1,0 +1,183 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.4cm,top=1.1cm,bottom=1.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setstretch{1.0}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+\pagestyle{empty}
+\newcommand{\repligne}{\par\vspace{0.42cm}\noindent\dotfill}
+\newcommand{\zonecalcul}[1]{\par\vspace{0.15cm}\noindent{\small\emph{Espace de calcul :}}\par\vspace{#1}}
+\newcommand{\aide}[1]{\fbox{\begin{minipage}{0.96\textwidth}\small #1\end{minipage}}}
+\begin{document}
+\begin{center}
+\textbf{\large Fiche d'exercices --- Séance 11 : le projet de bout en bout}\\[0.05cm]
+{\small Introduction au ML -- Dr. El Hadji Bassirou TOURÉ -- DMI $\cdot$ FST $\cdot$ UCAD \quad $\bullet$ \quad \textbf{Travail à la main, sans machine}}
+\end{center}
+\vspace{-0.15cm}\hrule\vspace{0.25cm}
+{\small Cette fiche reprend, étape par étape, la démarche de la Séance 11 : cadrer, battre une baseline, sceller le test et éviter les fuites, comparer les modèles loyalement, ouvrir le test et déjouer le piège de l'accuracy, choisir le seuil par le coût métier, puis interpréter et présenter. Répondre directement sur la fiche.}
+\vspace{0.2cm}
+
+\aide{\textbf{Aides numériques (valables pour toute la fiche).} Accuracy $=\dfrac{\text{VP}+\text{VN}}{n}$ ; precision $=\dfrac{\text{VP}}{\text{VP}+\text{FP}}$ ; recall (rappel) $=\dfrac{\text{VP}}{\text{VP}+\text{FN}}$ ; $F_1 = \dfrac{2\,\text{precision}\cdot\text{recall}}{\text{precision}+\text{recall}}$. Coût total d'une décision : $\ c_{\text{FN}}\times\text{FN} + c_{\text{FP}}\times\text{FP}$.}
+\vspace{0.4cm}
+
+\textbf{\large Exercice 1 -- Cadrer le problème}
+\vspace{0.15cm}
+
+Pour chacun des trois projets du district sanitaire de Kolda, préciser la tâche, la métrique principale, la baseline à battre et la contrainte métier qui compte.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{2.2}\begin{tabular}{|p{4.6cm}|p{2.6cm}|p{2.6cm}|p{2.9cm}|p{3.3cm}|}\hline
+projet & tâche & métrique & baseline & contrainte métier\\\hline
+Prévoir la durée d'hospitalisation (en jours). & & & & \\\hline
+Dépister la tuberculose (prévalence $4\,\%$). & & & & \\\hline
+Regrouper les patients en profils, sans étiquette. & & & & \\\hline
+\end{tabular}}
+
+\vspace{0.45cm}
+\textbf{\large Exercice 2 -- La baseline, juge de paix}
+\vspace{0.15cm}
+
+Le registre du dépistage de la tuberculose compte $2\,500$ patients, dont $100$ positifs.
+
+\vspace{0.15cm}
+(a) Calculer l'accuracy de la baseline « toujours négatif », puis son recall.
+\zonecalcul{0.7cm}
+accuracy $=$ \makebox[2cm]{\dotfill} \quad recall $=$ \makebox[2cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Un stagiaire annonce fièrement « mon modèle a $95\,\%$ d'accuracy ». Que répondre ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(c) Quelle baseline utiliser pour l'AUC ? Et pour une régression (durée d'hospitalisation) ?
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 3 -- Sceller le test, préparer sans tricher}
+\vspace{0.15cm}
+
+(a) Remettre dans l'ordre les étapes d'un projet propre : (1) comparer les modèles en validation croisée ; (2) sceller $20\,\%$ des données comme test (split stratifié) ; (3) cadrer ; (4) évaluer une seule fois sur le test ; (5) régler le meilleur candidat (\texttt{GridSearchCV}) ; (6) explorer les données d'entraînement (EDA) ; (7) interpréter et présenter.
+
+\vspace{0.15cm}
+Ordre : \makebox[6cm]{\dotfill}
+
+\vspace{0.2cm}
+(b) Pour chaque pratique, dire s'il y a fuite et laquelle.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.8}\begin{tabular}{|p{11.6cm}|c|}\hline
+pratique & fuite ? laquelle ?\\\hline
+Standardiser les $2\,500$ patients, puis découper train/test. & \\\hline
+Garder la variable « traitement antituberculeux prescrit ». & \\\hline
+Imputer, standardiser et modéliser dans un seul \texttt{Pipeline} passé à la validation croisée. & \\\hline
+Regarder le score de test après chaque essai de réglage, « juste pour voir ». & \\\hline
+\end{tabular}}
+
+\vspace{0.45cm}
+\textbf{\large Exercice 4 -- Comparer les modèles loyalement}
+\vspace{0.15cm}
+
+Cinq modèles sont évalués sur l'entraînement par validation croisée stratifiée à $5$ plis (AUC moyenne $\pm$ écart-type) :
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.4}\begin{tabular}{|l|c|}\hline
+modèle & AUC CV\\\hline
+régression logistique & $0{,}781 \pm 0{,}018$\\\hline
+arbre de décision réglé & $0{,}742 \pm 0{,}021$\\\hline
+forêt aléatoire & $0{,}776 \pm 0{,}015$\\\hline
+gradient boosting & $0{,}788 \pm 0{,}020$\\\hline
+réseau $16$--$8$ & $0{,}779 \pm 0{,}026$\\\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+(a) Quels modèles sont réellement distinguables des autres ? Lesquels forment un peloton de tête indistinct ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(b) Quel candidat retenir pour la suite, et sur quel argument, si l'on tient compte de l'interprétabilité ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(c) Pourquoi aurait-il été déloyal de comparer ces modèles sur un seul découpage, ou avec un réglage fin pour certains seulement ?
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 5 -- Ouvrir le test scellé : le piège de l'accuracy}
+\vspace{0.15cm}
+
+Le modèle retenu est enfin évalué, une seule fois, sur le test scellé : $500$ patients, dont $60$ malades. AUC de test : $0{,}79$.
+
+\vspace{0.15cm}
+{\small \renewcommand{\arraystretch}{1.9}\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+seuil & VN & FP & FN & VP & accuracy & precision & recall & $F_1$\\\hline
+$0{,}5$ & $438$ & $2$ & $58$ & $2$ & & & & \\\hline
+$0{,}2$ & $380$ & $60$ & $18$ & $42$ & & & & \\\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+(a) Compléter le tableau.
+\zonecalcul{1.6cm}
+
+(b) Au seuil $0{,}5$, le modèle affiche $88\,\%$ d'accuracy. Que fait-il réellement ? Le comparer à la baseline « toujours sain ».
+\repligne\repligne
+
+\vspace{0.15cm}
+(c) L'AUC de $0{,}79$ est-elle contredite par ce désastre au seuil $0{,}5$ ? Expliquer.
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 6 -- Choisir le seuil par le coût métier}
+\vspace{0.15cm}
+
+Pour le programme de lutte contre la tuberculose, un malade manqué (FN) coûte $10$ fois plus qu'une fausse alerte (FP), qui n'entraîne qu'un examen de confirmation. On pose $c_{\text{FP}} = 1$, $c_{\text{FN}} = 10$.
+
+\vspace{0.15cm}
+(a) Calculer le coût total aux seuils $0{,}5$ et $0{,}2$ (tableau de l'Exercice 5). Quel seuil retenir ?
+\zonecalcul{0.9cm}
+coût au seuil $0{,}5$ $=$ \makebox[2cm]{\dotfill} \quad coût au seuil $0{,}2$ $=$ \makebox[2cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) À partir de quel rapport $c_{\text{FN}}/c_{\text{FP}}$ les deux seuils coûteraient-ils autant ? Interpréter.
+\zonecalcul{1.0cm}
+rapport $=$ \makebox[2cm]{\dotfill}
+\repligne
+
+\vspace{0.15cm}
+(c) Ce seuil a été comparé ici \emph{sur le test}. Dans un vrai projet, où aurait-il dû être choisi ?
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 7 -- Interpréter et présenter}
+\vspace{0.15cm}
+
+L'importance des variables du modèle retenu est la suivante :
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.4}\begin{tabular}{|l|c|}\hline
+variable & importance\\\hline
+toux de plus de deux semaines & $0{,}41$\\\hline
+perte de poids & $0{,}22$\\\hline
+numéro de dossier & $0{,}18$\\\hline
+contact avec un cas connu & $0{,}12$\\\hline
+âge & $0{,}07$\\\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+(a) Quelles importances sont cohérentes avec ce que l'EDA et le métier laissaient attendre ?
+\repligne
+
+\vspace{0.15cm}
+(b) Une variable est suspecte. Laquelle, pourquoi, et que faire ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(c) Rédiger en trois phrases la conclusion à présenter au médecin-chef du district (performance, seuil choisi et son coût, facteurs de risque).
+\repligne\repligne\repligne
+
+\end{document}

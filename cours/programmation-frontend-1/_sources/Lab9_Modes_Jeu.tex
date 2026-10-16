@@ -1,0 +1,471 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== POLICES & LANGUE =====================
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,xcolor,booktabs,hyperref,tcolorbox,enumitem,fancyhdr,array,pifont,longtable,multirow,listings}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+% ===================== BOÎTES =====================
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title={#1},breakable}
+
+% ===================== CODE (listings) =====================
+\definecolor{codebg}{gray}{0.96}
+\definecolor{kwcolor}{RGB}{0,90,160}
+\definecolor{strcolor}{RGB}{160,55,30}
+\definecolor{comcolor}{RGB}{95,120,95}
+\definecolor{ndcolor}{RGB}{120,80,150}
+
+\lstdefinelanguage{JS}{
+  morekeywords={let,const,var,function,return,if,else,for,of,in,while,do,true,false,null,undefined,typeof,break,continue,new,this,async,await,try,catch,throw,finally},
+  morekeywords=[2]{console,log,table,document,Math,window,alert,prompt,forEach,map,filter,find,push,pop,querySelector,querySelectorAll,addEventListener,classList,textContent,innerHTML,createElement,appendChild,getElementById,includes,fetch,json,JSON,then,stringify,parse,setItem,getItem,removeItem,setInterval,clearInterval,dataset,values,keys,style},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+\lstdefinestyle{js}{
+  language=JS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{kwcolor},
+  keywordstyle=[2]\color{ndcolor},
+  commentstyle=\color{comcolor}\itshape,
+  stringstyle=\color{strcolor},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {â}{{â}}1 {ê}{{ê}}1
+    {î}{{î}}1 {ô}{{ô}}1 {û}{{û}}1 {ù}{{ù}}1 {ç}{{ç}}1
+    {ï}{{ï}}1 {ë}{{ë}}1 {É}{{É}}1 {È}{{È}}1 {À}{{À}}1
+    {œ}{{œ}}1 {°}{{°}}1 {²}{{²}}1
+}
+
+\lstdefinestyle{html}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {ê}{{ê}}1 {ç}{{ç}}1 {î}{{î}}1
+}
+
+\lstset{style=js}
+\newcommand{\code}[1]{\texttt{#1}}
+\setlength{\emergencystretch}{3em}
+
+% ===================== EN-TÊTES =====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 9 : Les modes de jeu}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ===================== TITRE =====================
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 9 --- Les modes de jeu}\\[0.3cm]
+\textbf{\Large Drapeaux, Langues, Voisins}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Informations pratiques]
+\textbf{Où sommes-nous ?} Jàng Afrig charge les vrais pays et propose un mode Capitales. Mais nos données contiennent bien plus : drapeaux, langues, voisins ! Aujourd'hui, on transforme le quiz en un jeu à \textbf{quatre modes}, sans réécrire le moteur --- juste en variant les questions.
+
+\smallskip
+\textbf{Avant de commencer :}
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item Le Lab 8 fonctionne (tag \code{v0.8}) : les pays se chargent depuis l'API.
+  \item Vous avez dans chaque pays : \code{nom}, \code{capitale}, \code{drapeau}, \code{langues}, \code{voisins}.
+\end{itemize}
+
+\smallskip
+\textbf{Validation de fin :} les quatre modes (Capitales, Drapeaux, Langues, Voisins) fonctionnent, avec une barre de progression. Tag \code{v0.9} poussé + rapport.
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab 9]
+À la fin, vous saurez :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Proposer plusieurs modes de jeu depuis l'écran d'accueil.
+  \item \textbf{Paramétrer} la génération d'une question selon le mode choisi.
+  \item Afficher une \textbf{image} (le drapeau) dans une question.
+  \item Construire des questions sur les langues et le nombre de voisins.
+  \item Ajouter une \textbf{barre de progression} visuelle.
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\bigskip\hrule\bigskip
+
+\section*{Rappel express du Lab 8}
+\addcontentsline{toc}{section}{Rappel express du Lab 8}
+Chaque pays est maintenant un objet riche : \code{\{ cca3, nom, capitale, drapeau, langues, voisins \}}. On va exploiter ces nouveaux champs.
+
+% ===================== SECTION 1 =====================
+\section{Choisir un mode depuis l'accueil}
+
+On remplace l'unique bouton « Mode Capitales » par \textbf{quatre boutons}. Chaque bouton porte un attribut \code{data-mode} qui dit lequel c'est. Dans l'écran \code{\#accueil} de \code{index.html} :
+
+\begin{lstlisting}[style=html]
+<section id="accueil" class="cachee">
+  <p>Choisis ton mode de jeu :</p>
+  <label for="pseudo">Ton pseudo :</label>
+  <input type="text" id="pseudo" placeholder="Ex : Aminata">
+
+  <div id="modes">
+    <button class="mode" data-mode="capitale">Capitales</button>
+    <button class="mode" data-mode="drapeau">Drapeaux</button>
+    <button class="mode" data-mode="langue">Langues</button>
+    <button class="mode" data-mode="voisin">Voisins</button>
+  </div>
+</section>
+\end{lstlisting}
+
+Dans \code{script.js}, on les écoute tous, et on lit le mode dans \code{event.target.dataset.mode} :
+
+\begin{lstlisting}[style=js]
+let modeActuel = "capitale";
+const boutonsMode = document.querySelectorAll(".mode");
+
+boutonsMode.forEach((bouton) => {
+  bouton.addEventListener("click", (event) => {
+    const mode = event.target.dataset.mode; // lit l'attribut data-mode
+    demarrerQuiz(mode);
+  });
+});
+\end{lstlisting}
+
+\begin{infobox}[Une nouveauté à prendre telle quelle : \texttt{data-mode}]
+Un attribut HTML qui commence par \code{data-} sert à \textbf{ranger une info} sur un élément. On le relit en JavaScript avec \code{.dataset} : \code{data-mode} devient \code{element.dataset.mode}. C'est la façon propre d'attacher « ce bouton lance le mode drapeau » directement dans le HTML.
+\end{infobox}
+
+On adapte \code{demarrerQuiz} pour qu'il \textbf{reçoive le mode} :
+
+\begin{lstlisting}[style=js]
+function demarrerQuiz(mode) {
+  modeActuel = mode;
+  pseudo = champPseudo.value;
+  if (pseudo === "") { pseudo = "Joueur"; }
+  score = 0;
+  indexQuestion = 0;
+  questions = genererQuestions(10, mode);
+  afficherEcran(ecranQuiz);
+  afficherQuestion();
+}
+
+function genererQuestions(nombre, mode) {
+  const liste = [];
+  for (let i = 0; i < nombre; i++) {
+    liste.push(genererQuestion(mode));
+  }
+  return liste;
+}
+\end{lstlisting}
+
+% ===================== SECTION 2 =====================
+\section{Une question selon le mode}
+
+Le cœur du Lab : une seule fonction \code{genererQuestion(mode)} qui fabrique la bonne question. D'abord, un \textbf{petit outil} qui construit quatre propositions de texte (la bonne + trois distracteurs pris dans un champ donné) :
+
+\begin{lstlisting}[style=js]
+// 4 propositions : la bonne réponse + 3 autres prises dans `champ`
+function quatrePropositions(bonneReponse, champ) {
+  const props = [bonneReponse];
+  while (props.length < 4) {
+    const autre = choisirAuHasard(pays);
+    const valeur = autre[champ]; // ex. autre.capitale ou autre.nom
+    if (valeur && !props.includes(valeur)) {
+      props.push(valeur);
+    }
+  }
+  return melanger(props);
+}
+\end{lstlisting}
+
+\code{autre[champ]} utilise l'\textbf{accès par crochets} (Lab 6) : si \code{champ} vaut \code{"nom"}, alors \code{autre[champ]} est \code{autre.nom}. Cela rend l'outil réutilisable pour tous les modes texte.
+
+\subsection{Mode Capitales (rappel) et Drapeaux}
+\begin{lstlisting}[style=js]
+function genererQuestion(mode) {
+  const bonPays = choisirAuHasard(pays);
+
+  if (mode === "capitale") {
+    return {
+      enonce: `Quelle est la capitale du pays : ${bonPays.nom} ?`,
+      bonneReponse: bonPays.capitale,
+      propositions: quatrePropositions(bonPays.capitale, "capitale"),
+      image: null
+    };
+  }
+
+  if (mode === "drapeau") {
+    return {
+      enonce: "À quel pays appartient ce drapeau ?",
+      bonneReponse: bonPays.nom,
+      propositions: quatrePropositions(bonPays.nom, "nom"),
+      image: bonPays.drapeau // l'adresse de l'image du drapeau
+    };
+  }
+  // ... (langue et voisin : ci-dessous)
+}
+\end{lstlisting}
+
+\subsection{Mode Langues}
+On choisit un pays qui a au moins une langue, on en tire une, et on demande qui la parle :
+
+\begin{lstlisting}[style=js]
+  if (mode === "langue") {
+    let p = choisirAuHasard(pays);
+    while (!p.langues) { p = choisirAuHasard(pays); } // s'assurer qu'il a des langues
+    const listeLangues = Object.values(p.langues); // ex. ["French", "Wolof"]
+    const langue = choisirAuHasard(listeLangues);
+    return {
+      enonce: `Dans quel pays parle-t-on le ${langue} ?`,
+      bonneReponse: p.nom,
+      propositions: quatrePropositions(p.nom, "nom"),
+      image: null
+    };
+  }
+\end{lstlisting}
+
+\begin{infobox}[\texttt{Object.values}, à prendre tel quel]
+Notre champ \code{langues} est un objet comme \code{\{ fra: "French", wol: "Wolof" \}}. \code{Object.values(...)} en extrait la \textbf{liste des valeurs} : \code{["French", "Wolof"]}. On peut alors en choisir une au hasard.
+\end{infobox}
+
+\begin{attentionbox}[Une simplification assumée]
+Une langue peut être parlée dans plusieurs pays (le français, par exemple). Nos distracteurs étant tirés au hasard, l'un d'eux pourrait, rarement, parler aussi cette langue. À notre niveau, on l'accepte : l'important est de faire fonctionner le mode. On affinera dans une vraie version.
+\end{attentionbox}
+
+\subsection{Mode Voisins (réponse numérique)}
+Ici la bonne réponse est un \textbf{nombre} (le nombre de voisins). On le transforme en texte, et on fabrique des distracteurs numériques proches :
+
+\begin{lstlisting}[style=js]
+  if (mode === "voisin") {
+    const nb = bonPays.voisins ? bonPays.voisins.length : 0;
+    return {
+      enonce: `Combien de pays voisins a ${bonPays.nom} ?`,
+      bonneReponse: String(nb),
+      propositions: quatreNombres(nb),
+      image: null
+    };
+  }
+}
+
+// 4 nombres : le bon + 3 voisins numériques (jamais négatifs)
+function quatreNombres(bonNombre) {
+  const props = [String(bonNombre)];
+  while (props.length < 4) {
+    const variation = bonNombre + Math.floor(Math.random() * 7) - 3; // +/- 3
+    if (variation >= 0 && !props.includes(String(variation))) {
+      props.push(String(variation));
+    }
+  }
+  return melanger(props);
+}
+\end{lstlisting}
+
+\code{String(nb)} convertit le nombre en texte, car nos boutons affichent et comparent du texte (Lab 7).
+
+% ===================== SECTION 3 =====================
+\section{Afficher l'image quand il faut}
+
+Le mode Drapeaux a besoin d'une image. Ajoutez-la dans l'écran \code{\#quiz} de \code{index.html} (cachée par défaut) :
+
+\begin{lstlisting}[style=html]
+<section id="quiz" class="cachee">
+  <div id="piste-progression"><div id="barre-progression"></div></div>
+  <p id="progression">Question 1 / 10</p>
+  <img id="image-question" class="cachee" alt="Drapeau à identifier">
+  <h2 id="enonce">Énoncé</h2>
+  <div id="reponses">
+    <button class="reponse">A</button>
+    <button class="reponse">B</button>
+    <button class="reponse">C</button>
+    <button class="reponse">D</button>
+  </div>
+</section>
+\end{lstlisting}
+
+Puis on met à jour \code{afficherQuestion} pour montrer ou cacher l'image, et pour faire avancer la barre :
+
+\begin{lstlisting}[style=js]
+const elImage = document.querySelector("#image-question");
+const barre   = document.querySelector("#barre-progression");
+
+function afficherQuestion() {
+  const q = questions[indexQuestion];
+  elProgression.textContent = `Question ${indexQuestion + 1} / ${questions.length}`;
+  elEnonce.textContent = q.enonce;
+
+  if (q.image) {
+    elImage.src = q.image;            // on met l'adresse de l'image
+    elImage.classList.remove("cachee");
+  } else {
+    elImage.classList.add("cachee");  // pas d'image pour les autres modes
+  }
+
+  boutonsReponse.forEach((bouton, i) => {
+    bouton.textContent = q.propositions[i];
+  });
+
+  // faire avancer la barre de progression
+  const pourcentage = (indexQuestion / questions.length) * 100;
+  barre.style.width = pourcentage + "%";
+}
+\end{lstlisting}
+
+% ===================== SECTION 4 =====================
+\section{La barre de progression (CSS)}
+
+Une barre qui se remplit au fil des questions. Ajoutez à \code{style.css} :
+
+\begin{lstlisting}[style=html]
+#piste-progression {
+  background: #eeeeee;
+  border-radius: 6px;
+  height: 10px;
+  margin: 1rem 0;
+}
+#barre-progression {
+  background: #c0392b; /* brique de la palette */
+  height: 100%;
+  width: 0;
+  border-radius: 6px;
+  transition: width 0.3s ease; /* l'animation douce du Lab 4 */
+}
+#image-question {
+  max-width: 220px;
+  display: block;
+  margin: 1rem auto;
+}
+\end{lstlisting}
+
+\begin{infobox}[\texttt{element.style.width}, à prendre tel quel]
+En JavaScript, \code{barre.style.width = "40\%"} change \emph{directement} la largeur de l'élément. Combiné à la \code{transition} CSS, la barre se remplit en douceur. C'est le pont JS $\leftrightarrow$ CSS : le code décide, le style anime.
+\end{infobox}
+
+\begin{infobox}[Vérification]
+Lancez chaque mode l'un après l'autre. En mode Drapeaux, l'image s'affiche ; dans les autres, elle disparaît. La barre avance à chaque question. \textbf{Quatre jeux pour le prix d'un moteur !}
+\end{infobox}
+
+% ===================== EXERCICES =====================
+\section{Exercices d'application}
+
+\begin{objectifbox}[Exercice 1 --- Mode « Superficie »]
+Ajoutez un cinquième mode : « Quel est le plus grand de ces pays ? ».\\
+\emph{Indices :} (1) ajoutez \code{area} à la liste \code{fields=} de l'URL et au \code{map} de \code{chargerPays} (champ \code{superficie}). (2) Tirez quatre pays, la bonne réponse est celui de plus grande \code{superficie}.
+\end{objectifbox}
+
+\begin{objectifbox}[Exercice 2 --- Compteur d'erreurs]
+Ajoutez une variable \code{erreurs} (avec \code{let}), incrémentée dans le \code{else} de \code{repondre}, et affichez-la sur l'écran Résultat à côté du score.
+\end{objectifbox}
+
+% ===================== AIDE-MÉMOIRE =====================
+\section{Aide-mémoire du Lab 9}
+
+\begin{center}
+\begin{tabular}{p{5.6cm} p{7.4cm}}
+\toprule
+\textbf{Besoin} & \textbf{Code} \\
+\midrule
+Ranger une info dans le HTML & \code{data-mode="drapeau"} \\
+La relire en JS & \code{element.dataset.mode} \\
+Accès par crochets & \code{objet[champ]} \\
+Valeurs d'un objet & \code{Object.values(objet)} \\
+Nombre $\rightarrow$ texte & \code{String(nombre)} \\
+Afficher une image & \code{img.src = adresse} \\
+Changer une dimension & \code{element.style.width = "40\%"} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ===================== GIT =====================
+\section{Sauvegarder mon travail (routine Git)}
+
+\begin{retenirbox}[Routine Git de fin de Lab --- tag \texttt{v0.9}]
+\begin{lstlisting}[style=html]
+git status
+git add .
+git commit -m "Lab 9 : modes Drapeaux, Langues, Voisins + progression"
+git tag v0.9
+git push
+git push --tags
+\end{lstlisting}
+Vérifiez sur GitHub que le commit \emph{et} le tag \code{v0.9} apparaissent.
+\end{retenirbox}
+
+% ===================== RAPPORT =====================
+\begin{attentionbox}[Rapport à produire]
+Déposez \code{rapport-lab-9-NOM-Prenom.pdf} dans \code{rapports/}, avec quatre sections :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textbf{Ce que j'ai fait} : les quatre modes, l'affichage du drapeau, la barre de progression.
+  \item \textbf{Difficultés rencontrées}.
+  \item \textbf{Comment je les ai résolues}.
+  \item \textbf{Lien vers mon repo} avec le tag \code{v0.9}.
+\end{enumerate}
+\end{attentionbox}
+
+% ===================== RÉSUMÉ =====================
+\section{Résumé et transition}
+
+Avec un seul moteur de quiz --- une fonction \code{genererQuestion} qui prend le mode en paramètre --- vous offrez quatre expériences de jeu. Vous savez désormais paramétrer un comportement, afficher des images, et animer une barre de progression.
+
+Au \textbf{Lab 10}, on finit l'application : sauvegarder les meilleurs scores entre les sessions (\code{localStorage}), ajouter un mode chrono, et soigner l'accessibilité. Ce sera la dernière touche avant la mise en ligne.
+
+\begin{center}
+\textit{Le jeu est complet. Au Lab 10, on le rend mémorable et accessible.}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+\small Dr.~El Hadji Bassirou TOURÉ --- UCAD\\
+\small Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+\end{center}
+
+\end{document}

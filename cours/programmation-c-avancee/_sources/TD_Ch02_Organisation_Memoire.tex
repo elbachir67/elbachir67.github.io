@@ -1,0 +1,352 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{booktabs}
+
+% Configuration listings
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\scriptsize,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+    frame=single,
+    tabsize=4,
+    showstringspaces=false,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 
+             {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ù}{{\`u}}1
+             {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1 {Ç}{{\c{C}}}1
+}
+
+% Boxes pédagogiques
+\newtcolorbox{exercicebox}[1]{
+    colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{infobox}[1]{
+    colback=cyan!5,colframe=cyan!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\title{\textbf{TD Chapitre 2 : Organisation Mémoire}\\
+\large Pointeurs, Tableaux et Forensics Mémoire}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+
+%==============================================================================
+\begin{exercicebox}{Exercice 1 : Endianness et Représentation Mémoire}
+%==============================================================================
+
+\textbf{Partie A :} La valeur \texttt{0x12345678} est stockée à l'adresse \texttt{0x100} sur 4 octets.
+
+\begin{enumerate}[label=\alph*)]
+    \item Dessiner le contenu de la mémoire (adresses 0x100 à 0x103) en \textbf{big-endian}.
+    \item Dessiner le contenu de la mémoire en \textbf{little-endian}.
+    \item Sur une machine little-endian, si on lit l'octet à l'adresse \texttt{0x100}, quelle valeur obtient-on ?
+    \item Sur une machine little-endian, si on lit un \texttt{short} à l'adresse \texttt{0x100}, quelle valeur obtient-on ?
+\end{enumerate}
+
+\textbf{Partie B :} Voici un dump mémoire d'une machine little-endian :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Addr} & \textbf{+0} & \textbf{+1} & \textbf{+2} & \textbf{+3} \\
+\hline
+0x200 & 78 & 56 & 34 & 12 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \setcounter{enumi}{4}
+    \item Quelle est la valeur de l'entier 32 bits stocké à 0x200 ?
+    \item Si ce même dump provenait d'une machine big-endian, quelle serait la valeur ?
+\end{enumerate}
+
+\end{exercicebox}
+
+%==============================================================================
+\begin{exercicebox}{Exercice 2 : Pointeurs et Arithmétique}
+%==============================================================================
+
+Soit le code suivant sur une machine 32 bits :
+
+\begin{lstlisting}[numbers=none]
+int arr[5] = {10, 20, 30, 40, 50};
+/* &arr[0] = 0x1000 */
+
+int *p = arr;
+int *q = &arr[3];
+\end{lstlisting}
+
+\begin{enumerate}[label=\alph*)]
+    \item Quelle est la valeur de \texttt{p} ?
+    \item Quelle est la valeur de \texttt{q} ?
+    \item Quelle est la valeur de \texttt{p + 2} ?
+    \item Quelle est la valeur de \texttt{q - p} ? (attention au type !)
+    \item Quelle est la valeur de \texttt{*(p + 4)} ?
+    \item Quelle est la valeur de \texttt{p[2]} ? Équivalent à quelle expression ?
+    \item Quelle est la valeur de \texttt{(char*)q - (char*)p} ? (résultat en octets)
+\end{enumerate}
+
+\textbf{Partie B :} Soit \texttt{void *base = (void *)0x1000;}
+
+Calculer les adresses résultantes :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Expression} & \textbf{sizeof(*p)} & \textbf{Adresse résultante} \\
+\hline
+\texttt{(int *)base + 3} & 4 & \\
+\hline
+\texttt{(short *)base + 3} & 2 & \\
+\hline
+\texttt{(char *)base + 3} & 1 & \\
+\hline
+\texttt{(double *)base + 2} & 8 & \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{exercicebox}
+
+%==============================================================================
+\begin{exercicebox}{Exercice 3 : Chaînes de Caractères}
+%==============================================================================
+
+\textbf{Partie A :} Soit le dump mémoire suivant :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Addr} & \textbf{+0} & \textbf{+1} & \textbf{+2} & \textbf{+3} & \textbf{+4} & \textbf{+5} & \textbf{+6} & \textbf{+7} \\
+\hline
+0x20 & 42 & 6F & 6E & 6A & 6F & 75 & 72 & 00 \\
+\hline
+0x28 & 55 & 43 & 41 & 44 & 00 & 00 & 00 & 00 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \item Convertir les octets 0x20 à 0x27 en caractères ASCII.
+    \item Si \texttt{char *s1 = (char *)0x20}, quelle est la chaîne pointée ?
+    \item Quelle est la valeur de \texttt{strlen(s1)} ?
+    \item Quelle est la valeur de \texttt{sizeof("Bonjour")} ?
+    \item Expliquer la différence entre \texttt{strlen} et \texttt{sizeof} pour les chaînes.
+\end{enumerate}
+
+\textbf{Partie B :} Comparer les deux déclarations :
+
+\begin{lstlisting}[numbers=none]
+char arr[] = "Hello";
+char *ptr = "Hello";
+\end{lstlisting}
+
+\begin{enumerate}[label=\alph*)]
+    \setcounter{enumi}{5}
+    \item Quelle est la valeur de \texttt{sizeof(arr)} ?
+    \item Quelle est la valeur de \texttt{sizeof(ptr)} sur une machine 64 bits ?
+    \item L'instruction \texttt{arr[0] = 'X';} est-elle valide ?
+    \item L'instruction \texttt{ptr[0] = 'X';} est-elle valide ? Pourquoi ?
+    \item L'instruction \texttt{ptr = "World";} est-elle valide ? Et \texttt{arr = "World";} ?
+\end{enumerate}
+
+\textit{Table ASCII : 0x00=NUL, 0x41='A', 0x42='B', 0x43='C', 0x44='D', 0x55='U', 0x6A='j', 0x6E='n', 0x6F='o', 0x72='r', 0x75='u'}
+
+\end{exercicebox}
+
+%==============================================================================
+\begin{exercicebox}{Exercice 4 : Allocation Dynamique}
+%==============================================================================
+
+\textbf{Partie A :}
+\begin{lstlisting}[numbers=none]
+int *a = malloc(5 * sizeof(int));
+int *b = calloc(5, sizeof(int));
+\end{lstlisting}
+
+\begin{enumerate}[label=\alph*)]
+    \item Combien d'octets sont alloués pour \texttt{a} ? Pour \texttt{b} ?
+    \item Quelle est la différence entre les contenus initiaux de \texttt{a} et \texttt{b} ?
+    \item Pourquoi est-il dangereux de lire \texttt{a[0]} juste après le \texttt{malloc} ?
+    \item Écrire le code pour libérer correctement la mémoire.
+\end{enumerate}
+
+\textbf{Partie B :} Pour chaque code, identifier l'erreur et expliquer la conséquence :
+
+\begin{lstlisting}[numbers=none]
+/* Cas 1 : Use-after-free */
+int *p = malloc(sizeof(int));
+free(p);
+*p = 42;
+
+/* Cas 2 : Memory leak */
+int *q = malloc(10 * sizeof(int));
+q = malloc(20 * sizeof(int));
+
+/* Cas 3 : Double free */
+int *r = malloc(sizeof(int));
+free(r);
+free(r);
+\end{lstlisting}
+
+\end{exercicebox}
+
+%==============================================================================
+\begin{exercicebox}{Exercice 5 : Forensics Mémoire I (32 bits, Little-Endian)}
+%==============================================================================
+
+Soit le dump mémoire suivant :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Addr} & \textbf{+0} & \textbf{+1} & \textbf{+2} & \textbf{+3} & \textbf{+4} & \textbf{+5} & \textbf{+6} & \textbf{+7} \\
+\hline
+0x00 & 1e & 00 & 00 & 00 & 00 & 00 & 00 & 00 \\
+\hline
+0x08 & aa & bb & cc & dd & ee & ff & 00 & 11 \\
+\hline
+0x10 & 8a & 7c & 6f & 22 & 9a & 66 & 44 & 17 \\
+\hline
+0x18 & 33 & 77 & 6f & 6c & 66 & 62 & 79 & 74 \\
+\hline
+0x20 & 65 & 73 & 00 & 44 & 00 & 00 & 88 & c0 \\
+\hline
+0x28 & de & ad & be & ef & ca & fe & f0 & 0d \\
+\hline
+\end{tabular}
+\end{center}
+
+Sachant que :
+\begin{lstlisting}[numbers=none]
+char  *c = (char *)0x19;
+short *s = (short *)0x0C;
+int   *p = (int *)0x28;
+\end{lstlisting}
+
+Remplir le tableau avec le \textbf{type C} et la \textbf{valeur hexadécimale} :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Expression C} & \textbf{Type C} & \textbf{Valeur Hex} \\
+\hline
+\texttt{*s} & & \\
+\hline
+\texttt{*p} & & \\
+\hline
+\texttt{*(c+2)} & & \\
+\hline
+\texttt{p[1]} & & \\
+\hline
+\texttt{*((short *)(c-1))} & & \\
+\hline
+\texttt{strlen(c)} & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{exercicebox}
+
+%==============================================================================
+\begin{exercicebox}{Exercice 6 : Forensics Mémoire II — Double Indirection}
+%==============================================================================
+
+Machine 32 bits, little-endian. Dump mémoire :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Addr} & \textbf{+0} & \textbf{+1} & \textbf{+2} & \textbf{+3} & \textbf{+4} & \textbf{+5} & \textbf{+6} & \textbf{+7} \\
+\hline
+0x1000 & 0A & 00 & 00 & 00 & 14 & 00 & 00 & 00 \\
+\hline
+0x1008 & 1E & 00 & 00 & 00 & 00 & 10 & 00 & 00 \\
+\hline
+0x1010 & 0C & 10 & 00 & 00 & 00 & 00 & 00 & 00 \\
+\hline
+\end{tabular}
+\end{center}
+
+Variables :
+\begin{lstlisting}[numbers=none]
+int arr[3];        /* &arr[0] = 0x1000 */
+int *p;            /* &p = 0x100C */
+int **pp;          /* &pp = 0x1010 */
+\end{lstlisting}
+
+\begin{enumerate}[label=\alph*)]
+    \item Donner les valeurs de \texttt{arr[0]}, \texttt{arr[1]}, \texttt{arr[2]}.
+    \item Quelle est la valeur de \texttt{p} ? Vers quelle adresse pointe-t-il ?
+    \item Quelle est la valeur de \texttt{*p} ?
+    \item Quelle est la valeur de \texttt{pp} ? Vers quelle adresse pointe-t-il ?
+    \item Quelle est la valeur de \texttt{*pp} ?
+    \item Quelle est la valeur de \texttt{**pp} ?
+    \item Dessiner un schéma montrant les pointeurs et leurs cibles.
+\end{enumerate}
+
+\end{exercicebox}
+
+%==============================================================================
+\begin{infobox}{Rappels Essentiels}
+\textbf{Endianness :}
+\begin{itemize}
+    \item \textbf{Little-endian} (x86) : LSB à l'adresse basse
+    \item \textbf{Big-endian} : MSB à l'adresse basse
+\end{itemize}
+
+\textbf{Arithmétique des pointeurs :}
+\begin{itemize}
+    \item \texttt{p + n} ajoute \texttt{n × sizeof(*p)} octets
+    \item \texttt{p[i]} $\equiv$ \texttt{*(p + i)}
+    \item \texttt{q - p} = nombre d'éléments entre \texttt{p} et \texttt{q}
+\end{itemize}
+
+\textbf{Chaînes :}
+\begin{itemize}
+    \item Terminées par \texttt{'\textbackslash 0'} (0x00)
+    \item \texttt{strlen} ne compte pas le terminateur
+    \item \texttt{sizeof} compte le terminateur
+\end{itemize}
+
+\textbf{Valeurs suspectes en debug :}
+\begin{itemize}
+    \item \texttt{0xDEADBEEF}, \texttt{0xCAFEBABE} : marqueurs de debug
+    \item \texttt{0xCDCDCDCD} : mémoire non initialisée (MSVC)
+    \item \texttt{0xDDDDDDDD} : mémoire libérée (MSVC)
+\end{itemize}
+\end{infobox}
+
+\end{document}

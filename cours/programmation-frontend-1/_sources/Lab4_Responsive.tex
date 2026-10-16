@@ -1,0 +1,1070 @@
+% ===========================================================================
+%  Jàng Afrig — Lab 4 : Layouts + Responsive mobile
+%  Adapter Jàng Afrig au téléphone avec media queries
+%  Licence 1 DUT1-Informatique — ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+% --- TikZ ---
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit,shadows.blur}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Couleurs (palette panafricaine) ---
+\definecolor{panvert}{HTML}{0E8A4F}
+\definecolor{panjaune}{HTML}{F5C518}
+\definecolor{panrouge}{HTML}{C8332E}
+\definecolor{pannoir}{HTML}{1A1A1A}
+\definecolor{panblanc}{HTML}{F8F8F8}
+
+% --- Couleurs schéma breakpoints ---
+\definecolor{bpmobile}{RGB}{200,80,60}
+\definecolor{bptablet}{RGB}{220,180,90}
+\definecolor{bpdesktop}{RGB}{45,160,110}
+
+% --- Code source ---
+\usepackage{listings}
+\lstdefinelanguage{HTML5}{
+  morekeywords={<!DOCTYPE,html,head,meta,title,body,h1,h2,h3,h4,p,ul,ol,li,table,tr,th,td,a,img,strong,em,br,div,span,header,nav,main,section,article,footer,aside,form,input,select,option,textarea,label,button,fieldset,legend,style,link,class,id,href,src,alt,name,content,viewport,figure,figcaption},
+  sensitive=true,
+  morecomment=[s]{<!--}{-->},
+  morestring=[b]",
+}
+\lstdefinelanguage{CSS}{
+  morekeywords={color,background-color,background,font-family,font-size,font-weight,text-align,padding,margin,border,border-radius,width,height,max-width,min-width,display,flex,flex-direction,justify-content,align-items,flex-wrap,gap,box-sizing,transition,transform,position,top,bottom,left,right,opacity,cursor,line-height,letter-spacing,box-shadow,list-style,text-decoration,text-transform,border-collapse,vertical-align,object-fit,overflow,grid,grid-template-columns,grid-gap,media,screen,min-width,max-width,only},
+  sensitive=true,
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 4 : Responsive mobile}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 4 --- Layouts \& Responsive}\\[0.3cm]
+\textbf{\Large Faire en sorte que Jàng Afrig marche sur téléphone}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% PRÉREQUIS + OBJECTIFS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Type} & Lab guidé \\
+\textbf{Séance} & S6 --- deuxième Lab CSS \\
+\textbf{Prérequis} & Lab 3 terminé (5 pages stylisées avec tag \texttt{v0.3}) \\
+\textbf{Validation} & App lisible sur téléphone + tag \texttt{v0.4} sur GitHub \\
+\textbf{Rapport} & 1-2 pages : ce que j'ai fait + difficultés + lien repo \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab]
+À la fin de ce Lab, vous aurez :
+\begin{enumerate}[nosep]
+    \item Compris pourquoi votre app actuelle est \textbf{inutilisable sur téléphone}
+    \item Ajouté la balise \texttt{<meta viewport>} pour le mobile
+    \item Découvert et utilisé les \textbf{media queries} CSS
+    \item Adopté l'approche \textbf{mobile-first}
+    \item Adapté la \textbf{nav}, les \textbf{cartes}, et le \textbf{tableau} pour mobile
+    \item Ajouté une \textbf{grille de drapeaux} responsive sur la page À propos
+    \item Testé votre app dans le \textbf{mode mobile de DevTools}
+    \item Posé le tag \texttt{v0.4} sur GitHub
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Le problème : votre app n'est pas mobile}
+% ===========================================================================
+
+\subsection{Faites le test maintenant}
+
+Ouvrez votre Jàng Afrig dans le navigateur. Maintenant :
+\begin{enumerate}[nosep]
+    \item Appuyez sur \texttt{F12} (ou \texttt{Cmd+Opt+I} sur Mac) pour ouvrir DevTools
+    \item Cliquez sur l'icône \textbf{téléphone/tablette} en haut à gauche du panneau (ou \texttt{Ctrl+Shift+M})
+    \item Choisissez un appareil dans la liste : \textbf{iPhone SE} ou \textbf{Pixel 5}
+\end{enumerate}
+
+Vous voyez l'horreur : la nav déborde, les cartes sont écrasées ou
+minuscules, le tableau du palmarès dépasse l'écran à droite et oblige à
+scroller horizontalement.
+
+\subsection{Pourquoi est-ce si moche ?}
+
+Deux raisons :
+
+\begin{enumerate}[leftmargin=*,nosep]
+    \item Vous n'avez pas la balise \texttt{<meta viewport>} dans vos pages, donc le téléphone affiche votre site comme s'il avait 980 pixels de large (et zoome dehors).
+    \item Vous n'avez écrit \textbf{aucune règle CSS spécifique au mobile}. Tout est calculé pour un écran d'ordinateur (1100px de large dans votre \texttt{main}).
+\end{enumerate}
+
+\subsection{Ce qu'on va faire aujourd'hui}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Ajouter le \texttt{<meta viewport>} (10 secondes)
+    \item Adopter une approche \textbf{mobile-first} : on écrit d'abord pour téléphone, puis on adapte pour grand écran avec des \textbf{media queries}
+    \item Adapter nav, cartes, tableau, et ajouter une grille de drapeaux
+\end{itemize}
+
+\begin{retenirbox}[Statistique mondiale]
+En 2025, plus de \textbf{60\%} du trafic web mondial vient des téléphones.
+Au Sénégal, ce chiffre dépasse \textbf{80\%}. Si votre site n'est pas
+\emph{responsive}, vous abandonnez 8 utilisateurs sur 10. C'est
+inacceptable.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Le viewport meta tag (la ligne magique)}
+% ===========================================================================
+
+\subsection{Ajouter la ligne dans les 5 pages}
+
+Dans le \texttt{<head>} de \textbf{chaque} page HTML, ajoutez cette ligne
+juste après \texttt{<meta charset="UTF-8">} :
+
+\begin{lstlisting}[language=HTML5]
+<meta name="viewport" content="width=device-width, initial-scale=1">
+\end{lstlisting}
+
+\textbf{Enregistrez les 5 fichiers}. Rafraîchissez votre simulation
+mobile dans DevTools : la page n'est plus dézoomée. Les éléments ont
+maintenant leur taille \og{}réelle\fg{}. \cmark
+
+\subsection{Ce que fait cette ligne}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item \texttt{width=device-width} : la largeur de la page égale celle de l'écran réel du téléphone (par exemple 375px sur iPhone SE)
+    \item \texttt{initial-scale=1} : pas de zoom au chargement
+\end{itemize}
+
+\begin{infobox}[Avant/après cette ligne]
+\textbf{Sans} \texttt{<meta viewport>} : le téléphone simule un écran de
+980px et dézoome pour faire tenir la page. Résultat : texte minuscule.
+
+\textbf{Avec} \texttt{<meta viewport>} : la page s'affiche à la vraie
+taille de l'écran. Résultat : texte lisible mais\ldots la nav déborde
+toujours. Il faut maintenant écrire des règles CSS pour mobile.
+\end{infobox}
+
+\begin{attentionbox}[À ne jamais oublier]
+Mettez \texttt{<meta viewport>} sur \textbf{toutes} les pages HTML que
+vous créerez dans votre vie. C'est la première ligne après
+\texttt{<meta charset>}. C'est devenu un automatisme pour tous les
+développeurs web depuis 2010.
+\end{attentionbox}
+
+\newpage
+
+% ===========================================================================
+\section{Mobile-first : la philosophie}
+% ===========================================================================
+
+\subsection{Deux approches possibles}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item \textbf{Desktop-first} : on écrit le CSS pour grand écran, puis on adapte pour mobile.
+    \item \textbf{Mobile-first} : on écrit le CSS pour mobile, puis on adapte pour grand écran.
+\end{itemize}
+
+\subsection{Pourquoi mobile-first ?}
+
+\begin{enumerate}[leftmargin=*,nosep]
+    \item Le mobile est plus \textbf{contraint} (petit écran, peu d'espace). Si on règle d'abord ce cas difficile, ajouter de l'espace pour grand écran est facile.
+    \item Le \textbf{layout par défaut} qu'on écrit (sans media query) est celui qui sera vu par les téléphones. C'est le cas le plus fréquent.
+    \item Les \textbf{media queries de type \texttt{min-width}} sont plus lisibles que \texttt{max-width}.
+\end{enumerate}
+
+\subsection{Les 3 breakpoints qu'on va utiliser}
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[
+    every node/.style={font=\small\bfseries, anchor=north},
+    bp/.style={rounded corners=4pt, draw, thick, minimum height=2.4cm, align=center}
+]
+    % Mobile
+    \filldraw[fill=bpmobile!20, draw=bpmobile!70!black, thick, rounded corners=4pt]
+        (0, 0) rectangle (3, 2.4);
+    \node[anchor=north] at (1.5, 2.3) {\small Mobile};
+    \node[anchor=center, font=\scriptsize] at (1.5, 1.6) {< 768px};
+    \node[anchor=center, font=\scriptsize\itshape] at (1.5, 1.1) {(téléphone)};
+    \node[anchor=center, font=\scriptsize] at (1.5, 0.4) {\textbf{défaut}};
+
+    % Tablette
+    \filldraw[fill=bptablet!30, draw=bptablet!70!black, thick, rounded corners=4pt]
+        (3.5, 0) rectangle (8.5, 2.4);
+    \node[anchor=north] at (6, 2.3) {\small Tablette};
+    \node[anchor=center, font=\scriptsize] at (6, 1.6) {≥ 768px};
+    \node[anchor=center, font=\scriptsize\itshape] at (6, 1.1) {(iPad, paysage mobile)};
+    \node[anchor=center, font=\scriptsize\ttfamily] at (6, 0.4) {@media (min-width: 768px)};
+
+    % Desktop
+    \filldraw[fill=bpdesktop!20, draw=bpdesktop!70!black, thick, rounded corners=4pt]
+        (9, 0) rectangle (15, 2.4);
+    \node[anchor=north] at (12, 2.3) {\small Desktop};
+    \node[anchor=center, font=\scriptsize] at (12, 1.6) {≥ 1024px};
+    \node[anchor=center, font=\scriptsize\itshape] at (12, 1.1) {(ordinateur)};
+    \node[anchor=center, font=\scriptsize\ttfamily] at (12, 0.4) {@media (min-width: 1024px)};
+\end{tikzpicture}
+\caption{Les 3 breakpoints utilisés dans ce Lab. Le CSS de base (sans media query) est pour mobile.}
+\label{fig:breakpoints}
+\end{figure}
+
+\begin{retenirbox}[La règle mentale]
+\begin{itemize}[nosep]
+    \item Sans aucune media query $\to$ s'applique à \textbf{tous} les écrans (donc en mobile-first, c'est mon style mobile)
+    \item \texttt{@media (min-width: 768px) \{\ldots\}} $\to$ s'ajoute pour les écrans \textbf{plus larges que 768px}
+    \item \texttt{@media (min-width: 1024px) \{\ldots\}} $\to$ s'ajoute pour les écrans \textbf{plus larges que 1024px}
+\end{itemize}
+Plus l'écran est large, plus de règles s'empilent en se cumulant.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Anatomie d'une media query}
+% ===========================================================================
+
+Une media query est une \textbf{condition} : si l'écran respecte une
+certaine largeur, alors le CSS à l'intérieur s'applique.
+
+\subsection{Syntaxe}
+
+\begin{lstlisting}[language=CSS]
+@media (min-width: 768px) {
+    /* Toutes les règles ici ne s'appliquent que */
+    /* si l'écran fait au moins 768 pixels de large */
+
+    .carte-mode {
+        flex: 1 1 250px;
+    }
+
+    main {
+        padding: 0 40px;
+    }
+}
+\end{lstlisting}
+
+\subsection{Exemple complet : un titre qui change de taille}
+
+\begin{lstlisting}[language=CSS]
+/* Mobile (par défaut) */
+header h1 {
+    font-size: 1.8rem;
+}
+
+/* Tablette et plus */
+@media (min-width: 768px) {
+    header h1 {
+        font-size: 2.2rem;
+    }
+}
+
+/* Desktop et plus */
+@media (min-width: 1024px) {
+    header h1 {
+        font-size: 2.8rem;
+    }
+}
+\end{lstlisting}
+
+\textbf{Comment lire ce code :}
+\begin{itemize}[leftmargin=*,nosep]
+    \item Sur téléphone (< 768px) : le titre est à 1.8rem
+    \item Sur tablette (768-1023px) : le titre devient 2.2rem
+    \item Sur desktop ($\geq$ 1024px) : le titre devient 2.8rem
+\end{itemize}
+
+\begin{infobox}[Pourquoi on n'écrit pas \texttt{max-width} ?]
+On pourrait écrire \texttt{@media (max-width: 767px) \{\ldots\}} pour
+viser uniquement le mobile. Mais en mobile-first, on préfère :
+\begin{enumerate}[nosep]
+    \item Écrire le mobile \emph{sans condition} (plus simple)
+    \item \emph{Ajouter} pour les écrans plus grands avec \texttt{min-width}
+\end{enumerate}
+On a moins de doublons et le code est plus facile à lire.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 1 : Adapter le main pour mobile}
+% ===========================================================================
+
+Dans votre \texttt{style.css} actuel, vous avez probablement :
+
+\begin{lstlisting}[language=CSS]
+main {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+\end{lstlisting}
+
+Le \texttt{max-width: 1100px} est OK pour mobile (la largeur sera celle
+de l'écran), mais le \texttt{padding: 0 20px} peut être trop sur petit
+écran. \textbf{Modifiez en} :
+
+\begin{lstlisting}[language=CSS]
+main {
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 0 15px;
+}
+
+@media (min-width: 768px) {
+    main {
+        padding: 0 30px;
+    }
+}
+
+@media (min-width: 1024px) {
+    main {
+        padding: 0 40px;
+    }
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. La marge intérieure du \texttt{main} grandit avec
+l'écran. Sur mobile : 15px. Sur tablette : 30px. Sur desktop : 40px. \cmark
+
+% ===========================================================================
+\section{Étape 2 : Adapter la nav}
+% ===========================================================================
+
+Votre nav actuelle utilise \texttt{display: flex} avec
+\texttt{justify-content: center}. Sur mobile, les 4 liens débordent.
+\textbf{Solution simple :} les empiler en colonne sur petit écran, en
+ligne sur grand écran.
+
+\textbf{Remplacez} le bloc \texttt{nav} de votre CSS par :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Navigation (mobile par défaut) ===== */
+nav {
+    background-color: var(--jaune);
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+nav a {
+    color: var(--noir);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 12px 15px;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+nav a:hover {
+    background-color: var(--vert);
+    color: white;
+}
+
+/* Tablette et plus : on revient en ligne */
+@media (min-width: 768px) {
+    nav {
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    nav a {
+        border-bottom: none;
+        padding: 15px 25px;
+    }
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. Testez en redimensionnant la fenêtre :
+\begin{itemize}[nosep]
+    \item Petit écran : les liens sont \textbf{empilés verticalement}
+    \item Grand écran : ils reviennent \textbf{en ligne horizontale}
+\end{itemize}
+
+\cmark
+
+\begin{infobox}[Le hamburger menu, ce sera pour plus tard]
+Sur les \emph{vrais} sites, on remplace souvent la nav mobile par une
+icône \og{}hamburger\fg{} (☰) qui ouvre le menu au clic. Cela demande du
+JavaScript, donc on s'en occupera au-delà de ce cours. Pour le L1, on
+fait la version simple : les liens en colonne. C'est tout à fait
+acceptable.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 3 : Adapter les cartes}
+% ===========================================================================
+
+Vos cartes \texttt{.carte-mode} ont \texttt{flex: 1 1 200px}, donc elles
+se mettent déjà en grille flexible. Sur mobile, le \og{}1 1 200px\fg{}
+peut donner 1 carte par ligne (parce que 200px est plus large que la
+moitié de l'écran). Sur tablette, 2 cartes par ligne. Sur desktop, 3 ou
+plus.
+
+C'est déjà bien. Mais on peut affiner pour avoir un comportement plus
+prévisible :
+
+\textbf{Modifiez} \texttt{.carte-mode} dans votre CSS :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Cartes de modes (mobile : 1 colonne) ===== */
+.modes-grille {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.carte-mode {
+    padding: 16px;
+    border-radius: 8px;
+    color: var(--noir);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Tablette : 2 colonnes */
+@media (min-width: 768px) {
+    .modes-grille {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .carte-mode {
+        flex: 1 1 calc(50% - 12px);
+    }
+}
+
+/* Desktop : 3 colonnes */
+@media (min-width: 1024px) {
+    .carte-mode {
+        flex: 1 1 calc(33.333% - 12px);
+    }
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. Maintenant :
+\begin{itemize}[nosep]
+    \item Mobile : \textbf{1 carte par ligne}
+    \item Tablette : \textbf{2 cartes par ligne}
+    \item Desktop : \textbf{3 cartes par ligne}
+\end{itemize}
+
+\cmark
+
+\begin{infobox}[\texttt{calc()}, c'est quoi ?]
+\texttt{calc(50\% - 12px)} permet de \emph{calculer} une valeur en mêlant
+unités. Ici : la moitié de la largeur du parent, moins 12 pixels (pour
+compenser le \texttt{gap}). C'est très utile pour les layouts.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 4 : Une grille de drapeaux sur la page À propos}
+% ===========================================================================
+
+Sur \texttt{apropos.html}, ajoutez une nouvelle section qui affiche une
+\textbf{galerie de drapeaux africains}.
+
+\subsection{Récupérer les images}
+
+Téléchargez 6 drapeaux (clic droit $\to$ \textbf{Enregistrer la cible
+sous}) dans votre dossier \texttt{images/} :
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Sénégal : \url{https://flagcdn.com/w320/sn.png} → \texttt{sn.png}
+    \item Mali : \url{https://flagcdn.com/w320/ml.png} → \texttt{ml.png}
+    \item Maroc : \url{https://flagcdn.com/w320/ma.png} → \texttt{ma.png}
+    \item Côte d'Ivoire : \url{https://flagcdn.com/w320/ci.png} → \texttt{ci.png}
+    \item Égypte : \url{https://flagcdn.com/w320/eg.png} → \texttt{eg.png}
+    \item Afrique du Sud : \url{https://flagcdn.com/w320/za.png} → \texttt{za.png}
+\end{itemize}
+
+\subsection{HTML : la grille}
+
+\textbf{Ajoutez à \texttt{apropos.html}}, dans le \texttt{<main>} :
+
+\begin{lstlisting}[language=HTML5]
+<section>
+    <h2>Quelques pays au programme</h2>
+    <div class="grille-drapeaux">
+        <figure>
+            <img src="images/sn.png" alt="Drapeau du Sénégal">
+            <figcaption>Sénégal</figcaption>
+        </figure>
+        <figure>
+            <img src="images/ml.png" alt="Drapeau du Mali">
+            <figcaption>Mali</figcaption>
+        </figure>
+        <figure>
+            <img src="images/ma.png" alt="Drapeau du Maroc">
+            <figcaption>Maroc</figcaption>
+        </figure>
+        <figure>
+            <img src="images/ci.png" alt="Drapeau de la Côte d'Ivoire">
+            <figcaption>Côte d'Ivoire</figcaption>
+        </figure>
+        <figure>
+            <img src="images/eg.png" alt="Drapeau de l'Égypte">
+            <figcaption>Égypte</figcaption>
+        </figure>
+        <figure>
+            <img src="images/za.png" alt="Drapeau de l'Afrique du Sud">
+            <figcaption>Afrique du Sud</figcaption>
+        </figure>
+    </div>
+</section>
+\end{lstlisting}
+
+\subsection{CSS : la grille responsive}
+
+\textbf{Ajoutez à \texttt{style.css}} :
+
+\begin{lstlisting}[language=CSS]
+/* ===== Grille de drapeaux (mobile : 2 par ligne) ===== */
+.grille-drapeaux {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.grille-drapeaux figure {
+    flex: 1 1 calc(50% - 15px);
+    text-align: center;
+    background-color: white;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.grille-drapeaux img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.grille-drapeaux figcaption {
+    margin-top: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Tablette : 3 par ligne */
+@media (min-width: 768px) {
+    .grille-drapeaux figure {
+        flex: 1 1 calc(33.333% - 15px);
+    }
+}
+
+/* Desktop : 6 par ligne */
+@media (min-width: 1024px) {
+    .grille-drapeaux figure {
+        flex: 1 1 calc(16.666% - 15px);
+    }
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. Sur la page \texttt{apropos.html}, vous voyez les
+6 drapeaux disposés :
+\begin{itemize}[nosep]
+    \item Mobile : 2 par ligne
+    \item Tablette : 3 par ligne
+    \item Desktop : 6 par ligne (alignés)
+\end{itemize}
+
+\cmark
+
+\begin{infobox}[\texttt{<figure>} et \texttt{<figcaption>}]
+Ces deux balises HTML5 sémantiques servent à associer une image à sa
+légende. Plus propre que d'enchaîner \texttt{<img>} et \texttt{<p>}
+anonymes : un lecteur d'écran annoncera \og{}figure : drapeau du Sénégal,
+légende Sénégal\fg{}.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 5 : Adapter le tableau du palmarès}
+% ===========================================================================
+
+Le tableau a 5 colonnes (Rang, Pseudo, Mode, Score, Date). Sur mobile,
+ça déborde et il faut scroller horizontalement. Plusieurs solutions
+existent. La plus simple : permettre le \textbf{scroll horizontal
+contrôlé} dans un conteneur.
+
+\subsection{Modifier scores.html}
+
+\textbf{Enveloppez} le tableau dans un \texttt{<div>} :
+
+\begin{lstlisting}[language=HTML5]
+<div class="tableau-conteneur">
+    <table>
+        <!-- ... lignes du tableau ... -->
+    </table>
+</div>
+\end{lstlisting}
+
+\subsection{Ajouter le CSS}
+
+\begin{lstlisting}[language=CSS]
+/* ===== Conteneur de tableau (scroll horizontal sur mobile) ===== */
+.tableau-conteneur {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 15px;
+}
+
+table {
+    min-width: 480px;
+}
+
+/* Police plus petite sur mobile */
+@media (max-width: 767px) {
+    th, td {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+}
+\end{lstlisting}
+
+\textbf{Enregistrez}. Sur mobile, le tableau a maintenant un
+\textbf{ascenseur horizontal local} (juste pour le tableau, pas pour
+toute la page). C'est élégant. \cmark
+
+\begin{retenirbox}[Pourquoi cette approche ?]
+Le tableau du palmarès a 5 colonnes \emph{essentielles}. On ne peut pas
+en cacher sans perdre de l'info. Le scroll horizontal localisé est la
+solution la plus simple et la plus courante. Plus tard, en L2, vous
+verrez d'autres techniques (cartes par ligne, transformation en accordéon).
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Tester avec DevTools}
+% ===========================================================================
+
+\subsection{Le mode mobile de DevTools}
+
+Dans Chrome ou Firefox :
+\begin{enumerate}[nosep]
+    \item Ouvrez DevTools (\texttt{F12})
+    \item Cliquez sur l'icône \textbf{téléphone/tablette} en haut à gauche
+    \item Sélectionnez un appareil dans la liste déroulante :
+        \begin{itemize}[nosep]
+            \item iPhone SE (375×667) --- petit téléphone
+            \item iPhone 14 Pro (393×852) --- téléphone moderne
+            \item iPad Mini (768×1024) --- tablette
+            \item Responsive (taille libre, redimensionnez à la souris)
+        \end{itemize}
+\end{enumerate}
+
+\subsection{Tester les 3 breakpoints}
+
+\begin{enumerate}[nosep]
+    \item Choisissez \textbf{iPhone SE} (375px) : tout doit s'afficher en colonne
+    \item Choisissez \textbf{iPad Mini} (768px) : la nav passe en ligne, les cartes en 2 colonnes
+    \item Passez en \textbf{Responsive} et étirez à 1100px : 3 cartes par ligne, 6 drapeaux par ligne
+\end{enumerate}
+
+\begin{infobox}[Tester sur un vrai téléphone (bonus)]
+Si vous voulez voir Jàng Afrig sur \emph{votre} téléphone réel :
+\begin{enumerate}[nosep]
+    \item Connectez votre PC et votre téléphone au \textbf{même Wi-Fi}
+    \item Dans VS Code, faites tourner Live Server
+    \item Notez l'adresse IP de votre PC (\texttt{ipconfig} sur Windows, \texttt{ifconfig} sur Mac/Linux)
+    \item Sur votre téléphone, ouvrez le navigateur et tapez : \texttt{http://192.168.X.X:5500/index.html}
+\end{enumerate}
+Ça marche, c'est très satisfaisant.
+\end{infobox}
+
+\subsection{Aperçu visuel attendu}
+
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={anchor=north west, inner sep=4pt}
+]
+    % Mobile (375px)
+    \draw[draw=gray, thick, rounded corners=8pt] (0, 0) rectangle (3.5, 6);
+    \filldraw[fill=panvert, draw=panvert] (0.05, 5.5) rectangle (3.45, 5.95);
+    \node[font=\tiny\bfseries, color=white, anchor=center] at (1.75, 5.725) {Jàng Afrig};
+
+    \filldraw[fill=panjaune, draw=panjaune!70!black] (0.05, 4.4) rectangle (3.45, 5.5);
+    \node[font=\tiny, anchor=center] at (1.75, 5.275) {Accueil};
+    \node[font=\tiny, anchor=center] at (1.75, 5) {Jouer};
+    \node[font=\tiny, anchor=center] at (1.75, 4.725) {Mes Scores};
+    \node[font=\tiny, anchor=center] at (1.75, 4.5) {À propos};
+
+    \filldraw[fill=panjaune!30, draw=panjaune!70!black, thick, rounded corners=2pt] (0.2, 3.5) rectangle (3.3, 4.2);
+    \node[font=\tiny\bfseries, anchor=center] at (1.75, 3.85) {Capitales};
+
+    \filldraw[fill=panrouge!30, draw=panrouge!70!black, thick, rounded corners=2pt] (0.2, 2.7) rectangle (3.3, 3.4);
+    \node[font=\tiny\bfseries, color=white, anchor=center] at (1.75, 3.05) {Drapeaux};
+
+    \filldraw[fill=panvert!30, draw=panvert!70!black, thick, rounded corners=2pt] (0.2, 1.9) rectangle (3.3, 2.6);
+    \node[font=\tiny\bfseries, color=white, anchor=center] at (1.75, 2.25) {Langues};
+
+    \node[anchor=center, font=\tiny\bfseries, color=bpmobile!70!black] at (1.75, -0.3) {Mobile (< 768px)};
+
+    % Tablette (768px)
+    \draw[draw=gray, thick, rounded corners=8pt] (4.5, 0) rectangle (10, 6);
+    \filldraw[fill=panvert, draw=panvert] (4.55, 5.5) rectangle (9.95, 5.95);
+    \node[font=\tiny\bfseries, color=white, anchor=center] at (7.25, 5.725) {Jàng Afrig};
+
+    \filldraw[fill=panjaune, draw=panjaune!70!black] (4.55, 5) rectangle (9.95, 5.5);
+    \node[font=\tiny, anchor=center] at (5.4, 5.25) {Accueil};
+    \node[font=\tiny, anchor=center] at (6.6, 5.25) {Jouer};
+    \node[font=\tiny, anchor=center] at (7.85, 5.25) {Mes Scores};
+    \node[font=\tiny, anchor=center] at (9.1, 5.25) {À propos};
+
+    \filldraw[fill=panjaune!30, draw=panjaune!70!black, thick, rounded corners=2pt] (4.7, 4) rectangle (7.2, 4.8);
+    \node[font=\tiny\bfseries, anchor=center] at (5.95, 4.4) {Capitales};
+    \filldraw[fill=panrouge!30, draw=panrouge!70!black, thick, rounded corners=2pt] (7.3, 4) rectangle (9.8, 4.8);
+    \node[font=\tiny\bfseries, color=white, anchor=center] at (8.55, 4.4) {Drapeaux};
+
+    \filldraw[fill=panvert!30, draw=panvert!70!black, thick, rounded corners=2pt] (4.7, 3.1) rectangle (7.2, 3.9);
+    \node[font=\tiny\bfseries, color=white, anchor=center] at (5.95, 3.5) {Langues};
+    \filldraw[fill=panjaune!30, draw=panjaune!70!black, thick, rounded corners=2pt] (7.3, 3.1) rectangle (9.8, 3.9);
+    \node[font=\tiny\bfseries, anchor=center] at (8.55, 3.5) {Voisins};
+
+    \node[anchor=center, font=\tiny\bfseries, color=bptablet!70!black] at (7.25, -0.3) {Tablette ($\geq$ 768px)};
+
+    % Desktop (1100px)
+    \draw[draw=gray, thick, rounded corners=8pt] (11, 0) rectangle (16.5, 6);
+    \filldraw[fill=panvert, draw=panvert] (11.05, 5.5) rectangle (16.45, 5.95);
+    \node[font=\tiny\bfseries, color=white, anchor=center] at (13.75, 5.725) {Jàng Afrig};
+    \filldraw[fill=panjaune, draw=panjaune!70!black] (11.05, 5) rectangle (16.45, 5.5);
+    \node[font=\tiny, anchor=center] at (12, 5.25) {Accueil};
+    \node[font=\tiny, anchor=center] at (13.2, 5.25) {Jouer};
+    \node[font=\tiny, anchor=center] at (14.4, 5.25) {Scores};
+    \node[font=\tiny, anchor=center] at (15.6, 5.25) {À propos};
+
+    \filldraw[fill=panjaune!30, draw=panjaune!70!black, thick, rounded corners=2pt] (11.2, 4) rectangle (12.85, 4.8);
+    \node[font=\tiny\bfseries, anchor=center] at (12, 4.4) {Capitales};
+    \filldraw[fill=panrouge!30, draw=panrouge!70!black, thick, rounded corners=2pt] (12.95, 4) rectangle (14.6, 4.8);
+    \node[font=\tiny\bfseries, color=white, anchor=center] at (13.78, 4.4) {Drapeaux};
+    \filldraw[fill=panvert!30, draw=panvert!70!black, thick, rounded corners=2pt] (14.7, 4) rectangle (16.35, 4.8);
+    \node[font=\tiny\bfseries, color=white, anchor=center] at (15.5, 4.4) {Langues};
+
+    \node[anchor=center, font=\tiny\bfseries, color=bpdesktop!70!black] at (13.75, -0.3) {Desktop ($\geq$ 1024px)};
+\end{tikzpicture}
+\end{center}
+
+\textbf{La même page} affichée différemment selon la largeur. C'est ça,
+le responsive.
+
+\newpage
+
+% ===========================================================================
+\section{Exercices d'application}
+% ===========================================================================
+
+\begin{objectifbox}[Trois mini-exercices]
+
+\textbf{Exercice 1 --- Footer responsive}
+
+Faites en sorte que sur mobile, le footer affiche le copyright sur une
+ligne et le lien \og{}En savoir plus\fg{} sur la ligne suivante (au lieu
+de tout sur une ligne qui déborde). Indice : \texttt{display: flex;
+flex-direction: column; gap: 8px;}.
+
+\medskip
+
+\textbf{Exercice 2 --- Image héro responsive}
+
+Sur la page d'accueil (\texttt{index.html}), ajoutez juste après le
+\texttt{<header>} une grande image \og{}héro\fg{} (par exemple un drapeau
+de l'Union Africaine).
+
+\begin{itemize}[nosep]
+    \item Largeur 100\% de l'écran
+    \item Hauteur max 200px sur mobile, 300px sur desktop
+    \item Centrée, avec \texttt{object-fit: cover}
+\end{itemize}
+
+\medskip
+
+\textbf{Exercice 3 --- Formulaire responsive}
+
+Sur \texttt{quiz.html}, faites en sorte que le formulaire occupe au
+maximum :
+\begin{itemize}[nosep]
+    \item \textbf{100\%} de la largeur sur mobile
+    \item \textbf{500px} centrés sur tablette et desktop
+\end{itemize}
+
+Indice : \texttt{form \{ max-width: 500px; margin: 0 auto; \}}.
+
+\medskip
+
+\textbf{Bonus} --- Affichage \og{}sticky\fg{}
+
+Faites en sorte que la nav reste \textbf{collée en haut} de l'écran quand
+on scrolle. Une seule ligne de CSS suffit : \texttt{position: sticky;
+top: 0;} sur \texttt{nav}.
+\end{objectifbox}
+
+\newpage
+
+% ===========================================================================
+\section{Aide-mémoire}
+% ===========================================================================
+
+\subsection{Le b.a.-ba du responsive}
+
+\begin{center}
+\begin{tabular}{@{}lp{8cm}@{}}
+\toprule
+\textbf{Élément}                                & \textbf{Rôle} \\
+\midrule
+\texttt{<meta name="viewport" content="...">}   & La ligne magique pour le mobile \\
+\addlinespace
+\texttt{@media (min-width: 768px)}              & Règles pour tablette et plus \\
+\texttt{@media (min-width: 1024px)}             & Règles pour desktop et plus \\
+\addlinespace
+\texttt{flex-direction: column / row}           & Empiler / aligner \\
+\texttt{flex-wrap: wrap}                        & Retour à la ligne \\
+\texttt{flex: 1 1 calc(50\% - 15px)}            & 2 colonnes flexibles \\
+\addlinespace
+\texttt{overflow-x: auto}                       & Scroll horizontal local \\
+\texttt{position: sticky; top: 0;}              & Élément collé en haut au scroll \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Les 3 breakpoints}
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Plage}        & \textbf{Cible}        & \textbf{Media query} \\
+\midrule
+< 768px               & Mobile (par défaut) & --- (CSS de base) \\
+768 -- 1023px         & Tablette / paysage   & \texttt{@media (min-width: 768px)} \\
+$\geq$ 1024px         & Desktop              & \texttt{@media (min-width: 1024px)} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Méthodologie mobile-first}
+
+\begin{enumerate}[leftmargin=*,nosep]
+    \item Écrire d'abord le CSS pour mobile (\textbf{sans} media query)
+    \item Tester sur DevTools mode mobile (iPhone SE 375px)
+    \item Ajouter \texttt{@media (min-width: 768px)} pour ce qui doit changer en tablette
+    \item Tester en mode tablette (iPad Mini 768px)
+    \item Ajouter \texttt{@media (min-width: 1024px)} pour le desktop
+    \item Tester en mode responsive à 1100px
+\end{enumerate}
+
+\subsection{Tester sur vrai téléphone}
+
+\begin{enumerate}[nosep]
+    \item PC et téléphone sur le même Wi-Fi
+    \item \texttt{ipconfig} (Windows) / \texttt{ifconfig} (Mac/Linux) pour récupérer l'IP du PC
+    \item Sur téléphone : \texttt{http://IP-DU-PC:5500/index.html}
+\end{enumerate}
+
+\newpage
+
+% ===========================================================================
+\section{Routine Git}
+% ===========================================================================
+
+\begin{lstlisting}
+git status
+git add .
+git commit -m "v0.4 : responsive mobile + grille drapeaux"
+git push
+git tag v0.4
+git push --tags
+\end{lstlisting}
+
+Vérifiez sur \url{https://github.com/votre-username/jang-afrig} :
+\begin{itemize}[nosep]
+    \item Le \texttt{<meta viewport>} est dans les 5 pages
+    \item \texttt{style.css} contient les media queries
+    \item Les 6 drapeaux sont dans \texttt{images/}
+    \item Le tag \texttt{v0.4} est visible
+\end{itemize}
+
+% ===========================================================================
+\section{Rapport à produire}
+% ===========================================================================
+
+\begin{attentionbox}[Rapport du Lab 4 --- obligatoire]
+\textbf{Format :} 1-2 pages, déposé dans \texttt{rapports/rapport-lab-4-NOM-Prenom.pdf}.
+
+\medskip
+
+\textbf{Contenu (4 sections) :}
+\begin{enumerate}[nosep]
+    \item \textbf{Ce que j'ai fait} : viewport ajouté, media queries écrites, nav/cartes/tableau adaptés, grille de drapeaux, exercices d'application.
+    \item \textbf{Difficultés rencontrées} : layout qui casse, breakpoints qui ne marchent pas, scroll horizontal indésirable.
+    \item \textbf{Comment j'ai résolu} : DevTools mode mobile, MDN, aide d'un camarade.
+    \item \textbf{Lien vers mon repo avec le tag v0.4} : \\
+          ex. \url{https://github.com/fatou-diop/jang-afrig/releases/tag/v0.4}
+\end{enumerate}
+
+\medskip
+
+\textbf{Bonus dans le rapport :} \textbf{2 captures d'écran} de la même
+page : une en mode mobile (375px), une en mode desktop (1100px). C'est
+votre preuve fière que vous savez faire du responsive.
+\end{attentionbox}
+
+\newpage
+
+% ===========================================================================
+\section{Résumé et transition}
+% ===========================================================================
+
+\subsection{Ce que vous avez accompli}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Ajouté \texttt{<meta viewport>} aux 5 pages \cmark
+    \item Adopté l'approche \textbf{mobile-first} \cmark
+    \item Maîtrisé les \textbf{media queries} avec 3 breakpoints \cmark
+    \item Adapté nav, cartes, formulaire, tableau \cmark
+    \item Construit une grille de drapeaux responsive \cmark
+    \item Testé dans le mode mobile de DevTools \cmark
+    \item Posé le tag \texttt{v0.4} \cmark
+\end{itemize}
+
+\subsection{Le bloc CSS est terminé}
+
+Vous savez maintenant tout le CSS dont vous avez besoin pour ce semestre :
+sélecteurs, cascade, box model, Flexbox, variables, media queries,
+responsive. C'est solide.
+
+\subsection{Ce qu'on fera au CM3 et au Lab 5}
+
+\textbf{CM3 (S7) : JavaScript débarque.} Le langage qui anime les pages.
+On verra variables, fonctions, conditions, boucles. Plus de pages
+statiques --- on va commencer à \emph{réagir} aux clics de l'utilisateur.
+
+\textbf{Lab 5 (S8) :} JS pratique. Vous découvrirez la console DevTools,
+écrirez vos premières lignes de JS, et ferez bouger un élément de Jàng
+Afrig avec un clic.
+
+\begin{projetbox}[À ce stade du semestre]
+Votre application a \textbf{une vraie interface professionnelle} qui
+marche \textbf{sur n'importe quel appareil}. Plus de la moitié du chemin
+est faite.
+
+Manque maintenant le \textbf{cerveau} : la logique JavaScript qui rend
+l'app \textit{interactive}. C'est ce qu'on attaque dans la prochaine
+séance.
+\end{projetbox}
+
+\vspace{0.5cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab 4 --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Votre app fonctionne sur tous les écrans, du téléphone à l'ordinateur.\\
+Place à JavaScript : on va lui donner vie.\\[0.2cm]
+\textit{Rendez-vous au CM3 !}\\[0.3cm]
+\vspace{0.3cm}
+\end{minipage}
+}
+\end{center}
+
+\end{document}

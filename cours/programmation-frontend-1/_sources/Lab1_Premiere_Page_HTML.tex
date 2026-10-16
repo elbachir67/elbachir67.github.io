@@ -1,0 +1,848 @@
+% ===========================================================================
+%  Jàng Afrig — Lab 1 : Ma première page HTML
+%  Construire la page d'accueil en HTML brut
+%  Licence 1 DUT1-Informatique — ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+% --- Code source HTML5 ---
+\usepackage{listings}
+\lstdefinelanguage{HTML5}{
+  morekeywords={<!DOCTYPE,html,head,meta,title,body,h1,h2,h3,h4,p,ul,ol,li,table,tr,th,td,a,img,strong,em,br,div,span},
+  sensitive=true,
+  morecomment=[s]{<!--}{-->},
+  morestring=[b]",
+}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 1 : Ma première page HTML}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 1 --- Ma première page HTML}\\[0.3cm]
+\textbf{\Large La page d'accueil de Jàng Afrig en HTML brut}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Type} & Lab guidé \\
+\textbf{Séance} & S2 --- premier Lab du semestre \\
+\textbf{Prérequis} & Lab 0 (environnement OK) + CM1 (notions HTML) \\
+\textbf{Validation} & Page d'accueil affichée avec Live Server + tag \texttt{v0.1} sur GitHub \\
+\textbf{Rapport} & 1-2 pages : ce que j'ai fait + difficultés + lien repo \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab]
+À la fin de ce Lab, vous aurez :
+\begin{enumerate}[nosep]
+    \item Créé le fichier \texttt{index.html} dans votre repo \texttt{jang-afrig}
+    \item Écrit la \textbf{structure HTML complète} de la page d'accueil
+    \item Utilisé les balises \texttt{h1}, \texttt{h2}, \texttt{p}, \texttt{strong}, \texttt{em}
+    \item Construit une \textbf{liste imbriquée} pour présenter les modes de jeu
+    \item Construit un \textbf{tableau} (palmarès) avec \texttt{th} et \texttt{td}
+    \item Ajouté un \textbf{lien} et une \textbf{image} (drapeau africain)
+    \item Posé le tag \textbf{\texttt{v0.1}} sur GitHub
+    \item Rédigé votre rapport de Lab
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Avant de coder}
+% ===========================================================================
+
+\subsection{Rappel : le CM1 et le Lab 0}
+
+Au CM1, vous avez vu :
+\begin{itemize}[nosep]
+    \item Une page web = \textbf{HTML} (structure) + \textbf{CSS} (déco) + \textbf{JS} (comportement)
+    \item Une page HTML a un \texttt{<head>} (invisible) et un \texttt{<body>} (visible)
+    \item Les balises essentielles : titres (\texttt{h1}-\texttt{h6}), paragraphes, listes, tableaux, liens, images
+\end{itemize}
+
+Au Lab 0, vous avez :
+\begin{itemize}[nosep]
+    \item Installé VS Code + Live Server + Git
+    \item Créé votre repo GitHub \texttt{jang-afrig}
+    \item Cloné ce repo sur votre ordinateur
+    \item Fait un premier cycle Git complet
+\end{itemize}
+
+\textbf{Aujourd'hui}, on combine les deux : on écrit une vraie page HTML
+dans le repo, on la voit dans le navigateur, on la pousse sur GitHub avec
+un tag de version.
+
+\subsection{Ce qu'on va construire concrètement}
+
+La \textbf{page d'accueil} de Jàng Afrig en HTML brut. Pas de CSS (la page
+sera moche, c'est normal --- on s'occupera du style aux Labs 3 et 4). Pas
+de JavaScript (la page ne fera rien d'interactif --- on s'en occupe à
+partir du Lab 5).
+
+Voici ce que la page contiendra :
+
+\begin{itemize}[nosep]
+    \item Un titre principal \textbf{Jàng Afrig} avec un sous-titre
+    \item Un paragraphe de présentation
+    \item La \textbf{liste des modes de jeu} (capitales, drapeaux, langues, voisins, chrono) avec des sous-éléments
+    \item Un \textbf{tableau} «\,Palmarès des champions\,» (5 lignes fictives)
+    \item Une image (drapeau de l'Union Africaine, ou un drapeau de votre choix)
+    \item Un lien vers le repo GitHub du projet
+\end{itemize}
+
+\begin{retenirbox}[Pas de panique si c'est moche]
+À la fin du Lab, votre page ressemblera à un document Word de 1990 :
+texte noir sur fond blanc, sans mise en forme. \textbf{C'est normal et
+c'est voulu}. On apprend à \emph{structurer} avant d'apprendre à
+\emph{décorer}. La beauté arrive aux Labs 3 et 4 (CSS).
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Préparer son espace de travail}
+% ===========================================================================
+
+\subsection{Ouvrir VS Code dans le repo}
+
+Dans votre terminal, allez dans votre dossier \texttt{cours-web/jang-afrig}
+et ouvrez VS Code :
+
+\begin{lstlisting}
+cd ~/cours-web/jang-afrig
+code .
+\end{lstlisting}
+
+VS Code s'ouvre avec votre repo dans l'Explorateur à gauche. Vous devez
+voir au moins :
+\begin{itemize}[nosep]
+    \item \texttt{README.md} (créé automatiquement par GitHub au Lab 0)
+    \item \texttt{index.html} (créé par vous au Lab 0 avec le «\,Hello\,»)
+\end{itemize}
+
+\subsection{Faire le ménage dans index.html}
+
+\textbf{Ouvrez \texttt{index.html}} (clic dans l'Explorateur). Vous voyez
+le code «\,Hello\,» que vous aviez écrit au Lab 0.
+
+\textbf{Effacez tout le contenu} pour repartir d'une feuille blanche. On
+va le réécrire pas à pas.
+
+\begin{infobox}[Pourquoi tout effacer ?]
+On aurait pu modifier le fichier petit à petit, mais pour bien intégrer la
+structure HTML, c'est mieux de la réécrire \textbf{de zéro}. À la
+deuxième page que vous écrirez dans votre vie, vous saurez la taper sans
+réfléchir.
+\end{infobox}
+
+\subsection{Lancer Live Server}
+
+\textbf{Avant de coder}, lancez Live Server pour voir le résultat en
+direct :
+\begin{enumerate}[nosep]
+    \item Clic droit sur \texttt{index.html} dans l'Explorateur
+    \item \textbf{Open with Live Server}
+\end{enumerate}
+
+Votre navigateur s'ouvre sur une page \textbf{vide} (puisqu'on a tout
+effacé). Laissez le navigateur ouvert à côté de VS Code.
+
+\begin{retenirbox}[Le rituel du développeur]
+Pendant tout le Lab, vous travaillerez avec :
+\begin{itemize}[nosep]
+    \item \textbf{VS Code} à gauche de l'écran
+    \item \textbf{Le navigateur} à droite
+\end{itemize}
+À chaque fois que vous enregistrez (\texttt{Ctrl+S}), la page se rafraîchit
+toute seule. Vous voyez le résultat instantanément.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 1 : Le squelette HTML}
+% ===========================================================================
+
+On commence par poser le squelette de toute page HTML. Tapez (ou copiez)
+ce code dans \texttt{index.html} :
+
+\begin{lstlisting}[language=HTML5]
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Jàng Afrig</title>
+    </head>
+    <body>
+    </body>
+</html>
+\end{lstlisting}
+
+Enregistrez (\texttt{Ctrl+S}). Regardez le navigateur : il est toujours
+vide \textbf{visuellement}, mais l'\textbf{onglet} affiche désormais
+«\,Jàng Afrig\,». \cmark
+
+\begin{infobox}[Pourquoi vide visuellement ?]
+Tout ce que vous écrivez dans \texttt{<head>} est invisible. Le \texttt{<body>}
+est encore vide. Donc rien à afficher. C'est attendu.
+\end{infobox}
+
+\textbf{Ce qui se passe ligne par ligne} :
+
+\begin{center}
+\begin{tabular}{@{}lp{8.5cm}@{}}
+\toprule
+\textbf{Ligne} & \textbf{Rôle} \\
+\midrule
+\texttt{<!DOCTYPE html>} & «\,Je suis du HTML5 moderne\,» \\
+\texttt{<html lang="fr">} & Démarre la page, langue française \\
+\texttt{<meta charset="UTF-8">} & Permet les accents (à, é, ç) et le \textbf{Jàng} \\
+\texttt{<title>Jàng Afrig</title>} & Texte de l'onglet du navigateur \\
+\texttt{<body></body>} & La zone visible, vide pour l'instant \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{attentionbox}[Le caractère «\,à\,» de Jàng]
+Sans \texttt{<meta charset="UTF-8">}, le mot «\,Jàng\,» risque de s'afficher
+comme «\,Jng\,» ou «\,J\textbackslash xc3\textbackslash xa0ng\,». Cette ligne est
+\textbf{obligatoire} dès qu'on a des accents (donc tout le temps en
+français).
+\end{attentionbox}
+
+% ===========================================================================
+\section{Étape 2 : Titre et présentation}
+% ===========================================================================
+
+On va maintenant remplir le \texttt{<body>}. Ajoutez \textbf{entre}
+\texttt{<body>} et \texttt{</body>} :
+
+\begin{lstlisting}[language=HTML5]
+<h1>Jàng Afrig</h1>
+<h2>Apprendre l'Afrique, un pays à la fois</h2>
+
+<p>
+    Bienvenue sur <strong>Jàng Afrig</strong>, un quiz géographique sur les
+    <strong>54 pays africains</strong>. Choisissez un mode de jeu, répondez à
+    10 questions, et battez votre meilleur score !
+</p>
+
+<p>
+    Le mot <em>jàng</em> signifie <em>«&nbsp;apprendre, étudier&nbsp;»</em>
+    en wolof. Le projet est développé dans le cadre du cours
+    <strong>Fondamentaux du Web</strong> en L1 DUT1-Info à l'ESP/UCAD.
+</p>
+\end{lstlisting}
+
+\textbf{Enregistrez}. Le navigateur affiche maintenant un grand titre
+«\,Jàng Afrig\,», un sous-titre «\,Apprendre l'Afrique\ldots\,», et deux
+paragraphes. \cmark
+
+\begin{infobox}[L'entité \texttt{\&nbsp;}]
+\texttt{\&nbsp;} est un \textbf{espace insécable} (qui ne se coupe pas en
+fin de ligne). On l'utilise avant les guillemets français
+(«\,texte\,»), les deux-points, les points-virgules. Pas obligatoire,
+mais joli.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 3 : La liste des modes de jeu}
+% ===========================================================================
+
+C'est ici qu'on va utiliser une \textbf{liste imbriquée} : une liste
+principale des modes, et pour chaque mode, une sous-liste avec une
+description courte.
+
+\textbf{Ajoutez à la suite}, dans le \texttt{<body>} :
+
+\begin{lstlisting}[language=HTML5]
+<h2>Les modes de jeu</h2>
+
+<ul>
+    <li>
+        <strong>Capitales</strong>
+        <ul>
+            <li>Identifier la capitale d'un pays africain</li>
+            <li>Exemple : « Quelle est la capitale du Mali ? »</li>
+        </ul>
+    </li>
+    <li>
+        <strong>Drapeaux</strong>
+        <ul>
+            <li>Reconnaître le drapeau d'un pays</li>
+            <li>Exemple : « À quel pays appartient ce drapeau ? »</li>
+        </ul>
+    </li>
+    <li>
+        <strong>Langues</strong>
+        <ul>
+            <li>Associer une langue à un pays</li>
+            <li>Exemple : « Dans quel pays parle-t-on le swahili ? »</li>
+        </ul>
+    </li>
+    <li>
+        <strong>Voisins</strong>
+        <ul>
+            <li>Compter les pays frontaliers</li>
+            <li>Exemple : « Combien de voisins a l'Algérie ? »</li>
+        </ul>
+    </li>
+    <li>
+        <strong>Chrono</strong>
+        <ul>
+            <li>Maximum de bonnes réponses en 60 secondes</li>
+        </ul>
+    </li>
+</ul>
+\end{lstlisting}
+
+\textbf{Enregistrez}. Vous voyez maintenant la liste à puces avec, sous
+chaque mode, une sous-liste indentée. \cmark
+
+\begin{retenirbox}[Indentation : votre meilleur ami]
+Notez comme le code est \textbf{indenté} : chaque niveau de liste imbriquée
+est décalé de 4 espaces. \textbf{Pour l'ordinateur}, ça ne change rien.
+\textbf{Pour vous} (et pour quiconque relit votre code), c'est
+\textbf{indispensable} pour comprendre la structure.
+
+VS Code indente automatiquement quand vous appuyez sur \texttt{Tab}.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 4 : Le tableau des champions}
+% ===========================================================================
+
+On va maintenant ajouter un \textbf{tableau} avec un faux palmarès. Les
+vrais scores arriveront au Lab 10 (avec \texttt{localStorage}), pour
+l'instant on hardcode des données.
+
+\textbf{Ajoutez à la suite} :
+
+\begin{lstlisting}[language=HTML5]
+<h2>Palmarès des champions</h2>
+
+<p>Les meilleurs scores enregistrés (données fictives pour le moment) :</p>
+
+<table>
+    <tr>
+        <th>Rang</th>
+        <th>Pseudo</th>
+        <th>Mode</th>
+        <th>Score</th>
+        <th>Date</th>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>Fatou</td>
+        <td>Capitales</td>
+        <td>10/10</td>
+        <td>15 mars 2026</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>Moussa</td>
+        <td>Drapeaux</td>
+        <td>9/10</td>
+        <td>12 mars 2026</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>Aminata</td>
+        <td>Capitales</td>
+        <td>9/10</td>
+        <td>10 mars 2026</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>Cheikh</td>
+        <td>Voisins</td>
+        <td>8/10</td>
+        <td>8 mars 2026</td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td>Awa</td>
+        <td>Langues</td>
+        <td>8/10</td>
+        <td>5 mars 2026</td>
+    </tr>
+</table>
+\end{lstlisting}
+
+\textbf{Enregistrez}. Le tableau apparaît, sans bordures (le navigateur
+les cache par défaut --- on les verra au Lab 3 avec CSS). \cmark
+
+\begin{infobox}[Tableau sans bordures ?]
+Sans CSS, un tableau HTML s'affiche \textbf{sans aucune bordure}. C'est le
+comportement standard depuis HTML5. Au Lab 3, deux lignes de CSS suffiront
+à dessiner de jolies bordures et alterner les couleurs des lignes.
+\end{infobox}
+
+\newpage
+
+% ===========================================================================
+\section{Étape 5 : Image et lien}
+% ===========================================================================
+
+\subsection{Préparer le dossier images}
+
+Dans votre repo, on va mettre les images dans un sous-dossier
+\texttt{images/} pour ranger.
+
+\begin{enumerate}[nosep]
+    \item Dans l'Explorateur de VS Code, clic droit sur le dossier racine
+    \item \textbf{New Folder}
+    \item Nommez-le : \texttt{images}
+\end{enumerate}
+
+\subsection{Récupérer une image de drapeau}
+
+Choisissez un drapeau parmi ceux-ci :
+\begin{itemize}[nosep]
+    \item Drapeau du Sénégal : \url{https://flagcdn.com/w320/sn.png}
+    \item Drapeau de l'Union Africaine : \url{https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Flag_of_the_African_Union.svg/320px-Flag_of_the_African_Union.svg.png}
+    \item Drapeau du Mali : \url{https://flagcdn.com/w320/ml.png}
+    \item Drapeau du Maroc : \url{https://flagcdn.com/w320/ma.png}
+    \item Drapeau de la Côte d'Ivoire : \url{https://flagcdn.com/w320/ci.png}
+\end{itemize}
+
+\textbf{Téléchargez} le drapeau de votre choix : clic droit sur le lien
+$\to$ \textbf{Enregistrer la cible sous} $\to$ choisissez le dossier
+\texttt{images/} de votre repo, nommez le fichier \texttt{drapeau.png}.
+
+\subsection{Insérer l'image et le lien}
+
+\textbf{Ajoutez à la suite} dans \texttt{<body>} :
+
+\begin{lstlisting}[language=HTML5]
+<h2>À propos de Jàng Afrig</h2>
+
+<p>
+    <img src="images/drapeau.png" alt="Drapeau africain" width="200">
+</p>
+
+<p>
+    Le code source du projet est disponible sur GitHub :
+    <a href="https://github.com/votre-username/jang-afrig">
+        github.com/votre-username/jang-afrig
+    </a>
+</p>
+
+<p>
+    Données fournies par
+    <a href="https://restcountries.com">REST Countries</a>,
+    une API libre et gratuite sur les pays du monde.
+</p>
+\end{lstlisting}
+
+\textbf{Remplacez \texttt{votre-username}} par votre vrai \emph{username}
+GitHub. Enregistrez. \cmark
+
+\begin{attentionbox}[L'attribut \texttt{alt} n'est pas optionnel]
+Toujours mettre un \texttt{alt} sur chaque \texttt{<img>}. Pour vos
+camarades qui utilisent un lecteur d'écran (cécité, déficience visuelle),
+c'est leur seule façon de «\,voir\,» l'image. C'est aussi utile si
+l'image ne se charge pas (lien cassé, connexion lente).
+\end{attentionbox}
+
+\newpage
+
+% ===========================================================================
+\section{Vérification : ce que doit afficher la page}
+% ===========================================================================
+
+À ce stade, votre page doit ressembler à ce schéma (en plus brut sans
+style) :
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\vspace{0.3cm}
+\begin{center}
+{\Large \textbf{Jàng Afrig}}\\[2pt]
+{\large Apprendre l'Afrique, un pays à la fois}
+\end{center}
+
+\medskip
+
+\small Bienvenue sur \textbf{Jàng Afrig}, un quiz géographique sur les
+\textbf{54 pays africains}\ldots
+
+\medskip
+
+{\large \textbf{Les modes de jeu}}
+
+\begin{itemize}[leftmargin=*,nosep,label=\textbullet]
+    \item \textbf{Capitales}
+        \begin{itemize}[nosep,label=\textopenbullet]
+            \item Identifier la capitale d'un pays africain
+            \item Exemple : «\,Quelle est la capitale du Mali ?\,»
+        \end{itemize}
+    \item \textbf{Drapeaux}\ldots
+    \item \textbf{Langues}\ldots
+\end{itemize}
+
+\medskip
+
+{\large \textbf{Palmarès des champions}}
+
+\medskip
+
+\begin{tabular}{lllll}
+Rang & Pseudo & Mode & Score & Date \\
+1 & Fatou & Capitales & 10/10 & 15 mars 2026 \\
+2 & Moussa & Drapeaux & 9/10 & 12 mars 2026 \\
+\multicolumn{5}{l}{\ldots}
+\end{tabular}
+
+\medskip
+
+{\large \textbf{À propos de Jàng Afrig}}
+
+\medskip
+
+\fbox{[Image du drapeau choisi]}
+
+\medskip
+
+\small Le code source du projet est disponible sur GitHub : \\
+\textcolor{blue}{\underline{github.com/votre-username/jang-afrig}}\\
+\vspace{0.3cm}
+\end{minipage}
+}
+\end{center}
+
+\bigskip
+
+\begin{retenirbox}[Aspect attendu]
+Tout est noir, sur fond blanc, sans bordure de tableau, sans couleurs ni
+mise en page. \textbf{C'est volontaire}. La page est \emph{structurée}, pas
+\emph{décorée}. CSS arrive bientôt.
+\end{retenirbox}
+
+\subsection{Si quelque chose ne s'affiche pas comme attendu}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item \textbf{Page totalement blanche} : vérifiez que vous avez bien enregistré (\texttt{Ctrl+S}) et que Live Server tourne.
+    \item \textbf{Caractères bizarres} (Jng au lieu de Jàng) : vérifiez la ligne \texttt{<meta charset="UTF-8">}.
+    \item \textbf{L'image ne s'affiche pas} : vérifiez le chemin (\texttt{images/drapeau.png}) et que le fichier est bien dans le bon dossier.
+    \item \textbf{La sous-liste n'apparaît pas} : vérifiez que le \texttt{<ul>} imbriqué est bien \emph{à l'intérieur} d'un \texttt{<li>}, pas entre deux \texttt{<li>}.
+\end{itemize}
+
+\newpage
+
+% ===========================================================================
+\section{Exercices d'application}
+% ===========================================================================
+
+\begin{objectifbox}[Trois mini-exercices à faire dans l'ordre]
+\textbf{Exercice 1 --- Une 6\textsuperscript{e} ligne au tableau}
+
+Ajoutez une ligne supplémentaire au tableau du palmarès, avec :
+\begin{itemize}[nosep]
+    \item Rang : 6
+    \item Pseudo : votre prénom
+    \item Mode : un mode de votre choix
+    \item Score : un score de votre choix
+    \item Date : aujourd'hui
+\end{itemize}
+
+\medskip
+
+\textbf{Exercice 2 --- Un mode de jeu supplémentaire}
+
+Inventez un \textbf{6\textsuperscript{e} mode de jeu} et ajoutez-le à la
+liste des modes (avec sous-liste de 1 ou 2 lignes pour le décrire). Idées :
+«\,Monnaies\,», «\,Superficie\,», «\,Population\,»\ldots
+
+\medskip
+
+\textbf{Exercice 3 --- Une section «\,Contact\,»}
+
+Ajoutez en bas de la page une section :
+\begin{itemize}[nosep]
+    \item Un titre \texttt{<h2>Contact</h2>}
+    \item Un paragraphe avec votre nom complet, votre filière (DUT1-Info), votre email étudiant
+    \item Un \emph{lien mailto} vers votre email : \texttt{<a href="mailto:vous@esp.sn">vous@esp.sn</a>}
+\end{itemize}
+
+\medskip
+
+\textbf{Bonus} (si vous avez fini en avance) : ajoutez 2 ou 3 drapeaux
+supplémentaires dans la section «\,À propos\,», côte à côte. Vous verrez
+qu'ils s'affichent les uns en dessous des autres. C'est normal, on
+règlera ça avec Flexbox au Lab 4.
+\end{objectifbox}
+
+\newpage
+
+% ===========================================================================
+\section{Aide-mémoire}
+% ===========================================================================
+
+\subsection{Les balises vues dans ce Lab}
+
+\begin{center}
+\begin{tabular}{@{}lp{8cm}@{}}
+\toprule
+\textbf{Balise} & \textbf{Rôle} \\
+\midrule
+\texttt{<!DOCTYPE html>}    & Déclaration HTML5 (toujours en première ligne) \\
+\texttt{<html lang="fr">}   & Racine de la page, langue \\
+\texttt{<head>}             & Métadonnées (invisibles) \\
+\texttt{<meta charset="UTF-8">} & Encodage des caractères (accents) \\
+\texttt{<title>}            & Texte de l'onglet \\
+\texttt{<body>}             & Contenu visible \\
+\texttt{<h1>} \ldots \texttt{<h6>} & Titres (un seul \texttt{<h1>} par page) \\
+\texttt{<p>}                & Paragraphe \\
+\texttt{<strong>}           & Texte important (gras par défaut) \\
+\texttt{<em>}               & Mise en valeur (italique par défaut) \\
+\texttt{<ul>} / \texttt{<ol>} / \texttt{<li>} & Listes non ordonnée / ordonnée / élément \\
+\texttt{<table>} / \texttt{<tr>} / \texttt{<th>} / \texttt{<td>} & Tableau / ligne / cellule en-tête / cellule \\
+\texttt{<a href="...">}     & Lien hypertexte \\
+\texttt{<img src="..." alt="...">} & Image (auto-fermante) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Le squelette à connaître par cœur}
+
+\begin{lstlisting}[language=HTML5]
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Titre de la page</title>
+    </head>
+    <body>
+        <!-- contenu visible ici -->
+    </body>
+</html>
+\end{lstlisting}
+
+\begin{retenirbox}[Le réflexe à acquérir]
+Quand vous créez un nouveau fichier HTML dans VS Code, tapez
+\texttt{html:5} puis \texttt{Tab}. VS Code génère automatiquement le
+squelette pour vous (c'est l'autocomplétion Emmet, intégrée).
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Routine Git de fin de Lab}
+% ===========================================================================
+
+C'est le moment de \textbf{sauvegarder votre travail} et de marquer cette
+version. Vous l'avez fait au Lab 0, on refait pareil.
+
+\subsection{Les commandes à enchaîner}
+
+Dans le terminal intégré de VS Code (\texttt{Ctrl+\textasciigrave}) :
+
+\begin{lstlisting}
+git status
+git add .
+git commit -m "v0.1 : page d'accueil HTML brut"
+git push
+git tag v0.1
+git push --tags
+\end{lstlisting}
+
+\subsection{Vérification}
+
+\begin{enumerate}[nosep]
+    \item Allez sur \url{https://github.com/votre-username/jang-afrig}
+    \item Vous devez voir \texttt{index.html} et le dossier \texttt{images/}
+    \item Cliquez sur l'onglet \textbf{Tags} (ou \textbf{Releases}) en haut
+    \item Le tag \texttt{v0.1} doit apparaître \cmark
+\end{enumerate}
+
+\begin{retenirbox}[Pourquoi un tag ?]
+Un \textbf{tag Git} est une étiquette qu'on pose sur une version précise
+du projet. Si vous travaillez 6 mois plus tard sur le projet et que vous
+voulez retrouver \emph{l'état exact à la fin du Lab 1}, il vous suffit
+de faire \texttt{git checkout v0.1}. Vous y êtes.
+\end{retenirbox}
+
+% ===========================================================================
+\section{Rapport à produire}
+% ===========================================================================
+
+\begin{attentionbox}[Rapport du Lab 1 --- obligatoire]
+À la fin de ce Lab, produisez un \textbf{rapport court} de
+\textbf{1 à 2 pages maximum}.
+
+\medskip
+
+\textbf{Format du fichier :}
+\begin{itemize}[nosep]
+    \item PDF, Markdown (\texttt{.md}) ou Word
+    \item Nom : \texttt{rapport-lab-1-NOM-Prenom.pdf}\\
+          (ex. \texttt{rapport-lab-1-DIOP-Fatou.pdf})
+    \item Déposer dans le sous-dossier \texttt{rapports/} de votre repo GitHub
+\end{itemize}
+
+\medskip
+
+\textbf{Contenu obligatoire (4 sections) :}
+
+\begin{enumerate}[nosep]
+    \item \textbf{Ce que j'ai fait} (½ page) : page d'accueil créée, balises utilisées, exercices d'application complétés.
+    \item \textbf{Difficultés rencontrées} (¼ page) : ce qui m'a bloqué (image qui ne s'affiche pas, structure de liste imbriquée, encodage\ldots).
+    \item \textbf{Comment j'ai résolu ces difficultés} (¼ page) : recherche, aide d'un camarade, essais et erreurs.
+    \item \textbf{Lien vers mon repo GitHub avec le tag v0.1} : \\
+          ex. \url{https://github.com/fatou-diop/jang-afrig/releases/tag/v0.1}
+\end{enumerate}
+
+\medskip
+
+\textbf{Ton attendu :} honnête et direct. Si quelque chose n'a pas marché
+du premier coup, dites-le. L'erreur fait partie de l'apprentissage.
+\end{attentionbox}
+
+% ===========================================================================
+\section{Résumé et transition}
+% ===========================================================================
+
+\subsection{Ce que vous avez accompli}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Créé une vraie page HTML structurée \cmark
+    \item Maîtrisé le squelette HTML5 (DOCTYPE, head, body) \cmark
+    \item Utilisé titres, paragraphes, mise en forme inline \cmark
+    \item Construit une liste imbriquée (modes de jeu) \cmark
+    \item Construit un tableau (palmarès) \cmark
+    \item Inséré une image et des liens \cmark
+    \item Posé le tag \texttt{v0.1} sur GitHub \cmark
+\end{itemize}
+
+\subsection{Ce qu'on fera au Lab 2}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Découvrir les balises \textbf{sémantiques} HTML5 (\texttt{header}, \texttt{nav}, \texttt{main}, \texttt{section}, \texttt{footer})
+    \item Construire les \textbf{5 pages} de Jàng Afrig (Accueil, Quiz, Résultat, Mes Scores, À propos)
+    \item Ajouter des \textbf{formulaires} (saisie du pseudo, sélection du mode)
+    \item Lier les pages entre elles avec des liens internes
+    \item Tag \texttt{v0.2}
+\end{itemize}
+
+\begin{infobox}[Avant le Lab 2]
+Lisez le PDF du Lab 2 que le prof vous a distribué. Aucun code à produire
+chez vous. Si vous avez du temps, vous pouvez parcourir la documentation
+des formulaires HTML sur MDN :\\
+\url{https://developer.mozilla.org/fr/docs/Learn/Forms}
+\end{infobox}
+
+\vspace{0.5cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Lab 1 --- Terminé \cmark}\\[0.3cm]
+\normalsize
+Vous avez écrit votre première vraie page HTML.\\
+La structure est posée. Place à la décoration et à l'interactivité.\\[0.2cm]
+\textit{Rendez-vous au Lab 2 !}\\[0.3cm]
+\vspace{0.3cm}
+\end{minipage}
+}
+\end{center}
+
+\end{document}

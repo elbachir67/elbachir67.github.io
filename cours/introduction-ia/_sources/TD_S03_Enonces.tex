@@ -1,0 +1,987 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc}
+\usepackage{multicol}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black}
+
+% En-tête et pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small TD S03 -- L'IA qui Cherche}
+\fancyhead[R]{\small Introduction à l'IA -- M1 IABD}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Boîtes
+\newtcolorbox{exercicebox}[1][]{
+    colback=blue!5,
+    colframe=blue!50,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{rappelbox}[1][]{
+    colback=yellow!10,
+    colframe=yellow!50!black,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{methodebox}[1][]{
+    colback=purple!5,
+    colframe=purple!50,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+% Espace de réponse avec lignes d'écriture
+\usepackage{pgffor} % pour \foreach
+\newlength{\ligneespacement}
+\setlength{\ligneespacement}{0.85cm}
+
+\newcommand{\lignesEcriture}[1]{%
+    \foreach \i in {1,...,#1}{%
+        \par\noindent\makebox[\linewidth]{\textcolor{gray!40}{\rule{\linewidth}{0.3pt}}}%
+        \vspace{\ligneespacement}%
+    }%
+}
+
+% Argument = nombre de lignes (défaut 6)
+\newcommand{\espaceReponse}[1][6]{%
+\begin{tcolorbox}[
+    colback=gray!3,
+    colframe=gray!30,
+    breakable,
+    title={\textit{Votre réponse :}},
+    fonttitle=\small\itshape,
+    top=4mm
+]
+\lignesEcriture{#1}
+\end{tcolorbox}
+}
+
+\title{\textbf{TD Séance 3 : L'IA qui Cherche}\\
+\large Exercices Progressifs --- Algorithmes de Recherche\\[0.3cm]
+\normalsize \textit{Feuille d'énoncés}}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Faculté des Sciences et Techniques\\
+Université Cheikh Anta Diop de Dakar}
+\date{M1 IABD --- Semestre 1}
+
+\begin{document}
+
+\maketitle
+
+\begin{rappelbox}[Organisation de ce TD]
+Ce TD est conçu pour une \textbf{compréhension progressive} des algorithmes de recherche :
+
+\begin{itemize}[nosep]
+    \item \textbf{Niveau 1} (Ex. 1--2) : Formulation de problèmes et vocabulaire
+    \item \textbf{Niveau 2} (Ex. 3--5) : Exécution manuelle de BFS, DFS, UCS
+    \item \textbf{Niveau 3} (Ex. 6--8) : Heuristiques, Greedy et A*
+    \item \textbf{Niveau 4} (Ex. 9--10) : Comparaison, analyse et conception
+    \item \textbf{Niveau 5} (Ex. 11--12) : Transfert sur nouveau graphe, vrai/faux théorique
+    \item \textbf{Niveau 6} (Ex. 13--14) : Recherche locale, problème de synthèse
+\end{itemize}
+
+\textbf{Conseil :} Pour chaque algorithme, reproduisez le tableau d'exécution étape par étape.
+\end{rappelbox}
+
+\vspace{0.3cm}
+
+Tous les exercices utilisent le graphe suivant :
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    city/.style={circle, draw, fill=blue!10, minimum size=0.9cm, font=\small\bfseries},
+    weight/.style={font=\small, fill=white, inner sep=1pt}
+]
+    \node[city, fill=green!20] (S) {S};
+    \node[city, right of=S] (A) {A};
+    \node[city, below of=S] (B) {B};
+    \node[city, right of=A] (C) {C};
+    \node[city, right of=B] (D) {D};
+    \node[city, fill=red!20, right of=D] (G) {G};
+    
+    \draw[-] (S) -- node[weight, above] {1} (A);
+    \draw[-] (S) -- node[weight, left] {4} (B);
+    \draw[-] (A) -- node[weight, above] {5} (C);
+    \draw[-] (A) -- node[weight, right] {2} (D);
+    \draw[-] (B) -- node[weight, below] {3} (D);
+    \draw[-] (C) -- node[weight, right] {2} (G);
+    \draw[-] (D) -- node[weight, below] {6} (G);
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\textbf{Graphe de référence.} S = départ (vert), G = but (rouge). Les nombres = coûts des arêtes.
+
+\smallskip
+\textbf{Voisins :}
+S: \{A, B\} \quad A: \{S, C, D\} \quad B: \{S, D\} \quad C: \{A, G\} \quad D: \{A, B, G\} \quad G: \{C, D\}
+\end{center}
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 1 --- Formulation de Problèmes}}
+%=============================================================================
+
+\subsection*{Exercice 1 : Formaliser un problème de recherche}
+
+\begin{exercicebox}[Énoncé]
+En utilisant le graphe de référence :
+\begin{enumerate}
+    \item Identifiez les cinq composants du problème de recherche : $(S, s_0, G, A, c)$.
+    \item Listez \textbf{tous} les chemins possibles de S à G (sans passer deux fois par le même nœud).
+    \item Pour chaque chemin, calculez le coût total.
+    \item Identifiez la solution optimale.
+\end{enumerate}
+\end{exercicebox}
+
+\espaceReponse[10]
+
+%=============================================================================
+
+\subsection*{Exercice 2 : Vocabulaire fondamental}
+
+\begin{exercicebox}[Énoncé]
+\begin{enumerate}
+    \item Qu'est-ce que la \textbf{frontière} (fringe) ? Quel est son contenu initial ?
+    \item Qu'est-ce qu'\textbf{expanser} (expand) un nœud ?
+    \item Quelle est la différence entre un nœud \textbf{généré} et un nœud \textbf{exploré} ?
+    \item Si on expanse le nœud S, quels nœuds sont ajoutés à la frontière ?
+    \item Si on expanse ensuite le nœud A, quels nœuds sont ajoutés ? Faut-il ajouter S ?
+\end{enumerate}
+\end{exercicebox}
+
+\espaceReponse[10]
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 2 --- Recherche Non Informée (BFS, DFS, UCS)}}
+%=============================================================================
+
+\begin{methodebox}[Méthode pour tous les exercices de ce niveau]
+Pour chaque algorithme, remplissez un \textbf{tableau d'exécution} au format suivant (identique au cours) :
+
+{\small
+\begin{center}
+\begin{tabular}{|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & \textbf{Frontière après expansion} & \textbf{Parents mis à jour} \\
+\hline
+0 & -- & [nœud initial] & -- \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\textbf{Vocabulaire (cf. cours §3.3) :}
+\begin{itemize}[nosep]
+    \item \textbf{Explorer} un nœud = le retirer de la frontière et générer ses successeurs
+    \item \textbf{Frontière} = nœuds découverts mais pas encore explorés
+    \item \textbf{Parent} : quand on ajoute $n'$ via $n$, on note $n' \leftarrow n$
+\end{itemize}
+
+\textbf{Rappel --- Structures de données :}
+\begin{itemize}[nosep]
+    \item \textbf{BFS} : File FIFO $\Rightarrow$ on explore le \textbf{plus ancien} (premier entré)
+    \item \textbf{DFS} : Pile LIFO $\Rightarrow$ on explore le \textbf{plus récent} (dernier entré)
+    \item \textbf{UCS} : File de priorité $\Rightarrow$ on explore celui de \textbf{plus petit $g(n)$}
+\end{itemize}
+
+\textbf{Reconstruction du chemin :} après avoir atteint le but, remontez les parents :
+$$\text{But} \xleftarrow{\text{parent}} \cdots \xleftarrow{\text{parent}} \text{Départ}$$
+\end{methodebox}
+
+%=============================================================================
+\subsection*{Exercice 3 : Recherche en Largeur (BFS)}
+
+\begin{exercicebox}[Énoncé]
+Exécutez BFS sur le graphe de référence, de S vers G.
+
+\textbf{Convention :} Successeurs en \textbf{ordre alphabétique}. Détection des états visités activée.
+
+\begin{enumerate}
+    \item Remplissez le tableau d'exécution étape par étape.
+    \item Quel chemin BFS trouve-t-il ?
+    \item Quel est le coût de ce chemin ?
+    \item Ce chemin est-il optimal ? Pourquoi ?
+    \item Combien de nœuds BFS a-t-il explorés ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Tableau d'exécution BFS (file FIFO) :}
+
+{\small
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & \textbf{Frontière après expansion} & \textbf{Parents mis à jour} \\
+\hline
+0 & -- & & -- \\
+\hline
+1 & & & \\
+\hline
+2 & & & \\
+\hline
+3 & & & \\
+\hline
+4 & & & \\
+\hline
+5 & & & \\
+\hline
+6 & & & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\noindent \textbf{Reconstruction du chemin :} G $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ S
+
+\noindent Chemin : \rule{5cm}{0.4pt} \quad Coût : \rule{2cm}{0.4pt} \quad Optimal ? \rule{2cm}{0.4pt} \quad Nœuds explorés : \rule{1.5cm}{0.4pt}
+
+\newpage
+
+%=============================================================================
+\subsection*{Exercice 4 : Recherche en Profondeur (DFS)}
+
+\begin{exercicebox}[Énoncé]
+Exécutez DFS sur le même graphe, de S vers G.
+
+\textbf{Convention :} Successeurs en \textbf{ordre alphabétique} sur la pile (le premier alphabétiquement au sommet). Détection des états visités activée.
+
+\begin{enumerate}
+    \item Remplissez le tableau d'exécution.
+    \item Quel chemin DFS trouve-t-il ? Quel est son coût ?
+    \item Comparez avec BFS : mêmes résultats ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Tableau d'exécution DFS (pile LIFO, sommet = élément en gras) :}
+
+{\small
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & \textbf{Pile après expansion} & \textbf{Parents mis à jour} \\
+\hline
+0 & -- & & -- \\
+\hline
+1 & & & \\
+\hline
+2 & & & \\
+\hline
+3 & & & \\
+\hline
+4 & & & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\noindent \textbf{Reconstruction :} G $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ S
+
+\noindent Chemin : \rule{5cm}{0.4pt} \quad Coût : \rule{2cm}{0.4pt}
+
+\vspace{0.3cm}
+\noindent\textit{Comparaison BFS vs DFS :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|l|c|c|}
+\hline
+& \textbf{BFS} & \textbf{DFS} \\
+\hline
+Chemin & \hspace{3cm} & \hspace{3cm} \\
+\hline
+Coût & & \\
+\hline
+Nœuds explorés & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[3]
+
+%=============================================================================
+\subsection*{Exercice 5 : Recherche à Coût Uniforme (UCS)}
+
+\begin{exercicebox}[Énoncé]
+Exécutez UCS sur le même graphe, de S vers G.
+
+\textbf{Convention :} Détection des états visités activée. En cas d'égalité de $g(n)$, ordre alphabétique.
+
+\begin{enumerate}
+    \item Remplissez le tableau d'exécution en indiquant $g(n)$ pour chaque nœud.
+    \item Quel chemin UCS trouve-t-il ?
+    \item Pourquoi peut-on garantir que ce chemin est optimal ?
+    \item À quelle étape UCS explore-t-il B ? Pourquoi pas avant ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Tableau d'exécution UCS (priorité par $g(n)$ croissant) :}
+
+{\small
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|c|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & $g$ & \textbf{Frontière (par $g$ croissant)} & \textbf{Parent} \\
+\hline
+0 & -- & -- & & -- \\
+\hline
+1 & & & & \\
+\hline
+2 & & & & \\
+\hline
+3 & & & & \\
+\hline
+4 & & & & \\
+\hline
+5 & & & & \\
+\hline
+6 & & & & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\noindent \textbf{Reconstruction :} G $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ S
+
+\noindent Chemin : \rule{5cm}{0.4pt} \quad Coût : \rule{2cm}{0.4pt} \quad Optimal garanti ? \rule{2cm}{0.4pt}
+
+\espaceReponse[4]
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 3 --- Recherche Informée (Heuristiques, Greedy, A*)}}
+%=============================================================================
+
+\subsection*{Exercice 6 : Comprendre les heuristiques}
+
+\begin{exercicebox}[Énoncé]
+On définit les heuristiques suivantes (estimations du coût vers G) :
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Nœud} & S & A & B & C & D & G \\
+\hline
+$h_1(n)$ & 7 & 6 & 8 & 2 & 5 & 0 \\
+\hline
+$h_2(n)$ & 10 & 8 & 12 & 1 & 7 & 0 \\
+\hline
+$h_3(n)$ & 5 & 4 & 6 & 1 & 3 & 0 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+    \item Rappelez la définition d'une heuristique \textbf{admissible}.
+    \item D'après l'exercice 1, quel est le vrai coût optimal $h^*(n)$ de chaque nœud vers G ?
+    \item Parmi $h_1$, $h_2$, $h_3$, lesquelles sont admissibles ? Justifiez.
+    \item Parmi les admissibles, laquelle est la \textbf{plus informative} ? Pourquoi ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Calcul des vrais coûts $h^*(n)$ et vérification d'admissibilité :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+& S & A & B & C & D & G & \textbf{Admissible ?} \\
+\hline
+$h^*(n)$ & \hspace{0.8cm} & \hspace{0.8cm} & \hspace{0.8cm} & \hspace{0.8cm} & \hspace{0.8cm} & \hspace{0.8cm} & --- \\
+\hline
+$h_1(n)$ & 7 & 6 & 8 & 2 & 5 & 0 & \\
+\hline
+$h_2(n)$ & 10 & 8 & 12 & 1 & 7 & 0 & \\
+\hline
+$h_3(n)$ & 5 & 4 & 6 & 1 & 3 & 0 & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[5]
+
+%=============================================================================
+\subsection*{Exercice 7 : Recherche Gloutonne (Greedy)}
+
+\begin{exercicebox}[Énoncé]
+Exécutez la recherche gloutonne avec $h_1$ :
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Nœud} & S & A & B & C & D & G \\
+\hline
+$h_1(n)$ & 7 & 6 & 8 & 2 & 5 & 0 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+    \item Remplissez le tableau d'exécution (priorité = $h(n)$ croissant).
+    \item Quel chemin Greedy trouve-t-il ? Coût ?
+    \item Ce chemin est-il optimal ?
+    \item Pourquoi Greedy n'explore-t-il pas B ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Tableau d'exécution Greedy (priorité par $h(n)$ croissant) :}
+
+{\small
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|c|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & $h$ & \textbf{Frontière (par $h$ croissant)} & \textbf{Parent} \\
+\hline
+0 & -- & -- & & -- \\
+\hline
+1 & & & & \\
+\hline
+2 & & & & \\
+\hline
+3 & & & & \\
+\hline
+4 & & & & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\noindent \textbf{Reconstruction :} G $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ S
+
+\noindent Chemin : \rule{5cm}{0.4pt} \quad Coût : \rule{2cm}{0.4pt} \quad Optimal ? \rule{2cm}{0.4pt}
+
+\espaceReponse[3]
+
+\newpage
+
+%=============================================================================
+\subsection*{Exercice 8 : L'algorithme A*}
+
+\begin{exercicebox}[Énoncé]
+Exécutez A* avec $h_1$ sur le graphe de référence.
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Nœud} & S & A & B & C & D & G \\
+\hline
+$h_1(n)$ & 7 & 6 & 8 & 2 & 5 & 0 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+    \item Remplissez le tableau avec $g(n)$, $h(n)$, et $f(n) = g(n) + h(n)$.
+    \item Quel chemin A* trouve-t-il ?
+    \item Comparez le nombre de nœuds explorés par A*, UCS, et Greedy.
+    \item Que se passerait-il avec $h_2$ (non admissible) ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Tableau d'exécution A* (priorité par $f(n) = g(n) + h(n)$ croissant) :}
+
+{\small
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|c|c|c|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & $g$ & $h$ & $f$ & \textbf{Frontière (par $f$)} & \textbf{Parent} \\
+\hline
+0 & -- & & & & & -- \\
+\hline
+1 & & & & & & \\
+\hline
+2 & & & & & & \\
+\hline
+3 & & & & & & \\
+\hline
+4 & & & & & & \\
+\hline
+5 & & & & & & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\noindent \textbf{Reconstruction :} G $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ \rule{1cm}{0.4pt} $\xleftarrow{\text{parent}}$ S
+
+\noindent Chemin : \rule{5cm}{0.4pt} \quad Coût : \rule{2cm}{0.4pt}
+
+\vspace{0.3cm}
+\noindent\textit{Comparaison finale de tous les algorithmes :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+& \textbf{BFS} & \textbf{DFS} & \textbf{UCS} & \textbf{Greedy} & \textbf{A*} \\
+\hline
+Nœuds explorés & & & & & \\
+\hline
+Chemin & & & & & \\
+\hline
+Coût & & & & & \\
+\hline
+Optimal garanti ? & & & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[4]
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 4 --- Comparaison, Analyse et Conception}}
+%=============================================================================
+
+\subsection*{Exercice 9 : Quand BFS bat A* (et inversement)}
+
+\begin{exercicebox}[Énoncé]
+Considérez le graphe suivant :
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    city/.style={circle, draw, fill=blue!10, minimum size=0.9cm, font=\small\bfseries},
+    weight/.style={font=\small, fill=white, inner sep=1pt}
+]
+    \node[city, fill=green!20] (S) {S};
+    \node[city, right of=S, xshift=1cm] (A) {A};
+    \node[city, below of=A] (B) {B};
+    \node[city, fill=red!20, right of=A, xshift=1cm] (G) {G};
+    
+    \draw[-] (S) -- node[weight, above] {1} (A);
+    \draw[-] (S) -- node[weight, left] {1} (B);
+    \draw[-] (A) -- node[weight, above] {1} (G);
+    \draw[-] (B) -- node[weight, right] {1} (G);
+\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+    \item Tous les coûts sont égaux à 1. Exécutez BFS et UCS. Trouvent-ils le même résultat ?
+    \item Maintenant, changez le coût de $A \to G$ à 100. Exécutez BFS et UCS. Que se passe-t-il ?
+    \item Conclusion : quand BFS suffit-il ? Quand faut-il UCS ou A* ?
+\end{enumerate}
+\end{exercicebox}
+
+\espaceReponse[12]
+
+%=============================================================================
+\subsection*{Exercice 10 : Concevoir une heuristique par relaxation}
+
+\begin{exercicebox}[Énoncé]
+Le \textbf{taquin} (8-puzzle) :
+
+\begin{center}
+\begin{tabular}{ccc}
+\textbf{État actuel} & & \textbf{État but} \\[0.2cm]
+\begin{tabular}{|c|c|c|}
+\hline
+7 & 2 & 4 \\
+\hline
+5 &   & 6 \\
+\hline
+8 & 3 & 1 \\
+\hline
+\end{tabular}
+& $\Longrightarrow$ &
+\begin{tabular}{|c|c|c|}
+\hline
+  & 1 & 2 \\
+\hline
+3 & 4 & 5 \\
+\hline
+6 & 7 & 8 \\
+\hline
+\end{tabular}
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+    \item Formulez comme problème de recherche $(S, s_0, G, A, c)$.
+    \item \textbf{$h_1$ (tuiles mal placées)} : comptez les tuiles hors position. Calculez $h_1$.
+    \item \textbf{$h_2$ (distance de Manhattan)} : pour chaque tuile, $|x_{act} - x_{but}| + |y_{act} - y_{but}|$. Calculez $h_2$.
+    \item Montrez que $h_1$ et $h_2$ sont admissibles par \textbf{relaxation}.
+    \item Laquelle est meilleure ? Pourquoi ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{$h_1$ --- Tuiles mal placées :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Tuile} & \textbf{Position actuelle} & \textbf{Position but} & \textbf{Mal placée ?} \\
+\hline
+1 & & & \\
+\hline
+2 & & & \\
+\hline
+3 & & & \\
+\hline
+4 & & & \\
+\hline
+5 & & & \\
+\hline
+6 & & & \\
+\hline
+7 & & & \\
+\hline
+8 & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent $h_1 = $ \rule{2cm}{0.4pt}
+
+\vspace{0.5cm}
+
+\noindent\textit{$h_2$ --- Distance de Manhattan :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Tuile} & \textbf{Pos. actuelle} (l,c) & \textbf{Pos. but} (l,c) & \textbf{Manhattan} \\
+\hline
+1 & & & \\
+\hline
+2 & & & \\
+\hline
+3 & & & \\
+\hline
+4 & & & \\
+\hline
+5 & & & \\
+\hline
+6 & & & \\
+\hline
+7 & & & \\
+\hline
+8 & & & \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Total}} & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent $h_2 = $ \rule{2cm}{0.4pt}
+
+\espaceReponse[6]
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 5 --- Transfert : Nouveau Graphe}}
+%=============================================================================
+
+\subsection*{Exercice 11 : Le réseau TER sénégalais}
+
+\begin{exercicebox}[Énoncé]
+Le Train Express Régional (TER) relie Dakar à l'Aéroport AIBD via plusieurs gares. Considérons le graphe simplifié suivant (les coûts représentent les temps de trajet en minutes) :
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=2.2cm,
+    city/.style={circle, draw=blue!60, fill=blue!10, thick, minimum size=1cm, font=\scriptsize\bfseries},
+    road/.style={thick, gray!70},
+    cost/.style={font=\scriptsize, fill=white, inner sep=1pt}
+]
+\node[city, fill=green!20] (Dk) at (0,0) {Dakar};
+\node[city] (Hm) at (2.5,1.2) {H.Mermoz};
+\node[city] (Co) at (2.5,-1.2) {Colobane};
+\node[city] (Th) at (5.5,1.2) {Thiaroye};
+\node[city] (Pk) at (5.5,-1.2) {Pikine};
+\node[city] (Gu) at (8,0) {Guédiawaye};
+\node[city] (Ru) at (10.5,0) {Rufisque};
+\node[city] (Bg) at (10.5,-2) {Bargny};
+\node[city, fill=red!20] (AB) at (13,0) {AIBD};
+
+\draw[road] (Dk) -- node[cost,above left] {5} (Hm);
+\draw[road] (Dk) -- node[cost,below left] {8} (Co);
+\draw[road] (Hm) -- node[cost,above] {10} (Th);
+\draw[road] (Co) -- node[cost,below] {6} (Pk);
+\draw[road] (Th) -- node[cost,above right] {7} (Gu);
+\draw[road] (Pk) -- node[cost,below right] {9} (Gu);
+\draw[road] (Co) -- node[cost,left] {12} (Th);
+\draw[road] (Gu) -- node[cost,above] {15} (Ru);
+\draw[road] (Gu) -- node[cost,below right] {20} (Bg);
+\draw[road] (Ru) -- node[cost,above] {12} (AB);
+\draw[road] (Bg) -- node[cost,below] {8} (AB);
+\draw[road] (Ru) -- node[cost,right] {6} (Bg);
+\end{tikzpicture}
+\end{center}
+
+Heuristiques $h(n)$ (temps estimé à vol d'oiseau vers AIBD, en minutes) :
+
+\begin{center}
+\begin{tabular}{lccccccccc}
+\toprule
+& Dakar & H.Merm. & Colobane & Thiaroye & Pikine & Guédiaw. & Rufisque & Bargny & AIBD \\
+\midrule
+$h$ & 35 & 30 & 32 & 22 & 24 & 18 & 10 & 7 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+    \item Formulez ce problème : $(S, s_0, G, A, c)$, $b$, $d$ optimal.
+    \item Exécutez \textbf{UCS} (Dakar $\to$ AIBD). Donnez le tableau complet.
+    \item Exécutez \textbf{A*} (Dakar $\to$ AIBD). Donnez le tableau complet.
+    \item Combien de nœuds chaque algorithme explore-t-il ? Quel est le gain apporté par l'heuristique ?
+    \item Vérifiez l'admissibilité de $h$ : pour chaque nœud, est-ce que $h(n) \leq h^*(n)$ ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Tableau UCS :}
+
+{\small
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|c|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & $g$ & \textbf{Frontière (par $g$ croissant)} & \textbf{Parent} \\
+\hline
+0 & -- & -- & & -- \\
+\hline
+1 & & & & \\
+\hline
+2 & & & & \\
+\hline
+3 & & & & \\
+\hline
+4 & & & & \\
+\hline
+5 & & & & \\
+\hline
+6 & & & & \\
+\hline
+7 & & & & \\
+\hline
+8 & & & & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\noindent\textit{Tableau A* :}
+
+{\small
+\begin{center}
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|c|c|c|c|c|l|l|}
+\hline
+\textbf{Ét.} & \textbf{Explore} & $g$ & $h$ & $f$ & \textbf{Frontière (par $f$)} & \textbf{Parent} \\
+\hline
+0 & -- & & & & & -- \\
+\hline
+1 & & & & & & \\
+\hline
+2 & & & & & & \\
+\hline
+3 & & & & & & \\
+\hline
+4 & & & & & & \\
+\hline
+5 & & & & & & \\
+\hline
+6 & & & & & & \\
+\hline
+7 & & & & & & \\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\espaceReponse[4]
+
+\newpage
+
+%=============================================================================
+\subsection*{Exercice 12 : Vrai ou Faux --- Propriétés des algorithmes}
+
+\begin{exercicebox}[Énoncé]
+Pour chaque affirmation, indiquez si elle est \textbf{vraie} ou \textbf{fausse}, et \textbf{justifiez} par un argument ou un contre-exemple.
+
+\begin{enumerate}
+    \item « Si BFS trouve un chemin de coût 10, alors il n'existe pas de chemin de moins de 3 étapes. »
+    
+    \item « DFS utilise moins de mémoire que BFS dans \textbf{tous} les cas. »
+    
+    \item « Si $h(n) = 0$ pour tout $n$, alors A* se comporte exactement comme UCS. »
+    
+    \item « Si l'heuristique $h$ surestime le coût pour un seul nœud, A* peut manquer le chemin optimal. »
+    
+    \item « UCS et Dijkstra trouvent toujours le même chemin optimal. »
+    
+    \item « La distance de Manhattan est une heuristique admissible pour la navigation routière (comme dans notre fil rouge). »
+    
+    \item « Si $h_1$ domine $h_2$ (toutes deux admissibles), alors A* avec $h_1$ explore toujours \textbf{strictement} moins de nœuds que A* avec $h_2$. »
+    
+    \item « Le recuit simulé peut trouver l'optimum global, mais pas hill climbing. »
+\end{enumerate}
+\end{exercicebox}
+
+\espaceReponse[16]
+
+\newpage
+
+%=============================================================================
+\section*{\textcolor{blue!70}{Niveau 6 --- Pour Aller Plus Loin}}
+%=============================================================================
+
+\subsection*{Exercice 13 : Recherche locale --- Le problème des 4 reines}
+
+\begin{exercicebox}[Énoncé]
+Placer 4 reines sur un échiquier 4$\times$4 tel qu'aucune paire ne s'attaque (pas sur la même ligne, colonne, ou diagonale).
+
+\textbf{Représentation :} Un état est un vecteur $(c_1, c_2, c_3, c_4)$ où $c_i$ est la colonne de la reine de la ligne $i$. Chaque reine est sur une ligne distincte.
+
+\textbf{Fonction objectif :} $h =$ nombre de paires de reines en conflit (à minimiser, objectif : $h = 0$).
+
+\textbf{Voisinage :} déplacer une reine dans sa ligne (changer $c_i$ pour une valeur différente).
+
+\begin{enumerate}
+    \item \textbf{État initial.} Considérez l'état $(1, 3, 2, 4)$.
+    \begin{enumerate}[label=(\alph*)]
+        \item Dessinez l'échiquier correspondant (Q en ligne $i$, colonne $c_i$).
+        \item Identifiez toutes les paires en conflit. Calculez $h$.
+    \end{enumerate}
+    
+    \item \textbf{Un pas de hill climbing.} Énumérez les 12 voisins (4 reines $\times$ 3 colonnes alternatives). Pour chacun, calculez $h$. Quel voisin hill climbing choisit-il ?
+    
+    \item \textbf{Itérez} : à partir du voisin choisi, effectuez un deuxième pas de hill climbing. Avez-vous atteint $h = 0$ ? Si non, continuez.
+    
+    \item \textbf{Recuit simulé.} Supposons qu'à un état avec $h = 1$, le recuit simulé propose un voisin avec $h = 2$ (dégradation $\Delta h = +1$), et que la température $T = 2$. Quelle est la probabilité d'accepter ce mouvement ? ($P = e^{-\Delta h / T}$). Quel est l'intérêt de cette acceptation ?
+\end{enumerate}
+\end{exercicebox}
+
+\noindent\textit{Échiquier 4$\times$4 pour l'état $(1, 3, 2, 4)$ :}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\phantom{Q} & \phantom{Q} & \phantom{Q} & \phantom{Q} \\
+\hline
+\phantom{Q} & \phantom{Q} & \phantom{Q} & \phantom{Q} \\
+\hline
+\phantom{Q} & \phantom{Q} & \phantom{Q} & \phantom{Q} \\
+\hline
+\phantom{Q} & \phantom{Q} & \phantom{Q} & \phantom{Q} \\
+\hline
+\end{tabular}
+\end{center}
+
+\espaceReponse[12]
+
+\newpage
+
+%=============================================================================
+\subsection*{Exercice 14 : Problème de synthèse --- Livraison à Dakar}
+
+\begin{exercicebox}[Énoncé]
+Amadou gère un service de livraison de colis à Dakar. Il doit trouver le trajet le plus rapide entre le Point E (Marché Sandaga) et le Point F (Université UCAD). Le réseau routier simplifié est le suivant (coûts en minutes) :
+
+\begin{center}
+\begin{tabular}{lll}
+E $\to$ A : 3 & A $\to$ C : 4 & C $\to$ F : 5 \\
+E $\to$ B : 5 & A $\to$ D : 7 & D $\to$ F : 2 \\
+B $\to$ C : 2 & B $\to$ D : 6 & C $\to$ D : 1 \\
+\end{tabular}
+\end{center}
+
+\textbf{Attention :} toutes les arêtes sont \textbf{orientées} (sens unique). Le graphe est dirigé.
+
+Heuristiques proposées :
+\begin{center}
+\begin{tabular}{lcccccc}
+\toprule
+& E & A & B & C & D & F \\
+\midrule
+$h_\alpha$ & 8 & 6 & 5 & 4 & 2 & 0 \\
+$h_\beta$ & 12 & 9 & 7 & 6 & 2 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+    \item Dessinez le graphe orienté. Trouvez le chemin optimal (par inspection ou UCS).
+    
+    \item \textbf{$h_\alpha$ est-elle admissible ?} Calculez $h^*(n)$ pour chaque nœud et vérifiez.
+    
+    \item \textbf{$h_\beta$ est-elle admissible ?} Même vérification. Si non, identifiez les nœuds problématiques.
+    
+    \item Exécutez \textbf{A* avec $h_\alpha$}. Trouvez-vous le chemin optimal ?
+    
+    \item Exécutez \textbf{A* avec $h_\beta$}. Trouvez-vous le chemin optimal ? Expliquez.
+    
+    \item Construisez une heuristique $h_\gamma$ qui \textbf{domine} $h_\alpha$ tout en restant admissible. (\textit{Indice : utilisez $h_\gamma(n) = \max(h_\alpha(n), \ldots)$})
+\end{enumerate}
+\end{exercicebox}
+
+\espaceReponse[16]
+
+\newpage
+
+%=============================================================================
+\section*{Aide-mémoire}
+%=============================================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+& \textbf{BFS} & \textbf{DFS} & \textbf{UCS} & \textbf{Greedy} & \textbf{A*} \\
+\hline
+\textbf{Frontière} & File FIFO & Pile LIFO & Priorité $g(n)$ & Priorité $h(n)$ & Priorité $f(n)$ \\
+\hline
+\textbf{Complet ?} & Oui & Non & Oui & Non & Oui \\
+\hline
+\textbf{Optimal ?} & Non* & Non & \textbf{Oui} & Non & \textbf{Oui}** \\
+\hline
+\textbf{Temps} & $O(b^d)$ & $O(b^m)$ & $O(b^{1+\lfloor C^*/\varepsilon\rfloor})$ & $O(b^m)$ & $\leq$ UCS \\
+\hline
+\textbf{Espace} & $O(b^d)$ & $O(bm)$ & Comme temps & $O(b^m)$ & Comme temps \\
+\hline
+\textbf{Informé ?} & Non & Non & Non & Oui & Oui \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{small}
+* BFS optimal si coûts égaux. \quad ** A* optimal si $h$ admissible.\\
+$b$ = branchement, $d$ = profondeur solution, $m$ = profondeur max, $C^*$ = coût optimal, $\varepsilon$ = coût min.
+\end{small}
+
+\end{document}

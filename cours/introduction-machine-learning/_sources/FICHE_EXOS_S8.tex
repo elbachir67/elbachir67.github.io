@@ -1,0 +1,198 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.4cm,top=1.1cm,bottom=1.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setstretch{1.0}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+\pagestyle{empty}
+\newcommand{\repligne}{\par\vspace{0.42cm}\noindent\dotfill}
+\newcommand{\zonecalcul}[1]{\par\vspace{0.15cm}\noindent{\small\emph{Espace de calcul :}}\par\vspace{#1}}
+\newcommand{\aide}[1]{\fbox{\begin{minipage}{0.96\textwidth}\small #1\end{minipage}}}
+\begin{document}
+\begin{center}
+\textbf{\large Fiche d'exercices --- Séance 8 : les méthodes d'ensemble}\\[0.05cm]
+{\small Introduction au ML -- Dr. El Hadji Bassirou TOURÉ -- DMI $\cdot$ FST $\cdot$ UCAD \quad $\bullet$ \quad \textbf{Travail à la main, sans machine}}
+\end{center}
+\vspace{-0.15cm}\hrule\vspace{0.25cm}
+{\small Cette fiche reprend, exercice par exercice, les calculs de la Séance 8 : la sagesse de la foule (Condorcet), le bootstrap et l'évaluation out-of-bag, la variance d'une moyenne corrélée, la décorrélation de la forêt, le gradient boosting sur les résidus, puis le choix raisonné d'un modèle. Répondre directement sur la fiche.}
+\vspace{0.2cm}
+
+\aide{\textbf{Aides numériques (valables pour toute la fiche).} Majorité de $M$ votants indépendants, chacun juste avec probabilité $p$ : $P = \sum_{k>M/2}\binom{M}{k}p^k(1-p)^{M-k}$, avec $\binom{3}{2}=3$, $\binom{5}{3}=10$, $\binom{5}{4}=5$. Puissances utiles : $0{,}7^2=0{,}49$ ; $0{,}7^3=0{,}343$ ; $0{,}7^4=0{,}2401$ ; $0{,}7^5=0{,}16807$ ; $0{,}4^2=0{,}16$ ; $0{,}4^3=0{,}064$ ; $(7/8)^8=0{,}344$ ; $(3/4)^4=0{,}316$ ; $1/e=0{,}368$.
+Variance d'une moyenne de $B$ modèles de variance $\sigma^2$ et de corrélation $\rho$ : $\ \rho\,\sigma^2 + \dfrac{1-\rho}{B}\,\sigma^2$.}
+\vspace{0.4cm}
+
+\textbf{\large Exercice 1 -- La sagesse de la foule}
+\vspace{0.15cm}
+
+Des agents de santé indépendants posent chacun un diagnostic juste avec probabilité $p$ ; la décision est prise à la majorité.
+
+\vspace{0.15cm}
+(a) Avec $M=3$ agents et $p=0{,}7$ : écrire les deux cas où la majorité a raison ($3$ justes, ou exactement $2$ justes), puis calculer $P(\text{majorité correcte})$.
+\zonecalcul{1.3cm}
+$P = $ \makebox[3cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Avec $M=5$ et $p=0{,}7$, calculer $P$. Que constate-t-on en passant de $3$ à $5$ agents ?
+\zonecalcul{1.3cm}
+$P = $ \makebox[3cm]{\dotfill}
+\repligne
+
+\vspace{0.15cm}
+(c) Avec $M=3$ et $p=0{,}4$, calculer $P$ et comparer à $p$.
+\zonecalcul{0.9cm}
+$P = $ \makebox[3cm]{\dotfill}
+\repligne
+
+\vspace{0.15cm}
+(d) Cinq agents qui se concertent et rendent \emph{toujours} le même avis ($p=0{,}7$) : que vaut leur majorité ? Quelle hypothèse de la formule est violée ?
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 2 -- Le bootstrap à la main}
+\vspace{0.15cm}
+
+Huit patients numérotés $1$ à $8$. Un échantillon bootstrap tire $8$ fois \emph{avec remise} : $\{1,\ 3,\ 3,\ 4,\ 6,\ 6,\ 6,\ 8\}$.
+
+\vspace{0.15cm}
+(a) Quels patients sont \emph{vus} ? Lesquels sont \emph{out-of-bag} (OOB) ? Quel patient pèse le plus lourd dans cet arbre ?
+
+\vspace{0.1cm}
+vus : \makebox[4cm]{\dotfill} \quad OOB : \makebox[3cm]{\dotfill} \quad le plus lourd : \makebox[2cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Pourquoi un patient OOB peut-il servir à évaluer honnêtement cet arbre ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(c) La probabilité qu'un patient donné soit absent d'un tirage de taille $n$ vaut $(1-1/n)^n$. La calculer pour $n=4$ et $n=8$ (aides), puis donner la limite quand $n$ devient grand. Comparer avec la proportion observée en (a).
+\zonecalcul{1.1cm}
+$n=4$ : \makebox[2cm]{\dotfill} \quad $n=8$ : \makebox[2cm]{\dotfill} \quad limite : \makebox[2cm]{\dotfill} \quad observé : \makebox[2cm]{\dotfill}
+
+\vspace{0.45cm}
+\textbf{\large Exercice 3 -- La variance d'une moyenne corrélée}
+\vspace{0.15cm}
+
+Chaque arbre a une variance $\sigma^2 = 0{,}04$. On fait la moyenne de $B$ arbres deux à deux corrélés au coefficient $\rho$.
+
+\vspace{0.15cm}
+(a) Compléter le tableau (variance de la moyenne).
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.9}\begin{tabular}{|c|c|c|c|}\hline
+corrélation $\rho$ & $B=10$ & $B=100$ & limite ($B\to\infty$)\\\hline
+$1{,}0$ (arbres identiques) & & & \\\hline
+$0{,}5$ (bagging) & & & \\\hline
+$0{,}1$ (forêt décorrélée) & & & \\\hline
+$0{,}0$ (indépendants) & & & \\\hline
+\end{tabular}}
+\zonecalcul{1.4cm}
+
+(b) Passer de $10$ à $100$ arbres avec $\rho=0{,}5$, ou garder $10$ arbres en ramenant $\rho$ à $0{,}1$ : laquelle des deux stratégies réduit le plus la variance ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(c) En déduire en une phrase la raison d'être de la forêt aléatoire.
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 4 -- La forêt : décorréler par max\_features}
+\vspace{0.15cm}
+
+(a) La valeur par défaut de \texttt{max\_features} en classification est $\sqrt d$. Combien de variables candidates par coupure pour $d=16$ ? pour $d=9$ ? \makebox[3.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Deux forêts sur le même problème : forêt A, \texttt{max\_features=2}, AUC CV $0{,}78$ ; forêt B, \texttt{max\_features} $=$ toutes les variables, AUC CV $0{,}73$. Les arbres de B sont individuellement \emph{meilleurs}. Expliquer pourquoi l'ensemble B est pourtant moins bon.
+\repligne\repligne\repligne
+
+\vspace{0.15cm}
+(c) À quel algorithme déjà vu la forêt B est-elle en fait équivalente ?
+\repligne
+
+\vspace{0.15cm}
+(d) Une variable « numéro de dossier » (identifiant unique) sort première au classement d'importance par impureté. Faut-il la garder ? Pourquoi ce classement est-il trompeur ?
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 5 -- Le gradient boosting à la main}
+\vspace{0.15cm}
+
+Jouet de régression : $x=(1,2,3,4)$, $y=(1,2,6,7)$. On part d'une constante $F_0$, puis on ajoute des souches (arbres de profondeur $1$) ajustées sur les résidus.
+
+\vspace{0.15cm}
+(a) Calculer $F_0 = \bar y$, les résidus $r_1 = y - F_0$ et la MSE de départ.
+\zonecalcul{0.9cm}
+$F_0=$ \makebox[1.5cm]{\dotfill} \quad $r_1=$ \makebox[4cm]{\dotfill} \quad MSE$_0=$ \makebox[1.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Trois coupures sont possibles : $x=1{,}5$, $x=2{,}5$, $x=3{,}5$. Pour chacune, la souche prédit la moyenne des résidus de chaque côté. Compléter le tableau (SSE $=$ somme des carrés des écarts aux moyennes) et désigner la meilleure.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.9}\begin{tabular}{|c|c|c|c|}\hline
+coupure & moyenne à gauche & moyenne à droite & SSE\\\hline
+$1{,}5$ & & & \\\hline
+$2{,}5$ & & & \\\hline
+$3{,}5$ & & & \\\hline
+\end{tabular}}
+\zonecalcul{1.4cm}
+
+(c) Avec un taux d'apprentissage $\nu=1$, calculer $F_1 = F_0 + h_1$, les nouveaux résidus et la MSE. Refaire avec $\nu=0{,}5$.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.9}\begin{tabular}{|c|c|c|c|}\hline
+ & $F_1$ & $r_2 = y - F_1$ & MSE$_1$\\\hline
+$\nu = 1$ & & & \\\hline
+$\nu = 0{,}5$ & & & \\\hline
+\end{tabular}}
+\zonecalcul{1.2cm}
+
+(d) Le pas $\nu=0{,}5$ progresse moins vite. Pourquoi le préfère-t-on souvent ? Quel hyperparamètre faut-il alors augmenter ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(e) La prédiction finale est-elle la \emph{moyenne} ou la \emph{somme} des arbres ? Comparer au bagging.
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 6 -- Bagging contre boosting}
+\vspace{0.15cm}
+
+Compléter le tableau comparatif.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.9}\begin{tabular}{|p{6.3cm}|p{5cm}|p{5cm}|}\hline
+critère & bagging / forêt & boosting\\\hline
+arbres entraînés en parallèle ou en série ? & & \\\hline
+arbres profonds ou peu profonds ? & & \\\hline
+réduit surtout le biais ou la variance ? & & \\\hline
+agrégation des arbres & & \\\hline
+trop d'arbres fait-il sur-apprendre ? & & \\\hline
+\end{tabular}}
+
+\vspace{0.45cm}
+\textbf{\large Exercice 7 -- Choisir un modèle : le principe de parcimonie}
+\vspace{0.15cm}
+
+Deux problèmes, trois modèles évalués par validation croisée à $5$ plis (AUC moyenne $\pm$ écart-type).
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.5}\begin{tabular}{|l|c|c|c|}\hline
+ & logistique & forêt & gradient boosting\\\hline
+problème 1 (dépistage de l'anémie) & $0{,}74 \pm 0{,}02$ & $0{,}75\pm 0{,}02$ & $0{,}84\pm 0{,}02$\\\hline
+problème 2 (réadmission à Thiès) & $0{,}81 \pm 0{,}02$ & $0{,}80\pm 0{,}03$ & $0{,}82\pm 0{,}02$\\\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+(a) Pour chaque problème, quel modèle retenir ? Justifier en tenant compte des écarts-types.
+\repligne\repligne\repligne
+
+\vspace{0.15cm}
+(b) Que peut-on deviner de la nature du signal dans chacun des deux problèmes ?
+\repligne\repligne
+
+\end{document}

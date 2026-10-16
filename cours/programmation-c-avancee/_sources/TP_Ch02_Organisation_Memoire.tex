@@ -1,0 +1,331 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{enumitem}
+
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\scriptsize,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+    frame=single,
+    tabsize=4,
+    showstringspaces=false,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 
+             {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ù}{{\`u}}1
+}
+
+\newtcolorbox{infobox}[1]{colback=blue!5,colframe=blue!75!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{exercicebox}[1]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{warningbox}[1]{colback=red!5,colframe=red!75!black,fonttitle=\bfseries,title=#1,breakable}
+
+\title{\textbf{TP Chapitre 2 : Organisation Mémoire}\\
+\large Exploration Pratique avec GDB et Valgrind}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{infobox}{Prérequis}
+Ce TP suppose que vous avez configuré votre environnement Docker (TP-0) et maîtrisez :
+\begin{itemize}
+    \item Compilation avec \texttt{gcc} et options \texttt{-Wall -Wextra -g}
+    \item Débogage de base avec \texttt{gdb}
+    \item Installation de \texttt{valgrind} : \texttt{apt-get install valgrind}
+\end{itemize}
+\end{infobox}
+
+\begin{infobox}{Commandes de référence}
+\begin{verbatim}
+# Compilation avec symboles de debug
+gcc -Wall -Wextra -g prog.c -o prog
+
+# Compilation avec Address Sanitizer
+gcc -Wall -Wextra -g -fsanitize=address prog.c -o prog
+
+# Débogage mémoire avec GDB
+gdb ./prog
+(gdb) break main
+(gdb) run
+(gdb) print &variable       # Adresse
+(gdb) print/x variable      # Hexadécimal
+(gdb) x/4xb &variable       # Examiner 4 octets en hex
+(gdb) x/s str               # Examiner comme string
+
+# Détection de fuites mémoire
+valgrind --leak-check=full ./prog
+\end{verbatim}
+\end{infobox}
+
+%==============================================================================
+\section{Exercice 1 : Visualisation Mémoire et Endianness}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Examiner la représentation mémoire des variables avec GDB et vérifier l'endianness.
+\end{exercicebox}
+
+\textbf{1.1} Créer un fichier \texttt{memory\_view.c} :
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdint.h>
+
+int main() {
+    int x = 0x12345678;
+    short s = 0xABCD;
+    char c = 'A';
+    
+    printf("x = 0x%X, &x = %p\n", x, (void*)&x);
+    printf("s = 0x%X, &s = %p\n", s, (void*)&s);
+    printf("c = '%c' (0x%X), &c = %p\n", c, c, (void*)&c);
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Compiler avec \texttt{gcc -Wall -g memory\_view.c -o memory\_view}.
+    \item Lancer GDB et mettre un breakpoint après les déclarations.
+    \item Utiliser \texttt{x/4xb \&x} pour afficher les 4 octets de \texttt{x}. Dans quel ordre sont-ils stockés ?
+    \item Vérifier que votre machine est bien little-endian.
+    \item Utiliser \texttt{x/2xb \&s} pour afficher les octets de \texttt{s}. Vérifier l'ordre.
+\end{enumerate}
+
+\textbf{1.2} Ajouter au programme :
+
+\begin{lstlisting}
+    int arr[3] = {0x0A, 0x14, 0x1E};
+    int *p = arr;
+    int *q = &arr[2];
+    
+    printf("\n=== Arithmétique des pointeurs ===\n");
+    printf("p = %p, q = %p\n", (void*)p, (void*)q);
+    printf("q - p = %ld (éléments)\n", q - p);
+    printf("(char*)q - (char*)p = %ld (octets)\n", (char*)q - (char*)p);
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \setcounter{enumi}{5}
+    \item En GDB, utiliser \texttt{x/12xb arr} pour voir les 12 octets du tableau.
+    \item Vérifier que \texttt{q - p = 2} (éléments) et non 8 (octets).
+    \item Calculer manuellement \texttt{\&arr[1]} à partir de \texttt{\&arr[0]}.
+\end{enumerate}
+
+%==============================================================================
+\section{Exercice 2 : Débordement de Tableau (Buffer Overflow)}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Observer les conséquences d'un accès hors limites et utiliser Address Sanitizer.
+\end{exercicebox}
+
+\begin{warningbox}{Attention}
+Ce code contient des bugs intentionnels ! Le but est de les détecter.
+\end{warningbox}
+
+\textbf{2.1} Créer un fichier \texttt{overflow.c} :
+
+\begin{lstlisting}
+#include <stdio.h>
+
+int main() {
+    int secret = 0xDEADBEEF;
+    int arr[4] = {1, 2, 3, 4};
+    int guard = 0xCAFEBABE;
+    
+    printf("Avant overflow:\n");
+    printf("secret = 0x%X\n", secret);
+    printf("guard  = 0x%X\n", guard);
+    
+    printf("\nAdresses:\n");
+    printf("&secret = %p\n", (void*)&secret);
+    printf("&arr[0] = %p\n", (void*)&arr[0]);
+    printf("&arr[4] = %p (hors limites!)\n", (void*)&arr[4]);
+    printf("&guard  = %p\n", (void*)&guard);
+    
+    // OVERFLOW INTENTIONNEL !
+    printf("\nÉcriture arr[4] = 0xBAD...\n");
+    arr[4] = 0xBAD;  // Hors limites !
+    
+    printf("\nAprès overflow:\n");
+    printf("secret = 0x%X\n", secret);
+    printf("guard  = 0x%X\n", guard);
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Compiler SANS sanitizer : \texttt{gcc -g overflow.c -o overflow}. Exécuter. Quelle variable a été corrompue ?
+    \item Compiler AVEC Address Sanitizer : \texttt{gcc -g -fsanitize=address overflow.c -o overflow}. Que se passe-t-il ?
+    \item Tester aussi \texttt{arr[-1] = 0xBAD}. Quelle variable est affectée ?
+    \item Expliquer pourquoi le compilateur ne détecte pas ces erreurs à la compilation.
+\end{enumerate}
+
+%==============================================================================
+\section{Exercice 3 : Chaînes et Allocation Dynamique}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Comprendre les chaînes en mémoire et détecter les fuites avec Valgrind.
+\end{exercicebox}
+
+\textbf{3.1} Créer un fichier \texttt{strings\_alloc.c} :
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+    // Partie 1: Chaînes
+    char arr[] = "Hello";
+    char *ptr = "World";
+    
+    printf("=== Chaînes ===\n");
+    printf("arr = \"%s\", sizeof = %zu, strlen = %zu\n", 
+           arr, sizeof(arr), strlen(arr));
+    printf("ptr = \"%s\", sizeof = %zu, strlen = %zu\n", 
+           ptr, sizeof(ptr), strlen(ptr));
+    
+    // Modification
+    arr[0] = 'J';  // OK
+    printf("Après arr[0]='J': %s\n", arr);
+    // ptr[0] = 'X';  // CRASH ! Décommenter pour tester
+    
+    // Partie 2: Allocation dynamique
+    printf("\n=== Allocation dynamique ===\n");
+    int *a = malloc(5 * sizeof(int));
+    int *b = calloc(5, sizeof(int));
+    
+    printf("malloc: a[0] = %d (non initialisé!)\n", a[0]);
+    printf("calloc: b[0] = %d (initialisé à 0)\n", b[0]);
+    
+    for (int i = 0; i < 5; i++) {
+        a[i] = i * 10;
+    }
+    
+    // FUITE INTENTIONNELLE : b n'est pas libéré !
+    free(a);
+    // free(b);  // Décommenter pour corriger
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Compiler et exécuter. Pourquoi \texttt{sizeof(arr) = 6} mais \texttt{sizeof(ptr) = 8} ?
+    \item Décommenter \texttt{ptr[0] = 'X'}. Compiler et exécuter. Que se passe-t-il ? Pourquoi ?
+    \item Exécuter avec Valgrind : \texttt{valgrind --leak-check=full ./strings\_alloc}. Combien d'octets sont perdus ?
+    \item Corriger la fuite en ajoutant \texttt{free(b)}. Relancer Valgrind pour vérifier.
+    \item En GDB, utiliser \texttt{x/6cb arr} pour afficher les caractères. Identifier le \texttt{'$\backslash$0'} final.
+\end{enumerate}
+
+%==============================================================================
+\section{Exercice 4 : Projet — Visualiseur Hexadécimal}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Créer un outil pour afficher un dump hexadécimal de n'importe quelle variable.
+\end{exercicebox}
+
+\textbf{4.1} Créer un fichier \texttt{hexdump.c} :
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdint.h>
+
+// Affiche 'size' octets à partir de 'ptr'
+void hexdump(const char *name, void *ptr, size_t size) {
+    unsigned char *p = (unsigned char *)ptr;
+    printf("=== %s (%zu octets à %p) ===\n", name, size, ptr);
+    for (size_t i = 0; i < size; i++) {
+        if (i % 8 == 0 && i > 0) printf("\n");
+        printf("%02X ", p[i]);
+    }
+    printf("\n\n");
+}
+
+int main() {
+    int x = 0x12345678;
+    hexdump("int x = 0x12345678", &x, sizeof(x));
+    
+    short s = 0xABCD;
+    hexdump("short s = 0xABCD", &s, sizeof(s));
+    
+    char str[] = "UCAD";
+    hexdump("char str[] = \"UCAD\"", str, sizeof(str));
+    
+    int arr[3] = {10, 20, 30};
+    hexdump("int arr[3] = {10, 20, 30}", arr, sizeof(arr));
+    
+    // TODO: Ajouter un test avec un pointeur
+    int *p = &x;
+    hexdump("int *p = &x", &p, sizeof(p));
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Compiler et exécuter. Vérifier que \texttt{0x12345678} apparaît comme \texttt{78 56 34 12} (little-endian).
+    \item Pour la chaîne "UCAD", identifier les codes ASCII et le terminateur \texttt{00}.
+    \item Pour le pointeur \texttt{p}, vérifier que sa valeur correspond bien à \texttt{\&x}.
+    \item Améliorer \texttt{hexdump} pour afficher aussi les caractères ASCII imprimables à droite (comme la commande \texttt{xxd}).
+\end{enumerate}
+
+%==============================================================================
+\section{Soumission}
+%==============================================================================
+
+\begin{infobox}{À rendre}
+\begin{itemize}
+    \item Tous les fichiers source (.c)
+    \item Un fichier \texttt{README.md} avec :
+    \begin{itemize}
+        \item Réponses aux questions de chaque exercice
+        \item Captures d'écran de GDB montrant les dumps mémoire
+        \item Sorties de Valgrind avant/après correction des fuites
+    \end{itemize}
+\end{itemize}
+
+\textbf{Format :} Archive \texttt{TP2\_NomPrenom.tar.gz}
+\end{infobox}
+
+%==============================================================================
+\begin{infobox}{Commandes GDB utiles}
+\begin{verbatim}
+x/Nxb addr    # N octets en hex
+x/Nxw addr    # N mots (4 octets) en hex
+x/Ncb addr    # N caractères
+x/s addr      # String à partir de addr
+p/x var       # Variable en hex
+p/t var       # Variable en binaire
+\end{verbatim}
+\end{infobox}
+
+\end{document}

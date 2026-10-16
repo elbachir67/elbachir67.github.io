@@ -1,0 +1,663 @@
+% =====================================================================
+% Lab Séance 2 — Analyse algorithmique
+% Structures de Données et Algorithmes Avancés — M1 — ESP/UCAD
+% Dr. El Hadji Bassirou TOURÉ — 2025–2026
+% Compilation : pdflatex (2 passes)
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{pifont}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,
+            citecolor=blue!60!black}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\bigO}{\mathcal{O}}
+\newcommand{\bigOmega}{\Omega}
+\newcommand{\bigTheta}{\Theta}
+\newcommand{\lig}[1]{\rule{#1}{0.4pt}}
+
+% ===== Boîtes =====
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{theorembox}[1][]{colback=purple!5,colframe=purple!50,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{appliboxQ}[1][]{colback=gray!8,colframe=gray!60,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{appliboxR}[1][]{colback=green!3,colframe=green!40!black,
+    fonttitle=\bfseries\itshape,title=#1,breakable}
+\newtcolorbox{exercicebox}[1][]{colback=white,colframe=gray!70,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{lienbox}[1][]{colback=blue!3,colframe=blue!70!black,
+    fonttitle=\bfseries\itshape,title=#1,breakable,
+    before upper={\itshape}}
+
+% ===== Code =====
+\lstset{
+  language=Java,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=4,
+  extendedchars=true,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {û}{{\^u}}1 {â}{{\^a}}1
+           {ë}{{\"e}}1 {ï}{{\"i}}1 {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1
+           {Ç}{{\c{C}}}1 {Ê}{{\^E}}1 {œ}{{\oe}}1 {°}{{$^\circ$}}1
+           {«}{{\guillemotleft}}1 {»}{{\guillemotright}}1
+}
+\lstdefinestyle{bash}{language=bash,keywordstyle=\color{black},
+  commentstyle=\color{gray!70!black}\itshape,numbers=none}
+
+% ===== En-têtes =====
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Lab S02 : Analyse algorithmique}
+\fancyhead[R]{\small ESP/UCAD --- M1}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Structures de Données et}\\
+\textbf{\LARGE Algorithmes Avancés}\\[0.8cm]
+\textbf{\huge Lab S02 --- Analyse algorithmique}\\[0.3cm]
+\textbf{\Large Compter, mesurer, confronter}\\[0.5cm]
+\large Master 1 --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Avant de commencer]
+\textbf{Prérequis :} TP-1 complété, CM~S02 lu, Lab~S01 terminé.\\[4pt]
+\textbf{Organisation :} deux parties. \emph{Partie I} --- vous instrumentez
+du code pour compter les opérations réellement exécutées, puis vous mesurez
+des temps d'exécution. \emph{Partie II} --- vous établissez par le calcul
+les formules que vos mesures auront confirmées.\\[4pt]
+\textbf{Ce Lab n'est pas noté.}\\[4pt]
+\textbf{Livrable :} le dépôt Git du projet \texttt{lab-s02} et le rapport
+individuel décrit en fin de document.
+\end{prereqbox}
+
+\begin{objectifbox}[Ce que vous saurez faire à la fin de ce Lab]
+\begin{enumerate}[nosep]
+    \item Instrumenter un fragment de code pour compter ses opérations
+          élémentaires selon la convention du cours.
+    \item Vérifier expérimentalement une formule de comptage, et localiser
+          l'écart quand elle est fausse.
+    \item Mesurer un temps d'exécution avec \texttt{System.nanoTime()} en
+          évitant les pièges de mesure les plus courants.
+    \item Confronter une courbe mesurée à une prédiction asymptotique, et
+          interpréter les écarts.
+    \item Prouver une borne $\bigO$ en exhibant $c$ et $n_0$.
+    \item Résoudre une récurrence de diviser-pour-régner.
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\newpage
+
+% #####################################################################
+\part{Pratique : instrumentation et mesure}
+% #####################################################################
+
+\section{Environnement de travail}
+
+\begin{lstlisting}[style=bash,caption={Rappel : lancer le conteneur et créer le projet}]
+# Windows (Git Bash)
+MSYS_NO_PATHCONV=1 docker run -it -v "$(pwd):/workspace" elbachirtoure/dsa-java-m1:v1.1
+# macOS / Linux
+docker run -it -v "$(pwd):/workspace" elbachirtoure/dsa-java-m1:v1.1
+
+cd /workspace
+new-project lab-s02
+cd lab-s02
+gradle build --no-daemon
+\end{lstlisting}
+
+\begin{attentionbox}[Deux règles héritées du TP-1]
+La classe principale s'appelle \texttt{Main}, et toutes les commandes
+Gradle prennent \texttt{--no-daemon}.
+\end{attentionbox}
+
+% =====================================================================
+\section{Étape 1 --- Compter pour de vrai}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+Le CM établit $f(n) = 5n + 3$ pour la somme des $n$ premiers entiers, avec
+la convention : \texttt{s = s + i} vaut deux opérations, \texttt{i++} vaut
+deux opérations, et il y a $n+1$ comparaisons. Un compteur incrémenté à
+chaque opération transforme cette formule en fait vérifiable.
+\end{lienbox}
+
+Créez \texttt{src/main/java/Compteur.java} :
+
+\begin{lstlisting}[caption={\texttt{Compteur.java}}]
+public class Compteur {
+    private long operations = 0;
+
+    public void ajouter(int k) { operations += k; }
+    public long total()        { return operations; }
+    public void remise()       { operations = 0; }
+}
+\end{lstlisting}
+
+Puis \texttt{src/main/java/Fragments.java} : la boucle du CM, réécrite en
+déclarant chaque opération comptée.
+
+\begin{lstlisting}[caption={\texttt{Fragments.java} --- somme instrumentée}]
+public class Fragments {
+
+    /** Somme des n premiers entiers, instrumentée. */
+    public static long sommeInstrumentee(int n, Compteur c) {
+        int s = 0;              c.ajouter(1);   // affectation
+        int i = 0;              c.ajouter(1);   // affectation
+        while (true) {
+            c.ajouter(1);                       // comparaison i < n
+            if (!(i < n)) break;
+            s = s + i;          c.ajouter(2);   // addition + affectation
+            i = i + 1;          c.ajouter(2);   // addition + affectation
+        }
+        return s;
+    }
+}
+\end{lstlisting}
+
+\begin{infobox}[Pourquoi une boucle \texttt{while} et non un \texttt{for}]
+La forme \texttt{for} cache l'ordre exact des opérations : on ne voit pas
+que la comparaison est évaluée une fois de plus que le corps. En dépliant
+la boucle, chaque opération devient une ligne, et le compteur devient
+lisible. C'est un artifice pédagogique, pas un style de production.
+\end{infobox}
+
+\begin{exercicebox}[Vérification 1 --- à compléter]
+Ajoutez à \texttt{Fragments} une méthode \texttt{triangleInstrumente(int n,
+Compteur c)} correspondant au fragment du CM :
+
+\begin{center}
+\texttt{for (i = 0; i < n; i++) \{ for (j = i; j < n; j++) \{ c = c + 1; \} \}}
+\end{center}
+
+N'oubliez pas de compter l'affectation \texttt{j = i} à chaque tour externe,
+ni la comparaison qui fait sortir de chaque boucle.
+\end{exercicebox}
+
+% =====================================================================
+\section{Étape 2 --- Un test qui force la formule}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+Une formule de comptage est une affirmation vérifiable. Un test JUnit qui
+compare le compteur à $5n+3$ pour plusieurs valeurs de $n$ transforme
+l'affirmation en propriété testée --- et fait échouer le test si l'on a
+oublié une opération.
+\end{lienbox}
+
+\begin{lstlisting}[caption={\texttt{src/test/java/FragmentsTest.java}}]
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class FragmentsTest {
+
+    @Test
+    void sommeSuitLaFormule() {
+        for (int n = 0; n <= 20; n++) {
+            Compteur c = new Compteur();
+            Fragments.sommeInstrumentee(n, c);
+            assertEquals(5L * n + 3, c.total(), "ecart a n = " + n);
+        }
+    }
+
+    @Test
+    void sommeCalculeLaBonneValeur() {
+        Compteur c = new Compteur();
+        assertEquals(45, Fragments.sommeInstrumentee(10, c));  // 0+1+...+9
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[style=bash]
+gradle test --no-daemon
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 2 --- à compléter]
+\begin{enumerate}[nosep]
+    \item Supprimez le \texttt{c.ajouter(1)} de la comparaison, relancez les
+          tests. Quel message obtenez-vous, et pour quelle valeur de $n$ le
+          test échoue-t-il en premier ? \lig{6cm}
+    \item Rétablissez-le, puis écrivez le test correspondant à
+          \texttt{triangleInstrumente} : la formule attendue est
+          $f(n) = 2{,}5n^2 + 7{,}5n + 3$. Comment l'écrire en arithmétique
+          entière, sans nombres à virgule ? \lig{6cm}
+\end{enumerate}
+\textit{Aide : $2{,}5n^2 + 7{,}5n + 3 = (5n^2 + 15n + 6)/2$, et le numérateur
+est toujours pair.}
+\end{exercicebox}
+
+% =====================================================================
+\section{Étape 3 --- Mesurer un temps d'exécution}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+Le comptage donne $f(n)$ ; le chronomètre donne un temps. Les deux doivent
+raconter la même histoire : si $f$ est quadratique, doubler $n$ doit
+multiplier le temps par environ quatre. Ce rapport est l'observable qui
+relie la théorie à la machine.
+\end{lienbox}
+
+\begin{lstlisting}[caption={\texttt{Benchmark.java} --- insertions en tête}]
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+public class Benchmark {
+
+    public static long mesurerInsertionsEnTete(List<Integer> liste, int n) {
+        long debut = System.nanoTime();
+        for (int i = 0; i < n; i++) {
+            liste.add(0, i);
+        }
+        long fin = System.nanoTime();
+        return (fin - debut) / 1_000_000;   // millisecondes
+    }
+
+    public static void main(String[] args) {
+        int[] tailles = {1_000, 2_000, 4_000, 8_000, 16_000, 32_000};
+
+        // Chauffe : la JVM compile le code apres quelques milliers d'executions.
+        for (int r = 0; r < 3; r++) mesurerInsertionsEnTete(new ArrayList<>(), 2_000);
+
+        System.out.printf("%8s %14s %14s %10s%n", "n", "ArrayList(ms)", "LinkedList(ms)", "rapport");
+        long precedent = 0;
+        for (int n : tailles) {
+            long tArray  = mesurerInsertionsEnTete(new ArrayList<>(), n);
+            long tLinked = mesurerInsertionsEnTete(new LinkedList<>(), n);
+            String rapport = (precedent == 0) ? "-" : String.format("%.1f", (double) tArray / precedent);
+            System.out.printf("%8d %14d %14d %10s%n", n, tArray, tLinked, rapport);
+            precedent = tArray;
+        }
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[style=bash]
+gradle run --no-daemon
+\end{lstlisting}
+
+\begin{attentionbox}[Trois pièges de la mesure]
+\textbf{La chauffe :} les premières exécutions sont interprétées, les
+suivantes compilées. Sans boucle de chauffe, la première ligne du tableau
+est systématiquement fausse.\\
+\textbf{La granularité :} en dessous de quelques millisecondes, le bruit
+domine. Si une ligne affiche $0$, augmentez $n$.\\
+\textbf{L'élimination de code mort :} si le résultat d'un calcul n'est
+jamais utilisé, la JVM peut supprimer le calcul. Ici, la liste est bien
+construite, donc le travail a lieu.
+\end{attentionbox}
+
+% =====================================================================
+\section{Étape 4 --- Observer}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+Le CM affirme que $n$ insertions en tête coûtent $n(n-1)/2$ déplacements
+dans un tableau contigu et $n$ rebranchements dans une liste chaînée. Ce
+programme affiche le rapport entre deux tailles consécutives : un rapport
+proche de $4$ quand on double $n$ signe un coût quadratique ; un rapport
+proche de $2$, un coût linéaire.
+\end{lienbox}
+
+\begin{exercicebox}[Vérification 3 --- notez vos observations]
+Remplissez avec vos propres mesures.
+
+\vspace{0.2cm}
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$n$ & \textbf{ArrayList (ms)} & \textbf{LinkedList (ms)} & \textbf{rapport ArrayList} \\
+\midrule
+$1\,000$  & \rule{0pt}{0.7cm} & & --- \\
+$2\,000$  & \rule{0pt}{0.7cm} & & \\
+$4\,000$  & \rule{0pt}{0.7cm} & & \\
+$8\,000$  & \rule{0pt}{0.7cm} & & \\
+$16\,000$ & \rule{0pt}{0.7cm} & & \\
+$32\,000$ & \rule{0pt}{0.7cm} & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\begin{enumerate}[nosep]
+    \item Quand $n$ double, par combien le temps de l'\texttt{ArrayList}
+          est-il multiplié ? \lig{3cm} \quad Cela correspond-il à la
+          prédiction du CM ? \lig{4cm}
+    \item Et pour la \texttt{LinkedList} ? \lig{6cm}
+    \item À partir de quelle taille l'écart devient-il visible à l'œil nu ?
+          \lig{4cm}
+    \item Vos rapports sont-ils exactement égaux à la prédiction ? Citez une
+          cause possible d'écart. \lig{7cm}
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}[Vérification 4 --- une seconde mesure]
+Écrivez une méthode \texttt{mesurerAccesParRang(List<Integer> liste, int n)}
+qui, sur une liste déjà remplie de $n$ éléments, exécute $n$ appels à
+\texttt{liste.get(i)} avec $i$ tiré au hasard, et mesure le temps total.
+
+Prédisez le résultat \emph{avant} d'exécuter :\\
+\texttt{ArrayList} : \lig{5cm} \quad \texttt{LinkedList} : \lig{5cm}
+
+Puis exécutez. Votre prédiction était-elle correcte ? \lig{6cm}
+\end{exercicebox}
+
+% =====================================================================
+\section{Enregistrer le travail}
+
+\begin{lstlisting}[style=bash,caption={Git}]
+cd /workspace/lab-s02
+git add .
+git commit -m "Lab S02 : instrumentation, tests de comptage, benchmarks"
+\end{lstlisting}
+
+\newpage
+% #####################################################################
+\part{Théorie : exercices d'application}
+% #####################################################################
+
+\begin{infobox}[Comment aborder cette partie]
+Ces exercices ne sont pas un contrôle et ne sont pas notés. Ils portent sur
+les fragments que vous venez d'instrumenter : le but est de retrouver par le
+calcul les nombres que votre compteur a affichés. Sauf mention contraire, on
+applique la convention du cours : \texttt{s = s + i} compte pour deux
+opérations, \texttt{i++} pour deux, une comparaison pour une, un accès
+\texttt{tab[i]} pour un.
+\end{infobox}
+
+% ---------------------------------------------------------------------
+\section{Exercice 1 --- Établir $f(n)$}
+
+Pour chaque fragment, donnez le nombre exact d'opérations puis la classe
+$\bigTheta$.
+
+\vspace{0.3cm}
+\noindent\textbf{(a)}
+\begin{center}
+\texttt{int s = 0; for (int i = 0; i < n; i++) \{ s = s + tab[i]; \}}
+\end{center}
+
+\noindent Détail du décompte : \lig{12cm}
+
+\noindent $f(n) = $ \lig{5cm} \qquad classe : \lig{3cm}
+
+\vspace{0.4cm}
+\noindent\textbf{(b)}
+\begin{center}
+\texttt{int c = 0; for (int i = 0; i < n; i++) \{ for (int j = 0; j < n; j++) \{ c = c + 1; \} \}}
+\end{center}
+
+\noindent $f(n) = $ \lig{5cm} \qquad classe : \lig{3cm}
+
+\vspace{0.4cm}
+\noindent\textbf{(c)}
+\begin{center}
+\texttt{int t = 1; for (int i = 1; i < n; i = i * 3) \{ t = t + i; \}}
+\end{center}
+
+\noindent Nombre de tours de boucle : \lig{4cm} \qquad classe : \lig{3cm}
+
+\vspace{0.3cm}
+\noindent Pour $n = 100$, listez les valeurs prises par \texttt{i} :
+\lig{8cm}
+
+\vspace{0.4cm}
+\noindent\textbf{(d)} Comparez (b) et le fragment triangulaire du CM
+(\texttt{j = i} au lieu de \texttt{j = 0}). Les deux ont-ils la même classe ?
+Le même $f(n)$ ? \lig{9cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 2 --- Prouver une borne}
+
+\noindent\textbf{(a)} Montrez que $f(n) = 4n + 25 \in \bigO(n)$ en exhibant
+un couple $(c, n_0)$ et en rédigeant l'inégalité.
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+\vspace{0.3cm}
+\noindent\textbf{(b)} Le CM démontre $3n^2 + 20n + 50 \in \bigO(n^2)$ avec
+$(73, 1)$, et la figure exhibe $(5, 13)$. Vérifiez que $(5, 13)$ convient
+en testant $n = 12$ puis $n = 13$ :
+
+\vspace{0.2cm}
+$n = 12$ : $f(12) = $ \lig{2.5cm} \quad $5 \times 12^2 = $ \lig{2.5cm}
+\quad inégalité vraie ? \lig{2cm}
+
+\vspace{0.2cm}
+$n = 13$ : $f(13) = $ \lig{2.5cm} \quad $5 \times 13^2 = $ \lig{2.5cm}
+\quad inégalité vraie ? \lig{2cm}
+
+\vspace{0.3cm}
+\noindent\textbf{(c)} Peut-on conclure de (b) que $13$ est le plus petit
+seuil possible \emph{quel que soit} $c$ ? \lig{7cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 3 --- Vrai ou faux}
+
+Cochez, sans justification.
+
+\vspace{0.3cm}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Affirmation} & \textbf{Vrai} & \textbf{Faux} \\
+\midrule
+$n^2 + n \in \bigO(n^2)$                      & \rule{0pt}{0.7cm} & \\
+$n^2 + n \in \bigO(n^3)$                      & \rule{0pt}{0.7cm} & \\
+$n^2 + n \in \bigTheta(n^3)$                  & \rule{0pt}{0.7cm} & \\
+$n \log n \in \bigOmega(n)$                   & \rule{0pt}{0.7cm} & \\
+$3^n \in \bigO(2^n)$                          & \rule{0pt}{0.7cm} & \\
+$\bigO$ est synonyme de « pire cas »          & \rule{0pt}{0.7cm} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\noindent Pour la dernière ligne, expliquez votre réponse en une phrase :
+\lig{10cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 4 --- Analyse de cas}
+
+On considère la recherche linéaire d'une valeur dans un tableau de $n$
+éléments.
+
+\vspace{0.3cm}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Cas} & \textbf{Entrée qui le réalise} & \textbf{Classe} \\
+\midrule
+Meilleur & \rule{0pt}{0.8cm} & \\
+Pire     & \rule{0pt}{0.8cm} & \\
+Moyen    & \rule{0pt}{0.8cm} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\noindent\textbf{(a)} Pourquoi le pire cas sert-il de référence plutôt que
+le cas moyen ? Donnez deux raisons. \lig{9cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+\vspace{0.3cm}
+\noindent\textbf{(b)} Décrivez l'entrée réalisant le pire cas pour la
+recherche d'un doublon par double boucle avec sortie anticipée :
+\lig{8cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 5 --- Récurrences}
+
+Résolvez par le théorème principal. Pour chacune, donnez $a$, $b$,
+$\alpha = \log_b a$, le cas applicable et la conclusion.
+
+\vspace{0.3cm}
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Récurrence} & $a$ & $b$ & $\alpha$ & \textbf{Cas et conclusion} \\
+\midrule
+$T(n) = T(n/2) + \bigTheta(1)$      & \rule{0pt}{0.8cm} & & & \\
+$T(n) = 2T(n/2) + \bigTheta(1)$     & \rule{0pt}{0.8cm} & & & \\
+$T(n) = 2T(n/2) + \bigTheta(n)$     & \rule{0pt}{0.8cm} & & & \\
+$T(n) = 3T(n/2) + \bigTheta(n^2)$   & \rule{0pt}{0.8cm} & & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\noindent\textbf{(a)} Les deux premières lignes ne diffèrent que par $a$.
+Expliquez, sans calcul, pourquoi l'écart de conclusion est si grand :
+\lig{9cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+\vspace{0.3cm}
+\noindent\textbf{(b)} À laquelle de ces récurrences correspond la recherche
+dichotomique ? \lig{5cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 6 --- Question subsidiaire}
+
+Vos mesures de la Partie I ne donnent probablement pas un rapport exactement
+égal à $4$ quand $n$ double.
+
+\vspace{0.2cm}
+\noindent\textbf{(a)} Citez deux causes possibles, l'une liée à la machine,
+l'autre à la théorie elle-même : \lig{9cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+\vspace{0.3cm}
+\noindent\textbf{(b)} Un écart mesuré invalide-t-il la prédiction
+asymptotique ? Argumentez en deux phrases. \lig{9cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+\newpage
+% =====================================================================
+\section*{Pour aller plus loin (optionnel)}
+\addcontentsline{toc}{section}{Pour aller plus loin (optionnel)}
+
+\begin{itemize}[nosep]
+    \item Tracer les courbes mesurées avec matplotlib (le conteneur dispose
+          de Python et matplotlib) et superposer $n^2/2$ ajusté par un
+          facteur constant. La forme doit coïncider, pas les valeurs.
+    \item Instrumenter votre \texttt{ArrayDeque} du Lab~S01 : compter les
+          déplacements réellement effectués par \texttt{agrandir()} sur une
+          séquence de $n$ insertions, et comparer à $n$.
+    \item Reprendre la file naïve sur \texttt{ArrayList} avec
+          \texttt{remove(0)} et mesurer $n$ \texttt{dequeue} successifs.
+\end{itemize}
+
+% =====================================================================
+\section*{Aide-mémoire}
+\addcontentsline{toc}{section}{Aide-mémoire}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Question} & \textbf{Réponse} \\
+\midrule
+\texttt{s = s + i} & 2 opérations \\
+Comparaisons d'une boucle de $n$ tours & $n + 1$ \\
+Boucles successives & on additionne, le maximum l'emporte \\
+Boucles imbriquées & on multiplie \\
+Pas multiplicatif (\texttt{i *= k}) & $\bigTheta(\log n)$ tours \\
+Prouver $f \in \bigO(g)$ & exhiber $c > 0$ et $n_0$ \\
+Rapport de temps quand $n$ double & $\approx 2$ si linéaire, $\approx 4$ si quadratique \\
+$T(n) = aT(n/b) + f(n)$ & comparer $f(n)$ à $n^{\log_b a}$ \\
+\midrule
+Compiler / tester / exécuter & \texttt{gradle build | test | run -\/-no-daemon} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\begin{attentionbox}[Rapport individuel --- obligatoire]
+Chaque étudiant rédige un rapport de \textbf{1 à 2 pages} :
+\begin{enumerate}[nosep]
+    \item \textbf{Ce que j'ai fait :} fragments instrumentés, tests écrits,
+          mesures obtenues.
+    \item \textbf{Les observations clés :} le tableau de mesures
+          confirme-t-il la prédiction du CM ? Où l'écart apparaît-il ?
+    \item \textbf{Les difficultés :} formules de comptage fausses, mesures
+          instables, blocages sur les exercices théoriques.
+    \item \textbf{Ce que j'ai appris :} le concept le plus important retenu
+          de cette séance.
+\end{enumerate}
+\textbf{Format :} PDF. \textbf{Nom :} \texttt{rapport-lab-S02-PRENOM-NOM.pdf}
+\end{attentionbox}
+
+\end{document}
