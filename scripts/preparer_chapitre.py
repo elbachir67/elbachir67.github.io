@@ -201,7 +201,10 @@ def ajouter_au_manifeste(cours: Path, entree: dict) -> None:
         avant, apres = texte[:debut], (texte[suivant:] if suivant != -1 else "")
     bloc = ["", "[[chapitres]]"]
     bloc += [f'{cle} = "{valeur}"' for cle, valeur in entree.items()
-             if cle not in ("figures_python", "ressources", "encadres", "origine_alt")]
+             if cle not in ("figures_python", "ressources", "encadres", "origine_alt", "aliases")]
+    if entree.get("aliases"):
+        # Anciennes adresses de la séance : une clé simple, écrite avant les sous-tables.
+        bloc.append("aliases = [" + ", ".join(f'"{alias}"' for alias in entree["aliases"]) + "]")
     if entree.get("figures_python"):
         bloc += ["", "[chapitres.figures_python]"]
         bloc += [f'{nom} = "{script}"' for nom, script in entree["figures_python"].items()]
@@ -246,6 +249,9 @@ def main() -> int:
     analyseur.add_argument("--langage-code", help="langage des blocs de code (par défaut : celui que "
                                                   "le .tex déclare)")
     analyseur.add_argument("--video", help="identifiant YouTube de la capsule de la séance (US-19)")
+    analyseur.add_argument("--alias", action="append", default=[],
+                           help="ancienne adresse de la séance, redirigée vers la nouvelle "
+                                "(répétable ; par défaut : celles du manifeste)")
     analyseur.add_argument("--ressource", action="append", default=[], metavar="TYPE|FICHIER|TITRE",
                            help="ressource de la séance : lab, td, tp, notebook ou pdf, le fichier "
                                 "dans le dépôt et son titre — type|fichier|titre. Répétable (US-49)")
@@ -338,6 +344,9 @@ def main() -> int:
     video = args.video or (precedente or {}).get("video", "")
     if video:
         commande += ["--video", video]
+    aliases = args.alias or (precedente or {}).get("aliases", [])
+    for alias in aliases:
+        commande += ["--alias", alias]
     ressources = ressources_demandees(args.ressource) or (precedente or {}).get("ressources", [])
     for ressource in ressources:
         ressource["fichier"] = chemin_dans_le_cours(cours, ressource["fichier"])
@@ -394,6 +403,7 @@ def main() -> int:
         **({"numero": numero_affiche} if numero_affiche else {}),
         **({"encadres": encadres} if encadres else {}),
         **({"video": video} if video else {}),
+        **({"aliases": aliases} if aliases else {}),
         **({"ressources": ressources} if ressources else {}),
         "figures_python": scripts_python,
         "origine_alt": origines_des_textes(rapport, valides, proposes),

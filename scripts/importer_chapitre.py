@@ -1681,8 +1681,18 @@ def guillemets(valeur: str) -> str:
     return '"' + valeur.replace('"', '\\"') + '"'
 
 
+def aliases_yaml(aliases: list[str] | None) -> list[str]:
+    """Anciennes adresses de la séance, que Quarto redirige vers la nouvelle.
+
+    Une séance renumérotée change d'adresse : le CM3 de Programmation Frontend 1, arrivé après la
+    mise en ligne, a décalé les séances 3 et 4. Les liens déjà partagés aux étudiants doivent
+    continuer de mener quelque part.
+    """
+    return ["aliases:"] + [f"  - {guillemets(alias)}" for alias in aliases] if aliases else []
+
+
 def entete_page(entete: dict[str, str], description: str, numero: str,
-                ressources: list[dict] | None = None) -> str:
+                ressources: list[dict] | None = None, aliases: list[str] | None = None) -> str:
     """En-tête d'un CM rédigé (US-40) : une page, et non une présentation.
 
     Le **numéro affiché** est une donnée à part : un cours peut commencer à -1 ou à 0 — le chapitre
@@ -1701,6 +1711,7 @@ def entete_page(entete: dict[str, str], description: str, numero: str,
     lignes.append("body-classes: cours-page")
     if numero:
         lignes.append(f"numero: {guillemets(numero)}")
+    lignes += aliases_yaml(aliases)
     lignes += ressources_yaml(ressources)
     lignes += [
         f"description: {guillemets(description)}",
@@ -1730,7 +1741,7 @@ def ressources_yaml(ressources: list[dict] | None) -> list[str]:
 
 
 def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: str = "",
-                ressources: list[dict] | None = None) -> str:
+                ressources: list[dict] | None = None, aliases: list[str] | None = None) -> str:
     lignes = [
         "---",
         f"title: {guillemets(entete.get('title', 'TODO(PO): titre'))}",
@@ -1740,6 +1751,7 @@ def entete_yaml(entete: dict[str, str], description: str, feuille: str, video: s
     if video:
         # Métadonnée de la séance : la capsule est aussi une slide, en fin de deck.
         lignes.append(f"video: {guillemets(video)}")
+    lignes += aliases_yaml(aliases)
     # Métadonnée de la séance : la slide de fin et la page du cours y lisent les ressources (US-49).
     lignes += ressources_yaml(ressources)
     lignes += [
@@ -1883,6 +1895,8 @@ def main() -> int:
                            help="description de la page, pour le référencement")
     analyseur.add_argument("--video", default="",
                            help="identifiant YouTube de la capsule de la séance (slide finale, US-19)")
+    analyseur.add_argument("--alias", action="append", default=[],
+                           help="ancienne adresse de la séance, redirigée vers la nouvelle (répétable)")
     analyseur.add_argument("--ressource", action="append", default=[],
                            metavar="TYPE|FICHIER|TITRE",
                            help="ressource de la séance : lab, td, tp, notebook ou pdf, son fichier "
@@ -1964,7 +1978,7 @@ def main() -> int:
         fin = section_ressources(ressources)
         if fin:
             morceaux.append(fin)
-        contenu = entete_page(entete, description, args.numero, ressources)
+        contenu = entete_page(entete, description, args.numero, ressources, args.alias)
     else:
         morceaux = slides(corps, conversion)
         slide = slide_ressources(ressources)
@@ -1972,7 +1986,7 @@ def main() -> int:
             morceaux.append(slide)
         if args.video:
             morceaux.append(slide_capsule(args.video, entete.get("title", "Capsule vidéo")))
-        contenu = entete_yaml(entete, description, args.feuille, args.video, ressources)
+        contenu = entete_yaml(entete, description, args.feuille, args.video, ressources, args.alias)
 
     args.sortie.parent.mkdir(parents=True, exist_ok=True)
     args.sortie.write_text(contenu + "\n\n".join(morceaux) + "\n", encoding="utf-8")

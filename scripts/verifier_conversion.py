@@ -74,6 +74,8 @@ def rejouer(cours: Path, chapitre: dict, dossier: Path) -> list[tuple[Path, str]
         commande += ["--encadre", f"{nom}={encadre}"]
     if chapitre.get("video"):
         commande += ["--video", chapitre["video"]]
+    for alias in chapitre.get("aliases", []):
+        commande += ["--alias", alias]
     for ressource in chapitre.get("ressources", []):
         champs = [ressource["type"], f"cours/{cours.name}/{ressource['fichier']}", ressource["titre"]]
         if ressource.get("date"):
