@@ -1,0 +1,454 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== POLICES & LANGUE =====================
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,xcolor,booktabs,hyperref,tcolorbox,enumitem,fancyhdr,array,pifont,longtable,multirow,listings}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+% ===================== BOÎTES =====================
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title={#1},breakable}
+
+% ===================== CODE (listings) =====================
+\definecolor{codebg}{gray}{0.96}
+\definecolor{kwcolor}{RGB}{0,90,160}
+\definecolor{strcolor}{RGB}{160,55,30}
+\definecolor{comcolor}{RGB}{95,120,95}
+\definecolor{ndcolor}{RGB}{120,80,150}
+
+\lstdefinelanguage{JS}{
+  morekeywords={let,const,var,function,return,if,else,for,of,in,while,do,true,false,null,undefined,typeof,break,continue,new,this,async,await,try,catch,throw,finally},
+  morekeywords=[2]{console,log,table,document,Math,window,alert,prompt,forEach,map,filter,find,push,pop,querySelector,querySelectorAll,addEventListener,classList,textContent,innerHTML,createElement,appendChild,getElementById,includes,fetch,json,JSON,then,stringify,parse,setItem,getItem,removeItem,setInterval,clearInterval},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+\lstdefinestyle{js}{
+  language=JS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{kwcolor},
+  keywordstyle=[2]\color{ndcolor},
+  commentstyle=\color{comcolor}\itshape,
+  stringstyle=\color{strcolor},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {â}{{â}}1 {ê}{{ê}}1
+    {î}{{î}}1 {ô}{{ô}}1 {û}{{û}}1 {ù}{{ù}}1 {ç}{{ç}}1
+    {ï}{{ï}}1 {ë}{{ë}}1 {É}{{É}}1 {È}{{È}}1 {À}{{À}}1
+    {œ}{{œ}}1 {°}{{°}}1 {²}{{²}}1
+}
+
+\lstdefinestyle{html}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {ê}{{ê}}1 {ç}{{ç}}1 {î}{{î}}1
+}
+
+\lstset{style=js}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% ===================== EN-TÊTES =====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 8 : Fetch + REST Countries}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ===================== TITRE =====================
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 8 --- Fetch + \texttt{async}/\texttt{await}}\\[0.3cm]
+\textbf{\Large Brancher Jàng Afrig sur les vrais pays}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Informations pratiques]
+\textbf{Le moment pivot.} Votre quiz fonctionne, mais avec dix pays écrits à la main. Aujourd'hui, on le branche sur l'API \textbf{REST Countries} : Jàng Afrig connaîtra désormais \emph{tous} les pays d'Afrique, sans que vous ayez à les saisir.
+
+\smallskip
+\textbf{Avant de commencer :}
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item Le quiz du Lab 7 fonctionne (tag \code{v0.7}).
+  \item Les notions du CM4 : \code{fetch}, \code{async}/\code{await}, \code{try}/\code{catch}, JSON.
+  \item Une connexion Internet pendant la séance.
+\end{itemize}
+
+\smallskip
+\textbf{Validation de fin :} le quiz Capitales fonctionne avec les pays réels chargés depuis l'API, un écran de chargement s'affiche pendant la requête, et le tag \code{v0.8} est poussé avec un rapport.
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab 8]
+À la fin, vous saurez :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Faire un vrai appel réseau avec \code{fetch} + \code{async}/\code{await}.
+  \item \textbf{Adapter} les données reçues à la forme attendue par votre quiz (avec \code{map}).
+  \item Charger les données \textbf{au démarrage} de la page, dans une variable globale.
+  \item Protéger l'application contre une coupure réseau (\code{try}/\code{catch}).
+  \item Afficher un \textbf{indicateur de chargement} (spinner CSS) pendant l'attente.
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\bigskip\hrule\bigskip
+
+\section*{Rappel express du CM4}
+\addcontentsline{toc}{section}{Rappel express du CM4}
+Une API se demande avec une URL et le verbe \code{GET} ; elle répond en JSON ; on attend la réponse avec \code{await fetch(...)} puis \code{await reponse.json()} ; et on protège le tout avec \code{try}/\code{catch}.
+
+% ===================== SECTION 1 =====================
+\section{Voir l'API en vrai}
+
+Avant de coder, regardons ce que l'API renvoie. Collez cette adresse dans la barre d'un navigateur :
+
+\begin{lstlisting}[style=html]
+https://restcountries.com/v3.1/region/africa?fields=name,capital,cca3,flags,languages,borders
+\end{lstlisting}
+
+Vous voyez un long texte JSON : une liste d'objets, un par pays africain. Repérez, pour un pays, les champs \code{name}, \code{capital}, \code{cca3}.
+
+\begin{attentionbox}[La forme de l'API n'est pas la nôtre]
+Dans REST Countries, le nom est \emph{niché} (\code{name.common}) et la capitale est un \emph{tableau} (\code{capital[0]}). Or notre quiz du Lab 7 attend des objets simples \code{\{ nom, capitale \}}. Il va donc falloir \textbf{traduire} la forme de l'API vers la nôtre. C'est l'idée centrale de ce Lab.
+\end{attentionbox}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  boite/.style={rectangle, rounded corners=4pt, draw, thick, align=left, inner sep=6pt},
+  arr/.style={-{Stealth[length=3mm]}, very thick, gray!65!black}
+]
+  \node[boite, draw=teal!55!black, fill=teal!6] (api) {\ttfamily\scriptsize
+    \{\\
+    \ \ name: \{ common: "Senegal" \},\\
+    \ \ capital: ["Dakar"],\\
+    \ \ cca3: "SEN"\\
+    \}};
+  \node[boite, draw=blue!55, fill=blue!6, right=2.6cm of api] (nous) {\ttfamily\scriptsize
+    \{\\
+    \ \ nom: "Senegal",\\
+    \ \ capitale: "Dakar",\\
+    \ \ cca3: "SEN"\\
+    \}};
+  \draw[arr] (api) -- node[above, font=\scriptsize]{\code{map}} node[below, font=\scriptsize]{on traduit} (nous);
+  \node[font=\scriptsize, above=1pt of api] {Forme de l'API};
+  \node[font=\scriptsize, above=1pt of nous] {Notre forme simple};
+\end{tikzpicture}
+\end{center}
+
+% ===================== SECTION 2 =====================
+\section{Écrire \texttt{chargerPays()} dans \texttt{data.js}}
+
+On transforme \code{data.js} : il ne contient plus de pays écrits à la main, mais une fonction qui les \textbf{récupère et les traduit}. Remplacez l'ancien tableau \code{const pays = [...]} par ceci (gardez \code{choisirAuHasard} et \code{melanger}) :
+
+\begin{lstlisting}[style=js]
+// data.js -- accès aux données + utilitaires
+
+const URL_API =
+  "https://restcountries.com/v3.1/region/africa?fields=name,capital,cca3,flags,languages,borders";
+
+async function chargerPays() {
+  try {
+    const reponse = await fetch(URL_API);
+    const donnees = await reponse.json();
+
+    // traduire chaque pays de la forme API vers notre forme simple
+    const liste = donnees.map((p) => {
+      return {
+        cca3: p.cca3,
+        nom: p.name.common,
+        capitale: p.capital ? p.capital[0] : "—",
+        drapeau: p.flags.svg,
+        langues: p.languages,
+        voisins: p.borders
+      };
+    });
+    return liste;
+  } catch (erreur) {
+    console.log("Erreur de chargement :", erreur);
+    return []; // liste vide : on évite de planter
+  }
+}
+
+function choisirAuHasard(tableau) {
+  const index = Math.floor(Math.random() * tableau.length);
+  return tableau[index];
+}
+
+function melanger(tableau) {
+  const copie = [...tableau];
+  for (let i = copie.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = copie[i];
+    copie[i] = copie[j];
+    copie[j] = temp;
+  }
+  return copie;
+}
+\end{lstlisting}
+
+\begin{infobox}[Pourquoi \texttt{p.capital ? p.capital[0] : "—"} ?]
+Quelques rares territoires n'ont pas de capitale renseignée. Ce \textbf{ternaire} (CM3) dit : « si \code{capital} existe, prends le premier élément, sinon mets un tiret ». C'est de la programmation \emph{défensive} : on prévoit le cas qui manque.
+\end{infobox}
+
+\begin{infobox}[Vérification dans la console]
+Dans la console : \code{const test = await chargerPays();} puis \code{console.table(test);}. Vous voyez vos pays, déjà à la bonne forme (\code{nom}, \code{capitale}). On garde aussi \code{drapeau}, \code{langues}, \code{voisins} : ils serviront au Lab 9.
+\end{infobox}
+
+% ===================== SECTION 3 =====================
+\section{Charger au démarrage (variable globale)}
+
+Le quiz a besoin des pays \emph{avant} qu'on puisse jouer. On les charge donc \textbf{au démarrage} de la page, et on les range dans une variable globale. En haut de \code{script.js} :
+
+\begin{lstlisting}[style=js]
+// L'état du jeu
+let pays = [];          // sera rempli par l'API au chargement
+let questions = [];
+let indexQuestion = 0;
+let score = 0;
+let pseudo = "";
+
+// Au chargement de la page : on va chercher les pays
+async function initialiser() {
+  pays = await chargerPays();
+  console.log(`${pays.length} pays chargés.`);
+  afficherEcran(ecranAccueil); // on révèle l'accueil une fois prêt
+}
+\end{lstlisting}
+
+\begin{attentionbox}[Le tableau \texttt{pays} est devenu une variable, pas une constante]
+Avant, \code{pays} était un \code{const} figé dans \code{data.js}. Maintenant, c'est un \code{let} dans \code{script.js}, car son contenu \emph{arrive plus tard} (quand l'API répond). Le reste du quiz (\code{genererQuestion}, etc.) n'a pas besoin de changer : il utilise toujours \code{pays}, \code{.nom} et \code{.capitale}.
+\end{attentionbox}
+
+% ===================== SECTION 4 =====================
+\section{L'écran de chargement}
+
+Pendant que l'API répond (une seconde ou deux), on montre un écran d'attente. Ajoutez une section \textbf{en premier} dans le \code{<main>} de \code{index.html}, et mettez la classe \code{cachee} sur \code{\#accueil} :
+
+\begin{lstlisting}[style=html]
+<main>
+  <!-- ÉCRAN 0 : CHARGEMENT (visible au départ) -->
+  <section id="chargement">
+    <div class="spinner"></div>
+    <p>Chargement des pays africains…</p>
+  </section>
+
+  <!-- ÉCRAN 1 : ACCUEIL (caché au départ) -->
+  <section id="accueil" class="cachee">
+    ... (contenu inchangé du Lab 7) ...
+  </section>
+
+  <!-- les écrans Quiz et Résultat ne changent pas -->
+</main>
+\end{lstlisting}
+
+Puis, dans \code{script.js}, on \textbf{sélectionne} cet écran et on l'\textbf{ajoute} à \code{afficherEcran}, pour qu'il se cache comme les autres :
+
+\begin{lstlisting}[style=js]
+const ecranChargement = document.querySelector("#chargement");
+
+function afficherEcran(ecran) {
+  ecranChargement.classList.add("cachee");
+  ecranAccueil.classList.add("cachee");
+  ecranQuiz.classList.add("cachee");
+  ecranResultat.classList.add("cachee");
+  ecran.classList.remove("cachee");
+}
+\end{lstlisting}
+
+Enfin, tout en bas de \code{script.js}, lancez le chargement :
+
+\begin{lstlisting}[style=js]
+initialiser(); // démarre le chargement dès que la page est prête
+\end{lstlisting}
+
+% ===================== SECTION 5 =====================
+\section{Le spinner qui tourne (CSS)}
+
+Un petit disque qui tourne, signe universel de « ça charge ». Ajoutez à la fin de \code{style.css} :
+
+\begin{lstlisting}[style=html]
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 6px solid #eeeeee;
+  border-top-color: #c0392b; /* brique de notre palette */
+  border-radius: 50%;
+  margin: 2rem auto;
+  animation: tourner 1s linear infinite;
+}
+
+@keyframes tourner {
+  to { transform: rotate(360deg); }
+}
+\end{lstlisting}
+
+\begin{infobox}[Une nouveauté CSS : \texttt{@keyframes}]
+Au Lab 4, vous aviez les \emph{transitions} (passer d'un état à un autre). \code{@keyframes} va plus loin : il décrit une \textbf{animation} qui se répète. Ici, on fait tourner le disque de 0 à 360° en continu (\code{infinite}). La bordure colorée sur un seul côté crée l'effet de rotation.
+\end{infobox}
+
+% ===================== SECTION 6 =====================
+\section{Gérer le réseau coupé proprement}
+
+Notre \code{try}/\code{catch} renvoie déjà une liste vide en cas de problème. Transformons ce silence en \textbf{message clair} pour le joueur. Dans \code{initialiser} :
+
+\begin{lstlisting}[style=js]
+async function initialiser() {
+  pays = await chargerPays();
+
+  if (pays.length === 0) {
+    ecranChargement.textContent =
+      "Impossible de charger les pays. Vérifie ta connexion et recharge la page.";
+    return; // on s'arrête là, on ne montre pas l'accueil
+  }
+
+  console.log(`${pays.length} pays chargés.`);
+  afficherEcran(ecranAccueil);
+}
+\end{lstlisting}
+
+\begin{infobox}[Vérification --- le test du mode avion]
+Activez le mode avion (ou coupez le Wi-Fi), rechargez la page : au lieu de planter, l'application affiche un message poli. Réactivez la connexion, rechargez : le quiz revient. \textbf{Une vraie application gère les imprévus.}
+\end{infobox}
+
+% ===================== EXERCICES =====================
+\section{Exercices d'application}
+
+\begin{objectifbox}[Exercice 1 --- Combien de pays ?]
+Dans la console, affichez \code{pays.length}. Combien l'API renvoie-t-elle de pays pour l'Afrique ?\\
+\emph{Note :} le nombre tourne autour de 54 ; il peut varier légèrement (54, 58, 59\ldots) selon les territoires inclus par l'API. L'essentiel est d'avoir de quoi faire un beau quiz.
+\end{objectifbox}
+
+\begin{objectifbox}[Exercice 2 --- Trouver le Sénégal]
+Retrouvez l'objet du Sénégal grâce à son code \code{cca3}, et affichez sa capitale.\\
+\emph{Indice :} \code{find} renvoie le \emph{premier} élément qui satisfait la condition.
+\end{objectifbox}
+
+\begin{lstlisting}[style=js]
+const senegal = pays.find((p) => p.cca3 === "SEN");
+console.log(senegal.capitale); // "Dakar"
+\end{lstlisting}
+
+\begin{objectifbox}[Exercice 3 --- Les pays francophones]
+Avec \code{filter}, fabriquez la liste des pays dont les langues incluent le français.\\
+\emph{Indice :} dans notre objet, \code{p.langues} est un objet comme \code{\{ fra: "French", ... \}}. La clé \code{fra} est présente si le pays parle français.
+\end{objectifbox}
+
+\begin{lstlisting}[style=js]
+const francophones = pays.filter((p) => p.langues && p.langues.fra);
+console.log(`${francophones.length} pays francophones`);
+\end{lstlisting}
+
+% ===================== AIDE-MÉMOIRE =====================
+\section{Aide-mémoire du Lab 8}
+
+\begin{center}
+\begin{tabular}{p{5.4cm} p{7.6cm}}
+\toprule
+\textbf{Besoin} & \textbf{Code} \\
+\midrule
+Fonction asynchrone & \code{async function f() \{ ... \}} \\
+Lancer une requête & \code{const r = await fetch(url);} \\
+Lire le JSON reçu & \code{const data = await r.json();} \\
+Filet de sécurité & \code{try \{ ... \} catch (e) \{ ... \}} \\
+Traduire une liste & \code{liste.map((p) => \{ return \{...\}; \})} \\
+Trouver un élément & \code{tableau.find((p) => condition)} \\
+Champ niché (API) & \code{p.name.common} \quad / \quad \code{p.capital[0]} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ===================== GIT =====================
+\section{Sauvegarder mon travail (routine Git)}
+
+\begin{retenirbox}[Routine Git de fin de Lab --- tag \texttt{v0.8}]
+\begin{lstlisting}[style=html]
+git status
+git add .
+git commit -m "Lab 8 : donnees reelles via REST Countries (fetch)"
+git tag v0.8
+git push
+git push --tags
+\end{lstlisting}
+Vérifiez sur GitHub que le commit \emph{et} le tag \code{v0.8} apparaissent.
+\end{retenirbox}
+
+% ===================== RAPPORT =====================
+\begin{attentionbox}[Rapport à produire]
+Déposez \code{rapport-lab-8-NOM-Prenom.pdf} dans \code{rapports/}, avec quatre sections :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textbf{Ce que j'ai fait} : \code{chargerPays}, la traduction avec \code{map}, le chargement au démarrage, le spinner.
+  \item \textbf{Difficultés rencontrées} : erreurs réseau, champs nichés, ordre de chargement\ldots
+  \item \textbf{Comment je les ai résolues}.
+  \item \textbf{Lien vers mon repo} avec le tag \code{v0.8}.
+\end{enumerate}
+\end{attentionbox}
+
+% ===================== RÉSUMÉ =====================
+\section{Résumé et transition}
+
+Jàng Afrig est désormais connecté au monde réel : il charge tous les pays d'Afrique depuis une API, les traduit à sa forme interne, gère l'attente et les pannes. Le mode Capitales tourne avec de vraies données --- et vous n'avez plus jamais à mettre à jour une liste à la main.
+
+Au \textbf{Lab 9}, on exploite la richesse de ces données pour ajouter de \textbf{nouveaux modes de jeu} : Drapeaux (grâce à \code{drapeau}), Langues (grâce à \code{langues}), Voisins (grâce à \code{voisins}). Le squelette du quiz est déjà là : il ne reste qu'à varier les questions.
+
+\begin{center}
+\textit{Les vraies données sont là. Au Lab 9, le jeu prend de l'ampleur.}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+\small Dr.~El Hadji Bassirou TOURÉ --- UCAD\\
+\small Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+\end{center}
+
+\end{document}

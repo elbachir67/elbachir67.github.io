@@ -1,0 +1,370 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{booktabs}
+\usepackage{array}
+
+% Boîte pour exercices
+\newtcolorbox{exercice}[1][]{
+    colback=blue!5,
+    colframe=blue!50,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{rappelbox}[1][]{
+    colback=yellow!10,
+    colframe=yellow!50!black,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+\newtcolorbox{methodebox}[1][]{
+    colback=purple!5,
+    colframe=purple!50,
+    fonttitle=\bfseries,
+    title=#1,
+    breakable
+}
+
+% En-tête
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small TD S02 -- L'IA qui Raisonne}
+\fancyhead[R]{\small Introduction à l'IA -- M1 IABD}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\title{\textbf{TD Séance 2 : L'IA qui Raisonne}\\
+\Large Logique Propositionnelle, Logique du Premier Ordre et Inférence\\[0.3cm]
+\normalsize Introduction à l'Intelligence Artificielle}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{M1 IABD --- Semestre 1}
+
+\begin{document}
+
+\maketitle
+
+\begin{rappelbox}[Structure du TD]
+Ce TD suit la progression du cours magistral :
+\begin{enumerate}
+    \item \textbf{Partie I} -- Logique propositionnelle : syntaxe, sémantique, tables de vérité
+    \item \textbf{Partie II} -- Interprétations et modèles
+    \item \textbf{Partie III} -- Formes normales et conversion CNF
+    \item \textbf{Partie IV} -- Inférence : Modus Ponens et Résolution
+    \item \textbf{Partie V} -- Logique du Premier Ordre
+    \item \textbf{Partie VI} -- Application : Puzzles logiques
+\end{enumerate}
+\end{rappelbox}
+
+%=============================================================================
+\part*{Partie I -- Logique Propositionnelle : Syntaxe et Sémantique}
+%=============================================================================
+
+%=============================================================================
+\section*{Exercice 1 : Formalisation de phrases en logique propositionnelle}
+%=============================================================================
+
+\begin{exercice}[Exercice 1 -- Du français vers la logique]
+\textbf{Contexte :} Fatou est étudiante en M1 IABD à l'UCAD. On définit les propositions atomiques :
+\begin{itemize}
+    \item $I$ : « Fatou est inscrite en M1 IABD »
+    \item $R$ : « Fatou a réussi l'examen d'IA »
+    \item $P$ : « Fatou peut passer en M2 »
+    \item $S$ : « Fatou a obtenu une bourse »
+    \item $T$ : « Fatou a rendu son mémoire à temps »
+\end{itemize}
+
+Formaliser les phrases suivantes en logique propositionnelle :
+
+\begin{enumerate}
+    \item « Fatou est inscrite en M1 IABD et elle a réussi l'examen d'IA. »
+    \item « Si Fatou réussit l'examen d'IA, alors elle peut passer en M2. »
+    \item « Fatou ne peut pas passer en M2 à moins d'avoir réussi l'examen d'IA. »
+    \item « Fatou a obtenu une bourse si et seulement si elle a réussi l'examen et rendu son mémoire à temps. »
+    \item « Soit Fatou n'est pas inscrite en M1, soit elle a réussi l'examen, soit elle ne peut pas passer en M2. »
+    \item « Il n'est pas vrai que Fatou soit inscrite et qu'elle ait échoué à l'examen. »
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\section*{Exercice 2 : Tables de vérité et classification}
+%=============================================================================
+
+\begin{exercice}[Exercice 2 -- Tables de vérité]
+Pour chacune des formules suivantes :
+\begin{enumerate}[label=\alph*)]
+    \item Construire la table de vérité complète
+    \item Classifier la formule : \textbf{tautologie}, \textbf{contradiction}, ou \textbf{satisfiable} (ni l'un ni l'autre)
+    \item Si satisfiable, donner un modèle et un contre-modèle
+\end{enumerate}
+
+\textbf{Formules :}
+\begin{enumerate}
+    \item $P \rightarrow (Q \rightarrow P)$
+    \item $(P \rightarrow Q) \land (P \land \neg Q)$
+    \item $(P \land Q) \rightarrow R$ \quad (formule vue en cours)
+    \item $((P \rightarrow Q) \land (Q \rightarrow R)) \rightarrow (P \rightarrow R)$
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\part*{Partie II -- Interprétations et Modèles}
+%=============================================================================
+
+\begin{rappelbox}[Rappel du cours]
+\begin{itemize}
+    \item Une \textbf{interprétation} $I$ assigne une valeur de vérité (V ou F) à chaque variable propositionnelle
+    \item Un \textbf{modèle} de $\varphi$ est une interprétation $I$ telle que $I \models \varphi$ ($I$ satisfait $\varphi$)
+    \item Une formule est \textbf{satisfiable} si elle a au moins un modèle
+    \item Une formule est \textbf{valide} (tautologie) si toutes les interprétations sont des modèles
+    \item Une formule est \textbf{insatisfiable} (contradiction) si elle n'a aucun modèle
+\end{itemize}
+\end{rappelbox}
+
+%=============================================================================
+\section*{Exercice 3 : Identifier les modèles}
+%=============================================================================
+
+\begin{exercice}[Exercice 3 -- Modèles d'une formule]
+Soit la formule $\varphi = (P \lor Q) \land (\neg P \lor R) \land (\neg Q \lor \neg R)$.
+
+\begin{enumerate}[label=\alph*)]
+    \item Combien d'interprétations possibles existe-t-il pour cette formule ?
+    \item Pour chaque interprétation, déterminer si c'est un modèle de $\varphi$ ou non.
+    \item Donner l'ensemble des modèles de $\varphi$.
+    \item La formule est-elle satisfiable ? valide ? insatisfiable ?
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\section*{Exercice 4 : Conséquence logique et équivalence}
+%=============================================================================
+
+\begin{exercice}[Exercice 4 -- Conséquence logique]
+\begin{enumerate}
+    \item Montrer que $\{P, P \rightarrow Q\} \models Q$ (« $Q$ est conséquence logique de $P$ et $P \rightarrow Q$ »)
+    
+    \textit{Indication :} Montrer que tout modèle des prémisses est aussi modèle de la conclusion.
+    
+    \item Montrer que $P \rightarrow Q \equiv \neg P \lor Q$ (équivalence logique)
+    
+    \textit{Indication :} Montrer qu'elles ont exactement les mêmes modèles.
+    
+    \item Soit $\varphi = \neg(P \rightarrow Q)$. Trouver une formule équivalente plus simple.
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\part*{Partie III -- Formes Normales}
+%=============================================================================
+
+%=============================================================================
+\section*{Exercice 5 : Conversion en CNF}
+%=============================================================================
+
+\begin{methodebox}[Méthode de conversion en CNF]
+\begin{enumerate}
+    \item Éliminer $\leftrightarrow$ : $A \leftrightarrow B \equiv (A \rightarrow B) \land (B \rightarrow A)$
+    \item Éliminer $\rightarrow$ : $A \rightarrow B \equiv \neg A \lor B$
+    \item Pousser les négations vers l'intérieur (De Morgan) : $\neg(A \land B) \equiv \neg A \lor \neg B$
+    \item Éliminer les doubles négations : $\neg\neg A \equiv A$
+    \item Distribuer $\lor$ sur $\land$ : $A \lor (B \land C) \equiv (A \lor B) \land (A \lor C)$
+\end{enumerate}
+\end{methodebox}
+
+\begin{exercice}[Exercice 5 -- Conversion en CNF]
+Convertir les formules suivantes en Forme Normale Conjonctive (CNF) :
+
+\begin{enumerate}
+    \item $(P \land Q) \rightarrow R$
+    \item $\neg(P \lor (Q \land R))$
+    \item $(P \leftrightarrow Q) \rightarrow R$
+    \item $\neg((P \rightarrow Q) \rightarrow R)$
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\part*{Partie IV -- Inférence}
+%=============================================================================
+
+%=============================================================================
+\section*{Exercice 6 : Modus Ponens}
+%=============================================================================
+
+\begin{rappelbox}[Modus Ponens]
+$$\frac{P \quad P \rightarrow Q}{Q}$$
+« Si $P$ est vrai, et si $P$ implique $Q$, alors $Q$ est vrai. »
+\end{rappelbox}
+
+\begin{exercice}[Exercice 6 -- Application du Modus Ponens]
+\textbf{Contexte :} Règlement de l'UCAD pour le passage en M2.
+
+On dispose de la base de connaissances suivante :
+\begin{enumerate}
+    \item $I$ : « Fatou est inscrite en M1 IABD » (fait)
+    \item $R$ : « Fatou a réussi tous ses examens » (fait)
+    \item $I \land R \rightarrow V$ : « Si inscrite ET réussit, alors elle valide le M1 » (règle)
+    \item $V \rightarrow P$ : « Si elle valide le M1, alors elle peut passer en M2 » (règle)
+\end{enumerate}
+
+\begin{enumerate}[label=\alph*)]
+    \item En utilisant le Modus Ponens, déduire si Fatou peut passer en M2.
+    \item Détailler chaque étape de l'inférence.
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\section*{Exercice 7 : Résolution propositionnelle}
+%=============================================================================
+
+\begin{rappelbox}[Règle de Résolution]
+$$\frac{A \lor C \quad \neg A \lor D}{C \lor D}$$
+On « résout » sur le littéral $A$ qui apparaît positivement dans une clause et négativement dans l'autre.
+\end{rappelbox}
+
+\begin{exercice}[Exercice 7 -- Résolution]
+Soit la base de connaissances en CNF :
+\begin{align*}
+C_1 &: P \lor Q \\
+C_2 &: \neg P \lor R \\
+C_3 &: \neg Q \lor R \\
+C_4 &: \neg R
+\end{align*}
+
+\begin{enumerate}[label=\alph*)]
+    \item Appliquer la règle de résolution pour dériver de nouvelles clauses.
+    \item Peut-on dériver la clause vide $\square$ ? Qu'est-ce que cela signifie ?
+    \item Cette base de connaissances est-elle satisfiable ?
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\part*{Partie V -- Logique du Premier Ordre}
+%=============================================================================
+
+%=============================================================================
+\section*{Exercice 8 : Formalisation en LPO}
+%=============================================================================
+
+\begin{exercice}[Exercice 8 -- Du français vers la LPO]
+\textbf{Domaine :} L'Université Cheikh Anta Diop de Dakar.
+
+\textbf{Prédicats :}
+\begin{itemize}
+    \item $\text{Etudiant}(x)$ : « $x$ est un étudiant »
+    \item $\text{Prof}(x)$ : « $x$ est un professeur »
+    \item $\text{Cours}(x)$ : « $x$ est un cours »
+    \item $\text{Inscrit}(x, c)$ : « l'étudiant $x$ est inscrit au cours $c$ »
+    \item $\text{Enseigne}(p, c)$ : « le professeur $p$ enseigne le cours $c$ »
+    \item $\text{Reussit}(x, c)$ : « l'étudiant $x$ a réussi le cours $c$ »
+\end{itemize}
+
+\textbf{Constantes :} $\text{Fatou}$, $\text{Amadou}$, $\text{DrToure}$, $\text{IA}$, $\text{ML}$
+
+Formaliser les phrases suivantes en logique du premier ordre :
+
+\begin{enumerate}
+    \item « Fatou est une étudiante. »
+    \item « Dr Touré enseigne le cours d'IA. »
+    \item « Tous les étudiants sont inscrits à au moins un cours. »
+    \item « Il existe un cours auquel tous les étudiants sont inscrits. »
+    \item « Tout étudiant inscrit au cours d'IA et qui réussit peut s'inscrire au cours de ML. »
+    \item « Aucun professeur n'est étudiant. »
+    \item « Certains étudiants réussissent tous les cours auxquels ils sont inscrits. »
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\section*{Exercice 9 : Unification}
+%=============================================================================
+
+\begin{rappelbox}[Unification]
+L'\textbf{unification} cherche une substitution $\theta$ telle que $E_1\theta = E_2\theta$.
+
+Une substitution est un ensemble de paires $\{x_1/t_1, x_2/t_2, ...\}$ où chaque $x_i$ est remplacé par $t_i$.
+\end{rappelbox}
+
+\begin{exercice}[Exercice 9 -- Unification]
+Pour chaque paire d'expressions, déterminer si elles sont unifiables. Si oui, donner l'unificateur le plus général (MGU).
+
+\begin{enumerate}
+    \item $\text{Enseigne}(x, \text{IA})$ et $\text{Enseigne}(\text{DrToure}, y)$
+    \item $\text{Pere}(x, y)$ et $\text{Pere}(y, x)$
+    \item $\text{Inscrit}(\text{Fatou}, x)$ et $\text{Inscrit}(y, \text{ML})$
+    \item $\text{Aime}(x, x)$ et $\text{Aime}(\text{Amadou}, \text{Fatou})$
+    \item $\text{F}(x, g(y))$ et $\text{F}(g(a), z)$
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\part*{Partie VI -- Applications : Puzzles Logiques}
+%=============================================================================
+
+%=============================================================================
+\section*{Exercice 10 : Enquête à Sandaga}
+%=============================================================================
+
+\begin{exercice}[Exercice 10 -- Puzzle d'enquête]
+\textbf{Contexte :} Un vol a été commis au marché Sandaga de Dakar. L'inspecteur Diallo interroge quatre suspects : \textbf{Amadou}, \textbf{Bineta}, \textbf{Cheikh} et \textbf{Dieynaba}. On sait qu'exactement une personne est coupable.
+
+\textbf{Témoignages :}
+\begin{itemize}
+    \item \textbf{Amadou} déclare : « Si Bineta est coupable, alors Cheikh l'est aussi. »
+    \item \textbf{Bineta} déclare : « Je ne suis pas coupable, ou alors Dieynaba l'est. »
+    \item \textbf{Cheikh} déclare : « Amadou et moi ne pouvons pas être tous les deux innocents. »
+    \item \textbf{Dieynaba} déclare : « Si je suis coupable, alors Amadou est innocent. »
+\end{itemize}
+
+En supposant que tous les témoignages sont vrais :
+\begin{enumerate}[label=\alph*)]
+    \item Définir les variables propositionnelles.
+    \item Formaliser chaque témoignage et la contrainte « exactement un coupable ».
+    \item Résoudre par raisonnement logique : qui est le coupable ?
+\end{enumerate}
+\end{exercice}
+
+%=============================================================================
+\section*{Exercice 11 (Bonus) : L'île aux Chevaliers et Écuyers}
+%=============================================================================
+
+\begin{exercice}[Exercice 11 -- Puzzle classique de Raymond Smullyan]
+Sur l'île de Gorée, il existe deux types d'habitants :
+\begin{itemize}
+    \item Les \textbf{Chevaliers} disent \textbf{toujours la vérité}
+    \item Les \textbf{Écuyers} \textbf{mentent toujours}
+\end{itemize}
+
+Vous rencontrez trois habitants : \textbf{Awa}, \textbf{Bara} et \textbf{Coumba}.
+
+\begin{itemize}
+    \item \textbf{Awa} dit : « Bara est un écuyer. »
+    \item \textbf{Bara} dit : « Awa et Coumba sont du même type. »
+\end{itemize}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Formaliser les déclarations. \textit{Indication :} « X dit $\varphi$ » se formalise par $X \leftrightarrow \varphi$.
+    \item Déterminer le type de chaque habitant.
+\end{enumerate}
+\end{exercice}
+
+\vfill
+\begin{center}
+\textit{Bon travail !}
+\end{center}
+
+\end{document}

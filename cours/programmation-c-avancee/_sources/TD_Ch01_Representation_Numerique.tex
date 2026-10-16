@@ -1,0 +1,384 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,arrows.meta,matrix}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{enumitem}
+
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\scriptsize,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+    frame=single,
+    tabsize=4,
+    showstringspaces=false,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 
+             {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ù}{{\`u}}1
+}
+
+\newtcolorbox{exercicebox}[1]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+\title{\textbf{TD Chapitre 1 : Représentation Numérique}\\
+\large Conversions, Entiers et Flottants}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+
+%==============================================================================
+\section{Conversions de Base}
+%==============================================================================
+
+\begin{exercicebox}{Exercice 1 : Conversions binaire $\leftrightarrow$ hexadécimal $\leftrightarrow$ décimal}
+
+Compléter le tableau suivant (valeurs non signées sur 8 bits) :
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Binaire (8 bits)} & \textbf{Hexadécimal} & \textbf{Décimal} \\
+\hline
+$10110101$ & & \\
+\hline
+& \texttt{0x7F} & \\
+\hline
+& & 200 \\
+\hline
+$11001010$ & & \\
+\hline
+& \texttt{0xE3} & \\
+\hline
+& & 47 \\
+\hline
+\end{tabular}
+\end{center}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 2 : Conversion décimal $\rightarrow$ binaire par divisions successives}
+
+En utilisant la méthode des divisions successives par 2, convertir en binaire sur 8 bits :
+
+\begin{enumerate}[label=\alph*)]
+    \item $73_{10}$
+    \item $156_{10}$
+    \item $241_{10}$
+\end{enumerate}
+
+Pour chaque conversion, montrer toutes les étapes (divisions et restes).
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 3 : Conversions rapides hex $\leftrightarrow$ binaire}
+
+Convertir directement (sans passer par le décimal) :
+
+\begin{enumerate}[label=\alph*)]
+    \item \texttt{0xAF} en binaire
+    \item \texttt{0x3C} en binaire
+    \item $11110001_2$ en hexadécimal
+    \item $01011110_2$ en hexadécimal
+\end{enumerate}
+
+\textit{Rappel : chaque chiffre hex correspond exactement à 4 bits.}
+\end{exercicebox}
+
+%==============================================================================
+\section{Entiers Signés et Non Signés}
+%==============================================================================
+
+\begin{exercicebox}{Exercice 4 : Formule B2U (Binary to Unsigned)}
+
+En utilisant la formule $B2U_w(\vec{x}) = \sum_{i=0}^{w-1} x_i \cdot 2^i$, calculer la valeur décimale des motifs binaires suivants interprétés comme \textbf{unsigned} sur 8 bits :
+
+\begin{enumerate}[label=\alph*)]
+    \item $10000001_2$
+    \item $11111111_2$
+    \item $01010101_2$
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 5 : Formule B2T (Binary to Two's complement)}
+
+En utilisant la formule $B2T_w(\vec{x}) = -x_{w-1} \cdot 2^{w-1} + \sum_{i=0}^{w-2} x_i \cdot 2^i$, calculer la valeur décimale des mêmes motifs interprétés comme \textbf{signed} sur 8 bits :
+
+\begin{enumerate}[label=\alph*)]
+    \item $10000001_2$
+    \item $11111111_2$
+    \item $01010101_2$
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 6 : Négation en complément à deux}
+
+Calculer la négation des nombres suivants sur 8 bits en utilisant $-x = \sim x + 1$ :
+
+\begin{enumerate}[label=\alph*)]
+    \item $x = 42$ (écrire d'abord en binaire)
+    \item $x = 1$
+    \item $x = -1$ (soit $11111111_2$)
+    \item $x = -128$ (soit $10000000_2$) — que remarquez-vous ?
+\end{enumerate}
+
+Pour chaque cas, montrer : $x$ en binaire, $\sim x$, puis $\sim x + 1$.
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 7 : Plages de valeurs}
+
+\begin{enumerate}[label=\alph*)]
+    \item Donner $T_{min}$ et $T_{max}$ pour un entier signé sur 8 bits.
+    \item Donner $U_{min}$ et $U_{max}$ pour un entier non signé sur 8 bits.
+    \item Donner $T_{min}$ et $T_{max}$ pour \texttt{int16\_t} (16 bits signés).
+    \item Pourquoi y a-t-il une asymétrie ($|T_{min}| \neq |T_{max}|$) pour les signés ?
+\end{enumerate}
+\end{exercicebox}
+
+%==============================================================================
+\section{Conversions Signed $\leftrightarrow$ Unsigned}
+%==============================================================================
+
+\begin{exercicebox}{Exercice 8 : Même motif, deux interprétations}
+
+Pour chaque motif binaire sur 8 bits, donner sa valeur en unsigned ET en signed :
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Binaire} & \textbf{Unsigned} & \textbf{Signed} \\
+\hline
+$01111111$ & & \\
+\hline
+$10000000$ & & \\
+\hline
+$11111111$ & & \\
+\hline
+$11111110$ & & \\
+\hline
+$11000000$ & & \\
+\hline
+\end{tabular}
+\end{center}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 9 : Formules de conversion T2U et U2T}
+
+\begin{enumerate}[label=\alph*)]
+    \item Appliquer $T2U_8(x)$ pour $x = -1$ (sur 8 bits). Vérifier avec la formule.
+    \item Appliquer $T2U_8(x)$ pour $x = -128$.
+    \item Appliquer $U2T_8(u)$ pour $u = 200$.
+    \item Appliquer $U2T_8(u)$ pour $u = 127$.
+\end{enumerate}
+
+\textit{Rappel :} $T2U_w(x) = x + 2^w$ si $x < 0$, sinon $x$. \quad $U2T_w(u) = u - 2^w$ si $u > T_{max}$, sinon $u$.
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 10 : Pièges de comparaison}
+
+Prédire le résultat (vrai=1 ou faux=0) de chaque expression C. Justifier.
+
+\begin{lstlisting}[numbers=none]
+int x = -1;
+unsigned int y = 0;
+
+a) x < y           // ?
+b) x == 0xFFFFFFFF // ? (sur machine 32 bits)
+c) -1 < 0U         // ?
+d) 2147483647 > -2147483648        // ? (types int)
+e) 2147483647U > -2147483648       // ? (unsigned à gauche)
+\end{lstlisting}
+\end{exercicebox}
+
+%==============================================================================
+\section{Extension de Signe}
+%==============================================================================
+
+\begin{exercicebox}{Exercice 11 : Extension 8 bits $\rightarrow$ 16 bits}
+
+Effectuer l'extension de signe de 8 vers 16 bits pour :
+
+\begin{enumerate}[label=\alph*)]
+    \item \texttt{int8\_t x = -6} (soit $11111010_2$) $\rightarrow$ \texttt{int16\_t}
+    \item \texttt{int8\_t x = 120} (soit $01111000_2$) $\rightarrow$ \texttt{int16\_t}
+    \item \texttt{uint8\_t x = 250} (soit $11111010_2$) $\rightarrow$ \texttt{uint16\_t}
+\end{enumerate}
+
+Donner le résultat en binaire (16 bits) et en hexadécimal.
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 12 : Piège de l'extension avec cast}
+
+Que valent les variables suivantes ? Expliquer chaque étape.
+
+\begin{lstlisting}[numbers=none]
+int8_t a = -1;                    // a = ?
+uint32_t b = a;                   // b = ?
+uint32_t c = (uint8_t)a;          // c = ?
+\end{lstlisting}
+
+\textit{Indice : dans le cas (c), le cast en \texttt{uint8\_t} est appliqué AVANT l'extension.}
+\end{exercicebox}
+
+%==============================================================================
+\section{Dépassements (Overflow)}
+%==============================================================================
+
+\begin{exercicebox}{Exercice 13 : Overflow unsigned}
+
+Calculer le résultat des opérations suivantes sur \texttt{uint8\_t} (8 bits, non signé). Utiliser la règle du modulo $2^8$.
+
+\begin{enumerate}[label=\alph*)]
+    \item $255 + 1$
+    \item $250 + 10$
+    \item $0 - 1$
+    \item $100 - 150$
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 14 : Overflow signed (Undefined Behavior)}
+
+Pour chaque opération sur \texttt{int8\_t} (8 bits, signé), indiquer :
+\begin{itemize}
+    \item Si le résultat est \textbf{défini} ou \textbf{UB} (Undefined Behavior)
+    \item Le résultat probable (si on suppose un wrap-around, même si c'est UB)
+\end{itemize}
+
+\begin{enumerate}[label=\alph*)]
+    \item $127 + 1$
+    \item $-128 - 1$
+    \item $100 + 20$
+    \item $-100 - 50$
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 15 : Détection d'overflow AVANT l'opération}
+
+Écrire les conditions qui permettent de détecter un overflow \textbf{avant} d'effectuer l'opération (pour éviter l'UB).
+
+\begin{enumerate}[label=\alph*)]
+    \item Pour l'addition \texttt{int32\_t a + b}, quand y a-t-il overflow positif ?
+    \item Pour l'addition \texttt{int32\_t a + b}, quand y a-t-il overflow négatif ?
+    \item Compléter le code :
+\begin{lstlisting}[numbers=none]
+int32_t a = ..., b = ...;
+if (/* condition overflow positif */ || /* condition overflow négatif */) {
+    printf("Overflow!\n");
+} else {
+    int32_t sum = a + b;  // Safe
+}
+\end{lstlisting}
+\end{enumerate}
+\end{exercicebox}
+
+%==============================================================================
+\section{IEEE 754 (Flottants)}
+%==============================================================================
+
+\begin{exercicebox}{Exercice 16 : Encodage IEEE 754 float (32 bits)}
+
+Encoder les nombres suivants en IEEE 754 float (32 bits). Donner le résultat en hexadécimal.
+
+\begin{enumerate}[label=\alph*)]
+    \item $+1.0$
+    \item $-1.0$
+    \item $+12.5$
+\end{enumerate}
+
+Pour chaque nombre, détailler :
+\begin{itemize}
+    \item Signe $s$
+    \item Conversion en binaire fractionnaire
+    \item Normalisation ($1.xxx \times 2^n$)
+    \item Exposant biaisé ($E + 127$)
+    \item Fraction (23 bits, sans le "1" implicite)
+\end{itemize}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 17 : Décodage IEEE 754}
+
+Le float \texttt{0xC1480000} est stocké en mémoire. Décoder ce nombre.
+
+\begin{enumerate}[label=\alph*)]
+    \item Écrire en binaire (32 bits).
+    \item Identifier : signe (1 bit), exposant (8 bits), fraction (23 bits).
+    \item Calculer l'exposant réel ($E = \text{exposant} - 127$).
+    \item Reconstituer la mantisse $M = 1.\text{fraction}$.
+    \item Calculer la valeur décimale : $V = (-1)^s \times M \times 2^E$.
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 18 : Valeurs spéciales IEEE 754}
+
+Compléter le tableau avec les représentations hexadécimales (32 bits) :
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Valeur} & \textbf{s} & \textbf{exp (8 bits)} & \textbf{frac (23 bits)} & \textbf{Hex} \\
+\hline
+$+0$ & & & & \\
+\hline
+$-0$ & & & & \\
+\hline
+$+\infty$ & & & & \\
+\hline
+$-\infty$ & & & & \\
+\hline
+NaN (exemple) & & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+\textit{Rappel : $\pm\infty$ a exposant = 255 et fraction = 0. NaN a exposant = 255 et fraction $\neq$ 0.}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 19 : Pièges des flottants}
+
+\begin{enumerate}[label=\alph*)]
+    \item Pourquoi $0.1_{10}$ n'a-t-il pas de représentation exacte en binaire ?
+    \item Que vaut \texttt{0.1f + 0.2f == 0.3f} en C ? Pourquoi ?
+    \item Expliquer pourquoi \texttt{(3.14f + 1e10f) - 1e10f} ne donne pas \texttt{3.14f}.
+    \item Quelle est la bonne façon de comparer deux flottants ?
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{Exercice 20 : Analyse de code}
+
+Prédire la sortie de chaque \texttt{printf}. Justifier.
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <math.h>
+
+int main() {
+    float a = 0.1f + 0.2f;
+    float b = 0.3f;
+    printf("a == b ? %d\n", a == b);
+    
+    float x = 1.0f / 0.0f;
+    printf("x = %f, isinf(x) = %d\n", x, isinf(x));
+    
+    float y = 0.0f / 0.0f;
+    printf("y == y ? %d, isnan(y) = %d\n", y == y, isnan(y));
+    
+    return 0;
+}
+\end{lstlisting}
+\end{exercicebox}
+
+\end{document}

@@ -1,0 +1,406 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{enumitem}
+
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\scriptsize,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+    frame=single,
+    tabsize=4,
+    showstringspaces=false,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 
+             {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ù}{{\`u}}1
+}
+
+\newtcolorbox{infobox}[1]{colback=blue!5,colframe=blue!75!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{exercicebox}[1]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{warningbox}[1]{colback=red!5,colframe=red!75!black,fonttitle=\bfseries,title=#1,breakable}
+
+\title{\textbf{TP Chapitre 1 : Représentation Numérique}\\
+\large Exploration Pratique avec Compilation et Débogage}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{infobox}{Prérequis}
+Ce TP suppose que vous avez configuré votre environnement Docker (TP-0) et maîtrisez :
+\begin{itemize}
+    \item Compilation avec \texttt{gcc} et options \texttt{-Wall -Wextra -g}
+    \item Débogage de base avec \texttt{gdb}
+    \item Utilisation des sanitizers (\texttt{-fsanitize=undefined})
+\end{itemize}
+\end{infobox}
+
+\begin{infobox}{Commandes de référence}
+\begin{verbatim}
+# Compilation standard
+gcc -Wall -Wextra -Werror -g prog.c -o prog
+
+# Compilation avec détection d'undefined behavior
+gcc -Wall -Wextra -g -fsanitize=undefined prog.c -o prog
+
+# Débogage
+gdb ./prog
+(gdb) break main
+(gdb) run
+(gdb) print variable
+(gdb) print/x variable    # Affichage hexadécimal
+(gdb) print/t variable    # Affichage binaire
+\end{verbatim}
+\end{infobox}
+
+%==============================================================================
+\section{Exercice 1 : Affichage Binaire et Hexadécimal}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Créer des fonctions d'affichage pour visualiser les représentations binaire et hexadécimale des entiers.
+\end{exercicebox}
+
+\textbf{1.1} Créer un fichier \texttt{affichage.c} avec le code suivant :
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdint.h>
+
+// Affiche un entier 8 bits en binaire
+void print_binary_8(uint8_t n) {
+    printf("0b");
+    for (int i = 7; i >= 0; i--) {
+        printf("%d", (n >> i) & 1);
+    }
+}
+
+int main() {
+    uint8_t a = 42;
+    printf("a = %3d = ", a);
+    print_binary_8(a);
+    printf(" = 0x%02X\n", a);
+    
+    // TODO: Tester avec d'autres valeurs
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Compiler et exécuter. Vérifier que 42 = 00101010 = 0x2A.
+    \item Ajouter les tests pour : 0, 127, 128, 255.
+    \item Écrire une fonction \texttt{print\_binary\_32(uint32\_t n)} pour les entiers 32 bits.
+    \item Utiliser GDB pour afficher la valeur de \texttt{a} avec \texttt{print/t a} et \texttt{print/x a}. Comparer avec votre fonction.
+\end{enumerate}
+
+%==============================================================================
+\section{Exercice 2 : Exploration Signed vs Unsigned}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Observer les différences d'interprétation entre types signés et non signés.
+\end{exercicebox}
+
+\textbf{2.1} Créer un fichier \texttt{signed\_unsigned.c} :
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdint.h>
+
+int main() {
+    // Même motif binaire, interprétations différentes
+    uint8_t u = 200;
+    int8_t  s = 200;  // Attention: conversion implicite
+    
+    printf("=== Même valeur initiale: 200 ===\n");
+    printf("uint8_t u = %u\n", u);
+    printf("int8_t  s = %d\n", s);
+    
+    // Afficher le motif binaire de chacun
+    printf("u en binaire: ");
+    for (int i = 7; i >= 0; i--) printf("%d", (u >> i) & 1);
+    printf("\n");
+    
+    printf("s en binaire: ");
+    for (int i = 7; i >= 0; i--) printf("%d", ((uint8_t)s >> i) & 1);
+    printf("\n");
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Compiler avec \texttt{gcc -Wall -Wextra}. Y a-t-il un warning ? Pourquoi ?
+    \item Quelle valeur affiche \texttt{s} ? Expliquer avec la formule B2T.
+    \item Modifier le code pour tester les valeurs : 127, 128, 255, 0.
+    \item Utiliser GDB : mettre un breakpoint après les affectations, puis \texttt{print u} et \texttt{print s}. Que montre GDB ?
+\end{enumerate}
+
+%==============================================================================
+\section{Exercice 3 : Pièges de Comparaison}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Identifier et comprendre les bugs liés aux comparaisons signed/unsigned.
+\end{exercicebox}
+
+\textbf{3.1} Créer un fichier \texttt{comparaisons.c} :
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdint.h>
+
+int main() {
+    int x = -1;
+    unsigned int y = 0;
+    
+    printf("x = %d, y = %u\n", x, y);
+    printf("x < y ? %d\n", x < y);
+    
+    // Prédire le résultat avant d'exécuter!
+    printf("-1 < 0U ? %d\n", -1 < 0U);
+    printf("-1 == 0xFFFFFFFF ? %d\n", -1 == 0xFFFFFFFF);
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Prédire les résultats AVANT de compiler. Puis vérifier.
+    \item Compiler avec \texttt{gcc -Wsign-compare}. Quels warnings apparaissent ?
+    \item Expliquer pourquoi \texttt{-1 < 0U} est faux (quelle conversion a lieu ?).
+    \item Ajouter un test : \texttt{2147483647U > -2147483648}. Prédire puis vérifier.
+    \item En GDB, utiliser \texttt{print/u x} pour voir \texttt{x} interprété comme unsigned.
+\end{enumerate}
+
+%==============================================================================
+\section{Exercice 4 : Détection d'Overflow avec Sanitizer}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Utiliser le sanitizer pour détecter les undefined behaviors liés aux overflows.
+\end{exercicebox}
+
+\textbf{4.1} Créer un fichier \texttt{overflow.c} :
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdint.h>
+
+int main() {
+    // Test 1: Overflow unsigned (comportement DÉFINI)
+    printf("=== Overflow Unsigned ===\n");
+    uint8_t u = 255;
+    printf("u = %u\n", u);
+    u = u + 1;
+    printf("u + 1 = %u\n", u);
+    
+    // Test 2: Overflow signed (UNDEFINED BEHAVIOR!)
+    printf("\n=== Overflow Signed ===\n");
+    int8_t s = 127;
+    printf("s = %d\n", s);
+    s = s + 1;  // UB!
+    printf("s + 1 = %d\n", s);
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Compiler SANS sanitizer : \texttt{gcc -g overflow.c -o overflow}. Exécuter. Noter les résultats.
+    \item Compiler AVEC sanitizer : \texttt{gcc -g -fsanitize=undefined overflow.c -o overflow}. Exécuter. Que se passe-t-il ?
+    \item Le sanitizer détecte-t-il l'overflow unsigned ? Pourquoi ?
+    \item Ajouter un test avec \texttt{int8\_t s = -128; s = s - 1;}. Le sanitizer le détecte-t-il ?
+    \item Compiler avec \texttt{-O2} (optimisation) sans sanitizer. Le résultat change-t-il ?
+\end{enumerate}
+
+%==============================================================================
+\section{Exercice 5 : Exploration IEEE 754}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Visualiser la structure interne des nombres flottants.
+\end{exercicebox}
+
+\textbf{5.1} Créer un fichier \texttt{ieee754.c} :
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdint.h>
+
+// Union pour accéder aux bits d'un float
+typedef union {
+    float f;
+    uint32_t u;
+} Float32;
+
+void analyze_float(float value) {
+    Float32 num;
+    num.f = value;
+    
+    // Extraire les champs
+    uint32_t sign = (num.u >> 31) & 1;
+    uint32_t exp = (num.u >> 23) & 0xFF;
+    uint32_t frac = num.u & 0x7FFFFF;
+    
+    printf("Valeur: %f\n", value);
+    printf("Hex: 0x%08X\n", num.u);
+    printf("Signe: %u\n", sign);
+    printf("Exposant brut: %u (biaisé)\n", exp);
+    printf("Exposant réel: %d\n", (int)exp - 127);
+    printf("Fraction: 0x%06X\n", frac);
+    printf("---\n");
+}
+
+int main() {
+    analyze_float(1.0f);
+    analyze_float(-1.0f);
+    analyze_float(12.5f);
+    
+    // TODO: Ajouter d'autres tests
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Compiler et exécuter. Vérifier que \texttt{1.0f} = \texttt{0x3F800000}.
+    \item Ajouter l'analyse de : \texttt{0.5f}, \texttt{0.1f}, \texttt{-12.5f}.
+    \item Pour \texttt{0.1f}, observer la fraction. Pourquoi n'est-elle pas "propre" ?
+    \item Ajouter des tests pour les valeurs spéciales :
+    \begin{itemize}
+        \item \texttt{1.0f / 0.0f} (infini positif)
+        \item \texttt{0.0f / 0.0f} (NaN)
+        \item \texttt{-0.0f} (zéro négatif)
+    \end{itemize}
+    \item En GDB, afficher \texttt{num.u} avec \texttt{print/t num.u} pour voir les 32 bits.
+\end{enumerate}
+
+%==============================================================================
+\section{Exercice 6 : Comparaison de Flottants}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Comprendre pourquoi la comparaison directe de flottants est dangereuse.
+\end{exercicebox}
+
+\textbf{6.1} Créer un fichier \texttt{float\_compare.c} :
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <math.h>
+
+int main() {
+    float a = 0.1f + 0.2f;
+    float b = 0.3f;
+    
+    printf("a = %.20f\n", a);
+    printf("b = %.20f\n", b);
+    printf("a == b ? %d\n", a == b);
+    printf("a - b = %.20e\n", a - b);
+    
+    // Comparaison correcte avec epsilon
+    float epsilon = 1e-6f;
+    printf("fabsf(a-b) < epsilon ? %d\n", fabsf(a - b) < epsilon);
+    
+    // Test: associativité
+    float x = (3.14f + 1e10f) - 1e10f;
+    float y = 3.14f + (1e10f - 1e10f);
+    printf("\nx = (3.14 + 1e10) - 1e10 = %f\n", x);
+    printf("y = 3.14 + (1e10 - 1e10) = %f\n", y);
+    printf("x == y ? %d\n", x == y);
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}[label=\alph*)]
+    \item Compiler avec \texttt{gcc -Wall -g -lm float\_compare.c -o float\_compare}. Exécuter.
+    \item Expliquer pourquoi \texttt{a != b} alors que mathématiquement $0.1 + 0.2 = 0.3$.
+    \item Quelle est la différence entre \texttt{x} et \texttt{y} ? Pourquoi ?
+    \item En GDB, mettre un breakpoint après le calcul de \texttt{a} et \texttt{b}, puis utiliser \texttt{print a} et \texttt{print b}. GDB montre-t-il la différence ?
+\end{enumerate}
+
+%==============================================================================
+\section{Exercice 7 : Projet Mini-Convertisseur}
+%==============================================================================
+
+\begin{exercicebox}{Objectif}
+Créer un programme interactif de conversion entre bases.
+\end{exercicebox}
+
+\textbf{7.1} Créer un programme \texttt{convertisseur.c} qui :
+
+\begin{enumerate}
+    \item Demande à l'utilisateur un nombre (décimal, hexadécimal avec préfixe 0x, ou binaire avec préfixe 0b)
+    \item Affiche ce nombre dans les trois bases
+    \item Affiche l'interprétation signed et unsigned (sur 8, 16, ou 32 bits selon la valeur)
+\end{enumerate}
+
+\textbf{Exemple d'exécution attendue :}
+\begin{verbatim}
+Entrez un nombre (dec, 0xHEX, ou 0bBIN): 0xFF
+=== Résultat sur 8 bits ===
+Décimal unsigned: 255
+Décimal signed:   -1
+Hexadécimal:      0xFF
+Binaire:          11111111
+
+Entrez un nombre (dec, 0xHEX, ou 0bBIN): -42
+=== Résultat sur 8 bits ===
+Décimal unsigned: 214
+Décimal signed:   -42
+Hexadécimal:      0xD6
+Binaire:          11010110
+\end{verbatim}
+
+\textbf{Conseils :}
+\begin{itemize}
+    \item Utiliser \texttt{strtol()} avec différentes bases pour parser l'entrée
+    \item Créer des fonctions séparées pour chaque type d'affichage
+    \item Tester avec GDB pour vérifier les conversions intermédiaires
+\end{itemize}
+
+%==============================================================================
+\section{Soumission}
+%==============================================================================
+
+\begin{infobox}{À rendre}
+\begin{itemize}
+    \item Tous les fichiers source (.c)
+    \item Un fichier \texttt{README.md} avec :
+    \begin{itemize}
+        \item Réponses aux questions de chaque exercice
+        \item Captures d'écran montrant l'utilisation de GDB et du sanitizer
+        \item Explications des bugs/comportements observés
+    \end{itemize}
+\end{itemize}
+
+\textbf{Format :} Archive \texttt{TP1\_NomPrenom.tar.gz}
+\end{infobox}
+
+\end{document}

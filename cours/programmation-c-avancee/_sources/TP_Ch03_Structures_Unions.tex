@@ -1,0 +1,513 @@
+\documentclass[10pt,a4paper]{article}
+
+% Packages essentiels
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,arrows.meta,shapes.geometric}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{hyperref}
+
+% Configuration listings avec gestion complète des accents
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\scriptsize,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+    frame=single,
+    tabsize=4,
+    showstringspaces=false,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 
+             {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ù}{{\`u}}1
+             {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1 {Ç}{{\c{C}}}1
+             {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1 {Ù}{{\`U}}1
+             {ë}{{\"e}}1 {ï}{{\"\i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+             {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+             {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1
+}
+
+% Boxes pédagogiques
+\newtcolorbox{exercicebox}[1]{
+    colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{warningbox}[1]{
+    colback=red!5,colframe=red!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{infobox}[1]{
+    colback=blue!5,colframe=blue!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{techbox}[1]{
+    colback=orange!5,colframe=orange!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\title{\textbf{TP Chapitre 3 : Structures et Unions}\\
+\large Programmation C Avancée - L3}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Faculté des Sciences et Techniques\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{infobox}{Environnement de travail}
+Ce TP doit être réalisé dans l'environnement Docker du cours. 
+Si vous n'avez pas encore configuré l'environnement, consultez le TP-1 (Setup Environnement).
+
+\textbf{Commandes de base:}
+\begin{verbatim}
+# Linux/macOS
+docker run -it -v $(pwd):/workspace elbachirtoure/c-advanced-course:v2.0
+
+# Windows (Git Bash)
+docker run -it -v /${PWD}:/workspace elbachirtoure/c-advanced-course:v2.0
+
+# Dans le container, aller dans le workspace
+cd /workspace
+\end{verbatim}
+\end{infobox}
+
+\section{Exercice 1 : Manipulation de Structures}
+
+\begin{exercicebox}{1.1 - Création et initialisation}
+Créer un fichier \texttt{ex1\_struct.c} avec les structures suivantes:
+
+\begin{lstlisting}
+typedef struct {
+    char name[32];
+    int age;
+    float height;
+} Person;
+
+typedef struct {
+    int day, month, year;
+} Date;
+
+typedef struct {
+    Person person;
+    Date birth_date;
+    char *email;  // allocation dynamique
+} Employee;
+\end{lstlisting}
+
+\textbf{Implémenter:}
+\begin{enumerate}
+\item \texttt{void print\_person(const Person *p)} -- affiche les infos
+\item \texttt{Person create\_person(const char *name, int age, float height)}
+\item \texttt{Employee *create\_employee(const char *name, int age, float height, int d, int m, int y, const char *email)}
+\item \texttt{void free\_employee(Employee *e)}
+\end{enumerate}
+
+\textbf{Tester avec:}
+\begin{lstlisting}
+Employee *e = create_employee("Alice", 30, 1.65, 15, 3, 1994, "alice@test.com");
+// afficher, puis libérer
+\end{lstlisting}
+\end{exercicebox}
+
+\begin{exercicebox}{1.2 - Comparaison de structures}
+\begin{lstlisting}
+typedef struct {
+    int x, y;
+} Point;
+\end{lstlisting}
+
+\textbf{Implémenter:}
+\begin{enumerate}
+\item \texttt{int point\_equal(const Point *a, const Point *b)} -- comparaison membre à membre
+\item \texttt{int point\_equal\_memcmp(const Point *a, const Point *b)} -- utiliser \texttt{memcmp}
+\end{enumerate}
+
+\textbf{Question:} Pourquoi \texttt{memcmp} peut-il donner des résultats incorrects sur certaines structures ?
+\end{exercicebox}
+
+\section{Exercice 2 : Analyse Mémoire avec GDB}
+
+\begin{exercicebox}{2.1 - Inspection de structures}
+Créer \texttt{ex2\_gdb.c}:
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stddef.h>
+
+struct Data {
+    char tag;
+    int value;
+    short code;
+    char flags;
+};
+
+int main(void) {
+    struct Data d = {'A', 0x12345678, 0xABCD, 'F'};
+    
+    printf("sizeof(struct Data) = %zu\n", sizeof(struct Data));
+    printf("offsetof tag   = %zu\n", offsetof(struct Data, tag));
+    printf("offsetof value = %zu\n", offsetof(struct Data, value));
+    printf("offsetof code  = %zu\n", offsetof(struct Data, code));
+    printf("offsetof flags = %zu\n", offsetof(struct Data, flags));
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Compiler et débugger:}
+\begin{verbatim}
+gcc -g -o ex2 ex2_gdb.c
+gdb ./ex2
+\end{verbatim}
+
+\textbf{Commandes GDB à exécuter:}
+\begin{verbatim}
+(gdb) break main
+(gdb) run
+(gdb) next
+(gdb) ptype struct Data
+(gdb) print d
+(gdb) print sizeof(d)
+(gdb) x/16xb &d
+(gdb) print &d.tag
+(gdb) print &d.value
+\end{verbatim}
+
+\textbf{À rendre:}
+\begin{itemize}
+\item Capture du dump hexadécimal (\texttt{x/16xb \&d})
+\item Identification des octets de padding
+\item Vérification de l'endianness
+\end{itemize}
+\end{exercicebox}
+
+\begin{exercicebox}{2.2 - Structures imbriquées}
+\begin{lstlisting}
+struct Inner {
+    char a;
+    int b;
+};
+
+struct Outer {
+    char x;
+    struct Inner inner;
+    char y;
+};
+
+int main(void) {
+    struct Outer o = {'X', {'A', 42}, 'Y'};
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Avec GDB:}
+\begin{enumerate}
+\item Afficher \texttt{sizeof(struct Outer)}
+\item Examiner le layout avec \texttt{x/Nxb \&o}
+\item Identifier tous les octets de padding
+\item Dessiner le schéma mémoire
+\end{enumerate}
+\end{exercicebox}
+
+\section{Exercice 3 : Unions et Type Punning}
+
+\begin{exercicebox}{3.1 - Conversion float/int}
+\begin{lstlisting}
+#include <stdio.h>
+
+union FloatInt {
+    float f;
+    unsigned int i;
+    unsigned char bytes[4];
+};
+
+int main(void) {
+    union FloatInt u;
+    
+    // Tester avec différentes valeurs
+    float values[] = {1.0f, -1.0f, 0.0f, 3.14159f, 1e10f};
+    
+    for (int j = 0; j < 5; j++) {
+        u.f = values[j];
+        printf("f = %g\n", u.f);
+        printf("  hex: 0x%08X\n", u.i);
+        printf("  bytes: ");
+        for (int i = 0; i < 4; i++) {
+            printf("%02X ", u.bytes[i]);
+        }
+        printf("\n\n");
+    }
+    
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Analyser:}
+\begin{enumerate}
+\item L'ordre des octets (little-endian)
+\item La structure IEEE 754 (signe, exposant, mantisse)
+\item Pourquoi \texttt{1.0f} donne \texttt{0x3F800000}
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{3.2 - Tagged Union (Variant)}
+Implémenter un type variant pouvant contenir \texttt{int}, \texttt{double}, ou \texttt{char*}:
+
+\begin{lstlisting}
+typedef enum { VAR_INT, VAR_DOUBLE, VAR_STRING } VarType;
+
+typedef struct {
+    VarType type;
+    union {
+        int i;
+        double d;
+        char *s;
+    } value;
+} Variant;
+
+// À implémenter:
+Variant var_int(int i);
+Variant var_double(double d);
+Variant var_string(const char *s);  // alloue une copie
+void var_print(const Variant *v);
+void var_free(Variant *v);  // libère si string
+\end{lstlisting}
+
+\textbf{Tester avec un tableau de Variants de types différents.}
+\end{exercicebox}
+
+\section{Exercice 4 : Optimisation de Structures}
+
+\begin{exercicebox}{4.1 - Mesure et optimisation}
+\begin{lstlisting}
+// Version originale
+struct Original {
+    char a;
+    double b;
+    char c;
+    int d;
+    short e;
+    char f;
+};
+
+// Votre version optimisée
+struct Optimized {
+    // réorganiser les membres
+};
+\end{lstlisting}
+
+\textbf{Implémenter un programme qui:}
+\begin{enumerate}
+\item Affiche \texttt{sizeof} et les offsets des deux versions
+\item Calcule l'économie en octets et pourcentage
+\item Vérifie que les données sont identiques après copie
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{4.2 - Impact sur les tableaux}
+\begin{lstlisting}
+#define N 1000000
+
+struct Big { /* version non optimisée */ };
+struct Small { /* version optimisée */ };
+
+int main(void) {
+    printf("Tableau Big:   %zu Mo\n", N * sizeof(struct Big) / (1024*1024));
+    printf("Tableau Small: %zu Mo\n", N * sizeof(struct Small) / (1024*1024));
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Mesurer l'impact mémoire pour 1 million d'éléments.}
+\end{exercicebox}
+
+\section{Exercice 5 : Structures Dynamiques}
+
+\begin{exercicebox}{5.1 - Liste chaînée simple}
+\begin{lstlisting}
+typedef struct Node {
+    int data;
+    struct Node *next;
+} Node;
+
+typedef struct {
+    Node *head;
+    size_t size;
+} List;
+
+// À implémenter:
+List *list_create(void);
+void list_push_front(List *list, int data);
+void list_push_back(List *list, int data);
+int list_pop_front(List *list);
+void list_print(const List *list);
+void list_destroy(List *list);
+\end{lstlisting}
+
+\textbf{Vérifier avec Valgrind:}
+\begin{verbatim}
+valgrind --leak-check=full ./ex5
+\end{verbatim}
+\end{exercicebox}
+
+\begin{exercicebox}{5.2 - Flexible Array Member}
+Implémenter une chaîne de caractères avec sa longueur:
+
+\begin{lstlisting}
+typedef struct {
+    size_t length;
+    size_t capacity;
+    char data[];  // flexible array member
+} String;
+
+String *string_create(const char *init);
+String *string_concat(const String *a, const String *b);
+void string_print(const String *s);
+void string_destroy(String *s);
+\end{lstlisting}
+\end{exercicebox}
+
+\section{Projet : Simple Database}
+
+\begin{techbox}{Description}
+Implémenter un système de gestion d'enregistrements en mémoire avec les fonctionnalités suivantes:
+\begin{itemize}
+\item Stockage dynamique de records (tableau redimensionnable)
+\item Opérations CRUD (Create, Read, Update, Delete)
+\item Recherche par ID ou par nom
+\item Affichage formaté
+\end{itemize}
+\end{techbox}
+
+\begin{exercicebox}{Structure de données}
+\begin{lstlisting}
+#define MAX_NAME 64
+#define MAX_EMAIL 128
+
+typedef struct {
+    int id;
+    char name[MAX_NAME];
+    char email[MAX_EMAIL];
+    int age;
+    double salary;
+} Record;
+
+typedef struct {
+    Record *records;
+    size_t count;
+    size_t capacity;
+    int next_id;
+} Database;
+\end{lstlisting}
+\end{exercicebox}
+
+\begin{exercicebox}{API à implémenter}
+\begin{lstlisting}
+// Création/Destruction
+Database *db_create(size_t initial_capacity);
+void db_destroy(Database *db);
+
+// CRUD
+int db_insert(Database *db, const char *name, const char *email, 
+              int age, double salary);  // retourne l'ID
+Record *db_find_by_id(Database *db, int id);
+Record *db_find_by_name(Database *db, const char *name);
+int db_update(Database *db, int id, const char *name, 
+              const char *email, int age, double salary);
+int db_delete(Database *db, int id);
+
+// Affichage
+void db_print_all(const Database *db);
+void db_print_record(const Record *r);
+
+// Statistiques
+size_t db_count(const Database *db);
+double db_average_salary(const Database *db);
+double db_average_age(const Database *db);
+\end{lstlisting}
+\end{exercicebox}
+
+\begin{exercicebox}{Programme de test}
+\begin{lstlisting}
+int main(void) {
+    Database *db = db_create(10);
+    
+    // Insertions
+    db_insert(db, "Alice", "alice@test.com", 30, 45000.0);
+    db_insert(db, "Bob", "bob@test.com", 25, 38000.0);
+    db_insert(db, "Charlie", "charlie@test.com", 35, 52000.0);
+    
+    printf("=== Tous les enregistrements ===\n");
+    db_print_all(db);
+    
+    printf("\n=== Recherche par nom: Bob ===\n");
+    Record *r = db_find_by_name(db, "Bob");
+    if (r) db_print_record(r);
+    
+    printf("\n=== Mise a jour ID 2 ===\n");
+    db_update(db, 2, "Robert", "robert@test.com", 26, 40000.0);
+    db_print_all(db);
+    
+    printf("\n=== Statistiques ===\n");
+    printf("Nombre: %zu\n", db_count(db));
+    printf("Salaire moyen: %.2f\n", db_average_salary(db));
+    printf("Age moyen: %.1f\n", db_average_age(db));
+    
+    printf("\n=== Suppression ID 1 ===\n");
+    db_delete(db, 1);
+    db_print_all(db);
+    
+    db_destroy(db);
+    return 0;
+}
+\end{lstlisting}
+\end{exercicebox}
+
+\begin{warningbox}{Contraintes}
+\begin{itemize}
+\item Le tableau \texttt{records} doit se redimensionner automatiquement (doubler la capacité)
+\item Aucune fuite mémoire (vérifier avec Valgrind)
+\item \texttt{db\_delete} peut réorganiser le tableau (compacter)
+\item Les ID sont uniques et ne sont jamais réutilisés
+\item Gestion des erreurs (NULL, ID invalide, etc.)
+\end{itemize}
+\end{warningbox}
+
+\section*{Soumission}
+
+\begin{infobox}{Fichiers à rendre}
+\begin{itemize}
+\item \texttt{ex1\_struct.c} -- Exercice 1
+\item \texttt{ex2\_gdb.c} + rapport GDB (captures/schémas)
+\item \texttt{ex3\_union.c} -- Exercice 3
+\item \texttt{ex4\_optim.c} -- Exercice 4
+\item \texttt{ex5\_list.c} -- Exercice 5
+\item \texttt{database.h} + \texttt{database.c} + \texttt{main.c} -- Projet
+\item \texttt{Makefile}
+\item Rapport Valgrind (capture sans erreurs)
+\end{itemize}
+
+\textbf{Compilation requise:}
+\begin{verbatim}
+gcc -Wall -Wextra -Werror -std=c11 -g -o prog *.c
+\end{verbatim}
+\end{infobox}
+
+\end{document}

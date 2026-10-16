@@ -1,0 +1,215 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.4cm,top=1.1cm,bottom=1.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setstretch{1.0}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+\pagestyle{empty}
+\newcommand{\repligne}{\par\vspace{0.42cm}\noindent\dotfill}
+\newcommand{\zonecalcul}[1]{\par\vspace{0.15cm}\noindent{\small\emph{Espace de calcul :}}\par\vspace{#1}}
+\newcommand{\aide}[1]{\fbox{\begin{minipage}{0.96\textwidth}\small #1\end{minipage}}}
+\begin{document}
+\begin{center}
+\textbf{\large Fiche d'exercices --- Séance 6 : la classification}\\[0.05cm]
+{\small Introduction au ML -- Dr. El Hadji Bassirou TOURÉ -- DMI $\cdot$ FST $\cdot$ UCAD \quad $\bullet$ \quad \textbf{Travail à la main, sans machine}}
+\end{center}
+\vspace{-0.15cm}\hrule\vspace{0.25cm}
+{\small Cette fiche reprend, exercice par exercice, les calculs de la Séance 6 : le score logistique passé dans la sigmoïde, la log-loss, la matrice de confusion et ses métriques, le seuil comme curseur, la courbe ROC et l'AUC construites à la main, puis le déséquilibre de classes et le choix de la métrique. Répondre directement sur la fiche.}
+\vspace{0.2cm}
+
+\aide{\textbf{Aides numériques (valables pour toute la fiche).} Table de la sigmoïde $\sigma(z)=1/(1+e^{-z})$ :
+\begin{center}\renewcommand{\arraystretch}{1.15}\begin{tabular}{c|ccccccc}
+$z$ & $-3$ & $-2$ & $-1$ & $0$ & $1$ & $2$ & $3$\\\midrule
+$\sigma(z)$ & $0{,}047$ & $0{,}119$ & $0{,}269$ & $0{,}500$ & $0{,}731$ & $0{,}881$ & $0{,}953$\\
+\end{tabular}\end{center}
+Logarithmes : $\ln 0{,}9=-0{,}105$ ; $\ln 0{,}8=-0{,}223$ ; $\ln 0{,}7=-0{,}357$ ; $\ln 0{,}6=-0{,}511$ ; $\ln 0{,}4=-0{,}916$ ; $\ln 0{,}3=-1{,}204$ ; $\ln 0{,}2=-1{,}609$ ; $\ln 0{,}1=-2{,}303$.}
+\vspace{0.4cm}
+
+\textbf{\large Exercice 1 -- Du score à la probabilité, puis à la décision}
+\vspace{0.15cm}
+
+Un modèle logistique a appris, sur des variables standardisées (âge, glycémie, fièvre), l'intercept $b=-1{,}2$ et les poids $\mathbf w = (0{,}6;\ -0{,}4;\ 1{,}0)$. Une patiente a pour valeurs standardisées $\mathbf x = (1{,}0;\ 1{,}5;\ 0{,}2)$.
+
+\vspace{0.15cm}
+(a) Calculer le score $z = b + \mathbf w\cdot\mathbf x$ terme à terme, puis la probabilité $\hat p = \sigma(z)$ (table).
+\zonecalcul{1.2cm}
+$z = $ \makebox[2.5cm]{\dotfill} \quad $\hat p = $ \makebox[2.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Donner la décision au seuil $0{,}5$, puis au seuil $0{,}2$. \quad seuil $0{,}5$ : $\hat y=$ \makebox[1.2cm]{\dotfill} \quad seuil $0{,}2$ : $\hat y=$ \makebox[1.2cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) Le poids de la glycémie est négatif. Que signifie ce signe, « toutes choses égales par ailleurs » ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(d) Trois autres patients ont les scores $z=+3$, $z=0$, $z=-2$. Pour lequel le modèle est-il le plus incertain ? Pourquoi ?
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 2 -- La log-loss à la main}
+\vspace{0.15cm}
+
+Quatre prédictions sont jugées par la log-loss $J = -\frac{1}{n}\sum_i\big[y_i\ln\hat p_i + (1-y_i)\ln(1-\hat p_i)\big]$.
+
+\vspace{0.15cm}
+{\small \renewcommand{\arraystretch}{1.9}\begin{tabular}{|c|c|c|c|c|}\hline
+patient & $\hat p_i$ & $y_i$ & terme qui survit & perte\\\hline
+A & $0{,}7$ & $1$ & & \\\hline
+B & $0{,}4$ & $1$ & & \\\hline
+C & $0{,}2$ & $0$ & & \\\hline
+D & $0{,}9$ & $0$ & & \\\hline
+\end{tabular}}
+
+\vspace{0.15cm}
+(a) Remplir le tableau (quel terme survit, et la perte de chaque patient). \quad (b) Calculer la log-loss moyenne.
+\zonecalcul{0.8cm}
+$J = $ \makebox[2.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) Quel patient coûte le plus cher ? Qu'est-ce que la log-loss punit, que l'accuracy ne voit pas ?
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 3 -- La matrice de confusion}
+\vspace{0.15cm}
+
+\aide{Huit patients de dépistage à Kolda, triés par probabilité prédite décroissante (P $=$ paludisme, $y=1$) :
+\begin{center}\renewcommand{\arraystretch}{1.2}\begin{tabular}{c|cccccccc}
+patient & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ & $8$\\\midrule
+$\hat p_i$ & $0{,}95$ & $0{,}85$ & $0{,}70$ & $0{,}55$ & $0{,}45$ & $0{,}35$ & $0{,}20$ & $0{,}10$\\
+réalité $y_i$ & $1$ & $1$ & $1$ & $0$ & $0$ & $1$ & $1$ & $0$\\
+\end{tabular}\end{center}
+Ce jeu sert aux Exercices 3, 4 et 5.}
+
+\vspace{0.2cm}
+(a) Au seuil $0{,}5$, écrire la décision $\hat y_i$ et la case (TP, FP, FN, TN) de chaque patient.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.8}\begin{tabular}{|l|c|c|c|c|c|c|c|c|}\hline
+patient & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ & $8$\\\hline
+$\hat y_i$ (seuil $0{,}5$) & & & & & & & & \\\hline
+case & & & & & & & & \\\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+(b) Compléter la matrice, puis calculer accuracy, precision, recall et F1.
+
+\vspace{0.1cm}
+\begin{minipage}{0.36\textwidth}{\small \renewcommand{\arraystretch}{1.9}\begin{tabular}{|c|c|c|}\hline
+ & prédit $1$ & prédit $0$\\\hline
+réel $1$ & TP $=$ & FN $=$\\\hline
+réel $0$ & FP $=$ & TN $=$\\\hline
+\end{tabular}}\end{minipage}\hfill
+\begin{minipage}{0.60\textwidth}
+accuracy $=$ \makebox[2.2cm]{\dotfill} \quad precision $=$ \makebox[2.2cm]{\dotfill}\\[0.35cm]
+recall $=$ \makebox[2.2cm]{\dotfill} \quad F1 $=$ \makebox[2.2cm]{\dotfill}
+\end{minipage}
+\zonecalcul{1.0cm}
+
+(c) Traduire la precision et le recall en une phrase chacun, dans la langue d'un agent de santé.
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 4 -- Le seuil, un curseur}
+\vspace{0.15cm}
+
+Même jeu de huit patients (Exercice 3). Le modèle ne change pas ; seul le seuil passe de $0{,}5$ à $0{,}3$.
+
+\vspace{0.15cm}
+(a) Quels patients changent de décision ? \makebox[5cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Recalculer TP, FP, FN, TN, puis precision, recall et F1 au seuil $0{,}3$.
+\zonecalcul{1.4cm}
+TP $=$ \makebox[1cm]{\dotfill} FP $=$ \makebox[1cm]{\dotfill} FN $=$ \makebox[1cm]{\dotfill} TN $=$ \makebox[1cm]{\dotfill} \quad precision $=$ \makebox[1.6cm]{\dotfill} recall $=$ \makebox[1.6cm]{\dotfill} F1 $=$ \makebox[1.6cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) Pour une campagne dont la consigne est « ne manquer presque aucun cas », quel seuil préférer ? Quelle métrique accepte-t-on de sacrifier ?
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 5 -- Construire la ROC et calculer l'AUC à la main}
+\vspace{0.15cm}
+
+Même jeu (Exercice 3) : $5$ positifs, $3$ négatifs. On abaisse le seuil juste sous chaque $\hat p_i$, dans l'ordre décroissant.
+
+\vspace{0.15cm}
+(a) Compléter le tableau : chaque positif fait \emph{monter}, chaque négatif pousse \emph{à droite}.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.7}\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}\hline
+le seuil passe sous & départ & $0{,}95$ & $0{,}85$ & $0{,}70$ & $0{,}55$ & $0{,}45$ & $0{,}35$ & $0{,}20$ & $0{,}10$\\\hline
+TPR (sur $5$) & $0$ & & & & & & & & \\\hline
+FPR (sur $3$) & $0$ & & & & & & & & \\\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+(b) Tracer la courbe (escalier) dans le repère ci-dessous.
+\begin{center}\setlength{\unitlength}{0.4cm}\begin{picture}(12,12)
+\thinlines
+\multiput(4,1)(3,0){3}{\line(0,1){10}}
+\multiput(1,3)(0,2){5}{\line(1,0){9}}
+\thicklines
+\put(1,1){\vector(1,0){10}}\put(1,1){\vector(0,1){10.8}}
+\put(0.4,0.2){\small $0$}\put(3.6,0.2){\small $\tfrac13$}\put(6.6,0.2){\small $\tfrac23$}\put(9.8,0.2){\small $1$}
+\put(-0.1,2.8){\small $0{,}2$}\put(-0.1,4.8){\small $0{,}4$}\put(-0.1,6.8){\small $0{,}6$}\put(-0.1,8.8){\small $0{,}8$}\put(0.2,10.8){\small $1$}
+\put(10.6,1.3){\small FPR}\put(1.3,11.4){\small TPR}
+\end{picture}\end{center}
+
+(c) Calculer l'AUC par les paires : nombre de paires (positif, négatif), nombre de paires mal ordonnées (négatif au-dessus d'un positif), puis AUC.
+\zonecalcul{1.0cm}
+paires $=$ \makebox[1.5cm]{\dotfill} \quad mal ordonnées $=$ \makebox[1.5cm]{\dotfill} \quad AUC $=$ \makebox[2cm]{\dotfill}
+
+\vspace{0.15cm}
+(d) L'AUC dépend-elle du seuil ? Que juge-t-elle exactement ?
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 6 -- La classe rare et l'accuracy trompeuse}
+\vspace{0.15cm}
+
+À Tambacounda, $1\,000$ patients sont dépistés ; $50$ sont réellement malades.
+
+\vspace{0.15cm}
+(a) Un « modèle » répond toujours « sain ». Calculer son accuracy, son recall et sa precision.
+\zonecalcul{0.8cm}
+accuracy $=$ \makebox[2cm]{\dotfill} \quad recall $=$ \makebox[2cm]{\dotfill} \quad precision $=$ \makebox[2.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Un vrai modèle affiche accuracy $0{,}93$, recall $0{,}60$. Est-il pire que le précédent ? Justifier.
+\repligne\repligne
+
+\vspace{0.15cm}
+(c) Trois modèles affichent AUC $=0{,}50$, $0{,}88$ et $0{,}25$. Interpréter chacun.
+\repligne\repligne
+
+\vspace{0.15cm}
+(d) Que fait \texttt{class\_weight="balanced"} à l'entraînement, et que ne change-t-il pas au jeu de test ?
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 7 -- Une métrique pour chaque mission}
+\vspace{0.15cm}
+
+(a) Pour chaque situation, choisir la métrique à privilégier (precision, recall, F1 ou AUC) et justifier.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.9}\begin{tabular}{|p{9.5cm}|c|p{3.6cm}|}\hline
+situation & métrique & raison\\\hline
+Dépistage du paludisme, test de confirmation bon marché. & & \\\hline
+Envoi d'une équipe mobile coûteuse à chaque alerte. & & \\\hline
+Comparer deux modèles avant d'avoir fixé le seuil. & & \\\hline
+\end{tabular}}
+
+\vspace{0.2cm}
+(b) Un collègue règle le seuil en choisissant celui qui maximise la F1 \emph{sur le jeu de test}, puis annonce cette F1. Qu'est-ce qui ne va pas ? Comment faire proprement ?
+\repligne\repligne\repligne
+
+\end{document}

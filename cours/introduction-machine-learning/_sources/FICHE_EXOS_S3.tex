@@ -1,0 +1,384 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.4cm,top=1.1cm,bottom=1.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setstretch{1.0}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+
+\pagestyle{empty}
+
+% ligne de réponse pleine largeur, espacée
+\newcommand{\repligne}{\par\vspace{0.42cm}\noindent\dotfill}
+\newcommand{\zonecalcul}[1]{\par\vspace{0.15cm}\noindent{\small\emph{Espace de calcul :}}\par\vspace{#1}}
+
+\begin{document}
+
+% ============= EN-TETE =============
+\begin{center}
+\textbf{\large Fiche d'exercices --- Séance 3 : l'apprentissage supervisé et l'arbre de décision}\\[0.05cm]
+{\small Introduction au ML -- Dr. El Hadji Bassirou TOURÉ -- DMI $\cdot$ FST $\cdot$ UCAD \quad $\bullet$ \quad \textbf{Travail à la main, sans machine}}
+\end{center}
+
+\vspace{-0.15cm}
+\hrule
+\vspace{0.25cm}
+
+{\small Cette fiche reprend, exercice par exercice, les calculs de la Séance 3 : accuracy et baseline, dimensions et découpage, le modèle d'arbre en formule, entropie et Gini, la construction d'un arbre à la main, puis le diagnostic par la profondeur. Répondre directement sur la fiche.}
+
+\vspace{0.2cm}
+
+\fbox{\begin{minipage}{0.96\textwidth}
+\small\textbf{Aides numériques (valables pour toute la fiche).} $\log_2 3 = 1{,}585$. Entropie d'un nœud binaire dont une classe occupe la proportion $p$ :
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|ccccc}
+$p$ & $1/2$ & $1/4$ ou $3/4$ & $1/3$ ou $2/3$ & $2/5$ ou $3/5$ & $1/5$ ou $4/5$\\
+\midrule
+$H$ & $1{,}000$ & $0{,}811$ & $0{,}918$ & $0{,}971$ & $0{,}722$\\
+\end{tabular}
+\end{center}
+Un nœud \emph{pur} (une seule classe) a $H = 0$.
+\end{minipage}}
+
+\vspace{0.45cm}
+
+%=============================================================================
+\textbf{\large Exercice 1 -- Accuracy et baseline}
+
+\vspace{0.15cm}
+
+Au dispensaire de Tivaouane, un modèle de dépistage a été testé sur $10$ patients (P $=$ paludisme, N $=$ sain) :
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|}
+\hline
+patient & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10\\
+\hline
+réalité $y_i$ & N & N & P & N & N & N & P & N & N & N\\
+\hline
+prédiction $\hat y_i$ & N & P & P & N & N & N & N & N & P & N\\
+\hline
+verdict (\checkmark{} ou $\times$) & & & & & & & & & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+(a) Remplir la ligne « verdict » en comparant $y$ et $\hat y$ composante par composante.
+
+Nombre de prédictions correctes : \makebox[2.5cm]{\dotfill}
+
+\vspace{0.2cm}
+(b) En déduire l'accuracy du modèle.
+\zonecalcul{0.9cm}
+accuracy $=$ \makebox[3cm]{\dotfill}
+
+\vspace{0.2cm}
+(c) Calculer l'accuracy de la \emph{baseline majoritaire} (le modèle qui prédit toujours la classe la plus fréquente du tableau).
+\zonecalcul{0.9cm}
+Classe majoritaire : \makebox[2cm]{\dotfill} \quad accuracy de la baseline $=$ \makebox[3cm]{\dotfill}
+
+\vspace{0.2cm}
+(d) Comparer les deux accuracies et conclure : ce modèle apporte-t-il quelque chose ?
+\repligne
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 2 -- Dimensions et découpage}
+
+\vspace{0.15cm}
+
+Une cohorte de Kaolack compte $1\,200$ patients, chacun décrit par $5$ caractéristiques (âge, glycémie, hémoglobine, fièvre, saison) ; la cible est le paludisme, présent chez $12\,\%$ des patients.
+
+\vspace{0.2cm}
+(a) Dimensions de la matrice de design $X$ : \makebox[3.2cm]{\dotfill} \quad du vecteur cible $y$ : \makebox[3.2cm]{\dotfill}
+
+\vspace{0.2cm}
+(b) Découpage train/test à $75/25$.
+\zonecalcul{0.9cm}
+Train : \makebox[2.5cm]{\dotfill} patients \quad Test : \makebox[2.5cm]{\dotfill} patients
+
+\vspace{0.2cm}
+(c) Le découpage est \emph{stratifié}.
+\zonecalcul{0.9cm}
+Positifs dans le train : \makebox[2.5cm]{\dotfill} \quad positifs dans le test : \makebox[2.5cm]{\dotfill}
+
+\vspace{0.2cm}
+(d) Sans stratification, qu'est-ce qui pourrait mal se passer ?
+\repligne
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 3 -- Le modèle en formule : la somme d'indicatrices}
+
+\vspace{0.15cm}
+
+La Séance 3 définit l'arbre formellement : il partitionne l'espace des entrées en $M$ régions disjointes $R_1, \dots, R_M$ (les feuilles) et prédit
+\[
+f(x) \;=\; \sum_{m=1}^{M} \hat c_m \, \mathbf{1}[x \in R_m],
+\]
+où $\mathbf{1}[\cdot]$ vaut $1$ si la condition est vraie et $0$ sinon, et où $\hat c_m$ est la \emph{classe majoritaire} des exemples d'entraînement tombés dans $R_m$.
+
+\vspace{0.15cm}
+\fbox{\begin{minipage}{0.96\textwidth}
+\small Au poste de santé de Ziguinchor, l'arbre suivant a été construit (cible codée P $= 1$, N $= 0$) : la racine applique la coupure (fièvre, $38{,}5$) ; le nœud droit (fièvre $\geq 38{,}5$) applique ensuite la coupure (âge, $30$) ; le nœud gauche est une feuille. Répartition des exemples d'entraînement :
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{l|l|c}
+feuille & condition & exemples d'entraînement\\
+\midrule
+$R_1$ & fièvre $< 38{,}5$ & $1$ P et $3$ N\\
+$R_2$ & fièvre $\geq 38{,}5$ \textbf{et} âge $< 30$ & $3$ P et $0$ N\\
+$R_3$ & fièvre $\geq 38{,}5$ \textbf{et} âge $\geq 30$ & $0$ P et $1$ N\\
+\end{tabular}
+\end{center}
+\end{minipage}}
+
+\vspace{0.2cm}
+(a) Déterminer les classes majoritaires (en code $0/1$) : $\hat c_1 = $ \makebox[1.2cm]{\dotfill} \quad $\hat c_2 = $ \makebox[1.2cm]{\dotfill} \quad $\hat c_3 = $ \makebox[1.2cm]{\dotfill}
+
+Écrire la formule complète de $f(x)$ pour cet arbre :
+
+\vspace{0.35cm}
+$f(x) = $ \dotfill
+
+\vspace{0.25cm}
+(b) Pour chacun des trois patients, calculer les indicatrices \emph{une à une}, puis $f(x)$ :
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.9}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+patient $x$ & $\mathbf{1}[x \in R_1]$ & $\mathbf{1}[x \in R_2]$ & $\mathbf{1}[x \in R_3]$ & $f(x)$ & prédiction (P/N)\\
+\hline
+(fièvre $39{,}0$, âge $24$) & & & & & \\
+\hline
+(fièvre $38{,}0$, âge $70$) & & & & & \\
+\hline
+(fièvre $40{,}2$, âge $55$) & & & & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.25cm}
+(c) Combien d'indicatrices valent $1$ simultanément dans chaque cas ? \makebox[1.5cm]{\dotfill}
+
+Expliquer pourquoi il ne peut pas en être autrement, et ce que cela implique pour la somme $\sum_m \hat c_m \mathbf{1}[x \in R_m]$.
+\repligne
+\repligne
+\repligne
+\repligne
+
+\vspace{0.25cm}
+(d) Écrire les deux coupures de l'arbre sous la forme $(j, s)$ de la séance :
+
+\vspace{0.2cm}
+nœud racine : $(j, s) = $ \makebox[5cm]{\dotfill} \qquad nœud droit : $(j, s) = $ \makebox[5cm]{\dotfill}
+
+\vspace{0.25cm}
+(e) Les régions $R_1, R_2, R_3$ recouvrent-elles \emph{tout} l'espace des entrées ? Justifier, puis dire ce qui se passerait pour $f$ si une zone n'était couverte par aucune région.
+\repligne
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 4 -- Entropie et indice de Gini}
+
+\vspace{0.15cm}
+
+Trois nœuds d'un arbre contiennent : \quad nœud $A$ : $8$ P / $0$ N \qquad nœud $B$ : $4$ P / $4$ N \qquad nœud $C$ : $6$ P / $2$ N
+
+\vspace{0.2cm}
+(a) Sans aucun calcul, classer les trois nœuds du plus pur au moins pur : \makebox[5cm]{\dotfill}
+
+\vspace{0.2cm}
+(b) Calculer l'entropie $H = -\sum_k p_k \log_2 p_k$ de chaque nœud. Pour le nœud $C$, détailler le calcul à partir de $\log_2 3 = 1{,}585$.
+
+\vspace{0.2cm}
+$H_A = $ \makebox[2.5cm]{\dotfill} \qquad $H_B = $ \makebox[2.5cm]{\dotfill}
+
+\vspace{0.2cm}
+$H_C$, calcul détaillé :
+\repligne
+\repligne
+\repligne
+\repligne
+
+\vspace{0.25cm}
+(c) Calculer l'indice de Gini $G = 1 - \sum_k p_k^2$ des trois nœuds.
+\zonecalcul{1.3cm}
+$G_A = $ \makebox[2.5cm]{\dotfill} \qquad $G_B = $ \makebox[2.5cm]{\dotfill} \qquad $G_C = $ \makebox[2.5cm]{\dotfill}
+
+\vspace{0.25cm}
+(d) Les deux mesures donnent-elles le même classement qu'en (a) ? \makebox[1.5cm]{\dotfill}
+
+Valeurs extrêmes possibles pour un nœud à deux classes : $H \in$ \makebox[2.5cm]{\dotfill} \qquad $G \in$ \makebox[2.5cm]{\dotfill}
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 5 -- Construire l'arbre à la main}
+
+\vspace{0.15cm}
+
+\fbox{\begin{minipage}{0.96\textwidth}
+\small Huit patients du district de Thiès (cible : paludisme, P/N) :
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{c|cc|c}
+patient & fièvre (°C) & âge (ans) & cible\\
+\midrule
+1 & $37{,}2$ & $25$ & N\\
+2 & $37{,}8$ & $45$ & N\\
+3 & $38{,}0$ & $19$ & N\\
+4 & $38{,}2$ & $33$ & P\\
+5 & $38{,}9$ & $7$  & P\\
+6 & $39{,}4$ & $15$ & P\\
+7 & $39{,}8$ & $22$ & P\\
+8 & $40{,}1$ & $61$ & N\\
+\end{tabular}
+\end{center}
+Gain d'une coupure : $\;\text{gain} = H(\text{parent}) - \big(\tfrac{n_g}{n} H(\text{gauche}) + \tfrac{n_d}{n} H(\text{droite})\big)$.
+\end{minipage}}
+
+\vspace{0.2cm}
+(a) Entropie de la racine : composition (P/N) : \makebox[2.5cm]{\dotfill} \quad $\Rightarrow$ \quad $H(\text{racine}) = $ \makebox[2cm]{\dotfill}
+
+\vspace{0.2cm}
+(b) \textbf{Le duel.} Deux coupures candidates pour la racine : A $= (\text{fièvre},\ 38{,}5)$ et B $= (\text{âge},\ 30)$. Compléter :
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.9}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+coupure & gauche (P/N) & $H(\text{gauche})$ & droite (P/N) & $H(\text{droite})$ & gain\\
+\hline
+A : (fièvre, $38{,}5$) & & & & & \\
+\hline
+B : (âge, $30$) & & & & & \\
+\hline
+\end{tabular}
+}
+\zonecalcul{2.6cm}
+Coupure retenue : \makebox[2cm]{\dotfill} \quad Justification : \dotfill
+
+\vspace{0.25cm}
+(c) \textbf{Purifier le nœud gauche} (fièvre $< 38{,}5$, patients $1$ à $4$). Deux candidates : (fièvre, $38{,}1$) et (âge, $30$).
+\zonecalcul{2.2cm}
+gain de (fièvre, $38{,}1$) $=$ \makebox[2.5cm]{\dotfill} \quad gain de (âge, $30$) $=$ \makebox[2.5cm]{\dotfill} \quad retenue : \makebox[3.2cm]{\dotfill}
+
+\vspace{0.25cm}
+(d) \textbf{Purifier le nœud droit} (fièvre $\geq 38{,}5$, patients $5$ à $8$) avec la candidate (âge, $30$).
+\zonecalcul{1.6cm}
+gain $=$ \makebox[2.5cm]{\dotfill} \quad Pourquoi la construction s'arrête-t-elle ici ? \dotfill
+
+\vspace{0.25cm}
+(e) Dessiner l'arbre final (nœuds avec leurs coupures, feuilles avec leur classe), puis vérifier qu'il classe correctement les $8$ patients d'entraînement.
+
+\vspace{6.2cm}
+
+(f) Nouveau patient : fièvre $38{,}3$, âge $28$. Suivre son chemin nœud par nœud et donner la prédiction.
+\repligne
+\repligne
+
+\vspace{0.2cm}
+Prédiction : \makebox[2.5cm]{\dotfill}
+
+\vspace{0.25cm}
+(g) \textbf{Retour à la formule.} Écrire les régions $R_1, \dots, R_4$ de l'arbre final et la valeur $\hat c_m$ de chacune — autrement dit, le $f(x)$ de l'exercice 3 pour \emph{cet} arbre.
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.9}
+\begin{tabular}{|c|p{9cm}|c|}
+\hline
+région & condition & $\hat c_m$\\
+\hline
+$R_1$ & & \\
+\hline
+$R_2$ & & \\
+\hline
+$R_3$ & & \\
+\hline
+$R_4$ & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.35cm}
+$f(x) = $ \dotfill
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 6 -- Profondeur et diagnostic}
+
+\vspace{0.15cm}
+
+Sur un jeu de dépistage, trois arbres ont été entraînés puis évalués. Baseline majoritaire : $0{,}61$.
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.9}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+profondeur & accuracy train & accuracy test & écart train $-$ test & diagnostic\\
+\hline
+$2$  & $0{,}74$ & $0{,}73$ & & \\
+\hline
+$5$  & $0{,}85$ & $0{,}83$ & & \\
+\hline
+$14$ & $0{,}99$ & $0{,}76$ & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+(a) Remplir la colonne des écarts.
+
+\vspace{0.15cm}
+(b) Remplir la colonne diagnostic (sous-ajusté / bien ajusté / sur-ajusté), puis justifier chaque diagnostic en une phrase, en s'appuyant sur les écarts \emph{et} sur la baseline.
+
+\vspace{0.2cm}
+profondeur $2$ : \dotfill
+\repligne
+
+\vspace{0.2cm}
+profondeur $5$ : \dotfill
+\repligne
+
+\vspace{0.2cm}
+profondeur $14$ : \dotfill
+\repligne
+
+\vspace{0.25cm}
+(c) Profondeur à retenir : \makebox[1.5cm]{\dotfill} \quad sur la foi de quel chiffre ? \dotfill
+
+\vspace{0.25cm}
+(d) L'arbre de profondeur $14$ a la meilleure accuracy d'entraînement. Expliquer pourquoi ce chiffre ne doit jamais servir à choisir un modèle.
+\repligne
+\repligne
+\repligne
+\repligne
+
+\end{document}

@@ -1,0 +1,247 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{listings}
+
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\scriptsize,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 
+             {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ù}{{\`u}}1
+             {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1 {Ç}{{\c{C}}}1
+}
+
+\newtcolorbox{exercicebox}[1]{
+    colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{warningbox}[1]{
+    colback=red!5,colframe=red!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\title{\textbf{TD Chapitre 0 : Fondamentaux du C}\\
+\large Analyse et Prédiction}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercice 1 : Analyse Multi-Concepts}
+
+\begin{exercicebox}{Types, conversions, opérateurs et évaluation}
+Pour chaque programme, prédire la sortie EXACTE et justifier en mobilisant les concepts pertinents (types, conversions, précédence, court-circuit, UB).
+
+\textbf{Programme A:}
+\begin{lstlisting}
+#include <stdio.h>
+int main() {
+    char c = 200;
+    unsigned char uc = 200;
+    int x = c + uc;
+    printf("%d %d %d\n", c, uc, x);
+    
+    int si = -1;
+    unsigned int ui = 1;
+    printf("%d\n", si < ui);
+    printf("%u\n", si);
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Programme B:}
+\begin{lstlisting}
+#include <stdio.h>
+int main() {
+    int a = 5, b = 10, c = 15;
+    int r1 = a + b * c;
+    int r2 = a & b == 10;
+    int r3 = 1 << 2 + 3;
+    printf("%d %d %d\n", r1, r2, r3);
+    
+    unsigned char x = 0xA5;
+    printf("%02X %02X %02X\n", x & 0x0F, x >> 4, x ^ 0xFF);
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Programme C:}
+\begin{lstlisting}
+#include <stdio.h>
+int main() {
+    int a = 0, b = 5, c = 0;
+    
+    if (a++ || b++ && c++) 
+        printf("vrai ");
+    printf("a=%d b=%d c=%d\n", a, b, c);
+    
+    int x = 10, y = 0;
+    int z = (y != 0) && (x / y > 2);
+    printf("z=%d\n", z);
+    return 0;
+}
+\end{lstlisting}
+\end{exercicebox}
+
+\section*{Exercice 2 : Variables, Stockage et Linkage}
+
+\begin{exercicebox}{static, extern, portée et durée de vie}
+\textbf{A.} Prédire la sortie exacte :
+\begin{lstlisting}
+#include <stdio.h>
+int x = 1;
+int f(void) { static int x = 10; return x++; }
+int g(void) { int x = 100; return x++; }
+int h(void) { return x++; }
+
+int main() {
+    printf("%d ", f()); printf("%d ", f()); printf("%d\n", f());
+    printf("%d ", g()); printf("%d ", g()); printf("%d\n", g());
+    printf("%d ", h()); printf("%d ", h()); printf("%d\n", h());
+    printf("x=%d\n", x);
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{B.} Soit deux fichiers compilés avec \texttt{gcc a.c b.c -o prog}. Pour chaque cas, indiquer si ça compile, linke, et si oui quelle est la sortie.
+
+\textbf{Cas 1:}
+\begin{lstlisting}
+// a.c                          // b.c
+#include <stdio.h>              int val = 42;
+extern int val;
+int main() { printf("%d\n", val); return 0; }
+\end{lstlisting}
+
+\textbf{Cas 2:}
+\begin{lstlisting}
+// a.c                          // b.c
+#include <stdio.h>              static int val = 42;
+extern int val;
+int main() { printf("%d\n", val); return 0; }
+\end{lstlisting}
+
+\textbf{Cas 3:}
+\begin{lstlisting}
+// a.c                          // b.c
+#include <stdio.h>              int val = 42;
+int val = 100;
+int main() { printf("%d\n", val); return 0; }
+\end{lstlisting}
+\end{exercicebox}
+
+\section*{Exercice 3 : Macros, sizeof et Pièges}
+
+\begin{exercicebox}{Préprocesseur, sizeof, évaluation}
+\textbf{A.} Prédire chaque sortie en expandant manuellement les macros :
+\begin{lstlisting}
+#include <stdio.h>
+#define A 2
+#define B A + 3
+#define C B * 2
+#define SQ(x) x * x
+#define SAFE_SQ(x) ((x) * (x))
+
+int main() {
+    printf("%d %d\n", B, C);
+    printf("%d %d\n", 100 / C, 100 / B);
+    printf("%d %d\n", SQ(1+2), SAFE_SQ(1+2));
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{B.} Prédire la sortie et expliquer :
+\begin{lstlisting}
+#include <stdio.h>
+int f(void) { printf("!"); return 1; }
+
+int main() {
+    int x = 10;
+    size_t s1 = sizeof(x = 999);
+    size_t s2 = sizeof(x++);
+    size_t s3 = sizeof(f());
+    printf("x=%d s1=%zu s2=%zu s3=%zu\n", x, s1, s2, s3);
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{C.} Expliquer les résultats (x86-64) :
+\begin{lstlisting}
+#include <stdio.h>
+int main() {
+    printf("%zu %zu\n", sizeof('A'), sizeof(3.14));
+    return 0;
+}
+\end{lstlisting}
+\end{exercicebox}
+
+\section*{Exercice 4 : Contrôle et Comportement Indéfini}
+
+\begin{exercicebox}{Switch, boucles, goto, UB}
+\textbf{A.} Prédire la sortie :
+\begin{lstlisting}
+#include <stdio.h>
+int main() {
+    for (int x = 0; x < 3; x++) {
+        switch (x) {
+            case 0: printf("A");
+            case 1: printf("B"); break;
+            case 2: printf("C");
+            default: printf("D");
+        }
+        printf(" ");
+    }
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{B.} Pour chaque fragment : UB ou défini ? Si défini, quelle valeur ?
+\begin{lstlisting}
+// (1)                    // (2)                    // (3)
+int a = 10;               #include <limits.h>       #include <limits.h>
+int b = (a++, ++a, a+1);  int c = INT_MAX + 1;      unsigned u = UINT_MAX + 1;
+
+// (4)                    // (5)
+int d = 1 << 31;          int e; printf("%d", e);
+\end{lstlisting}
+
+\textbf{C.} Réécrire avec goto (pattern sortie de boucles imbriquées) :
+\begin{lstlisting}
+// Trouver i,j tels que i*i + j*j == 50
+int found = 0, ri = 0, rj = 0;
+for (int i = 1; i <= 10 && !found; i++) {
+    for (int j = 1; j <= 10 && !found; j++) {
+        if (i*i + j*j == 50) { found = 1; ri = i; rj = j; }
+    }
+}
+\end{lstlisting}
+\end{exercicebox}
+
+\begin{warningbox}{Consignes}
+Pour chaque question : identifier les concepts en jeu, expliquer le raisonnement, donner la sortie exacte ou justifier pourquoi c'est indéfini.
+\end{warningbox}
+
+\end{document}

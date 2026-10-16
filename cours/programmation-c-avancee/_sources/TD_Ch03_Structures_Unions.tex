@@ -1,0 +1,456 @@
+\documentclass[10pt,a4paper]{article}
+
+% Packages essentiels
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,arrows.meta,shapes.geometric}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{hyperref}
+
+% Configuration listings avec gestion complète des accents
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\scriptsize,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+    frame=single,
+    tabsize=4,
+    showstringspaces=false,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 
+             {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ù}{{\`u}}1
+             {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1 {Ç}{{\c{C}}}1
+             {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1 {Ù}{{\`U}}1
+             {ë}{{\"e}}1 {ï}{{\"\i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+             {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+             {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1
+}
+
+% Boxes pédagogiques
+\newtcolorbox{exercicebox}[1]{
+    colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{warningbox}[1]{
+    colback=red!5,colframe=red!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{infobox}[1]{
+    colback=blue!5,colframe=blue!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\title{\textbf{TD Chapitre 3 : Structures et Unions}\\
+\large Programmation C Avancée - L3}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Faculté des Sciences et Techniques\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{infobox}{Contexte}
+Architecture x86-64, little-endian. Alignement: \texttt{char}=1, \texttt{short}=2, \texttt{int}=4, \texttt{long}/pointeur=8, \texttt{double}=8. Tous les dumps hexadécimaux utilisent 2 caractères par octet.
+\end{infobox}
+
+\section{Exercice 1 : Calcul de Padding}
+
+Pour chaque structure, calculer: (a) l'offset de chaque membre, (b) le padding inséré, (c) \texttt{sizeof} total.
+
+\begin{exercicebox}{1.1}
+\begin{lstlisting}
+struct A {
+    char a;
+    int b;
+    char c;
+};
+\end{lstlisting}
+\end{exercicebox}
+
+\begin{exercicebox}{1.2}
+\begin{lstlisting}
+struct B {
+    char a;
+    char b;
+    int c;
+    short d;
+};
+\end{lstlisting}
+\end{exercicebox}
+
+\begin{exercicebox}{1.3}
+\begin{lstlisting}
+struct C {
+    double x;
+    char tag;
+    int count;
+    char flag;
+};
+\end{lstlisting}
+\end{exercicebox}
+
+\begin{exercicebox}{1.4}
+\begin{lstlisting}
+struct D {
+    char a;
+    short b;
+    char c;
+    long d;
+    char e;
+};
+\end{lstlisting}
+\end{exercicebox}
+
+\section{Exercice 2 : Analyse de Dumps Hexadécimaux}
+
+\begin{exercicebox}{2.1 - Reconstruction de structure}
+Le dump suivant correspond à une variable de type \texttt{struct Data} à l'adresse \texttt{0x7FFE1000}:
+
+\begin{verbatim}
+0x7FFE1000: 41 00 00 00 78 56 34 12 42 43 00 00
+\end{verbatim}
+
+\begin{lstlisting}
+struct Data {
+    char tag;
+    int value;
+    short code;
+};
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Identifier les octets de données et de padding
+\item Reconstruire les valeurs: \texttt{tag}, \texttt{value}, \texttt{code}
+\item Quel est le \texttt{sizeof(struct Data)} ?
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{2.2 - Structure imbriquée}
+\begin{verbatim}
+0x7FFE2000: 0A 00 00 00 14 00 00 00 1E 00 00 00 28 00 00 00
+            52 00 00 00 00 00 00 00
+\end{verbatim}
+
+\begin{lstlisting}
+struct Point { int x, y; };
+struct Rectangle {
+    struct Point top_left;
+    struct Point bottom_right;
+    char color;
+};
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Identifier chaque champ dans le dump
+\item Extraire les coordonnées des deux points
+\item Quelle est la valeur de \texttt{color} (code ASCII) ?
+\item Combien d'octets de padding final ?
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{2.3 - Tableau de structures}
+\begin{verbatim}
+0x7FFE3000: 41 00 64 00 42 00 C8 00 43 00 2C 01
+\end{verbatim}
+
+\begin{lstlisting}
+struct Entry {
+    char id;
+    short value;
+};
+struct Entry entries[3];
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Quel est le \texttt{sizeof(struct Entry)} ?
+\item Reconstruire le tableau \texttt{entries}
+\item Quel est l'offset de \texttt{entries[2].value} ?
+\end{enumerate}
+\end{exercicebox}
+
+\section{Exercice 3 : Optimisation du Padding}
+
+\begin{exercicebox}{3.1 - Réorganisation}
+\begin{lstlisting}
+struct Original {
+    char a;
+    double b;
+    char c;
+    int d;
+    char e;
+};
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Calculer \texttt{sizeof(struct Original)}
+\item Proposer une réorganisation minimisant la taille
+\item Calculer la nouvelle taille
+\item Économie réalisée en octets et en pourcentage
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{3.2 - Structure avec pointeurs}
+\begin{lstlisting}
+struct Node {
+    char type;
+    struct Node *next;
+    int data;
+    char flags;
+};
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Calculer \texttt{sizeof(struct Node)} (x86-64)
+\item Proposer une version optimisée
+\item Quelle taille pour la version optimisée ?
+\end{enumerate}
+\end{exercicebox}
+
+\section{Exercice 4 : Unions}
+
+\begin{exercicebox}{4.1 - Interprétation mémoire}
+\begin{lstlisting}
+union U {
+    int i;
+    float f;
+    char c[4];
+};
+
+union U u;
+u.i = 0x40490FDB;
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Quel est le dump hexadécimal de \texttt{u} (little-endian) ?
+\item Quelle est la valeur de \texttt{u.c[0]}, \texttt{u.c[1]}, \texttt{u.c[2]}, \texttt{u.c[3]} ?
+\item \texttt{0x40490FDB} est la représentation IEEE 754 de $\pi$. Quelle sera la valeur (approximative) de \texttt{u.f} ?
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{4.2 - Analyse de dump}
+\begin{verbatim}
+0x7FFE4000: 01 00 00 00 00 00 F0 3F
+\end{verbatim}
+
+\begin{lstlisting}
+typedef struct {
+    int type;
+    union {
+        int i;
+        double d;
+    } value;
+} Variant;
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Quel est \texttt{sizeof(Variant)} ?
+\item Quelle est la valeur de \texttt{type} ?
+\item Si \texttt{type == 1} signifie \texttt{double}, quelle est la valeur stockée ?
+
+Note: \texttt{0x3FF0000000000000} est la représentation IEEE 754 de \texttt{1.0}.
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{4.3 - Détection d'endianness}
+\begin{lstlisting}
+union EndianCheck {
+    int i;
+    char c[4];
+};
+
+int is_little_endian(void) {
+    union EndianCheck e;
+    e.i = 1;
+    return e.c[0] == 1;
+}
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Expliquer pourquoi ce code fonctionne
+\item Dessiner le layout mémoire de \texttt{e} pour little-endian
+\item Dessiner le layout mémoire de \texttt{e} pour big-endian
+\end{enumerate}
+\end{exercicebox}
+
+\section{Exercice 5 : Bit Fields}
+
+\begin{exercicebox}{5.1 - Calcul de taille}
+\begin{lstlisting}
+struct Flags1 {
+    unsigned int a : 1;
+    unsigned int b : 3;
+    unsigned int c : 4;
+};
+
+struct Flags2 {
+    unsigned int a : 1;
+    unsigned int b : 3;
+    unsigned int : 0;  // force alignment
+    unsigned int c : 4;
+};
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Quel est \texttt{sizeof(struct Flags1)} ?
+\item Quel est \texttt{sizeof(struct Flags2)} ?
+\item Expliquer l'effet de \texttt{: 0}
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{5.2 - Représentation binaire}
+\begin{lstlisting}
+struct Status {
+    unsigned int active : 1;
+    unsigned int mode : 2;
+    unsigned int priority : 3;
+    unsigned int reserved : 2;
+};
+
+struct Status s = {1, 2, 5, 0};
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Représenter \texttt{s} en binaire (8 bits)
+\item Quelle est la valeur hexadécimale du premier octet ?
+\item Si on lit \texttt{s} comme un \texttt{unsigned char}, quelle valeur obtient-on ?
+\end{enumerate}
+\end{exercicebox}
+
+\section{Exercice 6 : Structures et Allocation}
+
+\begin{exercicebox}{6.1 - Analyse de code}
+\begin{lstlisting}
+struct Person {
+    char *name;
+    int age;
+};
+
+struct Person *p = malloc(sizeof(struct Person));
+p->name = "Alice";
+p->age = 25;
+// ...
+free(p);
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Ce code est-il correct ? Justifier.
+\item Proposer une version avec allocation de \texttt{name}
+\item Écrire la fonction de libération correspondante
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{6.2 - Flexible Array Member}
+\begin{lstlisting}
+typedef struct {
+    size_t len;
+    char data[];
+} String;
+
+String *s = malloc(sizeof(String) + 6);
+s->len = 5;
+strcpy(s->data, "Hello");
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Quel est \texttt{sizeof(String)} ?
+\item Pourquoi alloue-t-on \texttt{sizeof(String) + 6} ?
+\item Dessiner le layout mémoire de \texttt{s}
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{6.3 - Structure opaque}
+Soit le header:
+\begin{lstlisting}
+// stack.h
+typedef struct Stack Stack;
+Stack *stack_create(size_t capacity);
+void stack_push(Stack *s, int value);
+int stack_pop(Stack *s);
+void stack_destroy(Stack *s);
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Pourquoi ne peut-on pas écrire \texttt{Stack s;} dans le code client ?
+\item Pourquoi peut-on écrire \texttt{Stack *s;} ?
+\item Proposer une implémentation de \texttt{struct Stack}
+\end{enumerate}
+\end{exercicebox}
+
+\section{Exercice 7 : Forensics Avancé}
+
+\begin{exercicebox}{7.1 - Structure complexe}
+\begin{verbatim}
+0x7FFE5000: 01 00 00 00 00 00 00 00 00 10 FE 7F 00 00 00 00
+            05 00 00 00 00 00 00 00
+\end{verbatim}
+
+\begin{lstlisting}
+typedef struct {
+    int type;
+    void *data;
+    size_t size;
+} Buffer;
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Calculer \texttt{sizeof(Buffer)} et identifier le padding
+\item Extraire les valeurs de \texttt{type}, \texttt{data}, \texttt{size}
+\item À quelle adresse pointe \texttt{data} ?
+\end{enumerate}
+\end{exercicebox}
+
+\begin{exercicebox}{7.2 - Tableau dynamique de structures}
+\begin{verbatim}
+0x00602000: 00 00 00 00 0A 00 00 00 01 00 00 00 14 00 00 00
+            02 00 00 00 1E 00 00 00
+\end{verbatim}
+
+\begin{lstlisting}
+struct Item {
+    int id;
+    int value;
+};
+
+struct Item *items = malloc(3 * sizeof(struct Item));
+\end{lstlisting}
+
+Questions:
+\begin{enumerate}
+\item Reconstruire le contenu du tableau
+\item Quel est l'offset de \texttt{items[1].value} par rapport à \texttt{items} ?
+\item Écrire l'expression pour accéder à \texttt{items[2].id} via arithmétique de pointeurs
+\end{enumerate}
+\end{exercicebox}
+
+\end{document}

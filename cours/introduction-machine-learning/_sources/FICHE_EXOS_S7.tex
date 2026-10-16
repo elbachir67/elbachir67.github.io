@@ -1,0 +1,275 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.4cm,top=1.1cm,bottom=1.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setstretch{1.0}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+
+\pagestyle{empty}
+
+\newcommand{\repligne}{\par\vspace{0.42cm}\noindent\dotfill}
+\newcommand{\zonecalcul}[1]{\par\vspace{0.15cm}\noindent{\small\emph{Espace de calcul :}}\par\vspace{#1}}
+
+\begin{document}
+
+% ============= EN-TETE =============
+\begin{center}
+\textbf{\large Fiche d'exercices --- Séance 7 : la validation croisée}\\[0.05cm]
+{\small Introduction au ML -- Dr. El Hadji Bassirou TOURÉ -- DMI $\cdot$ FST $\cdot$ UCAD \quad $\bullet$ \quad \textbf{Travail à la main, sans machine}}
+\end{center}
+
+\vspace{-0.15cm}
+\hrule
+\vspace{0.25cm}
+
+{\small Cette fiche applique, exercice par exercice, les outils de la Séance 7 : la variance d'un découpage unique, la validation croisée à $k$ plis (calculée à la main), la stratification, le réglage d'un hyperparamètre par courbe de validation, le budget d'une grille \texttt{GridSearchCV}, et la frontière honnête entre réglage et test. Répondre directement sur la fiche.}
+
+\vspace{0.2cm}
+
+\fbox{\begin{minipage}{0.96\textwidth}
+\small\textbf{Aides numériques (valables pour toute la fiche).} Régression linéaire par les formules fermées de la Séance 5 (équation normale) :
+\[
+w = \frac{\sum_i (x_i - \bar x)(y_i - \bar y)}{\sum_i (x_i - \bar x)^2}, \qquad b = \bar y - w\,\bar x, \qquad
+\text{MSE} = \frac{1}{m}\sum_{i=1}^{m}\big(y_i - \hat y_i\big)^2.
+\]
+Validation croisée à $k$ plis : $\displaystyle \text{CV}_k = \frac{1}{k}\sum_{j=1}^{k}\text{score}_j$ --- on rapporte la moyenne \emph{et} la dispersion.
+\end{minipage}}
+
+\vspace{0.45cm}
+
+%=============================================================================
+\textbf{\large Exercice 1 -- La variance d'un seul découpage}
+
+\vspace{0.15cm}
+
+Une même recette (Pipeline standardisation $+$ régression logistique) est évaluée \emph{cinq fois} sur le paludisme, en changeant seulement la graine du découpage train/test. On obtient les AUC :
+\[
+0{,}74 \quad 0{,}77 \quad 0{,}73 \quad 0{,}76 \quad 0{,}75 \qquad (\text{somme} = 3{,}75).
+\]
+
+(a) Calculer la moyenne et l'étendue (max $-$ min), puis commenter la dispersion.
+\zonecalcul{1.1cm}
+moyenne $=$ \makebox[2.5cm]{\dotfill} \quad étendue $=$ \makebox[2.5cm]{\dotfill}
+\repligne
+
+\vspace{0.15cm}
+(b) Un collègue n'a fait \emph{qu'un} découpage et rapporte « AUC $= 0{,}77$ ». Que vaut réellement cette annonce ?
+\repligne
+\repligne
+
+\vspace{0.15cm}
+(c) Quelle conclusion peut-on légitimement tirer des cinq mesures ?
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 2 -- La validation croisée à la main}
+
+\vspace{0.15cm}
+
+\fbox{\begin{minipage}{0.96\textwidth}
+\small Jeu-jouet : $x = (1, 2, 3, 4, 5, 6)$, $y = (1, 1, 2, 4, 4, 6)$. Validation croisée à \textbf{3 plis consécutifs} : $\{1,2\}$, $\{3,4\}$, $\{5,6\}$. À chaque tour, on ajuste une droite (équation normale, aide ci-dessus) sur les \emph{quatre} points restants, puis on mesure la MSE sur les deux points mis de côté.
+\end{minipage}}
+
+\vspace{0.2cm}
+(a) Pour chacun des trois tours, donner l'ensemble d'entraînement, la droite apprise $(b, w)$, les prédictions et la MSE de validation. Remplir le tableau (laisser la trace des calculs dans la zone prévue).
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{2.0}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+tour & entraîne sur & droite $(b, w)$ & prédictions (valid.) & MSE\\
+\hline
+$1$ & & & & \\
+\hline
+$2$ & & & & \\
+\hline
+$3$ & & & & \\
+\hline
+\end{tabular}
+}
+\zonecalcul{3.0cm}
+
+\vspace{0.1cm}
+(b) En déduire $\text{CV}_3$ (et, si possible, l'écart-type des trois MSE).
+\zonecalcul{0.9cm}
+$\text{CV}_3 = $ \makebox[3cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) Trois droites différentes ont été ajustées : laquelle garde-t-on comme modèle final ? Justifier.
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 3 -- La stratification}
+
+\vspace{0.15cm}
+
+Sur un entraînement de $50$ patients dont $10$ paludéens ($20\,\%$), une validation croisée à $5$ plis de $10$ patients chacun est lancée. Un découpage \texttt{KFold} (sans stratification) répartit les positifs ainsi, pli par pli :
+\[
+4 \quad 3 \quad 0 \quad 2 \quad 1 \qquad (\text{total} = 10).
+\]
+
+(a) Calculer la part de positifs dans chaque pli.
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+pli & $1$ & $2$ & $3$ & $4$ & $5$\\
+\hline
+positifs & $4$ & $3$ & $0$ & $2$ & $1$\\
+\hline
+part de positifs & & & & & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+(b) Qu'a de problématique le 3\textsuperscript{e} pli ? (Penser au calcul du rappel et de l'AUC.)
+\repligne
+\repligne
+
+\vspace{0.15cm}
+(c) Que produirait \texttt{StratifiedKFold} à la place (nombre de positifs et part par pli) ? Pourquoi est-ce la règle en classification ?
+\zonecalcul{0.9cm}
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 4 -- Dépouiller une validation croisée}
+
+\vspace{0.15cm}
+
+Deux recettes sont en compétition. La recette \textbf{A} est évaluée par CV à $5$ plis : scores $(0{,}81;\ 0{,}84;\ 0{,}79;\ 0{,}83;\ 0{,}78)$, de somme $4{,}05$. La recette \textbf{B} n'a été évaluée que par un \emph{unique} découpage : score $0{,}85$.
+
+\vspace{0.2cm}
+(a) Calculer la moyenne et la dispersion (amplitude) de A.
+\zonecalcul{0.9cm}
+moyenne de A $=$ \makebox[2.5cm]{\dotfill} \quad dispersion $\approx$ \makebox[2.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Peut-on conclure « B bat A » ? Justifier en s'appuyant sur la variance du découpage.
+\repligne
+\repligne
+
+\vspace{0.15cm}
+(c) Quel protocole rendrait la comparaison équitable ?
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 5 -- Lire une courbe de validation}
+
+\vspace{0.15cm}
+
+Pour régler la profondeur d'un arbre prédisant la durée d'hospitalisation, on attribue à chaque valeur candidate sa note de validation croisée ($R^2$ à $5$ plis) :
+\[
+{\small
+\begin{array}{c|ccccccccc}
+\text{profondeur} & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 9 & 12\\
+\hline
+R^2\ \text{CV} & 0{,}31 & 0{,}45 & 0{,}54 & 0{,}58 & 0{,}60 & 0{,}59 & 0{,}55 & 0{,}47 & 0{,}33
+\end{array}}
+\]
+
+(a) Quelle profondeur retenir ? \makebox[2cm]{\dotfill}
+
+\vspace{0.2cm}
+(b) Lire les deux branches de la courbe en termes de biais et de variance.
+\repligne
+\repligne
+
+\vspace{0.15cm}
+(c) Réentraînée à la profondeur retenue, la recette donne $R^2 = 0{,}58$ sur le test. Cet écart avec $0{,}60$ est-il inquiétant ? Justifier.
+\repligne
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 6 -- Budgéter une grille \texttt{GridSearchCV}}
+
+\vspace{0.15cm}
+
+On règle un arbre par \texttt{GridSearchCV} sur deux hyperparamètres : \texttt{max\_depth} $\in \{3, 5, 7, 9, 11\}$ et \texttt{min\_samples\_leaf} $\in \{1, 10, 50\}$, en validation croisée à $5$ plis.
+
+\vspace{0.2cm}
+(a) Combien de combinaisons la grille contient-elle ? Combien d'entraînements de modèle la recherche déclenche-t-elle (sans compter le réentraînement final) ?
+\zonecalcul{1.0cm}
+combinaisons $=$ \makebox[2cm]{\dotfill} \quad entraînements $=$ \makebox[3cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Si un entraînement dure $2$ secondes, combien de temps la recherche prend-elle ?
+\zonecalcul{0.6cm}
+durée $=$ \makebox[3cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) On double chacune des deux listes ($10$ profondeurs, $6$ valeurs de feuille). Quel est le nouveau nombre d'entraînements ? Quel principe cela illustre-t-il ?
+\zonecalcul{0.7cm}
+nouveau total $=$ \makebox[3cm]{\dotfill}
+\repligne
+
+\vspace{0.5cm}
+
+%=============================================================================
+\textbf{\large Exercice 7 -- Trois protocoles, un seul honnête}
+
+\vspace{0.15cm}
+
+On veut régler le \emph{seuil} de décision d'un classifieur du paludisme (la Séance 6 avait laissé ce réglage en suspens). Pour chaque protocole, dire s'il est \textbf{honnête}, et nommer la fuite le cas échéant (variable fuyarde / prétraitement fuyard / test consulté).
+
+\vspace{0.15cm}
+{\small
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|p{11.2cm}|c|}
+\hline
+protocole & honnête ? fuite ?\\
+\hline
+(P1) Choisir le seuil sur le jeu de \emph{test}, en gardant celui qui y maximise la précision. & \\
+\hline
+(P2) Standardiser tout l'entraînement \emph{une seule fois}, puis lancer la CV qui choisit le seuil. & \\
+\hline
+(P3) Obtenir des probabilités hors-échantillon par \texttt{cross\_val\_predict} sur l'entraînement, y choisir le seuil, puis juger \emph{une fois} sur le test. & \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+Justifier brièvement chaque verdict :
+
+\vspace{0.1cm}
+(P1) \dotfill
+\repligne
+
+\vspace{0.1cm}
+(P2) \dotfill
+\repligne
+
+\vspace{0.1cm}
+(P3) \dotfill
+\repligne
+
+\vspace{0.2cm}
+Question finale : après un \texttt{GridSearchCV}, le \texttt{best\_score\_} est-il une estimation fiable de la performance future ? Justifier.
+\repligne
+\repligne
+
+\end{document}

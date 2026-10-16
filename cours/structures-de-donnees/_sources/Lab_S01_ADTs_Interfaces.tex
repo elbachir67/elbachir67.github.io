@@ -1,0 +1,795 @@
+% =====================================================================
+% Lab Séance 1 — ADTs et Interfaces Java
+% Structures de Données et Algorithmes Avancés — M1 — ESP/UCAD
+% Dr. El Hadji Bassirou TOURÉ — 2025–2026
+% Compilation : pdflatex (2 passes)
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{pifont}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,
+            citecolor=blue!60!black}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\bigO}{\mathcal{O}}
+\newcommand{\bigOmega}{\Omega}
+\newcommand{\bigTheta}{\Theta}
+\newcommand{\lig}[1]{\rule{#1}{0.4pt}}
+
+% ===== Boîtes =====
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{theorembox}[1][]{colback=purple!5,colframe=purple!50,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{appliboxQ}[1][]{colback=gray!8,colframe=gray!60,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{appliboxR}[1][]{colback=green!3,colframe=green!40!black,
+    fonttitle=\bfseries\itshape,title=#1,breakable}
+\newtcolorbox{exercicebox}[1][]{colback=white,colframe=gray!70,
+    fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{lienbox}[1][]{colback=blue!3,colframe=blue!70!black,
+    fonttitle=\bfseries\itshape,title=#1,breakable,
+    before upper={\itshape}}
+
+% ===== Code =====
+\lstset{
+  language=Java,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!60!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=4,
+  extendedchars=true,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {û}{{\^u}}1 {â}{{\^a}}1
+           {ë}{{\"e}}1 {ï}{{\"i}}1 {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1
+           {Ç}{{\c{C}}}1 {Ê}{{\^E}}1 {œ}{{\oe}}1 {°}{{$^\circ$}}1
+           {«}{{\guillemotleft}}1 {»}{{\guillemotright}}1
+}
+\lstdefinestyle{bash}{language=bash,keywordstyle=\color{black},
+  commentstyle=\color{gray!70!black}\itshape,numbers=none}
+
+% ===== En-têtes =====
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Lab S01 : ADTs et Interfaces Java}
+\fancyhead[R]{\small ESP/UCAD --- M1}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Structures de Données et}\\
+\textbf{\LARGE Algorithmes Avancés}\\[0.8cm]
+\textbf{\huge Lab S01 --- ADTs et Interfaces Java}\\[0.3cm]
+\textbf{\Large Implémenter \texttt{ArrayDeque<T>} et le mettre à l'épreuve}\\[0.5cm]
+\large Master 1 --- 2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Avant de commencer]
+\textbf{Prérequis :} TP-1 complété (Docker, Gradle, JUnit opérationnels) et
+CM~S01 lu.\\[4pt]
+\textbf{Organisation :} ce document comporte deux parties.
+\emph{Partie I} --- vous implémentez et vous observez.
+\emph{Partie II} --- vous établissez par le calcul ce que vous venez
+d'observer.\\[4pt]
+\textbf{Ce Lab n'est pas noté.} Il est formatif : son rôle est de rendre
+exécutable ce que le CM a énoncé.\\[4pt]
+\textbf{Livrable :} le dépôt Git du projet \texttt{lab-s01} et le rapport
+individuel décrit en fin de document.
+\end{prereqbox}
+
+\begin{objectifbox}[Ce que vous saurez faire à la fin de ce Lab]
+\begin{enumerate}[nosep]
+    \item Créer un projet Gradle et y déclarer une interface générique.
+    \item Implémenter \texttt{ArrayDeque<T>} sur un tableau circulaire :
+          les quatre opérations d'extrémité et le redimensionnement.
+    \item Écrire un test JUnit qui \emph{force} le rebouclage du tableau,
+          et un autre qui force le redimensionnement.
+    \item Lire un programme d'observation et y reconnaître le déplacement
+          des indices \texttt{tete} et \texttt{fin}.
+    \item Restreindre un deque pour en faire une pile, et évaluer une
+          expression postfixe.
+    \item Calculer à la main l'état d'un tableau circulaire après une
+          séquence d'opérations.
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\newpage
+
+% #####################################################################
+\part{Pratique : implémentation et observation}
+% #####################################################################
+
+\section{Environnement de travail}
+
+Le travail se fait dans le conteneur installé au TP-1 : vous éditez les
+fichiers avec votre éditeur habituel sur votre machine, vous compilez et
+testez dans le conteneur.
+
+\begin{lstlisting}[style=bash,caption={Rappel : lancer le conteneur depuis le dossier de travail}]
+# Windows (Git Bash)
+MSYS_NO_PATHCONV=1 docker run -it -v "$(pwd):/workspace" elbachirtoure/dsa-java-m1:v1.1
+
+# macOS / Linux
+docker run -it -v "$(pwd):/workspace" elbachirtoure/dsa-java-m1:v1.1
+\end{lstlisting}
+
+\begin{lstlisting}[style=bash,caption={Créer le projet}]
+cd /workspace
+new-project lab-s01
+cd lab-s01
+gradle build --no-daemon
+\end{lstlisting}
+
+\begin{attentionbox}[Deux règles héritées du TP-1]
+La classe principale doit s'appeler \texttt{Main} --- c'est ce que
+\texttt{new-project} inscrit dans \texttt{build.gradle}. Et toutes les
+commandes Gradle prennent \texttt{--no-daemon} : sans cette option, le
+démon Gradle échoue sur les volumes montés.
+\end{attentionbox}
+
+% =====================================================================
+\section{Étape 1 --- Poser le contrat}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+L'ADT est un contrat, et en Java un contrat s'écrit \texttt{interface}. Rien
+dans ce fichier ne dit comment les éléments seront rangés : c'est
+précisément ce qui permettra d'en écrire plusieurs implémentations.
+\end{lienbox}
+
+Créez \texttt{src/main/java/Deque.java} :
+
+\begin{lstlisting}[caption={\texttt{Deque.java} --- le contrat, fourni}]
+public interface Deque<T> {
+    void addFirst(T element);
+    void addLast(T element);
+    T removeFirst();
+    T removeLast();
+    T peekFirst();
+    T peekLast();
+    int size();
+    boolean isEmpty();
+}
+\end{lstlisting}
+
+% =====================================================================
+\section{Étape 2 --- Le squelette et les champs}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+Le tableau circulaire ne déplace jamais les éléments : il déplace les
+indices. Trois champs suffisent --- le tableau, l'indice \texttt{tete} du
+premier élément, et le nombre d'éléments \texttt{taille}. L'indice de la
+prochaine case libre en fin se calcule par $(\texttt{tete} + \texttt{taille})
+\bmod m$.
+\end{lienbox}
+
+Créez \texttt{src/main/java/ArrayDeque.java} :
+
+\begin{lstlisting}[caption={\texttt{ArrayDeque.java} --- champs et utilitaires}]
+public class ArrayDeque<T> implements Deque<T> {
+
+    private Object[] donnees;
+    private int tete;      // indice du premier élément
+    private int taille;    // nombre d'éléments présents
+
+    public ArrayDeque() {
+        this.donnees = new Object[8];
+        this.tete = 0;
+        this.taille = 0;
+    }
+
+    public int size()          { return taille; }
+    public boolean isEmpty()   { return taille == 0; }
+    public int capacite()      { return donnees.length; }  // utile pour observer
+    public int indiceTete()    { return tete; }            // utile pour observer
+
+    /** Avance ou recule un indice sur l'anneau. */
+    private int suivant(int i) { return (i + 1) % donnees.length; }
+    private int precedent(int i) { return (i - 1 + donnees.length) % donnees.length; }
+}
+\end{lstlisting}
+
+\begin{attentionbox}[Le point sur lequel presque tout le monde trébuche]
+Dans \texttt{precedent}, le terme \texttt{+ donnees.length} n'est pas
+décoratif. En Java, \texttt{(0 - 1) \% 8} vaut $-1$, pas $7$ : l'opérateur
+\texttt{\%} renvoie un reste dont le signe suit le dividende. Sans ce
+correctif, le premier \texttt{addFirst} sur un deque vide lève une
+\texttt{ArrayIndexOutOfBoundsException}.
+\end{attentionbox}
+
+% =====================================================================
+\section{Étape 3 --- Les quatre opérations d'extrémité}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+Les quatre opérations écrivent ou lisent une seule case et bougent un seul
+indice. Aucune boucle : c'est la raison pour laquelle le deque est la
+structure de choix quand on travaille aux deux bouts.
+\end{lienbox}
+
+\begin{lstlisting}[caption={Les quatre opérations}]
+    public void addLast(T element) {
+        if (taille == donnees.length) agrandir();
+        donnees[(tete + taille) % donnees.length] = element;
+        taille++;
+    }
+
+    public void addFirst(T element) {
+        if (taille == donnees.length) agrandir();
+        tete = precedent(tete);
+        donnees[tete] = element;
+        taille++;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T removeFirst() {
+        if (isEmpty()) throw new java.util.NoSuchElementException("deque vide");
+        T premier = (T) donnees[tete];
+        donnees[tete] = null;
+        tete = suivant(tete);
+        taille--;
+        return premier;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T removeLast() {
+        if (isEmpty()) throw new java.util.NoSuchElementException("deque vide");
+        int dernier = (tete + taille - 1) % donnees.length;
+        T valeur = (T) donnees[dernier];
+        donnees[dernier] = null;
+        taille--;
+        return valeur;
+    }
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 1 --- à compléter]
+Écrivez \texttt{peekFirst()} et \texttt{peekLast()} sur le modèle
+ci-dessus. Ces deux méthodes ne modifient ni \texttt{tete} ni
+\texttt{taille}.
+
+Quelle expression donne l'indice du dernier élément ? \lig{7cm}
+\end{exercicebox}
+
+% =====================================================================
+\section{Étape 4 --- Le redimensionnement}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+La capacité d'un tableau est finie. Quand le deque est plein, on alloue un
+tableau deux fois plus grand et on y recopie les éléments \emph{dans
+l'ordre logique}, en repartant de \texttt{tete} : le nouveau tableau n'est
+plus rebouclé, et \texttt{tete} redevient $0$.
+\end{lienbox}
+
+\begin{lstlisting}[caption={Agrandir en remettant l'anneau à plat}]
+    private void agrandir() {
+        Object[] neuf = new Object[donnees.length * 2];
+        for (int k = 0; k < taille; k++) {
+            neuf[k] = donnees[(tete + k) % donnees.length];  // ordre logique
+        }
+        donnees = neuf;
+        tete = 0;
+    }
+\end{lstlisting}
+
+\begin{attentionbox}[L'erreur à ne pas commettre]
+Recopier avec \texttt{System.arraycopy(donnees, 0, neuf, 0, taille)} paraît
+plus rapide, mais copie les cases dans l'ordre \emph{physique}. Si le deque
+a rebouclé, l'ordre logique est détruit et les tests d'ordre échouent sans
+que rien ne plante.
+\end{attentionbox}
+
+% =====================================================================
+\section{Étape 5 --- Les tests}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+Un test vérifie le \emph{contrat}, pas l'implémentation : il n'a pas à
+connaître \texttt{tete}. Mais deux phénomènes internes doivent être
+provoqués volontairement, car ils ne surviennent pas dans un usage naïf : le
+rebouclage et le redimensionnement.
+\end{lienbox}
+
+Créez \texttt{src/test/java/ArrayDequeTest.java} :
+
+\begin{lstlisting}[caption={Tests JUnit fournis}]
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class ArrayDequeTest {
+
+    @Test
+    void ordreFifoEtLifo() {
+        Deque<String> d = new ArrayDeque<>();
+        d.addLast("Fatou");
+        d.addLast("Moussa");
+        assertEquals("Fatou", d.removeFirst());   // comportement de file
+        d.addFirst("Awa");
+        assertEquals("Awa", d.removeFirst());     // comportement de pile
+        assertEquals(1, d.size());
+    }
+
+    @Test
+    void testForcerLeRebouclage() {
+        // capacité initiale 8 : on remplit, on vide par devant, on remplit encore
+        Deque<Integer> d = new ArrayDeque<>();
+        for (int i = 0; i < 6; i++) d.addLast(i);
+        for (int i = 0; i < 4; i++) d.removeFirst();   // tete avance à 4
+        for (int i = 100; i < 104; i++) d.addLast(i);  // la fin repasse par 0
+        assertEquals(6, d.size());
+        assertEquals(4, d.removeFirst());
+        assertEquals(103, d.removeLast());
+    }
+
+    @Test
+    void testForcerLeRedimensionnement() {
+        Deque<Integer> d = new ArrayDeque<>();
+        for (int i = 0; i < 100; i++) d.addFirst(i);   // dépasse largement 8
+        assertEquals(100, d.size());
+        assertEquals(99, d.removeFirst());             // ordre préservé
+        assertEquals(0, d.removeLast());
+    }
+
+    @Test
+    void videLeveUneException() {
+        Deque<String> d = new ArrayDeque<>();
+        assertThrows(java.util.NoSuchElementException.class, d::removeFirst);
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[style=bash,caption={Lancer les tests}]
+gradle test --no-daemon
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 2 --- à compléter]
+Ajoutez deux tests de votre cru :
+\begin{enumerate}[nosep]
+    \item un test qui alterne \texttt{addFirst} et \texttt{addLast} puis
+          vérifie l'ordre complet de sortie ;
+    \item un test qui vide entièrement le deque puis le remplit à nouveau.
+\end{enumerate}
+Lequel des deux échoue si l'on oublie le \texttt{+ donnees.length} de
+\texttt{precedent} ? \lig{6cm}
+\end{exercicebox}
+
+% =====================================================================
+\section{Étape 6 --- Observer}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+Le CM affirme que les éléments ne bougent jamais et que ce sont les indices
+qui se déplacent. Ce programme le rend visible : après chaque opération, il
+affiche \texttt{tete}, l'indice de fin, la taille et la capacité, et signale
+les redimensionnements.
+\end{lienbox}
+
+\begin{lstlisting}[caption={\texttt{Main.java} --- programme d'observation}]
+public class Main {
+
+    static <T> void trace(String operation, ArrayDeque<T> d) {
+        int fin = (d.indiceTete() + d.size()) % d.capacite();
+        System.out.printf("%-16s tete=%2d  fin=%2d  taille=%2d  capacite=%2d%n",
+                          operation, d.indiceTete(), fin, d.size(), d.capacite());
+    }
+
+    public static void main(String[] args) {
+        ArrayDeque<String> d = new ArrayDeque<>();
+        System.out.println("--- on remplit par la fin ---");
+        for (String s : new String[]{"A", "B", "C"}) { d.addLast(s); trace("addLast(" + s + ")", d); }
+
+        System.out.println("--- on remplit par le debut : tete recule ---");
+        for (String s : new String[]{"D", "E"}) { d.addFirst(s); trace("addFirst(" + s + ")", d); }
+
+        System.out.println("--- on retire aux deux bouts ---");
+        d.removeLast();  trace("removeLast()", d);
+        d.addFirst("F"); trace("addFirst(F)", d);
+        d.removeFirst(); trace("removeFirst()", d);
+
+        System.out.println("--- on depasse la capacite ---");
+        for (int i = 0; i < 12; i++) { d.addLast("x" + i); trace("addLast(x" + i + ")", d); }
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[style=bash,caption={Exécuter}]
+gradle run --no-daemon
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 3 --- notez vos observations]
+\begin{enumerate}[nosep]
+    \item Après le premier \texttt{addFirst}, que vaut \texttt{tete} ?
+          \lig{2.5cm} \quad Pourquoi cette valeur ? \lig{6cm}
+    \item À quelle opération la capacité change-t-elle pour la première
+          fois ? \lig{5cm}
+    \item Juste après un changement de capacité, que vaut \texttt{tete} ?
+          \lig{2.5cm} \quad Expliquez : \lig{7cm}
+    \item Relevez une ligne où \texttt{fin} est \emph{inférieur} à
+          \texttt{tete}. Que cela signifie-t-il ? \lig{7cm}
+\end{enumerate}
+\end{exercicebox}
+
+% =====================================================================
+\section{Étape 7 --- Une pile, et un évaluateur postfixe}
+
+\begin{lienbox}[Ce qu'on matérialise du CM]
+Le deque subsume la pile : en n'utilisant que \texttt{addLast} et
+\texttt{removeLast}, on obtient exactement le comportement
+dernier-arrivé-premier-sorti. On n'écrit donc pas une nouvelle structure ---
+on restreint celle qu'on a.
+\end{lienbox}
+
+\begin{lstlisting}[caption={\texttt{PostfixEvaluator.java}}]
+public class PostfixEvaluator {
+
+    public static int evaluer(String expression) {
+        ArrayDeque<Integer> pile = new ArrayDeque<>();
+        for (String jeton : expression.trim().split("\\s+")) {
+            if (estOperateur(jeton)) {
+                if (pile.size() < 2) throw new IllegalArgumentException("operandes manquants");
+                int b = pile.removeLast();     // l'ordre compte
+                int a = pile.removeLast();
+                pile.addLast(appliquer(jeton, a, b));
+            } else {
+                pile.addLast(Integer.parseInt(jeton));
+            }
+        }
+        int resultat = pile.removeLast();
+        if (!pile.isEmpty()) throw new IllegalArgumentException("expression mal formee");
+        return resultat;
+    }
+
+    private static boolean estOperateur(String j) {
+        return j.equals("+") || j.equals("-") || j.equals("*") || j.equals("/");
+    }
+
+    private static int appliquer(String op, int a, int b) {
+        switch (op) {
+            case "+": return a + b;
+            case "-": return a - b;
+            case "*": return a * b;
+            case "/": return a / b;
+            default: throw new IllegalArgumentException("operateur inconnu : " + op);
+        }
+    }
+}
+\end{lstlisting}
+
+\begin{exercicebox}[Vérification 4 --- à compléter]
+Écrivez trois tests JUnit pour \texttt{PostfixEvaluator} :
+\begin{enumerate}[nosep]
+    \item \texttt{"6 2 / 3 4 * +"} doit valoir \lig{1.5cm}
+    \item une expression contenant une soustraction, pour détecter une
+          inversion des opérandes ;
+    \item une expression mal formée, qui doit lever une exception.
+\end{enumerate}
+\end{exercicebox}
+
+% =====================================================================
+\section{Enregistrer le travail}
+
+\begin{lstlisting}[style=bash,caption={Git}]
+cd /workspace/lab-s01
+git init
+git add .
+git commit -m "Lab S01 : ArrayDeque, tests, evaluateur postfixe"
+\end{lstlisting}
+
+\newpage
+% #####################################################################
+\part{Théorie : exercices d'application}
+% #####################################################################
+
+\begin{infobox}[Comment aborder cette partie]
+Ces exercices ne sont pas un contrôle et ne sont pas notés. Ils reprennent
+exactement les situations que vous venez de programmer : le but est que vous
+retrouviez par le calcul ce que le programme d'observation vous a montré à
+l'écran. Remplissez directement sur ce document.
+\end{infobox}
+
+% ---------------------------------------------------------------------
+\section{Exercice 1 --- Arithmétique de l'anneau}
+
+Un \texttt{ArrayDeque} de capacité $m = 8$, initialement vide, avec
+\texttt{tete} $= 0$. Complétez le tableau après chaque opération. Les cases
+du tableau interne sont numérotées de $0$ à $7$.
+
+\vspace{0.3cm}
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Opération} & \textbf{tete} & \textbf{taille} & \textbf{case écrite ou libérée} \\
+\midrule
+\texttt{addLast(A)}  & \rule{0pt}{0.75cm} & & \\
+\texttt{addLast(B)}  & \rule{0pt}{0.75cm} & & \\
+\texttt{addLast(C)}  & \rule{0pt}{0.75cm} & & \\
+\texttt{addFirst(D)} & \rule{0pt}{0.75cm} & & \\
+\texttt{addFirst(E)} & \rule{0pt}{0.75cm} & & \\
+\texttt{removeLast()} & \rule{0pt}{0.75cm} & & \\
+\texttt{addFirst(F)} & \rule{0pt}{0.75cm} & & \\
+\texttt{removeFirst()} & \rule{0pt}{0.75cm} & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\textit{Aide : la case écrite par \texttt{addLast} est
+$(\texttt{tete} + \texttt{taille}) \bmod 8$ ; \texttt{addFirst} écrit dans
+$(\texttt{tete} - 1 + 8) \bmod 8$.}
+
+\vspace{0.4cm}
+\noindent\textbf{(a)} Quelles valeurs ont été retirées, et dans cet ordre ?
+\lig{8cm}
+
+\vspace{0.3cm}
+\noindent\textbf{(b)} Dessinez l'état final des huit cases :
+
+\begin{center}
+\begin{tabular}{cccccccc}
+\toprule
+0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+\midrule
+\rule{0pt}{0.9cm}\lig{1.2cm} & \lig{1.2cm} & \lig{1.2cm} & \lig{1.2cm} &
+\lig{1.2cm} & \lig{1.2cm} & \lig{1.2cm} & \lig{1.2cm} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\noindent\textbf{(c)} À la fin, \texttt{tete} vaut-il un indice inférieur ou
+supérieur à celui de la case de fin ? Qu'est-ce que cela indique sur l'état
+du tableau ? \lig{10cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 2 --- Le modulo négatif}
+
+\noindent\textbf{(a)} En Java, donnez la valeur de chaque expression :
+
+\vspace{0.2cm}
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+\textbf{Expression} & \textbf{Valeur} \\
+\midrule
+\texttt{(3 - 1) \% 8}     & \rule{0pt}{0.7cm} \\
+\texttt{(0 - 1) \% 8}     & \rule{0pt}{0.7cm} \\
+\texttt{(0 - 1 + 8) \% 8} & \rule{0pt}{0.7cm} \\
+\texttt{(7 + 1) \% 8}     & \rule{0pt}{0.7cm} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\noindent\textbf{(b)} Un étudiant écrit \texttt{tete = (tete - 1) \% donnees.length;}
+puis appelle \texttt{addFirst} sur un deque vide. Que se passe-t-il
+exactement, et à quelle ligne ? \lig{10cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+\vspace{0.3cm}
+\noindent\textbf{(c)} Ce bug est-il détecté par un test qui n'utilise que
+\texttt{addLast} et \texttt{removeFirst} ? Justifiez. \lig{9cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 3 --- Trace d'une pile}
+
+Déroulez la vérification de parenthésage sur
+\texttt{\{ a ( b [ c ] ) d \}} en notant le contenu de la pile après chaque
+symbole significatif (on ignore les lettres).
+
+\vspace{0.3cm}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Symbole lu} & \textbf{Action} & \textbf{Pile après} \\
+\midrule
+\rule{0pt}{0.7cm} & & \\
+\rule{0pt}{0.7cm} & & \\
+\rule{0pt}{0.7cm} & & \\
+\rule{0pt}{0.7cm} & & \\
+\rule{0pt}{0.7cm} & & \\
+\rule{0pt}{0.7cm} & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\noindent\textbf{(a)} L'expression est-elle équilibrée ? \lig{3cm}
+
+\vspace{0.2cm}
+\noindent\textbf{(b)} Modifiez un seul symbole de l'expression pour qu'elle
+soit rejetée \emph{par le test final} (pile non vide à la fin), et non par
+une correspondance fautive : \lig{7cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 4 --- Trace postfixe}
+
+Évaluez \texttt{6 2 / 3 4 * + 5 -} en notant la pile après chaque jeton.
+
+\vspace{0.3cm}
+\begin{center}
+\begin{tabular}{ccccccccc}
+\toprule
+\texttt{6} & \texttt{2} & \texttt{/} & \texttt{3} & \texttt{4} &
+\texttt{*} & \texttt{+} & \texttt{5} & \texttt{-} \\
+\midrule
+\rule{0pt}{1.8cm} & & & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\noindent\textbf{(a)} Résultat : \lig{2cm}
+
+\vspace{0.2cm}
+\noindent\textbf{(b)} Hauteur maximale atteinte par la pile : \lig{2cm}
+
+\vspace{0.2cm}
+\noindent\textbf{(c)} Si l'on inverse les deux dépilements dans le code, quel
+résultat obtient-on pour cette expression ? \lig{4cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 5 --- Contrat et coût}
+
+Pour chaque opération, indiquez si le travail effectué est indépendant du
+nombre $n$ d'éléments présents, ou s'il croît avec $n$.
+
+\vspace{0.3cm}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Opération} & \textbf{Tableau contigu} & \textbf{Nœuds chaînés} \\
+\midrule
+\texttt{get(i)}                & \rule{0pt}{0.7cm} & \\
+\texttt{ajouter(x)} en fin     & \rule{0pt}{0.7cm} & \\
+\texttt{ajouter(0, x)} en tête & \rule{0pt}{0.7cm} & \\
+\texttt{supprimer(0)}          & \rule{0pt}{0.7cm} & \\
+\texttt{taille()}              & \rule{0pt}{0.7cm} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\noindent\textbf{(a)} Un collègue implémente une file avec une
+\texttt{ArrayList} : \texttt{enqueue} $\rightarrow$ \texttt{add(x)},
+\texttt{dequeue} $\rightarrow$ \texttt{remove(0)}. Le contrat de l'ADT Queue
+est-il respecté ? \lig{4cm}
+
+\vspace{0.2cm}
+\noindent\textbf{(b)} Un test JUnit portant uniquement sur le contrat
+peut-il révéler le problème ? \lig{8cm}
+
+\vspace{0.2cm}
+\noindent\textbf{(c)} Comment le mettriez-vous en évidence expérimentalement ?
+\lig{11cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+% ---------------------------------------------------------------------
+\section{Exercice 6 --- Question subsidiaire}
+
+On voudrait ajouter au contrat \texttt{Deque<T>} une opération
+\texttt{get(int i)} renvoyant le $i$-ième élément depuis la tête.
+
+\vspace{0.2cm}
+\noindent\textbf{(a)} Écrivez l'expression de l'indice interne correspondant :
+\lig{7cm}
+
+\vspace{0.2cm}
+\noindent\textbf{(b)} Cette opération a-t-elle sa place dans le contrat d'un
+deque ? Argumentez en une ou deux phrases. \lig{10cm}
+
+\vspace{0.2cm}
+\noindent\lig{14cm}
+
+\newpage
+% =====================================================================
+\section*{Pour aller plus loin (optionnel)}
+\addcontentsline{toc}{section}{Pour aller plus loin (optionnel)}
+
+\begin{itemize}[nosep]
+    \item Écrire \texttt{LinkedDeque<T>}, seconde implémentation du même
+          contrat, à l'aide de nœuds doublement chaînés --- et faire passer
+          \emph{les mêmes tests} sans y changer une ligne. C'est la
+          démonstration expérimentale du principe de la séance.
+    \item Ajouter au deque une capacité maximale avec éviction automatique
+          du plus ancien : vous obtenez un historique borné.
+    \item Étendre l'évaluateur postfixe à la puissance et aux nombres
+          négatifs.
+\end{itemize}
+
+% =====================================================================
+\section*{Aide-mémoire}
+\addcontentsline{toc}{section}{Aide-mémoire}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Question} & \textbf{Réponse} \\
+\midrule
+Indice de la prochaine case en fin & $(\texttt{tete} + \texttt{taille}) \bmod m$ \\
+Indice du dernier élément & $(\texttt{tete} + \texttt{taille} - 1) \bmod m$ \\
+Reculer un indice & $(i - 1 + m) \bmod m$ \\
+Avancer un indice & $(i + 1) \bmod m$ \\
+Deque vide & \texttt{taille == 0} (jamais \texttt{tete == fin}) \\
+Après \texttt{agrandir()} & \texttt{tete} redevient $0$ \\
+\midrule
+Lancer le conteneur & \texttt{docker run -it -v "\$(pwd):/workspace" ...:v1.1} \\
+Créer un projet & \texttt{new-project lab-s01} \\
+Compiler & \texttt{gradle build -\/-no-daemon} \\
+Tester & \texttt{gradle test -\/-no-daemon} \\
+Exécuter & \texttt{gradle run -\/-no-daemon} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\begin{attentionbox}[Rapport individuel --- obligatoire]
+Chaque étudiant rédige un rapport de \textbf{1 à 2 pages} :
+\begin{enumerate}[nosep]
+    \item \textbf{Ce que j'ai fait :} classes implémentées, tests écrits, ce
+          qu'affiche \texttt{Main}.
+    \item \textbf{Les observations clés :} qu'est-ce que le programme
+          d'observation m'a montré que je n'avais pas bien compris du CM ?
+    \item \textbf{Les difficultés :} erreurs de compilation, bugs, blocages
+          sur les exercices théoriques.
+    \item \textbf{Ce que j'ai appris :} le concept le plus important retenu
+          de cette séance.
+\end{enumerate}
+\textbf{Format :} PDF. \textbf{Nom :} \texttt{rapport-lab-S01-PRENOM-NOM.pdf}
+\end{attentionbox}
+
+\end{document}

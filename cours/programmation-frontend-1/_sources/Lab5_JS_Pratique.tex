@@ -1,0 +1,495 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== POLICES & LANGUE =====================
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,xcolor,booktabs,hyperref,tcolorbox,enumitem,fancyhdr,array,pifont,longtable,multirow,listings}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,backgrounds,fit}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+% ===================== BOÎTES =====================
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title={#1},breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title={#1},breakable}
+
+% ===================== CODE (listings) =====================
+\definecolor{codebg}{gray}{0.96}
+\definecolor{kwcolor}{RGB}{0,90,160}
+\definecolor{strcolor}{RGB}{160,55,30}
+\definecolor{comcolor}{RGB}{95,120,95}
+\definecolor{ndcolor}{RGB}{120,80,150}
+
+\lstdefinelanguage{JS}{
+  morekeywords={let,const,var,function,return,if,else,for,of,in,while,do,true,false,null,undefined,typeof,break,continue,new,this},
+  morekeywords=[2]{console,log,table,document,Math,window,alert,prompt,forEach,map,filter,push,pop,querySelector,querySelectorAll,addEventListener,classList,textContent,innerHTML,createElement,appendChild,getElementById},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+\lstdefinestyle{js}{
+  language=JS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{kwcolor},
+  keywordstyle=[2]\color{ndcolor},
+  commentstyle=\color{comcolor}\itshape,
+  stringstyle=\color{strcolor},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {â}{{â}}1 {ê}{{ê}}1
+    {î}{{î}}1 {ô}{{ô}}1 {û}{{û}}1 {ù}{{ù}}1 {ç}{{ç}}1
+    {ï}{{ï}}1 {ë}{{ë}}1 {É}{{É}}1 {È}{{È}}1 {À}{{À}}1
+    {œ}{{œ}}1 {°}{{°}}1 {²}{{²}}1
+}
+
+\lstdefinestyle{html}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  literate=%
+    {é}{{é}}1 {è}{{è}}1 {à}{{à}}1 {ê}{{ê}}1 {ç}{{ç}}1 {î}{{î}}1
+}
+
+\lstset{style=js}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% ===================== EN-TÊTES =====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Lab 5 : JavaScript en pratique}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ===================== TITRE =====================
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Lab 5 --- JavaScript en pratique}\\[0.3cm]
+\textbf{\Large Variables, fonctions, conditions}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- 2025--2026}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{prereqbox}[Informations pratiques]
+\textbf{Où sommes-nous ?} Au CM3, on a découvert le langage JavaScript dans la \emph{console} (notre brouillon). Aujourd'hui, on quitte le brouillon : on écrit notre \textbf{premier vrai fichier de code}, \code{script.js}, branché à la page Jàng Afrig.
+
+\smallskip
+\textbf{Avant de commencer, vous devez avoir :}
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item Votre repo \code{jang-afrig} ouvert dans VS Code, avec Live Server qui fonctionne.
+  \item Les pages HTML et le CSS des Labs précédents (jusqu'au tag \code{v0.4}).
+  \item Les notions du CM3 en tête : \code{let}/\code{const}, types, conditions, boucles, fonctions, et les \textbf{trois règles d'or}.
+\end{itemize}
+
+\smallskip
+\textbf{Validation de fin de séance :} votre fichier \code{script.js} contient toutes les fonctions d'entraînement, la console les exécute \emph{sans erreur rouge}, et vous avez poussé un commit avec le tag \code{v0.5} ainsi qu'un rapport.
+\end{prereqbox}
+
+\begin{objectifbox}[Objectifs du Lab 5]
+À la fin de cette séance, vous saurez :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Créer un fichier \code{script.js} et le brancher à \code{index.html}.
+  \item Afficher des messages dans la console avec \code{console.log}.
+  \item Déclarer des variables et écrire des fonctions qui renvoient un résultat.
+  \item Prendre des décisions avec \code{if}/\code{else} et le ternaire.
+  \item Parcourir un tableau avec \code{for...of}.
+  \item Coder cinq fonctions utiles : convertisseur FCFA, moyenne, majorité, FizzBuzz « sénégalais », palindrome.
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+\bigskip\hrule\bigskip
+
+\section*{Rappel express du CM3}
+\addcontentsline{toc}{section}{Rappel express du CM3}
+Trois choses à garder sous la main :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \textbf{Variables} : \code{const} par défaut, \code{let} si ça change, jamais \code{var}.
+  \item \textbf{Comparaison} : toujours \code{===}, jamais \code{==}.
+  \item \textbf{Fonction} : \code{function nom(parametres) \{ ... return ...\, \}}.
+\end{itemize}
+
+% ===================== SECTION 1 =====================
+\section{Mise en place : créer et brancher \texttt{script.js}}
+
+\subsection{Créer le fichier}
+Dans VS Code, à la racine de votre dossier \code{jang-afrig} (au même endroit que \code{index.html} et \code{style.css}), créez un nouveau fichier nommé exactement \code{script.js}.
+
+\subsection{Le brancher à la page}
+Pour que la page exécute votre code, on ajoute la balise \code{<script>} dans le \code{<head>} de \code{index.html}, avec le mot \code{defer} (rappel du CM3 : « attends que la page soit prête »).
+
+\begin{lstlisting}[style=html]
+<head>
+  <meta charset="UTF-8">
+  <title>Jàng Afrig</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+\end{lstlisting}
+
+\subsection{Vérifier que tout est branché}
+Dans \code{script.js}, écrivez une seule ligne :
+\begin{lstlisting}[style=js]
+console.log("script.js est bien branché !");
+\end{lstlisting}
+
+\begin{infobox}[Vérification]
+Lancez la page avec Live Server, puis appuyez sur \textbf{F12} et ouvrez l'onglet \textbf{Console}. Vous devez voir le message \emph{« script.js est bien branché ! »}. Si rien n'apparaît, vérifiez l'orthographe du nom de fichier et la balise \code{<script>}. \textbf{Si ça ne marche pas, levez la main.}
+\end{infobox}
+
+\begin{attentionbox}[La page ne « change » pas encore, c'est normal]
+Aujourd'hui, tout votre code s'affiche dans la \textbf{console}, pas sur la page. C'est voulu : apprendre à modifier la page visible viendra au \textbf{Lab 7} (le DOM). Pour l'instant, la console est votre terrain d'entraînement.
+\end{attentionbox}
+
+% ===================== SECTION 2 =====================
+\section{Parler à la console}
+
+On commence doux. Tapez ceci dans \code{script.js} (remplacez par votre prénom) :
+
+\begin{lstlisting}[style=js]
+const prenom = "Fatou";
+console.log("Bonjour " + prenom);
+console.log(`Bonjour ${prenom}, prêt(e) à coder ?`);
+\end{lstlisting}
+
+Les deux dernières lignes affichent un message personnalisé. La première version \emph{colle} le texte avec \code{+} ; la seconde utilise une \emph{template string} (les accents graves) du CM3 : plus lisible.
+
+\begin{infobox}[Vérification]
+La console doit afficher deux lignes commençant par \emph{« Bonjour »}. Changez la valeur de \code{prenom}, sauvegardez : Live Server recharge, le message change.
+\end{infobox}
+
+% ===================== SECTION 3 =====================
+\section{Variables et types, pour de vrai}
+
+Rangeons quelques informations sur un joueur de Jàng Afrig :
+
+\begin{lstlisting}[style=js]
+const pseudo = "Aminata";   // texte (string)
+let score = 0;              // nombre (number), va changer -> let
+const partieFinie = false;  // booléen (boolean)
+
+console.log(`Joueur : ${pseudo}`);
+console.log(`Score de départ : ${score}`);
+
+score = score + 5;          // on réécrit l'ardoise
+console.log(`Nouveau score : ${score}`);  // 5
+\end{lstlisting}
+
+\begin{infobox}[Vérification]
+La console doit montrer le score passer de \code{0} à \code{5}. Essayez ensuite de réaffecter \code{pseudo} (\code{pseudo = "Moussa";}) : la console affichera une \textbf{erreur rouge}, car \code{pseudo} est un \code{const}. C'est exactement ce qu'on attend : c'est la preuve que l'étiquette est « gravée ».
+\end{infobox}
+
+% ===================== SECTION 4 =====================
+\section{Ma première fonction}
+
+Une fonction est une machine réutilisable (CM3). Écrivons-en une qui fabrique un message de bienvenue :
+
+\begin{lstlisting}[style=js]
+function direBonjour(nom) {
+  return `Bonjour ${nom}, bienvenue sur Jàng Afrig !`;
+}
+
+console.log(direBonjour("Cheikh"));
+console.log(direBonjour("Ndèye"));
+\end{lstlisting}
+
+On a écrit la machine \emph{une fois}, et on l'appelle \emph{autant de fois} qu'on veut, avec des noms différents.
+
+\begin{objectifbox}[Exercice éclair]
+Écrivez une fonction \code{direAuRevoir(nom)} qui renvoie \emph{« À bientôt, [nom] ! »}, et appelez-la deux fois avec deux prénoms.
+\end{objectifbox}
+
+% ===================== SECTION 5 =====================
+\section{Prendre des décisions : les conditions}
+
+Une fonction peut \textbf{choisir} quoi renvoyer selon la situation. Reprenons l'appréciation d'une note (CM3) :
+
+\begin{lstlisting}[style=js]
+function appreciation(note) {
+  if (note >= 16) {
+    return "Très bien";
+  } else if (note >= 12) {
+    return "Bien";
+  } else if (note >= 10) {
+    return "Passable";
+  } else {
+    return "À retravailler";
+  }
+}
+
+console.log(appreciation(14)); // "Bien"
+console.log(appreciation(8));  // "À retravailler"
+\end{lstlisting}
+
+Quand le choix est binaire, le \textbf{ternaire} fait la même chose en une ligne :
+
+\begin{lstlisting}[style=js]
+function statutMajorite(age) {
+  return age >= 18 ? "majeur" : "mineur";
+}
+
+console.log(statutMajorite(20)); // "majeur"
+\end{lstlisting}
+
+% ===================== SECTION 6 =====================
+\section{Répéter sans se fatiguer : \texttt{for...of}}
+
+Pour traiter \emph{chaque} élément d'une liste, on utilise \code{for...of} (CM3). Affichons une petite liste de pays :
+
+\begin{lstlisting}[style=js]
+const pays = ["Sénégal", "Mali", "Ghana", "Kenya"];
+
+for (const nom of pays) {
+  console.log(`Pays africain : ${nom}`);
+}
+
+console.log(`Il y a ${pays.length} pays dans la liste.`);
+\end{lstlisting}
+
+Notez \code{pays.length} : la \emph{longueur} du tableau (ici 4). On s'en servira beaucoup.
+
+\begin{infobox}[Vérification]
+La console doit afficher quatre lignes « Pays africain : \ldots », puis « Il y a 4 pays dans la liste. ».
+\end{infobox}
+
+% ===================== EXERCICES =====================
+\section{Exercices d'application}
+
+C'est le cœur de la séance. Ajoutez ces fonctions à \code{script.js} et testez-les avec des \code{console.log}.
+
+\begin{objectifbox}[Exercice 1 --- Convertisseur FCFA $\rightarrow$ EUR]
+Le taux est fixe : \textbf{1 EUR = 656 FCFA}. Écrivez \code{fcfaVersEuro(montant)} qui renvoie le montant en euros.\\
+\emph{Indice :} il faut \textbf{diviser} par 656. Testez avec \code{10000} FCFA.
+\end{objectifbox}
+
+\begin{lstlisting}[style=js]
+function fcfaVersEuro(montant) {
+  return montant / 656;
+}
+
+console.log(fcfaVersEuro(10000)); // environ 15.24
+\end{lstlisting}
+
+\begin{objectifbox}[Exercice 2 --- Moyenne d'un étudiant]
+Écrivez \code{moyenne(notes)} qui reçoit un tableau de notes et renvoie leur moyenne.\\
+\emph{Indice :} additionnez toutes les notes dans une variable \code{somme} avec \code{for...of}, puis divisez par \code{notes.length}.
+\end{objectifbox}
+
+\begin{lstlisting}[style=js]
+function moyenne(notes) {
+  let somme = 0;
+  for (const note of notes) {
+    somme = somme + note;
+  }
+  return somme / notes.length;
+}
+
+const notesAminata = [12, 15, 9, 14];
+console.log(`Moyenne : ${moyenne(notesAminata)}`); // 12.5
+\end{lstlisting}
+
+\begin{objectifbox}[Exercice 3 --- Majorité]
+Écrivez \code{estMajeur(age)} qui renvoie un \textbf{booléen} (\code{true} ou \code{false}).\\
+\emph{Indice :} la comparaison \code{age >= 18} est \emph{déjà} un booléen ! On peut la renvoyer directement.
+\end{objectifbox}
+
+\begin{lstlisting}[style=js]
+function estMajeur(age) {
+  return age >= 18;
+}
+
+console.log(estMajeur(20)); // true
+console.log(estMajeur(16)); // false
+\end{lstlisting}
+
+\subsection*{Exercice 4 --- FizzBuzz « à la sénégalaise »}
+\addcontentsline{toc}{subsection}{Exercice 4 --- FizzBuzz sénégalais}
+
+Un classique de la programmation, version Jàng Afrig. Pour chaque nombre de 1 à 30 :
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item s'il est multiple de \textbf{3 et de 5} (donc de 15) $\rightarrow$ afficher \emph{« Thiéboudienne »} ;
+  \item sinon, s'il est multiple de \textbf{3} $\rightarrow$ afficher \emph{« Thié »} ;
+  \item sinon, s'il est multiple de \textbf{5} $\rightarrow$ afficher \emph{« Bou »} ;
+  \item sinon $\rightarrow$ afficher le nombre.
+\end{itemize}
+
+\textbf{Le piège : l'ordre des tests compte.} Si on testait « multiple de 3 » \emph{avant} « multiple de 15 », le nombre 15 afficherait « Thié » au lieu de « Thiéboudienne ». On teste donc \textbf{toujours le cas le plus précis en premier} (le 15).
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  deci/.style={diamond, aspect=2.4, draw, thick, align=center, inner sep=1pt, fill=cyan!6, draw=cyan!55!black},
+  io/.style={rectangle, rounded corners=3pt, draw, thick, align=center, fill=orange!8, draw=orange!70, minimum height=0.8cm},
+  arr/.style={-{Stealth[length=2.5mm]}, thick, gray!70!black},
+  lab/.style={font=\scriptsize, text=gray!50!black}
+]
+  \node[deci] (d15) {n divisible\\par 15 ?};
+  \node[io, right=2.4cm of d15] (r15) {« Thiéboudienne »};
+  \node[deci, below=0.9cm of d15] (d3) {n divisible\\par 3 ?};
+  \node[io, right=2.4cm of d3] (r3) {« Thié »};
+  \node[deci, below=0.9cm of d3] (d5) {n divisible\\par 5 ?};
+  \node[io, right=2.4cm of d5] (r5) {« Bou »};
+  \node[io, below=0.9cm of d5] (rn) {afficher n};
+
+  \draw[arr] (d15) -- node[lab,above]{oui} (r15);
+  \draw[arr] (d15) -- node[lab,left]{non} (d3);
+  \draw[arr] (d3) -- node[lab,above]{oui} (r3);
+  \draw[arr] (d3) -- node[lab,left]{non} (d5);
+  \draw[arr] (d5) -- node[lab,above]{oui} (r5);
+  \draw[arr] (d5) -- node[lab,left]{non} (rn);
+\end{tikzpicture}
+
+\textit{L'ordre des conditions : on teste d'abord le cas le plus précis (15).}
+\end{center}
+
+\begin{lstlisting}[style=js]
+function fizzBuzzSenegal() {
+  for (let n = 1; n <= 30; n++) {
+    if (n % 15 === 0) {
+      console.log("Thiéboudienne");
+    } else if (n % 3 === 0) {
+      console.log("Thié");
+    } else if (n % 5 === 0) {
+      console.log("Bou");
+    } else {
+      console.log(n);
+    }
+  }
+}
+
+fizzBuzzSenegal();
+\end{lstlisting}
+
+Rappel : \code{n \% 15 === 0} se lit « le reste de la division de \code{n} par 15 est nul », c'est-à-dire « \code{n} est un multiple de 15 ».
+
+\begin{objectifbox}[Exercice 5 --- Palindrome]
+Un palindrome est un mot qui se lit pareil à l'endroit et à l'envers (« kayak », « radar », « ressasser »). Écrivez \code{estPalindrome(mot)} qui renvoie un booléen.\\
+\emph{Indice :} construisez le mot à l'envers en plaçant chaque lettre \emph{devant} les précédentes, puis comparez avec \code{===}.
+\end{objectifbox}
+
+\begin{lstlisting}[style=js]
+function estPalindrome(mot) {
+  let inverse = "";
+  for (const lettre of mot) {
+    inverse = lettre + inverse; // on empile à l'envers
+  }
+  return mot === inverse;
+}
+
+console.log(estPalindrome("kayak")); // true
+console.log(estPalindrome("Dakar")); // false
+\end{lstlisting}
+
+% ===================== AIDE-MÉMOIRE =====================
+\section{Aide-mémoire du Lab 5}
+
+\begin{center}
+\begin{tabular}{p{5cm} p{8cm}}
+\toprule
+\textbf{Besoin} & \textbf{Code} \\
+\midrule
+Brancher le JS & \code{<script src="script.js" defer></script>} \\
+Afficher dans la console & \code{console.log(...)} \\
+Variable fixe / variable & \code{const x = ...} \quad / \quad \code{let x = ...} \\
+Message avec variable & \code{`Texte \$\{variable\}`} \\
+Fonction qui renvoie & \code{function f(p) \{ return ...\, \}} \\
+Décision & \code{if (...) \{...\} else \{...\}} \quad ou \quad \code{cond ? a : b} \\
+Parcourir un tableau & \code{for (const e of tableau) \{...\}} \\
+Taille d'un tableau & \code{tableau.length} \\
+Reste d'une division & \code{a \% b} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ===================== GIT =====================
+\section{Sauvegarder mon travail (routine Git)}
+
+Comme à chaque Lab, on enregistre le travail dans Git et on pose le tag de la séance.
+
+\begin{retenirbox}[Routine Git de fin de Lab --- tag \texttt{v0.5}]
+Dans le terminal de VS Code, à la racine du projet :
+\begin{lstlisting}[style=html]
+git status
+git add .
+git commit -m "Lab 5 : premières fonctions JavaScript"
+git tag v0.5
+git push
+git push --tags
+\end{lstlisting}
+Vérifiez ensuite sur GitHub que le commit \emph{et} le tag \code{v0.5} apparaissent bien.
+\end{retenirbox}
+
+% ===================== RAPPORT =====================
+\begin{attentionbox}[Rapport à produire]
+Avant la fin, déposez un rapport court (1 à 2 pages) dans le dossier \code{rapports/} de votre repo, nommé \code{rapport-lab-5-NOM-Prenom.pdf}. Il contient \textbf{quatre} sections :
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textbf{Ce que j'ai fait} : les fonctions codées (FCFA, moyenne, majorité, FizzBuzz, palindrome).
+  \item \textbf{Difficultés rencontrées} : copiez-collez les messages d'erreur qui vous ont bloqué.
+  \item \textbf{Comment je les ai résolues} : ce que vous avez cherché, à qui vous avez demandé.
+  \item \textbf{Lien vers mon repo} avec le tag : \code{.../jang-afrig/releases/tag/v0.5}.
+\end{enumerate}
+L'erreur fait partie de l'apprentissage : soyez honnête, c'est le but du rapport.
+\end{attentionbox}
+
+% ===================== RÉSUMÉ =====================
+\section{Résumé et transition}
+
+Vous venez d'écrire votre \textbf{premier vrai fichier JavaScript} et de coder cinq fonctions qui marchent. Vous savez désormais déclarer des variables, écrire des fonctions, décider avec des conditions et répéter avec \code{for...of}.
+
+Au \textbf{Lab 6}, on monte d'un cran : on apprend à manipuler des \textbf{collections} de données (des tableaux, des objets) avec des outils élégants --- \code{forEach}, \code{map}, \code{filter}. On créera le fichier \code{data.js} contenant nos premiers pays africains : la matière première du futur quiz.
+
+\begin{center}
+\textit{Première ampoule allumée. Au Lab 6, on remplit la maison de données.}
+\end{center}
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+\small Dr.~El Hadji Bassirou TOURÉ --- UCAD\\
+\small Licence 1 DUT1-Informatique --- Fondamentaux du Web --- 2025--2026
+\end{center}
+
+\end{document}

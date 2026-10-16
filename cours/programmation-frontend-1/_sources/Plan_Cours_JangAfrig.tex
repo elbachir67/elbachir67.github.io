@@ -1,0 +1,441 @@
+% ===========================================================================
+%  Jàng Afrig — Plan de Cours : Fondamentaux du Web (HTML, CSS, JavaScript)
+%  Licence 1 DUT1-Informatique — ESP/UCAD — 2025–2026
+%  Dr. El Hadji Bassirou TOURÉ
+%  Compilé avec : xelatex (2–3 passes)
+%  Version : courte (distribuable aux étudiants)
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{french}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable,skins}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{longtable}
+\usepackage{multirow}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black
+}
+
+\newtcolorbox{objectifbox}[1][]{colback=blue!5,colframe=blue!50,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{infobox}[1][]{colback=green!5,colframe=green!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{attentionbox}[1][]{colback=orange!5,colframe=orange!70,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{retenirbox}[1][]{colback=yellow!10,colframe=yellow!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{prereqbox}[1][]{colback=cyan!5,colframe=cyan!50!black,fonttitle=\bfseries,title=#1,breakable}
+\newtcolorbox{projetbox}[1][]{colback=teal!5,colframe=teal!50!black,fonttitle=\bfseries,title=#1,breakable}
+
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ô}{{\^o}}1 {î}{{\^i}}1 {ç}{{\c{c}}}1 {É}{{\'E}}1
+           {→}{{$\rightarrow$}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Jàng Afrig --- Plan de Cours}
+\fancyhead[R]{\small UCAD --- L1 DUT1-Info}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{\small Dr. El Hadji Bassirou TOURÉ}
+\fancyfoot[R]{\small 2025--2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{%
+\vspace{-1cm}
+\textbf{\LARGE Fondamentaux du Web}\\
+\textbf{\LARGE HTML, CSS, JavaScript}\\[0.8cm]
+\textbf{\huge Plan de Cours}\\[0.3cm]
+\textbf{\Large Projet fil rouge : Jàng Afrig}\\[0.5cm]
+\large Licence 1 DUT1-Informatique --- Semestre 2\\
+2025--2026}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département Génie Informatique\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vspace{0.5cm}
+
+% ===========================================================================
+% BOÎTE PRÉREQUIS
+% ===========================================================================
+\begin{prereqbox}[Informations pratiques]
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Volume horaire} & 15 séances de 2h = \textbf{30h} \\
+\textbf{Public} & Licence 1 DUT1-Informatique --- DGI / ESP / UCAD \\
+\textbf{Semestre} & Semestre 2 (2\textsuperscript{e} semestre de L1) \\
+\textbf{Prérequis} & Algorithmique du S1. Savoir utiliser un ordinateur. \\
+\textbf{Outils} & VS Code, Live Server, Git, GitHub, Chrome ou Firefox \\
+\textbf{Projet} & \textbf{Jàng Afrig} --- quiz géographique sur les 54 pays africains \\
+\textbf{Évaluation} & Participation + avancement Git (voir détail p.~\pageref{sec:evaluation}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{prereqbox}
+
+\begin{objectifbox}[Ce que vous saurez faire à la fin du cours]
+\begin{enumerate}[nosep]
+    \item Écrire une page web complète en HTML5 (structure, sémantique, formulaires, tableaux)
+    \item Mettre en forme une page avec CSS3 (sélecteurs, box model, Flexbox, responsive mobile)
+    \item Programmer en JavaScript moderne (variables, fonctions, tableaux, objets, \texttt{forEach}, \texttt{map}, \texttt{filter})
+    \item Modifier le contenu d'une page depuis JavaScript (DOM et événements)
+    \item Récupérer des données d'une API distante avec \texttt{fetch} et \texttt{async/await}
+    \item Sauvegarder des données dans le navigateur (\texttt{localStorage})
+    \item Versionner votre code avec Git et le partager sur GitHub
+    \item Déployer une application web en ligne sur GitHub Pages
+\end{enumerate}
+\end{objectifbox}
+
+\tableofcontents
+
+\newpage
+
+% ===========================================================================
+\section{Présentation du cours}
+% ===========================================================================
+
+Ce cours est votre \textbf{premier contact avec un vrai langage de
+programmation qui s'exécute dans un outil réel}. Vous avez vu l'algorithmique
+en pseudo-code au S1 ; vous allez maintenant écrire du code qui
+\textit{marche}, dans un navigateur, et qui produit des résultats visibles.
+
+Au terme du semestre, vous aurez construit \textbf{Jàng Afrig}, un quiz
+géographique sur les 54 pays africains, accessible depuis n'importe quel
+téléphone via une URL publique que vous pourrez partager à votre famille.
+
+\begin{infobox}[Pourquoi 100\% vanilla ?]
+Vous entendrez parler de frameworks (React, Vue, Next.js\ldots). Ce sont des
+outils très puissants, mais ils \textbf{cachent} ce qui se passe vraiment
+dans le navigateur. Avant d'utiliser un framework, il faut comprendre ce
+qu'il fait à votre place. Ce cours se concentre donc sur les briques
+standard du Web --- pas de framework, pas de \texttt{npm}. Les frameworks
+viendront en L2 (cours PRC) et L3 (cours IPDL1).
+\end{infobox}
+
+\subsection{Deux types de séances : CM et Lab}
+
+Le cours alterne deux types de séances, qui se complètent :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{CM (Cours Magistral).} 4 séances au total. On introduit
+          les concepts avec des analogies, des exemples visuels, une démo
+          en direct, et un mini-exercice en classe. Aucun devoir à la
+          maison après un CM.
+
+    \item \textbf{Lab (TP guidé).} 10 séances au total. On met les mains
+          dans le code, on construit une partie de Jàng Afrig, on fait des
+          exercices d'application, et on termine par la routine Git.
+\end{itemize}
+
+La dernière séance (S15) est un \textbf{hybride} : première heure sur le
+déploiement en ligne, deuxième heure démo collective.
+
+\subsection{Déroulement d'une séance}
+
+\begin{center}
+\begin{tabular}{@{}p{2.5cm}p{5.5cm}p{5.5cm}@{}}
+\toprule
+\textbf{Moment} & \textbf{CM (2h)} & \textbf{Lab (2h)} \\
+\midrule
+5 min    & Rappel séance précédente & Rappel séance précédente \\
+10 min   & Analogie + question centrale & Démo de l'objectif du jour \\
+60 min   & Contenu théorique en 3-4 blocs & Vous codez en suivant le pas-à-pas \\
+30 min   & Mini-exercice en classe & Exercices d'application + avancement Jàng Afrig \\
+15 min   & Résumé + teaser du Lab suivant & Routine Git + annonce S suivante \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ===========================================================================
+\section{Le projet fil rouge : Jàng Afrig}
+% ===========================================================================
+
+\textbf{Jàng} signifie \textit{«\,apprendre, étudier\,»} en wolof, et \textbf{Afrig} désigne l'Afrique. Le nom évoque donc littéralement \textit{«\,apprendre l'Afrique\,»} --- ce que fait l'étudiant en jouant au quiz tout en construisant l'application.
+Jàng Afrig est une application web de \textbf{quiz géographique} sur les 54
+pays africains. L'utilisateur choisit un mode de jeu, répond à 10 questions
+à choix multiples, obtient un score, et garde un classement local de ses
+meilleures performances.
+
+\subsection{Les modes de jeu}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Mode} & \textbf{Question type} \\
+\midrule
+Capitales      & «\,Quelle est la capitale du Mali ?\,» \\
+Drapeaux       & «\,À quel pays appartient ce drapeau ?\,» \\
+Langues        & «\,Dans quel pays parle-t-on le swahili ?\,» \\
+Voisins        & «\,Combien de voisins a l'Algérie ?\,» \\
+Chrono         & Maximum de bonnes réponses en 60 secondes \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Comment on le construit}
+
+\textbf{Jàng Afrig n'est pas un projet à rendre.} C'est l'application qu'on
+construit \textbf{ensemble}, séance après séance, en Lab. À chaque Lab,
+l'application gagne une fonctionnalité visible. Au bout de 15 séances,
+c'est une vraie application en ligne.
+
+\begin{projetbox}[Les données]
+L'application utilisera l'API publique \href{https://restcountries.com}{REST
+Countries v3.1}, qui fournit gratuitement des informations sur tous les pays
+du monde : nom, capitale, drapeau, langues, frontières, superficie. Aucune
+inscription, aucune clé API, aucune limite.
+
+Un seul appel au démarrage, puis toutes les questions sont générées
+localement à partir du tableau des 54 pays africains.
+\end{projetbox}
+
+\subsection{Les pages de l'application}
+
+\begin{enumerate}[nosep]
+    \item \textbf{Accueil} : choix du mode + saisie du pseudo + meilleur score
+    \item \textbf{Quiz} : énoncé + 4 propositions + barre de progression
+    \item \textbf{Résultat} : score final + bouton rejouer
+    \item \textbf{Mes Scores} : classement local par mode (top 5)
+    \item \textbf{À propos} : sources des données, technologies
+\end{enumerate}
+
+\newpage
+
+% ===========================================================================
+\section{Outils à installer}
+% ===========================================================================
+
+\textbf{Avant la première séance}, vous devez avoir installé tous les
+outils et fait votre premier cycle Git. Une fiche dédiée \texttt{Lab0\_Setup.pdf}
+vous guide pas à pas, avec captures d'écran. \textbf{Faites-la à la maison
+la veille du cours}.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Outil} & \textbf{Usage} & \textbf{Lien} \\
+\midrule
+\textbf{VS Code} & Éditeur de code & \href{https://code.visualstudio.com}{code.visualstudio.com} \\
+\textbf{Live Server} & Extension VS Code (1 clic) & Marketplace VS Code \\
+\textbf{Git} & Suivre les modifications du code & \href{https://git-scm.com}{git-scm.com} \\
+\textbf{Compte GitHub} & Hébergement du code en ligne & \href{https://github.com}{github.com} \\
+\textbf{Chrome ou Firefox} & Navigateur + outils de développement & Préinstallé \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{attentionbox}[Aucun npm, aucun framework]
+Le cours est volontairement vanilla. \textbf{Aucune installation Node.js},
+aucun \texttt{package.json}, aucun \texttt{npm install}.
+\end{attentionbox}
+
+\subsection{Git : la routine de fin de Lab}
+
+À la fin de chaque Lab, vous exécuterez la même séquence rituelle :
+
+\begin{lstlisting}
+git add .
+git commit -m "v0.X : titre du Lab"
+git push
+git tag v0.X
+git push --tags
+\end{lstlisting}
+
+Cette routine devient automatique au bout de 3-4 Labs. Les commandes Git
+elles-mêmes sont toutes enseignées dans le Lab 0 --- \textbf{aucun prérequis}
+n'est demandé.
+
+\newpage
+
+% ===========================================================================
+\section{Plan des 15 séances}
+% ===========================================================================
+
+\begin{center}
+\begin{tabular}{clllc}
+\toprule
+\textbf{N\textsuperscript{o}} & \textbf{Type} & \textbf{Bloc} & \textbf{Titre} & \textbf{Tag Git} \\
+\midrule
+\textbf{Lab 0} & Lab & Setup & Mise en route (à la maison) & \texttt{v0} \\
+\midrule
+S1   & \textbf{CM1}   & HTML & Le Web et HTML                                      & --- \\
+S2   & Lab 1          & HTML & Ma première page HTML                               & \texttt{v0.1} \\
+S3   & Lab 2          & HTML & Sémantique, formulaires, tableaux                   & \texttt{v0.2} \\
+\midrule
+S4   & \textbf{CM2}   & CSS  & Sélecteurs, cascade, box model, Flexbox             & --- \\
+S5   & Lab 3          & CSS  & CSS en pratique : styliser Jàng Afrig                & \texttt{v0.3} \\
+S6   & Lab 4          & CSS  & Layouts + responsive mobile                          & \texttt{v0.4} \\
+\midrule
+S7   & \textbf{CM3}   & JS   & JavaScript : le langage qui anime les pages         & --- \\
+S8   & Lab 5          & JS   & JS pratique : variables, fonctions, conditions      & \texttt{v0.5} \\
+S9   & Lab 6          & JS   & Tableaux et objets (\texttt{forEach}, \texttt{map}, \texttt{filter}) & \texttt{v0.6} \\
+S10  & Lab 7          & JS   & DOM et événements : premier quiz fonctionnel        & \texttt{v0.7} \\
+\midrule
+S11  & \textbf{CM4}   & API  & Le Web moderne : APIs, JSON, asynchrone             & --- \\
+S12  & Lab 8          & API  & Fetch + \texttt{async/await} : brancher REST Countries & \texttt{v0.8} \\
+S13  & Lab 9          & API  & Tous les modes de jeu avec l'API                    & \texttt{v0.9} \\
+S14  & Lab 10         & JS   & \texttt{localStorage}, chrono, polish               & \texttt{v0.14} \\
+\midrule
+\textbf{S15} & \textbf{Hybride} & Final & \textbf{Déploiement GitHub Pages + démo collective} & \textbf{\texttt{v1.0}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\bigskip
+
+\begin{infobox}[Le fil narratif]
+Chaque bloc est construit autour d'un CM qui pose les concepts, suivi de
+Labs qui les appliquent sur Jàng Afrig. À chaque fin de Lab, un tag Git
+\texttt{v0.X} marque la progression. À la fin, le tag \texttt{v1.0} marque
+la version publiée en ligne.
+\end{infobox}
+
+\bigskip
+
+\begin{retenirbox}[À chaque CM, chaque Lab, un PDF]
+Pour chaque séance, un document PDF dédié vous est distribué :
+\begin{itemize}[nosep]
+    \item \textbf{CMX\_[titre].pdf} pour les cours magistraux
+    \item \textbf{LabX\_[titre].pdf} pour les TP guidés
+\end{itemize}
+Le prof projette le PDF en direct, vous le suivez sur votre écran ou en
+papier. Tout est écrit, rien n'est à noter à la volée.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Évaluation}
+\label{sec:evaluation}
+% ===========================================================================
+
+\subsection{Philosophie}
+
+Ce cours \textbf{ne comporte pas de projet noté final} à rendre. Le projet
+Jàng Afrig n'est pas un livrable séparé : c'est l'application qu'on construit
+ensemble en Labs, séance après séance. L'évaluation porte sur la
+\textbf{participation continue} et la \textbf{progression visible}.
+
+\subsection{Critères d'évaluation}
+
+\begin{center}
+\begin{tabular}{lp{8cm}c}
+\toprule
+\textbf{Critère} & \textbf{Comment c'est observé} & \textbf{Poids} \\
+\midrule
+Présence et participation active & Présence aux séances + interactions en Labs & 20\% \\
+Avancement Git & Tags posés de \texttt{v0.1} à \texttt{v1.0} & 30\% \\
+Qualité du code & Code lisible, indenté, commenté & 20\% \\
+Fonctionnalité de l'app & L'app finale fonctionne sur le téléphone du jury & 20\% \\
+Déploiement réussi & URL GitHub Pages accessible en S15 & 10\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{retenirbox}[Le seul vrai test]
+À la fin du cours, vous devez être capable de :
+\begin{enumerate}[leftmargin=*,nosep]
+  \item Ouvrir un terminal et faire un commit Git
+  \item Écrire une page HTML sémantique
+  \item Styliser une page avec Flexbox responsive
+  \item Manipuler le DOM en JavaScript
+  \item Manipuler un tableau avec \texttt{forEach}, \texttt{map}, \texttt{filter}
+  \item Récupérer des données d'une API avec \texttt{async}/\texttt{await}
+  \item Persister des données avec \texttt{localStorage}
+  \item Déployer un site statique sur GitHub Pages
+\end{enumerate}
+Si oui, le cours a réussi.
+\end{retenirbox}
+
+\newpage
+
+% ===========================================================================
+\section{Ressources}
+% ===========================================================================
+
+\subsection{Pendant le cours}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item \textbf{MDN Web Docs} --- la documentation de référence.\\
+          \url{https://developer.mozilla.org/fr}
+    \item \textbf{REST Countries v3.1} --- l'API du projet.\\
+          \url{https://restcountries.com}
+\end{itemize}
+
+\subsection{Pour aller plus loin (optionnel)}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item Marijn Haverbeke, \textit{Eloquent JavaScript} (3\textsuperscript{e} éd.), gratuit en ligne : \url{https://eloquentjavascript.net}
+    \item Stanford CS193X --- \textit{Web Programming Fundamentals} (cours d'inspiration) : \url{https://web.stanford.edu/class/archive/cs/cs193x/cs193x.1176}
+\end{itemize}
+
+\subsection{Cours connexes du cursus}
+
+\begin{itemize}[leftmargin=*,nosep]
+    \item \textbf{L2 S4 --- Programmation par Réutilisation de Composants (PRC).}
+          Suite naturelle : React, Flask, fil rouge SénTransport.
+    \item \textbf{L2 S4 --- Intégration de Modèles IA (IMA).} APIs, Docker, fil rouge SénSanté.
+    \item \textbf{L3 --- IPDL1.} Ingénierie des processus, Next.js, équipes de 6.
+\end{itemize}
+
+\vspace{1.5cm}
+
+\begin{center}
+\fbox{
+\begin{minipage}{0.85\textwidth}
+\centering
+\vspace{0.5cm}
+\textbf{\Large Bon semestre à toutes et tous \cmark}\\[0.3cm]
+\normalsize
+\textit{Le code, ça s'apprend en codant.}\\[0.3cm]
+\vspace{0.3cm}
+\end{minipage}
+}
+\end{center}
+
+\end{document}

@@ -1,0 +1,203 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.4cm,top=1.1cm,bottom=1.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setstretch{1.0}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.15em}
+\pagestyle{empty}
+\newcommand{\repligne}{\par\vspace{0.42cm}\noindent\dotfill}
+\newcommand{\zonecalcul}[1]{\par\vspace{0.15cm}\noindent{\small\emph{Espace de calcul :}}\par\vspace{#1}}
+\newcommand{\aide}[1]{\fbox{\begin{minipage}{0.96\textwidth}\small #1\end{minipage}}}
+\begin{document}
+\begin{center}
+\textbf{\large Fiche d'exercices --- Séance 9 : apprendre sans étiquettes}\\[0.05cm]
+{\small Introduction au ML -- Dr. El Hadji Bassirou TOURÉ -- DMI $\cdot$ FST $\cdot$ UCAD \quad $\bullet$ \quad \textbf{Travail à la main, sans machine}}
+\end{center}
+\vspace{-0.15cm}\hrule\vspace{0.25cm}
+{\small Cette fiche reprend, exercice par exercice, les calculs de la Séance 9 : k-means déroulé à la main (en une puis deux dimensions), l'inertie, le coude et la silhouette, l'effet de l'échelle, puis les fondations de l'ACP --- variance, covariance, vecteurs propres --- et la variance expliquée. Répondre directement sur la fiche.}
+\vspace{0.2cm}
+
+\aide{\textbf{Aides numériques (valables pour toute la fiche).} Distance au carré : $\lVert \mathbf x-\mathbf c\rVert^2 = \sum_j (x_j-c_j)^2$. Inertie : $\mathcal I = \sum_k\sum_{i\in C_k}\lVert\mathbf x_i-\mathbf c_k\rVert^2$. Silhouette d'un point : $s = \dfrac{b-a}{\max(a,b)}$ ($a$ : distance moyenne à son cluster, $b$ : au cluster voisin).
+Variance $\operatorname{Var}(x)=\frac1n\sum_i(x_i-\bar x)^2$ ; covariance $\operatorname{Cov}(x,y)=\frac1n\sum_i(x_i-\bar x)(y_i-\bar y)$ ; vecteur propre : $A\mathbf v=\lambda\mathbf v$ ; variance expliquée par la composante $i$ : $\lambda_i/\sum_j\lambda_j$.}
+\vspace{0.4cm}
+
+\textbf{\large Exercice 1 -- Une étape de k-means en une dimension}
+\vspace{0.15cm}
+
+Cinq patients décrits par une seule variable : $x = 2,\ 3,\ 4,\ 10,\ 12$. On vise $k=2$, avec les centres initiaux (mal choisis) $c_1 = 2$ et $c_2 = 3$.
+
+\vspace{0.15cm}
+(a) Affecter chaque point au centre le plus proche, puis recalculer les deux centres.
+\zonecalcul{1.1cm}
+clusters : \makebox[5cm]{\dotfill} \quad $c_1=$ \makebox[1.5cm]{\dotfill} \quad $c_2=$ \makebox[1.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Réaffecter avec les nouveaux centres, puis recalculer. Continuer jusqu'à ce que plus rien ne change. Combien d'itérations ?
+\zonecalcul{1.4cm}
+clusters finaux : \makebox[5cm]{\dotfill} \quad centres finaux : \makebox[3cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) Calculer l'inertie avec les centres initiaux ($2$ et $3$), puis l'inertie finale. Que constate-t-on ?
+\zonecalcul{1.0cm}
+inertie initiale $=$ \makebox[2cm]{\dotfill} \quad inertie finale $=$ \makebox[2cm]{\dotfill}
+
+\vspace{0.45cm}
+\textbf{\large Exercice 2 -- k-means à la main, en deux dimensions}
+\vspace{0.15cm}
+
+\aide{Six patients (deux mesures exprimées sur une même échelle) :
+$A(1,1)$, $B(3,1)$, $C(2,4)$, $D(7,7)$, $E(9,7)$, $F(8,10)$. On vise $k=2$, avec des centres initiaux volontairement médiocres : $\mathbf c_1 = A = (1,1)$ et $\mathbf c_2 = C = (2,4)$.}
+
+\vspace{0.2cm}
+(a) \textbf{Affectation 1.} Calculer la distance au carré de chaque point aux deux centres, puis affecter.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.8}\begin{tabular}{|c|c|c|c|c|c|c|}\hline
+point & $A$ & $B$ & $C$ & $D$ & $E$ & $F$\\\hline
+$d^2$ à $\mathbf c_1=(1,1)$ & & & & & & \\\hline
+$d^2$ à $\mathbf c_2=(2,4)$ & & & & & & \\\hline
+cluster & & & & & & \\\hline
+\end{tabular}}
+
+\vspace{0.15cm}
+Inertie après l'affectation 1 : \makebox[2cm]{\dotfill}
+
+\vspace{0.2cm}
+(b) \textbf{Mise à jour 1.} Recalculer les deux centres (moyennes des clusters).
+\zonecalcul{0.8cm}
+$\mathbf c_1=$ \makebox[2.5cm]{\dotfill} \quad $\mathbf c_2=$ \makebox[2.5cm]{\dotfill}
+
+\vspace{0.15cm}
+(c) \textbf{Affectation 2 et mise à jour 2.} Quel point change de cluster ? Donner les nouveaux centres et l'inertie.
+\zonecalcul{2.0cm}
+point qui change : \makebox[1.5cm]{\dotfill} \quad $\mathbf c_1=$ \makebox[2cm]{\dotfill} \quad $\mathbf c_2=$ \makebox[2cm]{\dotfill} \quad inertie $=$ \makebox[1.8cm]{\dotfill}
+
+\vspace{0.15cm}
+(d) Une troisième affectation change-t-elle quelque chose ? Donner l'inertie finale, et dire si k-means garantit toujours la meilleure solution.
+\zonecalcul{0.9cm}
+inertie finale $=$ \makebox[2cm]{\dotfill}
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 3 -- Combien de clusters ? Coude et silhouette}
+\vspace{0.15cm}
+
+(a) Sur un jeu de patients, l'inertie vaut, selon $k$ :
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.3}\begin{tabular}{|c|cccccc|}\hline
+$k$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$\\\hline
+inertie & $900$ & $420$ & $180$ & $150$ & $128$ & $110$\\\hline
+\end{tabular}}
+
+\vspace{0.1cm}
+Calculer le gain d'inertie à chaque ajout de cluster, puis désigner le « coude ».
+\zonecalcul{0.9cm}
+gains : \makebox[6cm]{\dotfill} \quad coude : $k=$ \makebox[1cm]{\dotfill}
+
+\vspace{0.15cm}
+(b) Pourquoi ne choisit-on pas le $k$ qui minimise l'inertie ?
+\repligne
+
+\vspace{0.15cm}
+(c) Calculer la silhouette de trois points et interpréter chacune.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.8}\begin{tabular}{|c|c|c|c|c|}\hline
+point & $a$ & $b$ & $s$ & interprétation\\\hline
+P & $1{,}2$ & $4{,}0$ & & \\\hline
+Q & $3{,}0$ & $2{,}5$ & & \\\hline
+R & $2{,}0$ & $2{,}2$ & & \\\hline
+\end{tabular}}
+
+\vspace{0.45cm}
+\textbf{\large Exercice 4 -- k-means et l'échelle des variables}
+\vspace{0.15cm}
+
+Trois patients sont décrits par (âge en années, glycémie en g/L) : Awa $(30;\ 1{,}0)$, Binta $(34;\ 2{,}2)$, Coumba $(50;\ 1{,}0)$. Sur le jeu, âge : $\sigma = 10$ ; glycémie : $\sigma = 0{,}5$.
+
+\vspace{0.15cm}
+(a) En unités brutes, calculer $d^2(\text{Awa},\text{Binta})$ et $d^2(\text{Awa},\text{Coumba})$. Qui est la plus proche d'Awa ?
+\zonecalcul{0.9cm}
+
+(b) Diviser chaque variable par son écart-type (le centrage ne change pas les distances), puis recalculer les deux distances au carré. Qui est maintenant la plus proche ?
+\zonecalcul{1.1cm}
+
+(c) Qu'aurait fait k-means sans standardisation sur ce jeu ?
+\repligne\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 5 -- Variance et covariance}
+\vspace{0.15cm}
+
+Deux variables mesurées sur quatre patients : $x = (1,\ 3,\ 5,\ 7)$ et $y = (2,\ 3,\ 7,\ 8)$.
+
+\vspace{0.15cm}
+(a) Calculer les moyennes, puis $\operatorname{Var}(x)$, $\operatorname{Var}(y)$ et $\operatorname{Cov}(x,y)$.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.8}\begin{tabular}{|c|c|c|c|c|c|}\hline
+patient & $x_i-\bar x$ & $y_i-\bar y$ & $(x_i-\bar x)^2$ & $(y_i-\bar y)^2$ & $(x_i-\bar x)(y_i-\bar y)$\\\hline
+$1$ & & & & & \\\hline
+$2$ & & & & & \\\hline
+$3$ & & & & & \\\hline
+$4$ & & & & & \\\hline
+moyenne & --- & --- & & & \\\hline
+\end{tabular}}
+
+\vspace{0.15cm}
+(b) Écrire la matrice de covariance. Le signe de la covariance était-il prévisible ?
+\zonecalcul{0.9cm}
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 6 -- Vecteurs propres d'une matrice de covariance}
+\vspace{0.15cm}
+
+Soit la matrice de covariance $C = \begin{pmatrix} 5 & 3\\ 3 & 5\end{pmatrix}$.
+
+\vspace{0.15cm}
+(a) Calculer $C\,(1;\ 1)^\top$ et $C\,(1;\ -1)^\top$. En déduire que ce sont des vecteurs propres, et leurs valeurs propres.
+\zonecalcul{1.2cm}
+$\lambda_1=$ \makebox[1.5cm]{\dotfill} (vecteur \makebox[1.8cm]{\dotfill}) \quad $\lambda_2=$ \makebox[1.5cm]{\dotfill} (vecteur \makebox[1.8cm]{\dotfill})
+
+\vspace{0.15cm}
+(b) Quelle est la direction de plus grande variance ? Quelle part de la variance totale porte-t-elle ?
+\zonecalcul{0.7cm}
+\repligne
+
+\vspace{0.15cm}
+(c) Normaliser le premier vecteur propre (longueur $1$). C'est la première composante principale.
+\repligne
+
+\vspace{0.45cm}
+\textbf{\large Exercice 7 -- La variance expliquée : combien de composantes garder ?}
+\vspace{0.15cm}
+
+Une ACP sur six variables standardisées d'un registre de santé donne les valeurs propres :
+\[ \lambda = (2{,}4;\ 1{,}2;\ 0{,}9;\ 0{,}7;\ 0{,}5;\ 0{,}3) \qquad (\text{somme} = 6). \]
+
+(a) Compléter la variance expliquée et la variance cumulée.
+
+\vspace{0.1cm}
+{\small \renewcommand{\arraystretch}{1.8}\begin{tabular}{|c|c|c|c|c|c|c|}\hline
+composante & PC1 & PC2 & PC3 & PC4 & PC5 & PC6\\\hline
+part expliquée & & & & & & \\\hline
+cumul & & & & & & \\\hline
+\end{tabular}}
+
+\vspace{0.15cm}
+(b) Combien de composantes garder pour conserver au moins $80\,\%$ de la variance ? Que perd-on en ne gardant que deux composantes pour \emph{visualiser} ?
+\repligne\repligne
+
+\vspace{0.15cm}
+(c) Pourquoi la somme des valeurs propres vaut-elle exactement $6$ ici ? Pourquoi faut-il standardiser avant une ACP ?
+\repligne\repligne
+
+\end{document}

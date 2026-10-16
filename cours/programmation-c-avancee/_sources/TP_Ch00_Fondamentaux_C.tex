@@ -1,0 +1,304 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,arrows.meta,shapes.geometric}
+
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\scriptsize,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 
+             {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ù}{{\`u}}1
+             {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1 {Ç}{{\c{C}}}1
+             {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1 {Ù}{{\`U}}1
+             {ë}{{\"e}}1 {ï}{{\"\i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+             {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+             {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1
+}
+
+\newtcolorbox{infobox}[1]{
+    colback=blue!5,colframe=blue!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{exercicebox}[1]{
+    colback=green!5,colframe=green!50!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{warningbox}[1]{
+    colback=red!5,colframe=red!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\newtcolorbox{techbox}[1]{
+    colback=orange!5,colframe=orange!75!black,
+    fonttitle=\bfseries,title=#1,breakable
+}
+
+\title{\textbf{TP Chapitre 0 : Compilation et Débogage}\\
+\large Du Code Source à l'Exécutable}
+\author{Dr. El Hadji Bassirou TOURÉ\\
+Département de Mathématiques et Informatique\\
+Faculté des Sciences et Techniques\\
+Université Cheikh Anta Diop de Dakar}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{infobox}{Environnement de travail}
+Ce TP doit être réalisé dans l'environnement Docker du cours. 
+Si vous n'avez pas encore configuré l'environnement, consultez le TP-1 (Setup Environnement).
+
+\textbf{Commandes de base:}
+\begin{verbatim}
+# Linux/macOS
+docker run -it -v $(pwd):/workspace elbachirtoure/c-advanced-course:v1.0
+
+# Windows (Git Bash)
+docker run -it -v /${PWD}:/workspace elbachirtoure/c-advanced-course:v1.0
+
+# Dans le container
+cd /workspace
+\end{verbatim}
+\end{infobox}
+
+\section{Phases de Compilation et Optimisations}
+
+\begin{exercicebox}{Exercice 1 : De la source à l'exécutable}
+\textbf{Objectifs :} Observer les fichiers intermédiaires, comprendre le rôle de chaque phase, mesurer l'impact des optimisations.
+
+\textbf{Partie A -- Fichiers intermédiaires.} Créer \texttt{phases.c} :
+\begin{lstlisting}
+#include <stdio.h>
+
+#define TAILLE 100
+#define CARRE(x) ((x) * (x))
+
+int global = 42;  // Variable globale initialisée
+
+int somme_carres(int n) {
+    int total = 0;
+    for (int i = 1; i <= n; i++) {
+        total += CARRE(i);
+    }
+    return total;
+}
+
+int main() {
+    int local = TAILLE;
+    printf("Somme des carrés de 1 à %d = %d\n", local, somme_carres(local));
+    return 0;
+}
+\end{lstlisting}
+
+Générer tous les fichiers intermédiaires :
+\begin{lstlisting}[language=bash]
+gcc -E phases.c -o phases.i      # Préprocesseur
+gcc -S phases.c -o phases.s      # Compilation (assembleur)
+gcc -c phases.c -o phases.o      # Assemblage (objet)
+gcc phases.o -o phases           # Édition des liens
+\end{lstlisting}
+
+Analyser les fichiers :
+\begin{lstlisting}[language=bash]
+head -50 phases.i && tail -20 phases.i   # Fichier préprocessé
+cat phases.s                              # Code assembleur
+nm phases.o                               # Symboles avant linkage
+nm phases                                 # Symboles après linkage
+\end{lstlisting}
+
+\textbf{Partie B -- Impact des optimisations.} Compiler avec différents niveaux :
+\begin{lstlisting}[language=bash]
+gcc -O0 -S phases.c -o phases_O0.s && gcc -O0 -o phases_O0 phases.c
+gcc -O2 -S phases.c -o phases_O2.s && gcc -O2 -o phases_O2 phases.c
+gcc -O3 -S phases.c -o phases_O3.s && gcc -O3 -o phases_O3 phases.c
+
+wc -l phases_O*.s                # Comparer le nombre de lignes
+ls -la phases_O*                 # Comparer les tailles
+diff phases_O0.s phases_O2.s | head -30
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}
+\item Les macros \texttt{TAILLE} et \texttt{CARRE} apparaissent-elles dans \texttt{phases.i} ? Pourquoi ?
+\item Dans \texttt{nm phases.o}, que signifient les symboles marqués \texttt{T}, \texttt{D}, et \texttt{U} ?
+\item La fonction \texttt{somme\_carres} est-elle présente dans l'assembleur \texttt{-O3} ? Expliquer.
+\item Pourquoi le nombre de lignes assembleur peut-il augmenter avec l'optimisation ?
+\end{enumerate}
+\end{exercicebox}
+
+\section{Compilation Séparée et Erreurs}
+
+\begin{exercicebox}{Exercice 2 : Multi-fichiers et diagnostic d'erreurs}
+\textbf{Objectifs :} Maîtriser la compilation séparée, distinguer erreurs de compilation et de liaison.
+
+\textbf{Partie A -- Compilation séparée.} Créer trois fichiers :
+
+\texttt{math\_utils.h} :
+\begin{lstlisting}
+#ifndef MATH_UTILS_H
+#define MATH_UTILS_H
+int addition(int a, int b);
+int factorielle(int n);
+extern int nb_appels;
+#endif
+\end{lstlisting}
+
+\texttt{math\_utils.c} :
+\begin{lstlisting}
+#include "math_utils.h"
+int nb_appels = 0;
+
+int addition(int a, int b) { nb_appels++; return a + b; }
+
+int factorielle(int n) {
+    nb_appels++;
+    return (n <= 1) ? 1 : n * factorielle(n - 1);
+}
+\end{lstlisting}
+
+\texttt{main.c} :
+\begin{lstlisting}
+#include <stdio.h>
+#include "math_utils.h"
+
+int main() {
+    printf("5 + 3 = %d\n", addition(5, 3));
+    printf("5! = %d\n", factorielle(5));
+    printf("Nombre d'appels: %d\n", nb_appels);
+    return 0;
+}
+\end{lstlisting}
+
+Compiler et analyser :
+\begin{lstlisting}[language=bash]
+gcc -Wall -c math_utils.c -o math_utils.o
+gcc -Wall -c main.c -o main.o
+nm math_utils.o && echo "---" && nm main.o
+gcc math_utils.o main.o -o programme
+./programme
+\end{lstlisting}
+
+\textbf{Partie B -- Provoquer des erreurs.} Tester ces scénarios :
+\begin{lstlisting}[language=bash]
+# Erreur de compilation : oublier un point-virgule dans main.c
+# Erreur de linkage : compiler sans math_utils.o
+gcc main.o -o test_link
+
+# Définition multiple : ajouter "int nb_appels = 99;" dans main.c
+gcc -c main.c -o main.o   # Compile OK
+gcc math_utils.o main.o -o test_multi  # Erreur ici
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}
+\item Pourquoi \texttt{main.o} montre \texttt{addition} comme \texttt{U} (undefined) alors que le code compile ?
+\item Quelle est la différence entre le message d'erreur du compilateur et celui du linker ?
+\item Comment le linker détecte-t-il une définition multiple de \texttt{nb\_appels} ?
+\end{enumerate}
+\end{exercicebox}
+
+\section{Débogage avec GDB}
+
+\begin{exercicebox}{Exercice 3 : Trouver et corriger des bugs avec GDB}
+\textbf{Objectifs :} Utiliser breakpoints, inspection de variables, exécution pas à pas, pile d'appels.
+
+Créer \texttt{buggy.c} contenant plusieurs bugs :
+\begin{lstlisting}
+#include <stdio.h>
+
+int chercher_max(int tab[], int taille) {
+    int max = 0;  // Bug 1: mauvaise initialisation
+    for (int i = 0; i <= taille; i++) {  // Bug 2: <= au lieu de <
+        if (tab[i] > max)
+            max = tab[i];
+    }
+    return max;
+}
+
+double moyenne(int tab[], int taille) {
+    int somme = 0;
+    for (int i = 0; i < taille; i++)
+        somme += tab[i];
+    return somme / taille;  // Bug 3: division entière
+}
+
+int main() {
+    int valeurs[] = {-5, -2, -8, -1, -3};
+    int n = 5;
+    
+    printf("Maximum: %d\n", chercher_max(valeurs, n));  // Attendu: -1
+    
+    int notes[] = {15, 12, 18, 10, 14};
+    printf("Moyenne: %.2f\n", moyenne(notes, 5));  // Attendu: 13.80
+    
+    return 0;
+}
+\end{lstlisting}
+
+Compiler et déboguer :
+\begin{lstlisting}[language=bash]
+gcc -g -O0 -Wall buggy.c -o buggy
+./buggy  # Observer les résultats incorrects
+
+gdb ./buggy
+(gdb) break chercher_max
+(gdb) run
+(gdb) print taille
+(gdb) print tab[0]
+(gdb) watch max
+(gdb) continue       # Observer les changements de max
+(gdb) print i        # Quand i == taille, accès hors limites
+(gdb) backtrace
+(gdb) break moyenne
+(gdb) continue
+(gdb) print somme
+(gdb) print somme / taille    # Division entière!
+(gdb) print (double)somme / taille
+(gdb) quit
+\end{lstlisting}
+
+\textbf{Questions :}
+\begin{enumerate}
+\item Pourquoi \texttt{chercher\_max} retourne 0 pour un tableau de valeurs négatives ?
+\item Quelle valeur lit \texttt{tab[5]} (accès hors limites) ? Utilisez GDB pour le vérifier.
+\item Comment corriger la division entière dans \texttt{moyenne} ?
+\item Corrigez les trois bugs et vérifiez les résultats attendus.
+\end{enumerate}
+\end{exercicebox}
+
+
+
+\section*{Livrables}
+
+\begin{infobox}{À rendre}
+\begin{enumerate}
+\item Un fichier pdf en bonne et due forme contenant les captures, réponses et explications
+\end{enumerate}
+
+\end{infobox}
+
+\end{document}
