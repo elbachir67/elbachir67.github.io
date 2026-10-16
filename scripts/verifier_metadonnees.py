@@ -151,6 +151,20 @@ def main() -> int:
             if page.relative_to(racine).as_posix() in chemins:
                 erreur(page, "redirection présente dans sitemap.xml : seule la nouvelle adresse y figure")
 
+    # Une redirection désigne sa cible comme adresse canonique, en URL absolue du domaine
+    # (scripts/rendre.py) : c'est la nouvelle adresse qu'un moteur de recherche doit retenir.
+    for page in redirections:
+        texte = page.read_text(encoding="utf-8")
+        cible = re.search(r'var redirects = \{"":"([^"]+)"', texte)[1]
+        attendue = (page.parent / cible).resolve().relative_to(racine.resolve()).as_posix()
+        canonique = re.search(r'<link rel="canonical" href="([^"]+)"', texte)
+        if not canonique:
+            erreur(page, f"redirection sans <link rel=\"canonical\"> vers {attendue}")
+        elif urlparse(canonique[1]).path.lstrip("/") != attendue:
+            erreur(page, f"adresse canonique {canonique[1]} : la redirection mène à {attendue}")
+        else:
+            hors_domaine(page, canonique[1], "adresse canonique")
+
     robots = racine / "robots.txt"
     if not robots.is_file():
         erreur(robots, "robots.txt absent")
