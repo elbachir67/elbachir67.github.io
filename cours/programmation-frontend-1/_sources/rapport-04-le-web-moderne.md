@@ -1,6 +1,6 @@
 # Rapport de conversion — CM4_Web_Moderne.tex
 
-Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/programmation-frontend-1/chapitres/03-le-web-moderne.qmd`.
+Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/programmation-frontend-1/chapitres/04-le-web-moderne.qmd`.
 
 ## À traiter à la main
 
@@ -8,7 +8,7 @@ Rien : tout le contenu a été converti.
 
 ## Figures
 
-- 03-le-web-moderne-01 : schéma TikZ, texte alternatif — texte fourni par le PO
+- 04-le-web-moderne-01 : schéma TikZ, texte alternatif — texte fourni par le PO
 
 ## Blocs de code
 

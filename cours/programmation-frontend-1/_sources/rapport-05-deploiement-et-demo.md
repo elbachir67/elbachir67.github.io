@@ -1,6 +1,6 @@
 # Rapport de conversion — S15_Deploiement_Demo.tex
 
-Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/programmation-frontend-1/chapitres/04-deploiement-et-demo.qmd`.
+Produit par `scripts/importer_chapitre.py` (US-15). Sortie : `cours/programmation-frontend-1/chapitres/05-deploiement-et-demo.qmd`.
 
 ## À traiter à la main
 
@@ -8,7 +8,7 @@ Rien : tout le contenu a été converti.
 
 ## Figures
 
-- 04-deploiement-et-demo-01 : schéma TikZ, texte alternatif — texte fourni par le PO
+- 05-deploiement-et-demo-01 : schéma TikZ, texte alternatif — texte fourni par le PO
 
 ## Blocs de code
 
